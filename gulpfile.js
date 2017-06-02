@@ -1,7 +1,8 @@
 var gulp = require('gulp');
 var watch = require('gulp-watch');
 var less = require('gulp-less');
-var open = require('gulp-open');
+var del = require('del');
+var clean = require('gulp-clean');
 var embedTemplate = require('gulp-angular-embed-templates');
 var glob = require('glob');
 
@@ -28,8 +29,7 @@ gulp.task('img', function () {
 });
 gulp.task('js', function () {
     return gulp.src('source/js/*.js')
-        .pipe(gulp.dest('build/js'))
-        .pipe(live_reload());
+        .pipe(gulp.dest('build/js'));
 });
 gulp.task('html', function () {
     return gulp.src('source/html/*.html').pipe(gulp.dest('build'));
@@ -38,9 +38,10 @@ gulp.task('css', function () {
     return gulp.src('source/less/*.less').pipe(less()).pipe(gulp.dest('build/css'));
 });
 
-
-gulp.task('run', function () {
-    gulp.src('build/index.html').pipe(open());
+gulp.task('clean', function (cb) {
+    return gulp.src('build')
+        .pipe(clean({force: true}));
 });
+
 gulp.task('build', ['html', 'css', 'js:component', 'js', 'img']);
 gulp.task('default', ['watch']);

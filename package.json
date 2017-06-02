@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
+    "del": "^2.2.2",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
     "gulp-angular-embed-templates": "^2.3.0",
+    "gulp-clean": "^0.3.2",
     "gulp-less": "^3.3.0",
     "gulp-open": "^2.0.0",
     "gulp-watch": "^4.3.11"
