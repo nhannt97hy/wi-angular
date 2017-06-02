@@ -1,0 +1,27 @@
+{
+  "name": "angular-tut",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "glob": "^7.1.2",
+    "gulp": "^3.9.1",
+    "gulp-angular-embed-templates": "^2.3.0",
+    "gulp-less": "^3.3.0",
+    "gulp-open": "^2.0.0",
+    "gulp-watch": "^4.3.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minhnt95/angular-tut.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/minhnt95/angular-tut/issues"
+  },
+  "homepage": "https://github.com/minhnt95/angular-tut#readme"
+}
