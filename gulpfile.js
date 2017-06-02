@@ -6,7 +6,7 @@ var clean = require('gulp-clean');
 var embedTemplate = require('gulp-angular-embed-templates');
 var glob = require('glob');
 
-gulp.task('watch', function () {
+gulp.task('watch', ['build'], function () {
     gulp.watch('source/components/**/*', ['js:component']);
     gulp.watch('source/html/**/*', ['html']);
     gulp.watch('source/img/**/*', ['img']);
@@ -17,9 +17,11 @@ gulp.task('watch', function () {
 gulp.task('js:component', function () {
     glob('source/components/**/*', function (err, files) {
         files.forEach(function (f, i) {
-            gulp.src(f)
-                .pipe(embedTemplate())
-                .pipe(gulp.dest('build/js'));
+            if (f.includes('.js')) {
+                gulp.src(f)
+                    .pipe(embedTemplate())
+                    .pipe(gulp.dest('build/js'));
+            }
         });
     });
 });
@@ -38,7 +40,7 @@ gulp.task('css', function () {
     return gulp.src('source/less/*.less').pipe(less()).pipe(gulp.dest('build/css'));
 });
 
-gulp.task('clean', function (cb) {
+gulp.task('clean', function () {
     return gulp.src('build')
         .pipe(clean({force: true}));
 });
