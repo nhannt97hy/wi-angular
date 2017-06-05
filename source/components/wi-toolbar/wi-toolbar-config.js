@@ -1,13 +1,13 @@
 DATA_CONFIG = [
     {
         imgUrl: 'img/ic_folder.png',
-        label: 'login',
-        handler: 'login'
+        label: 'file 1',
+        handler: '1'
     },
     {
         imgUrl: 'img/ic_folder.png',
         label: 'file 2',
-        handler: 'register'
+        handler: '2'
     },
     {
         imgUrl: 'img/ic_folder.png',
@@ -23,11 +23,11 @@ DATA_CONFIG = [
 ];
 
 HANDLER_FUNCTION = {
-    'login': function () {
-        console.log('login');
+    '1': function () {
+        console.log('1');
     },
-    'register': function () {
-        console.log('register');
+    '2': function () {
+        console.log('2');
     },
     '3': function () {
         console.log('3');
