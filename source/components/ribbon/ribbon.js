@@ -2,7 +2,6 @@ var name = 'ribbon';
 
 function Controller() {
     var self = this;
-
 }
 
 app.component(name, {
