@@ -1,1 +1,14 @@
-<wi-toolbar></wi-toolbar>
+<uib-tabset class="tabbable">
+    <uib-tab heading="{{wiRibbon.tabs[0].name}}" ng-attr-active="wiRibbon.tabs[0].active">
+        <div class="row">
+        </div>
+    </uib-tab>
+
+    <uib-tab heading="{{wiRibbon.tabs[1].name}}" ng-attr-active="wiRibbon.tabs[1].active">
+        <div class="row">
+        </div>
+    </uib-tab>
+</uib-tabset>
+
+<wi-toolbar ng-show="wiRibbon.tabs[0].active" data="wiRibbon.tabs[0]"></wi-toolbar>
+<wi-toolbar ng-show="wiRibbon.tabs[1].active" data="wiRibbon.tabs[1]"></wi-toolbar>

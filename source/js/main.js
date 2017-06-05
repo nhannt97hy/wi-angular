@@ -1,1 +1,1 @@
-app = angular.module('helloapp', []);
+app = angular.module('helloapp', ['ui.bootstrap']);

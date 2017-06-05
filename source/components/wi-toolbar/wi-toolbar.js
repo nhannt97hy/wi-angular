@@ -3,11 +3,16 @@ var name = 'wiToolbar';
 function Controller() {
     var self = this;
 
-    this.dataConfig = DATA_CONFIG;
+    this.$onInit = function () {
+        console.log(this.data)
+    }
 }
 
 app.component(name, {
     templateUrl: 'wi-toolbar.html',
     controller: Controller,
-    controllerAs: name
+    controllerAs: name,
+    bindings: {
+        data: '<'
+    }
 });
