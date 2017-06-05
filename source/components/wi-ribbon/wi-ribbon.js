@@ -1,11 +1,13 @@
-var name = 'ribbon';
+var name = 'wiRibbon';
 
 function Controller() {
     var self = this;
+
+    console.log('ok men')
 }
 
 app.component(name, {
-    templateUrl: 'ribbon.html',
+    templateUrl: 'wi-ribbon.html',
     controller: Controller,
     controllerAs: name
 });

@@ -1,4 +1,4 @@
-var name = 'ribbonToolbar';
+var name = 'wiToolbar';
 
 function Controller() {
     var self = this;
@@ -7,7 +7,7 @@ function Controller() {
 }
 
 app.component(name, {
-    templateUrl: 'ribbon-toolbar.html',
+    templateUrl: 'wi-toolbar.html',
     controller: Controller,
     controllerAs: name
 });

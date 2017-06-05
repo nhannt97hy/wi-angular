@@ -1,4 +1,4 @@
-var name = 'ribbonButton';
+var name = 'wiButton';
 
 function Controller() {
     var self = this;
@@ -9,7 +9,7 @@ function Controller() {
 }
 
 app.component(name, {
-    templateUrl: 'ribbon-button.html',
+    templateUrl: 'wi-button.html',
     controller: Controller,
     controllerAs: name,
     bindings: {
