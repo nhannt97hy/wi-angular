@@ -2,16 +2,10 @@ var name = 'ribbonButton';
 
 function Controller() {
     var self = this;
-    this.imgUrl = 'img/ic_folder.png';
-    this.label = 'item name';
 
     this.$onInit = function() {
-        console.log(self.data);
+        self.onClick = HANDLER_FUNCTION[self.data.handler];
     };
-
-    this.onClick = function () {
-        console.log('click');
-    }
 }
 
 app.component(name, {
