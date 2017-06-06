@@ -1,0 +1,57 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+    <script src="vendor/js/ui-bootstrap-tpls-0.14.3.js"></script>
+    <link rel='stylesheet' href='css/main.css'>
+
+    <script>
+        app = angular.module('helloapp', ['ui.bootstrap'])
+            .controller('WiDummy', function($scope) {
+                $scope.toolbarCfg = toolbarCfg;
+            });
+
+        toolbarCfg = {
+            type: 'tab',
+            name: 'project',
+            active: true,
+            buttons: [
+                {
+                    type: 'button',
+                    imgUrl: 'img/32x32/project_new_32x32.png',
+                    label: 'New Project',
+                    layout: 'icon-left',
+                    //layout: 'icon-top',
+                    handler: function (thisButton) {
+                        console.log(thisButton.label);
+                    }
+                },
+                {
+                    type: 'button',
+                    imgUrl: 'img/32x32/project_open_32x32.png',
+                    label: 'Open Project',
+                    layout: 'icon-left',
+                    handler: 'project-open-project'
+                }
+            ]
+        };
+    </script>
+
+</head>
+
+<body ng-app='helloapp'>
+    <div ng-controller="WiDummy">
+        <wi-toolbar data="toolbarCfg">
+            <!--<wi-button config="btn" ng-repeat="btn in wiToolbar.data.buttons"></wi-button>-->
+            <wi-button label="my button" layout="icon-left"
+                       imgurl="img/32x32/project_new_32x32.png">
+            </wi-button>
+        </wi-toolbar>
+    </div>
+
+    <script src='js/wi-button.js'></script>
+    <script src='js/wi-toolbar.js'></script>
+</body>
+</html>

@@ -5,46 +5,72 @@ RIBBON_TAB_DATA_CONFIG = [
         active: true,
         buttons: [
             {
+                type: 'button',
                 imgUrl: 'img/32x32/project_new_32x32.png',
                 label: 'New Project',
-                handler: 'project-new-project'
+                layout: 'icon-left',
+                //layout: 'icon-top',
+                handler: function(thisButton) {console.log(thisButton.label);}
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/project_open_32x32.png',
                 label: 'Open Project',
+                layout: 'icon-left',
                 handler: 'project-open-project'
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/project_close_32x32.png',
                 label: 'Close Project',
                 handler: 'project-close-project'
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/properties_32x32.png',
                 label: 'Unit Settings',
                 handler: 'project-unit-settings'
             },
             {
+                type: 'dropdown-button',
                 imgUrl: 'img/32x32/properties_32x32.png',
                 label: 'Save Project',
-                handler: 'project-save-project'
+                subButton: [
+                    {
+                        type: 'sub-button',
+                        imgUrl: 'img/32x32/properties_32x32.png',
+                        label: 'Save Project',
+                        handler: ''
+                    },
+                    {
+                        type: 'sub-button',
+                        imgUrl: 'img/32x32/properties_32x32.png',
+                        label: 'Save Project As',
+                        handler: ''
+                    }
+
+                ]
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/properties_32x32.png',
                 label: 'Project',
                 handler: 'project-project'
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/properties_32x32.png',
                 label: 'Workflows',
                 handler: 'project-workflows'
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/properties_32x32.png',
                 label: 'Property Grid',
                 handler: 'project-property-grid'
             },
             {
+                type: 'button',
                 imgUrl: 'img/32x32/properties_32x32.png',
                 label: 'Exit',
                 handler: 'project-exit'

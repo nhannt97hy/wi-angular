@@ -3,9 +3,21 @@ var name = 'wiButton';
 function Controller() {
     var self = this;
 
+    this.onClick = function() {
+        // TODO: Error checking must be added here
+        self.handlers.onclick();
+    }
+    this.onMouseOver = function() {
+        // TODO: Error checking must be added here
+        self.handlers.mouseover();
+    }
     this.$onInit = function() {
-        self.onClick = HANDLER_FUNCTION[self.data.handler];
-    };
+        console.log(self.label);
+        console.log(self.layout);
+        console.log(self.imgurl);
+        console.log(self.handlers);
+        console.log(self.config);
+    }
 }
 
 app.component(name, {
@@ -13,6 +25,10 @@ app.component(name, {
     controller: Controller,
     controllerAs: name,
     bindings: {
-        data: '<'
+        config: '<',
+        label: '@',
+        layout: '@',
+        imgurl: '@',
+        handlers: '<'
     }
 });
