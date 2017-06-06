@@ -2,17 +2,22 @@ var name = 'wiToolbar';
 
 function Controller() {
     var self = this;
-
+    var Btns = this.Btns = [];
     this.$onInit = function () {
-        console.log(this.data)
+        console.log('wi-toolbar');
+    }
+
+    this.addButton = function (btn) {
+        Btns.push(btn);
     }
 }
 
 app.component(name, {
     templateUrl: 'wi-toolbar.html',
+    transclude: true,
     controller: Controller,
     controllerAs: name,
     bindings: {
-        data: '<'
+        label: '@'
     }
 });
