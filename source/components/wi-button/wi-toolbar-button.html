@@ -1,0 +1,8 @@
+<div ng-transclude style="display: inline-block">
+    <button ng-click="wiToolbarButton.config.handlers.onclick()" ng-mouseover="wiToolbarButton.config.handlers.onmouseover()">
+        <img class="{{wiToolbarButton.layout || wiToolbarButton.config.layout}}"
+             ng-src="{{wiToolbarButton.imgurl || wiToolbarButton.config.imgUrl}}" alt="folder">
+        <p class="{{wiToolbarButton.layout || wiToolbarButton.config.layout}}">{{wiToolbarButton.label || wiToolbarButton.config.label}}</p>
+    </button>
+
+</div>

@@ -64,7 +64,7 @@ gulp.task('clean', function () {
 });
 
 gulp.task('index', function () {
-    var target = gulp.src('build/test-wiToolbar.html');
+    var target = gulp.src('build/*.html');
     // It's not necessary to read the files (will speed up things), we're only after their paths:
     var sources = gulp.src(['build/js/*.js', 'build/css/*.css'], {read: false});
 
@@ -72,8 +72,5 @@ gulp.task('index', function () {
         .pipe(gulp.dest('build'));
 });
 const mainTasks =  ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
-gulp.task('build',function () {
-        runSequence('clean', mainTasks, 'index')
-    }
-);
+gulp.task('build', mainTasks);
 gulp.task('default', ['watch']);
