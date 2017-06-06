@@ -5,7 +5,8 @@ var del = require('del');
 var clean = require('gulp-clean');
 var embedTemplate = require('gulp-angular-embed-templates');
 var glob = require('glob');
-var injector = require('gulp-inject');
+var inject = require('gulp-inject');
+var runSequence = require('run-sequence');
 
 gulp.task('watch', ['build'], function () {
     gulp.watch('source/components/**/*', ['component']);
@@ -19,7 +20,7 @@ gulp.task('watch', ['build'], function () {
 
 gulp.task('component', function () {
     glob('source/components/**/*', function (err, files) {
-        files.forEach(function (f, i) {
+        files.forEach(function (f) {
             if (f.includes('.js')) {
                 gulp.src(f)
                     .pipe(embedTemplate())
@@ -62,5 +63,17 @@ gulp.task('clean', function () {
         .pipe(clean({force: true}));
 });
 
-gulp.task('build', ['html', 'css', 'component', 'js', 'img', 'config', 'vendor']);
+gulp.task('index', function () {
+    var target = gulp.src('build/test-wiToolbar.html');
+    // It's not necessary to read the files (will speed up things), we're only after their paths:
+    var sources = gulp.src(['build/js/*.js', 'build/css/*.css'], {read: false});
+
+    return target.pipe(inject(sources, {relative: true}))
+        .pipe(gulp.dest('build'));
+});
+const mainTasks =  ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
+gulp.task('build',function () {
+        runSequence('clean', mainTasks, 'index')
+    }
+);
 gulp.task('default', ['watch']);
