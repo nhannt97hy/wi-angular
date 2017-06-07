@@ -71,8 +71,8 @@ gulp.task('index', function () {
     return target.pipe(inject(sources, {relative: true}))
         .pipe(gulp.dest('build'));
 });
+
 const mainTasks =  ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
-//gulp.task('build', mainTasks);
 gulp.task('build', mainTasks, function() {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {

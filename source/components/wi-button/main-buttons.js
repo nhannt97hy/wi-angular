@@ -1,6 +1,6 @@
-wiButtons = require('./wi-buttons');
+wiRibbon = require('./wi-buttons');
 
-var app = angular.module('helloapp', ['ui.bootstrap', wiButtons.name]);
+var app = angular.module('helloapp', ['ui.bootstrap', wiRibbon.name]);
 app.controller('WiDummy', function($scope) {
     $scope.buttonCfg = buttonCfg;
     $scope.myHandlers = myHandlers;

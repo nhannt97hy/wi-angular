@@ -1,9 +1,3 @@
-<uib-tabset class="tabbable">
-    <uib-tab heading="{{tab.name}}" ng-attr-active="tab.active" ng-repeat="tab in wiRibbon.tabs track by $index">
-        <div class="row">
-        </div>
-    </uib-tab>
-</uib-tabset>
-
-<wi-toolbar ng-show="toolbar.active" data="toolbar"
-            ng-repeat="toolbar in wiRibbon.tabs"></wi-toolbar>
+<div>
+    <div ng-transclude></div>
+</div>

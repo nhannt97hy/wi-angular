@@ -7,17 +7,19 @@
     <script src="vendor/js/angular.min.js"></script>
     <script src="vendor/js/ui-bootstrap-tpls-0.14.3.js"></script>
 
-    <script src='js/main-buttons.js.bundle.js'></script>
-    
+    <script src='js/main-ribbon.js.bundle.js'></script>
+
     <title>Test button</title>
 </head>
 
 <body ng-app='helloapp'>
-<div ng-controller="WiDummy">
-    <wi-button label="my button" layout="icon-left"
-               imgurl="img/32x32/project_new_32x32.png"
-               handlers="myHandlers">
-    </wi-button>
+<div ng-controller="WiRibbonController">
+    <wi-ribbon>
+        <wi-button label="my button" layout="icon-left"
+                   imgurl="img/32x32/project_new_32x32.png"
+                   handlers="myHandlers">
+        </wi-button>
+    </wi-ribbon>
 </div>
 </body>
 </html>

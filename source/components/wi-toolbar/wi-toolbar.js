@@ -3,14 +3,6 @@ const moduleName = 'wi-toolbar';
 
 function Controller() {
     var self = this;
-    var Btns = this.Btns = [];
-    this.$onInit = function () {
-        console.log('wi-toolbar');
-    }
-
-    this.addButton = function (btn) {
-        Btns.push(btn);
-    }
 }
 
 var app = angular.module(moduleName, []);
