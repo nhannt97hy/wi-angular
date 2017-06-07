@@ -1,6 +1,3 @@
-/**
- * Created by tienm on 07-Jun-17.
- */
 const name = 'wiTab';
 const moduleName = 'wi-tab';
 
