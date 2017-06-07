@@ -31,6 +31,10 @@ gulp.task('component', function () {
                     .pipe(less())
                     .pipe(gulp.dest('build/css'));
             }
+            if (f.includes('test.html')) {
+                gulp.src(f)
+                    .pipe(gulp.dest('build'));
+            }
         });
     });
 });
