@@ -1,0 +1,7 @@
+<h1>{{wiList.heading}}</h1>
+<table>
+    <tr ng-repeat="item in wiList.items track by $index">
+        <td>{{item.key}}</td>
+        <td>{{item.value}}</td>
+    </tr>
+</table>
