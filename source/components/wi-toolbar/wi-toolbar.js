@@ -14,6 +14,7 @@ function Controller() {
 }
 
 var app = angular.module(moduleName, []);
+
 app.component(name, {
     templateUrl: 'wi-toolbar.html',
     transclude: true,
