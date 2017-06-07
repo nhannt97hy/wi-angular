@@ -1,8 +1,9 @@
 /**
  * Created by cuong on 6/6/2017.
  */
-var wiButtonName = 'wiButton';
-var wiToolbarButtonName = 'wiToolbarButton';
+const wiButtonName = 'wiButton';
+const wiToolbarButtonName = 'wiToolbarButton';
+const moduleName = 'wi-buttons';
 
 function ButtonController() {
     var self = this;
@@ -15,7 +16,9 @@ function ToolbarButtonController() {
         this.wi_toolbar_CTRL.addButton(self.config);
     };
 }
-var app = angular.module('wi-buttons', []);
+
+var app = angular.module(moduleName, []);
+
 app.component(wiButtonName, {
     templateUrl: 'wi-button.html',
     controller: ButtonController,
@@ -44,3 +47,5 @@ app.component(wiToolbarButtonName, {
         handlers: '<'
     }
 });
+
+exports.name=moduleName;

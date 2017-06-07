@@ -1,4 +1,5 @@
-var name = 'wiToolbar';
+const name = 'wiToolbar';
+const moduleName = 'wi-toolbar';
 
 function Controller() {
     var self = this;
@@ -12,7 +13,7 @@ function Controller() {
     }
 }
 
-var app = angular.module('wi-toolbar', []);
+var app = angular.module(moduleName, []);
 app.component(name, {
     templateUrl: 'wi-toolbar.html',
     transclude: true,
@@ -22,3 +23,5 @@ app.component(name, {
         label: '@'
     }
 });
+
+exports.name = moduleName;

@@ -72,8 +72,8 @@ gulp.task('index', function () {
         .pipe(gulp.dest('build'));
 });
 const mainTasks =  ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
-gulp.task('build', mainTasks);
-gulp.task('bundle', mainTasks, function() {
+//gulp.task('build', mainTasks);
+gulp.task('build', mainTasks, function() {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
             if (f.includes('main')) {
