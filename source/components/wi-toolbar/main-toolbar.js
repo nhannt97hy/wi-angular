@@ -1,4 +1,4 @@
-wiRibbon = require('./wi-buttons.js');
+wiRibbon = require('./wi-button.js');
 wiToolbar = require('./wi-toolbar.js');
 
 app=angular.module('helloapp', ['ui.bootstrap', wiToolbar.name, wiRibbon.name]);

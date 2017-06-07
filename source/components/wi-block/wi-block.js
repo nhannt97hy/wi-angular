@@ -1,5 +1,5 @@
-const name = 'wiRibbon';
-const moduleName = 'wi-ribbon';
+const name = 'wiBlock';
+const moduleName = 'wi-block';
 
 function Controller() {
     var self = this;
@@ -8,7 +8,7 @@ function Controller() {
 var app = angular.module(moduleName, []);
 
 app.component(name, {
-    templateUrl: 'wi-ribbon.html',
+    templateUrl: 'wi-block.html',
     transclude: true,
     controller: Controller,
     controllerAs: name

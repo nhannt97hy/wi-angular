@@ -1,4 +1,4 @@
-wiRibbon = require('./wi-buttons');
+wiRibbon = require('./wi-button');
 
 var app = angular.module('helloapp', ['ui.bootstrap', wiRibbon.name]);
 app.controller('WiDummy', function($scope) {
