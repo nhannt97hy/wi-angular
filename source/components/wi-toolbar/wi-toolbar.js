@@ -12,6 +12,7 @@ function Controller() {
     }
 }
 
+var app = angular.module('wi-toolbar', []);
 app.component(name, {
     templateUrl: 'wi-toolbar.html',
     transclude: true,

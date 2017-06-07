@@ -15,6 +15,7 @@ function ToolbarButtonController() {
         this.wi_toolbar_CTRL.addButton(self.config);
     };
 }
+var app = angular.module('wi-buttons', []);
 app.component(wiButtonName, {
     templateUrl: 'wi-button.html',
     controller: ButtonController,

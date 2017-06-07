@@ -1,10 +1,10 @@
 var gulp = require('gulp');
 var watch = require('gulp-watch');
 var less = require('gulp-less');
-var del = require('del');
 var clean = require('gulp-clean');
 var embedTemplate = require('gulp-angular-embed-templates');
 var glob = require('glob');
+var exec = require('gulp-exec');
 var inject = require('gulp-inject');
 var runSequence = require('run-sequence');
 
@@ -73,4 +73,14 @@ gulp.task('index', function () {
 });
 const mainTasks =  ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
 gulp.task('build', mainTasks);
+gulp.task('bundle', mainTasks, function() {
+    glob('build/js/*.js', function (err, files) {
+        files.forEach(function (f) {
+            if (f.includes('main')) {
+                gulp.src(f)
+                    .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
+            }
+        });
+    });
+});
 gulp.task('default', ['watch']);
