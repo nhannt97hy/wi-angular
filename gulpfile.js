@@ -7,6 +7,7 @@ var glob = require('glob');
 var exec = require('gulp-exec');
 var inject = require('gulp-inject');
 var runSequence = require('run-sequence');
+var deploy = require('gulp-gh-pages');
 
 gulp.task('watch', ['build'], function () {
     gulp.watch('source/components/**/*', ['component']);
@@ -76,8 +77,8 @@ gulp.task('index', function () {
         .pipe(gulp.dest('build'));
 });
 
-const mainTasks =  ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
-gulp.task('build', mainTasks, function() {
+const mainTasks = ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
+gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
             if (f.includes('main')) {
@@ -88,8 +89,6 @@ gulp.task('build', mainTasks, function() {
     });
 });
 gulp.task('default', ['watch']);
-
-var deploy      = require('gulp-gh-pages');
 
 /**
  * Push build to gh-pages
