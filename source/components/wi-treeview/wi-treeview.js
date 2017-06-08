@@ -4,10 +4,6 @@ const moduleName = 'wi-treeview';
 function Controller() {
     var self = this;
 
-    this.$onInit = function () {
-        console.log('config: ', self.config);
-    }
-
     this.onCaretClick = function () {
         self.data.childExpanded = !self.data.childExpanded;
     }

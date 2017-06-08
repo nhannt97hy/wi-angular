@@ -91,7 +91,6 @@ const TREE_CONFIG_TEST = [
             description: 'description 2',
             childExpanded: true,
             handler: ''
-        },
-        children: []
+        }
     }
 ];

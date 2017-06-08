@@ -7,8 +7,14 @@ wi-treeview {
         cursor: pointer;
     }
 
-    .wi-parent-node:hover{
-        background-color: lightgray;
-        opacity: 0.5;
+    .wi-parent-node {
+        &:hover{
+            background-color: lightgray;
+            opacity: 0.5;
+        }
+
+        .icon-expanded {
+            min-width: 8px;
+        }
     }
 }
