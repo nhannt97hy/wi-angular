@@ -1,23 +1,14 @@
-wi-button, wi-toolbar-button {
-    display: inline-block;
-    & > div {
-        display:block;
-        & > button {
-            display: inline-block;
-            & > img {
-                margin:auto;
-            }
-            & > p {
-                font-size: 12px;
-            }
-        }
-    }
-}
-
-.icon-top { 
+wi-treeview {
     display:block;
-}
-.icon-left {
-  display: inline-block;
-  margin: 0;
+
+    .wi-treeview-container {
+        display: block;
+        margin-left: 2em;
+        cursor: pointer;
+    }
+
+    .wi-parent-node:hover{
+        background-color: lightgray;
+        opacity: 0.5;
+    }
 }

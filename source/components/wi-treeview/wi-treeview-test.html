@@ -1,6 +1,8 @@
 <html>
 <head>
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href='css/main.css' rel='stylesheet'>
     <link href='css/wi-treeview.css' rel='stylesheet'>
 
     <script src="vendor/js/jquery.min.js"></script>
@@ -15,8 +17,11 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-treeview>
-    </wi-treeview>
+    <div class="row">
+        <div class="col-md-6">
+            <wi-treeview config="myConfig"></wi-treeview>
+        </div>
+    </div>
 </div>
 </body>
 </html>
