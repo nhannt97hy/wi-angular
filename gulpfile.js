@@ -5,79 +5,96 @@ var clean = require('gulp-clean');
 var embedTemplate = require('gulp-angular-embed-templates');
 var glob = require('glob');
 var exec = require('gulp-exec');
-var inject = require('gulp-inject');
-var runSequence = require('run-sequence');
 var deploy = require('gulp-gh-pages');
+var changed = require('gulp-changed');
+var async = require('async');
+
+const BUILD_DIR = {
+    root: 'build',
+    js: 'build/js',
+    css: 'build/css',
+    img: 'build/img',
+    vendor: 'build/vendor'
+};
+const SOURCE_DIR = {
+    root: 'source',
+    js: 'source/js/**/*.js',
+    components: 'source/components/**/*',
+    html: 'source/html/**/*.html',
+    img: 'source/img/**/*',
+    less: 'source/less/**/*.less',
+    vendor: 'source/vendor/**/*'
+};
+
 
 gulp.task('watch', ['build'], function () {
-    gulp.watch('source/components/**/*', ['component']);
     gulp.watch('source/html/**/*', ['html']);
-    gulp.watch('source/img/**/*', ['img']);
-    gulp.watch('source/js/**/*', ['js']);
-    gulp.watch('source/config/**/*', ['config']);
     gulp.watch('source/less/**/*', ['css']);
+    gulp.watch('source/components/**/*', ['component']);
+    gulp.watch('source/js/**/*', ['js']);
+    gulp.watch('source/img/**/*', ['img']);
     gulp.watch('source/vendor/**/*', ['vendor']);
 });
 
-gulp.task('component', function () {
-    glob('source/components/**/*', function (err, files) {
-        files.forEach(function (f) {
+gulp.task('component', function (taskCallback) {
+    glob(SOURCE_DIR.components, function (err, files) {
+        async.each(files, function (f, cb) {
             if (f.includes('.js')) {
                 gulp.src(f)
-                    .pipe(embedTemplate())
-                    .pipe(gulp.dest('build/js'));
-            }
-            if (f.includes('.less')) {
+                    .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
+                    .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
+            } else if (f.includes('.less')) {
                 gulp.src(f)
-                    .pipe(less())
-                    .pipe(gulp.dest('build/css'));
+                    .pipe(less()).pipe(changed(BUILD_DIR.css))
+                    .pipe(gulp.dest(BUILD_DIR.css)).on('end', cb);
+            } else if (f.includes('test.html')) {
+                gulp.src(f).pipe(changed(BUILD_DIR.root))
+                    .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
+            } else {
+                cb();
             }
-            if (f.includes('test.html')) {
-                gulp.src(f)
-                    .pipe(gulp.dest('build'));
+        }, function (error) {
+            if (error) {
+                console.log(error);
             }
+            return taskCallback();
         });
     });
 });
 
 
 gulp.task('img', function () {
-    return gulp.src('source/img/**/*')
-        .pipe(gulp.dest('build/img'));
+    var DEST = BUILD_DIR.img;
+    return gulp.src(SOURCE_DIR.img).pipe(changed(DEST))
+        .pipe(gulp.dest(DEST));
 });
 gulp.task('js', function () {
-    return gulp.src('source/js/*.js')
-        .pipe(gulp.dest('build/js'));
-});
-gulp.task('config', function () {
-    return gulp.src('source/config/*.js')
-        .pipe(gulp.dest('build/js'));
+    var DEST = BUILD_DIR.js;
+    return gulp.src(SOURCE_DIR.js).pipe(changed(DEST))
+        .pipe(gulp.dest(DEST));
 });
 gulp.task('html', function () {
-    return gulp.src('source/html/*.html').pipe(gulp.dest('build'));
+    var DEST = BUILD_DIR.root;
+    return gulp.src(SOURCE_DIR.html).pipe(changed(DEST))
+        .pipe(gulp.dest(DEST));
 });
 gulp.task('css', function () {
-    return gulp.src('source/less/*.less').pipe(less()).pipe(gulp.dest('build/css'));
+    var DEST = BUILD_DIR.css;
+    return gulp.src(SOURCE_DIR.less).pipe(less()).pipe(changed(DEST))
+        .pipe(gulp.dest(DEST));
 });
 gulp.task('vendor', function () {
-    return gulp.src('source/vendor/**/*').pipe(gulp.dest('build/vendor'));
+    var DEST = BUILD_DIR.vendor;
+    return gulp.src(SOURCE_DIR.vendor).pipe(changed(DEST))
+        .pipe(gulp.dest(DEST));
 });
 
 gulp.task('clean', function () {
-    return gulp.src('build')
+    return gulp.src(BUILD_DIR.root)
         .pipe(clean({force: true}));
 });
 
-gulp.task('index', function () {
-    var target = gulp.src('build/*.html');
-    // It's not necessary to read the files (will speed up things), we're only after their paths:
-    var sources = gulp.src(['build/js/*.js', 'build/css/*.css'], {read: false});
-
-    return target.pipe(inject(sources, {relative: true}))
-        .pipe(gulp.dest('build'));
-});
-
-const mainTasks = ['html', 'css', 'component', 'js', 'img', 'config', 'vendor'];
+const mainTasks = ['html', 'css', 'component', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
