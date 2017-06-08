@@ -1,34 +1,8 @@
 const componentName = 'wiList';
 const moduleName = 'wi-list';
 
-function Controller($timeout) {
+function Controller() {
     var self = this;
-    this.$onInit = function () {
-        console.log(self.items);
-    }
-    this.tick = function() {
-        var newItem = {
-            imgUrl: '',
-            key: 'key',
-            value: 'value' + Date.now()
-        };
-        self.items.push(newItem);
-        console.log('push')
-        console.log(newItem)
-        console.log(self.items.length);
-        $timeout(self.tick, 1000);
-    };
-    $timeout(self.tick, 1000);
-
-    this.onclick = function () {
-        var newItem = {
-            imgUrl: '',
-            key: 'key',
-            value: 'value' + Date.now()
-        };
-        self.items.push(newItem);
-        console.log('push')
-    }
 }
 
 var app = angular.module(moduleName, []);
