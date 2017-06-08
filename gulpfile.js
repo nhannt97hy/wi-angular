@@ -88,3 +88,13 @@ gulp.task('build', mainTasks, function() {
     });
 });
 gulp.task('default', ['watch']);
+
+var deploy      = require('gulp-gh-pages');
+
+/**
+ * Push build to gh-pages
+ */
+gulp.task('deploy', function () {
+    return gulp.src("./build/**/*")
+        .pipe(deploy())
+});

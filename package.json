@@ -8,6 +8,7 @@
     "gulp": "^3.9.1",
     "gulp-angular-embed-templates": "^2.3.0",
     "gulp-clean": "^0.3.2",
+    "gulp-gh-pages": "^0.5.4",
     "gulp-inject": "^4.2.0",
     "gulp-less": "^3.3.0",
     "gulp-open": "^2.0.0",
