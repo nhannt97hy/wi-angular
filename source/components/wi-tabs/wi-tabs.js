@@ -7,17 +7,34 @@ function TabsetController() {
 
     this.tabs = [];
 
-    this.selectTab = function (tab) {
-        for(var i=0; i < self.tabs.length; i++){
-            self.tabs[i].active = false;
-        }
+    this.selectTab = function (index) {
+        deactiveAllTabs(self.tabs);
 
-        self.tabs[tab.index].active = true;
+        self.tabs[index].active = true;
+    };
+
+    this.closeTab = function (index) {
+        deactiveAllTabs(self.tabs);
+
+        self.tabs.splice(index, 1);
+        if (self.tabs.length !== 0){
+            if (index < self.tabs.length){
+                self.tabs[index].active = true;
+            } else {
+                self.tabs[self.tabs.length - 1].active = true;
+            }
+        }
     };
 
     this.addTab = function (tab) {
         self.tabs.push(tab);
         self.tabs[self.tabs.length - 1].active = (self.tabs.length === 1);
+    };
+
+    function deactiveAllTabs(tabs) {
+        for(var i=0; i < tabs.length; i++){
+            tabs[i].active = false;
+        }
     }
 }
 
@@ -47,7 +64,6 @@ app.component(tabComponentName, {
         'wiTabsetCtrl': '^wiTabset'
     },
     bindings: {
-        index: '@',
         heading: '@',
         closable: '@'
     }

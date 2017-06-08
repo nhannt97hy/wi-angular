@@ -23,7 +23,7 @@
 <div ng-controller="TestTabset">
 
     <wi-tabset>
-        <wi-tab index="0" heading="Tab 2" closable="false">
+        <wi-tab heading="Tab 1" closable="true">
             <wi-toolbar label="Project">
                 <wi-button label="my button toobar" layout="icon-left"
                            imgurl="img/32x32/project_new_32x32.png"
@@ -42,9 +42,31 @@
             </wi-toolbar>
         </wi-tab>
 
-        <wi-tab index="1" heading="Tab 3" closable="true">
+        <wi-tab heading="Tab 2" closable="true">
             <wi-toolbar label="Well">
+                <wi-button label="my button toobar 3" layout="icon-top"
+                           imgurl="img/32x32/project_new_32x32.png"
+                           handlers="myHandlers"></wi-button>
                 <wi-button label="my button toobar" layout="icon-top"
+                           imgurl="img/32x32/project_new_32x32.png"
+                           handlers="myHandlers"></wi-button>
+            </wi-toolbar>
+        </wi-tab>
+
+        <wi-tab heading="Tab 3" closable="true">
+            <wi-toolbar label="Well">
+                <wi-button label="my button toobar 4" layout="icon-top"
+                           imgurl="img/32x32/project_new_32x32.png"
+                           handlers="myHandlers"></wi-button>
+                <wi-button label="my button toobar" layout="icon-top"
+                           imgurl="img/32x32/project_new_32x32.png"
+                           handlers="myHandlers"></wi-button>
+            </wi-toolbar>
+        </wi-tab>
+
+        <wi-tab heading="Tab 4" closable="true">
+            <wi-toolbar label="Well">
+                <wi-button label="my button toobar 5" layout="icon-top"
                            imgurl="img/32x32/project_new_32x32.png"
                            handlers="myHandlers"></wi-button>
                 <wi-button label="my button toobar" layout="icon-top"
