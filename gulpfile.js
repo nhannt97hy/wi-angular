@@ -8,6 +8,7 @@ var exec = require('gulp-exec');
 var deploy = require('gulp-gh-pages');
 var changed = require('gulp-changed');
 var async = require('async');
+var fileInclude = require('gulp-file-include');
 
 const BUILD_DIR = {
     root: 'build',
@@ -68,9 +69,10 @@ gulp.task('img', function () {
     return gulp.src(SOURCE_DIR.img).pipe(changed(DEST))
         .pipe(gulp.dest(DEST));
 });
+
 gulp.task('js', function () {
     var DEST = BUILD_DIR.js;
-    return gulp.src(SOURCE_DIR.js).pipe(changed(DEST))
+    return gulp.src([SOURCE_DIR.js, 'source/main.js']).pipe(changed(DEST))
         .pipe(gulp.dest(DEST));
 });
 gulp.task('html', function () {
@@ -94,11 +96,21 @@ gulp.task('clean', function () {
         .pipe(clean({force: true}));
 });
 
-const mainTasks = ['html', 'css', 'component', 'js', 'img', 'vendor'];
+gulp.task('include', function() {
+    gulp.src(['./source/html/index.html'])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest('./build'));
+});
+
+const mainTasks = ['include', 'css', 'component', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
-            if (f.includes('main')) {
+            if (f.includes('main') && !f.includes('bundle')) {
                 gulp.src(f)
                     .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
             }
@@ -112,5 +124,5 @@ gulp.task('default', ['watch']);
  */
 gulp.task('deploy', function () {
     return gulp.src("./build/**/*")
-        .pipe(deploy())
+        .pipe(deploy());
 });

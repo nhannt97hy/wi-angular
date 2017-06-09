@@ -1,8 +1,9 @@
 <div>
     <ul class="nav nav-tabs">
         <li class="wi-tab" ng-repeat="tab in wiTabset.tabs track by $index"
-            ng-class="{'active': tab.active}">
-            <a ng-click="wiTabset.selectTab($index)">{{tab.heading}}</a>
+            ng-class="{'active': tab.active}"
+            ng-click="wiTabset.selectTab($index)">
+            <a>{{tab.heading}}</a>
             <i class="ti-close"
                ng-show="tab.closable == 'true'"
                ng-click="wiTabset.closeTab($index)"></i>
