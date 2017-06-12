@@ -10,6 +10,7 @@ app.component(componentName, {
     templateUrl: 'wi-dropdown.html',
     controller: Controller,
     controllerAs: componentName,
+    transclude: true,
     bindings: {
         config: '<',
         label: '@',

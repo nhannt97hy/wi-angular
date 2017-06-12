@@ -1,18 +1,15 @@
 <div class="dropdown">
-    <button class="dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
-        <span class="caret"></span></button>
-    <ul class="dropdown-menu">
-        <li><a href="#">HTML</a></li>
-        <li><a href="#">CSS</a></li>
-        <li><a href="#">JavaScript</a></li>
-    </ul>
-</div>
-
-<div class="dropdown">
-    <button class="dropdown-toggle" type="button" data-toggle="dropdown" ng-click="wiButton.handlers.onclick()" ng-mouseover="wiButton.handlers.onmouseover()">
-        <img class="{{wiButton.layout || wiButton.config.layout}}"
-             ng-src="{{wiButton.imgurl || wiButton.config.imgUrl}}" alt="folder">
-        <p class="{{wiButton.layout || wiButton.config.layout}}">{{wiButton.label || wiButton.config.label}}</p>
-        <span class="caret"></span>
+    <button class="dropdown-toggle" type="button" data-toggle="dropdown"
+            ng-click="wiButton.handlers.onclick()"
+            ng-mouseover="wiButton.handlers.onmouseover()">
+        <img class="{{wiDropdown.layout || wiDropdown.config.layout}}"
+             ng-src="{{wiDropdown.imgurl || wiDropdown.config.imgUrl}}" alt="folder">
+        <div class="label-wrapper {{wiDropdown.layout || wiDropdown.config.layout}}">
+            <span class="{{wiDropdown.layout || wiDropdown.config.layout}}">{{wiDropdown.label || wiDropdown.config.label}}</span>
+            <span class="caret"></span>
+        </div>
     </button>
+    <ul class="dropdown-menu">
+        <div ng-transclude></div>
+    </ul>
 </div>

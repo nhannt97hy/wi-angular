@@ -3,6 +3,7 @@
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href='css/main.css' rel='stylesheet'>
+    <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-dropdown.css' rel='stylesheet'>
 
     <script src="vendor/js/jquery.min.js"></script>
@@ -16,14 +17,31 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <div>ok men</div>
-    <wi-dropdown label="my button 1" layout="icon-left"
+    <wi-dropdown label="my button 2" layout="icon-left"
                  imgurl="img/32x32/project_new_32x32.png"
-                 handlers="myHandlers"></wi-dropdown>
+                 handlers="myHandlers">
+        <wi-button label="my button 1" layout="icon-left"
+                     imgurl="img/32x32/project_new_32x32.png"
+                     handlers="myHandlers">
+        </wi-button>
+        <wi-button label="my button 2" layout="icon-left"
+                   imgurl="img/32x32/project_new_32x32.png"
+                   handlers="myHandlers">
+        </wi-button>
+    </wi-dropdown>
 
     <wi-dropdown label="my button 2" layout="icon-top"
                  imgurl="img/32x32/project_new_32x32.png"
-                 handlers="myHandlers"></wi-dropdown>
+                 handlers="myHandlers">
+        <wi-button label="my button 1" layout="icon-top"
+                   imgurl="img/32x32/project_new_32x32.png"
+                   handlers="myHandlers">
+        </wi-button>
+        <wi-button label="my button 2" layout="icon-top"
+                   imgurl="img/32x32/project_new_32x32.png"
+                   handlers="myHandlers">
+        </wi-button>
+    </wi-dropdown>
 </div>
 </body>
 </html>
