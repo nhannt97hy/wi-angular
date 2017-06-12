@@ -8,6 +8,15 @@ var app = angular.module('wiapp', [wiButton.name, wiToolbar.name, wiTabs.name, w
 
 app.controller('AppController', function ($scope) {
     $scope.myConfig = TREE_CONFIG_TEST;
+
+    $scope.config = {
+        ProjectTab: {
+            heading: 'Project'
+        },
+        WellTab: {
+            heading: 'Well'
+        }
+    }
 });
 
 const TREE_CONFIG_TEST = [
@@ -55,9 +64,7 @@ const TREE_CONFIG_TEST = [
                                             childExpanded: true,
                                             handler: ''
                                         },
-                                        children: [
-
-                                        ]
+                                        children: []
                                     }
                                 ]
                             }
@@ -71,9 +78,7 @@ const TREE_CONFIG_TEST = [
                             childExpanded: true,
                             handler: ''
                         },
-                        children: [
-
-                        ]
+                        children: []
                     }
                 ]
             },
