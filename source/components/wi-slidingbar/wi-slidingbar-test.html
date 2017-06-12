@@ -1,0 +1,36 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/jquery-ui.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href='css/main.css' rel='stylesheet'>
+    <link href='css/wi-button.css' rel='stylesheet'>
+    <link href='css/wi-slidingbar.css' rel='stylesheet'>
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src="vendor/js/jquery-ui.js"></script>
+
+    <script src='js/main-slidingbar.js.bundle.js'></script>
+    
+    <title>Test</title>
+</head>
+
+<body ng-app='helloapp'>
+<div ng-controller="WiDummy">
+    <div class="container">
+        <div class="row">
+           <div class="col-md-4" style="height: 50vh;">
+               <wi-slidingbar>
+                   <div>
+                       <p>Some thing is liked plot</p>
+                   </div>
+               </wi-slidingbar>
+           </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
