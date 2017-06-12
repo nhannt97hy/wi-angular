@@ -1,6 +1,3 @@
-/**
- * Created by cuong on 6/6/2017.
- */
 const wiButtonName = 'wiButton';
 const moduleName = 'wi-button';
 
@@ -21,4 +18,4 @@ app.component(wiButtonName, {
     }
 });
 
-exports.name=moduleName;
+exports.name = moduleName;
