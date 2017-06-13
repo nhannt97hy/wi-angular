@@ -1,7 +1,7 @@
 <div>
     <button ng-click="wiButton.handlers.onclick()" ng-mouseover="wiButton.handlers.onmouseover()">
-        <img class="{{wiButton.layout || wiButton.config.layout}}"
-             ng-src="{{wiButton.imgurl || wiButton.config.imgUrl}}" alt="folder">
-        <p class="{{wiButton.layout || wiButton.config.layout}}">{{wiButton.label || wiButton.config.label}}</p>
+        <img class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}"
+             ng-class="{{wiButton.layout || wiButton.config.layout || wiButton.default.layout}}" alt="icon">
+        <p class="{{wiButton.layout || wiButton.config.layout || wiButton.default.layout}}">{{wiButton.label || wiButton.config.label}}</p>
     </button>
 </div>

@@ -7,9 +7,8 @@ app.controller('WiDummy', function($scope) {
         $scope.buttonCfg2 = buttonCfg2;
     });
 buttonCfg = {
-    type: 'button',
-    imgUrl: 'img/32x32/project_new_32x32.png',
-    label: 'New Projecttttt',
+    icon: 'project-new-32x32',
+    label: 'New Project',
     layout: 'icon-left',
     handlers: {
         onclick: function() {
@@ -21,8 +20,7 @@ buttonCfg = {
     }
 };
 buttonCfg2 = {
-    type: 'button',
-    imgUrl: 'img/32x32/project_new_32x32.png',
-    label: 'New Buttooooon',
+    icon: 'project-open-32x32',
+    label: 'Open Project',
     layout: 'icon-top'
 };
