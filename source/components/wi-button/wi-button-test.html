@@ -9,20 +9,19 @@
     <script src="vendor/js/angular.min.js"></script>
     <script src="vendor/js/ui-bootstrap-tpls-0.14.3.js"></script>
 
+    <script src="js/wi-config.js"></script>
     <script src='js/main-button.js.bundle.js'></script>
-    
+
     <title>Test button</title>
 </head>
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-button label="Exit" icon="exit-32x32"
-               handlers="myHandlers">
-    </wi-button>
-    <wi-button label="Open Project" layout="icon-left"
-               icon="project-open-16x16"
-               handlers="myHandlers">
-    </wi-button>
+    <div ng-repeat="btn in ProjectTab | filter:'wiButton'">
+        <wi-button label="{{btn.label}}" icon="{{btn.icon}}"
+                  handlers="myHandlers">
+        </wi-button>
+    </div>
 </div>
 </body>
 </html>

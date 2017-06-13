@@ -9,6 +9,9 @@ var deploy = require('gulp-gh-pages');
 var changed = require('gulp-changed');
 var async = require('async');
 var fileInclude = require('gulp-file-include');
+var XLSX = require('xlsx');
+var workbook = XLSX.readFile('Wi-UI.xlsx');
+const fs = require('fs');
 
 const BUILD_DIR = {
     root: 'build',
@@ -126,3 +129,26 @@ gulp.task('deploy', function () {
     return gulp.src("./build/**/*")
         .pipe(deploy());
 });
+
+function to_json(workbook) {
+    // var result = {};
+    var text = '';
+    workbook.SheetNames.forEach(function (sheetName) {
+        var roa = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+        if (roa.length > 0) {
+            // result[sheetName] = roa;
+            text += 'var ' + sheetName + ' = ' + JSON.stringify(roa, null, 2) + '\n';
+        }
+    });
+    return text;
+}
+
+gulp.task('config', function () {
+    var config = to_json(workbook);
+
+    fs.writeFile('./build/js/wi-config.js', config, 'utf-8', function (er) {
+        if (er) {
+            console.log(er);
+        }
+    })
+})
