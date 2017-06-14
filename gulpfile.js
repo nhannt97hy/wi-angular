@@ -100,7 +100,7 @@ gulp.task('clean', function () {
 });
 
 gulp.task('include', function() {
-    gulp.src(['./source/html/index.html'])
+    return gulp.src(['./source/html/index.html'])
         .pipe(fileInclude({
             prefix: '@@',
             basepath: '@file',
