@@ -23,9 +23,9 @@ const BUILD_DIR = {
 const SOURCE_DIR = {
     root: 'source',
     main: 'source/*.js',
-    services: 'source/services/**/*.js',
     js: 'source/js/**/*.js',
     components: 'source/components/**/*',
+    services: 'source/services/**/*',
     html: 'source/html/**/*.html',
     img: 'source/img/**/*',
     less: 'source/less/**/*.less',
@@ -68,6 +68,26 @@ gulp.task('component', function (taskCallback) {
     });
 });
 
+gulp.task('services', function (servicesCb) {
+    glob(SOURCE_DIR.services, function (err, files) {
+        async.each(files, function (f, cb) {
+            if(f.includes('.js')){
+                gulp.src(f)
+                    .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
+                    .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
+            }else if(f.includes('test.html')){
+                gulp.src(f).pipe(changed(BUILD_DIR.root))
+                    .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
+            }
+        },function (err) {
+            if(err){
+                console.log(err);
+            }
+            return servicesCb();
+        });
+    });
+});
+
 
 gulp.task('img', function () {
     var DEST = BUILD_DIR.img;
@@ -76,7 +96,7 @@ gulp.task('img', function () {
 });
 gulp.task('js', function () {
     var DEST = BUILD_DIR.js;
-    return gulp.src([SOURCE_DIR.js, SOURCE_DIR.main, SOURCE_DIR.services]).pipe(changed(DEST))
+    return gulp.src([SOURCE_DIR.js, SOURCE_DIR.main]).pipe(changed(DEST))
         .pipe(gulp.dest(DEST));
 });
 gulp.task('html', function () {
@@ -110,7 +130,7 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-const mainTasks = ['include', 'css', 'component', 'js', 'img', 'vendor'];
+const mainTasks = ['include', 'css', 'component', 'services', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
