@@ -4,9 +4,9 @@ const moduleName = 'wi-treeview';
 function Controller() {
     var self = this;
 
-    this.onCaretClick = function () {
-        self.data.childExpanded = !self.data.childExpanded;
-    }
+    this.onSelectItem = function () {
+        console.log('double click');
+    };
 }
 var app = angular.module(moduleName, []);
 app.component(componentName, {

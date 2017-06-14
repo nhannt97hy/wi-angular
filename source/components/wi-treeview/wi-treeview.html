@@ -1,12 +1,14 @@
 <div class="wi-treeview-container" ng-repeat="item in wiTreeview.config">
-    <div class="wi-parent-node" ng-click="item.data.childExpanded = !item.data.childExpanded">
+    <div class="wi-parent-node"
+         ng-click="item.data.childExpanded = !item.data.childExpanded"
+         ng-dblclick="wiTreeview.onSelectItem()">
         <i aria-hidden="true" class="fa icon-expanded"
            ng-class="
            {'fa-caret-down': item.data.childExpanded,
            'fa-caret-right': !item.data.childExpanded,
            'wi-hidden': item.children == null || item.children.length == 0}">
         </i>
-        <img ng-src="{{item.data.imgUrl}}" alt="img item treeview">
+        <img class="{{item.data.icon}}" alt="img item treeview">
         <span>{{item.data.label}}</span>
     </div>
 

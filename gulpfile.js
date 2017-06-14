@@ -22,6 +22,8 @@ const BUILD_DIR = {
 };
 const SOURCE_DIR = {
     root: 'source',
+    main: 'source/*.js',
+    services: 'source/services/**/*.js',
     js: 'source/js/**/*.js',
     components: 'source/components/**/*',
     html: 'source/html/**/*.html',
@@ -72,10 +74,9 @@ gulp.task('img', function () {
     return gulp.src(SOURCE_DIR.img).pipe(changed(DEST))
         .pipe(gulp.dest(DEST));
 });
-
 gulp.task('js', function () {
     var DEST = BUILD_DIR.js;
-    return gulp.src([SOURCE_DIR.js, 'source/main.js']).pipe(changed(DEST))
+    return gulp.src([SOURCE_DIR.js, SOURCE_DIR.main, SOURCE_DIR.services]).pipe(changed(DEST))
         .pipe(gulp.dest(DEST));
 });
 gulp.task('html', function () {
