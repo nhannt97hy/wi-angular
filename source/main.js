@@ -15,8 +15,7 @@ var app = angular.module('wiapp',
         wiTabs.name,
         wiTreeview.name,
         wiStatusBar.name,
-        wiSlidingbar.name,
-        'ui.router'
+        wiSlidingbar.name
     ]);
 
 app.controller('AppController', function ($scope) {
@@ -31,4 +30,3 @@ app.controller('AppController', function ($scope) {
         }
     }
 });
-
