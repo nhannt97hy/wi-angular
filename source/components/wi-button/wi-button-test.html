@@ -17,7 +17,7 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <div ng-repeat="btn in ProjectTab | filter:'wiButton'">
+    <div ng-repeat="btn in ProjectTab | filter:{Dependency:'wiButton'}">
         <wi-button label="{{btn.label}}" icon="{{btn.icon}}"
                   handlers="myHandlers">
         </wi-button>
