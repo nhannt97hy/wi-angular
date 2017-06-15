@@ -1,19 +1,19 @@
 var WORKING_TABS = [
-    {
-        type: 'dogs',
-        heading: 'Dogs',
-        closable: 'true'
-    },
-    {
-        type: 'tuts',
-        heading: 'Tuts',
-        closable: 'true'
-    },
-    {
-        type: 'cars',
-        heading: 'Cars',
-        closable: 'true'
-    }
+    // {
+    //     type: 'dogs',
+    //     heading: 'Dogs',
+    //     closable: 'true'
+    // },
+    // {
+    //     type: 'tuts',
+    //     heading: 'Tuts',
+    //     closable: 'true'
+    // },
+    // {
+    //     type: 'cars',
+    //     heading: 'Cars',
+    //     closable: 'true'
+    // }
 ];
 
 const TREE_CONFIG_TEST = [

@@ -1,6 +1,6 @@
-const tabsetComponentName = 'wiTabset';
-const tabComponentName = 'wiTab';
-const moduleName = 'wi-tabs';
+const tabsetComponentName = 'wiWorkingtabset';
+const tabComponentName = 'wiWorkingtab';
+const moduleName = 'wi-workingtabs';
 
 function TabsetController() {
     var self = this;
@@ -19,6 +19,8 @@ function TabsetController() {
         console.log(self.tabs);
 
         self.tabs.splice(index, 1);
+        self.tabConfigs.splice(index, 1);
+
         if (self.tabs.length !== 0) {
             if (index < self.tabs.length) {
                 self.tabs[index].active = true;
@@ -42,10 +44,13 @@ function TabsetController() {
 
 var app = angular.module(moduleName, []);
 app.component(tabsetComponentName, {
-    templateUrl: 'wi-tabset.html',
+    templateUrl: 'wi-workingtabset.html',
     controller: TabsetController,
     controllerAs: tabsetComponentName,
-    transclude: true
+    transclude: true,
+    bindings: {
+        tabConfigs: '<'
+    }
 });
 
 
@@ -58,12 +63,12 @@ function TabController() {
 }
 
 app.component(tabComponentName, {
-    templateUrl: 'wi-tab.html',
+    templateUrl: 'wi-workingtab.html',
     controller: TabController,
     controllerAs: tabComponentName,
     transclude: true,
     require: {
-        'wiTabsetCtrl': '^wiTabset'
+        'wiTabsetCtrl': '^wiWorkingtabset'
     },
     bindings: {
         heading: '@',
