@@ -2,14 +2,14 @@
 <head>
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href='css/wi-button.css' rel='stylesheet'>
+
     <link rel="stylesheet" href="css/sprite_32.css">
     <link rel="stylesheet" href="css/sprite_16.css">
+
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
-    <script src="vendor/js/ui-bootstrap-tpls-0.14.3.js"></script>
 
-    <script src="js/wi-config.js"></script>
     <script src='js/main-button.js.bundle.js'></script>
 
     <title>Test button</title>
@@ -17,11 +17,14 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <div ng-repeat="btn in ProjectTab | filter:{Dependency:'wiButton'}">
-        <wi-button label="{{btn.label}}" icon="{{btn.icon}}"
-                  handlers="myHandlers">
-        </wi-button>
-    </div>
+    <wi-button label="Test button" icon="project-new-32x32" layout='icon-top'
+               handler="myHandler"></wi-button>
+
+    <wi-button label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>
+
+    <!-- default wi-button-->
+    <wi-button></wi-button>
 </div>
 </body>
 </html>

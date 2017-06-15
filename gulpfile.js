@@ -33,14 +33,16 @@ const SOURCE_DIR = {
     vendor: 'source/vendor/**/*'
 };
 
-
 gulp.task('watch', ['build'], function () {
+    // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'js', 'img', 'vendor'
     gulp.watch('source/html/**/*', ['html']);
     gulp.watch('source/less/**/*', ['css']);
     gulp.watch('source/components/**/*', ['component']);
+    gulp.watch('source/app/components/**/*', ['appcomponent']);
     gulp.watch('source/js/**/*', ['js']);
     gulp.watch('source/img/**/*', ['img']);
     gulp.watch('source/vendor/**/*', ['vendor']);
+    gulp.watch('source/dialogs/**/*', ['dialogs']);
 });
 
 gulp.task('component', function (taskCallback) {
@@ -170,6 +172,7 @@ gulp.task('build', mainTasks, function () {
         });
     });
 });
+
 gulp.task('default', ['watch']);
 
 /**

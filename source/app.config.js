@@ -1,49 +1,25 @@
-var WORKING_TABS = [
-    // {
-    //     type: 'dogs',
-    //     heading: 'Dogs',
-    //     closable: 'true'
-    // },
-    // {
-    //     type: 'tuts',
-    //     heading: 'Tuts',
-    //     closable: 'true'
-    // },
-    // {
-    //     type: 'cars',
-    //     heading: 'Cars',
-    //     closable: 'true'
-    // }
-];
+var WORKING_TABS = [];
 
 const TREE_CONFIG_TEST = [
     {
         data: {
             icon: 'project-new-16x16',
-            label: 'Item 1 (cars)',
+            label: 'Item 1',
             description: 'description 1',
             childExpanded: false,
             handler: function () {
-                WORKING_TABS.push({
-                    type: 'cars',
-                    heading: 'Item 1 (cars)',
-                    closable: 'true'
-                });
+                console.log('do nothing');
             }
         },
         children: [
             {
                 data: {
                     icon: 'project-new-16x16',
-                    label: 'Item 1.1 (tuts)',
+                    label: 'Item 1.1',
                     description: '',
                     childExpanded: false,
                     handler: function () {
-                        WORKING_TABS.push({
-                            type: 'tuts',
-                            heading: 'Item 1.1 (tuts)',
-                            closable: 'true'
-                        });
+                        console.log('do nothing');
                     }
                 },
                 children: [
