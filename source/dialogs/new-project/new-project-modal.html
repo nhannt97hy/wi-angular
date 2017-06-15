@@ -1,0 +1,36 @@
+<div class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">New Project</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="">Project Name: </label>
+                    <input type="text" ng-model="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for=""> Location: </label>
+                    <input type="text" ng-model="location" class="form-control">
+                </div>
+                <div class="form-group">
+                   <label for="">Company: </label>
+                   <input type="text" ng-model="company" class="form-control">
+               </div>
+                <div class="form-group">
+                   <label for="">Department: </label>
+                   <input type="text" ng-model="department" class="form-control">
+               </div>
+                <div class="form-group">
+                    <label for="">Description: </label>
+                    <textarea name="des" id="" cols="30" rows="10" ng-model="description" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.close(wiModal.onOK())" class="btn btn-default" data-dismiss="modal">OK</button>
+                <button type="button" ng-click="wiModal.close('Cancel')" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -25,8 +25,7 @@ const SOURCE_DIR = {
     main: 'source/*.js',
     js: 'source/js/**/*.js',
     components: 'source/components/**/*',
-    appComponents: 'source/app/components/**/*',
-    services: 'source/services/**/*',
+    dialogs: 'source/dialogs/**/*',
     html: 'source/html/**/*.html',
     img: 'source/img/**/*',
     less: 'source/less/**/*.less',
@@ -69,34 +68,8 @@ gulp.task('component', function (taskCallback) {
     });
 });
 
-gulp.task('appcomponent', function (taskCallback) {
-    glob(SOURCE_DIR.appComponents, function (err, files) {
-        async.each(files, function (f, cb) {
-            if (f.includes('.js')) {
-                gulp.src(f)
-                    .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
-                    .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
-            } else if (f.includes('.less')) {
-                gulp.src(f)
-                    .pipe(less()).pipe(changed(BUILD_DIR.css))
-                    .pipe(gulp.dest(BUILD_DIR.css)).on('end', cb);
-            } else if (f.includes('test.html')) {
-                gulp.src(f).pipe(changed(BUILD_DIR.root))
-                    .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
-            } else {
-                cb();
-            }
-        }, function (error) {
-            if (error) {
-                console.log(error);
-            }
-            return taskCallback();
-        });
-    });
-});
-
-gulp.task('services', function (servicesCb) {
-    glob(SOURCE_DIR.services, function (err, files) {
+gulp.task('dialogs', function (servicesCb) {
+    glob(SOURCE_DIR.dialogs, function (err, files) {
         async.each(files, function (f, cb) {
             if(f.includes('.js')){
                 gulp.src(f)
@@ -159,7 +132,7 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-const mainTasks = ['include', 'css', 'component', 'appcomponent', 'services', 'js', 'img', 'vendor'];
+const mainTasks = ['include', 'css', 'component', 'dialogs', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
