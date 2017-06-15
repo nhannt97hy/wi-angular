@@ -48,14 +48,14 @@ gulp.task('component', function (taskCallback) {
         async.each(files, function (f, cb) {
             if (f.includes('.js')) {
                 gulp.src(f)
-                    .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
+                    .pipe(embedTemplate())
                     .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
             } else if (f.includes('.less')) {
                 gulp.src(f)
-                    .pipe(less()).pipe(changed(BUILD_DIR.css))
+                    .pipe(less())
                     .pipe(gulp.dest(BUILD_DIR.css)).on('end', cb);
             } else if (f.includes('test.html')) {
-                gulp.src(f).pipe(changed(BUILD_DIR.root))
+                gulp.src(f)
                     .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
             } else {
                 cb();
@@ -74,15 +74,18 @@ gulp.task('appcomponent', function (taskCallback) {
         async.each(files, function (f, cb) {
             if (f.includes('.js')) {
                 gulp.src(f)
-                    .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
-                    .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
+                    .pipe(embedTemplate())
+                    .pipe(gulp.dest(BUILD_DIR.js))
+                    .on('end', cb);
             } else if (f.includes('.less')) {
                 gulp.src(f)
-                    .pipe(less()).pipe(changed(BUILD_DIR.css))
-                    .pipe(gulp.dest(BUILD_DIR.css)).on('end', cb);
+                    .pipe(less())
+                    .pipe(gulp.dest(BUILD_DIR.css))
+                    .on('end', cb);
             } else if (f.includes('test.html')) {
-                gulp.src(f).pipe(changed(BUILD_DIR.root))
-                    .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
+                gulp.src(f)
+                    .pipe(gulp.dest(BUILD_DIR.root))
+                    .on('end', cb);
             } else {
                 cb();
             }
@@ -100,11 +103,13 @@ gulp.task('dialogs', function (servicesCb) {
         async.each(files, function (f, cb) {
             if(f.includes('.js')){
                 gulp.src(f)
-                    .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
-                    .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
+                    .pipe(embedTemplate())
+                    .pipe(gulp.dest(BUILD_DIR.js))
+                    .on('end', cb);
             } else if(f.includes('test.html')){
-                gulp.src(f).pipe(changed(BUILD_DIR.root))
-                    .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
+                gulp.src(f)
+                    .pipe(gulp.dest(BUILD_DIR.root))
+                    .on('end', cb);
             } else {
                 cb();
             }
@@ -120,28 +125,23 @@ gulp.task('dialogs', function (servicesCb) {
 
 gulp.task('img', function () {
     var DEST = BUILD_DIR.img;
-    return gulp.src(SOURCE_DIR.img).pipe(changed(DEST))
-        .pipe(gulp.dest(DEST));
+    return gulp.src(SOURCE_DIR.img).pipe(changed(DEST)).pipe(gulp.dest(DEST));
 });
 gulp.task('js', function () {
     var DEST = BUILD_DIR.js;
-    return gulp.src([SOURCE_DIR.js, SOURCE_DIR.main]).pipe(changed(DEST))
-        .pipe(gulp.dest(DEST));
+    return gulp.src([SOURCE_DIR.js, SOURCE_DIR.main]).pipe(gulp.dest(DEST));
 });
 gulp.task('html', function () {
     var DEST = BUILD_DIR.root;
-    return gulp.src(SOURCE_DIR.html).pipe(changed(DEST))
-        .pipe(gulp.dest(DEST));
+    return gulp.src(SOURCE_DIR.html).pipe(gulp.dest(DEST));
 });
 gulp.task('css', function () {
     var DEST = BUILD_DIR.css;
-    return gulp.src(SOURCE_DIR.less).pipe(less()).pipe(changed(DEST))
-        .pipe(gulp.dest(DEST));
+    return gulp.src(SOURCE_DIR.less).pipe(less()).pipe(gulp.dest(DEST));
 });
 gulp.task('vendor', function () {
     var DEST = BUILD_DIR.vendor;
-    return gulp.src(SOURCE_DIR.vendor).pipe(changed(DEST))
-        .pipe(gulp.dest(DEST));
+    return gulp.src(SOURCE_DIR.vendor).pipe(changed(DEST)).pipe(gulp.dest(DEST));
 });
 
 gulp.task('clean', function () {
