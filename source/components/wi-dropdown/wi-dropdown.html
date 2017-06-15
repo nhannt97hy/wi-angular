@@ -2,8 +2,7 @@
     <button class="dropdown-toggle" type="button" data-toggle="dropdown"
             ng-click="wiButton.handlers.onclick()"
             ng-mouseover="wiButton.handlers.onmouseover()">
-        <img class="{{wiDropdown.layout || wiDropdown.config.layout}}"
-             ng-src="{{wiDropdown.imgurl || wiDropdown.config.imgUrl}}" alt="folder">
+        <img ng-src="{{wiDropdown.imgurl || wiDropdown.config.imgUrl}}" alt="folder">
         <div class="label-wrapper {{wiDropdown.layout || wiDropdown.config.layout}}">
             <span class="{{wiDropdown.layout || wiDropdown.config.layout}}">{{wiDropdown.label || wiDropdown.config.label}}</span>
             <span class="caret"></span>
