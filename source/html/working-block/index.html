@@ -1,1 +1,26 @@
-<ui-view></ui-view>
+<wi-tabset>
+    <wi-tab heading="{{tab.heading}}" closable="{{tab.closable}}" ng-repeat="tab in workingTabs">
+        <div ng-switch="tab.type">
+            <div ng-switch-when="dogs">
+                <h1>Dogs</h1>
+                <p>Welcome to a world of dogs.</p>
+            </div>
+
+            <div ng-switch-when="tuts">
+                <h1>Tutorials</h1>
+                <p>Learn from examples.</p>
+            </div>
+
+            <div ng-switch-when="cars">
+                <h1>Cars</h1>
+                <p>Read about cars.</p>
+            </div>
+
+            <div ng-switch-default>
+                <h1>Default</h1>
+                <p>none</p>
+            </div>
+        </div>
+    </wi-tab>
+
+</wi-tabset>

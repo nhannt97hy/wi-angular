@@ -28,5 +28,7 @@ app.controller('AppController', function ($scope) {
         WellTab: {
             heading: 'Well'
         }
-    }
+    };
+
+    $scope.workingTabs = appConfig.WORKING_TABS;
 });
