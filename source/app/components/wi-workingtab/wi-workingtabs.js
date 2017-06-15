@@ -16,8 +16,6 @@ function TabsetController() {
     this.closeTab = function (index) {
         deactiveAllTabs(self.tabs);
 
-        console.log(self.tabs);
-
         self.tabs.splice(index, 1);
         self.tabConfigs.splice(index, 1);
 
