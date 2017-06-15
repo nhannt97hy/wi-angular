@@ -75,9 +75,11 @@ gulp.task('services', function (servicesCb) {
                 gulp.src(f)
                     .pipe(embedTemplate()).pipe(changed(BUILD_DIR.js))
                     .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
-            }else if(f.includes('test.html')){
+            } else if(f.includes('test.html')){
                 gulp.src(f).pipe(changed(BUILD_DIR.root))
                     .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
+            } else {
+                cb();
             }
         },function (err) {
             if(err){
@@ -152,7 +154,6 @@ gulp.task('deploy', function () {
 });
 
 function to_json(workbook) {
-    // var result = {};
     var text = '';
     workbook.SheetNames.forEach(function (sheetName) {
         var roa = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
@@ -172,4 +173,4 @@ gulp.task('config', function () {
             console.log(er);
         }
     })
-})
+});
