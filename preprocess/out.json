@@ -1,0 +1,134 @@
+{
+  "body": [
+    {
+      "name": "wi-toolbar",
+      "attrs": {
+        "name": "DatabasesToolbar",
+        "label": "Databases",
+        "icon": ""
+      },
+      "children": [
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "NewProjectButton",
+            "label": "NewProject",
+            "icon": "project-new-32x32"
+          },
+          "children": []
+        },
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "OpenProjectButton",
+            "label": "OpenProject",
+            "icon": "project-open-32x32"
+          },
+          "children": []
+        },
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "CloseProjectButton",
+            "label": "CloseProject",
+            "icon": "project-close-32x32"
+          },
+          "children": []
+        },
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "UnitSettingsButton",
+            "label": "UnitSettings",
+            "icon": "properties-32x32"
+          },
+          "children": []
+        },
+        {
+          "name": "wi-dropdown",
+          "attrs": {
+            "name": "SaveProjectDropdown",
+            "label": "SaveProject",
+            "icon": "save-32x32"
+          },
+          "children": [
+            {
+              "name": "wi-button",
+              "attrs": {
+                "name": "SaveProjectButton",
+                "label": "SaveProject",
+                "icon": "save-16x16"
+              },
+              "children": []
+            },
+            {
+              "name": "wi-button",
+              "attrs": {
+                "name": "SaveProjectAsButton",
+                "label": "SaveProjectAs",
+                "icon": "save-as-16x16"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wi-toolbar",
+      "attrs": {
+        "name": "ViewToolbar",
+        "label": "View",
+        "icon": ""
+      },
+      "children": [
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "ProjectButton",
+            "label": "Project",
+            "icon": "project-normal-32x32"
+          },
+          "children": []
+        },
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "WorkflowButton",
+            "label": "Workflow",
+            "icon": "workflow-32x32"
+          },
+          "children": []
+        },
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "PropertyGridButton",
+            "label": "PropertyGrid",
+            "icon": "property-grid-32x32"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "wi-toolbar",
+      "attrs": {
+        "name": "ExitToolbar",
+        "label": "Exit",
+        "icon": ""
+      },
+      "children": [
+        {
+          "name": "wi-button",
+          "attrs": {
+            "name": "ExitButton",
+            "label": "Exit",
+            "icon": "exit-32x32"
+          },
+          "children": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "html",
+  "component": [
+    {
+      "name": "Ribbon",
+      "Description": "",
+      "content": [
+        {
+          "name": "ProjectTab",
+          "Description": "",
+          "content": []
+        },
+        {
+          "name": "WellTab",
+          "Description": "",
+          "content": []
+        },
+        {
+          "name": "DataAnalysisTab",
+          "Description": "",
+          "content": []
+        },
+        {
+          "name": "DataProcessingTab",
+          "Description": "",
+          "content": []
+        },
+        {
+          "name": "PetrophysicsTab",
+          "Description": "",
+          "content": []
+        },
+        {
+          "name": "HelpTab",
+          "Description": "",
+          "content": []
+        }
+      ]
+    }
+  ]
+}
