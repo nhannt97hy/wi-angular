@@ -4,8 +4,8 @@ const moduleName = 'wi-treeview';
 function Controller() {
     var self = this;
 
-    this.onSelectItem = function ($index) {
-        self.config[$index].data.handler();
+    this.onDoubleClick = function ($index) {
+        if (self.config[$index].data.handler) self.config[$index].data.handler();
     };
 }
 

@@ -1,7 +1,7 @@
 <div class="wi-treeview-container" ng-repeat="item in wiTreeview.config track by $index">
     <div class="wi-parent-node"
          ng-click="item.data.childExpanded = !item.data.childExpanded"
-         ng-dblclick="wiTreeview.onSelectItem($index)">
+         ng-dblclick="wiTreeview.onDoubleClick($index)">
         <i aria-hidden="true" class="fa icon-expanded"
            ng-class="
            {'fa-caret-down': item.data.childExpanded,
@@ -16,4 +16,3 @@
         <wi-treeview config="item.children"></wi-treeview>
     </div>
 </div>
-
