@@ -34,15 +34,18 @@ app.controller('AppController', function ($scope, $timeout) {
 
     $scope.workingTabs = appConfig.WORKING_TABS;
 
-    $timeout(function () {
-        console.log($scope.workingTabs);
-        printLog();
-    }, 5000);
-
-    function printLog() {
-        $timeout(function () {
-            console.log($scope.workingTabs);
-            printLog();
-        }, 5000);
-    }
+    /**
+     * debug working tabs
+     */
+    // $timeout(function () {
+    //     console.log($scope.workingTabs);
+    //     printLog();
+    // }, 5000);
+    //
+    // function printLog() {
+    //     $timeout(function () {
+    //         console.log($scope.workingTabs);
+    //         printLog();
+    //     }, 5000);
+    // }
 });
