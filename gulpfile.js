@@ -25,7 +25,7 @@ const SOURCE_DIR = {
     main: 'source/*.js',
     js: 'source/js/**/*.js',
     components: 'source/components/**/*',
-    services: 'source/services/**/*',
+    dialogs: 'source/dialogs/**/*',
     html: 'source/html/**/*.html',
     img: 'source/img/**/*',
     less: 'source/less/**/*.less',
@@ -68,8 +68,8 @@ gulp.task('component', function (taskCallback) {
     });
 });
 
-gulp.task('services', function (servicesCb) {
-    glob(SOURCE_DIR.services, function (err, files) {
+gulp.task('dialogs', function (servicesCb) {
+    glob(SOURCE_DIR.dialogs, function (err, files) {
         async.each(files, function (f, cb) {
             if(f.includes('.js')){
                 gulp.src(f)
@@ -132,7 +132,7 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-const mainTasks = ['include', 'css', 'component', 'services', 'js', 'img', 'vendor'];
+const mainTasks = ['include', 'css', 'component', 'dialogs', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
