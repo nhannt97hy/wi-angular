@@ -4,10 +4,6 @@ const moduleName = 'wi-treeview';
 function Controller() {
     var self = this;
 
-    this.$onInit = function () {
-        console.log('on init tree view', self.config);
-    };
-
     this.onSelectItem = function ($index) {
         self.config[$index].data.handler();
     };
