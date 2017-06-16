@@ -35,14 +35,15 @@ const SOURCE_DIR = {
 
 gulp.task('watch', ['build'], function () {
     // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'js', 'img', 'vendor'
-    gulp.watch('source/html/**/*', ['html']);
+    gulp.watch('source/html/**/*', ['include']);
     gulp.watch('source/less/**/*', ['css']);
     gulp.watch('source/components/**/*', ['component']);
     gulp.watch('source/app/components/**/*', ['appcomponent']);
+    gulp.watch('source/dialogs/**/*', ['dialogs']);
     gulp.watch('source/js/**/*', ['js']);
+    gulp.watch('source/*.js', ['build']);
     gulp.watch('source/img/**/*', ['img']);
     gulp.watch('source/vendor/**/*', ['vendor']);
-    gulp.watch('source/dialogs/**/*', ['dialogs']);
 });
 
 gulp.task('component', function (taskCallback) {
@@ -132,10 +133,6 @@ gulp.task('img', function () {
 gulp.task('js', function () {
     var DEST = BUILD_DIR.js;
     return gulp.src([SOURCE_DIR.js, SOURCE_DIR.main]).pipe(gulp.dest(DEST));
-});
-gulp.task('html', function () {
-    var DEST = BUILD_DIR.root;
-    return gulp.src(SOURCE_DIR.html).pipe(gulp.dest(DEST));
 });
 gulp.task('css', function () {
     var DEST = BUILD_DIR.css;
