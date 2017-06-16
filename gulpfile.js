@@ -37,10 +37,10 @@ gulp.task('watch', ['build'], function () {
     // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'js', 'img', 'vendor'
     gulp.watch('source/html/**/*', ['include']);
     gulp.watch('source/less/**/*', ['css']);
-    gulp.watch('source/components/**/*', ['component']);
-    gulp.watch('source/app/components/**/*', ['appcomponent']);
-    gulp.watch('source/dialogs/**/*', ['dialogs']);
-    gulp.watch('source/js/**/*', ['js']);
+    gulp.watch('source/components/**/*', ['build']);
+    gulp.watch('source/app/components/**/*', ['build']);
+    gulp.watch('source/dialogs/**/*', ['build']);
+    gulp.watch('source/js/**/*', ['build']);
     gulp.watch('source/*.js', ['build']);
     gulp.watch('source/img/**/*', ['img']);
     gulp.watch('source/vendor/**/*', ['vendor']);
