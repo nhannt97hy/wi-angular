@@ -1,7 +1,7 @@
 const componentName = 'wiSlidingbar';
 const moduleName = 'wi-slidingbar';
 
-const MIN_RANGE = 10;
+const MIN_RANGE = 30;
 
 var slidingBarState = {
     top: 0,
@@ -50,6 +50,7 @@ function Controller($scope, wiSlidingbar) {
         $("#sliding-handle").on("resize", function (event, ui) {
             update(ui);
         });
+
         $("#sliding-handle").on("drag", function (event, ui) {
             update(ui);
         });
