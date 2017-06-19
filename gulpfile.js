@@ -192,6 +192,12 @@ function to_json(workbook) {
     return text;
 }
 
+gulp.task('gen-index', function() {
+    var wiUI = require('./preprocess/wi-ui-v1.js');
+    var jsonXML = require('./preprocess/toXML.js');
+    wiUI.xlsxToJson('./Wi-UI.xlsx');
+    jsonXML.jsonToXML();
+});
 gulp.task('config', function () {
     var config = to_json(workbook);
 

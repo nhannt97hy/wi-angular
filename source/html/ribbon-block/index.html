@@ -1,4 +1,20 @@
 <wi-tabset>
-    @@include('./project-tab/index.html')
-    @@include('./well-tab/index.html')
+    <wi-tab heading="Project" closable='false'>
+        @@include('./project-tab/index.html')
+    </wi-tab>
+    <wi-tab heading="Well" closable='false'>
+        @@include('./well-tab/index.html')
+    </wi-tab>
+    <wi-tab heading="Data Analysis"  closable='false'>
+        @@include('./data-analysis-tab/index.html')
+    </wi-tab>
+    <wi-tab heading="Data Processing" closable='false'>
+        @@include('./data-processing-tab/index.html')
+    </wi-tab>
+    <wi-tab heading="Petrophysics" closable='false'>
+        @@include('./petrophysics-tab/index.html')
+    </wi-tab>
+    <wi-tab heading="Help" closable='false'>
+        @@include('./help-tab/index.html')
+    </wi-tab>
 </wi-tabset>

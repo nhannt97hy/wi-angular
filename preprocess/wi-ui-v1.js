@@ -1,10 +1,9 @@
 XLSX = require('xlsx');
+
 var fs = require('fs');
-workbook = XLSX.readFile('../Wi-UI.xlsx');
 // workbook.SheetNames.forEach(function(aSheet) {
 //     console.log(aSheet);
 // });
-
 Array.prototype.cleanData = function (deleteValue) {
     for (var i = 0; i < this.length; i++) {
         if (this[i] == deleteValue) {
@@ -16,7 +15,7 @@ Array.prototype.cleanData = function (deleteValue) {
 };
 //Param: sheetName: name of sheet
 //       attrCols: array of colums contain attribute data (index start from 0)
-function sheetToJson(sheetName, attrCols) {
+function sheetToJson(workbook, sheetName, attrCols) {
     var worksheet = workbook.Sheets[sheetName];
     var range = XLSX.utils.decode_range(worksheet['!ref']);
 
@@ -40,11 +39,10 @@ function sheetToJson(sheetName, attrCols) {
     }
     cleanComponentArr(componentArr);
     RESULT.body = componentArr;
-    return RESULT;
+    //return RESULT;
+    return componentArr;
 }
 
-// printToFile("ribon.json", JSON.stringify(sheetToJson("RibbonBlock", [3])));
-printToFile("out.json", JSON.stringify(sheetToJson("ProjectTab", [3, 5])));
 //Remove empty element in array component
 function cleanComponentArr(component_Arr) {
     component_Arr.cleanData();
@@ -95,6 +93,20 @@ function printToFile(fileName, content) {
         if (err) {
             return console.log(err);
         }
-        console.log("The file was saved");
+        console.log("The file "+fileName+" was saved");
     });
 }
+
+
+// MAIN function
+//var processTabInfos = require('./config.js').getTabInfos();
+exports.xlsxToJson = function(xlsxFile) {
+    var processTabInfos = require('./config.js').processTabInfos;
+    //var workbook = XLSX.readFile('../Wi-UI.xlsx');
+    console.log(xlsxFile);
+    var workbook = XLSX.readFile(xlsxFile);
+    processTabInfos.forEach(function(item) {
+        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [3, 5])));
+    });
+};
+
