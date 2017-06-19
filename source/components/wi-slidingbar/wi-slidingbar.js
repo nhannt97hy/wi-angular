@@ -55,7 +55,6 @@ function Controller(wiSlidingbar) {
 var app = angular.module(moduleName, []);
 
 app.factory(componentName, function () {
-    this.top = 0;
     return slidingBarState;
 });
 
@@ -68,3 +67,4 @@ app.component(componentName, {
 });
 
 exports.name = moduleName;
+exports.componentName = componentName;
