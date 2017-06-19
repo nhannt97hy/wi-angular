@@ -8,7 +8,7 @@ var slidingBarState = {
     range: MIN_RANGE
 };
 
-function Controller(wiSlidingbar) {
+function Controller($scope, wiSlidingbar) {
     var self = this;
     self.tinyWindow = null;
     var parentHeight = 0;
@@ -23,6 +23,9 @@ function Controller(wiSlidingbar) {
         }
         wiSlidingbar.top = Math.round(self.tinyWindow.top / parentHeight * 100);
         wiSlidingbar.range = Math.round(self.tinyWindow.height / parentHeight * 100);
+
+        // call apply to call all parent scope watcher
+        $scope.$apply();
     }
 
     this.$onInit = function () {
