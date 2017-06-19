@@ -3,37 +3,37 @@ const moduleName = 'wi-slidingbar';
 
 const MIN_RANGE = 10;
 
-app.factory(componentName, function() {
-    var slidingBarState = {
-        top: 0,
-        range: MIN_RANGE
-    };
-    return slidingBarState;
-});
+var slidingBarState = {
+    top: 0,
+    range: MIN_RANGE
+};
 
 function Controller(wiSlidingbar) {
     var self = this;
-    self.tinyWindow = {
-        height: 150,
-        top: 0
-    };
+    self.tinyWindow = null;
     var parentHeight = 0;
 
     function update(ui) {
         parentHeight = parseInt($("#sliding-bar-content").height());
         if (ui.size) {
-            self.tinyWindow.height = (ui.size.height > parentHeight)?parentHeight:ui.size.height;
+            self.tinyWindow.height = (ui.size.height > parentHeight) ? parentHeight : ui.size.height;
         }
-        if(ui.position) {
+        if (ui.position) {
             self.tinyWindow.top = (ui.position.top > 0) ? ui.position.top : 0;
         }
-        wiSlidingbar.top = Math.round(self.tinyWindow.top/parentHeight*100);
-        wiSlidingbar.range = Math.round(self.tinyWindow.height/parentHeight*100);
+        wiSlidingbar.top = Math.round(self.tinyWindow.top / parentHeight * 100);
+        wiSlidingbar.range = Math.round(self.tinyWindow.height / parentHeight * 100);
     }
+
     this.$onInit = function () {
         parentHeight = parseInt($("#sliding-bar-content").height());
-        var initialHeight = Math.round(parentHeight * MIN_RANGE/100);
-        console.log(MIN_RANGE);
+        var initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
+
+        self.tinyWindow = {
+            height: initialHeight,
+            top: 0
+        };
+
         $("#sliding-handle").draggable({
             axis: "y",
             containment: "parent"
@@ -44,17 +44,21 @@ function Controller(wiSlidingbar) {
         });
         $('#sliding-handle').height(initialHeight);
 
-        $( "#sliding-handle" ).on( "resize", function( event, ui ) {
+        $("#sliding-handle").on("resize", function (event, ui) {
             update(ui);
-            //console.log(getValues());
         });
-        $( "#sliding-handle" ).on( "drag", function( event, ui ) {
+        $("#sliding-handle").on("drag", function (event, ui) {
             update(ui);
-            //console.log(getValues());
         });
     }
 }
 var app = angular.module(moduleName, []);
+
+app.factory(componentName, function () {
+    this.top = 0;
+    return slidingBarState;
+});
+
 app.component(componentName, {
     templateUrl: 'wi-slidingbar.html',
     controller: Controller,
@@ -62,6 +66,5 @@ app.component(componentName, {
     transclude: true,
     bindings: {}
 });
-
 
 exports.name = moduleName;
