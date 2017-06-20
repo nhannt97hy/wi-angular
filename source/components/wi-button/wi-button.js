@@ -5,7 +5,7 @@ function ButtonController() {
     var self = this;
 
     this.default = {
-        label: 'Button',
+        label: '',
         layout: 'icon-top',
         icon: 'project-new-32x32'
     };

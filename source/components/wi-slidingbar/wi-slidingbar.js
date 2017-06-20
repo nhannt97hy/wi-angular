@@ -8,13 +8,14 @@ var slidingBarState = {
     range: MIN_RANGE
 };
 
-function Controller($scope, wiSlidingbar) {
+function Controller($scope, $timeout, wiSlidingbar) {
     var self = this;
     self.tinyWindow = null;
     var parentHeight = 0;
 
     function update(ui) {
         parentHeight = parseInt($("#sliding-bar-content").height());
+
         if (ui.size) {
             self.tinyWindow.height = (ui.size.height > parentHeight) ? parentHeight : ui.size.height;
         }
@@ -45,7 +46,12 @@ function Controller($scope, wiSlidingbar) {
             containment: "parent",
             handles: "n, s"
         });
-        $('#sliding-handle').height(initialHeight);
+
+        setSlidingHandleHeight();
+        $timeout(function () {
+            setSlidingHandleHeight();
+        }, 100);
+
 
         $("#sliding-handle").on("resize", function (event, ui) {
             update(ui);
@@ -54,6 +60,14 @@ function Controller($scope, wiSlidingbar) {
         $("#sliding-handle").on("drag", function (event, ui) {
             update(ui);
         });
+    };
+
+    function setSlidingHandleHeight() {
+        parentHeight = parseInt($("#sliding-bar-content").height());
+
+        var initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
+        $('#sliding-handle').height(initialHeight);
+        self.tinyWindow.height = initialHeight;
     }
 }
 var app = angular.module(moduleName, []);
