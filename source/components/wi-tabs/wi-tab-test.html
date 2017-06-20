@@ -4,6 +4,9 @@
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-toolbar.css' rel='stylesheet'>
@@ -15,63 +18,28 @@
 
     <script src="js/main-tabs.js.bundle.js"></script>
 
-    <title>Test button</title>
+    <title>Test</title>
 </head>
 
 <body ng-app='helloapp'>
-
-<div ng-controller="TestTabset">
+<div ng-controller="WiDummy">
 
     <wi-tabset>
         <wi-tab heading="Tab 1" closable="true">
             <wi-toolbar label="Project">
-                <wi-button label="my button toobar" layout="icon-left"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-                <wi-button label="my button toobar" layout="icon-left"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
+                <wi-button layout="icon-left"></wi-button>
+                <wi-button layout="icon-left"></wi-button>
             </wi-toolbar>
             <wi-toolbar label="Well">
-                <wi-button label="my button toobar" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-                <wi-button label="my button toobar" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
+                <wi-button layout="icon-top"></wi-button>
+                <wi-button layout="icon-top"></wi-button>
             </wi-toolbar>
         </wi-tab>
 
         <wi-tab heading="Tab 2" closable="true">
             <wi-toolbar label="Well">
-                <wi-button label="my button toobar 3" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-                <wi-button label="my button toobar" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-            </wi-toolbar>
-        </wi-tab>
-
-        <wi-tab heading="Tab 3" closable="true">
-            <wi-toolbar label="Well">
-                <wi-button label="my button toobar 4" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-                <wi-button label="my button toobar" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-            </wi-toolbar>
-        </wi-tab>
-
-        <wi-tab heading="Tab 4" closable="true">
-            <wi-toolbar label="Well">
-                <wi-button label="my button toobar 5" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
-                <wi-button label="my button toobar" layout="icon-top"
-                           imgurl="img/32x32/project_new_32x32.png"
-                           handlers="myHandlers"></wi-button>
+                <wi-button layout="icon-left"></wi-button>
+                <wi-button layout="icon-left"></wi-button>
             </wi-toolbar>
         </wi-tab>
     </wi-tabset>

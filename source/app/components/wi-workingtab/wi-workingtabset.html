@@ -1,0 +1,12 @@
+<ul class="nav nav-tabs">
+    <li class="wi-tab" ng-repeat="tab in wiWorkingtabset.tabs track by $index"
+        ng-class="{'active': tab.active}"
+        ng-click="wiWorkingtabset.selectTab($index)">
+        <a>{{tab.heading}}</a>
+        <i class="ti-close"
+           ng-show="tab.closable == 'true'"
+           ng-click="wiWorkingtabset.closeTab($index)"></i>
+    </li>
+</ul>
+
+<div class="wi-working-tabset-content" ng-transclude></div>

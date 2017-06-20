@@ -4,10 +4,11 @@ const moduleName = 'wi-treeview';
 function Controller() {
     var self = this;
 
-    this.onCaretClick = function () {
-        self.data.childExpanded = !self.data.childExpanded;
-    }
+    this.onDoubleClick = function ($index) {
+        if (self.config[$index].data.handler) self.config[$index].data.handler();
+    };
 }
+
 var app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-treeview.html',

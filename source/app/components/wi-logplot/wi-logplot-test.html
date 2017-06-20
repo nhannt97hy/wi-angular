@@ -1,11 +1,15 @@
 <html>
 <head>
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/jquery-ui.css" rel="stylesheet">
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href="vendor/css/themify-icons.css" rel="stylesheet">
 
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/wi-button.css' rel='stylesheet'>
-    <link href='css/wi-dropdown.css' rel='stylesheet'>
+    <link href='css/wi-toolbar.css' rel='stylesheet'>
+    <link href='css/wi-slidingbar.css' rel='stylesheet'>
+    <link href='css/wi-logplot.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="css/sprite_32.css">
     <link rel="stylesheet" href="css/sprite_16.css">
@@ -14,28 +18,20 @@
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
 
-    <script src='js/main-dropdown.js.bundle.js'></script>
+    <script src="vendor/js/jquery-ui.js"></script>
+
+
+    <script src="js/main-logplot.js.bundle.js"></script>
 
     <title>Test</title>
 </head>
 
 <body ng-app='helloapp'>
+
 <div ng-controller="WiDummy">
-    <wi-dropdown label="my dropdown 2" layout="icon-left" icon="project-new-32x32">
-        <wi-button label="my button 1" layout="icon-left">
-        </wi-button>
-
-        <wi-button label="my button 1" layout="icon-left">
-        </wi-button>
-    </wi-dropdown>
-
-    <!-- default dropdown -->
-    <wi-dropdown>
-        <wi-button label="my button 1" layout="icon-top">
-        </wi-button>
-        <wi-button label="my button 2" layout="icon-top">
-        </wi-button>
-    </wi-dropdown>
+    <div style="width: 1000px; height: 500px; border: 1px solid green; display: flex">
+        <wi-logplot style="flex: 1"></wi-logplot>
+    </div>
 </div>
 </body>
 </html>

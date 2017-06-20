@@ -20,17 +20,18 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <div class="container">
-        <div class="row">
-           <div class="col-md-4" style="height: 50vh;">
-               <wi-slidingbar>
-                   <div>
-                       <p>Some thing like plot</p>
-                   </div>
-               </wi-slidingbar>
-           </div>
-        </div>
+    <div class="container" style="height: 500px; background-color: #5e5e5e">
+        <wi-slidingbar>
+            <div>
+                <p>Some thing like plot</p>
+                <p>Some thing like plot</p>
+                <p>Some thing like plot</p>
+                <p>Some thing like plot</p>
+            </div>
+        </wi-slidingbar>
     </div>
+
+    <h1>{{wiSlidingbar.top}} -- {{wiSlidingbar.range}}</h1>
 </div>
 </body>
 </html>

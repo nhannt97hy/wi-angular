@@ -1,9 +1,20 @@
-wi-tabset {
+wi-workingtabset {
+  display: flex;
+  flex-direction: column;
 
-  display: block;
+  .wi-working-tabset-content {
+    flex: 1;
+    display: flex;
 
-  wi-tab {
-    display: block;
+    wi-workingtab {
+      flex: 1;
+      display: flex;
+
+      .wi-workingtab-content {
+        flex: 1;
+        display: flex;
+      }
+    }
   }
 
   li.wi-tab.active {
