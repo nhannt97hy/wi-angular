@@ -34,9 +34,13 @@ function TabsetController() {
     };
 
     this.addTab = function (tab) {
+        deactiveAllTabs(self.tabs);
+        deactiveAllTabs(self.tabConfigs);
+
+        tab.active = true;
         self.tabs.push(tab);
-        self.tabs[self.tabs.length - 1].active = (self.tabs.length === 1);
-        self.tabConfigs[self.tabConfigs.length - 1].active = (self.tabConfigs.length === 1);
+
+        self.tabConfigs[self.tabConfigs.length - 1].active = true;
     };
 
     function deactiveAllTabs(tabs) {
