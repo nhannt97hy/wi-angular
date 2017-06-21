@@ -35,12 +35,13 @@ const SOURCE_DIR = {
 };
 
 gulp.task('watch', ['build'], function () {
-    // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'js', 'img', 'vendor'
+    // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor'
     gulp.watch('source/html/**/*', ['include']);
     gulp.watch('source/less/**/*', ['css']);
     gulp.watch('source/components/**/*', ['build']);
     gulp.watch('source/app/components/**/*', ['build']);
     gulp.watch('source/dialogs/**/*', ['build']);
+    gulp.watch('source/services/**/*.js', ['build']);
     gulp.watch('source/js/**/*', ['build']);
     gulp.watch('source/*.js', ['build']);
     gulp.watch('source/img/**/*', ['img']);
