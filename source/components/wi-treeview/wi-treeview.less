@@ -1,31 +1,31 @@
 wi-treeview {
-  display: block;
-
-  .wi-treeview-container {
     display: block;
-    padding-left: 21px;
-    cursor: pointer;
-  }
+    padding-left: 6px;
 
-  .wi-parent-node {
-    position: relative;
+    .wi-treeview-container {
+        display: block;
+        cursor: pointer;
+        .wi-parent-node {
+            position: relative;
+            border-bottom: 1px dotted lightgray;
 
-    .wi-parent-description {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
+            .wi-parent-description {
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 100px; // use fixed width here!
+                border-left: 1px dotted lightgray;
+            }
+            &:hover {
+                background-color: lightgray;
+                opacity: 0.5;
+            }
 
-      border: 1px solid violet;
+            .icon-expanded {
+                min-width: 8px;
+            }
+        }
     }
 
-    &:hover {
-      background-color: lightgray;
-      opacity: 0.5;
-    }
-
-    .icon-expanded {
-      min-width: 8px;
-    }
-  }
 }

@@ -11,6 +11,8 @@ wiLogplot = require('./wi-logplot.js');
 
 wiList = require('./wi-list');
 
+wiComponentService = require('./wi-component-service.js');
+
 var app = angular.module('wiapp',
     [
         wiButton.name,
@@ -22,7 +24,8 @@ var app = angular.module('wiapp',
         wiStatusBar.name,
         wiSlidingbar.name,
         wiLogplot.name,
-        wiList.name
+        wiList.name,
+        wiComponentService.name
     ]);
 
 app.controller('AppController', function ($scope, $timeout) {

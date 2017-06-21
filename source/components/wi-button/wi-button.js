@@ -1,7 +1,7 @@
 const wiButtonName = 'wiButton';
 const moduleName = 'wi-button';
 
-function ButtonController() {
+function ButtonController(wiComponentService) {
     var self = this;
 
     this.default = {
@@ -13,6 +13,9 @@ function ButtonController() {
     this.onClick = function () {
         if (self.handler) self.handler();
     };
+    this.$onInit = function() {
+        wiComponentService.putComponent(this.name, this);
+    }
 }
 var app = angular.module(moduleName, []);
 app.component(wiButtonName, {

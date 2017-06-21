@@ -1,9 +1,16 @@
-wiRibbon = require('./wi-button');
+wiButton = require('./wi-button');
+wiComponentService = require('./wi-component-service');
 
-var app = angular.module('helloapp', [wiRibbon.name]);
-app.controller('WiDummy', function ($scope) {
+var app = angular.module('helloapp', [wiButton.name, wiComponentService.name]);
+app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.buttonCfg = buttonCfg;
-    $scope.myHandler = myHandler;
+//    $scope.myHandler = myHandler;
+    $scope.myHandler =  function() {
+        console.log('test wiComponentService');
+        var controller = wiComponentService.getComponent('TestButton');
+        console.log(controller);
+        controller.label = 'New label';
+    }
 });
 
 buttonCfg = {
@@ -16,4 +23,6 @@ buttonCfg = {
 
 function myHandler() {
     console.log('click from main test');
+    wiComponentService.getComponent('TestButton');
 }
+
