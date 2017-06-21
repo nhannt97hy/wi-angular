@@ -1,20 +1,31 @@
 wi-treeview {
-    display:block;
+  display: block;
 
-    .wi-treeview-container {
-        display: block;
-        padding-left: 21px;
-        cursor: pointer;
+  .wi-treeview-container {
+    display: block;
+    padding-left: 21px;
+    cursor: pointer;
+  }
+
+  .wi-parent-node {
+    position: relative;
+
+    .wi-parent-description {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+
+      border: 1px solid violet;
     }
 
-    .wi-parent-node {
-        &:hover{
-            background-color: lightgray;
-            opacity: 0.5;
-        }
-
-        .icon-expanded {
-            min-width: 8px;
-        }
+    &:hover {
+      background-color: lightgray;
+      opacity: 0.5;
     }
+
+    .icon-expanded {
+      min-width: 8px;
+    }
+  }
 }

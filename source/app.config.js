@@ -16,7 +16,7 @@ const TREE_CONFIG_TEST = [
                 data: {
                     icon: 'project-new-16x16',
                     label: 'Item 1.1',
-                    description: '',
+                    description: 'des 1',
                     childExpanded: false,
                     handler: function () {
                         console.log('do nothing');
@@ -27,7 +27,7 @@ const TREE_CONFIG_TEST = [
                         data: {
                             icon: 'project-new-16x16',
                             label: 'Item 1.2.1 (dogs)',
-                            description: '',
+                            description: 'des 1.2',
                             childExpanded: false,
                             handler: function () {
                                 WORKING_TABS.push({
@@ -44,7 +44,7 @@ const TREE_CONFIG_TEST = [
                         data: {
                             icon: 'project-new-16x16',
                             label: 'Item 1.2.2 (cars)',
-                            description: '',
+                            description: 'cars',
                             childExpanded: false,
                             handler: function () {
                                 WORKING_TABS.push({
@@ -61,7 +61,7 @@ const TREE_CONFIG_TEST = [
                         data: {
                             icon: 'project-new-16x16',
                             label: 'Logplot',
-                            description: '',
+                            description: 'logplot',
                             childExpanded: false,
                             handler: function () {
                                 WORKING_TABS.push({
@@ -80,7 +80,7 @@ const TREE_CONFIG_TEST = [
                 data: {
                     icon: 'project-new-16x16',
                     label: 'Item 1.2 (cars)',
-                    description: '',
+                    description: 'cars',
                     childExpanded: false,
                     handler: function () {
                         WORKING_TABS.push({
@@ -99,7 +99,7 @@ const TREE_CONFIG_TEST = [
         data: {
             icon: 'project-new-16x16',
             label: 'Item 2 (cars)',
-            description: 'description 2',
+            description: 'car',
             childExpanded: false,
             handler: function () {
                 WORKING_TABS.push({

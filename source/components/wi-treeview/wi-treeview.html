@@ -10,6 +10,8 @@
         </i>
         <img class="{{item.data.icon}}" alt="img item treeview">
         <span>{{item.data.label}}</span>
+
+        <span class="wi-parent-description" ng-show="item.data.description">{{item.data.description}}</span>
     </div>
 
     <div ng-show="item.data.childExpanded">
