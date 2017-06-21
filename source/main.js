@@ -9,6 +9,8 @@ wiStatusBar = require('./wi-status-bar');
 wiSlidingbar = require('./wi-slidingbar');
 wiLogplot = require('./wi-logplot.js');
 
+wiList = require('./wi-list');
+
 var app = angular.module('wiapp',
     [
         wiButton.name,
@@ -19,7 +21,8 @@ var app = angular.module('wiapp',
         wiTreeview.name,
         wiStatusBar.name,
         wiSlidingbar.name,
-        wiLogplot.name
+        wiLogplot.name,
+        wiList.name
     ]);
 
 app.controller('AppController', function ($scope, $timeout) {
@@ -33,6 +36,29 @@ app.controller('AppController', function ($scope, $timeout) {
             heading: 'Well'
         }
     };
+
+    $scope.listItems = [
+        {
+            imgUrl: '',
+            key: 'key',
+            value: 'value'
+        },
+        {
+            imgUrl: '',
+            key: 'key',
+            value: 'value'
+        },
+        {
+            imgUrl: '',
+            key: 'key',
+            value: 'value'
+        },
+        {
+            imgUrl: '',
+            key: 'key',
+            value: 'value'
+        }
+    ];
 
     $scope.workingTabs = appConfig.WORKING_TABS;
 
