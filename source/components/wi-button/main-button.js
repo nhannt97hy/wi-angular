@@ -6,10 +6,9 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.buttonCfg = buttonCfg;
 //    $scope.myHandler = myHandler;
     $scope.myHandler =  function() {
-        console.log('test wiComponentService');
-        var controller = wiComponentService.getComponent('TestButton');
-        console.log(controller);
-        controller.label = 'New label';
+        var buttonController = wiComponentService.getComponent('TestButton');
+        console.log(buttonController);
+        buttonController.label = 'New label';
     }
 });
 

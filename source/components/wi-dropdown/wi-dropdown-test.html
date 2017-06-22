@@ -21,20 +21,19 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-dropdown label="my dropdown 2" layout="icon-left" icon="project-new-32x32">
-        <wi-button label="my button 1" layout="icon-left">
-        </wi-button>
-
-        <wi-button label="my button 1" layout="icon-left">
-        </wi-button>
+    <wi-dropdown name="MyDropdown1"
+                 label="My dropdown 1"
+                 layout="icon-left"
+                 icon="project-new-32x32"
+                 handler="myHandler">
+        <wi-button name="MyButton1" label="my button 1" layout="icon-left"></wi-button>
+        <wi-button name="MyButton2" label="my button 2" layout="icon-left"></wi-button>
     </wi-dropdown>
 
     <!-- default dropdown -->
-    <wi-dropdown>
-        <wi-button label="my button 1" layout="icon-top">
-        </wi-button>
-        <wi-button label="my button 2" layout="icon-top">
-        </wi-button>
+    <wi-dropdown name="MyDropdown2">
+        <wi-button name="MyButton3" label="my button 3" layout="icon-top"></wi-button>
+        <wi-button name="MyButton4" label="my button 4" layout="icon-top"></wi-button>
     </wi-dropdown>
 </div>
 </body>

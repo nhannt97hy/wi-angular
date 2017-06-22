@@ -13,10 +13,12 @@ function ButtonController(wiComponentService) {
     this.onClick = function () {
         if (self.handler) self.handler();
     };
+
     this.$onInit = function() {
-        wiComponentService.putComponent(this.name, this);
+        if (self.name) wiComponentService.putComponent(self.name, self);
     }
 }
+
 var app = angular.module(moduleName, []);
 app.component(wiButtonName, {
     templateUrl: 'wi-button.html',
