@@ -7,9 +7,10 @@ wiTreeview = require('./wi-treeview');
 wiStatusBar = require('./wi-status-bar');
 wiSlidingbar = require('./wi-slidingbar');
 appConfig = require('./app.config');
-
+dialogUtils = require('./DialogUtils');
 var app = angular.module('wiapp',
     [
+        'angularModalService',
         wiButton.name,
         wiDropdown.name,
         wiToolbar.name,
@@ -20,9 +21,17 @@ var app = angular.module('wiapp',
         wiSlidingbar.name
     ]);
 
-app.controller('AppController', function ($scope, $timeout) {
+app.controller('AppController', function ($scope, $timeout, ModalService) {
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
-
+    $scope.NewProjectButtonHandler = function() {
+        console.log("New Project Button clicked");
+        dialogUtils.newProjectDialog($scope, ModalService);
+    };
+    $scope.OpenProjectButtonHandler = function() {
+        console.log("Open Project Button clicked");
+        dialogUtils.openProjectDialog($scope, ModalService);
+    }
+/*
     $scope.config = {
         ProjectTab: {
             heading: 'Project'
@@ -33,7 +42,7 @@ app.controller('AppController', function ($scope, $timeout) {
     };
 
     $scope.workingTabs = appConfig.WORKING_TABS;
-
+*/
     /**
      * debug working tabs
      */
@@ -49,3 +58,4 @@ app.controller('AppController', function ($scope, $timeout) {
     //     }, 5000);
     // }
 });
+
