@@ -8,6 +8,7 @@
     <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-toolbar.css' rel='stylesheet'>
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
+    <link href='css/wi-logplot.css' rel='stylesheet'>
     <link href='css/wi-workingtabs.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="css/sprite_32.css">
@@ -26,8 +27,8 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <div class="container" style="display: flex; height: 500px; background-color: #5e5e5e">
-        <wi-workingtabset tab-configs="workingTabs">
+    <div class="container" style="display: flex; height: 500px; width: 700px; border: 1px solid #5e5e5e; padding: 5px;">
+        <wi-workingtabset tab-configs="workingTabs" style="flex: 1;">
             <wi-workingtab heading="{{tab.heading}}" closable="{{tab.closable}}" ng-repeat="tab in workingTabs" ng-switch="tab.type" ng-class="{'wi-display-none': !tab.active}">
                 <div class="working-tab-content" ng-switch-when="dogs" >
                     <h1>Dogs</h1>
@@ -56,8 +57,6 @@
 
         </wi-workingtabset>
     </div>
-
-    <h1>{{wiSlidingbar.slidingBarState.top}} -- {{wiSlidingbar.slidingBarState.range}}</h1>
 </div>
 </body>
 </html>

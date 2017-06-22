@@ -1,5 +1,7 @@
 wiButton = require('./wi-button');
+wiSlidingbar = require('./wi-slidingbar.js');
 wiWorkingtabs = require('./wi-workingtabs');
+wiLogplot = require('./wi-logplot.js');
 
 wiComponentService = require('./wi-component-service');
 
@@ -32,7 +34,7 @@ var WORKING_TABS = [
     }
 ];
 
-var app = angular.module('helloapp', [wiButton.name, wiWorkingtabs.name, wiComponentService.name]);
+var app = angular.module('helloapp', [wiButton.name, wiSlidingbar.name, wiWorkingtabs.name, wiLogplot.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.workingTabs = WORKING_TABS;
 });
