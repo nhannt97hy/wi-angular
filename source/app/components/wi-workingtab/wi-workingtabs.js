@@ -79,6 +79,7 @@ app.component(tabComponentName, {
         'wiTabsetCtrl': '^wiWorkingtabset'
     },
     bindings: {
+        name: '@',
         heading: '@',
         closable: '@'
     }

@@ -6,7 +6,12 @@
 
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/wi-button.css' rel='stylesheet'>
+    <link href='css/wi-toolbar.css' rel='stylesheet'>
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
+    <link href='css/wi-workingtabs.css' rel='stylesheet'>
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
 
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
@@ -14,7 +19,7 @@
 
     <script src="vendor/js/jquery-ui.js"></script>
 
-    <script src='js/main-slidingbar.js.bundle.js'></script>
+    <script src='js/main-workingtabs.js.bundle.js'></script>
 
     <title>Test</title>
 </head>
@@ -22,7 +27,7 @@
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
     <div class="container" style="display: flex; height: 500px; background-color: #5e5e5e">
-        <wi-workingtabset class="pane" tab-configs="workingTabs">
+        <wi-workingtabset tab-configs="workingTabs">
             <wi-workingtab heading="{{tab.heading}}" closable="{{tab.closable}}" ng-repeat="tab in workingTabs" ng-switch="tab.type" ng-class="{'wi-display-none': !tab.active}">
                 <div class="working-tab-content" ng-switch-when="dogs" >
                     <h1>Dogs</h1>
@@ -40,7 +45,7 @@
                 </div>
 
                 <div class="working-tab-content working-logplot-tab-container" ng-switch-when="logplot">
-                    <wi-logplot></wi-logplot>
+                    <wi-logplot name="{{tab.name}}"></wi-logplot>
                 </div>
 
                 <div class="working-tab-content" ng-switch-default>
