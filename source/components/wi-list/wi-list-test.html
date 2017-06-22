@@ -1,21 +1,18 @@
 <html>
 <head>
-    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href='css/wi-list.css' rel='stylesheet'>
 
-    <script src="vendor/js/jquery.min.js"></script>
-    <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
-    <script src="vendor/js/ui-bootstrap-tpls-0.14.3.js"></script>
 
     <script src='js/main-list.js.bundle.js'></script>
     
-    <title>Test tree view</title>
+    <title>Test list</title>
 </head>
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-list heading="My heading" items="myListItems"></wi-list>
+    <wi-list name="MyList1" heading="My list 1" items="myListItems" handler="myHandler"></wi-list>
+    <button ng-click="myHandler()">Change List's heading</button>
 </div>
 </body>
 </html>

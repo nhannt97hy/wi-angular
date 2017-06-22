@@ -9,8 +9,8 @@ TREE_CONFIG_TEST = [
     {
         data: {
             icon: 'project-new-16x16',
-            label: 'item 1',
-            description: 'description 1',
+            label: 'item 11000',
+            description: 'mm',
             childExpanded: false,
             handler: function () {
                 console.log('handler');
@@ -21,7 +21,7 @@ TREE_CONFIG_TEST = [
                 data: {
                     icon: 'project-new-16x16',
                     label: 'item 1.1',
-                    description: '',
+                    description: 'hu hu hu',
                     childExpanded: false,
                     handler: function () {
                         console.log('handler');
@@ -32,7 +32,7 @@ TREE_CONFIG_TEST = [
                         data: {
                             icon: 'project-new-16x16',
                             label: 'item 1.2.1',
-                            description: '',
+                            description: 'hic',
                             childExpanded: false,
                             handler: function () {
                                 console.log('handler');

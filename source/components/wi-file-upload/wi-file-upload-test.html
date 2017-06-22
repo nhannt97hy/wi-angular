@@ -1,0 +1,26 @@
+<html>
+<head>
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href='css/main.css' rel='stylesheet'>
+    <link href='css/wi-file-upload.css' rel='stylesheet'>
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
+    <script src="vendor/js/angular.min.js"></script>
+    <script src="vendor/js/ng-file-upload.min.js"></script>
+
+    <script src='js/main-file-upload.js.bundle.js'></script>
+
+    <title>Test File Upload</title>
+</head>
+<body ng-app="app">
+<div ng-controller="dummy">
+    <wi-file-upload success-handler="successHandler"
+                    error-handler="errorHandler"
+                    progress-handler="progressHandler">
+    </wi-file-upload>
+</div>
+</body>
+</html>
