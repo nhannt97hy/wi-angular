@@ -22,42 +22,51 @@
 
     <link href='css/ribbon-block/ribbon-block.css' rel='stylesheet'>
     <link href='css/status-bar/status-bar.css' rel='stylesheet'>
-    <link href='css/workspace-block/explorer-block.css' rel='stylesheet'>
-    <link href='css/workspace-block/working-block.css' rel='stylesheet'>
+    <!--<link href='css/workspace-block/explorer-block.css' rel='stylesheet'>
+    <link href='css/workspace-block/working-block.css' rel='stylesheet'>-->
     <link href='css/workspace-block/workspace-block.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="css/sprite_16.css">
     <link rel="stylesheet" href="css/sprite_32.css">
 
+    <link rel='stylesheet' href='vendor/css/goldenlayout-base.css'>
+
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
     <script src="vendor/js/jquery-ui.js"></script>
+    <script src='vendor/js/goldenlayout.min.js'></script>
 
     <script src="js/main.js.bundle.js"></script>
 </head>
-<body ng-app='wiapp'>
-
-<div class="container" ng-controller="AppController as app">
-
+<!--<body ng-app='wiapp' ng-controller="AppController as app">-->
+<body>
+<!--<div class="container" ng-controller="AppController as app">-->
     <div class="ribbon-wrapper">
         @@include('./ribbon-block/index.html')
     </div>
 
-    <div class="workspace-wrapper">
-        <div class="explorer-block">
-            @@include('./explorer-block/index.html')
-        </div>
-        <div class="working-block">
-            @@include('./working-block/index.html')
-        </div>
+    <div id='myLayout'>
     </div>
+    <!--<div class="workspace-wrapper">-->
+    <template id='explorer-block'>
+        <!--<div class="explorer-block">-->
+            @@include('./explorer-block/index.html')
+        <!--</div>-->
+    </template>
+    <template id='working-block'>
+        <h1>Working block</h1>
+        <!--<div class="working-block">-->
+            @@include('./working-block/index.html')
+        <!--</div>-->
+    </template>
+    <!--</div>-->
 
     <div class="status-bar">
         @@include('./status-bar/index.html')
     </div>
 
-</div>
+<!--</div>-->
 
 </body>
 </html>

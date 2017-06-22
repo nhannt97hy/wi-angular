@@ -35,19 +35,44 @@ app.controller('AppController', function ($scope, $timeout) {
     };
 
     $scope.workingTabs = appConfig.WORKING_TABS;
+});
 
-    /**
-     * debug working tabs
-     */
-    // $timeout(function () {
-    //     console.log($scope.workingTabs);
-    //     printLog();
-    // }, 5000);
-    //
-    // function printLog() {
-    //     $timeout(function () {
-    //         console.log($scope.workingTabs);
-    //         printLog();
-    //     }, 5000);
-    // }
+var config = {
+    settings: {
+        hasHeaders: true
+    },
+    content: [
+        {
+            type: "row",
+            content: [
+                {
+                    type: 'component',
+                    componentName: "wi-block",
+                    componentState: {
+                        templateId: 'explorer-block'
+                    }
+                },
+                {
+                    type: 'component',
+                    componentName: 'wi-block',
+                    componentState: {
+                        templateId: 'working-block'
+                    }
+                }
+            ]
+        }
+    ]
+};
+document.addEventListener("DOMContentLoaded", function(event) { 
+    var myLayout = new GoldenLayout(config, document.getElementById('myLayout'));
+
+    myLayout.registerComponent('wi-block', function(container, componentState){
+        var templateHtml = $('template#' + componentState.templateId).html();
+        container.getElement().html(templateHtml);
+    });
+    myLayout.on('initialised', function() {
+        $('body').attr('ng-controller', 'AppController as app');
+        angular.bootstrap(document.body, ['wiapp']);
+    });
+    myLayout.init();
 });
