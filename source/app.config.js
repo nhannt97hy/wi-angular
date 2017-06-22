@@ -66,6 +66,7 @@ const TREE_CONFIG_TEST = [
                             handler: function () {
                                 WORKING_TABS.push({
                                     type: 'logplot',
+                                    name: 'MyLogplot' + Date.now(),
                                     heading: 'blank logplot',
                                     closable: 'true',
                                     active: false

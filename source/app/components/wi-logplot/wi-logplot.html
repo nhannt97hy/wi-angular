@@ -9,8 +9,8 @@
     </wi-toolbar>
 </div>
 <div class="logplot-main-content">
-    <wi-slidingbar>
+    <wi-slidingbar name="{{wiLogplot.slidingbarName}}" ng-init="wiLogplot.getSlidingbar()">
         <p>Some thing like curve</p>
     </wi-slidingbar>
-    <div class="logplot-sub-content">Some tracks: {{wiLogplot.wiSlidingbar.top}} -- {{wiLogplot.wiSlidingbar.range}}</div>
+    <div class="logplot-sub-content">Some tracks: {{wiLogplot.slidingBar.slidingBarState.top}} -- {{wiLogplot.slidingBar.slidingBarState.range}}</div>
 </div>

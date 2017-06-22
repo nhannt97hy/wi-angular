@@ -1,4 +1,4 @@
-<div id="sliding-bar-content" ng-transclude></div>
-<div id="sliding-handle" class="ui-widget-content">
+<div id="sliding-bar-content{{wiSlidingbar.name}}" class="sliding-bar-content" ng-transclude elem-ready="wiSlidingbar.onReady()"></div>
+<div id="sliding-handle{{wiSlidingbar.name}}" class="ui-widget-content sliding-handle">
     <div class="sliding-handler-border"></div>
 </div>
