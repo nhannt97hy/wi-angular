@@ -27,6 +27,7 @@ const SOURCE_DIR = {
     components: 'source/components/**/*',
     appComponents: 'source/app/components/**/*',
     dialogs: 'source/dialogs/**/*',
+    services: 'source/services/**/*.js',
     html: 'source/html/**/*.html',
     img: 'source/img/**/*',
     less: 'source/less/**/*.less',
@@ -34,12 +35,13 @@ const SOURCE_DIR = {
 };
 
 gulp.task('watch', ['build'], function () {
-    // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'js', 'img', 'vendor'
+    // 'include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor'
     gulp.watch('source/html/**/*', ['include']);
     gulp.watch('source/less/**/*', ['css']);
     gulp.watch('source/components/**/*', ['build']);
     gulp.watch('source/app/components/**/*', ['build']);
     gulp.watch('source/dialogs/**/*', ['build']);
+    gulp.watch('source/services/**/*.js', ['build']);
     gulp.watch('source/js/**/*', ['build']);
     gulp.watch('source/*.js', ['build']);
     gulp.watch('source/img/**/*', ['img']);
@@ -101,6 +103,21 @@ gulp.task('appcomponent', function (taskCallback) {
     });
 });
 
+gulp.task('services', function(callback) {
+    glob(SOURCE_DIR.services, function(err, files) {
+        async.each(files, function(f, cb) {
+            gulp.src(f).pipe(gulp.dest(BUILD_DIR.js))
+                .on('end', cb);
+        },
+        function(err) {
+            if(err){
+                console.log(err);
+            }
+            return callback();
+        });
+    });
+});
+
 gulp.task('dialogs', function (servicesCb) {
     glob(SOURCE_DIR.dialogs, function (err, files) {
         async.each(files, function (f, cb) {
@@ -158,7 +175,7 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'js', 'img', 'vendor'];
+const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {

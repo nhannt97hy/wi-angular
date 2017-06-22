@@ -1,6 +1,6 @@
 wiList = require('./wi-list');
 
-var app = angular.module('helloapp', ['ui.bootstrap', wiList.name]);
+var app = angular.module('helloapp', [wiList.name]);
 app.controller('WiDummy', function($scope, $timeout) {
     $scope.myListItems = [
         {

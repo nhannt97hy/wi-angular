@@ -1,8 +1,32 @@
 .working-block {
-  position: absolute;
-  left: 240px;
-  right: 0;
-  height: 100%;
+  display: flex;
+  flex: 1;
   border: 2px solid #2a6496;
   padding: 5px;
+
+  wi-workingtabset {
+    flex: 1;
+    display: flex;
+
+    wi-workingtab {
+      flex: 1;
+      display: flex;
+
+      .working-tab-content {
+        flex: 1;
+      }
+      .working-logplot-tab-container {
+        display: flex;
+
+        wi-logplot {
+          flex: 1;
+        }
+      }
+    }
+
+    .wi-display-none {
+      display: none;
+    }
+  }
+
 }

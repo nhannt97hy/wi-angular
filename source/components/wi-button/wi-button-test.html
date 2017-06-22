@@ -17,14 +17,14 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-button label="Test button" icon="project-new-32x32" layout='icon-top'
+    <wi-button name='TestButton' label="Test" icon="project-new-32x32" layout='icon-top'
                handler="myHandler"></wi-button>
 
-    <wi-button label="Test button 2" icon="project-new-32x32" layout='icon-left'
+    <wi-button name='Test2Button' label="Test button 2" icon="project-new-32x32" layout='icon-left'
                handler="myHandler"></wi-button>
 
     <!-- default wi-button-->
-    <wi-button></wi-button>
+    <wi-button name='NoLabelButton'></wi-button>
 </div>
 </body>
 </html>

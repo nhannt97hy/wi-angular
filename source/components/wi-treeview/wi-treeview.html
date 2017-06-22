@@ -2,14 +2,18 @@
     <div class="wi-parent-node"
          ng-click="item.data.childExpanded = !item.data.childExpanded"
          ng-dblclick="wiTreeview.onDoubleClick($index)">
-        <i aria-hidden="true" class="fa icon-expanded"
-           ng-class="
-           {'fa-caret-down': item.data.childExpanded,
-           'fa-caret-right': !item.data.childExpanded,
-           'wi-hidden': item.children == null || item.children.length == 0}">
-        </i>
-        <img class="{{item.data.icon}}" alt="img item treeview">
-        <span>{{item.data.label}}</span>
+        <div>
+            <i aria-hidden="true" class="fa icon-expanded"
+               ng-class="
+               {'fa-caret-down': item.data.childExpanded,
+               'fa-caret-right': !item.data.childExpanded,
+               'wi-hidden': item.children == null || item.children.length == 0}"></i>
+            <img class="{{item.data.icon}}" alt="img item treeview">
+            <span>{{item.data.label}}</span>
+        </div>
+        <div class="wi-parent-description text-right" ng-show="item.data.description">
+            {{item.data.description}}
+        </div>
     </div>
 
     <div ng-show="item.data.childExpanded">

@@ -9,12 +9,15 @@ function TabsetController() {
 
     this.selectTab = function (index) {
         deactiveAllTabs(self.tabs);
+        deactiveAllTabs(self.tabConfigs);
 
         self.tabs[index].active = true;
+        self.tabConfigs[index].active = true;
     };
 
     this.closeTab = function (index) {
         deactiveAllTabs(self.tabs);
+        deactiveAllTabs(self.tabConfigs);
 
         self.tabs.splice(index, 1);
         self.tabConfigs.splice(index, 1);
@@ -22,15 +25,22 @@ function TabsetController() {
         if (self.tabs.length !== 0) {
             if (index < self.tabs.length) {
                 self.tabs[index].active = true;
+                self.tabConfigs[index].active = true;
             } else {
                 self.tabs[self.tabs.length - 1].active = true;
+                self.tabConfigs[self.tabs.length - 1].active = true;
             }
         }
     };
 
     this.addTab = function (tab) {
+        deactiveAllTabs(self.tabs);
+        deactiveAllTabs(self.tabConfigs);
+
+        tab.active = true;
         self.tabs.push(tab);
-        self.tabs[self.tabs.length - 1].active = (self.tabs.length === 1);
+
+        self.tabConfigs[self.tabConfigs.length - 1].active = true;
     };
 
     function deactiveAllTabs(tabs) {
