@@ -6,10 +6,12 @@ function Controller(wiComponentService) {
 
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
+
+        if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    this.getSlidingbar = function () {
-        self.slidingBar = wiComponentService.getComponent(self.slidingbarName);
+    this.getSlidingbarCtrl = function () {
+        return self.slidingBar = wiComponentService.getComponent(self.slidingbarName);
     }
 }
 

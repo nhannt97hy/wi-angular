@@ -4,9 +4,9 @@ const moduleName = 'wi-slidingbar';
 const MIN_RANGE = 30;
 
 function Controller($scope, wiComponentService) {
-    var self = this;
+    let self = this;
     self.tinyWindow = null;
-    var parentHeight = 0;
+    let parentHeight = 0;
     this.slidingBarState = {
         top: 0,
         range: MIN_RANGE
@@ -65,6 +65,14 @@ function Controller($scope, wiComponentService) {
             update(ui);
         });
     };
+
+    this.setSlidingHandleHeight = function () {
+        parentHeight = parseInt($(self.contentId).height());
+
+        var initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
+        $(self.handlerId).height(initialHeight);
+        self.tinyWindow.height = initialHeight;
+    }
 }
 
 var app = angular.module(moduleName, []);
@@ -78,12 +86,12 @@ app.component(componentName, {
     }
 });
 
-app.directive( 'elemReady', function( $parse ) {
+app.directive('elemReady', function ($parse) {
     return {
         restrict: 'A',
-        link: function( $scope, elem, attrs ) {
-            elem.ready(function(){
-                $scope.$apply(function(){
+        link: function ($scope, elem, attrs) {
+            elem.ready(function () {
+                $scope.$apply(function () {
                     var func = $parse(attrs.elemReady);
                     func($scope);
                 })

@@ -8,12 +8,14 @@ wiComponentService = require('./wi-component-service');
 var WORKING_TABS = [
     {
         type: 'dogs',
+        name: 'dogsTab',
         heading: 'Item 1.2.1 (dogs)',
         closable: 'true',
         active: false
     },
     {
         type: 'cars',
+        name: 'carTab',
         heading: 'Item 1.2.2 (cars)',
         closable: 'true',
         active: false
