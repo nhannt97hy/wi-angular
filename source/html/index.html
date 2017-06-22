@@ -7,7 +7,6 @@
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
 
-    <link href='css/main.css' rel='stylesheet'>
     <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-dropdown.css' rel='stylesheet'>
     <link href='css/wi-list.css' rel='stylesheet'>
@@ -20,17 +19,18 @@
     <link href='css/wi-logplot.css' rel='stylesheet'>
     <link href='css/wi-workingtabs.css' rel='stylesheet'>
 
+    <link href='css/main.css' rel='stylesheet'>
     <link href='css/ribbon-block/ribbon-block.css' rel='stylesheet'>
     <link href='css/status-bar/status-bar.css' rel='stylesheet'>
-    <!--<link href='css/workspace-block/explorer-block.css' rel='stylesheet'>
-    <link href='css/workspace-block/working-block.css' rel='stylesheet'>-->
+    <link href='css/workspace-block/explorer-block.css' rel='stylesheet'>
+    <link href='css/workspace-block/working-block.css' rel='stylesheet'>
     <link href='css/workspace-block/workspace-block.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="css/sprite_16.css">
     <link rel="stylesheet" href="css/sprite_32.css">
 
     <link rel='stylesheet' href='vendor/css/goldenlayout-base.css'>
-
+    <link type="text/css" rel="stylesheet" href="vendor/css/goldenlayout-light-theme.css" />
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
@@ -39,34 +39,28 @@
 
     <script src="js/main.js.bundle.js"></script>
 </head>
-<!--<body ng-app='wiapp' ng-controller="AppController as app">-->
-<body>
-<!--<div class="container" ng-controller="AppController as app">-->
-    <div class="ribbon-wrapper">
-        @@include('./ribbon-block/index.html')
-    </div>
+<body ng-app='wiapp'>
+    <div class='main' ng-controller="AppController as app">
+        <div class="ribbon-wrapper">
+            @@include('./ribbon-block/index.html')
+        </div>
 
-    <div id='myLayout'>
+        <div id='myLayout'>
+        </div>
+
+        <div class="status-bar">
+            @@include('./status-bar/index.html')
+        </div>
+
     </div>
-    <!--<div class="workspace-wrapper">-->
     <template id='explorer-block'>
-        <!--<div class="explorer-block">-->
-            @@include('./explorer-block/index.html')
-        <!--</div>-->
+        <wi-treeview config="myConfig"></wi-treeview>
+    </template>
+    <template id='property-block'>
+        <wi-list heading="List 1" items="listItems"></wi-list>
     </template>
     <template id='working-block'>
-        <h1>Working block</h1>
-        <!--<div class="working-block">-->
-            @@include('./working-block/index.html')
-        <!--</div>-->
+        <wi-workingtabset class="pane" tab-configs="workingTabs"></wi-workingtabset>
     </template>
-    <!--</div>-->
-
-    <div class="status-bar">
-        @@include('./status-bar/index.html')
-    </div>
-
-<!--</div>-->
-
 </body>
 </html>
