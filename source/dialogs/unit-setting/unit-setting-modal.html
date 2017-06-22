@@ -1,0 +1,170 @@
+<div class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><span><img src="img/32x32/project_open_32x32.png"></span>&nbsp;Open Project</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" action="" name="modalUnitSetting">
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="unitSystem">Unit System:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="system" name="unitSystem" ng-options="x for x in wiModal.data.unitSystem" class="form-control track by x"></select>
+                    </div>
+                  </div>
+                  <button class="btn btn-default">Default</button>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="caliper">Caliper:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.caliper[0]" name="caliper" value="" class="form-control" ng-options="x for x in wiModal.data.caliper track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="neutron">Neutron:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.neutron[0]" name="neutron" value="" class="form-control" ng-options="x for x in wiModal.data.neutron track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="gammaRay">Gamma Ray:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.gammaRay[0]" name="gammaRay" value="" class="form-control" ng-options="x for x in wiModal.data.gammaRay track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="acoustic">Acoustic:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.acoustic[0]" name="acoustic" value="" class="form-control" ng-options="x for x in wiModal.data.acoustic track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="pressure">Pressure:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.pressure[0]" name="pressure" value="" class="form-control" ng-options="x for x in wiModal.data.pressure track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="bitSize">BitSize:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.bitSize[0]" name="bitSize" value="" class="form-control" ng-options="x for x in wiModal.data.bitSize track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="density">Density:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.density[0]" name="density" value="" class="form-control" ng-options="x for x in wiModal.data.density track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="concentration">Concentration:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.concentration[0]" name="concentration" value="" class="form-control" ng-options="x for x in wiModal.data.concentration track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="permeability">Permeability:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.permeability[0]" name="permeability" value="" class="form-control" ng-options="x for x in wiModal.data.permeability track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="porosity">Porosity:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.porosity[0]" name="porosity" value="" class="form-control" ng-options="x for x in wiModal.data.porosity track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="angle">Angle:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.angle[0]" name="angle" value="" class="form-control" ng-options="x for x in wiModal.data.angle track by x"></select>
+                    </div>
+                  </div>                   
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    
+                  </div>
+                  <div class="form-group">
+                    
+                  </div>
+                  <div class="form-group">
+                    
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="resistivity">Resistivity:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.resistivity[0]" name="resistivity" value="" class="form-control" ng-options="x for x in wiModal.data.resistivity track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="saturation">Saturation:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.saturation[0]" name="saturation" value="" class="form-control" ng-options="x for x in wiModal.data.saturation track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="temperature">Temperature:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.temperature[0]" name="temperature" value="" class="form-control" ng-options="x for x in wiModal.data.temperature track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="volume">Volume:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.volume[0]" name="volume" value="" class="form-control" ng-options="x for x in wiModal.data.volume track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="sp">Sp:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.sp[0]" name="sp" value="" class="form-control" ng-options="x for x in wiModal.data.sp track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="length">Length:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.length[0]" name="length" value="" class="form-control" ng-options="x for x in wiModal.data.length track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="time">Time:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.time[0]" name="time" value="" class="form-control" ng-options="x for x in wiModal.data.time track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="area">Area:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.area[0]" name="area" value="" class="form-control" ng-options="x for x in wiModal.data.area track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="flow">Flow:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.flow[0]" name="flow" value="" class="form-control" ng-options="x for x in wiModal.data.flow track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="speed">Speed:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.speed[0]" name="speed" value="" class="form-control" ng-options="x for x in wiModal.data.speed track by x"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label col-sm-4" for="force">Force:</label>
+                    <div class="col-sm-8">
+                      <select ng-model="wiModal.data.force[0]" name="force" value="" class="form-control" ng-options="x for x in wiModal.data.force track by x"></select>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.close(wiModal.projectName);" class="btn btn-default" data-dismiss="modal"><span><img src="img/16x16/ok_16x16.png"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.close('Cancel click')" class="btn btn-default" data-dismiss="modal"><span><img src="img/16x16/close_16x16.png"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
