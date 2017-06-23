@@ -1,3 +1,4 @@
+@width: 90%;
 input, button, textarea, select{
 	&:focus{
 		outline: none;
@@ -10,20 +11,20 @@ input, button, textarea, select{
     display: flex;
     flex-direction: column;
     height: 99%;
-    width: 100%;
+    width: @width;
 }
 #myLayout {
-    width: 100%;
+    width: @width;
     flex: 1 1 auto;
 }
 .status-bar {
-    width: 100%;
+    width: @width;
     min-height: 30px;
 }
 
 .ribbon-wrapper {
-    width: 100%;
-//    min-height: 132px;
+    width: @width;
+    min-height: 139px;
 }
 
 .lm_content {

@@ -19,7 +19,9 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-treeview name="MyTreeview" config="myConfig"></wi-treeview>
+    <div style="width: 50%; margin: 3em 0;">
+        <wi-treeview name="MyTreeview" config="myConfig"></wi-treeview>
+    </div>
     <button ng-click='addItem("item11000")'>add item to item 11000</button>
     <button ng-click=addItem("item11")>add item to item 1.1</button>
 </div>

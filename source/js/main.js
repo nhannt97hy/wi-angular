@@ -84,7 +84,9 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     $scope.workingTabs = appConfig.WORKING_TABS;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putRight('explorer-block', 'Explorer');
-    layoutManager.putRight('property-block', 'Properties');
+    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('property-block', 'Properties');
+    layoutManager.putRight('vovan', 'Vo va vovan');
+    
 });
 
