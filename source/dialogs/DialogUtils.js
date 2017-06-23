@@ -294,6 +294,7 @@ exports.unitSettingDialog = function(ModalService, callback) {
 
 exports.addNewDialog = function(ModalService, callbak) {
     function ModalController($scope, close) {
+
         this.close = function(ret) {
             close(ret);
         }
@@ -312,3 +313,23 @@ exports.addNewDialog = function(ModalService, callbak) {
     });
 }
 
+exports.wellHeaderDialog = function(ModalService, callback) {
+    function ModalController($scope, close) {
+        this.wellHeader = ["well1", "well2", "well3"];
+        this.close = function(ret) {
+            close(ret);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "well-header/well-header-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function(modal) {
+        modal.element.modal();
+        modal.close.then(function(ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
