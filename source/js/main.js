@@ -66,6 +66,7 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
             value: 'value'
         }
     ];
+
     $scope.listItems2 = [
         {
             key: 'key',
@@ -84,7 +85,9 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     $scope.workingTabs = appConfig.WORKING_TABS;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putRight('explorer-block', 'Explorer');
-    layoutManager.putRight('property-block', 'Properties');
+    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('property-block', 'Properties');
+    layoutManager.putRight('working-block', 'Working Block');
+    layoutManager.putRight('working-block', 'Working Block 2');
 });
 
