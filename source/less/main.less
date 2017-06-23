@@ -1,3 +1,8 @@
+input, button, textarea, select{
+	&:focus{
+		outline: none;
+	}
+}
 .wi-hidden {
   visibility: hidden;
 }
@@ -14,10 +19,13 @@
 .status-bar {
     width: 100%;
     min-height: 30px;
-    max-height: 30px;
 }
 
 .ribbon-wrapper {
     width: 100%;
     min-height: 132px;
+}
+
+.lm_content {
+    overflow-y: scroll;
 }

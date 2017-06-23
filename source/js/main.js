@@ -13,6 +13,8 @@ var wiList = require('./wi-list');
 
 var layoutManager = require('./layout.js');
 
+var handlers = require('./handlers.js');
+
 wiComponentService = require('./wi-component-service.js');
 
 var app = angular.module('wiapp',
@@ -32,6 +34,8 @@ var app = angular.module('wiapp',
 
 app.controller('AppController', function ($scope, $timeout, $compile) {
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
+
+    $scope.handlers = handlers;
 
     $scope.config = {
         ProjectTab: {
@@ -67,8 +71,8 @@ app.controller('AppController', function ($scope, $timeout, $compile) {
 
     $scope.workingTabs = appConfig.WORKING_TABS;
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putLeft('explorer-block');
-    layoutManager.putLeft('property-block');
+    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('property-block', 'Properties');
 /*
     var myLayout = new GoldenLayout(layoutConfig, document.getElementById('myLayout'));
 

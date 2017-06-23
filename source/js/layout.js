@@ -3,7 +3,9 @@ var compileFunc;
 var scopeObj;
 var layoutConfig = {
     settings: {
-        hasHeaders: true
+        hasHeaders: true,
+        showCloseIcon: false,
+        showPopoutIcon: false
     },
     content: [
         {
@@ -11,27 +13,16 @@ var layoutConfig = {
             content: [
                 {
                     type: 'column',
+                    id: 'left',
+                    isClosable: false,
+                    width: 30,
                     content: [
-                        /*
-                        {
-                            type: 'component',
-                            componentName: "wi-block",
-                            componentState: {
-                                templateId: 'explorer-block'
-                            }
-                        }
-                        , {
-                            type: 'component',
-                            componentName: 'wi-block',
-                            componentState: {
-                                templateId: 'property-block'
-                            }
-                        }
-                        */
                     ]
                 },
                 {
                     type: 'stack',
+                    id: 'right',
+                    isClosable: false,
                     content:[]
                 }
             ]
@@ -49,22 +40,26 @@ function createLayout(domId, $scope, $compile) {
     });
     layoutManager.init();
 }
-function putLeft(templateId) {
-    layoutManager.root.contentItems[0].contentItems[0].addChild({
+function putLeft(templateId, title) {
+    //layoutManager.root.contentItems[0].contentItems[0].addChild({
+    layoutManager.root.getItemsById('left')[0].addChild({
         type:'component',
-        componentName: 'wi-block', 
+        componentName: 'wi-block',
         componentState: {
             templateId: templateId
-        }
+        },
+        title: title
     });
 }
-function putRight(templateId) {
-    layoutManager.root.contentItems[0].contentItems[1].addChild({
+function putRight(templateId, title) {
+    //layoutManager.root.contentItems[0].contentItems[1].addChild({
+    layoutManager.root.getItemsById('right')[0].addChild({
         type:'component',
         componentName: 'wi-block', 
         componentState: {
             templateId: templateId
-        }
+        },
+        title: title
     });
 }
 

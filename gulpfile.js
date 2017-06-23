@@ -216,6 +216,17 @@ gulp.task('gen-index', function() {
     wiUI.xlsxToJson('./Wi-UI.xlsx');
     jsonXML.jsonToXML();
 });
+gulp.task('gen-functions', function() {
+    var templateFile = 'source/js/handlers.js.tmpl';
+    try {
+        fs.unlinkSync(templateFile);
+    }
+    catch(err) {
+        console.log(err);
+    }
+    var wiUI = require('./preprocess/wi-ui-v1.js');
+    wiUI.genFunctionsFromXlsx('./Wi-UI.xlsx', templateFile);
+});
 gulp.task('config', function () {
     var config = to_json(workbook);
 
