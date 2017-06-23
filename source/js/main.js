@@ -32,10 +32,19 @@ var app = angular.module('wiapp',
         wiComponentService.name
     ]);
 
-app.controller('AppController', function ($scope, $timeout, $compile) {
+app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
-
-    $scope.handlers = handlers;
+    function bindAll($scope, wiComponentService) {
+        var newHandlers = new Object();
+        for (var handler in handlers) {
+            newHandlers[handler] = handlers[handler].bind({
+                $scope:$scope, 
+                wiComponentService: wiComponentService
+            });
+        }
+        return newHandlers;
+    }
+    $scope.handlers = bindAll($scope, wiComponentService);
 
     $scope.config = {
         ProjectTab: {

@@ -1,5 +1,5 @@
 exports.NewProjectButtonClicked = function() {
-    console.log('NewProjectButton is clicked');
+    console.log('NewProjectButton is clicked', this);
 }
 
 exports.OpenProjectButtonClicked = function() {

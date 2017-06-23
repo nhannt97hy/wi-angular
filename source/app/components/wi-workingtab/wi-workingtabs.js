@@ -2,8 +2,8 @@ const tabsetComponentName = 'wiWorkingtabset';
 const tabComponentName = 'wiWorkingtab';
 const moduleName = 'wi-workingtabs';
 
-function TabsetController() {
-    var self = this;
+function TabsetController($timeout, wiComponentService) {
+    let self = this;
 
     this.tabs = [];
 
@@ -13,6 +13,11 @@ function TabsetController() {
 
         self.tabs[index].active = true;
         self.tabConfigs[index].active = true;
+
+        let tabSelectCtrl = wiComponentService.getComponent(self.tabs[index].name);
+        if (tabSelectCtrl.type === 'logplot') {
+            $timeout(wiComponentService.getComponent(tabSelectCtrl.name + 'Logplot').getSlidingbarCtrl().setSlidingHandleHeight);
+        }
     };
 
     this.closeTab = function (index) {
@@ -62,11 +67,13 @@ app.component(tabsetComponentName, {
 });
 
 
-function TabController() {
+function TabController(wiComponentService) {
     var self = this;
 
     this.$onInit = function () {
         self.wiTabsetCtrl.addTab(self);
+
+        if (self.name) wiComponentService.putComponent(self.name, self);
     };
 }
 
@@ -79,6 +86,8 @@ app.component(tabComponentName, {
         'wiTabsetCtrl': '^wiWorkingtabset'
     },
     bindings: {
+        name: '@',
+        type: '@',
         heading: '@',
         closable: '@'
     }

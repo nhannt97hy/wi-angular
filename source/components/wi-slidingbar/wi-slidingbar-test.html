@@ -3,6 +3,7 @@
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href="vendor/css/jquery-ui.css" rel="stylesheet">
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
@@ -20,8 +21,8 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <div class="container" style="height: 500px; background-color: #5e5e5e">
-        <wi-slidingbar>
+    <div class="container" style="display: flex; height: 500px; background-color: #5e5e5e">
+        <wi-slidingbar name="MySlidingBar1" style="width: 150px" ng-init="getSlidingbarComponent()">
             <div>
                 <p>Some thing like plot</p>
                 <p>Some thing like plot</p>
@@ -31,7 +32,7 @@
         </wi-slidingbar>
     </div>
 
-    <h1>{{wiSlidingbar.top}} -- {{wiSlidingbar.range}}</h1>
+    <h1>{{wiSlidingbar.slidingBarState.top}} -- {{wiSlidingbar.slidingBarState.range}}</h1>
 </div>
 </body>
 </html>
