@@ -61,6 +61,14 @@ app.controller('AppController', function ($scope, $timeout, ModalService) {
             imgUrl: '',
             key: 'key',
             value: 'value'
+        }
+    ];
+
+    $scope.listItems2 = [
+        {
+            imgUrl: '',
+            key: 'key',
+            value: 'value'
         },
         {
             imgUrl: '',
