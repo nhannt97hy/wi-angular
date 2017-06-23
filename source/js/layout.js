@@ -16,8 +16,7 @@ var layoutConfig = {
                     id: 'left',
                     isClosable: false,
                     width: 30,
-                    content: [
-                    ]
+                    content: []
                 },
                 {
                     type: 'stack',

@@ -44,7 +44,9 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
         }
         return newHandlers;
     }
+
     $scope.handlers = bindAll($scope, wiComponentService);
+
 
     $scope.listItems = [
         {
@@ -80,8 +82,9 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     ];
 
     $scope.workingTabs = appConfig.WORKING_TABS;
+
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putLeft('explorer-block', 'Explorer');
-    layoutManager.putLeft('property-block', 'Properties');
+    layoutManager.putRight('explorer-block', 'Explorer');
+    layoutManager.putRight('property-block', 'Properties');
 });
 

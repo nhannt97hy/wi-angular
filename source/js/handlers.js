@@ -1,5 +1,7 @@
 exports.NewProjectButtonClicked = function() {
-    console.log('NewProjectButton is clicked', this);
+    console.log('NewProjectButton is clicked ', this);
+    var wiComponentService = this.wiComponentService;
+    wiComponentService.getComponent('OpenProjectButton').label = "hic hic";
 }
 
 exports.OpenProjectButtonClicked = function() {
