@@ -1,9 +1,6 @@
 XLSX = require('xlsx');
 
 var fs = require('fs');
-// workbook.SheetNames.forEach(function(aSheet) {
-//     console.log(aSheet);
-// });
 Array.prototype.cleanData = function (deleteValue) {
     for (var i = 0; i < this.length; i++) {
         if (this[i] == deleteValue) {
@@ -19,7 +16,6 @@ function sheetToJson(workbook, sheetName, attrCols) {
     var worksheet = workbook.Sheets[sheetName];
     var range = XLSX.utils.decode_range(worksheet['!ref']);
 
-    var RESULT = new Object();
     var componentArr = [];
     for (var R = range.s.r + 1; R <= range.e.r; ++R) {
         var index = getValueAtCell(R, 0, worksheet);
@@ -38,8 +34,6 @@ function sheetToJson(workbook, sheetName, attrCols) {
         }
     }
     cleanComponentArr(componentArr);
-    RESULT.body = componentArr;
-    //return RESULT;
     return componentArr;
 }
 
@@ -67,6 +61,9 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     var dependency=getValueAtCell(row, 2, sheet);
 
     newComponent.name = dependency.replace("wi", "wi-").toLowerCase();
+    if(newComponent.name === 'wi-button') {
+        attrObject.handler = 'handlers.' + clickFunctionName(attrObject.name);
+    }
     newComponent.attrs = attrObject;
     newComponent.children = [];
     return newComponent;
@@ -89,19 +86,15 @@ function isInt(data) {
 }
 //Just print string to file
 function printToFile(fileName, content) {
-    fs.writeFile(fileName, content, function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log("The file "+fileName+" was saved");
-    });
+    fs.writeFileSync(fileName, content);
+    console.log("The file "+fileName+" was saved");
 }
-
 
 // MAIN function
 //var processTabInfos = require('./config.js').getTabInfos();
-exports.xlsxToJson = function(xlsxFile) {
-    var processTabInfos = require('./config.js').processTabInfos;
+exports.xlsxToJson = function(xlsxFile, configFile) {
+    //var processTabInfos = require('./config.js').processTabInfos;
+    var processTabInfos = require('./' + configFile).processTabInfos;
     //var workbook = XLSX.readFile('../Wi-UI.xlsx');
     console.log(xlsxFile);
     var workbook = XLSX.readFile(xlsxFile);
@@ -110,3 +103,39 @@ exports.xlsxToJson = function(xlsxFile) {
     });
 };
 
+function clickFunctionName(name) {
+    return (name + 'Clicked').replace(/\&/g,'And')
+        .replace(/\+/g, 'Plus')
+        .replace(/^3/g, 'Tri')
+        .replace(/[\/\-\.]/g, '_');
+}
+
+function genFunctionsFromSheet(workbook, sheetName) {
+    var worksheet = workbook.Sheets[sheetName];
+    var range = XLSX.utils.decode_range(worksheet['!ref']);
+    var nameCol = 1;
+    var functions = [];
+    var functionStr;
+    var name;
+    for (var R = range.s.r + 1; R <= range.e.r; ++R) {
+        functionStr = '';
+        name = getValueAtCell(R, nameCol, worksheet);
+        var fName = clickFunctionName(name);
+        if (/Button$/.test(name)) {
+            functionStr = 'exports.' + fName + ' = function() {\n' +
+                '    console.log(\'' + name + ' is clicked\');\n' +
+            '}';
+            functions.push(functionStr);
+        }
+    }
+    return functions;
+}
+
+exports.genFunctionsFromXlsx = function(xlsxFile, outputFile, configFile) {
+    var processTabInfos = require('./' + configFile).processTabInfos;
+    var workbook = XLSX.readFile(xlsxFile);
+    processTabInfos.forEach(function(item) {
+        fs.appendFileSync(outputFile, genFunctionsFromSheet(workbook, item.tab).join('\n\n') + "\n\n");
+        console.log("Tab " + item.tab + " was processed");
+    });
+}
