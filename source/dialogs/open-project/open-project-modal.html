@@ -3,20 +3,19 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"><span><img src="img/32x32/project_open_32x32.png"></span>&nbsp;Open Project</h4>
+                <h4 class="modal-title"><span class="project-open-16x16"></span>&nbsp;Open Project</h4>
             </div>
             <div class="modal-body">
               <div class="">
                   <form class="form-horizontal" action="" name="modalOpenProject">
                   	<div class="form-group">
-                    
                         <div class="col-sm-12">
                           <div class="area text-center padding-50px">
                           	Open project 
                           </div>
                         </div>
                       </div>
-                  	<h4 class="modal-infomation-title"><span><img src="img/32x32/project_normal_32x32.png"></span>&nbsp;Project Information</h4>
+                  	<h4 class="modal-infomation-title"><span class="project-normal-16x16"></span>&nbsp;Project Information</h4>
                       
                       <div class="form-group">
                         <label class="control-label col-sm-3" for="projectName">Project name:</label>
@@ -53,8 +52,8 @@
               </div>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.close(wiModal.projectName);" class="btn btn-default" data-dismiss="modal" ng-disabled="!modalOpenProject.$dirty || (modalOpenProject.$dirty && modalOpenProject.$invalid)"><span><img src="img/16x16/ok_16x16.png"></span>&nbsp;OK</button>
-                <button type="button" ng-click="wiModal.close('Cancel click')" class="btn btn-default" data-dismiss="modal"><span><img src="img/16x16/close_16x16.png"></span>&nbsp;Cancel</button>
+                <button type="button" ng-click="wiModal.close(wiModal.projectName);" class="btn btn-default" data-dismiss="modal" ng-disabled="!modalOpenProject.$dirty || (modalOpenProject.$dirty && modalOpenProject.$invalid)"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.close('Cancel click')" class="btn btn-default" data-dismiss="modal"><span class="cancel-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>
     </div>

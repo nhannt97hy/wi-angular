@@ -275,6 +275,7 @@ exports.unitSettingDialog = function(ModalService, callback) {
         console.log(self.selectedData.unitSystem)
         this.close = function(ret) {
             close(ret);
+            
         }                    
     }
     ModalService.showModal({
@@ -324,6 +325,25 @@ exports.wellHeaderDialog = function(ModalService, callback) {
         templateUrl: "well-header/well-header-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
+    }).then(function(modal) {
+        modal.element.modal();
+        modal.close.then(function(ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.depthConversionDialog = function(ModalService, callback) {
+    function ModalController($scope, close) {
+        this.close = function(ret) {
+            close(ret);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "depth-conversion/depth-conversion-modal.html",
+        controller : ModalController,
+        controllerAs : "wiModal"
     }).then(function(modal) {
         modal.element.modal();
         modal.close.then(function(ret) {
