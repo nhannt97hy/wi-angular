@@ -3,12 +3,9 @@ let wiList = require('./wi-list');
 let wiComponentService = require('./wi-component-service');
 
 let app = angular.module('helloapp', [wiList.name, wiComponentService.name]);
+
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.myListItems = [
-        {
-            key: 'key',
-            value: 'value'
-        },
         {
             key: 'key',
             value: 'value'
