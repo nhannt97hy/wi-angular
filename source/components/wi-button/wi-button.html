@@ -1,5 +1,5 @@
 <div>
-    <button ng-click="wiButton.onClick()">
+    <button ng-click="wiButton.onClick()" class="{{wiButton.type || wiButton.config.type || wiButton.default.type}}">
         <img class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}" alt="icon wi-button">
         <p class="{{wiButton.layout || wiButton.config.layout || wiButton.default.layout}}"
         ng-show="wiButton.label != null || wiButton.config.label != null">

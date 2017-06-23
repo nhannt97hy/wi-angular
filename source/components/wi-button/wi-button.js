@@ -2,9 +2,10 @@ const wiButtonName = 'wiButton';
 const moduleName = 'wi-button';
 
 function ButtonController(wiComponentService) {
-    var self = this;
+    let self = this;
 
     this.default = {
+        type: 'normal',
         label: '',
         layout: 'icon-top',
         icon: 'project-new-32x32'
@@ -19,13 +20,14 @@ function ButtonController(wiComponentService) {
     }
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 app.component(wiButtonName, {
     templateUrl: 'wi-button.html',
     controller: ButtonController,
     controllerAs: wiButtonName,
     bindings: {
         config: '<',
+        type: '@',
         name: '@',
         label: '@',
         layout: '@',
