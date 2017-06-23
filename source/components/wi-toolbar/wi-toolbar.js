@@ -2,10 +2,17 @@ const name = 'wiToolbar';
 const moduleName = 'wi-toolbar';
 
 function Controller() {
-    var self = this;
+    let self = this;
+
+    this.default = {
+        type: 'vertical',
+        label: ''
+    }
+
+
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 
 app.component(name, {
     templateUrl: 'wi-toolbar.html',
@@ -13,6 +20,8 @@ app.component(name, {
     controller: Controller,
     controllerAs: name,
     bindings: {
+        name: '@',
+        type: '@',
         label: '@'
     }
 });
