@@ -176,6 +176,24 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
+gulp.task('wi-logplot-include', function() {
+    var templateFile = './source/app/components/wi-logplot/template/wi-logplot.html';
+    var outputDir = './source/app/components/wi-logplot';
+    /*try {
+        fs.unlinkSync(outputFile);
+    }
+    catch(err) {
+        console.log(err);
+    }*/
+    return gulp.src([templateFile])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest(outputDir));
+});
+
 const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
@@ -210,12 +228,23 @@ function to_json(workbook) {
     return text;
 }
 
-gulp.task('gen-index', function() {
+function xlsxToHTML(xlsxFile, configFile) {
     var wiUI = require('./preprocess/wi-ui-v1.js');
     var jsonXML = require('./preprocess/toXML.js');
-    wiUI.xlsxToJson('./Wi-UI.xlsx');
-    jsonXML.jsonToXML();
+    wiUI.xlsxToJson(xlsxFile, configFile);
+    jsonXML.jsonToXML(configFile);
+}
+gulp.task('gen-index', function() {
+    var configFile = 'config.js';
+    var xlsxFile = './Wi-UI.xlsx';
+    xlsxToHTML(xlsxFile, configFile);
 });
+gulp.task('gen-wi-logplot-template', function() {
+    var configFile = 'wi-logplot.config.js';
+    var xlsxFile = './Wi-LogPlot.xlsx';
+    xlsxToHTML(xlsxFile, configFile);
+});
+
 gulp.task('gen-functions', function() {
     var templateFile = 'source/js/handlers.js.tmpl';
     try {
@@ -225,8 +254,21 @@ gulp.task('gen-functions', function() {
         console.log(err);
     }
     var wiUI = require('./preprocess/wi-ui-v1.js');
-    wiUI.genFunctionsFromXlsx('./Wi-UI.xlsx', templateFile);
+    wiUI.genFunctionsFromXlsx('./Wi-UI.xlsx', templateFile, 'config.js');
 });
+
+gulp.task('gen-wi-logplot-functions', function() {
+    var templateFile = 'source/js/wi-logplot-handlers.js.tmpl';
+    try {
+        fs.unlinkSync(templateFile);
+    }
+    catch(err) {
+        console.log(err);
+    }
+    var wiUI = require('./preprocess/wi-ui-v1.js');
+    wiUI.genFunctionsFromXlsx('./Wi-UI.xlsx', templateFile, 'wi-logplot.config.js');
+});
+
 gulp.task('config', function () {
     var config = to_json(workbook);
 

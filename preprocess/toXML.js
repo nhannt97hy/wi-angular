@@ -33,8 +33,8 @@ function toXML(jsonFileName,xmlFileName) {
         printToFile(xmlFileName, xml);
     });
 }
-exports.jsonToXML = function() {
-    var processTabInfos = require('./config.js').processTabInfos;
+exports.jsonToXML = function(configFile) {
+    var processTabInfos = require('./' + configFile).processTabInfos;
     processTabInfos.forEach(function(item){
         toXML(item.file, item.dir + "/index.html");
     });
