@@ -17,6 +17,10 @@ var handlers = require('./handlers.js');
 
 wiComponentService = require('./wi-component-service.js');
 
+function addWiLogPlot(layoutManager, logPlotName) {
+    $('template#wi-logplot wi-logplot').attr('name', logPlotName);
+    layoutManager.putRight('wi-logplot', logPlotName);
+}
 var app = angular.module('wiapp',
     [
         wiButton.name,
@@ -84,7 +88,8 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     $scope.workingTabs = appConfig.WORKING_TABS;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putRight('explorer-block', 'Explorer');
-    layoutManager.putRight('property-block', 'Properties');
+    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('property-block', 'Properties');
+    addWiLogPlot(layoutManager, 'myLogPlot');
 });
 

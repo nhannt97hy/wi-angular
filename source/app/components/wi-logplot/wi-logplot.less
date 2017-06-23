@@ -1,21 +1,26 @@
 wi-logplot {
-  display: flex;
-  flex-direction: column;
-
-  .logplot-toolbar-wrapper {
-    border: 1px solid blue;
-  }
-  .logplot-main-content {
-    border: 1px solid red;
-    flex: 1;
     display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
 
-    wi-slidingbar {
-      width: 150px;
+    .logplot-toolbar-wrapper {
+        border: none;
     }
 
-    .logplot-sub-content {
-      flex: 1;
+    .logplot-main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+
+        .slidingbar {
+            width: 100px;
+            display: flex;
+        }
+
+        .track-area {
+            border: 1px solid red;
+            flex: 1;
+        }
     }
-  }
 }
