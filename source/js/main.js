@@ -46,33 +46,34 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     }
     $scope.handlers = bindAll($scope, wiComponentService);
 
-    $scope.config = {
-        ProjectTab: {
-            heading: 'Project'
-        },
-        WellTab: {
-            heading: 'Well'
-        }
-    };
-
     $scope.listItems = [
         {
-            imgUrl: '',
             key: 'key',
             value: 'value'
         },
         {
-            imgUrl: '',
             key: 'key',
             value: 'value'
         },
         {
-            imgUrl: '',
             key: 'key',
             value: 'value'
         },
         {
-            imgUrl: '',
+            key: 'key',
+            value: 'value'
+        }
+    ];
+    $scope.listItems2 = [
+        {
+            key: 'key',
+            value: 'value'
+        },
+        {
+            key: 'key',
+            value: 'value'
+        },
+        {
             key: 'key',
             value: 'value'
         }
@@ -82,15 +83,5 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
-/*
-    var myLayout = new GoldenLayout(layoutConfig, document.getElementById('myLayout'));
-
-    myLayout.registerComponent('wi-block', function(container, componentState){
-        console.log('templateId', componentState.templateId);
-        var templateHtml = $('template#' + componentState.templateId).html();
-        container.getElement().html( $compile(templateHtml)($scope) );
-    });
-    myLayout.init();
-*/
 });
 

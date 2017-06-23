@@ -1,5 +1,6 @@
 wi-toolbar {
     display:inline-block;
+/*<<<<<<< HEAD*/
     padding:0 15px;
     border-right: 1px solid transparent;
     -moz-border-image: -moz-linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
@@ -40,4 +41,28 @@ wi-toolbar:nth-child(n+1){
         border-image-slice: 1;
         padding: 6px 0;
         }
+/*=======*/
+    margin: 1px;
+    & > div {
+        padding: 2px;
+        background-color: #f0f0f0;
+    }
+    & > .wi-toolbar-label {
+        margin: 0.2em;
+        padding: 0.2em;
+        text-align: center;
+        width: 100%;
+        background-color: darkgray ;
+    }
+}
+
+.toolbar-vertical {
+
+}
+
+.toolbar-horizontal {
+    & > wi-button {
+        display: block;
+    }
+/*>>>>>>> master*/
 }

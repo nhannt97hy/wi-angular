@@ -11,8 +11,10 @@
 
 <body ng-app='helloapp'>
 <div ng-controller="WiDummy">
-    <wi-list name="MyList1" heading="My list 1" items="myListItems" handler="myHandler"></wi-list>
-    <button ng-click="myHandler()">Change List's heading</button>
+    <wi-list name="MyList1" heading="My list 1" items="myListItems"></wi-list>
+    <wi-list name="MyList2" heading="My list 2" items="myListItems2"></wi-list>
+    <button ng-click="myHandler()">Change list 1 heading</button>
+    <button ng-click="addMoreItem()">Add more item to list 2</button>
 </div>
 </body>
 </html>

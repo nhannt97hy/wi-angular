@@ -1,4 +1,4 @@
-<div class="wi-treeview-container" ng-repeat="item in wiTreeview.config track by $index">
+<div class="wi-treeview-container" ng-repeat="item in wiTreeview.items track by $index">
     <div class="wi-parent-node"
          ng-click="item.data.childExpanded = !item.data.childExpanded"
          ng-dblclick="wiTreeview.onDoubleClick($index)">

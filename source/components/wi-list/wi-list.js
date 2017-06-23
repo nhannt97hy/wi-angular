@@ -2,14 +2,18 @@ const componentName = 'wiList';
 const moduleName = 'wi-list';
 
 function Controller(wiComponentService) {
-    var self = this;
+    let self = this;
 
     this.$onInit = function() {
         if (self.name) wiComponentService.putComponent(self.name, self);
+    };
+
+    this.addItem = function (key, value) {
+        self.items.push({key, value});
     }
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-list.html',
     controller: Controller,
@@ -17,8 +21,7 @@ app.component(componentName, {
     bindings: {
         name : '@',
         heading: '@',
-        items: '<',
-        handler: '<'
+        items: '<'
     }
 });
 

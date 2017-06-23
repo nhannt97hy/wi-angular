@@ -1,4 +1,5 @@
 wiButton = require('./wi-button');
+
 wiComponentService = require('./wi-component-service');
 
 var app = angular.module('helloapp', [wiButton.name, wiComponentService.name]);

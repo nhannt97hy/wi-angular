@@ -16,11 +16,11 @@
 </head>
 
 <body ng-app='helloapp'>
-<div ng-controller="WiDummy">
-    <wi-button name='TestButton' label="Test" icon="project-new-32x32" layout='icon-top'
+<div ng-controller="WiDummy" style="display: flex">
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-32x32" layout='icon-top'
                handler="myHandler"></wi-button>
 
-    <wi-button name='Test2Button' label="Test button 2" icon="project-new-32x32" layout='icon-left'
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
                handler="myHandler"></wi-button>
 
     <!-- default wi-button-->
