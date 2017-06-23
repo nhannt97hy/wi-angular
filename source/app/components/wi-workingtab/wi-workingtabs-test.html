@@ -1,0 +1,63 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/jquery-ui.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href="vendor/css/themify-icons.css" rel="stylesheet">
+
+    <link href='css/main.css' rel='stylesheet'>
+    <link href='css/wi-button.css' rel='stylesheet'>
+    <link href='css/wi-toolbar.css' rel='stylesheet'>
+    <link href='css/wi-slidingbar.css' rel='stylesheet'>
+    <link href='css/wi-logplot.css' rel='stylesheet'>
+    <link href='css/wi-workingtabs.css' rel='stylesheet'>
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src="vendor/js/jquery-ui.js"></script>
+
+    <script src='js/main-workingtabs.js.bundle.js'></script>
+
+    <title>Test</title>
+</head>
+
+<body ng-app='helloapp'>
+<div ng-controller="WiDummy">
+    <div class="container" style="display: flex; height: 500px; width: 700px; border: 1px solid #5e5e5e; padding: 5px;">
+        <wi-workingtabset tab-configs="workingTabs" style="flex: 1;">
+            <wi-workingtab type="{{tab.type}}" name="{{tab.name}}" heading="{{tab.heading}}" closable="{{tab.closable}}" ng-repeat="tab in workingTabs" ng-switch="tab.type" ng-class="{'wi-display-none': !tab.active}">
+                <div class="working-tab-content" ng-switch-when="dogs" >
+                    <h1>Dogs</h1>
+                    <p>Welcome to a world of dogs.</p>
+                </div>
+
+                <div class="working-tab-content" ng-switch-when="tuts">
+                    <h1>Tutorials</h1>
+                    <p>Learn from examples.</p>
+                </div>
+
+                <div class="working-tab-content" ng-switch-when="cars">
+                    <h1>Cars</h1>
+                    <p>Read about cars.</p>
+                </div>
+
+                <div class="working-tab-content working-logplot-tab-container" ng-switch-when="logplot">
+                    <wi-logplot name="{{tab.name}}Logplot"></wi-logplot>
+                </div>
+
+                <div class="working-tab-content" ng-switch-default>
+                    <h1>Default</h1>
+                    <p>none</p>
+                </div>
+            </wi-workingtab>
+
+        </wi-workingtabset>
+    </div>
+</div>
+</body>
+</html>

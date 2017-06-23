@@ -1,4 +1,4 @@
-<wi-workingtabset class="pane" tab-configs="workingTabs">
+<wi-workingtabset tab-configs="workingTabs">
     <wi-workingtab heading="{{tab.heading}}" closable="{{tab.closable}}" ng-repeat="tab in workingTabs" ng-switch="tab.type" ng-class="{'wi-display-none': !tab.active}">
         <div class="working-tab-content" ng-switch-when="dogs" >
             <h1>Dogs</h1>
@@ -16,7 +16,7 @@
         </div>
 
         <div class="working-tab-content working-logplot-tab-container" ng-switch-when="logplot">
-            <wi-logplot></wi-logplot>
+            <wi-logplot name="{{tab.name}}"></wi-logplot>
         </div>
 
         <div class="working-tab-content" ng-switch-default>
