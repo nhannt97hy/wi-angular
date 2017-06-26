@@ -1,11 +1,11 @@
-wiButton = require('./wi-button');
-wiSlidingbar = require('./wi-slidingbar.js');
-wiWorkingtabs = require('./wi-workingtabs');
-wiLogplot = require('./wi-logplot.js');
+let wiButton = require('./wi-button');
+let wiSlidingbar = require('./wi-slidingbar.js');
+let wiWorkingtabs = require('./wi-workingtabs');
+let wiLogplot = require('./wi-logplot.js');
 
-wiComponentService = require('./wi-component-service');
+let wiComponentService = require('./wi-component-service');
 
-var WORKING_TABS = [
+let WORKING_TABS = [
     {
         type: 'dogs',
         name: 'dogsTab',
@@ -36,7 +36,7 @@ var WORKING_TABS = [
     }
 ];
 
-var app = angular.module('helloapp', [wiButton.name, wiSlidingbar.name, wiWorkingtabs.name, wiLogplot.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiButton.name, wiSlidingbar.name, wiWorkingtabs.name, wiLogplot.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.workingTabs = WORKING_TABS;
 });

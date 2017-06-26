@@ -1,6 +1,6 @@
-wiFileUpload = require('./wi-file-upload');
+let wiFileUpload = require('./wi-file-upload');
 
-var app = angular.module('app', [wiFileUpload.name]);
+let app = angular.module('app', [wiFileUpload.name]);
 
 app.controller('dummy', function($scope) {
     $scope.successHandler = function (responseSuccess) {

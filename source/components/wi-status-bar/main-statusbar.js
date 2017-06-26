@@ -1,7 +1,6 @@
-wiStatusBar = require('./wi-status-bar');
+let wiStatusBar = require('./wi-status-bar');
 
-var app = angular.module('helloapp', [wiStatusBar.name]);
+let app = angular.module('helloapp', [wiStatusBar.name]);
 app.controller('WiDummy', function($scope) {
 
 });
-// tung.hoang@gmail.com

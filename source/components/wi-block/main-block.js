@@ -1,7 +1,7 @@
-wiBlock = require('./wi-block.js');
-wiButton = require('./wi-button.js');
+let wiBlock = require('./wi-block.js');
+let wiButton = require('./wi-button.js');
 
-var app = angular.module('helloapp', ['ui.bootstrap', wiBlock.name, wiButton.name]);
+let app = angular.module('helloapp', ['ui.bootstrap', wiBlock.name, wiButton.name]);
 app.controller('WiBlockController', WiBlockController);
 
 function WiBlockController($scope) {

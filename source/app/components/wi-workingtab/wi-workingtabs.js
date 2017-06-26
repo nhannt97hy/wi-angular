@@ -49,13 +49,13 @@ function TabsetController($timeout, wiComponentService) {
     };
 
     function deactiveAllTabs(tabs) {
-        for (var i = 0; i < tabs.length; i++) {
+        for (let i = 0; i < tabs.length; i++) {
             tabs[i].active = false;
         }
     }
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 app.component(tabsetComponentName, {
     templateUrl: 'wi-workingtabset.html',
     controller: TabsetController,
@@ -68,7 +68,7 @@ app.component(tabsetComponentName, {
 
 
 function TabController(wiComponentService) {
-    var self = this;
+    let self = this;
 
     this.$onInit = function () {
         self.wiTabsetCtrl.addTab(self);

@@ -1,34 +1,34 @@
-var appConfig = require('./app.config');
-var wiButton = require('./wi-button.js');
-var wiDropdown = require('./wi-dropdown.js');
-var wiToolbar = require('./wi-toolbar.js');
-var wiTabs = require('./wi-tabs.js');
-var wiWorkingtabs = require('./wi-workingtabs.js');
-var wiTreeview = require('./wi-treeview');
-var wiStatusBar = require('./wi-status-bar');
-var wiSlidingbar = require('./wi-slidingbar');
-var wiD3 = require('./wi-d3');
-var wiLogplot = require('./wi-logplot.js');
+let appConfig = require('./app.config');
+let wiButton = require('./wi-button.js');
+let wiDropdown = require('./wi-dropdown.js');
+let wiToolbar = require('./wi-toolbar.js');
+let wiTabs = require('./wi-tabs.js');
+let wiWorkingtabs = require('./wi-workingtabs.js');
+let wiTreeview = require('./wi-treeview');
+let wiStatusBar = require('./wi-status-bar');
+let wiSlidingbar = require('./wi-slidingbar');
+let wiD3 = require('./wi-d3');
+let wiLogplot = require('./wi-logplot.js');
 
-var wiList = require('./wi-list');
+let wiList = require('./wi-list');
 
-var layoutManager = require('./layout.js');
+let layoutManager = require('./layout.js');
 
-var handlers = require('./handlers.js');
+let handlers = require('./handlers.js');
 
-var graph = require('./graph.js');
+let graph = require('./graph.js');
 
 function genSamples(nSamples) {
-    var samples = new Array();
-    for( let i = 0; i < nSamples; i++ ) {
-        samples.push({y:i, x: Math.random()});
+    let samples = new Array();
+    for (let i = 0; i < nSamples; i++) {
+        samples.push({y: i, x: Math.random()});
     }
     return samples;
 }
 
 wiComponentService = require('./wi-component-service.js');
 
-var app = angular.module('wiapp',
+let app = angular.module('wiapp',
     [
         wiButton.name,
         wiDropdown.name,
@@ -47,13 +47,14 @@ var app = angular.module('wiapp',
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
     function bindAll($scope, wiComponentService) {
-        var newHandlers = new Object();
-        for (var handler in handlers) {
+        let newHandlers = new Object();
+        for (let handler in handlers) {
             newHandlers[handler] = handlers[handler].bind({
-                $scope:$scope, 
+                $scope: $scope,
                 wiComponentService: wiComponentService
             });
         }
+
         return newHandlers;
     }
 
@@ -104,6 +105,14 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     layoutManager.putRight('working-block', 'Working Block');
     layoutManager.putRight('working-block', 'Working Block 2');
 
-    layoutManager.putWiLogPlotRight('myLogPlot', 'plot 1');
+    setTimeout(function () {
+        layoutManager.putWiLogPlotRight('myLogPlot', 'plot 1');
+    }, 0);
+    setTimeout(function () {
+        layoutManager.putWiLogPlotRight('myLogPlot2', 'plot 2');
+    }, 1000);
+    setTimeout(function () {
+        layoutManager.putWiLogPlotRight('myLogPlot3', 'plot 3');
+    }, 2000);
 });
 

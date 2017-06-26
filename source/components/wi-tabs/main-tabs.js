@@ -1,8 +1,8 @@
-wiButton = require('./wi-button.js');
-wiToolbar = require('./wi-toolbar.js');
-wiTabs = require('./wi-tabs.js');
+let wiButton = require('./wi-button.js');
+let wiToolbar = require('./wi-toolbar.js');
+let wiTabs = require('./wi-tabs.js');
 
-var app = angular.module('helloapp', [wiButton.name, wiToolbar.name, wiTabs.name]);
+let app = angular.module('helloapp', [wiButton.name, wiToolbar.name, wiTabs.name]);
 app.controller('WiDummy', function ($scope) {
 
 });
