@@ -1,5 +1,9 @@
-<p class="list-heading">{{wiList.heading}}</p>
-<table>
+<p ng-click='wiList.shown = !wiList.shown' class="list-heading position-relative cursor-pointer">
+    <span class='text-left'>{{wiList.heading}}</span>
+    <span ng-show='!wiList.shown' class='block-right'><i class='ti-plus'></i></span>
+    <span ng-show='wiList.shown' class='block-right'><i class='ti-minus'></i></span>
+</p>
+<table ng-show='wiList.shown'>
     <tr ng-repeat="item in wiList.items">
         <td>{{item.key}}</td>
         <td>{{item.value}}</td>

@@ -1,54 +1,49 @@
 wi-toolbar {
-  display: inline-block;
-  padding: 0 15px;
-  border-right: 1px solid transparent;
-  -moz-border-image: -moz-linear-gradient(to bottom, rgba(180, 182, 191, 0) 0%, rgba(180, 182, 191, 1) 51%, rgba(180, 182, 191, 0) 100%);
-  -webkit-border-image: -webkit-linear-gradient(to bottom, rgba(180, 182, 191, 0) 0%, rgba(180, 182, 191, 1) 51%, rgba(180, 182, 191, 0) 100%);
-  border-image: linear-gradient(to bottom, rgba(180, 182, 191, 0) 0%, rgba(180, 182, 191, 1) 51%, rgba(180, 182, 191, 0) 100%);
-  border-image-slice: 1;
-  margin-bottom: 0;
-  & > div {
-    & > div {
+    display:inline-block;
+    padding:0 5px;
+    border-right: 1px solid transparent;
+    -moz-border-image: -moz-linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
+    -webkit-border-image: -webkit-linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
+    border-image: linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
+    border-image-slice: 1;     
+    margin-bottom: 0; 
+    vertical-align: top;
+    & > div.toolbar-vertical {
+        border-bottom: 1px solid transparent;
+        -moz-border-image: -moz-linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(216,217,223,1) 49%, rgba(255,255,255,0) 100%);
+        -webkit-border-image: -webkit-linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(216,217,223,1) 49%, rgba(255,255,255,0) 100%);
+        border-image: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(216,217,223,1) 49%, rgba(255,255,255,0) 100%);
+        border-image-slice: 1;
+        padding: 6px 0;
     }
+        
     & > .wi-toolbar-label {
-      padding: 0.2em;
-      text-align: center;
-      width: 100%;
-      color: #90929c;
-      border-top: 1px solid transparent;
-      -moz-border-image: -moz-linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 49%, rgba(255, 255, 255, 0) 100%);
-      -webkit-border-image: -webkit-linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 49%, rgba(255, 255, 255, 0) 100%);
-      border-image: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 49%, rgba(255, 255, 255, 0) 100%);
-      border-image-slice: 1;
-      margin-bottom: 0;
+        padding: 0.2em;
+        text-align: center;
+        width: 100%;
+        color: #90929c; 
+        border-top: 1px solid transparent;
+        -moz-border-image: -moz-linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 49%, rgba(255,255,255,0) 100%);
+        -webkit-border-image: -webkit-linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 49%, rgba(255,255,255,0) 100%);
+        border-image: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 49%, rgba(255,255,255,0) 100%);
+        border-image-slice: 1;     
+        margin-bottom: 0;   
+        font-size: 12px;   
     }
-  }
-}
-
-wi-toolbar:nth-child(n+1) {
-  wi-dropdown:first-child {
-    border: none;
-  }
-}
-
-.toolbar-wrapper {
-  & > div {
-    border-bottom: 1px solid transparent;
-    -moz-border-image: -moz-linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(216, 217, 223, 1) 49%, rgba(255, 255, 255, 0) 100%);
-    -webkit-border-image: -webkit-linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(216, 217, 223, 1) 49%, rgba(255, 255, 255, 0) 100%);
-    border-image: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(216, 217, 223, 1) 49%, rgba(255, 255, 255, 0) 100%);
-    border-image-slice: 1;
-    padding: 6px 0;
-  }
-
-  .toolbar-vertical {
-
-  }
-
-  .toolbar-horizontal {
-    & > wi-button {
-      display: block;
+    
+    .toolbar-vertical {
+        display: inline-block;
     }
-  }
+
+    .toolbar-horizontal {
+        & > wi-button {
+          display: block;
+        }
+    }
 }
 
+wi-toolbar:nth-child(n+1){
+    wi-dropdown:first-child{
+        border: none;
+    }
+}

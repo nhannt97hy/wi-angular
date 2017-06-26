@@ -8,7 +8,7 @@ var TRACK_CFG = {
     xFormatter: '.2f',
     yFormatter: '.2f',
     xPadding: 50,
-    yPadding: 1,
+    yPadding: 10,
     yStep: 0.25,
     plotWidth: 250 
 }
