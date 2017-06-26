@@ -79,6 +79,7 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
             value: 'value'
         }
     ];
+
     $scope.listItems2 = [
         {
             key: 'key',
@@ -99,36 +100,10 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
+
+    layoutManager.putRight('working-block', 'Working Block');
+    layoutManager.putRight('working-block', 'Working Block 2');
+
     layoutManager.putWiLogPlotRight('myLogPlot', 'plot 1');
-
-    /*setTimeout(function() {
-        layoutManager.putWiLogPlotRight('myLogPlot1', 'plot 2');
-        setTimeout(function(){
-            layoutManager.putWiLogPlotRight('myLogPlot2', 'plot 3');
-        }, 1000);
-    }, 1000);
-    */
-
-/*
-    var containerObj = $('wi-logplot[name="myLogPlot"] .track-area');
-    console.log(containerObj);
-    var plot = graph.createLogPlot({
-        xNTicks: 4,
-        yNTicks: 10,
-        xAxisPosition: 'top',
-        xFormatter: '.2f',
-        yFormatter: '.4f'
-    }, containerObj.get(0));
-    function genSamples(nSamples) {
-        var samples = new Array();
-        for( let i = 0; i < nSamples; i++ ) {
-            samples.push({y:i, x: Math.random()});
-        }
-        return samples;
-    }
-    var samples = genSamples(1000);
-    plot.plotPoint(samples, [0, 1], [100,500]);
-    plot.trackPointer(true);
-*/
 });
 
