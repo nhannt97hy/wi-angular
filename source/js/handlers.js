@@ -4,8 +4,30 @@ exports.NewProjectButtonClicked = function() {
     wiComponentService.getComponent('OpenProjectButton').label = "hic hic";
 }
 
+function genSamples(nSamples) {
+    var samples = new Array();
+    for( let i = 0; i < nSamples; i++ ) {
+        samples.push({y:i, x: Math.random()});
+    }
+    return samples;
+}
+
 exports.OpenProjectButtonClicked = function() {
-    console.log('OpenProjectButton is clicked');
+    console.log('OpenProjectButtoon is clicked');
+    console.log('Do click');
+    var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
+    var slidingBar = this.wiComponentService.getComponent('myLogPlotSlidingbar');
+    var idx = myPlot.addTrack();
+
+    myPlot.setData(idx, genSamples(1000));
+
+    var maxDepth = myPlot.getMaxDepth();
+
+    var low = slidingBar.slidingBarState.top * maxDepth / 100;
+    var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
+    console.log(slidingBar.slidingBarState, low, high, maxDepth);
+    myPlot.setDepthRange([low, high]);
+    myPlot.plotAll();
 }
 
 exports.CloseProjectButtonClicked = function() {

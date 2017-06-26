@@ -1,18 +1,19 @@
-var gulp = require('gulp');
-var watch = require('gulp-watch');
-var less = require('gulp-less');
-var clean = require('gulp-clean');
-var embedTemplate = require('gulp-angular-embed-templates');
-var glob = require('glob');
-var exec = require('gulp-exec');
-var deploy = require('gulp-gh-pages');
-var changed = require('gulp-changed');
-var async = require('async');
-var fileInclude = require('gulp-file-include');
-var XLSX = require('xlsx');
-var workbook = XLSX.readFile('Wi-UI.xlsx');
-const fs = require('fs');
+'use strict';
 
+const gulp = require('gulp');
+const watch = require('gulp-watch');
+const less = require('gulp-less');
+const clean = require('gulp-clean');
+const embedTemplate = require('gulp-angular-embed-templates');
+const glob = require('glob');
+const exec = require('gulp-exec');
+const deploy = require('gulp-gh-pages');
+const changed = require('gulp-changed');
+const async = require('async');
+const fileInclude = require('gulp-file-include');
+const XLSX = require('xlsx');
+const workbook = XLSX.readFile('Wi-UI.xlsx');
+const fs = require('fs');
 
 const BUILD_DIR = {
     root: 'build',
@@ -234,11 +235,13 @@ function xlsxToHTML(xlsxFile, configFile) {
     wiUI.xlsxToJson(xlsxFile, configFile);
     jsonXML.jsonToXML(configFile);
 }
+
 gulp.task('gen-index', function() {
     var configFile = 'config.js';
     var xlsxFile = './Wi-UI.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
+
 gulp.task('gen-wi-logplot-template', function() {
     var configFile = 'wi-logplot.config.js';
     var xlsxFile = './Wi-LogPlot.xlsx';
