@@ -17,8 +17,10 @@
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
 
     <link href='css/wi-logplot.css' rel='stylesheet'>
+    <link href='css/wi-d3.css' rel='stylesheet'>
     <link href='css/wi-workingtabs.css' rel='stylesheet'>
 
+    <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="css/sprite_16.css">
@@ -31,7 +33,8 @@
     <script src="vendor/js/angular.min.js"></script>
     <script src="vendor/js/jquery-ui.js"></script>
     <script src='vendor/js/goldenlayout.min.js'></script>
-
+    <script src='vendor/js/d3.min.js'></script>
+    <script src='vendor/js/ResizeSensor.js'></script>
     <script src="js/main.js.bundle.js"></script>
 </head>
 <body ng-app='wiapp'>
@@ -59,7 +62,10 @@
         <wi-list heading="List 2" items="listItems2"></wi-list>
     </template>
     <template id='working-block'>
-        <wi-workingtabset class="pane" tab-configs="workingTabs"></wi-workingtabset>
+        <wi-workingtabset tab-configs="workingTabs"></wi-workingtabset>
+    </template>
+    <template id='wi-logplot'>
+        <wi-logplot name='myPlot'></wi-logplot>
     </template>
     <template id='vovan'>
         <h2>Vo va vo van</h2>

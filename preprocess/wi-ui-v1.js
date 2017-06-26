@@ -92,8 +92,9 @@ function printToFile(fileName, content) {
 
 // MAIN function
 //var processTabInfos = require('./config.js').getTabInfos();
-exports.xlsxToJson = function(xlsxFile) {
-    var processTabInfos = require('./config.js').processTabInfos;
+exports.xlsxToJson = function(xlsxFile, configFile) {
+    //var processTabInfos = require('./config.js').processTabInfos;
+    var processTabInfos = require('./' + configFile).processTabInfos;
     //var workbook = XLSX.readFile('../Wi-UI.xlsx');
     console.log(xlsxFile);
     var workbook = XLSX.readFile(xlsxFile);
@@ -130,8 +131,8 @@ function genFunctionsFromSheet(workbook, sheetName) {
     return functions;
 }
 
-exports.genFunctionsFromXlsx = function(xlsxFile, outputFile) {
-    var processTabInfos = require('./config.js').processTabInfos;
+exports.genFunctionsFromXlsx = function(xlsxFile, outputFile, configFile) {
+    var processTabInfos = require('./' + configFile).processTabInfos;
     var workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function(item) {
         fs.appendFileSync(outputFile, genFunctionsFromSheet(workbook, item.tab).join('\n\n') + "\n\n");

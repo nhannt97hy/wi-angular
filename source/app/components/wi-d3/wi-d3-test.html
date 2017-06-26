@@ -1,0 +1,32 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/jquery-ui.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href="vendor/css/themify-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
+    <link rel="stylesheet" href="css/graph.css">
+    <link rel="stylesheet" href="css/wi-d3.css">
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+    <script src="vendor/js/d3.min.js"></script>
+    <script src="vendor/js/ResizeSensor.js"></script>
+
+    <script src="js/main-wi-d3.js.bundle.js"></script>
+
+    <title>Test wi-d3</title>
+</head>
+
+<body ng-app='helloapp'>
+
+<div ng-controller="WiDummy">
+    <button ng-click='doClick()'>Add Track</button>
+    <wi-d3 style='height: 600px;' name="myPlot"></wi-d3>
+</div>
+</body>
+</html>
