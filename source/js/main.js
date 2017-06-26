@@ -7,6 +7,7 @@ var wiWorkingtabs = require('./wi-workingtabs.js');
 var wiTreeview = require('./wi-treeview');
 var wiStatusBar = require('./wi-status-bar');
 var wiSlidingbar = require('./wi-slidingbar');
+var wiD3 = require('./wi-d3');
 var wiLogplot = require('./wi-logplot.js');
 
 var wiList = require('./wi-list');
@@ -15,12 +16,18 @@ var layoutManager = require('./layout.js');
 
 var handlers = require('./handlers.js');
 
+var graph = require('./graph.js');
+
+function genSamples(nSamples) {
+    var samples = new Array();
+    for( let i = 0; i < nSamples; i++ ) {
+        samples.push({y:i, x: Math.random()});
+    }
+    return samples;
+}
+
 wiComponentService = require('./wi-component-service.js');
 
-function addWiLogPlot(layoutManager, logPlotName) {
-    $('template#wi-logplot wi-logplot').attr('name', logPlotName);
-    layoutManager.putRight('wi-logplot', logPlotName);
-}
 var app = angular.module('wiapp',
     [
         wiButton.name,
@@ -32,6 +39,7 @@ var app = angular.module('wiapp',
         wiStatusBar.name,
         wiSlidingbar.name,
         wiLogplot.name,
+        wiD3.name,
         wiList.name,
         wiComponentService.name
     ]);
@@ -51,6 +59,7 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
 
     $scope.handlers = bindAll($scope, wiComponentService);
 
+    wiComponentService.putComponent('GRAPH', graph);
 
     $scope.listItems = [
         {
@@ -90,6 +99,36 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
-    addWiLogPlot(layoutManager, 'myLogPlot');
+    layoutManager.putWiLogPlotRight('myLogPlot', 'plot 1');
+
+    /*setTimeout(function() {
+        layoutManager.putWiLogPlotRight('myLogPlot1', 'plot 2');
+        setTimeout(function(){
+            layoutManager.putWiLogPlotRight('myLogPlot2', 'plot 3');
+        }, 1000);
+    }, 1000);
+    */
+
+/*
+    var containerObj = $('wi-logplot[name="myLogPlot"] .track-area');
+    console.log(containerObj);
+    var plot = graph.createLogPlot({
+        xNTicks: 4,
+        yNTicks: 10,
+        xAxisPosition: 'top',
+        xFormatter: '.2f',
+        yFormatter: '.4f'
+    }, containerObj.get(0));
+    function genSamples(nSamples) {
+        var samples = new Array();
+        for( let i = 0; i < nSamples; i++ ) {
+            samples.push({y:i, x: Math.random()});
+        }
+        return samples;
+    }
+    var samples = genSamples(1000);
+    plot.plotPoint(samples, [0, 1], [100,500]);
+    plot.trackPointer(true);
+*/
 });
 

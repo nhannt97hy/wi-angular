@@ -31,7 +31,7 @@ function Controller($scope, wiComponentService) {
 
     this.$onInit = function () {
         self.contentId = '#sliding-bar-content' + self.name;
-        self.handlerId = '#sliding-handle' + self.name;
+        self.handleId = '#sliding-handle' + self.name;
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
@@ -41,19 +41,20 @@ function Controller($scope, wiComponentService) {
         var initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
 
         self.tinyWindow = {
-            top: 0,
+            top: (parentHeight - initialHeight*4) * Math.random(),
             height: initialHeight * 4
         };
 
 
         // init tiny window height
-        $(self.handlerId).height(self.tinyWindow.height);
-        //$(self.handlerId).top(self.tinyWindow.top);
+        $(self.handleId).height(self.tinyWindow.height);
+        console.log($(self.handleId));
+        $(self.handleId).css('top', self.tinyWindow.top+'px');
 
         self.slidingBarState.top = Math.round(self.tinyWindow.top / parentHeight * 100);
         self.slidingBarState.range = Math.round(self.tinyWindow.height / parentHeight * 100);
 
-        $(self.handlerId).draggable({
+        $(self.handleId).draggable({
             axis: "y",
             containment: "parent"
         }).resizable({
@@ -62,11 +63,11 @@ function Controller($scope, wiComponentService) {
             handles: "n, s"
         });
 
-        $(self.handlerId).on("resize", function (event, ui) {
+        $(self.handleId).on("resize", function (event, ui) {
             update(ui);
         });
 
-        $(self.handlerId).on("drag", function (event, ui) {
+        $(self.handleId).on("drag", function (event, ui) {
             update(ui);
         });
     };
@@ -76,7 +77,7 @@ function Controller($scope, wiComponentService) {
         parentHeight = parseInt($(self.contentId).height());
 
         var initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
-        $(self.handlerId).height(initialHeight);
+        $(self.handleId).height(initialHeight);
         self.tinyWindow.height = initialHeight;
     }
 */
