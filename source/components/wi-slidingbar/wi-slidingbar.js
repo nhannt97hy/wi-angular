@@ -5,13 +5,13 @@ const MIN_RANGE = 5;
 
 function Controller($scope, wiComponentService) {
     let self = this;
-    self.tinyWindow = null;
+
+    this.tinyWindow = null;
     let parentHeight = 0;
     this.slidingBarState = {
         top: 0,
         range: MIN_RANGE
     };
-
 
     function update(ui) {
         parentHeight = parseInt($(self.contentId).height());
@@ -38,7 +38,7 @@ function Controller($scope, wiComponentService) {
 
     this.onReady = function () {
         parentHeight = parseInt($(self.contentId).height());
-        var initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
+        let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
 
         self.tinyWindow = {
             top: (parentHeight - initialHeight*4) * Math.random(),
@@ -76,14 +76,14 @@ function Controller($scope, wiComponentService) {
         console.log('set slidingHandleHeight');
         parentHeight = parseInt($(self.contentId).height());
 
-        var initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
+        let initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
         $(self.handleId).height(initialHeight);
         self.tinyWindow.height = initialHeight;
     }
 */
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-slidingbar.html',
     controller: Controller,
@@ -100,7 +100,7 @@ app.directive('elemReady', function ($parse) {
         link: function ($scope, elem, attrs) {
             elem.ready(function () {
                 $scope.$apply(function () {
-                    var func = $parse(attrs.elemReady);
+                    let func = $parse(attrs.elemReady);
                     func($scope);
                 })
             })

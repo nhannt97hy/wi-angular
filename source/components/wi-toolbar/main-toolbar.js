@@ -1,9 +1,9 @@
-wiRibbon = require('./wi-button.js');
-wiToolbar = require('./wi-toolbar.js');
+let wiRibbon = require('./wi-button.js');
+let wiToolbar = require('./wi-toolbar.js');
 
-wiComponentService = require('./wi-component-service');
+let wiComponentService = require('./wi-component-service');
 
-app = angular.module('helloapp', [wiToolbar.name, wiRibbon.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiToolbar.name, wiRibbon.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
 
 });

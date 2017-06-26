@@ -8,8 +8,6 @@ function Controller() {
         type: 'vertical',
         label: ''
     }
-
-
 }
 
 let app = angular.module(moduleName, []);
