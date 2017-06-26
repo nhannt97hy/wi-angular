@@ -28,6 +28,7 @@
 
     <link rel='stylesheet' href='vendor/css/goldenlayout-base.css'>
     <link type="text/css" rel="stylesheet" href="vendor/css/goldenlayout-light-theme.css" />
+
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
@@ -51,18 +52,37 @@
         </div>
 
     </div>
+
     <template id='explorer-block'>
-        <wi-treeview config="myConfig"></wi-treeview>
+        <div class="explorer-block">
+            <wi-toolbar name="Toolbar" label="" icon="">
+                <wi-button name="Button1Button" label="" icon="help-16x16" handler="handlers.Button1ButtonClicked">
+
+                </wi-button>
+                <wi-button name="Button2Button" label="" icon="info-frp-16x16" handler="handlers.Button2ButtonClicked">
+
+                </wi-button>
+                <wi-button name="Button3Button" label="" icon="project-new-16x16" handler="handlers.Button3ButtonClicked">
+
+                </wi-button>
+
+            </wi-toolbar>
+            <div class="filter-block">
+                <span>Filter: </span>
+                <input type="text" placeholder="well or .../dataset or .../curve or ...">
+            </div>
+
+            <div class="treeview-header">
+                <span>Name</span>
+                <span class="header-description">Unit</span>
+            </div>
+            <wi-treeview config="myConfig"></wi-treeview>
+        </div>
     </template>
+
     <template id='property-block'>
         <wi-list heading="List 1" items="listItems"></wi-list>
         <wi-list heading="List 2" items="listItems2"></wi-list>
-    </template>
-    <template id='working-block'>
-        <wi-workingtabset tab-configs="workingTabs"></wi-workingtabset>
-    </template>
-    <template id='wi-logplot'>
-        <wi-logplot name='myPlot'></wi-logplot>
     </template>
 </body>
 </html>

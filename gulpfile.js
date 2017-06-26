@@ -177,15 +177,10 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-gulp.task('wi-logplot-include', function() {
+gulp.task('wi-logplot-include', ['gen-wi-logplot-template'], function() {
     var templateFile = './source/app/components/wi-logplot/template/wi-logplot.html';
     var outputDir = './source/app/components/wi-logplot';
-    /*try {
-        fs.unlinkSync(outputFile);
-    }
-    catch(err) {
-        console.log(err);
-    }*/
+
     return gulp.src([templateFile])
         .pipe(fileInclude({
             prefix: '@@',
@@ -195,7 +190,7 @@ gulp.task('wi-logplot-include', function() {
         .pipe(gulp.dest(outputDir));
 });
 
-const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor'];
+const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor', 'wi-logplot-include'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {

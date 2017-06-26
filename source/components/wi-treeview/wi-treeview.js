@@ -11,19 +11,17 @@ function Controller(wiComponentService) {
 
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) self.config[$index].data.handler();
+
+        // get func from component service
+        if (wiComponentService.treeFunctions) {
+            wiComponentService.treeFunctions[self.config[$index].type]();
+        }
     };
 
     this.addItem = function (parentName, item) {
         let parentItem = getItemByName(parentName);
 
-        console.log('items', self.items);
-        console.log('parentName', parentName)
-        console.log('item', item)
-        if (parentItem) {
-            parentItem.children.push(item);
-
-            console.log('addItem, push to ', parentItem);
-        }
+        if (parentItem) parentItem.children.push(item);
     };
 
     function getItemByName(name) {
