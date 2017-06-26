@@ -13,11 +13,36 @@
     <script src='js/main-button.js.bundle.js'></script>
 
     <title>Test button</title>
+    <style>
+       wi-button{ float: left; }
+       wi-button:nth-child(n+5){
+        float: none;
+        display: block;
+       }  
+       wi-button:nth-child(5n){
+        float: left;
+       } 
+            
+    </style>
 </head>
 
 <body ng-app='helloapp'>
-<div ng-controller="WiDummy" style="display: flex">
+<div ng-controller="WiDummy" style="overflow: hidden; vertical-align: top;">
     <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>                                 
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
                handler="myHandler"></wi-button>
     <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
                handler="myHandler"></wi-button>
