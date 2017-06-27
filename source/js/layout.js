@@ -5,8 +5,7 @@ let layoutConfig = {
     settings: {
         hasHeaders: true,
         showCloseIcon: false,
-        showPopoutIcon: false,
-        selectionEnabled:true
+        showPopoutIcon: false
     },
     content: [
         {
@@ -44,7 +43,7 @@ function createLayout(domId, $scope, $compile) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
 
-        container.on('shown', function(e){
+        container.on('shown', function (e) {
             console.log('componentState', componentState)
         })
     });
