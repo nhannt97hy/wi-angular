@@ -48,7 +48,7 @@ let app = angular.module('wiapp',
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
     // config treeview
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
-    wiComponentService.treeFunctions = appConfig.TREE_FUNCTIONS;
+    wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     $scope.handlers = bindAll(handlers, $scope, wiComponentService);
 

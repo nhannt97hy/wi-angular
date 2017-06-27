@@ -16,6 +16,10 @@ TREE_FUNCTIONS = {
     },
     'newitem': function () {
         console.log('newitem');
+    },
+    'logplot': function () {
+        this.wiComponentService.emit('new-logplot-tab', 'new logplot');
+        console.log('$scope ', this.$scope);
     }
 };
 
@@ -85,6 +89,16 @@ EXPLORER_TREE_CONFIG = [
             icon: 'project-new-16x16',
             label: 'item 2',
             description: 'description 2',
+            childExpanded: false
+        }
+    },
+    {
+        name: 'logplot1',
+        type: 'logplot',
+        data: {
+            icon: 'project-new-16x16',
+            label: 'Logplot',
+            description: 'Logplot',
             childExpanded: false
         }
     }
