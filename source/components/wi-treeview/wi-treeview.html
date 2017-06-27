@@ -1,6 +1,7 @@
 <div class="wi-treeview-container" ng-repeat="item in wiTreeview.items track by $index">
     <div class="wi-parent-node"
-         ng-click="item.data.childExpanded = !item.data.childExpanded"
+         ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
+         ng-click="wiTreeview.onClick($index)"
          ng-dblclick="wiTreeview.onDoubleClick($index)">
         <div>
             <i aria-hidden="true" class="fa icon-expanded"

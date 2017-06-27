@@ -6,24 +6,42 @@ function Controller(wiComponentService) {
 
     this.$onInit = function () {
         self.items = self.config;
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
+    this.onClick = function ($index) {
+        self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
+
+        if (!self.config[$index].children || self.config[$index].children.length === 0) {
+            let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
+            wiExplorerCtrl.itemActiveName = self.config[$index].name;
+            //wiComponentService.itemActiveName = self.config[$index].name;
+
+            wiComponentService.emit('update-properties', self.config[$index].data.properties);
+            //var wiPropertyCtrl = wiComponentService.getComponent('WiProperties');
+            //console.log('++++++++++', wiPropertyCtrl);
+            //wiPropertyCtrl.updateListConfig(self.config[$index].data.properties);
+        }
+    };
+
     this.onDoubleClick = function ($index) {
-        if (self.config[$index].data.handler) self.config[$index].data.handler();
+        if (self.config[$index].data.handler) {
+            self.config[$index].data.handler();
+        } else if (wiComponentService.treeFunctions) {
+            // get func from component service
+            wiComponentService.treeFunctions[self.config[$index].type]();
+        }
+    };
+
+    this.getItemActiveName = function () {
+        return wiComponentService.getComponent('WiExplorer').itemActiveName;
     };
 
     this.addItem = function (parentName, item) {
         let parentItem = getItemByName(parentName);
 
-        console.log('items', self.items);
-        console.log('parentName', parentName)
-        console.log('item', item)
-        if (parentItem) {
-            parentItem.children.push(item);
-
-            console.log('addItem, push to ', parentItem);
-        }
+        if (parentItem) parentItem.children.push(item);
     };
 
     function getItemByName(name) {
@@ -57,7 +75,6 @@ function Controller(wiComponentService) {
                 }
             }
         }
-
         return childSelect;
     }
 }

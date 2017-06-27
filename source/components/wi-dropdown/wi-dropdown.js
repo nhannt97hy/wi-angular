@@ -2,7 +2,7 @@ const componentName = 'wiDropdown';
 const moduleName = 'wi-dropdown';
 
 function Controller(wiComponentService) {
-    var self = this;
+    let self = this;
 
     this.default = {
         label: '',
@@ -16,10 +16,10 @@ function Controller(wiComponentService) {
 
     this.$onInit = function() {
         if (self.name) wiComponentService.putComponent(self.name, self);
-    }
+    };
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-dropdown.html',
     controller: Controller,

@@ -1,13 +1,13 @@
-wiButton = require('./wi-button');
+let wiButton = require('./wi-button');
 
-wiComponentService = require('./wi-component-service');
+let wiComponentService = require('./wi-component-service');
 
-var app = angular.module('helloapp', [wiButton.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiButton.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.buttonCfg = buttonCfg;
-//    $scope.myHandler = myHandler;
+
     $scope.myHandler =  function() {
-        var buttonController = wiComponentService.getComponent('TestButton');
+        let buttonController = wiComponentService.getComponent('TestButton');
         console.log(buttonController);
         buttonController.label = 'New label';
     }

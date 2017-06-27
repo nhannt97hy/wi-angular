@@ -2,10 +2,10 @@ const name = 'wiBlock';
 const moduleName = 'wi-block';
 
 function Controller() {
-    var self = this;
+    let self = this;
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 
 app.component(name, {
     templateUrl: 'wi-block.html',

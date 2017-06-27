@@ -7,27 +7,29 @@
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
 
-    <link href='css/wi-button.css' rel='stylesheet'>
-    <link href='css/wi-dropdown.css' rel='stylesheet'>
-    <link href='css/wi-list.css' rel='stylesheet'>
-    <link href='css/wi-status-bar.css' rel='stylesheet'>
-    <link href='css/wi-tab.css' rel='stylesheet'>
-    <link href='css/wi-toolbar.css' rel='stylesheet'>
-    <link href='css/wi-treeview.css' rel='stylesheet'>
-    <link href='css/wi-slidingbar.css' rel='stylesheet'>
-
-    <link href='css/wi-logplot.css' rel='stylesheet'>
-    <link href='css/wi-d3.css' rel='stylesheet'>
-    <link href='css/wi-workingtabs.css' rel='stylesheet'>
-
-    <link href='css/graph.css' rel='stylesheet'>
-    <link href='css/main.css' rel='stylesheet'>
-
     <link rel="stylesheet" href="css/sprite_16.css">
     <link rel="stylesheet" href="css/sprite_32.css">
 
     <link rel='stylesheet' href='vendor/css/goldenlayout-base.css'>
     <link type="text/css" rel="stylesheet" href="vendor/css/goldenlayout-light-theme.css" />
+
+    <link href='css/wi-button.css' rel='stylesheet'>
+    <link href='css/wi-dropdown.css' rel='stylesheet'>
+    <link href='css/wi-toolbar.css' rel='stylesheet'>
+    <link href='css/wi-tab.css' rel='stylesheet'>
+    <link href='css/wi-list.css' rel='stylesheet'>
+    <link href='css/wi-treeview.css' rel='stylesheet'>
+    <link href='css/wi-status-bar.css' rel='stylesheet'>
+    <link href='css/wi-slidingbar.css' rel='stylesheet'>
+
+    <link href='css/wi-logplot.css' rel='stylesheet'>
+    <link href='css/wi-d3.css' rel='stylesheet'>
+    <link href='css/wi-workingtabs.css' rel='stylesheet'>
+    <link href='css/wi-explorer.css' rel='stylesheet'>
+
+    <link href='css/graph.css' rel='stylesheet'>
+    <link href='css/main.css' rel='stylesheet'>
+
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
@@ -35,6 +37,7 @@
     <script src='vendor/js/goldenlayout.min.js'></script>
     <script src='vendor/js/d3.min.js'></script>
     <script src='vendor/js/ResizeSensor.js'></script>
+
     <script src="js/main.js.bundle.js"></script>
 </head>
 <body ng-app='wiapp'>
@@ -45,27 +48,14 @@
 
         <div id='myLayout'>
         </div>
-<!--
-        <div class="status-bar">
-            @@include('./status-bar/index.html')
-        </div>
--->
     </div>
+
     <template id='explorer-block'>
-        <div class="label_treeview">
-            <span>Name</span><span>Unit</span>
-        </div>
-        <wi-treeview config="myConfig"></wi-treeview>
+        <wi-explorer name="WiExplorer" tree-config="myTreeviewConfig"></wi-explorer>
     </template>
+
     <template id='property-block'>
-        <wi-list heading="List 1" items="listItems"></wi-list>
-        <wi-list heading="List 2" items="listItems2"></wi-list>
-    </template>
-    <template id='working-block'>
-        <wi-workingtabset tab-configs="workingTabs"></wi-workingtabset>
-    </template>
-    <template id='wi-logplot'>
-        <wi-logplot name='myPlot'></wi-logplot>
+        <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties>
     </template>
     <template id='vovan'>
         <h2>Vo va vo van</h2>

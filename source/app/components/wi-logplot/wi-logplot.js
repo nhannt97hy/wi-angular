@@ -1,25 +1,26 @@
 const componentName = 'wiLogplot';
 const moduleName = 'wi-logplot';
 
-//Utils for object checkings and object cloning
+//Utils for object checking and object cloning
 function objcpy(destObj, sourceObj) {
-    if(destObj) {
-        for(var attr in sourceObj) {
+    if (destObj) {
+        for (let attr in sourceObj) {
             destObj[attr] = sourceObj[attr];
         }
     }
 }
+
 function isEqual(a, b) {
     if (!a || !b) return false;
-    var aProps = Object.getOwnPropertyNames(a);
-    var bProps = Object.getOwnPropertyNames(b);
+    let aProps = Object.getOwnPropertyNames(a);
+    let bProps = Object.getOwnPropertyNames(b);
 
-    if (aProps.length != bProps.length) {
+    if (aProps.length !== bProps.length) {
         return false;
     }
 
-    for (var i = 0; i < aProps.length; i++) {
-        var propName = aProps[i];
+    for (let i = 0; i < aProps.length; i++) {
+        let propName = aProps[i];
 
         if (a[propName] !== b[propName]) {
             return false;
@@ -30,8 +31,8 @@ function isEqual(a, b) {
 }
 
 function Controller(wiComponentService) {
-    var self = this;
-    var previousSlidingBarState = new Object();
+    let self = this;
+    let previousSlidingBarState = {};
 
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
@@ -39,25 +40,26 @@ function Controller(wiComponentService) {
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
-    this.$doCheck = function() {
-        if( !self.slidingBar ) return;
-        if(!isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
+
+    this.$doCheck = function () {
+        if (!self.slidingBar) return;
+        if (!isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
             objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
-            var wiD3Controler = wiComponentService.getComponent(self.wiD3AreaName);
-            var max = wiD3Controler.getMaxDepth();
-            var low = max * previousSlidingBarState.top / 100;
-            var high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
-            wiD3Controler.setDepthRange([low, high]);
-            wiD3Controler.plotAll();
+            let wiD3Controller = wiComponentService.getComponent(self.wiD3AreaName);
+            let max = wiD3Controller.getMaxDepth();
+            let low = max * previousSlidingBarState.top / 100;
+            let high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
+            wiD3Controller.setDepthRange([low, high]);
+            wiD3Controller.plotAll();
         }
-    }
+    };
 
     this.getSlidingbarCtrl = function () {
         return self.slidingBar = wiComponentService.getComponent(self.slidingbarName);
-    }
+    };
 }
 
-var app = angular.module(moduleName, []);
+let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-logplot.html',
     controller: Controller,
