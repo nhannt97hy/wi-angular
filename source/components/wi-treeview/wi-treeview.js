@@ -6,7 +6,15 @@ function Controller(wiComponentService) {
 
     this.$onInit = function () {
         self.items = self.config;
+
         if (self.name) wiComponentService.putComponent(self.name, self);
+    };
+
+    this.onClick = function ($index) {
+        self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
+
+        if (!self.config[$index].children || self.config[$index].children.length === 0)
+            wiComponentService.itemActiveName = self.config[$index].name;
     };
 
     this.onDoubleClick = function ($index) {
@@ -16,6 +24,10 @@ function Controller(wiComponentService) {
             // get func from component service
             wiComponentService.treeFunctions[self.config[$index].type]();
         }
+    };
+
+    this.getItemActiveName = function () {
+        return wiComponentService.itemActiveName;
     };
 
     this.addItem = function (parentName, item) {
