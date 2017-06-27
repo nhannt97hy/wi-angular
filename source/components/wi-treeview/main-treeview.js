@@ -23,10 +23,10 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         wiComponentService.getComponent('MyTreeview').addItem(parentName, item);
     };
 
-    wiComponentService.treeFunctions = treeFunctions;
+    wiComponentService.treeFunctions = TREE_FUNCTIONS;
 });
 
-treeFunctions = {
+TREE_FUNCTIONS = {
     'item11000' : function () {
         console.log('item11000');
     },

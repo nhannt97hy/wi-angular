@@ -46,28 +46,11 @@ let app = angular.module('wiapp',
     ]);
 
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
+    // config treeview
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
+    wiComponentService.treeFunctions = appConfig.TREE_FUNCTIONS;
 
-    function bindAll($scope, wiComponentService) {
-        let newHandlers = {};
-        for (let handler in handlers) {
-            newHandlers[handler] = handlers[handler].bind({
-                $scope: $scope,
-                wiComponentService: wiComponentService
-            });
-        }
-
-        for (let handler in logplotHandlers) {
-            newHandlers[handler] = logplotHandlers[handler].bind({
-                $scope: $scope,
-                wiComponentService: wiComponentService
-            });
-        }
-
-        return newHandlers;
-    }
-
-    $scope.handlers = bindAll($scope, wiComponentService);
+    $scope.handlers = bindAll(handlers, $scope, wiComponentService);
 
     wiComponentService.putComponent('GRAPH', graph);
 
@@ -116,3 +99,21 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     });
 });
 
+function bindAll(handlers, $scope, wiComponentService) {
+    let newHandlers = {};
+    for (let handler in handlers) {
+        newHandlers[handler] = handlers[handler].bind({
+            $scope: $scope,
+            wiComponentService: wiComponentService
+        });
+    }
+
+    for (let handler in logplotHandlers) {
+        newHandlers[handler] = logplotHandlers[handler].bind({
+            $scope: $scope,
+            wiComponentService: wiComponentService
+        });
+    }
+
+    return newHandlers;
+}

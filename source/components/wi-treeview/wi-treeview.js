@@ -10,10 +10,10 @@ function Controller(wiComponentService) {
     };
 
     this.onDoubleClick = function ($index) {
-        if (self.config[$index].data.handler) self.config[$index].data.handler();
-
-        // get func from component service
-        if (wiComponentService.treeFunctions) {
+        if (self.config[$index].data.handler) {
+            self.config[$index].data.handler();
+        } else if (wiComponentService.treeFunctions) {
+            // get func from component service
             wiComponentService.treeFunctions[self.config[$index].type]();
         }
     };
