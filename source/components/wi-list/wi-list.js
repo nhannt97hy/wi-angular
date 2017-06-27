@@ -3,6 +3,7 @@ const moduleName = 'wi-list';
 
 function Controller(wiComponentService) {
     let self = this;
+    this.expanded = true;
 
     this.$onInit = function() {
         if (self.name) wiComponentService.putComponent(self.name, self);

@@ -1,5 +1,10 @@
-<p class="list-heading">{{wiList.heading}}</p>
-<table>
+<div class="list-header-wrapper">
+    <p class="list-heading">{{wiList.heading}}</p>
+    <i class="fa list-expanded" aria-hidden="true"
+       ng-class="{'fa-caret-down' : wiList.expanded, 'fa-caret-right' : !wiList.expanded}"
+       ng-click="wiList.expanded = !wiList.expanded"></i>
+</div>
+<table ng-show="wiList.expanded">
     <tr ng-repeat="item in wiList.items">
         <td>{{item.key}}</td>
         <td>{{item.value}}</td>
