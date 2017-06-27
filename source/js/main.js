@@ -56,24 +56,26 @@ let app = angular.module('wiapp',
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
     // config explorer block - treeview
     $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
-    wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
+    //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block
     $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
-
     $scope.handlers = bindAll(handlers, $scope, wiComponentService);
-
-    wiComponentService.putComponent('GRAPH', graph); // IMPORTANT!
+    /* ========== IMPORTANT! ================== */
+    wiComponentService.putComponent('TREE_FUNCTIONS', 
+        bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService));
+    wiComponentService.putComponent('GRAPH', graph);
+    /* ======================================== */
 
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
     layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
-/*
-    wiComponentService.on('new-logplot-tab', function (title) {
+
+    // Install 
+    wiComponentService.on('add-logplot-event', function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
-    */
 });
 
 function bindAll(handlers, $scope, wiComponentService) {
@@ -84,13 +86,5 @@ function bindAll(handlers, $scope, wiComponentService) {
             wiComponentService: wiComponentService
         });
     }
-
-    for (let handler in logplotHandlers) {
-        newHandlers[handler] = logplotHandlers[handler].bind({
-            $scope: $scope,
-            wiComponentService: wiComponentService
-        });
-    }
-
     return newHandlers;
 }

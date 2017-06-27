@@ -128,8 +128,8 @@ TREE_FUNCTIONS = {
         console.log('newitem');
     },
     'logplot': function () {
-        this.wiComponentService.emit('new-logplot-tab', 'new logplot');
         console.log('$scope ', this.$scope);
+        this.wiComponentService.emit('add-logplot-event', 'new logplot');
     }
 };
 

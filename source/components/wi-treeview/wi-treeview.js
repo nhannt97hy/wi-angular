@@ -28,9 +28,14 @@ function Controller(wiComponentService) {
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
-        } else if (wiComponentService.treeFunctions) {
-            // get func from component service
-            wiComponentService.treeFunctions[self.config[$index].type]();
+        } 
+        else {
+            let treeFunctions = wiComponentService.getComponent('TREE_FUNCTIONS');
+            if (treeFunctions) {
+                // get func from component service
+                treeFunctions[self.config[$index].type]();
+                //wiComponentService.treeFunctions[self.config[$index].type]();
+            }
         }
     };
 
