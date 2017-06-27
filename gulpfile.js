@@ -177,7 +177,7 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-gulp.task('wi-logplot-include', ['gen-wi-logplot-template'], function() {
+gulp.task('wi-logplot-include', function() {
     var templateFile = './source/app/components/wi-logplot/template/wi-logplot.html';
     var outputDir = './source/app/components/wi-logplot';
 

@@ -17,10 +17,15 @@ exports.OpenProjectButtonClicked = function() {
     console.log('OpenProjectButtoon is clicked');
     console.log('Do click');
     var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
+    if (!myPlot) return;
     var slidingBar = this.wiComponentService.getComponent('myLogPlotSlidingbar');
-    var idx = myPlot.addTrack();
+    if (!slidingBar) return;
 
-    myPlot.setData(idx, genSamples(1000));
+    var idx = myPlot.addDepthTrack();
+
+    idx = myPlot.addTrack();
+
+    myPlot.setData(idx, genSamples(10000));
 
     var maxDepth = myPlot.getMaxDepth();
 

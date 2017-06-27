@@ -13,18 +13,53 @@
     <script src='js/main-button.js.bundle.js'></script>
 
     <title>Test button</title>
+    <style>
+        wi-button{
+            float: left; 
+        }
+        /*wi-button:nth-child(n+5){
+            float: none;
+            display: block;
+        } 
+        wi-button:nth-child(5n){
+            float: left;
+        }*/
+        wi-button button {
+            border: 1px solid black !important; 
+        }
+            
+    </style>
 </head>
 
 <body ng-app='helloapp'>
-<div ng-controller="WiDummy" style="display: flex">
-    <wi-button name='TestButton' type="small" label="Test" icon="project-new-32x32" layout='icon-top'
-               handler="myHandler"></wi-button>
-
+<div ng-controller="WiDummy" style="overflow: scroll; vertical-align: top; height: 70px; width:600px;">
     <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
                handler="myHandler"></wi-button>
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-top' 
+               handler="myHandler"></wi-button>                                 
+    <wi-button name='TestButton' type="small" label="Test Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test Test Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test tt" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test sdff" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    <wi-button name='TestButton' type="small" label="Test uuasdf" icon="project-new-16x16" layout='icon-left'
+               handler="myHandler"></wi-button>
+    
+    <!-- <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-top'
+               handler="myHandler"></wi-button>
 
-    <!-- default wi-button-->
-    <wi-button name='NoLabelButton'></wi-button>
+    <wi-button name='NoLabelButton'></wi-button> -->
 </div>
 </body>
 </html>

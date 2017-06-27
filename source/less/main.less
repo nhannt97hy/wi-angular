@@ -1,3 +1,4 @@
+@width: 100%;
 input, button, textarea, select{
 	&:focus{
 		outline: none;
@@ -9,51 +10,75 @@ input, button, textarea, select{
 .main {
     display: flex;
     flex-direction: column;
-    height: 99%;
+    height: ~"calc(100% - 6px)";
     width: 100%;
+    font-size: 12px;
 }
 #myLayout {
-    width: 100%;
+    width: ~"calc(100% - 5px)";
+    display: flex;
+    flex-wrap: wrap;
     flex: 1 1 auto;
+}
+.ribbon-wrapper {
+    height:126px;
 }
 .status-bar {
     width: 100%;
-    min-height: 30px;
+    height: 30px;
+    background-color: yellow;
+    border: 1px solid black;
+    z-index: 100;
 }
 
-.ribbon-wrapper {
-    width: 100%;
-    min-height: 139px;
+.lm_goldenlayout{
+    padding: 5px 0px;
 }
 
 div.lm_content {
     overflow-y: scroll;
 }
 
-.explorer-block {
-  .filter-block {
+.label_treeview{
+    border-bottom: 1px solid #cacbd3;
+    background: rgba(248,248,249,1);
+    background: -moz-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(248,248,249,1)), color-stop(100%, rgba(242,243,244,1)));
+    background: -webkit-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+    background: -o-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+    background: -ms-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+    background: linear-gradient(to bottom, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f9', endColorstr='#f2f3f4', GradientType=0 );
+    span{
+        text-align: left;
+        display: inline-block;
+        text-indent: 10px;
+    }
+    span:first-child{
+        border-right: 1px solid #cacbd3;
+        width: 75%;
+    }
+    span:last-child{
+        width: 25%;
+    }
+}
+.block-right {
+    position:absolute;
+    right: 5px;
+    top: 2px;
+}
+.position-relative {
+    position:relative;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+
+label.flex-row {
     display: flex;
+    flex-direction: row;
+}
 
-    span {
-      margin: auto;
-    }
-
-    input {
-      flex: 1;
-    }
-  }
-
-  .treeview-header {
-    position: relative;
-
-    .header-description {
-      position: absolute;
-      top:0;
-      right: 0;
-      bottom: 0;
-      width: 100px;
-      text-align: right;
-      border-left: 1px dotted lightgray;
-    }
-  }
+.flex-1 {
+    flex: 1;
 }

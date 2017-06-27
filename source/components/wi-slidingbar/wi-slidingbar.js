@@ -1,7 +1,7 @@
 const componentName = 'wiSlidingbar';
 const moduleName = 'wi-slidingbar';
 
-const MIN_RANGE = 5;
+const MIN_RANGE = 1;
 
 function Controller($scope, wiComponentService) {
     let self = this;
@@ -41,7 +41,7 @@ function Controller($scope, wiComponentService) {
         let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
 
         self.tinyWindow = {
-            top: (parentHeight - initialHeight*4) * Math.random(),
+            top: (parentHeight - initialHeight * 4) * Math.random(),
             height: initialHeight * 4
         };
 
@@ -49,7 +49,7 @@ function Controller($scope, wiComponentService) {
         // init tiny window height
         $(self.handleId).height(self.tinyWindow.height);
         console.log($(self.handleId));
-        $(self.handleId).css('top', self.tinyWindow.top+'px');
+        $(self.handleId).css('top', self.tinyWindow.top + 'px');
 
         self.slidingBarState.top = Math.round(self.tinyWindow.top / parentHeight * 100);
         self.slidingBarState.range = Math.round(self.tinyWindow.height / parentHeight * 100);
@@ -71,16 +71,16 @@ function Controller($scope, wiComponentService) {
             update(ui);
         });
     };
-/*
-    this.setSlidingHandleHeight = function () {
-        console.log('set slidingHandleHeight');
-        parentHeight = parseInt($(self.contentId).height());
+    /*
+     this.setSlidingHandleHeight = function () {
+     console.log('set slidingHandleHeight');
+     parentHeight = parseInt($(self.contentId).height());
 
-        let initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
-        $(self.handleId).height(initialHeight);
-        self.tinyWindow.height = initialHeight;
-    }
-*/
+     let initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
+     $(self.handleId).height(initialHeight);
+     self.tinyWindow.height = initialHeight;
+     }
+     */
 }
 
 let app = angular.module(moduleName, []);

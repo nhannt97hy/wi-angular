@@ -1,48 +1,35 @@
-const wiTreeview = require('./wi-treeview');
+let wiExplorer = require('./wi-explorer');
+let wiTreeview = require('./wi-treeview');
+let wiToolbar = require('./wi-toolbar');
+let wiButton = require('./wi-button');
 
-const wiComponentService = require('./wi-component-service');
+let wiComponentService = require('./wi-component-service');
 
-let app = angular.module('helloapp', [wiTreeview.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiToolbar.name, wiButton.name, wiExplorer.name, wiTreeview.name, wiComponentService.name]);
 
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.myConfig = TREE_CONFIG_TEST;
-
-    $scope.addItem = function (parentName) {
-        let item = {
-            name: 'item' + Date.now(),
-            type: 'newitem',
-            data: {
-                icon: 'project-new-16x16',
-                label: 'item ' + Date.now(),
-                description: 'hic',
-                childExpanded: false
-            },
-            children: []
-        };
-
-        wiComponentService.getComponent('MyTreeview').addItem(parentName, item);
-    };
 
     wiComponentService.treeFunctions = TREE_FUNCTIONS;
 });
 
 TREE_FUNCTIONS = {
-    'item11000' : function () {
+    'item11000': function () {
         console.log('item11000');
     },
-    'item11' : function () {
+    'item11': function () {
         console.log('item11');
     },
-    'item121' : function () {
+    'item121': function () {
         console.log('item121');
     },
-    'item12' : function () {
+    'item12': function () {
         console.log('item12');
     },
-    'item2' : function () {
+    'item2': function () {
         console.log('item2');
     },
-    'newitem' : function () {
+    'newitem': function () {
         console.log('newitem');
     }
 };

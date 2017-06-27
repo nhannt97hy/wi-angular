@@ -1,20 +1,44 @@
+.track-container {
+    display: flex;
+    flex-direction: column;
+}
+.track-header {
+    width: 100%;
+    height: 100px;
+    label {
+        display: block;
+        border: 1px solid black;
+        margin-bottom: 1px;
+        & > div {
+            width: auto;
+            display: inline-block;
+        }
+    }
+    label.track-name {
+        background-color: #88CC88;
+    }
+}
 .plot-container {
     position: relative;
     //display: flex;
-    width: 250px;
+    //width: 250px;
+    width: 100%;
+    flex: 1;
 //    border: 1px dashed gray;
 }
 canvas, svg {
     position:absolute;
     top:0; left:0; bottom:0; right:0;
-//    border: 1px solid green;
     cursor: crosshair;
 }
 .grid .tick line {
     stroke: blue;
-    stroke-dasharray: 20, 5;
-    stroke-width: 0.2;
-    
+    stroke-dasharray: 20, 2;
+    stroke-width: 0.5;
+}
+.depthtrack .tick line {
+    stroke: black;
+    stroke-width: 1;
 }
 .wi-tooltip {
     font-size: 10px;

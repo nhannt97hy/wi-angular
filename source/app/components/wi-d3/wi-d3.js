@@ -7,35 +7,56 @@ var TRACK_CFG = {
     xAxisPosition: 'top',
     xFormatter: '.2f',
     yFormatter: '.2f',
-    xPadding: 50,
-    yPadding: 1,
+    xPadding: 1,
+    yPadding: 5,
     yStep: 0.25,
-    plotWidth: 250 
+    plotWidth: 120 
 }
 
+var DTRACK_CFG = {
+    xNTicks: 4,
+    yNTicks: 10,
+    xAxisPosition: 'top',
+    xFormatter: '.2f',
+    yFormatter: '.2f',
+    xPadding: 1,
+    yPadding: 5,
+    yStep: 0.25,
+    plotWidth: 60 
+}
 function Controller($scope, wiComponentService) {
     var self = this;
     console.log('wi-d3: Init');
     var tracks = new Array();
     this.addTrack = function() {
         var graph = wiComponentService.getComponent('GRAPH');
-        var track = graph.createLogPlot(TRACK_CFG, document.getElementById(self.plotAreaId));
+        var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         track.trackPointer(true);
         var len = tracks.push(track);
 
         return len - 1;
     }
+    this.addDepthTrack = function() {
+        var graph = wiComponentService.getComponent('GRAPH');
+        var track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
+        var len = tracks.push(track);
+
+        return len - 1;
+    },
     this.setDepthRange = function(deepRange) {
         tracks.forEach(function(track) {
             track.setYRange(deepRange);
         });
     }
     this.getMaxDepth = function() {
-        return d3.max(tracks, function(track) { return track.getYMax();});
+        return d3.max(tracks, function(track) { 
+            if (track.getYMax) return track.getYMax();
+            return -1;
+        });
     }
     this.setData = function(trackIdx, data) {
-        tracks[trackIdx].setData(data);
-        tracks[trackIdx].adjustXRange();
+        tracks[trackIdx].setData(data, 'Rock', 'm3', 0, 200);
+        tracks[trackIdx].adjustXRange(1);
     }
     this.plot = function(trackIdx) {
         tracks[trackIdx].doPlot();
@@ -43,7 +64,7 @@ function Controller($scope, wiComponentService) {
     this.plotAll = function() {
         tracks.forEach(function(track) {
             track.doPlot();
-            track.trackPointer(true);
+            if( track.trackPointer ) track.trackPointer(true);
         } );
     }
     this.$onInit = function () {

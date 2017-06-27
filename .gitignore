@@ -12,5 +12,10 @@ source/html/ribbon-block/data-processing-tab/
 source/html/ribbon-block/help-tab/
 source/html/ribbon-block/petrophysics-tab/
 source/html/ribbon-block/project-tab/
-source/html/ribbon-block/well-tab/
+source/html/ribbon-block/well-tab
 well-tab.json
+source/js/handlers.js.tmpl
+source/js/wi-logplot-handlers.js.tmpl
+well-tab.json
+wi-logplot.json
+.DS_Store

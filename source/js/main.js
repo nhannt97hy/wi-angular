@@ -1,6 +1,5 @@
 let appConfig = require('./app.config');
 
-
 var DialogUtils = require('./DialogUtils');
 
 let wiButton = require('./wi-button.js');
@@ -8,21 +7,24 @@ let wiDropdown = require('./wi-dropdown.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiTabs = require('./wi-tabs.js');
 let wiWorkingtabs = require('./wi-workingtabs.js');
+
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');
 let wiSlidingbar = require('./wi-slidingbar');
-let wiD3 = require('./wi-d3');
-let wiLogplot = require('./wi-logplot.js');
 
 let wiList = require('./wi-list');
 
-let layoutManager = require('./layout.js');
+let wiD3 = require('./wi-d3');
+let wiLogplot = require('./wi-logplot');
+let wiExplorer = require('./wi-explorer');
+let wiProperties = require('./wi-properties');
 
-let handlers = require('./handlers.js');
+let layoutManager = require('./layout');
+
+let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 
-let graph = require('./graph.js');
-
+let graph = require('./graph');
 
 
 function genSamples(nSamples) {
@@ -33,7 +35,7 @@ function genSamples(nSamples) {
     return samples;
 }
 
-wiComponentService = require('./wi-component-service.js');
+let wiComponentService = require('./wi-component-service');
 
 let app = angular.module('wiapp',
     [
@@ -45,98 +47,55 @@ let app = angular.module('wiapp',
         wiTreeview.name,
         wiStatusBar.name,
         wiSlidingbar.name,
-        wiLogplot.name,
-        wiD3.name,
         wiList.name,
+
+        wiD3.name,
+        wiLogplot.name,
+        wiExplorer.name,
+        wiProperties.name,
+
         wiComponentService.name,
+
         'angularModalService'
+        
     ]);
 
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService, ModalService) {
-    $scope.myConfig = appConfig.TREE_CONFIG_TEST;
+    // config explorer block - treeview
+    $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
+    //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
-    function bindAll($scope, wiComponentService, ModalService) {
-        let newHandlers = new Object();
-
-        for (let handler in handlers) {
-            newHandlers[handler] = handlers[handler].bind({
-                $scope: $scope,
-                wiComponentService: wiComponentService,
-                ModalService: ModalService
-            });
-        }
-
-        for (let handler in logplotHandlers) {
-            newHandlers[handler] = logplotHandlers[handler].bind({
-                $scope: $scope,
-                wiComponentService: wiComponentService
-            });
-        }
-
-        return newHandlers;
-    }
-
-    $scope.handlers = bindAll($scope, wiComponentService, ModalService);
-
+    // config properties - list block
+    $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    $scope.handlers = bindAll(handlers, $scope, wiComponentService, ModalService);
+    /* ========== IMPORTANT! ================== */
+    wiComponentService.putComponent('TREE_FUNCTIONS', 
+        bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService));
     wiComponentService.putComponent('GRAPH', graph);
+    /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
 
-    $scope.listItems = [
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        }
-    ];
-
-    $scope.listItems2 = [
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        }
-    ];
-
-    $scope.workingTabs = appConfig.WORKING_TABS;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
+    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
-    // layoutManager.putRight('working-block', 'Working Block');
-    // layoutManager.putRight('working-block', 'Working Block 2');
-
-    setTimeout(function () {
-        layoutManager.putWiLogPlotRight('myLogPlot', 'plot 1');
-    }, 0);
-    // setTimeout(function () {
-    //     layoutManager.putWiLogPlotRight('myLogPlot2', 'plot 2');
-    // }, 1000);
-    // setTimeout(function () {
-    //     layoutManager.putWiLogPlotRight('myLogPlot3', 'plot 3');
-    // }, 2000);
-
-    wiComponentService.on('new-logplot-tab', function (title) {
+    // Install 
+    wiComponentService.on('add-logplot-event', function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
 
 });
 
+function bindAll(handlers, $scope, wiComponentService, ModalService) {
+    let newHandlers = {};
+    for (let handler in handlers) {
+        newHandlers[handler] = handlers[handler].bind({
+            $scope: $scope,
+            wiComponentService: wiComponentService,
+            ModalService: ModalService
+        });
+    }
+    return newHandlers;
+}

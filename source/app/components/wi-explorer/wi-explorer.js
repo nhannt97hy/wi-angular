@@ -1,28 +1,22 @@
-const componentName = 'wiList';
-const moduleName = 'wi-list';
+const componentName = 'wiExplorer';
+const moduleName = 'wi-explorer';
 
 function Controller(wiComponentService) {
     let self = this;
-    this.shown = true;
 
-    this.$onInit = function() {
+    this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
-
-    this.addItem = function (key, value) {
-        self.items.push({key, value});
-    }
 }
 
 let app = angular.module(moduleName, []);
 app.component(componentName, {
-    templateUrl: 'wi-list.html',
+    templateUrl: 'wi-explorer.html',
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        name : '@',
-        heading: '@',
-        items: '<'
+        name: '@',
+        treeConfig: '<'
     }
 });
 
