@@ -104,6 +104,42 @@ EXPLORER_TREE_CONFIG = [
     }
 ];
 
+PROPERTIES_LIST_CONFIG = [
+    {
+        name: 'list1',
+        heading: 'List 1',
+        data: [
+            {
+                key: 'key1',
+                value: 'value'
+            },
+            {
+                key: 'key1',
+                value: 'value'
+            },
+            {
+                key: 'key1',
+                value: 'value'
+            }
+        ]
+    },
+    {
+        name: 'list2',
+        heading: 'List 2',
+        data: [
+            {
+                key: 'key2',
+                value: 'value'
+            },
+            {
+                key: 'key2',
+                value: 'value'
+            }
+        ]
+    }
+];
+
 
 exports.TREE_CONFIG_TEST = EXPLORER_TREE_CONFIG;
+exports.LIST_CONFIG_TEST = PROPERTIES_LIST_CONFIG;
 exports.TREE_FUNCTIONS = TREE_FUNCTIONS;

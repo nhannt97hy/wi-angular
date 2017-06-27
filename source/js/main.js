@@ -12,6 +12,7 @@ let wiList = require('./wi-list');
 let wiD3 = require('./wi-d3');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
+let wiProperties = require('./wi-properties');
 
 let layoutManager = require('./layout');
 
@@ -45,54 +46,22 @@ let app = angular.module('wiapp',
         wiD3.name,
         wiLogplot.name,
         wiExplorer.name,
+        wiProperties.name,
 
         wiComponentService.name
     ]);
 
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
-    // config treeview
+    // config explorer block - treeview
     $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
+
+    // config properties - list block
+    $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
 
     $scope.handlers = bindAll(handlers, $scope, wiComponentService);
 
     wiComponentService.putComponent('GRAPH', graph);
-
-    $scope.listItems = [
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        }
-    ];
-
-    $scope.listItems2 = [
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        },
-        {
-            key: 'key',
-            value: 'value'
-        }
-    ];
-
-    $scope.workingTabs = appConfig.WORKING_TABS;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
