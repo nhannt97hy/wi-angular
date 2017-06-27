@@ -7,6 +7,9 @@ var layoutConfig = {
         showCloseIcon: false,
         showPopoutIcon: false
     },
+    dimensions: {
+        borderWidth: 5
+    },
     content: [
         {
             type: "row",

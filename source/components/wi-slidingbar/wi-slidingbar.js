@@ -1,7 +1,7 @@
 const componentName = 'wiSlidingbar';
 const moduleName = 'wi-slidingbar';
 
-const MIN_RANGE = 5;
+const MIN_RANGE = 1;
 
 function Controller($scope, wiComponentService) {
     let self = this;
