@@ -71,6 +71,11 @@ exports.PropertyGridButtonClicked = function() {
 
 exports.ExitButtonClicked = function() {
     console.log('ExitButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function(ret) {
+        console.log("User choose: " + ret);
+    })
 }
 
 exports.AddNewButtonClicked = function() {
@@ -84,6 +89,11 @@ exports.AddNewButtonClicked = function() {
 
 exports.WellHeaderButtonClicked = function() {
     console.log('WellHeaderButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.wellHeaderDialog(this.ModalService, function(ret) {
+        console.log("User choose: " + ret);
+    })
 }
 
 exports.DepthConversionButtonClicked = function() {

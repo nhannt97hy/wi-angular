@@ -1,13 +1,13 @@
 <div class="logplot-toolbar-wrapper">
     
     <wi-toolbar name="Toolbar" label="" icon="">
-    		<wi-button name="Button1Button" label="" icon="help-16x16" handler="handlers.Button1ButtonClicked">
+    		<wi-button name="Button1Button" label="" icon="help-32x32" handler="handlers.Button1ButtonClicked">
 
     		</wi-button>
-    		<wi-button name="Button2Button" label="" icon="info-frp-16x16" handler="handlers.Button2ButtonClicked">
+    		<wi-button name="Button2Button" label="" icon="info-frp-32x32" handler="handlers.Button2ButtonClicked">
 
     		</wi-button>
-    		<wi-button name="Button3Button" label="" icon="project-new-16x16" handler="handlers.Button3ButtonClicked">
+    		<wi-button name="Button3Button" label="" icon="" handler="handlers.Button3ButtonClicked">
 
     		</wi-button>
 
@@ -20,8 +20,7 @@
         </wi-slidingbar>
     </div>
     <div class="track-area">
-<!--        Some tracks: {{wiLogplot.slidingBar.slidingBarState.top}} : {{wiLogplot.slidingBar.slidingBarState.range}} -->
-        <wi-d3 style="width: 100%; flex: 1; display: flex;" 
-            name='{{wiLogplot.wiD3AreaName}}'></wi-d3>
+        <wi-d3 style="width: 100%; flex: 1; display: flex;"
+               name='{{wiLogplot.wiD3AreaName}}'></wi-d3>
     </div>
 </div>

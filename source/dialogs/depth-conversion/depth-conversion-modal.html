@@ -53,18 +53,19 @@
 							</div>
 							<div class="areaWrap">
 								<label>
-									<input type="radio" name="fixed" value="topFixed" ng-model="wiModal.topFixed">&nbsp;Fixed Top
+									<input type="radio" name="fixed" value="topFixed" ng-model="wiModal.fixed" ng-checked="true">&nbsp;Fixed Top
 								</label><br>
 								<label>
-									<input type="radio" name="fixed" value="bottomFixed" ng-model="wiModal.bottomFixed">&nbsp;Fixed Bottom
+									<input type="radio" name="fixed" value="bottomFixed" ng-model="wiModal.fixed">&nbsp;Fixed Bottom
 								</label>
+								{{wiModal.fixed}}
 							</div>
 						</div>
 					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button type="button" ng-click="wiModal.close(wiModal.onOK())" class="btn btn-default" data-dismiss="modal"><span class="run-16x16"></span>&nbsp;Run</button>
+				<button type="button" ng-click="wiModal.close()" class="btn btn-default" data-dismiss="modal"><span class="run-16x16"></span>&nbsp;Run</button>
                 <button type="button" ng-click="wiModal.close('Cancel')" class="btn btn-default" data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
 			</div>
 		</div>

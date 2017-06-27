@@ -19,13 +19,14 @@ let wiList = require('./wi-list');
 let layoutManager = require('./layout.js');
 
 let handlers = require('./handlers.js');
+let logplotHandlers = require('./wi-logplot-handlers');
 
 let graph = require('./graph.js');
 
 
 
 function genSamples(nSamples) {
-    let samples = new Array();
+    let samples = [];
     for (let i = 0; i < nSamples; i++) {
         samples.push({y: i, x: Math.random()});
     }
@@ -53,13 +54,22 @@ let app = angular.module('wiapp',
 
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService, ModalService) {
     $scope.myConfig = appConfig.TREE_CONFIG_TEST;
+
     function bindAll($scope, wiComponentService, ModalService) {
         let newHandlers = new Object();
+
         for (let handler in handlers) {
             newHandlers[handler] = handlers[handler].bind({
                 $scope: $scope,
                 wiComponentService: wiComponentService,
                 ModalService: ModalService
+            });
+        }
+
+        for (let handler in logplotHandlers) {
+            newHandlers[handler] = logplotHandlers[handler].bind({
+                $scope: $scope,
+                wiComponentService: wiComponentService
             });
         }
 
@@ -123,5 +133,10 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     // setTimeout(function () {
     //     layoutManager.putWiLogPlotRight('myLogPlot3', 'plot 3');
     // }, 2000);
+
+    wiComponentService.on('new-logplot-tab', function (title) {
+        layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
+    });
+
 });
 

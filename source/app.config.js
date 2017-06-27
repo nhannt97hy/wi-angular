@@ -1,6 +1,4 @@
-var WORKING_TABS = [];
-
-const TREE_CONFIG_TEST = [
+const EXPLORER_TREE_CONFIG = [
     {
         data: {
             icon: 'project-new-16x16',
@@ -114,5 +112,4 @@ const TREE_CONFIG_TEST = [
     }
 ];
 
-exports.TREE_CONFIG_TEST = TREE_CONFIG_TEST;
-exports.WORKING_TABS = WORKING_TABS;
+exports.TREE_CONFIG_TEST = EXPLORER_TREE_CONFIG;

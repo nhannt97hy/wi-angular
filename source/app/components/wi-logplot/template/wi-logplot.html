@@ -2,8 +2,12 @@
     @@include('./toolbar/index.html')
 </div>
 <div class="logplot-main-content">
-    <wi-slidingbar name="{{wiLogplot.slidingbarName}}" ng-init="wiLogplot.getSlidingbarCtrl()">
-        <p>Some thing like curve</p>
-    </wi-slidingbar>
-    <div class="logplot-sub-content">Some tracks: {{wiLogplot.slidingBar.slidingBarState.top}} -- {{wiLogplot.slidingBar.slidingBarState.range}}</div>
+    <div class='slidingbar'>
+        <wi-slidingbar name="{{wiLogplot.slidingbarName}}" ng-init="wiLogplot.getSlidingbarCtrl()">
+        </wi-slidingbar>
+    </div>
+    <div class="track-area">
+        <wi-d3 style="width: 100%; flex: 1; display: flex;"
+               name='{{wiLogplot.wiD3AreaName}}'></wi-d3>
+    </div>
 </div>

@@ -8,7 +8,7 @@
 			<div class="modal-body">
               	<form class="form-horizontal" action="" name="modalCurveAlias">
 					<h5>Alias by</h5>
-					<div class="areaWrap" ng-init="wiModal.curveAlias=none">
+					<div class="areaWrap">
 						<label class="radio-inline">
 							<input type="radio" name="curve" value="none" ng-model="wiModal.curveAlias" ng-checked="true">&nbsp;None
 						</label><br>
@@ -18,6 +18,7 @@
 						<label class="radio-inline">
 							<input type="radio" name="curve" value="familyName" ng-model="wiModal.curveAlias">&nbsp;Family name
 						</label>
+						{{wiModal.curveAlias}}
 					</div>
 					<div ng-switch="wiModal.curveAlias">
 						<div ng-switch-when="none">
