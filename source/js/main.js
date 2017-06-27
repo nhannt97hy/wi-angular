@@ -1,23 +1,25 @@
 let appConfig = require('./app.config');
-let wiButton = require('./wi-button.js');
-let wiDropdown = require('./wi-dropdown.js');
-let wiToolbar = require('./wi-toolbar.js');
-let wiTabs = require('./wi-tabs.js');
-let wiWorkingtabs = require('./wi-workingtabs.js');
+let wiButton = require('./wi-button');
+let wiDropdown = require('./wi-dropdown');
+let wiToolbar = require('./wi-toolbar');
+let wiWorkingtabs = require('./wi-workingtabs');
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');
 let wiSlidingbar = require('./wi-slidingbar');
-let wiD3 = require('./wi-d3');
-let wiLogplot = require('./wi-logplot.js');
 
 let wiList = require('./wi-list');
 
-let layoutManager = require('./layout.js');
+let wiD3 = require('./wi-d3');
+let wiLogplot = require('./wi-logplot');
+let wiExplorer = require('./wi-explorer');
 
-let handlers = require('./handlers.js');
+let layoutManager = require('./layout');
+
+let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 
-let graph = require('./graph.js');
+let graph = require('./graph');
+
 
 function genSamples(nSamples) {
     let samples = [];
@@ -27,27 +29,29 @@ function genSamples(nSamples) {
     return samples;
 }
 
-wiComponentService = require('./wi-component-service.js');
+let wiComponentService = require('./wi-component-service');
 
 let app = angular.module('wiapp',
     [
         wiButton.name,
         wiDropdown.name,
         wiToolbar.name,
-        wiTabs.name,
         wiWorkingtabs.name,
         wiTreeview.name,
         wiStatusBar.name,
         wiSlidingbar.name,
-        wiLogplot.name,
-        wiD3.name,
         wiList.name,
+
+        wiD3.name,
+        wiLogplot.name,
+        wiExplorer.name,
+
         wiComponentService.name
     ]);
 
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService) {
     // config treeview
-    $scope.myConfig = appConfig.TREE_CONFIG_TEST;
+    $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     $scope.handlers = bindAll(handlers, $scope, wiComponentService);

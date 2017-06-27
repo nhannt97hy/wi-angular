@@ -1,0 +1,33 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href="vendor/css/themify-icons.css" rel="stylesheet">
+
+    <link href='css/main.css' rel='stylesheet'>
+    <link href='css/wi-button.css' rel='stylesheet'>
+    <link href='css/wi-toolbar.css' rel='stylesheet'>
+    <link href='css/wi-treeview.css' rel='stylesheet'>
+    <link href='css/wi-explorer.css' rel='stylesheet'>
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src="js/main-explorer.js.bundle.js"></script>
+
+    <title>Test</title>
+</head>
+
+<body ng-app='helloapp'>
+
+<div ng-controller="WiDummy">
+    <div style="width: 500px; height: 500px; border: 1px solid green; display: flex">
+        <wi-explorer name="myExplorer" tree-config="myConfig" style="flex: 1"></wi-explorer>
+    </div>
+</div>
+</body>
+</html>
