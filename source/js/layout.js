@@ -5,7 +5,8 @@ let layoutConfig = {
     settings: {
         hasHeaders: true,
         showCloseIcon: false,
-        showPopoutIcon: false
+        showPopoutIcon: false,
+        selectionEnabled:true
     },
     content: [
         {
@@ -32,15 +33,22 @@ function createLayout(domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
     layoutManager = new GoldenLayout(layoutConfig, document.getElementById(domId));
+
     layoutManager.registerComponent('wi-block', function (container, componentState) {
         let templateHtml = $('template#' + componentState.templateId).html();
         //console.log('template#' + componentState.templateId, templateHtml);
         container.getElement().html(compileFunc(templateHtml)(scopeObj));
     });
+
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
+
+        container.on('shown', function(e){
+            console.log('componentState', componentState)
+        })
     });
+
     layoutManager.init();
 }
 function putLeft(templateId, title) {

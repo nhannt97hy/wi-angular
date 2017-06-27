@@ -8,6 +8,7 @@ app.factory(wiServiceName, function () {
 
     return {
         treeFunctions: {},
+        tabActiveName: '',
 
         getComponent: function (componentName) {
             return __Controllers[componentName];
