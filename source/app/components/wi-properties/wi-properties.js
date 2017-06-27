@@ -6,7 +6,13 @@ function Controller(wiComponentService) {
 
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
+
+        wiComponentService.on('update-properties', updateListConfig);
     };
+
+    function updateListConfig(newConfig) {
+        self.listConfig = newConfig;
+    }
 }
 
 let app = angular.module(moduleName, []);

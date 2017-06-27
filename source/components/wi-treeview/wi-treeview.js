@@ -13,8 +13,12 @@ function Controller(wiComponentService) {
     this.onClick = function ($index) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
 
-        if (!self.config[$index].children || self.config[$index].children.length === 0)
+        if (!self.config[$index].children || self.config[$index].children.length === 0) {
             wiComponentService.itemActiveName = self.config[$index].name;
+
+            wiComponentService.emit('update-properties', self.config[$index].data.properties);
+            console.log('properties' ,self.config[$index].data.properties)
+        }
     };
 
     this.onDoubleClick = function ($index) {
