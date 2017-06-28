@@ -1,12 +1,11 @@
 let appConfig = require('./app.config');
 
-var DialogUtils = require('./DialogUtils');
+let DialogUtils = require('./DialogUtils');
 
 let wiButton = require('./wi-button.js');
 let wiDropdown = require('./wi-dropdown.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiTabs = require('./wi-tabs.js');
-let wiWorkingtabs = require('./wi-workingtabs.js');
 
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');
@@ -43,7 +42,6 @@ let app = angular.module('wiapp',
         wiDropdown.name,
         wiToolbar.name,
         wiTabs.name,
-        wiWorkingtabs.name,
         wiTreeview.name,
         wiStatusBar.name,
         wiSlidingbar.name,
