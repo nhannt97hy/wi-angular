@@ -26,12 +26,11 @@ var DTRACK_CFG = {
 }
 function Controller($scope, wiComponentService) {
     var self = this;
-    console.log('wi-d3: Init');
     var tracks = new Array();
     this.addTrack = function() {
         var graph = wiComponentService.getComponent('GRAPH');
         var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
-        track.trackPointer(true);
+        //track.trackPointer(true);
         var len = tracks.push(track);
 
         return len - 1;
@@ -64,11 +63,10 @@ function Controller($scope, wiComponentService) {
     this.plotAll = function() {
         tracks.forEach(function(track) {
             track.doPlot();
-            if( track.trackPointer ) track.trackPointer(true);
+            //if( track.trackPointer ) track.trackPointer(true);
         } );
     }
     this.$onInit = function () {
-        console.log('wi-d3: onInit');
         self.plotAreaId = self.name + 'PlotArea';
         if (self.name) {
             console.log('putComponent:', self.name);

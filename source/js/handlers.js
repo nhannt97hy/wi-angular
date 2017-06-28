@@ -25,7 +25,7 @@ exports.OpenProjectButtonClicked = function() {
 
     idx = myPlot.addTrack();
 
-    myPlot.setData(idx, genSamples(10000));
+    myPlot.setData(idx, genSamples(1000));
 
     var maxDepth = myPlot.getMaxDepth();
 

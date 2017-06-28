@@ -53,10 +53,27 @@ function appendToTrackHeader(base, dataSetName, unit, minVal, maxVal) {
 }
 
 function appendTrack(baseElement, trackName, plotWidth) {
+    var compensator;
+    var minPlotWidth = plotWidth;
     var trackContainer = d3.select(baseElement).append('div')
         .attr('class', 'track-container')
         .style('width', plotWidth + 'px');
     appendTrackHeader(trackContainer, trackName);
+    var resizer = d3.select(baseElement).append('div')
+        .attr('class', 'resizer')
+        .call(d3.drag()
+            .on('start', function() {
+                compensator = 0;
+            })
+            .on('drag', function() {
+                compensator += d3.event.dx;
+                if (( plotWidth + compensator ) > minPlotWidth) {
+                    plotWidth += compensator;
+                    compensator = 0;
+                    trackContainer.style('width', plotWidth + 'px');
+                }
+            })
+        );
     trackContainer.append('div')
         .attr('class', 'plot-container');
     return trackContainer;
@@ -102,6 +119,14 @@ function DepthTrack(config) {
         yAxisGroup1 = svg.append('g')
             .attr('class', yAxisClass);
             //.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
+        new ResizeSensor(base.node(), function() {
+            clientRect = base.node().getBoundingClientRect();
+
+            svg.attr('width', clientRect.width)
+                .attr('height', clientRect.height);
+            yAxisGroup.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
+            if( _viewportY.length == 2 ) _doPlot();
+        });
     }
     function _doPlot() {
         transformY = d3.scaleLinear().domain(_viewportY).range([yPadding, clientRect.height - yPadding]);
@@ -137,6 +162,8 @@ function Plot(config) {
         console.error("config must not be null");
         return;
     }
+    var refLine;
+    var refX = 10;
     var root;
     var base;
     var svg;
@@ -176,7 +203,6 @@ function Plot(config) {
         return yStep; 
     }
     this.getYMax = function() {
-        console.log('getYMax:', _data);
         if (!_data || _data.length == 0) return null;
         return (_data.length - 1) * yStep;
     }
@@ -214,8 +240,23 @@ function Plot(config) {
             .attr('class', yAxisClass)
             .attr('transform', translateOpts[yAxisPosition]);
 
+        refLine = svg.append('line').attr('class', 'ref-line')
+                .attr('x1', refX)
+                .attr('x2', refX)
+                .attr('y1', 0)
+                .attr('y2', clientRect.height)
+                .attr('style', 'stroke:green; stroke-width:4')
+                .call(d3.drag().on('drag', function(){
+                    console.log('drag');
+                    refX = d3.event.x;
+                    refX = (refX > clientRect.width)?clientRect.width:refX;
+                    refX = (refX < xPadding)?xPadding:refX;
+                    _doPlot();
+                }))
+                .raise();
         new ResizeSensor(base.node(), function() {
             clientRect = base.node().getBoundingClientRect();
+            console.log('ResizeSensor size changed:', clientRect);
 
             updateTranslateOpts(translateOpts, clientRect);
 
@@ -231,7 +272,6 @@ function Plot(config) {
         });
     }
     function _doPlot() {
-        console.log(_viewportX, _viewportY);
         var axisRange = {
             top: [yPadding, clientRect.height - yPadding],
             bottom: [yPadding, clientRect.height - yPadding].reverse(),
@@ -243,7 +283,6 @@ function Plot(config) {
         function setupAxes() {
             var xAxis = axisCfg[xAxisPosition](transformX)
                 .tickValues(d3.range(_viewportX[0], _viewportX[1], (_viewportX[1] - _viewportX[0])/xNTicks))
-                //.tickFormat(xFormatter)
                 .tickFormat("")
                 .tickSize(-(clientRect.height - 2 * yPadding));
             var start = roundUp(_viewportY[0], yStep);
@@ -265,15 +304,40 @@ function Plot(config) {
                        item.y * yStep <= _viewportY[1]);
                 return ret;
             });
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+            ctx.lineWidth = 0;
             ctx.beginPath();
+            ctx.moveTo(refX, transformY(plotSamples[0].y * yStep));
+            plotSamples.forEach(function(item) {
+                ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
+            });
+            ctx.lineTo(refX, transformY(plotSamples[plotSamples.length - 1].y * yStep));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(transformX(plotSamples[0].x), transformY(plotSamples[0].y * yStep));
             plotSamples.forEach(function(item) {
                 ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
             });
             ctx.stroke();
         }
+        function drawRefLine() {
+            refLine.attr('x1', refX)
+                .attr('x2', refX)
+                .attr('y1', 0)
+                .attr('y2', clientRect.height)
+                .attr('stroke', 'green')
+                .raise();
+        }
         setupAxes();
+        drawRefLine();
         plotOnCanvas();
     }
+
     this.doPlot = function() {
         _doPlot();
     }
@@ -368,7 +432,7 @@ function Plot(config) {
             _viewportX[1] = tempVport[1] * kFactor;
         }
     }
-    const trackerLifetime = 10 * 1000; // 1 seconds
+    const trackerLifetime = 1 * 1000; // 1 seconds
     this.periodicTask = function() {
         if( Date.now() - freshness > trackerLifetime )
             svg.selectAll('.wi-tooltip, .tooltipBg, .tooltipLine').remove();
