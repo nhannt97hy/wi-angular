@@ -167,6 +167,7 @@ function Plot(config) {
     var root;
     var base;
     var svg;
+    var canvas;
     var clientRect;
     var translateOpts = new Object();
     var ctx;
@@ -297,6 +298,7 @@ function Plot(config) {
         }
         function plotOnCanvas() {
             ctx.clearRect(0, 0, clientRect.width, clientRect.height);
+
             var plotSamples = _data.filter(function(item){
                 var ret =(item.x >= _viewportX[0] && 
                        item.x <= _viewportX[1] && 
@@ -304,8 +306,13 @@ function Plot(config) {
                        item.y * yStep <= _viewportY[1]);
                 return ret;
             });
-            ctx.save();
-            ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+
+            /* draw shade */
+            var gradient = ctx.createLinearGradient(refX - 2, 0, refX + 2, 0);
+            gradient.addColorStop(0, 'red');
+            gradient.addColorStop(1, 'blue');
+            //ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+            ctx.fillStyle = gradient;
             ctx.lineWidth = 0;
             ctx.beginPath();
             ctx.moveTo(refX, transformY(plotSamples[0].y * yStep));
@@ -316,6 +323,7 @@ function Plot(config) {
             ctx.closePath();
             ctx.fill();
 
+            /* draw curve */
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -414,6 +422,9 @@ function Plot(config) {
         }
     }
     this.setData = function(data, dataSetName, unit, min, max) {
+        appendToTrackHeader(root, dataSetName, unit, min, max);
+        appendToTrackHeader(root, dataSetName, unit, min, max);
+        appendToTrackHeader(root, dataSetName, unit, min, max);
         appendToTrackHeader(root, dataSetName, unit, min, max);
         _data = data;
     }
