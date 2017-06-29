@@ -1,7 +1,6 @@
 /**
  * Created by cuong on 6/15/2017.
  */
-// var callConfirmDialog = required('./confirm/main-confirm-modal');
 exports.newProjectDialog = function ($scope, ModalService) {
     var self = this;
     console.log("new project dialog");
@@ -11,22 +10,27 @@ exports.newProjectDialog = function ($scope, ModalService) {
         };
 
         this.onOK = function () {
-            if (typeof $scope.name == 'undefined') {
-                var err = 'NewProject: Project Name is required!';
-                return {error: err};
-            } else if (typeof $scope.location == 'undefined') {
-                var err = 'NewProject: Location is required';
-                return {error: err};
-            } else {
-                return {
-                    name: $scope.name,
-                    location: $scope.location,
+            // if (typeof $scope.name == 'undefined') {
+            //     var err = 'NewProject: Project Name is required!';
+            //     return {error: err};
+            // } else if (typeof $scope.location == 'undefined') {
+            //     var err = 'NewProject: Location is required';
+            //     return {error: err};
+            // } else {
+                $scope.newProjectInfo{
+                    name: $scope.projectName,
                     company: $scope.company,
                     department: $scope.department,
                     description: $scope.description
                 }
-            }
+            console.log($scope.newProjectInfo);
         }
+        $http({
+            method : 'GET',
+            url : '54.255.212.141/'
+        }).then(function newProject(req, res) {
+            $scope.newProjectInfo = req.data.projectInfo;
+        });
     }
 
     ModalService.showModal({
@@ -334,14 +338,18 @@ exports.wellHeaderDialog = function(ModalService, callback) {
         });
     });
 }
-exports.depthConversionDialog = function(ModalService, callback) {
+exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
+    console.log(DialogUtils);
     function ModalController($scope, close) {
         this.close = function(ret) {
             close(ret);
         }
-        // this.run = function() {
-        //     callConfirmDialog.SampleController
-        // }
+        this.runClick = function(){
+            console.log("Click run");
+            DialogUtils.confirmDialog(ModalService, "Run ", "Project", function(ret) {
+                console.log(ret);
+            });
+        }
     }
     ModalService.showModal({
         templateUrl: "depth-conversion/depth-conversion-modal.html",
@@ -359,117 +367,15 @@ exports.depthConversionDialog = function(ModalService, callback) {
 
 exports.curveAliasDialog = function(ModalService, callback) {
     function ModalController($scope, close) {
-        this.curveAlias = "none";
-        this.dataCurveName = {};
-        this.dataCurveName = {
-            "1" : {
-                "alias" : "",
-                "selectedName" : [
-                {
-                    "Name" : "Name1",
-                    "selected" : true
-                },
-                {
-                    "Name" : "Name2",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name3",
-                    "selected" : false
-                }
-                ]
-            },
-            "2" : {
-                "alias" : "",
-                "selectedName" : [
-                {
-                    "Name" : "Name1",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name2",
-                    "selected" : true
-                },
-                {
-                    "Name" : "Name3",
-                    "selected" : false
-                }
-                ]
-            },
-            "3" : {
-                "alias" : "",
-                "selectedName" : [
-                {
-                    "Name" : "Name1",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name2",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name3",
-                    "selected" : true
-                }
-                ]
-            }
+        this.addCurveName = function(curveAlias){
+
         }
-        this.dataFamilyName = {
-            "Family1" : {
-                "alias" : "",
-                "selectedName" : [
-                {
-                    "Name" : "Name1",
-                    "selected" : true
-                },
-                {
-                    "Name" : "Name2",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name3",
-                    "selected" : false
-                }
-                ]
-            },
-            "Family2" : {
-                "alias" : "",
-                "selectedName" : [
-                {
-                    "Name" : "Name4",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name5",
-                    "selected" : true
-                },
-                {
-                    "Name" : "Name6",
-                    "selected" : false
-                }
-                ]
-            },
-            "Family3" : {
-                "alias" : "",
-                "selectedName" : [
-                {
-                    "Name" : "Name7",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name8",
-                    "selected" : false
-                },
-                {
-                    "Name" : "Name9",
-                    "selected" : true
-                }
-                ]
-            }
-        }           
-        // this.addRowCurve = function() {
-        //     this.dataCurveName.push()
-        // }
+        this.isSelected = function(item) {
+            console.log(item);
+            return "";
+        }
+        
+        
         this.close = function(ret) {
             close(ret);
         }
@@ -478,6 +384,27 @@ exports.curveAliasDialog = function(ModalService, callback) {
         templateUrl : "curve-alias/curve-alias-modal.html",
         controller : ModalController,
         controllerAs : "wiModal"
+    }).then(function(modal) {
+        modal.element.modal();
+        modal.close.then(function(ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.familyEditDialog = function(ModalService, callback) {
+    function ModalController($scope, close) {
+        this.close = function(ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "family-edit/family-edit-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
     }).then(function(modal) {
         modal.element.modal();
         modal.close.then(function(ret) {

@@ -8,17 +8,16 @@
 			<div class="modal-body">
               	<form class="form-horizontal" action="" name="modalCurveAlias">
 					<h5>Alias by</h5>
-					<div class="areaWrap">
+					<div class="areaWrap text-center">
 						<label class="radio-inline">
 							<input type="radio" name="curve" value="none" ng-model="wiModal.curveAlias" ng-checked="true">&nbsp;None
-						</label><br>
+						</label>
 						<label class="radio-inline">
 							<input type="radio" name="curve" value="curveName" ng-model="wiModal.curveAlias">&nbsp;Curve name
-						</label><br>
+						</label>
 						<label class="radio-inline">
 							<input type="radio" name="curve" value="familyName" ng-model="wiModal.curveAlias">&nbsp;Family name
 						</label>
-						{{wiModal.curveAlias}}
 					</div>
 					<div ng-switch="wiModal.curveAlias">
 						<div ng-switch-when="none">
@@ -38,20 +37,29 @@
 								<div class="checkbox">
 							      	<label><input type="checkbox" value="">Use Search Option</label>
 							    </div>
+		<!--
 							    <table class="table">
 							    	<thead>
 							    		<tr>
-							    			<td>Name</td>
-							    			<td>Alias</td>
+							    			<th>Name</th>
+							    			<th>Alias</th>
 							    		</tr>
 							    	</thead>
 							    	<tbody>
-							    		<tr ng-repeat="(key, value) in wiModal.dataCurveName">
-							    			<td><!-- <select ng-model="selectedName" value="" ng-options="x for x in item track by x" ng-selected="selectedName.selected == true"></select> -->
-							    				<select  ng-model="selectName" class="form-control">
-									            	<option ng-repeat="selectName in value.selectedName" 
-									                value="">{{ selectName.Name }}</option>
-									            </select>
+							    		<tr ng-repeat="value in wiModal.dataCurveName">
+							    			<td>
+		
+
+
+		<select  ng-model="wiModal.selectName" class="form-control">
+        	<option ng-repeat="item in value.selectedName" value="{{item.Name}}" 
+        	{{ wiModal.isSelected(item); }}>
+        		{{ item.Name }}
+        	</option>
+        </select>
+
+
+
 							    			</td>
 							    			<td><input type="text" name="alias" ng-model="value.alias" class="form-control"></td>
 							    		</tr>
@@ -80,7 +88,7 @@
 							    		</tr>
 							    	</tbody>
 							    </table>
-
+-->
 							</div>
 						</div>
 					</div>
