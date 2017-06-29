@@ -11,6 +11,9 @@
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
     <link href='css/wi-logplot.css' rel='stylesheet'>
 
+    <link rel="stylesheet" href="css/graph.css">
+    <link rel="stylesheet" href="css/wi-d3.css">
+
     <link rel="stylesheet" href="css/sprite_32.css">
     <link rel="stylesheet" href="css/sprite_16.css">
 
@@ -19,6 +22,8 @@
     <script src="vendor/js/angular.min.js"></script>
 
     <script src="vendor/js/jquery-ui.js"></script>
+    <script src="vendor/js/d3.min.js"></script>
+    <script src="vendor/js/ResizeSensor.js"></script>
 
 
     <script src="js/main-logplot.js.bundle.js"></script>
@@ -30,8 +35,10 @@
 
 <div ng-controller="WiDummy">
     <div style="width: 1000px; height: 500px; border: 1px solid green; display: flex">
-        <wi-logplot name="MyLogplot" style="flex: 1"></wi-logplot>
+        <wi-logplot name="myPlot" style="flex: 1"></wi-logplot>
     </div>
+    <wi-button name="buttontest" label="Test button" icon="help-32x32" handler="handlers.Button1ButtonClicked"></wi-button>
+    <button ng-click='doClick()'>Add Track</button>
 </div>
 </body>
 </html>

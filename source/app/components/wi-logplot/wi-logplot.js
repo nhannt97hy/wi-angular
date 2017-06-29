@@ -30,7 +30,7 @@ function isEqual(a, b) {
     return true;
 }
 
-function Controller(wiComponentService) {
+function Controller($scope, wiComponentService) {
     let self = this;
     let previousSlidingBarState = {};
 
@@ -45,7 +45,7 @@ function Controller(wiComponentService) {
         if (!self.slidingBar) return;
         if (!isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
             objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
-            let wiD3Controller = wiComponentService.getComponent(self.wiD3AreaName);
+            let wiD3Controller = self.getwiD3Ctrl();
             let max = wiD3Controller.getMaxDepth();
             let low = max * previousSlidingBarState.top / 100;
             let high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
@@ -56,6 +56,10 @@ function Controller(wiComponentService) {
 
     this.getSlidingbarCtrl = function () {
         return self.slidingBar = wiComponentService.getComponent(self.slidingbarName);
+    };
+
+    this.getwiD3Ctrl = function () {
+        return self.slidingBar = wiComponentService.getComponent(self.wiD3AreaName);
     };
 }
 

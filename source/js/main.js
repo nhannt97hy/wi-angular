@@ -1,4 +1,5 @@
 let appConfig = require('./app.config');
+let utils = require('./utils');
 
 let DialogUtils = require('./DialogUtils');
 
@@ -55,24 +56,30 @@ let app = angular.module('wiapp',
         wiComponentService.name,
 
         'angularModalService'
-        
+
     ]);
 
 app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService, ModalService) {
+    $scope.handlers = {};
+
     // config explorer block - treeview
     $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block
     $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
-    $scope.handlers = bindAll(handlers, $scope, wiComponentService, ModalService);
+    bindFunctions($scope.handlers, handlers, $scope, wiComponentService, ModalService);
+    console.log('-----------------------');
+    // utils.copyProperties($scope.handlers, bindAll(logplotHandlers, $scope, wiComponentService, ModalService));
+    bindFunctions($scope.handlers, logplotHandlers, $scope, wiComponentService, ModalService);
+
+    console.log('-----------------------');
     /* ========== IMPORTANT! ================== */
-    wiComponentService.putComponent('TREE_FUNCTIONS', 
-        bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService));
+    // wiComponentService.putComponent('TREE_FUNCTIONS',
+    //     bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService));
     wiComponentService.putComponent('GRAPH', graph);
     /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
-
 
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
@@ -86,14 +93,16 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
 
 });
 
-function bindAll(handlers, $scope, wiComponentService, ModalService) {
-    let newHandlers = {};
-    for (let handler in handlers) {
-        newHandlers[handler] = handlers[handler].bind({
+function bindFunctions(destHandlers, sourceHandlers, $scope, wiComponentService, ModalService) {
+    for (let handler in sourceHandlers) {
+        destHandlers[handler] = sourceHandlers[handler].bind({
             $scope: $scope,
             wiComponentService: wiComponentService,
             ModalService: ModalService
         });
+
+        console.log('handler', handler)
     }
-    return newHandlers;
+
+    console.log('========================');
 }
