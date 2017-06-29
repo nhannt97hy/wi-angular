@@ -23,6 +23,7 @@ let layoutManager = require('./layout');
 
 let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
+let explorerHandlers = require('./wi-explorer-handlers');
 
 let graph = require('./graph');
 
@@ -61,15 +62,17 @@ __WICS = null;
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
+    let explorerHandlers = {};
+    let treeHandlers = {};
     bindFunctions(globalHandlers, handlers, $scope, wiComponentService, ModalService);
     bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
-    bindFunctions(globalHandlers, appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService);
+    bindFunctions(globalHandlers, explorerHandlers, $scope, wiComponentService, ModalService);
+    bindFunctions(treeHandlers, appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService);
     wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
+    wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-
-
 
 
     // config explorer block - treeview

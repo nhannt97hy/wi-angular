@@ -1,5 +1,3 @@
-exports.ItemLogplot = function() {
-    console.log('ItemLogplot is clicked');
-
-    this.wiComponentService.emit('new-logplot-tab', 'Blank Logplot tab');
+exports.TestToolbarExplorerButtonClicked = function() {
+    console.log('TestToolbarExplorerButton is clicked');
 }

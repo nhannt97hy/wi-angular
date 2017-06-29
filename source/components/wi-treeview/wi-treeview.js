@@ -7,8 +7,6 @@ function Controller($scope, wiComponentService) {
     this.$onInit = function () {
         self.items = self.config;
 
-        $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
