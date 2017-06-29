@@ -62,7 +62,6 @@ __WICS = null;
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
-    let explorerHandlers = {};
     let treeHandlers = {};
     bindFunctions(globalHandlers, handlers, $scope, wiComponentService, ModalService);
     bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
