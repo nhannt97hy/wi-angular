@@ -38,6 +38,9 @@ function Controller($scope, wiComponentService) {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
 
+        // hook globalHandlers into scope
+        $scope.handlers = wiComponentService.getComponent("GLOBAL_HANDLERS");
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 

@@ -26,7 +26,6 @@ let logplotHandlers = require('./wi-logplot-handlers');
 
 let graph = require('./graph');
 
-
 function genSamples(nSamples) {
     let samples = [];
     for (let i = 0; i < nSamples; i++) {
@@ -58,9 +57,20 @@ let app = angular.module('wiapp',
         'angularModalService'
 
     ]);
+__WICS = null;
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
+    // SETUP HANDLER FUNCTIONS
+    let globalHandlers = {};
+    bindFunctions(globalHandlers, handlers, $scope, wiComponentService, ModalService);
+    bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
+    bindFunctions(globalHandlers, appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService);
+    wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
 
-app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService, ModalService) {
-    $scope.handlers = {};
+    // Hook globalHandler into $scope
+    $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
+
+
+
 
     // config explorer block - treeview
     $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
@@ -68,15 +78,8 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
 
     // config properties - list block
     $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
-    bindFunctions($scope.handlers, handlers, $scope, wiComponentService, ModalService);
-    console.log('-----------------------');
-    // utils.copyProperties($scope.handlers, bindAll(logplotHandlers, $scope, wiComponentService, ModalService));
-    bindFunctions($scope.handlers, logplotHandlers, $scope, wiComponentService, ModalService);
 
-    console.log('-----------------------');
     /* ========== IMPORTANT! ================== */
-    // wiComponentService.putComponent('TREE_FUNCTIONS',
-    //     bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService));
     wiComponentService.putComponent('GRAPH', graph);
     /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
@@ -92,7 +95,6 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     });
 
 });
-
 function bindFunctions(destHandlers, sourceHandlers, $scope, wiComponentService, ModalService) {
     for (let handler in sourceHandlers) {
         destHandlers[handler] = sourceHandlers[handler].bind({
@@ -100,9 +102,5 @@ function bindFunctions(destHandlers, sourceHandlers, $scope, wiComponentService,
             wiComponentService: wiComponentService,
             ModalService: ModalService
         });
-
-        console.log('handler', handler)
     }
-
-    console.log('========================');
 }
