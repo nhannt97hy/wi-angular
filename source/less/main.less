@@ -4,6 +4,9 @@ input, button, textarea, select{
 		outline: none;
 	}
 }
+body{
+    background: url(../img/bg_index.png) repeat;
+}
 .wi-hidden {
   visibility: hidden;
 }
@@ -15,13 +18,13 @@ input, button, textarea, select{
     font-size: 12px;
 }
 #myLayout {
-    width: ~"calc(100% - 5px)";
+    width: ~"calc(100% - 2px)";
     display: flex;
     flex-wrap: wrap;
     flex: 1 1 auto;
 }
 .ribbon-wrapper {
-    height:126px;
+    max-height: 136px;
 }
 .status-bar {
     width: 100%;
@@ -33,10 +36,11 @@ input, button, textarea, select{
 
 .lm_goldenlayout{
     padding: 5px 0px;
+    background: none;
 }
 
 div.lm_content {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .label_treeview{
@@ -82,3 +86,54 @@ label.flex-row {
 .flex-1 {
     flex: 1;
 }
+
+.height65 button{
+    height: 65px;
+}
+
+.width-290{
+    width: 290px;    
+}
+
+.width-868{
+    width: 868px;
+}
+
+.width-920{
+    width: 920px;
+}
+
+.width-290 .toolbar-vertical{
+    padding: 4px 0;
+}
+
+.width-150{
+    width: 150px;
+}
+
+.fix-btn-sm{
+    margin-right: 5px;
+}
+
+.fix-btn-sm p{ 
+    width: 105px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: middle;
+    text-indent: 5px;
+    text-align: left;
+}
+
+.fix-btn-sm button{
+    padding: 2px 5px;
+}
+
+wi-dropdown.fix-btn-sm{
+    border: none;
+}
+
+wi-dropdown.fix-btn-sm span{
+    text-indent: 5px;
+}
+
