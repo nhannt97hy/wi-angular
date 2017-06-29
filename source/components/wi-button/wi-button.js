@@ -8,7 +8,8 @@ function ButtonController(wiComponentService) {
         type: 'normal',
         label: '',
         layout: 'icon-top',
-        icon: 'project-new-32x32'
+        icon: 'project-new-32x32',
+        disabled: false
     };
 
     this.onClick = function () {
@@ -16,6 +17,12 @@ function ButtonController(wiComponentService) {
     };
 
     this.$onInit = function() {
+        if (self.disabled === 'true'){
+            self.disabled = true;
+        } else {
+            self.disabled = self.default.disabled;
+        }
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     }
 }
@@ -32,7 +39,8 @@ app.component(wiButtonName, {
         label: '@',
         layout: '@',
         icon: '@',
-        handler: '<'
+        handler: '<',
+        disabled: '@'
     }
 });
 
