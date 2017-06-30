@@ -17,20 +17,20 @@ exports.newProjectDialog = function ($scope, ModalService) {
             //     var err = 'NewProject: Location is required';
             //     return {error: err};
             // } else {
-                $scope.newProjectInfo{
-                    name: $scope.projectName,
-                    company: $scope.company,
-                    department: $scope.department,
-                    description: $scope.description
-                }
-            console.log($scope.newProjectInfo);
+                // $scope.newProjectInfo{
+                //     name: $scope.projectName,
+                //     company: $scope.company,
+                //     department: $scope.department,
+                //     description: $scope.description
+                // }
+            // console.log($scope.newProjectInfo);
         }
-        $http({
-            method : 'GET',
-            url : '54.255.212.141/'
-        }).then(function newProject(req, res) {
-            $scope.newProjectInfo = req.data.projectInfo;
-        });
+        // $http({
+        //     method : 'GET',
+        //     url : '54.255.212.141/'
+        // }).then(function newProject(req, res) {
+        //     $scope.newProjectInfo = req.data.projectInfo;
+        // });
     }
 
     ModalService.showModal({
