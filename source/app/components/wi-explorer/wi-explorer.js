@@ -1,10 +1,12 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller(wiComponentService) {
+function Controller($scope, wiComponentService) {
     let self = this;
 
     this.$onInit = function () {
+        $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 }

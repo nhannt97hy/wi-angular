@@ -103,36 +103,6 @@ PROPERTIES_LIST_CONFIG_TEST_3 = [
     }
 ];
 
-/**
- * Treeview
- * @type {Array}
- */
-
-TREE_FUNCTIONS = {
-    'item11000': function () {
-        console.log('item11000');
-    },
-    'item11': function () {
-        console.log('item11');
-    },
-    'item121': function () {
-        console.log('item121');
-    },
-    'item12': function () {
-        console.log('item12');
-    },
-    'item2': function () {
-        console.log('item2');
-    },
-    'newitem': function () {
-        console.log('newitem');
-    },
-    'logplot': function () {
-        this.wiComponentService.emit('new-logplot-tab', 'new logplot');
-        console.log('$scope ', this.$scope);
-    }
-};
-
 EXPLORER_TREE_CONFIG = [
     {
         name: 'item11000',
@@ -224,4 +194,3 @@ EXPLORER_TREE_CONFIG = [
 
 exports.TREE_CONFIG_TEST = EXPLORER_TREE_CONFIG;
 exports.LIST_CONFIG_TEST = PROPERTIES_LIST_CONFIG_TEST_1;
-exports.TREE_FUNCTIONS = TREE_FUNCTIONS;

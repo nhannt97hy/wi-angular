@@ -1,0 +1,73 @@
+<div class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" ng-click="wiModal.close()" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">&nbsp;Depth Conversion</h4>
+			</div>
+			<div class="modal-body">
+                <form class="form-horizontal" action="" name="modalAddNew">
+					<div class="row">
+						<div class="col-sm-7">
+							<div class="form-group">
+				                <label class="control-label col-sm-5" for="well">Select well</label>
+				                <div class="col-sm-7">
+			                  		<select ng-model="wiModal.selectWell" name="selectWell" ng-options="item for item in wiModal.selectWellList track by item" class="form-control"></select>
+				                </div>
+				            </div>
+		              	</div>
+					</div>
+					<div class="row">
+						
+					</div>
+					<div class="row">
+						<div class="col-sm-7">
+							<div class="form-group">
+	                          <label class="control-label col-sm-5" for="step">Step</label>
+	                          <div class="col-sm-7">
+	                            <input type="number" class="form-control" value="" id="originalStep" name="step" ng-model="wiModal.originalStep">
+	                          </div>
+	                        </div>
+							<div class="form-group">
+	                          <label class="control-label col-sm-5" for="topDepth">Top Depth</label>
+	                          <div class="col-sm-7">
+	                            <input type="number" class="form-control" value="" id="originalTopDepth" name="topDepth" ng-model="wiModal.originalTopDepth">
+	                          </div>
+	                        </div>
+							<div class="form-group">
+	                          <label class="control-label col-sm-5" for="bottomDepth">Bottom Depth</label>
+	                          <div class="col-sm-7">
+	                            <input type="number" class="form-control" value="" id="originalBottomDepth" name="bottomDepth" ng-model="originalBottomDepth">
+	                          </div>
+	                        </div>
+						</div>
+						<div class="col-sm-4">
+							<div class="form-group">
+								<input type="number" class="form-control" value="" id="newStep" name="step" ng-model="newStep">
+							</div>
+							<div class="form-group">
+								<input type="number" class="form-control" value="" id="newTopDepth" name="topDepth" ng-model="newTopDepth">
+							</div>
+							<div class="form-group">
+								<input type="number" class="form-control" value="" id="newBottomDepth" name="bottomDepth" ng-model="newBottomDepth">
+							</div>
+							<div class="areaWrap">
+								<label>
+									<input type="radio" name="fixed" value="topFixed" ng-model="wiModal.fixed" ng-checked="true">&nbsp;Fixed Top
+								</label><br>
+								<label>
+									<input type="radio" name="fixed" value="bottomFixed" ng-model="wiModal.fixed">&nbsp;Fixed Bottom
+								</label>
+								{{wiModal.fixed}}
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" ng-click="wiModal.runClick()" class="btn btn-default"><span class="run-16x16"></span>&nbsp;Run</button>
+                <button type="button" ng-click="wiModal.close('Cancel')" class="btn btn-default" data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>

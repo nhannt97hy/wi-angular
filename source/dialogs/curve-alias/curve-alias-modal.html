@@ -1,0 +1,103 @@
+<div class='modal fade'>
+	<div class='modal-dialog'>
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4><span class="curve-header-edit-16x16"></span>&nbsp;Curve Alias</h4>
+			</div>
+			<div class="modal-body">
+              	<form class="form-horizontal" action="" name="modalCurveAlias">
+					<h5>Alias by</h5>
+					<div class="areaWrap text-center">
+						<label class="radio-inline">
+							<input type="radio" name="curve" value="none" ng-model="wiModal.curveAlias" ng-checked="true">&nbsp;None
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="curve" value="curveName" ng-model="wiModal.curveAlias">&nbsp;Curve name
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="curve" value="familyName" ng-model="wiModal.curveAlias">&nbsp;Family name
+						</label>
+					</div>
+					<div ng-switch="wiModal.curveAlias">
+						<div ng-switch-when="none">
+							<div class="noneArea fixedHeight">
+								<div class="row">
+									<div class="col-sm-5 text-center">
+										<p>Name</p>
+									</div>
+									<div class="col-sm-7 text-center">
+										<p>Alias</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div ng-switch-when="curveName">
+							<div class="curveNameArea fixedHeight">
+								<div class="checkbox">
+							      	<label><input type="checkbox" value="">Use Search Option</label>
+							    </div>
+		<!--
+							    <table class="table">
+							    	<thead>
+							    		<tr>
+							    			<th>Name</th>
+							    			<th>Alias</th>
+							    		</tr>
+							    	</thead>
+							    	<tbody>
+							    		<tr ng-repeat="value in wiModal.dataCurveName">
+							    			<td>
+		
+
+
+		<select  ng-model="wiModal.selectName" class="form-control">
+        	<option ng-repeat="item in value.selectedName" value="{{item.Name}}" 
+        	{{ wiModal.isSelected(item); }}>
+        		{{ item.Name }}
+        	</option>
+        </select>
+
+
+
+							    			</td>
+							    			<td><input type="text" name="alias" ng-model="value.alias" class="form-control"></td>
+							    		</tr>
+							    	</tbody>
+							    </table>
+							</div>	
+						</div>
+						<div ng-switch-when="familyName">
+							<div class="familyNameArea fixedHeight">
+								<table class="table">
+							    	<thead>
+							    		<tr>
+							    			<td>Name</td>
+							    			<td>Alias</td>
+							    		</tr>
+							    	</thead>
+							    	<tbody>
+							    		<tr ng-repeat="(key, value) in wiModal.dataFamilyName">
+							    			<td>
+							    				<select  ng-model="selectName" class="form-control">
+									            	<option ng-repeat="selectName in value.selectedName" 
+									                value="">{{ selectName.Name }}</option>
+									            </select>
+							    			</td>
+							    			<td><input type="text" name="alias" ng-model="value.alias" class="form-control"></td>
+							    		</tr>
+							    	</tbody>
+							    </table>
+-->
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button class='btn btn-default' ng-click='wiModal.close()'><span class="ok-16x16"></span>Ok</button>
+				<button class='btn btn-default' ng-click='wiModal.close()'><span class="cancel-16x16"></span>Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>

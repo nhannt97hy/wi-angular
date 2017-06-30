@@ -1,15 +1,8 @@
 exports.NewProjectButtonClicked = function() {
     console.log('NewProjectButton is clicked ', this);
     var wiComponentService = this.wiComponentService;
-    wiComponentService.getComponent('OpenProjectButton').label = "hic hic";
-}
-
-function genSamples(nSamples) {
-    var samples = new Array();
-    for( let i = 0; i < nSamples; i++ ) {
-        samples.push({y:i, x: Math.random()});
-    }
-    return samples;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.newProjectDialog(this.$scope, this.ModalService );
 }
 
 exports.OpenProjectButtonClicked = function() {
@@ -24,7 +17,7 @@ exports.OpenProjectButtonClicked = function() {
 
     idx = myPlot.addTrack();
 
-    myPlot.setData(idx, genSamples(10000));
+    myPlot.setData(idx, genSamples(1000));
 
     var maxDepth = myPlot.getMaxDepth();
 
@@ -33,14 +26,42 @@ exports.OpenProjectButtonClicked = function() {
     console.log(slidingBar.slidingBarState, low, high, maxDepth);
     myPlot.setDepthRange([low, high]);
     myPlot.plotAll();
+    // var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
+    // if (!myPlot) return;
+    // var slidingBar = this.wiComponentService.getComponent('myLogPlotSlidingbar');
+    // if (!slidingBar) return;
+    //
+    // var idx = myPlot.addDepthTrack();
+    //
+    // idx = myPlot.addTrack();
+    //
+    // myPlot.setData(idx, genSamples(10000));
+    //
+    // var maxDepth = myPlot.getMaxDepth();
+    //
+    // var low = slidingBar.slidingBarState.top * maxDepth / 100;
+    // var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
+    // console.log(slidingBar.slidingBarState, low, high, maxDepth);
+    // myPlot.setDepthRange([low, high]);
+    // myPlot.plotAll();
 }
 
 exports.CloseProjectButtonClicked = function() {
     console.log('CloseProjectButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function(yesOrNo){
+        console.log("User choose: "+yesOrNo);
+    })
 }
 
 exports.UnitSettingsButtonClicked = function() {
     console.log('UnitSettingsButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.unitSettingDialog(this.ModalService, function(ret) {
+        console.log("User Choose: " + ret);
+    })
 }
 
 exports.SaveProjectButtonClicked = function() {
@@ -65,14 +86,29 @@ exports.PropertyGridButtonClicked = function() {
 
 exports.ExitButtonClicked = function() {
     console.log('ExitButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function(ret) {
+        console.log("User choose: " + ret);
+    })
 }
 
 exports.AddNewButtonClicked = function() {
     console.log('AddNewButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.addNewDialog(this.ModalService, function(ret) {
+        console.log("User Choose: " + ret);
+    })
 }
 
 exports.WellHeaderButtonClicked = function() {
     console.log('WellHeaderButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.wellHeaderDialog(this.ModalService, function(ret) {
+        console.log("User choose: " + ret);
+    })
 }
 
 exports.DepthConversionButtonClicked = function() {

@@ -30,13 +30,16 @@ function isEqual(a, b) {
     return true;
 }
 
-function Controller(wiComponentService) {
+function Controller($scope, wiComponentService) {
     let self = this;
     let previousSlidingBarState = {};
 
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
+
+        // hook globalHandlers into scope
+        $scope.handlers = wiComponentService.getComponent("GLOBAL_HANDLERS");
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
@@ -45,7 +48,7 @@ function Controller(wiComponentService) {
         if (!self.slidingBar) return;
         if (!isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
             objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
-            let wiD3Controller = wiComponentService.getComponent(self.wiD3AreaName);
+            let wiD3Controller = self.getwiD3Ctrl();
             let max = wiD3Controller.getMaxDepth();
             let low = max * previousSlidingBarState.top / 100;
             let high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
@@ -56,6 +59,10 @@ function Controller(wiComponentService) {
 
     this.getSlidingbarCtrl = function () {
         return self.slidingBar = wiComponentService.getComponent(self.slidingbarName);
+    };
+
+    this.getwiD3Ctrl = function () {
+        return self.slidingBar = wiComponentService.getComponent(self.wiD3AreaName);
     };
 }
 

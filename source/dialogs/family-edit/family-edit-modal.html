@@ -1,0 +1,48 @@
+<div class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" ng-click="wiModal.close()" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4><span class="curve-header-edit-16x16"></span>&nbsp;Family Edit</h4>
+			</div>
+			<div class="modal-body">
+				<table class="table">
+					<thead>
+						<tr>
+							<td>Dataset Name</td>
+							<td>Curve Name</td>
+							<td>Family</td>
+							<td>Unit</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<select class="form-control" ng-model="datasetName">
+									<option ng-repeat=""></option>
+								</select>
+							</td>
+							<td>
+								<select class="form-control" ng-model="datasetName">
+									<option ng-repeat=""></option>
+								</select>
+							</td>
+							<td>
+								<select class="form-control" ng-model="datasetName">
+									<option ng-repeat=""></option>
+								</select>
+							</td>
+							<td>
+								<input type="text" class="form-control">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button class='btn btn-default' ng-click='wiModal.close()'><span class="ok-16x16"></span>Ok</button>
+				<button class='btn btn-default' ng-click='wiModal.close()'><span class="cancel-16x16"></span>Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
