@@ -55,6 +55,8 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     var newComponent = new Object();
     var attrObject = new Object();
     attrObject.name = getValueAtCell(row, nameCol, sheet);
+    console.log('attrObject.name', attrObject.name);
+
     attrCols.forEach(function (col) {
         attrObject[FIELD[col]] = getValueAtCell(row, col, sheet);
     });
@@ -99,7 +101,7 @@ exports.xlsxToJson = function (xlsxFile, configFile) {
     console.log(xlsxFile);
     var workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function (item) {
-        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8])));
+        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9])));
     });
 };
 
@@ -127,8 +129,6 @@ function genFunctionsFromSheet(workbook, sheetName) {
                 '}';
             functions.push(functionStr);
         }
-
-        // todo: remove
     }
     return functions;
 }

@@ -6,8 +6,8 @@ function genSamples(nSamples) {
     return samples;
 }
 
-exports.Button1ButtonClicked = function() {
-    console.log('Button1Button is clicked');
+exports.Test1ButtonClicked = function() {
+    console.log('Test1Button is clicked');
 
     var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
     if (!myPlot) return;
@@ -29,11 +29,11 @@ exports.Button1ButtonClicked = function() {
     myPlot.plotAll();
 }
 
-exports.Button2ButtonClicked = function() {
-    console.log('Button2Button is clicked');
+exports.Test2ButtonClicked = function() {
+    console.log('Test2Button is clicked');
 }
 
-exports.Button3ButtonClicked = function() {
-    console.log('Button3Button is clicked');
+exports.Test3ButtonClicked = function() {
+    console.log('Test3Button is clicked');
 }
 
