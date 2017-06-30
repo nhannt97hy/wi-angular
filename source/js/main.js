@@ -24,6 +24,7 @@ let layoutManager = require('./layout');
 let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
+let treeviewHandlers = require('./wi-treeview-handlers');
 
 let graph = require('./graph');
 
@@ -66,7 +67,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     bindFunctions(globalHandlers, handlers, $scope, wiComponentService, ModalService);
     bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
     bindFunctions(globalHandlers, explorerHandlers, $scope, wiComponentService, ModalService);
-    bindFunctions(treeHandlers, appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService);
+    bindFunctions(treeHandlers, treeviewHandlers, $scope, wiComponentService, ModalService);
     wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
     wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
 
