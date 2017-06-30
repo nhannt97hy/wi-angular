@@ -16,6 +16,7 @@ source/html/ribbon-block/well-tab
 well-tab.json
 source/js/handlers.js.tmpl
 source/js/wi-logplot-handlers.js.tmpl
-well-tab.json
+source/js/wi-explorer-handlers.js.tmpl
 wi-logplot.json
+wi-explorer.json
 .DS_Store

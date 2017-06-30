@@ -105,38 +105,38 @@ gulp.task('appcomponent', function (taskCallback) {
     });
 });
 
-gulp.task('services', function(callback) {
-    glob(SOURCE_DIR.services, function(err, files) {
-        async.each(files, function(f, cb) {
-            gulp.src(f).pipe(gulp.dest(BUILD_DIR.js))
-                .on('end', cb);
-        },
-        function(err) {
-            if(err){
-                console.log(err);
-            }
-            return callback();
-        });
+gulp.task('services', function (callback) {
+    glob(SOURCE_DIR.services, function (err, files) {
+        async.each(files, function (f, cb) {
+                gulp.src(f).pipe(gulp.dest(BUILD_DIR.js))
+                    .on('end', cb);
+            },
+            function (err) {
+                if (err) {
+                    console.log(err);
+                }
+                return callback();
+            });
     });
 });
 
 gulp.task('dialogs', function (servicesCb) {
     glob(SOURCE_DIR.dialogs, function (err, files) {
         async.each(files, function (f, cb) {
-            if(f.includes('.js')){
+            if (f.includes('.js')) {
                 gulp.src(f)
                     .pipe(embedTemplate())
                     .pipe(gulp.dest(BUILD_DIR.js))
                     .on('end', cb);
-            } else if(f.includes('test.html')){
+            } else if (f.includes('test.html')) {
                 gulp.src(f)
                     .pipe(gulp.dest(BUILD_DIR.root))
                     .on('end', cb);
             } else {
                 cb();
             }
-        },function (err) {
-            if(err){
+        }, function (err) {
+            if (err) {
                 console.log(err);
             }
             return servicesCb();
@@ -167,7 +167,7 @@ gulp.task('clean', function () {
         .pipe(clean({force: true}));
 });
 
-gulp.task('include', function() {
+gulp.task('include', function () {
     return gulp.src(['./source/html/index.html'])
         .pipe(fileInclude({
             prefix: '@@',
@@ -177,7 +177,7 @@ gulp.task('include', function() {
         .pipe(gulp.dest('./build'));
 });
 
-gulp.task('wi-logplot-include', function() {
+gulp.task('wi-logplot-include', function () {
     var templateFile = './source/app/components/wi-logplot/template/wi-logplot.html';
     var outputDir = './source/app/components/wi-logplot';
 
@@ -190,26 +190,17 @@ gulp.task('wi-logplot-include', function() {
         .pipe(gulp.dest(outputDir));
 });
 
-const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor', 'wi-logplot-include'];
-gulp.task('build', mainTasks, function () {
-    glob('build/js/*.js', function (err, files) {
-        files.forEach(function (f) {
-            if (f.includes('main') && !f.includes('bundle')) {
-                gulp.src(f)
-                    .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
-            }
-        });
-    });
-});
+gulp.task('wi-explorer-include', function () {
+    var templateFile = './source/app/components/wi-explorer/template/wi-explorer.html';
+    var outputDir = './source/app/components/wi-explorer';
 
-gulp.task('default', ['watch']);
-
-/**
- * Push build to gh-pages
- */
-gulp.task('deploy', function () {
-    return gulp.src("./build/**/*")
-        .pipe(deploy());
+    return gulp.src([templateFile])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest(outputDir));
 });
 
 function to_json(workbook) {
@@ -231,41 +222,60 @@ function xlsxToHTML(xlsxFile, configFile) {
     jsonXML.jsonToXML(configFile);
 }
 
-gulp.task('gen-index', function() {
+gulp.task('gen-template', ['gen-wi-logplot-template', 'gen-wi-explorer-template'], function () {
     var configFile = 'config.js';
     var xlsxFile = './Wi-UI.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 
-gulp.task('gen-wi-logplot-template', function() {
+gulp.task('gen-wi-logplot-template', function () {
     var configFile = 'wi-logplot.config.js';
     var xlsxFile = './Wi-LogPlot.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
+gulp.task('gen-wi-explorer-template', function () {
+    var configFile = 'wi-explorer.config.js';
+    var xlsxFile = './Wi-Explorer.xlsx';
+    xlsxToHTML(xlsxFile, configFile);
+});
 
-gulp.task('gen-functions', function() {
+gulp.task('gen-functions', ['gen-wi-logplot-functions', 'gen-wi-explorer-functions'], function () {
     var configFile = 'config.js';
     var xlsxFile = './Wi-UI.xlsx';
     var templateFile = 'source/js/handlers.js.tmpl';
     try {
         fs.unlinkSync(templateFile);
     }
-    catch(err) {
+    catch (err) {
         console.log(err);
     }
     var wiUI = require('./preprocess/wi-ui-v1.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
 
-gulp.task('gen-wi-logplot-functions', function() {
+gulp.task('gen-wi-logplot-functions', function () {
     var configFile = 'wi-logplot.config.js';
     var xlsxFile = './Wi-LogPlot.xlsx';
     var templateFile = 'source/js/wi-logplot-handlers.js.tmpl';
     try {
         fs.unlinkSync(templateFile);
     }
-    catch(err) {
-        console.log(err);
+    catch (err) {
+        // console.log(err);
+    }
+    var wiUI = require('./preprocess/wi-ui-v1.js');
+    wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
+});
+
+gulp.task('gen-wi-explorer-functions', function () {
+    var configFile = 'wi-explorer.config.js';
+    var xlsxFile = './Wi-Explorer.xlsx';
+    var templateFile = 'source/js/wi-explorer-handlers.js.tmpl';
+    try {
+        fs.unlinkSync(templateFile);
+    }
+    catch (err) {
+        // console.log(err);
     }
     var wiUI = require('./preprocess/wi-ui-v1.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
@@ -279,4 +289,28 @@ gulp.task('config', function () {
             console.log(er);
         }
     })
+});
+
+gulp.task('pre', ['gen-template', 'gen-functions'],function () {});
+
+const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor', 'wi-logplot-include', 'wi-explorer-include'];
+gulp.task('build', mainTasks, function () {
+    glob('build/js/*.js', function (err, files) {
+        files.forEach(function (f) {
+            if (f.includes('main') && !f.includes('bundle')) {
+                gulp.src(f)
+                    .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
+            }
+        });
+    });
+});
+
+gulp.task('default', ['watch']);
+
+/**
+ * Push build to gh-pages
+ */
+gulp.task('deploy', function () {
+    return gulp.src("./build/**/*")
+        .pipe(deploy());
 });

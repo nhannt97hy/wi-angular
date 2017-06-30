@@ -48,7 +48,6 @@ function Controller($scope, wiComponentService) {
 
         // init tiny window height
         $(self.handleId).height(self.tinyWindow.height);
-        console.log($(self.handleId));
         $(self.handleId).css('top', self.tinyWindow.top + 'px');
 
         self.slidingBarState.top = Math.round(self.tinyWindow.top / parentHeight * 100);
