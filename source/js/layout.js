@@ -38,7 +38,6 @@ function createLayout(domId, $scope, $compile) {
 
     layoutManager.registerComponent('wi-block', function (container, componentState) {
         let templateHtml = $('template#' + componentState.templateId).html();
-        //console.log('template#' + componentState.templateId, templateHtml);
         container.getElement().html(compileFunc(templateHtml)(scopeObj));
     });
 
@@ -46,10 +45,17 @@ function createLayout(domId, $scope, $compile) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
 
-        container.on('shown', function (e) {
-            console.log('componentState', componentState)
-        })
+        // container.on('shown', function (e) {
+        //     console.log('componentState', componentState)
+        // })
     });
+
+    // todo: remove test
+    // layoutManager.on('stackCreated' , function (stack) {
+    //     stack.on('activeContentItemChanged', function (contentItem) {
+    //         console.log('activeContentItemChanged contentItem', contentItem);
+    //     })
+    // });
 
     layoutManager.init();
 }

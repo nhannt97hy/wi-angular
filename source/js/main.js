@@ -1,4 +1,5 @@
 let appConfig = require('./app.config');
+let utils = require('./utils');
 
 let DialogUtils = require('./DialogUtils');
 
@@ -22,9 +23,10 @@ let layoutManager = require('./layout');
 
 let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
+let explorerHandlers = require('./wi-explorer-handlers');
+let treeviewHandlers = require('./wi-treeview-handlers');
 
 let graph = require('./graph');
-
 
 function genSamples(nSamples) {
     let samples = [];
@@ -55,24 +57,35 @@ let app = angular.module('wiapp',
         wiComponentService.name,
 
         'angularModalService'
-        
-    ]);
 
-app.controller('AppController', function ($scope, $timeout, $compile, wiComponentService, ModalService) {
+    ]);
+__WICS = null;
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
+    // SETUP HANDLER FUNCTIONS
+    let globalHandlers = {};
+    let treeHandlers = {};
+    bindFunctions(globalHandlers, handlers, $scope, wiComponentService, ModalService);
+    bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
+    bindFunctions(globalHandlers, explorerHandlers, $scope, wiComponentService, ModalService);
+    bindFunctions(treeHandlers, treeviewHandlers, $scope, wiComponentService, ModalService);
+    wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
+    wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
+
+    // Hook globalHandler into $scope
+    $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
+
+
     // config explorer block - treeview
     $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block
     $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
-    $scope.handlers = bindAll(handlers, $scope, wiComponentService, ModalService);
+
     /* ========== IMPORTANT! ================== */
-    wiComponentService.putComponent('TREE_FUNCTIONS', 
-        bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService, ModalService));
     wiComponentService.putComponent('GRAPH', graph);
     /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
-
 
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
@@ -85,15 +98,12 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     });
 
 });
-
-function bindAll(handlers, $scope, wiComponentService, ModalService) {
-    let newHandlers = {};
-    for (let handler in handlers) {
-        newHandlers[handler] = handlers[handler].bind({
+function bindFunctions(destHandlers, sourceHandlers, $scope, wiComponentService, ModalService) {
+    for (let handler in sourceHandlers) {
+        destHandlers[handler] = sourceHandlers[handler].bind({
             $scope: $scope,
             wiComponentService: wiComponentService,
             ModalService: ModalService
         });
     }
-    return newHandlers;
 }
