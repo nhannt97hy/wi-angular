@@ -3,7 +3,7 @@ let wiButton = require('./wi-button');
 let wiDropdown = require('./wi-dropdown');
 let wiToolbar = require('./wi-toolbar');
 let wiTabs = require('./wi-tabs');
-let wiWorkingtabs = require('./wi-workingtabs');
+//let wiWorkingtabs = require('./wi-workingtabs');
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');
 let wiSlidingbar = require('./wi-slidingbar');
@@ -39,17 +39,14 @@ let app = angular.module('wiapp',
         wiDropdown.name,
         wiToolbar.name,
         wiTabs.name,
-        wiWorkingtabs.name,
         wiTreeview.name,
         wiStatusBar.name,
         wiSlidingbar.name,
         wiList.name,
-
         wiD3.name,
         wiLogplot.name,
         wiExplorer.name,
         wiProperties.name,
-
         wiComponentService.name
     ]);
 
@@ -68,7 +65,7 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
-    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+//    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 /*
     wiComponentService.on('new-logplot-tab', function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
