@@ -65,7 +65,7 @@ app.controller('AppController', function ($scope, $timeout, $compile, wiComponen
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
-//    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 /*
     wiComponentService.on('new-logplot-tab', function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
