@@ -127,6 +127,8 @@ function genFunctionsFromSheet(workbook, sheetName) {
             '}';
             functions.push(functionStr);
         }
+
+        // todo: remove
     }
     return functions;
 }

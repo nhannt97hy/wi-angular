@@ -1,15 +1,18 @@
+
 <wi-toolbar name="Toolbar" label="" icon="">
-    <wi-button name="TestToolbarExplorerButton" label="" icon="project-new-16x16" handler="handlers.TestToolbarExplorerButtonClicked">
+		<wi-button name="ExplorerButton1Button" label="" icon="help-32x32" handler="handlers.ExplorerButton1ButtonClicked">
 
-    </wi-button>
-    <wi-button name="Button2Button" label="" icon="info-frp-16x16" handler="handlers.Button2ButtonClicked">
+		</wi-button>
+		<wi-button name="ExplorerButton2Button" label="" icon="info-frp-32x32" handler="handlers.ExplorerButton2ButtonClicked">
 
-    </wi-button>
-    <wi-button name="Button3Button" label="" icon="project-new-16x16" handler="handlers.Button3ButtonClicked">
+		</wi-button>
+		<wi-button name="ExplorerButton3Button" label="" icon="" handler="handlers.ExplorerButton3ButtonClicked">
 
-    </wi-button>
+		</wi-button>
 
 </wi-toolbar>
+
+
 <div class="filter-block">
     <span>Filter: </span>
     <input type="text" placeholder="well or .../dataset or .../curve or ...">
@@ -18,8 +21,4 @@
 <div class="label_treeview">
     <span>Name</span><span>Unit</span>
 </div>
-<!--<div class="treeview-header">
-    <span>Name</span>
-    <span class="header-description">Unit</span>
-</div>-->
 <wi-treeview config="wiExplorer.treeConfig"></wi-treeview>
