@@ -28,13 +28,7 @@ let treeviewHandlers = require('./wi-treeview-handlers');
 
 let graph = require('./graph');
 
-function genSamples(nSamples) {
-    let samples = [];
-    for (let i = 0; i < nSamples; i++) {
-        samples.push({y: i, x: Math.random()});
-    }
-    return samples;
-}
+let wiElementReadyDirective = require('./wi-element-ready-directive');
 
 let wiComponentService = require('./wi-component-service');
 
@@ -54,12 +48,14 @@ let app = angular.module('wiapp',
         wiExplorer.name,
         wiProperties.name,
 
+        wiElementReadyDirective.name,
+
         wiComponentService.name,
 
         'angularModalService'
 
     ]);
-__WICS = null;
+
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
@@ -98,6 +94,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     });
 
 });
+
 function bindFunctions(destHandlers, sourceHandlers, $scope, wiComponentService, ModalService) {
     for (let handler in sourceHandlers) {
         destHandlers[handler] = sourceHandlers[handler].bind({
