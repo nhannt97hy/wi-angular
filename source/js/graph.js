@@ -12,12 +12,21 @@ function roundDown(value, granularity) {
     return Math.floor(value / granularity) * granularity;
 }
 
-function appendTrackHeader(container, trackName) {
+function appendTrackHeader(plotArea, container, trackName) {
     container.append('div')
         .attr('class', 'track-header text-center')
             .append('label')
             .attr('class', 'track-name text-center')
                 .text(trackName);
+    container.append('div')
+        .attr('class', 'vresizer')
+        .call(d3.drag()
+            .on('drag', function() {
+                var plotHeight = container.select('.plot-container').node().clientHeight;
+                d3.select(plotArea).selectAll('.plot-container')
+                    .style('height', (plotHeight - d3.event.dy) + "px");
+            })
+        );
 }
 
 function appendDepthHeader(base, unit) {
@@ -58,7 +67,7 @@ function appendTrack(baseElement, trackName, plotWidth) {
     var trackContainer = d3.select(baseElement).append('div')
         .attr('class', 'track-container')
         .style('width', plotWidth + 'px');
-    appendTrackHeader(trackContainer, trackName);
+    appendTrackHeader(baseElement, trackContainer, trackName);
     var resizer = d3.select(baseElement).append('div')
         .attr('class', 'resizer')
         .call(d3.drag()
@@ -269,7 +278,12 @@ function Plot(config) {
                 .attr('height', clientRect.height);
             xAxisGroup.attr('transform', translateOpts[xAxisPosition]);
             yAxisGroup.attr('transform', translateOpts[yAxisPosition]);
-            if(_data) _doPlot();
+            _doPlot();
+        });
+    }
+    this.onDrop = function(dropCallback){
+        base.on('mouseover', function() {
+            dropCallback();
         });
     }
     function _doPlot() {
@@ -298,40 +312,41 @@ function Plot(config) {
         }
         function plotOnCanvas() {
             ctx.clearRect(0, 0, clientRect.width, clientRect.height);
+            if( _data ) {
+                var plotSamples = _data.filter(function(item){
+                    var ret =(item.x >= _viewportX[0] && 
+                           item.x <= _viewportX[1] && 
+                           item.y * yStep >= _viewportY[0] &&
+                           item.y * yStep <= _viewportY[1]);
+                    return ret;
+                });
+                console.log('plotSamples:', plotSamples);
+                /* draw shade */
+                var gradient = ctx.createLinearGradient(refX - 2, 0, refX + 2, 0);
+                gradient.addColorStop(0, 'red');
+                gradient.addColorStop(1, 'blue');
+                //ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+                ctx.fillStyle = gradient;
+                ctx.lineWidth = 0;
+                ctx.beginPath();
+                ctx.moveTo(refX, transformY(plotSamples[0].y * yStep));
+                plotSamples.forEach(function(item) {
+                    ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
+                });
+                ctx.lineTo(refX, transformY(plotSamples[plotSamples.length - 1].y * yStep));
+                ctx.closePath();
+                ctx.fill();
 
-            var plotSamples = _data.filter(function(item){
-                var ret =(item.x >= _viewportX[0] && 
-                       item.x <= _viewportX[1] && 
-                       item.y * yStep >= _viewportY[0] &&
-                       item.y * yStep <= _viewportY[1]);
-                return ret;
-            });
-
-            /* draw shade */
-            var gradient = ctx.createLinearGradient(refX - 2, 0, refX + 2, 0);
-            gradient.addColorStop(0, 'red');
-            gradient.addColorStop(1, 'blue');
-            //ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-            ctx.fillStyle = gradient;
-            ctx.lineWidth = 0;
-            ctx.beginPath();
-            ctx.moveTo(refX, transformY(plotSamples[0].y * yStep));
-            plotSamples.forEach(function(item) {
-                ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
-            });
-            ctx.lineTo(refX, transformY(plotSamples[plotSamples.length - 1].y * yStep));
-            ctx.closePath();
-            ctx.fill();
-
-            /* draw curve */
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(transformX(plotSamples[0].x), transformY(plotSamples[0].y * yStep));
-            plotSamples.forEach(function(item) {
-                ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
-            });
-            ctx.stroke();
+                /* draw curve */
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(transformX(plotSamples[0].x), transformY(plotSamples[0].y * yStep));
+                plotSamples.forEach(function(item) {
+                    ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
+                });
+                ctx.stroke();
+            }
         }
         function drawRefLine() {
             refLine.attr('x1', refX)
@@ -422,9 +437,6 @@ function Plot(config) {
         }
     }
     this.setData = function(data, dataSetName, unit, min, max) {
-        appendToTrackHeader(root, dataSetName, unit, min, max);
-        appendToTrackHeader(root, dataSetName, unit, min, max);
-        appendToTrackHeader(root, dataSetName, unit, min, max);
         appendToTrackHeader(root, dataSetName, unit, min, max);
         _data = data;
     }

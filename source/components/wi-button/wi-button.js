@@ -40,7 +40,8 @@ app.component(wiButtonName, {
         layout: '@',
         icon: '@',
         handler: '<',
-        disabled: '@'
+        disabled: '@',
+        separator: '@'
     }
 });
 

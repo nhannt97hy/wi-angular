@@ -1,5 +1,5 @@
 <div>
-    <button ng-click="wiButton.onClick()"
+    <button ng-if='wiButton.separator != "1"' ng-click="wiButton.onClick()"
             class="button-{{wiButton.type || wiButton.config.type || wiButton.default.type}}"
             ng-disabled="wiButton.disabled">
         <img class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}" alt="icon wi-button">
@@ -7,4 +7,5 @@
         ng-show="wiButton.label != null || wiButton.config.label != null">
             {{wiButton.label || wiButton.config.label || wiButton.default.label}}</p>
     </button>
+    <div ng-if='wiButton.separator == "1"' class='separator'></div>
 </div>

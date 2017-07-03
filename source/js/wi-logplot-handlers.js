@@ -5,13 +5,10 @@ function genSamples(nSamples) {
     }
     return samples;
 }
-
 exports.Test1ButtonClicked = function() {
-    console.log('Test1Button is clicked');
-
-    var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
+    var myPlot = this.wiComponentService.getD3Area(this.wiLogplot.name);
     if (!myPlot) return;
-    var slidingBar = this.wiComponentService.getComponent('myLogPlotSlidingbar');
+    var slidingBar = this.wiComponentService.getSlidingBar(this.wiLogplot.name);
     if (!slidingBar) return;
 
     var idx = myPlot.addDepthTrack();

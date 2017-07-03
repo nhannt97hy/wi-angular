@@ -2,7 +2,8 @@
     <div class="wi-parent-node"
          ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
          ng-click="wiTreeview.onClick($index)"
-         ng-dblclick="wiTreeview.onDoubleClick($index)">
+         ng-dblclick="wiTreeview.onDoubleClick($index)"
+         data-curve="{{wiTreeview.config[$index].name}}">
         <div>
             <i aria-hidden="true" class="fa icon-expanded"
                ng-class="
