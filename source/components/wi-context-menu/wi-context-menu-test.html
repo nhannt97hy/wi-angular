@@ -1,0 +1,30 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href='css/wi-context-menu.css' rel='stylesheet'>
+    <link href='css/wi-button.css' rel='stylesheet'>
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src="js/main-wi-context-menu.js.bundle.js"></script>
+</head>
+
+<body ng-app='helloapp'>
+    <div ng-controller="WiDummy" style="display: flex">
+        <button ng-click="buttonClick($event);">click me</button>
+        <wi-button name='abcCCC'
+            icon=''
+            layout='icon-left'
+            label='abcC abc'
+            type='small'
+            handler="buttonClick2"
+            ></wi-button>
+        <wi-context-menu name='ContextMenu1'></wi-context-menu>
+    </div>
+</body>
+</html>
