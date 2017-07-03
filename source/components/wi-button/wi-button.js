@@ -7,6 +7,7 @@ function ButtonController(wiComponentService) {
     this.default = {
         type: 'normal',
         label: '',
+        tooltip: '',
         layout: 'icon-top',
         icon: 'project-new-32x32',
         disabled: false
@@ -24,6 +25,10 @@ function ButtonController(wiComponentService) {
         }
 
         if (self.name) wiComponentService.putComponent(self.name, self);
+    };
+
+    this.initTooltip = function () {
+        $('[data-toggle="tooltip"]').tooltip();
     }
 }
 
@@ -36,6 +41,7 @@ app.component(wiButtonName, {
         config: '<',
         type: '@',
         name: '@',
+        tooltip: '@',
         label: '@',
         layout: '@',
         icon: '@',

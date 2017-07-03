@@ -1,13 +1,19 @@
 
-<wi-toolbar name="DatabasesToolbar" icon="" label="" layout="" description="" type="">
-		<wi-button name="NewProjectButton" icon="project-new-32x32" label="" layout="" description="" type="small" handler="handlers.NewProjectButtonClicked">
+<wi-toolbar name="DatabasesToolbar" icon="" label="" layout="" description="" type="" ="">
+		<wi-dropdown name="ImportProjectButton" icon="import-file" label="Import" layout="" description="" type="small" ="">
+
+		</wi-dropdown>
+		<wi-button name="ReloadProjectButton" icon="reload-16x16" label="Reload" layout="" description="" type="small" ="" handler="handlers.ReloadProjectButtonClicked">
 
 		</wi-button>
-		<wi-button name="OpenProjectButton" icon="project-open-32x32" label="" layout="" description="" type="small" handler="handlers.OpenProjectButtonClicked">
+		<wi-button name="CollapseProjectButton" icon="apply-16x16" label="Apply" layout="" description="" type="small" ="" handler="handlers.CollapseProjectButtonClicked">
 
 		</wi-button>
-		<wi-button name="CloseProjectButton" icon="project-close-32x32" label="" layout="" description="" type="small" handler="handlers.CloseProjectButtonClicked">
+		<wi-button  name="DeleteProjectButton" icon="delete-16x16" label="Delete" layout="" description="" type="small" ="">
 
-		</wi-button>
+		</wi-button >
+		<wi-button  name="BrowseProjectButton" icon="browse-project" label="Browse project" layout="" description="" type="small" ="">
+
+		</wi-button >
 
 </wi-toolbar>
