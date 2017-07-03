@@ -20,3 +20,11 @@ source/js/wi-explorer-handlers.js.tmpl
 wi-logplot.json
 wi-explorer.json
 .DS_Store
+
+# Logplot generate
+source/app/components/wi-logplot/wi-logplot.html
+source/app/components/wi-logplot/template/toolbar/*
+
+# Explorer generate
+source/app/components/wi-explorer/wi-explorer.html
+source/app/components/wi-explorer/template/toolbar/*
