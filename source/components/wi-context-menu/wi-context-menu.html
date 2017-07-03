@@ -1,4 +1,4 @@
-<div ng-if="wiContextMenu.shown" ng-click="wiContextMenu.dismiss();" class="context-menu-backdrop">
+<div ng-if="wiContextMenu.shown" ng-click="wiContextMenu.dismiss()" wi-right-click="wiContextMenu.dismiss()" class="context-menu-backdrop">
     <div class="context-menu-wrapper" style="top:{{wiContextMenu.top}}px; left:{{wiContextMenu.left}}px">
         <wi-button ng-repeat='button in wiContextMenu.buttons'
                    name='{{wiContextMenu.name + "." + button.name}}'

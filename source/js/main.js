@@ -35,7 +35,7 @@ let dragMan = {
     cancelingId: null
 };
 
-let wiElementReadyDirective = require('./wi-element-ready-directive');
+let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
@@ -56,7 +56,7 @@ let app = angular.module('wiapp',
         wiExplorer.name,
         wiProperties.name,
 
-        wiElementReadyDirective.name,
+        wiElementReady.name,
         wiRightClick.name,
 
         wiComponentService.name,
@@ -73,21 +73,25 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     let globalHandlers = {};
     let treeHandlers = {};
     utils.bindFunctions(globalHandlers, handlers, {
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
-        });
-//    utils.bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService
+    });
+   utils.bindFunctions(globalHandlers, logplotHandlers, {
+       $scope: $scope,
+       wiComponentService: wiComponentService,
+       ModalService: ModalService
+   });
     utils.bindFunctions(globalHandlers, explorerHandlers, {
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
-        });
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService
+    });
     utils.bindFunctions(treeHandlers, treeviewHandlers, {
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
-        });
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService
+    });
     wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
     wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
 
@@ -117,15 +121,16 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     wiComponentService.on('add-logplot-event', function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
-    $(document).ready(function() {
+
+    $(document).ready(function () {
         $('.wi-parent-node').draggable({
-            start: function(event, ui) {
+            start: function (event, ui) {
                 console.log('start', ui.helper.attr('data-curve'));
                 dragMan.dragging = true;
                 dragMan.draggedObj = ui.helper.attr('data-curve');
             },
-            stop: function(event, ui) {
-                dragMan.cancelingId = setTimeout(function() {
+            stop: function (event, ui) {
+                dragMan.cancelingId = setTimeout(function () {
                     console.log('stop');
                     dragMan.dragging = false;
                     dragMan.draggedObj = null;

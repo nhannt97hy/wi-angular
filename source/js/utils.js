@@ -1,13 +1,5 @@
 'use strict';
 
-function copyProperties(objectDest, objectCopy) {
-    for (let prop in objectCopy) {
-        objectDest[prop] = objectCopy[prop];
-    }
-
-    console.log(objectDest)
-}
-
 //Utils for object checking and object cloning
 function objcpy(destObj, sourceObj) {
     if (destObj) {
@@ -36,14 +28,13 @@ function isEqual(a, b) {
 
     return true;
 }
+
 function bindFunctions(destHandlers, sourceHandlers, thisObj) {
     for (let handler in sourceHandlers) {
         destHandlers[handler] = sourceHandlers[handler].bind(thisObj);
     }
 }
 
-//exports.copyProperties = copyProperties;
-exports.copyProperties = objcpy;
 exports.objcpy = objcpy;
 exports.isEqual = isEqual;
 exports.bindFunctions = bindFunctions;

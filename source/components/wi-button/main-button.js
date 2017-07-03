@@ -1,10 +1,10 @@
 let wiButton = require('./wi-button');
 
-let wiElementReadyDirective = require('./wi-element-ready-directive');
+let wiElementReady = require('./wi-element-ready');
 
 let wiComponentService = require('./wi-component-service');
 
-let app = angular.module('helloapp', [wiButton.name, wiElementReadyDirective.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiButton.name, wiElementReady.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.myHandler = function () {
         let buttonController = wiComponentService.getComponent('TestButton');
