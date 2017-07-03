@@ -1,8 +1,9 @@
-var fs = require('fs');
-var mkdirp = require('mkdirp');
-var jsonxml = require('jsontoxml');
-var getDirName = require('path').dirname;
-var obj;
+const fs = require('fs');
+const mkdirp = require('mkdirp');
+const jsonxml = require('jsontoxml');
+let getDirName = require('path').dirname;
+
+let obj;
 
 /*
 toXML("project-tab.json","project-tab/index.html");
@@ -25,6 +26,7 @@ function printToFile(path, contents, cb) {
         });
     });
 }
+
 function toXML(jsonFileName,xmlFileName) {
     fs.readFile(jsonFileName, 'utf8', function (err, data) {
         if (err) throw err;
@@ -33,9 +35,10 @@ function toXML(jsonFileName,xmlFileName) {
         printToFile(xmlFileName, xml);
     });
 }
+
 exports.jsonToXML = function(configFile) {
     var processTabInfos = require('./' + configFile).processTabInfos;
     processTabInfos.forEach(function(item){
         toXML(item.file, item.dir + "/index.html");
     });
-}
+};
