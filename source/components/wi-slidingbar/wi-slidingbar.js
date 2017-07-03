@@ -93,19 +93,19 @@ app.component(componentName, {
     }
 });
 
-app.directive('elemReady', function ($parse) {
-    return {
-        restrict: 'A',
-        link: function ($scope, elem, attrs) {
-            elem.ready(function () {
-                $scope.$apply(function () {
-                    let func = $parse(attrs.elemReady);
-                    func($scope);
-                })
-            })
-        }
-    }
-});
+// app.directive('elemReady', function ($parse) {
+//     return {
+//         restrict: 'A',
+//         link: function ($scope, elem, attrs) {
+//             elem.ready(function () {
+//                 $scope.$apply(function () {
+//                     let func = $parse(attrs.elemReady);
+//                     func($scope);
+//                 })
+//             })
+//         }
+//     }
+// });
 
 exports.name = moduleName;
 exports.componentName = componentName;

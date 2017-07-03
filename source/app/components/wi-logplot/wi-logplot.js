@@ -1,53 +1,32 @@
 const componentName = 'wiLogplot';
 const moduleName = 'wi-logplot';
 
-//Utils for object checking and object cloning
-function objcpy(destObj, sourceObj) {
-    if (destObj) {
-        for (let attr in sourceObj) {
-            destObj[attr] = sourceObj[attr];
-        }
-    }
-}
-
-function isEqual(a, b) {
-    if (!a || !b) return false;
-    let aProps = Object.getOwnPropertyNames(a);
-    let bProps = Object.getOwnPropertyNames(b);
-
-    if (aProps.length !== bProps.length) {
-        return false;
-    }
-
-    for (let i = 0; i < aProps.length; i++) {
-        let propName = aProps[i];
-
-        if (a[propName] !== b[propName]) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function Controller($scope, wiComponentService) {
+function Controller($scope, wiComponentService, ModalService) {
     let self = this;
     let previousSlidingBarState = {};
+    let utils = wiComponentService.getComponent('UTILS');
+    let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
 
-        // hook globalHandlers into scope
-        $scope.handlers = wiComponentService.getComponent("GLOBAL_HANDLERS");
+        // Setup handlers for logplot
+        $scope.handlers = {};
+        utils.bindFunctions($scope.handlers, logplotHandlers, {
+            $scope: $scope,
+            wiComponentService: wiComponentService,
+            ModalService: ModalService,
+            wiLogplot: self
+        });
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
     this.$doCheck = function () {
         if (!self.slidingBar) return;
-        if (!isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
-            objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
+        if (!utils.isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
+            utils.objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
             let wiD3Controller = self.getwiD3Ctrl();
             let max = wiD3Controller.getMaxDepth();
             let low = max * previousSlidingBarState.top / 100;
@@ -62,7 +41,7 @@ function Controller($scope, wiComponentService) {
     };
 
     this.getwiD3Ctrl = function () {
-        return self.slidingBar = wiComponentService.getComponent(self.wiD3AreaName);
+        return wiComponentService.getComponent(self.wiD3AreaName);
     };
 }
 

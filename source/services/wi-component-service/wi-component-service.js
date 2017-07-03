@@ -12,6 +12,16 @@ app.factory(wiServiceName, function () {
         getComponent: function (componentName) {
             return __Controllers[componentName];
         },
+        getD3Area: function(wiLogplotName) {
+            return __Controllers[wiLogplotName + 'D3Area'];
+        },
+        getSlidingBar: function(wiLogplotName) {
+            return __Controllers[wiLogplotName + 'Slidingbar'];
+        },
+        getSlidingBarForD3Area: function(wiD3AreaName) {
+            var wiLogplotName = wiD3AreaName.replace('D3Area', '');
+            return __Controllers[wiLogplotName + 'Slidingbar'];
+        },
         putComponent: function (componentName, controller) {
             __Controllers[componentName] = controller;
         },

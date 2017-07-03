@@ -14,6 +14,8 @@ let wiSlidingbar = require('./wi-slidingbar');
 
 let wiList = require('./wi-list');
 
+let wiContextMenu = require('./wi-context-menu');
+
 let wiD3 = require('./wi-d3');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
@@ -27,14 +29,14 @@ let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
 
 let graph = require('./graph');
+let dragMan = {
+    dragging: false,
+    draggedObj: null,
+    cancelingId: null
+};
 
-function genSamples(nSamples) {
-    let samples = [];
-    for (let i = 0; i < nSamples; i++) {
-        samples.push({y: i, x: Math.random()});
-    }
-    return samples;
-}
+let wiElementReady = require('./wi-element-ready');
+let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
 
@@ -48,26 +50,48 @@ let app = angular.module('wiapp',
         wiStatusBar.name,
         wiSlidingbar.name,
         wiList.name,
-
+        wiContextMenu.name,
         wiD3.name,
         wiLogplot.name,
         wiExplorer.name,
         wiProperties.name,
 
+        wiElementReady.name,
+        wiRightClick.name,
+
         wiComponentService.name,
-
         'angularModalService'
-
     ]);
-__WICS = null;
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
+    // UTIL FUNCTIONS
+    wiComponentService.putComponent('UTILS', utils);
+    // Logplot Handlers
+    wiComponentService.putComponent('LOGPLOT_HANDLERS', logplotHandlers);
+
+
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
-    bindFunctions(globalHandlers, handlers, $scope, wiComponentService, ModalService);
-    bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
-    bindFunctions(globalHandlers, explorerHandlers, $scope, wiComponentService, ModalService);
-    bindFunctions(treeHandlers, treeviewHandlers, $scope, wiComponentService, ModalService);
+    utils.bindFunctions(globalHandlers, handlers, {
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService
+    });
+   utils.bindFunctions(globalHandlers, logplotHandlers, {
+       $scope: $scope,
+       wiComponentService: wiComponentService,
+       ModalService: ModalService
+   });
+    utils.bindFunctions(globalHandlers, explorerHandlers, {
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService
+    });
+    utils.bindFunctions(treeHandlers, treeviewHandlers, {
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService
+    });
     wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
     wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
 
@@ -84,6 +108,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
 
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent('GRAPH', graph);
+    wiComponentService.putComponent('DRAG_MAN', dragMan);
     /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
 
@@ -97,13 +122,26 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
 
-});
-function bindFunctions(destHandlers, sourceHandlers, $scope, wiComponentService, ModalService) {
-    for (let handler in sourceHandlers) {
-        destHandlers[handler] = sourceHandlers[handler].bind({
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
+    $(document).ready(function () {
+        $('.wi-parent-node').draggable({
+            start: function (event, ui) {
+                console.log('start', ui.helper.attr('data-curve'));
+                dragMan.dragging = true;
+                dragMan.draggedObj = ui.helper.attr('data-curve');
+            },
+            stop: function (event, ui) {
+                dragMan.cancelingId = setTimeout(function () {
+                    console.log('stop');
+                    dragMan.dragging = false;
+                    dragMan.draggedObj = null;
+                    dragMan.cancelingId = null;
+                }, 1000);
+            },
+            appendTo: 'body',
+            revert: false,
+            scroll: false,
+            helper: 'clone',
+            containment: 'document'
         });
-    }
-}
+    });
+});

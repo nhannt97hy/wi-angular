@@ -30,6 +30,7 @@ const SOURCE_DIR = {
     appComponents: 'source/app/components/**/*',
     dialogs: 'source/dialogs/**/*',
     services: 'source/services/**/*.js',
+    directives: 'source/directives/**/*.js',
     html: 'source/html/**/*.html',
     img: 'source/img/**/*',
     less: 'source/less/**/*.less',
@@ -44,6 +45,7 @@ gulp.task('watch', ['build'], function () {
     gulp.watch('source/app/components/**/*', ['build']);
     gulp.watch('source/dialogs/**/*', ['build']);
     gulp.watch('source/services/**/*.js', ['build']);
+    gulp.watch('source/directives/**/*.js', ['build']);
     gulp.watch('source/js/**/*', ['build']);
     gulp.watch('source/*.js', ['build']);
     gulp.watch('source/img/**/*', ['img']);
@@ -53,15 +55,15 @@ gulp.task('watch', ['build'], function () {
 gulp.task('component', function (taskCallback) {
     glob(SOURCE_DIR.components, function (err, files) {
         async.each(files, function (f, cb) {
-            if (f.includes('.js')) {
+            if (/\.js$/.test(f)) {
                 gulp.src(f)
                     .pipe(embedTemplate())
                     .pipe(gulp.dest(BUILD_DIR.js)).on('end', cb);
-            } else if (f.includes('.less')) {
+            } else if (/\.less$/.test(f)) {
                 gulp.src(f)
                     .pipe(less())
                     .pipe(gulp.dest(BUILD_DIR.css)).on('end', cb);
-            } else if (f.includes('test.html')) {
+            } else if (/test\.html$/.test(f)) {
                 gulp.src(f)
                     .pipe(gulp.dest(BUILD_DIR.root)).on('end', cb);
             } else {
@@ -79,17 +81,17 @@ gulp.task('component', function (taskCallback) {
 gulp.task('appcomponent', function (taskCallback) {
     glob(SOURCE_DIR.appComponents, function (err, files) {
         async.each(files, function (f, cb) {
-            if (f.includes('.js')) {
+            if (/.js$/.test(f)) {
                 gulp.src(f)
                     .pipe(embedTemplate())
                     .pipe(gulp.dest(BUILD_DIR.js))
                     .on('end', cb);
-            } else if (f.includes('.less')) {
+            } else if (/.less$/.test(f)) {
                 gulp.src(f)
                     .pipe(less())
                     .pipe(gulp.dest(BUILD_DIR.css))
                     .on('end', cb);
-            } else if (f.includes('test.html')) {
+            } else if (/test.html$/.test(f)) {
                 gulp.src(f)
                     .pipe(gulp.dest(BUILD_DIR.root))
                     .on('end', cb);
@@ -120,15 +122,30 @@ gulp.task('services', function (callback) {
     });
 });
 
+gulp.task('directives', function (callback) {
+    glob(SOURCE_DIR.directives, function (err, files) {
+        async.each(files, function (f, cb) {
+                gulp.src(f).pipe(gulp.dest(BUILD_DIR.js))
+                    .on('end', cb);
+            },
+            function (err) {
+                if (err) {
+                    console.log(err);
+                }
+                return callback();
+            });
+    });
+});
+
 gulp.task('dialogs', function (servicesCb) {
     glob(SOURCE_DIR.dialogs, function (err, files) {
         async.each(files, function (f, cb) {
-            if (f.includes('.js')) {
+            if (/.js$/.test(f)) {
                 gulp.src(f)
                     .pipe(embedTemplate())
                     .pipe(gulp.dest(BUILD_DIR.js))
                     .on('end', cb);
-            } else if (f.includes('test.html')) {
+            } else if (/test.html$/.test(f)) {
                 gulp.src(f)
                     .pipe(gulp.dest(BUILD_DIR.root))
                     .on('end', cb);
@@ -291,9 +308,10 @@ gulp.task('config', function () {
     })
 });
 
-gulp.task('pre', ['gen-template', 'gen-functions'],function () {});
+gulp.task('pre', ['gen-template', 'gen-functions'], function () {
+});
 
-const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'js', 'img', 'vendor', 'wi-logplot-include', 'wi-explorer-include'];
+const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor', 'wi-logplot-include', 'wi-explorer-include'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {

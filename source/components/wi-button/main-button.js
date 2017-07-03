@@ -1,20 +1,14 @@
 let wiButton = require('./wi-button');
 
+let wiElementReady = require('./wi-element-ready');
+
 let wiComponentService = require('./wi-component-service');
 
-let app = angular.module('helloapp', [wiButton.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiButton.name, wiElementReady.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
-    $scope.buttonCfg = buttonCfg;
-    $scope.myHandler =  function() {
+    $scope.myHandler = function () {
         let buttonController = wiComponentService.getComponent('TestButton');
         console.log(buttonController);
         buttonController.label = 'New label';
     }
 });
-
-
-function myHandler() {
-    console.log('click from main test');
-    wiComponentService.getComponent('TestButton');
-}
-

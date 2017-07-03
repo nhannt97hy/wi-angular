@@ -1,24 +1,26 @@
-XLSX = require('xlsx');
+'use strict';
+const XLSX = require('xlsx');
+const fs = require('fs');
 
-var fs = require('fs');
 Array.prototype.cleanData = function (deleteValue) {
-    for (var i = 0; i < this.length; i++) {
+    for (let i = 0; i < this.length; i++) {
         if (this[i] == deleteValue) {
             this.splice(i, 1);
             i--;
         }
     }
+
     return this;
 };
 //Param: sheetName: name of sheet
 //       attrCols: array of colums contain attribute data (index start from 0)
 function sheetToJson(workbook, sheetName, attrCols) {
-    var worksheet = workbook.Sheets[sheetName];
-    var range = XLSX.utils.decode_range(worksheet['!ref']);
+    let worksheet = workbook.Sheets[sheetName];
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
 
-    var componentArr = [];
-    for (var R = range.s.r + 1; R <= range.e.r; ++R) {
-        var index = getValueAtCell(R, 0, worksheet);
+    let componentArr = [];
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        let index = getValueAtCell(R, 0, worksheet);
         if (isInt(index)) {
             componentArr[index] = buildComponent(R, 1, worksheet, attrCols);
         } else {
@@ -26,7 +28,6 @@ function sheetToJson(workbook, sheetName, attrCols) {
             var temp = componentArr[indexTree[0]];
             indexTree.forEach(function (branch, i) {
                 if (i == 0 || i == indexTree.length - 1) return;
-
                 temp = temp.children[branch];
             });
             if (typeof temp != 'undefined') {
@@ -34,6 +35,7 @@ function sheetToJson(workbook, sheetName, attrCols) {
             }
         }
     }
+
     cleanComponentArr(componentArr);
     return componentArr;
 }
@@ -48,20 +50,20 @@ function cleanComponentArr(component_Arr) {
 }
 //Build a component object in row with attributes in attrCols
 function buildComponent(row, nameCol, sheet, attrCols) {
-    var FIELD = new Object();
+    let FIELD = new Object();
     attrCols.forEach(function (col) {
-        var value = getValueAtCell(0, col, sheet);
+        let value = getValueAtCell(0, col, sheet);
         FIELD[col] = value;
     });
-    var newComponent = new Object();
-    var attrObject = new Object();
+    let newComponent = new Object();
+    let attrObject = new Object();
     attrObject.name = getValueAtCell(row, nameCol, sheet);
     console.log('attrObject.name', attrObject.name);
 
     attrCols.forEach(function (col) {
         attrObject[FIELD[col]] = getValueAtCell(row, col, sheet);
     });
-    var dependency = getValueAtCell(row, 2, sheet);
+    let dependency = getValueAtCell(row, 2, sheet);
 
     newComponent.name = dependency.replace("wi", "wi-").toLowerCase();
     if (newComponent.name === 'wi-button') {
@@ -74,9 +76,9 @@ function buildComponent(row, nameCol, sheet, attrCols) {
 //Get value data in a cell
 //Return string "" if cell is empty
 function getValueAtCell(rowIndex, colIndex, sheet) {
-    var cellPositionObject = {r: rowIndex, c: colIndex};
-    var cellPositionString = XLSX.utils.encode_cell(cellPositionObject);
-    var cell = sheet[cellPositionString];
+    let cellPositionObject = {r: rowIndex, c: colIndex};
+    let cellPositionString = XLSX.utils.encode_cell(cellPositionObject);
+    let cell = sheet[cellPositionString];
     if (typeof cell === 'undefined') {
         return "";
     }
@@ -84,7 +86,7 @@ function getValueAtCell(rowIndex, colIndex, sheet) {
 }
 //Check if data is integer number
 function isInt(data) {
-    var check = /\./.test(data);
+    let check = /\./.test(data);
     return !check;
 }
 //Just print string to file
@@ -94,15 +96,15 @@ function printToFile(fileName, content) {
 }
 
 // MAIN function
-//var processTabInfos = require('./config.js').getTabInfos();
+//let processTabInfos = require('./config.js').getTabInfos();
 exports.xlsxToJson = function (xlsxFile, configFile) {
-    //var processTabInfos = require('./config.js').processTabInfos;
-    var processTabInfos = require('./' + configFile).processTabInfos;
-    //var workbook = XLSX.readFile('../Wi-UI.xlsx');
+    //let processTabInfos = require('./config.js').processTabInfos;
+    let processTabInfos = require('./' + configFile).processTabInfos;
+    //let workbook = XLSX.readFile('../Wi-UI.xlsx');
     console.log(xlsxFile);
-    var workbook = XLSX.readFile(xlsxFile);
+    let workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function (item) {
-        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9])));
+        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9, 10])));
     });
 };
 
@@ -114,16 +116,16 @@ function clickFunctionName(name) {
 }
 
 function genFunctionsFromSheet(workbook, sheetName) {
-    var worksheet = workbook.Sheets[sheetName];
-    var range = XLSX.utils.decode_range(worksheet['!ref']);
-    var nameCol = 1;
-    var functions = [];
-    var functionStr;
-    var name;
-    for (var R = range.s.r + 1; R <= range.e.r; ++R) {
+    let worksheet = workbook.Sheets[sheetName];
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
+    let nameCol = 1;
+    let functions = [];
+    let functionStr;
+    let name;
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         functionStr = '';
         name = getValueAtCell(R, nameCol, worksheet);
-        var fName = clickFunctionName(name);
+        let fName = clickFunctionName(name);
         if (/Button$/.test(name)) {
             functionStr = 'exports.' + fName + ' = function() {\n' +
                 '    console.log(\'' + name + ' is clicked\');\n' +
@@ -135,10 +137,10 @@ function genFunctionsFromSheet(workbook, sheetName) {
 }
 
 exports.genFunctionsFromXlsx = function (xlsxFile, outputFile, configFile) {
-    var processTabInfos = require('./' + configFile).processTabInfos;
-    var workbook = XLSX.readFile(xlsxFile);
+    let processTabInfos = require('./' + configFile).processTabInfos;
+    let workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function (item) {
         fs.appendFileSync(outputFile, genFunctionsFromSheet(workbook, item.tab).join('\n\n') + "\n\n");
         console.log("Tab " + item.tab + " was processed");
     });
-}
+};

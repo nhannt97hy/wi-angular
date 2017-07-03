@@ -8,7 +8,9 @@ wi-toolbar {
     border-image-slice: 1;     
     margin-bottom: 0; 
     vertical-align: top;
-    & > div.toolbar-vertical {
+
+    .toolbar-vertical {
+        display: inline-block;
         border-bottom: 1px solid transparent;
         -moz-border-image: -moz-linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(216,217,223,1) 49%, rgba(255,255,255,0) 100%);
         -webkit-border-image: -webkit-linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(216,217,223,1) 49%, rgba(255,255,255,0) 100%);
@@ -17,7 +19,7 @@ wi-toolbar {
         padding: 6px 0;
     }
         
-    & > .wi-toolbar-label {
+    .wi-toolbar-label {
         padding: 0.2em;
         text-align: center;
         width: 100%;
@@ -31,11 +33,7 @@ wi-toolbar {
         font-size: 12px;   
     }
     
-    .toolbar-vertical {
-        display: inline-block;
-    }
-
-    .toolbar-horizontal {
+        .toolbar-horizontal {
         & > wi-button {
           display: block;
         }
