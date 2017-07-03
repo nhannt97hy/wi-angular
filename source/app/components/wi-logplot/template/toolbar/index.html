@@ -1,6 +1,6 @@
 
 <wi-toolbar name="Databases1Toolbar" icon="" label="" layout="" description="" type="">
-		<wi-button name="EditFormatButton" icon="" label="" layout="" description="" type="small" handler="handlers.EditFormatButtonClicked">
+		<wi-button name="EditFormatButton" icon="properties-16x16" label="" layout="" description="" type="small" handler="handlers.EditFormatButtonClicked">
 
 		</wi-button>
 		<wi-button name="SaveAsLogplotButton" icon="save-16x16" label="" layout="" description="" type="small" handler="handlers.SaveAsLogplotButtonClicked">
@@ -12,15 +12,51 @@
 		<wi-button name="PrintButton" icon="print-16x16" label="" layout="" description="" type="small" handler="handlers.PrintButtonClicked">
 
 		</wi-button>
-		<wi-button name="PrintToImageButton" icon="" label="" layout="" description="" type="small" handler="handlers.PrintToImageButtonClicked">
+		<wi-button name="PrintToImageButton" icon="arrow-right-16x16" label="" layout="" description="" type="small" handler="handlers.PrintToImageButtonClicked">
 
 		</wi-button>
-		<wi-dropdown name="ScaleButton" icon="scale-16x16" label="" layout="" description="" type="small">
+		<wi-dropdown name="ScaleDropdown" icon="scale-16x16" label="" layout="" description="" type="small">
+				<wi-button name="Scale20Button" icon="" label="1:20" layout="" description="" type="" handler="handlers.Scale20ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale50Button" icon="" label="1:50" layout="" description="" type="" handler="handlers.Scale50ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale100Button" icon="" label="1:100" layout="" description="" type="" handler="handlers.Scale100ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale200Button" icon="" label="1:200" layout="" description="" type="" handler="handlers.Scale200ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale300Button" icon="" label="1:300" layout="" description="" type="" handler="handlers.Scale300ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale500Button" icon="" label="1:500" layout="" description="" type="" handler="handlers.Scale500ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale1000Button" icon="" label="1:1000" layout="" description="" type="" handler="handlers.Scale1000ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale2000Button" icon="" label="1:2000" layout="" description="" type="" handler="handlers.Scale2000ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale2500Button" icon="" label="1:2500" layout="" description="" type="" handler="handlers.Scale2500ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale3000Button" icon="" label="1:3000" layout="" description="" type="" handler="handlers.Scale3000ButtonClicked">
+
+				</wi-button>
+				<wi-button name="Scale5000Button" icon="" label="1:5000" layout="" description="" type="" handler="handlers.Scale5000ButtonClicked">
+
+				</wi-button>
+				<wi-button name="ScaleFullButton" icon="" label="1:Full" layout="" description="" type="" handler="handlers.ScaleFullButtonClicked">
+
+				</wi-button>
 
 		</wi-dropdown>
 
 </wi-toolbar>
-<wi-toolbar name="Databases2Toolbar" icon="" label="" layout="" description="" type="small">
+<wi-toolbar name="Databases2Toolbar" icon="" label="" layout="" description="" type="">
 		<wi-button name="ZoomInButton" icon="zoom-in-16x16" label="" layout="" description="" type="small" handler="handlers.ZoomInButtonClicked">
 
 		</wi-button>
@@ -29,11 +65,20 @@
 		</wi-button>
 
 </wi-toolbar>
-<wi-toolbar name="Databases3Toolbar" icon="" label="" layout="" description="" type="small">
+<wi-toolbar name="Databases3Toolbar" icon="" label="" layout="" description="" type="">
 		<wi-button name="CropDisplayButton" icon="plot-range-16x16" label="" layout="" description="" type="small" handler="handlers.CropDisplayButtonClicked">
 
 		</wi-button>
 		<wi-dropdown name="RangeSpecificDropdown" icon="plot-range-specific-16x16" label="" layout="" description="" type="small">
+				<wi-button name="RangeFromButton" icon="" label="From" layout="" description="" type="" handler="handlers.RangeFromButtonClicked">
+
+				</wi-button>
+				<wi-button name="RangeToButton" icon="" label="To" layout="" description="" type="" handler="handlers.RangeToButtonClicked">
+
+				</wi-button>
+				<wi-button name="RangeOkButton" icon="" label="OK" layout="" description="" type="" handler="handlers.RangeOkButtonClicked">
+
+				</wi-button>
 
 		</wi-dropdown>
 		<wi-button name="ViewWholeWellButton" icon="plot-whole-well-16x16" label="" layout="" description="" type="small" handler="handlers.ViewWholeWellButtonClicked">
@@ -41,7 +86,7 @@
 		</wi-button>
 
 </wi-toolbar>
-<wi-toolbar name="Databases4Toolbar" icon="" label="" layout="" description="" type="small">
+<wi-toolbar name="Databases4Toolbar" icon="" label="" layout="" description="" type="">
 		<wi-button name="AddDepthAxisButton" icon="depth-axis-add-16x16" label="" layout="" description="" type="small" handler="handlers.AddDepthAxisButtonClicked">
 
 		</wi-button>
@@ -56,7 +101,7 @@
 		</wi-button>
 
 </wi-toolbar>
-<wi-toolbar name="Databases5Toolbar" icon="" label="" layout="" description="" type="small">
+<wi-toolbar name="Databases5Toolbar" icon="" label="" layout="" description="" type="">
 		<wi-button name="AddMarkerButton" icon="marker-add-16x16" label="" layout="" description="" type="small" handler="handlers.AddMarkerButtonClicked">
 
 		</wi-button>
@@ -77,7 +122,7 @@
 		</wi-button>
 
 </wi-toolbar>
-<wi-toolbar name="Databases6Toolbar" icon="" label="" layout="" description="" type="small">
+<wi-toolbar name="Databases6Toolbar" icon="" label="" layout="" description="" type="">
 		<wi-button name="CrossPlotButton" icon="crossplot-new-16x16" label="" layout="" description="" type="small" handler="handlers.CrossPlotButtonClicked">
 
 		</wi-button>
@@ -87,13 +132,13 @@
 
 </wi-toolbar>
 <wi-toolbar name="Databases7Toolbar" icon="" label="" layout="" description="" type="">
-		<wi-checkbox name="FitWindowCheckbox" icon="" label="" layout="" description="" type="">
+		<wi-checkbox name="FitWindowCheckbox" icon="" label="Fit Window" layout="" description="" type="">
 
 		</wi-checkbox>
-		<wi-checkbox name="ReferenceLineCheckbox" icon="" label="" layout="" description="" type="">
+		<wi-checkbox name="ReferenceLineCheckbox" icon="" label="Reference Line" layout="" description="" type="">
 
 		</wi-checkbox>
-		<wi-checkbox name="TooltipCheckbox" icon="" label="" layout="" description="" type="">
+		<wi-checkbox name="TooltipCheckbox" icon="" label="Tool tip" layout="" description="" type="">
 
 		</wi-checkbox>
 

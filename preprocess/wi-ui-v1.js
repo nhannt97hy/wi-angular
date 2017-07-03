@@ -22,10 +22,11 @@ function sheetToJson(workbook, sheetName, attrCols) {
         if (isInt(index)) {
             componentArr[index] = buildComponent(R, 1, worksheet, attrCols);
         } else {
-            var indexTree = index.toString().split(".");
+            var indexTree = index.toString().trim().split(".");
             var temp = componentArr[indexTree[0]];
             indexTree.forEach(function (branch, i) {
                 if (i == 0 || i == indexTree.length - 1) return;
+
                 temp = temp.children[branch];
             });
             if (typeof temp != 'undefined') {
