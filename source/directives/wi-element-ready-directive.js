@@ -8,7 +8,7 @@ app.directive(wiDirectiveName, function ($parse) {
         link: function ($scope, elem, attrs) {
             elem.ready(function () {
                 $scope.$apply(function () {
-                    let func = $parse(attrs.wiElementReady);
+                    let func = $parse(attrs[wiDirectiveName]);
                     func($scope);
                 })
             })
