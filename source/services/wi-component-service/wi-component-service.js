@@ -7,7 +7,7 @@ app.factory(wiServiceName, function () {
     let handlers = {};
 
     return {
-        treeFunctions: {},
+        // treeFunctions: {},
 
         getComponent: function (componentName) {
             return __Controllers[componentName];
@@ -19,12 +19,12 @@ app.factory(wiServiceName, function () {
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
         getSlidingBarForD3Area: function(wiD3AreaName) {
-            var wiLogplotName = wiD3AreaName.replace('D3Area', '');
+            let wiLogplotName = wiD3AreaName.replace('D3Area', '');
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
         putComponent: function (componentName, controller) {
-            console.log('put component');
-            console.log('componentName', componentName)
+            // console.log('put component');
+            // console.log('componentName', componentName);
 
             __Controllers[componentName] = controller;
         },

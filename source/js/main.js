@@ -105,7 +105,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block
-    $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    $scope.myPropertiesConfig = {};
 
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent('GRAPH', graph);
