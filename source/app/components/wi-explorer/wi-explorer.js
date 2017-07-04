@@ -16,26 +16,17 @@ function Controller($scope, $timeout, wiComponentService) {
          "department": "FIT",
          "description": "blablabla"
          */
-        // wiComponentService.on('open-project-event', function (data) {
-        //     // todo: remove test
-        //     console.log('project data: ', data);
-        //     self.treeConfig = TREE_CONFIG_TEST;
-        //     console.log('treeConfig', self.treeConfig)
-        //     // $scope.$apply();
-        //     // $timeout(function () {
-        //     //     let mockTreeData = TREE_CONFIG_TEST;
-        //     //     console.log('response data: ', mockTreeData);
-        //     //
-        //     //     self.treeConfig = mockTreeData;
-        //     //     $scope.$apply();
-        //     // }, 2000);
-        // });
+        wiComponentService.on('open-project-event', function (data) {
+            // todo: remove test
+            console.log('project data: ', data);
 
-        // test
-        // $timeout(function () {
-        //     self.treeConfig = TREE_CONFIG_TEST;
-        //     console.log('treeConfig', self.treeConfig)
-        // }, 5000);
+            $timeout(function () {
+                let mockTreeData = TREE_CONFIG_TEST_3;
+                console.log('response data: ', mockTreeData);
+
+                self.treeConfig = mockTreeData;
+            }, 2000);
+        });
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
@@ -72,7 +63,8 @@ TREE_CONFIG_TEST_3 = [
             icon: 'project-new-16x16',
             label: 'item 11000',
             description: 'mm',
-            childExpanded: false
+            childExpanded: false,
+            properties: PROPERTIES_LIST_CONFIG_TEST_2
         },
         children: [
             {
@@ -82,7 +74,8 @@ TREE_CONFIG_TEST_3 = [
                     icon: 'project-new-16x16',
                     label: 'item 1.1',
                     description: 'hu hu hu',
-                    childExpanded: false
+                    childExpanded: false,
+                    properties: PROPERTIES_LIST_CONFIG_TEST_3
                 },
                 children: [
                     {
@@ -92,7 +85,8 @@ TREE_CONFIG_TEST_3 = [
                             icon: 'project-new-16x16',
                             label: 'item 1.2.1.1',
                             description: 'hic',
-                            childExpanded: false
+                            childExpanded: false,
+                            properties: PROPERTIES_LIST_CONFIG_TEST_1
                         },
                         children: []
                     },
@@ -104,7 +98,8 @@ TREE_CONFIG_TEST_3 = [
                             icon: 'project-new-16x16',
                             label: 'item 1.2.1.2',
                             description: '',
-                            childExpanded: false
+                            childExpanded: false,
+                            properties: PROPERTIES_LIST_CONFIG_TEST_2
                         },
                         children: []
                     }
@@ -117,7 +112,8 @@ TREE_CONFIG_TEST_3 = [
                     icon: 'project-new-16x16',
                     label: 'item 1.2',
                     description: '',
-                    childExpanded: false
+                    childExpanded: false,
+                    properties: PROPERTIES_LIST_CONFIG_TEST_3
                 },
                 children: []
             }
@@ -130,7 +126,19 @@ TREE_CONFIG_TEST_3 = [
             icon: 'project-new-16x16',
             label: 'item 2',
             description: 'description 2',
-            childExpanded: false
+            childExpanded: false,
+            properties: PROPERTIES_LIST_CONFIG_TEST_2
+        }
+    },
+    {
+        name: 'logplot1',
+        type: 'logplot',
+        data: {
+            icon: 'project-new-16x16',
+            label: 'Logplot',
+            description: 'Logplot',
+            childExpanded: false,
+            properties: PROPERTIES_LIST_CONFIG_TEST_3
         }
     }
 ];
