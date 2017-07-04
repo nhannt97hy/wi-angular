@@ -32,11 +32,6 @@ function Controller($scope, $timeout, wiComponentService) {
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
-    
-    this.$onChanges = function (changes) {
-        console.log('wi explorer changes ', changes);
-
-    }
 }
 
 let app = angular.module(moduleName, []);
