@@ -233,68 +233,53 @@ function to_json(workbook) {
 }
 
 function xlsxToHTML(xlsxFile, configFile) {
-    var wiUI = require('./preprocess/wi-ui-v1.js');
+    var wiUI = require('./preprocess/excel-to-json.js');
     var jsonXML = require('./preprocess/toXML.js');
     wiUI.xlsxToJson(xlsxFile, configFile);
     jsonXML.jsonToXML(configFile);
 }
 
 gulp.task('gen-template', ['gen-wi-logplot-template', 'gen-wi-explorer-template'], function () {
-    var configFile = 'config.js';
+    var configFile = 'config/ribbon-config.js';
     var xlsxFile = './Wi-UI.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 
 gulp.task('gen-wi-logplot-template', function () {
-    var configFile = 'wi-logplot.config.js';
+    var configFile = 'config/wi-logplot.config.js';
     var xlsxFile = './Wi-LogPlot.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 gulp.task('gen-wi-explorer-template', function () {
-    var configFile = 'wi-explorer.config.js';
+    var configFile = 'config/wi-explorer.config.js';
     var xlsxFile = './Wi-Explorer.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 
 gulp.task('gen-functions', ['gen-wi-logplot-functions', 'gen-wi-explorer-functions'], function () {
-    var configFile = 'config.js';
+    var configFile = 'config/ribbon-config.js';
     var xlsxFile = './Wi-UI.xlsx';
     var templateFile = 'source/js/handlers.js.tmpl';
-    try {
-        fs.unlinkSync(templateFile);
-    }
-    catch (err) {
-        console.log(err);
-    }
-    var wiUI = require('./preprocess/wi-ui-v1.js');
+
+    var wiUI = require('./preprocess/excel-to-json.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
 
 gulp.task('gen-wi-logplot-functions', function () {
-    var configFile = 'wi-logplot.config.js';
+    var configFile = 'config/wi-logplot.config.js';
     var xlsxFile = './Wi-LogPlot.xlsx';
     var templateFile = 'source/js/wi-logplot-handlers.js.tmpl';
-    try {
-        fs.unlinkSync(templateFile);
-    }
-    catch (err) {
-        // console.log(err);
-    }
-    var wiUI = require('./preprocess/wi-ui-v1.js');
+
+    var wiUI = require('./preprocess/excel-to-json.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
 
 gulp.task('gen-wi-explorer-functions', function () {
-    var configFile = 'wi-explorer.config.js';
+    var configFile = 'config/wi-explorer.config.js';
     var xlsxFile = './Wi-Explorer.xlsx';
     var templateFile = 'source/js/wi-explorer-handlers.js.tmpl';
-    try {
-        fs.unlinkSync(templateFile);
-    }
-    catch (err) {
-        // console.log(err);
-    }
-    var wiUI = require('./preprocess/wi-ui-v1.js');
+
+    var wiUI = require('./preprocess/excel-to-json.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
 

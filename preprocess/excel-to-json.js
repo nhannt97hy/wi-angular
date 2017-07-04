@@ -104,11 +104,12 @@ function printToFile(fileName, content) {
 exports.xlsxToJson = function (xlsxFile, configFile) {
     //let processTabInfos = require('./config.js').processTabInfos;
     let processTabInfos = require('./' + configFile).processTabInfos;
+    let colProcessArr = require('./' + configFile).colProcesses;
     //let workbook = XLSX.readFile('../Wi-UI.xlsx');
     console.log(xlsxFile);
     let workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function (item) {
-        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9, 10, 11, 12])));
+        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, colProcessArr)));
     });
 };
 
