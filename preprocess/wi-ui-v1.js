@@ -53,6 +53,9 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     let FIELD = new Object();
     attrCols.forEach(function (col) {
         let value = getValueAtCell(0, col, sheet);
+        // console.log('buildComponent, col', col);
+        // console.log('buildComponent, value', value);
+
         FIELD[col] = value;
     });
     let newComponent = new Object();
@@ -61,7 +64,8 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     console.log('attrObject.name', attrObject.name);
 
     attrCols.forEach(function (col) {
-        attrObject[FIELD[col]] = getValueAtCell(row, col, sheet);
+        let value = getValueAtCell(row, col, sheet);
+        if (value && value !== 'undefined') attrObject[FIELD[col]] = value;
     });
     let dependency = getValueAtCell(row, 2, sheet);
 
@@ -104,7 +108,7 @@ exports.xlsxToJson = function (xlsxFile, configFile) {
     console.log(xlsxFile);
     let workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function (item) {
-        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9, 10])));
+        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9, 10, 11, 12])));
     });
 };
 

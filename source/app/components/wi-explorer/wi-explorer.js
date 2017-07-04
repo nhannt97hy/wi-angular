@@ -25,6 +25,8 @@ function Controller($scope, $timeout, wiComponentService) {
                 console.log('response data: ', mockTreeData);
 
                 self.treeConfig = mockTreeData;
+
+                wiComponentService.emit('open-project-success-event');
             }, 2000);
         });
 

@@ -10,25 +10,35 @@ function ButtonController(wiComponentService) {
         tooltip: '',
         layout: 'icon-top',
         icon: 'project-new-32x32',
-        disabled: true
+        disabled: false
     };
 
     this.onClick = function () {
         if (self.handler) self.handler();
     };
 
-    this.$onInit = function() {
-        if (self.disabled === 'true'){
-            self.disabled = true;
-        } else {
-            self.disabled = self.default.disabled;
-        }
-
+    this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
+
+        if (self.container === 'ribbon' || self.container === 'explorer') {
+            wiComponentService.on('open-project-success-event', function () {
+                self.disabled = "false";
+            });
+        }
     };
 
     this.initTooltip = function () {
         $('[data-toggle="tooltip"]').tooltip();
+    };
+
+    this.isDisabled = function () {
+        if (self.disabled === 'true'){
+            return true;
+        } else if (self.disabled === 'false'){
+            return false;
+        } else {
+            return self.default.disabled;
+        }
     }
 }
 
@@ -47,7 +57,8 @@ app.component(wiButtonName, {
         icon: '@',
         handler: '<',
         disabled: '@',
-        separator: '@'
+        separator: '@',
+        container: '@'
     }
 });
 
