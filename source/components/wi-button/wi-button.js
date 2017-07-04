@@ -10,7 +10,7 @@ function ButtonController(wiComponentService) {
         tooltip: '',
         layout: 'icon-top',
         icon: 'project-new-32x32',
-        disabled: false
+        disabled: true
     };
 
     this.onClick = function () {

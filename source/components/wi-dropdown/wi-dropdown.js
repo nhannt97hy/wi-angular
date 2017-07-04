@@ -7,7 +7,8 @@ function Controller(wiComponentService) {
     this.default = {
         label: '',
         layout: 'icon-top',
-        icon: 'project-new-32x32'
+        icon: 'project-new-32x32',
+        disabled: true
     };
 
     this.onClick = function () {
@@ -15,6 +16,12 @@ function Controller(wiComponentService) {
     };
 
     this.$onInit = function() {
+        if (self.disabled === 'true'){
+            self.disabled = true;
+        } else {
+            self.disabled = self.default.disabled;
+        }
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 }
@@ -31,7 +38,8 @@ app.component(componentName, {
         label: '@',
         layout: '@',
         icon: '@',
-        handler: '<'
+        handler: '<',
+        disabled: '@'
     }
 });
 
