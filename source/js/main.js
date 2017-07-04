@@ -101,6 +101,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
 
     // config explorer block - treeview
     $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
+    // $scope.myTreeviewConfig = {};
     //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block

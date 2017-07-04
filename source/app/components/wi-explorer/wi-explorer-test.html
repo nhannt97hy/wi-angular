@@ -26,7 +26,8 @@
 
 <div ng-controller="WiDummy">
     <div style="width: 500px; height: 500px; border: 1px solid green; display: flex">
-        <wi-explorer name="myExplorer" tree-config="myConfig" style="flex: 1"></wi-explorer>
+        <wi-explorer name="WiExplorer" tree-config="myConfig" style="flex: 1"></wi-explorer>
+        <button ng-click="changeTreeviewConfig()">Change treeview</button>
     </div>
 </div>
 </body>
