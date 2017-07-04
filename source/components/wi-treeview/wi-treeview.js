@@ -5,9 +5,13 @@ function Controller($scope, wiComponentService) {
     let self = this;
 
     this.$onInit = function () {
-        self.items = self.config;
+        // self.items = self.config;
 
         if (self.name) wiComponentService.putComponent(self.name, self);
+    };
+
+    this.$onChanges = function (changes) {
+        console.log('wi treeview changes, ', changes)
     };
 
     this.onClick = function ($index) {

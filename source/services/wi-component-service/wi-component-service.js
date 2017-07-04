@@ -23,6 +23,9 @@ app.factory(wiServiceName, function () {
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
         putComponent: function (componentName, controller) {
+            console.log('put component');
+            console.log('componentName', componentName)
+
             __Controllers[componentName] = controller;
         },
 
