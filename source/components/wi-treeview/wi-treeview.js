@@ -10,9 +10,9 @@ function Controller($scope, wiComponentService) {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    this.$onChanges = function (changes) {
-        console.log('wi treeview changes, ', changes)
-    };
+    // this.$onChanges = function (changes) {
+    //     console.log('wi treeview changes, ', changes)
+    // };
 
     this.onClick = function ($index) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
