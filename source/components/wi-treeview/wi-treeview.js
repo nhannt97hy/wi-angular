@@ -10,10 +10,6 @@ function Controller($scope, wiComponentService) {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    // this.$onChanges = function (changes) {
-    //     console.log('wi treeview changes, ', changes)
-    // };
-
     this.onClick = function ($index) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
 
@@ -21,19 +17,20 @@ function Controller($scope, wiComponentService) {
             let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
             wiExplorerCtrl.itemActiveName = self.config[$index].name;
 
-            wiComponentService.emit('update-properties', self.config[$index].data.properties);
+            if (self.config[$index].data.properties)
+                wiComponentService.emit('update-properties', self.config[$index].data.properties);
         }
     };
 
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
-        } 
+        }
         else {
             let treeFunctions = wiComponentService.getComponent('TREE_FUNCTIONS');
             if (treeFunctions) {
                 // get func from component service
-                if( self.config && self.config[$index] && self.config[$index].type
+                if (self.config && self.config[$index] && self.config[$index].type
                     && treeFunctions[self.config[$index].type]) {
                     treeFunctions[self.config[$index].type]();
                 }

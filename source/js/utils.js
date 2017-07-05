@@ -160,6 +160,7 @@ var PROPERTIES_LIST_CONFIG_TEST_3 = [
         ]
     }
 ];
+
 var TREE_CONFIG_TEST_3 = [
     {
         name: 'wells',
@@ -185,11 +186,11 @@ var TREE_CONFIG_TEST_3 = [
                 children: [
                     {
                         name: 'Data',
-                        type: 'item121',
+                        type: 'data',
                         data: {
                             icon: 'curve-data-16x16',
-                            label: 'item 1.2.1.1',
-                            description: 'hic',
+                            label: 'Data',
+                            description: '',
                             childExpanded: false,
                             properties: PROPERTIES_LIST_CONFIG_TEST_1
                         },
@@ -199,98 +200,90 @@ var TREE_CONFIG_TEST_3 = [
                                 type: 'depth',
                                 data: {
                                     icon: 'depth-blank-16x16',
-                                    label: 'depth',
+                                    label: 'Depth',
                                     description: 'M'
                                 }
                             }
                         ]
                     },
                     {
-                        name: 'item1212',
-                        type: 'item121',
+                        name: 'data1',
+                        type: 'data',
                         data: {
-                            name: 'item122',
-                            icon: 'project-new-16x16',
-                            label: 'item 1.2.1.2',
+                            icon: 'curve-data-16x16',
+                            label: 'Data2',
                             description: '',
-                            childExpanded: false,
-                            properties: PROPERTIES_LIST_CONFIG_TEST_2
-                        },
-                        children: []
-                    }
-                ]
-            },
-            {
-                name: 'item12',
-                type: 'item12',
-                data: {
-                    icon: 'project-new-16x16',
-                    label: 'item 1.2',
-                    description: '',
-                    childExpanded: false,
-                    properties: PROPERTIES_LIST_CONFIG_TEST_3
-                },
-                children: []
-            }
-        ]
-    }
-];
-/*var TREE_CONFIG_TEST_3 = [
-    {
-        name: 'item11000',
-        type: 'item11000',
-        data: {
-            icon: 'project-new-16x16',
-            label: 'item 11000',
-            description: 'mm',
-            childExpanded: false,
-            properties: PROPERTIES_LIST_CONFIG_TEST_2
-        },
-        children: [
-            {
-                name: 'item11',
-                type: 'item11',
-                data: {
-                    icon: 'project-new-16x16',
-                    label: 'item 1.1',
-                    description: 'hu hu hu',
-                    childExpanded: false,
-                    properties: PROPERTIES_LIST_CONFIG_TEST_3
-                },
-                children: [
-                    {
-                        name: 'item1211',
-                        type: 'item121',
-                        data: {
-                            icon: 'project-new-16x16',
-                            label: 'item 1.2.1.1',
-                            description: 'hic',
                             childExpanded: false,
                             properties: PROPERTIES_LIST_CONFIG_TEST_1
                         },
-                        children: []
-                    },
-                    {
-                        name: 'item1212',
-                        type: 'item121',
-                        data: {
-                            name: 'item122',
-                            icon: 'project-new-16x16',
-                            label: 'item 1.2.1.2',
-                            description: '',
-                            childExpanded: false,
-                            properties: PROPERTIES_LIST_CONFIG_TEST_2
-                        },
-                        children: []
+                        children: [
+                            {
+                                name: 'depth1',
+                                type: 'depth',
+                                data: {
+                                    icon: 'depth-blank-16x16',
+                                    label: 'Depth',
+                                    description: 'M'
+                                }
+                            }
+                        ]
                     }
                 ]
             },
             {
-                name: 'item12',
-                type: 'item12',
+                name: 'rawdata',
+                type: 'rawdata',
                 data: {
                     icon: 'project-new-16x16',
-                    label: 'item 1.2',
+                    label: 'Raw data',
+                    description: '',
+                    childExpanded: false,
+                    properties: PROPERTIES_LIST_CONFIG_TEST_3
+                },
+                children: []
+            },
+            {
+                name: 'intepretationmodel',
+                type: 'intepretationmodel',
+                data: {
+                    icon: 'project-new-16x16',
+                    label: 'Intepretation Model',
+                    description: '',
+                    childExpanded: false,
+                    properties: PROPERTIES_LIST_CONFIG_TEST_3
+                },
+                children: []
+            },
+            {
+                name: 'userdefined',
+                type: 'userdefined',
+                data: {
+                    icon: 'user-define-16x16',
+                    label: 'User Defined',
+                    description: '',
+                    childExpanded: false,
+                    properties: PROPERTIES_LIST_CONFIG_TEST_3
+                },
+                children: []
+            },
+            {
+                name: 'logplot',
+                type: 'logplot',
+                data: {
+                    icon: 'logplot-blank-16x16',
+                    label: 'Logplot',
+                    description: '',
+                    childExpanded: false,
+                    properties: PROPERTIES_LIST_CONFIG_TEST_3
+                },
+                children: []
+            },
+            {
+                name: 'crossplot',
+                type: 'crossplot',
+                data: {
+                    icon: 'crossplot-blank-16x16',
+                    label: 'CrossPlot',
                     description: '',
                     childExpanded: false,
                     properties: PROPERTIES_LIST_CONFIG_TEST_3
@@ -298,29 +291,6 @@ var TREE_CONFIG_TEST_3 = [
                 children: []
             }
         ]
-    },
-    {
-        name: 'item2',
-        type: 'item2',
-        data: {
-            icon: 'project-new-16x16',
-            label: 'item 2',
-            description: 'description 2',
-            childExpanded: false,
-            properties: PROPERTIES_LIST_CONFIG_TEST_2
-        }
-    },
-    {
-        name: 'logplot1',
-        type: 'logplot',
-        data: {
-            icon: 'project-new-16x16',
-            label: 'Logplot',
-            description: 'Logplot',
-            childExpanded: false,
-            properties: PROPERTIES_LIST_CONFIG_TEST_3
-        }
     }
 ];
-*/
 
