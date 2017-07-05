@@ -7,17 +7,40 @@ img {
 
 }
 
-//<<<<<<< HEAD
-//.form-horizontal .control-label {
-//    text-align: left;
-//	font-style: normal !important;
-//
-//}
-//=======
-//>>>>>>> update well add new dialog
+
+.form-horizontal .control-label {
+    text-align: left;
+	font-style: normal !important;
+}
+
+.form-control{
+	height: 30px;
+	padding: 4px 12px;
+}
+
+.modal-content {
+    border: 10px solid rgba(175,209,244,.5);
+    border-radius: 6px;
+}
+
+.modal-footer{
+	padding: 15px 20px 15px;
+} 
 
 .modal-footer button {
-	width: 100px;
+	padding: 4px 10px 4px 8px;
+	background: rgba(255,255,255,1);
+	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(222,224,230,1) 49%, rgba(255,255,255,1) 100%);
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(49%, rgba(222,224,230,1)), color-stop(100%, rgba(255,255,255,1)));
+	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(222,224,230,1) 49%, rgba(255,255,255,1) 100%);
+	background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(222,224,230,1) 49%, rgba(255,255,255,1) 100%);
+	background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(222,224,230,1) 49%, rgba(255,255,255,1) 100%);
+	background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(222,224,230,1) 49%, rgba(255,255,255,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ffffff', GradientType=0 );
+	span{
+		position: relative;
+		top: 2px;
+	}
 }
 
 .modal-footer button span img {
@@ -29,8 +52,11 @@ img {
 	color: red;
 }
 .area {
-	border: 2px dashed #ccc;
-	background-color: #eee;
+    border: 1px dashed #4d97e6;
+    background-color: #bedaf7;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 5px;
 }
 .padding-top-2em {
 	padding-top: 2em;
@@ -69,6 +95,9 @@ img {
 	padding: 2px 8px;
 }
 input[required] {
-	background-color: #ffe0e0;
-    border: 1px solid #faa;
+	background-color: #ffefd9;
+    border: 1px solid #f8d6bd;
+}
+.modal-backdrop.in{
+	opacity: 0;
 }
