@@ -63,7 +63,9 @@ exports.openProjectDialog = function($scope, ModalService, callback) {
         modal.close.then(function(ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+            if( ret ) {
+                callback(ret);
+            }
         })
     });
 }

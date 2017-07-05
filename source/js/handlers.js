@@ -6,29 +6,25 @@ exports.NewProjectButtonClicked = function () {
 }
 
 exports.OpenProjectButtonClicked = function () {
+    var self = this;
     console.log('OpenProjectButtoon is clicked');
-    // var wiComponentService = this.wiComponentService;
-    // var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    // DialogUtils.openProjectDialog(this.$scope, this.ModalService );
-
-    // todo: remove test
-    var data = {
-        id: Date.now(),
-        "type": "project",
-        "name": "Test-Project",
-        "company": "UET",
-        "department": "FIT",
-        "description": "blablabla"
-    };
-    this.wiComponentService.emit('open-project-event', data);
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function(projectData) {
+        var utils = self.wiComponentService.getComponent('UTILS');
+        utils.projectOpen(self.wiComponentService, projectData, self.$timeout);
+    } );
 }
 
 exports.CloseProjectButtonClicked = function () {
+    let self = this;
     console.log('CloseProjectButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    var utils = this.wiComponentService.getComponent('UTILS');
+    var DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
-        console.log("User choose: " + yesOrNo);
+        if (yesOrNo) {
+            utils.projectClose(self.wiComponentService);
+        }
     })
 }
 
@@ -67,6 +63,7 @@ exports.ExitButtonClicked = function () {
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (ret) {
         console.log("User choose: " + ret);
+        window.close();
     })
 }
 

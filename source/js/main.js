@@ -75,22 +75,26 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.bindFunctions(globalHandlers, handlers, {
         $scope: $scope,
         wiComponentService: wiComponentService,
-        ModalService: ModalService
+        ModalService: ModalService,
+        $timeout: $timeout
     });
    utils.bindFunctions(globalHandlers, logplotHandlers, {
        $scope: $scope,
        wiComponentService: wiComponentService,
-       ModalService: ModalService
+       ModalService: ModalService,
+       $timeout: $timeout
    });
     utils.bindFunctions(globalHandlers, explorerHandlers, {
         $scope: $scope,
         wiComponentService: wiComponentService,
-        ModalService: ModalService
+        ModalService: ModalService,
+        $timeout: $timeout
     });
     utils.bindFunctions(treeHandlers, treeviewHandlers, {
         $scope: $scope,
         wiComponentService: wiComponentService,
-        ModalService: ModalService
+        ModalService: ModalService,
+        $timeout: $timeout
     });
     wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
     wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);

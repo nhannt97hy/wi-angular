@@ -143,6 +143,12 @@ function Controller($scope, wiComponentService) {
             handler: function () {
                 self.addTrack();
             }
+        },{
+            name: "hhhhh",
+            label: "HHHHHHHH",
+            handler: function() {
+                console.log(self);
+            }
         }]);
     }
 }

@@ -33,8 +33,13 @@ function Controller($scope, wiComponentService) {
             let treeFunctions = wiComponentService.getComponent('TREE_FUNCTIONS');
             if (treeFunctions) {
                 // get func from component service
-                treeFunctions[self.config[$index].type]();
-                //wiComponentService.treeFunctions[self.config[$index].type]();
+                if( self.config && self.config[$index] && self.config[$index].type
+                    && treeFunctions[self.config[$index].type]) {
+                    treeFunctions[self.config[$index].type]();
+                }
+                else {
+                    console.error(treeFunctions, self.config, self.config[$index]);
+                }
             }
         }
     };
