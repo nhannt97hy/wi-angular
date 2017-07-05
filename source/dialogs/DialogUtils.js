@@ -4,35 +4,34 @@
 exports.newProjectDialog = function ($scope, ModalService) {
     var self = this;
     console.log("new project dialog");
-    function ModalController($scope, close) {
+    function ModalController($scope, close,$http) {
         this.close = function (ret) {
             close(ret, 500); // close, but give 500ms for bootstrap to animate
         };
 
         this.onOK = function () {
-            // if (typeof $scope.name == 'undefined') {
-            //     var err = 'NewProject: Project Name is required!';
-            //     return {error: err};
-            // } else if (typeof $scope.location == 'undefined') {
-            //     var err = 'NewProject: Location is required';
-            //     return {error: err};
-            // } else {
-                // $scope.newProjectInfo{
-                //     name: $scope.projectName,
-                //     company: $scope.company,
-                //     department: $scope.department,
-                //     description: $scope.description
-                // }
-            // console.log($scope.newProjectInfo);
+            $scope.newProjectInfo = {
+                name: $scope.projectName,
+                company: $scope.company,
+                department: $scope.department,
+                description: $scope.descriptions
+            };
+            // getProjectList();
+            console.log($scope.newProjectInfo);
         }
-        // $http({
-        //     method : 'GET',
-        //     url : '54.255.212.141/'
-        // }).then(function newProject(req, res) {
-        //     $scope.newProjectInfo = req.data.projectInfo;
-        // });
-    }
+        // function getProjectList(){
+        //     console.log("ok");
+        //     $http({
+        //         method: "POST",
+        //         url : "http://54.169.109.34/project/list"
+        //     }).then(function getData(res){
+        //         console.log($scope.res.data);
+        //     });
+        // };
 
+
+
+    }
     ModalService.showModal({
         templateUrl: 'new-project/new-project-modal.html',
         controller: ModalController,
@@ -345,12 +344,30 @@ exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
     function ModalController($scope, close) {
         this.close = function(ret) {
             close(ret);
-        }
+        };
+
+
+        this.selectWell = "well1";
+        this.selectWellList = ["well1", "well2", "well3"];
+        this.originalsDepth = {
+            step : 5,
+            topDepth : 200,
+            bottomDepth : 500
+        };
+
         this.runClick = function(){
             console.log("Click run");
-            DialogUtils.confirmDialog(ModalService, "Run ", "Project", function(ret) {
+            DialogUtils.confirmDialog(ModalService, "Depth Conversion ", "Change wells depth and step?", function(ret) {
                 console.log(ret);
+                $scope.newDepth = {
+                    step : $scope.step,
+                    topDepth : $scope.topDepth,
+                    bottomDepth : $scope.bottomDepth,
+                    fixed : $scope.fixed
+            };
+                console.log($scope.newDepth);
             });
+
         }
     }
     ModalService.showModal({
@@ -405,6 +422,33 @@ exports.familyEditDialog = function(ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "family-edit/family-edit-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function(modal) {
+        modal.element.modal();
+        modal.close.then(function(ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.blankLogplotDialog = function(ModalService, callback) {
+    function ModalController($scope, close) {
+        this.close = function(ret) {
+            close(ret);
+        }
+
+        $scope.name = "BlankLogplot";
+
+        this.onOk = function () {
+            console.log($scope.name);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "blank-logplot/blank-logplot-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function(modal) {
