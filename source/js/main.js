@@ -78,12 +78,12 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         ModalService: ModalService,
         $timeout: $timeout
     });
-   utils.bindFunctions(globalHandlers, logplotHandlers, {
-       $scope: $scope,
-       wiComponentService: wiComponentService,
-       ModalService: ModalService,
-       $timeout: $timeout
-   });
+    utils.bindFunctions(globalHandlers, logplotHandlers, {
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService,
+        $timeout: $timeout
+    });
     utils.bindFunctions(globalHandlers, explorerHandlers, {
         $scope: $scope,
         wiComponentService: wiComponentService,
@@ -121,11 +121,16 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Explorer');
     layoutManager.putLeft('property-block', 'Properties');
-    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+    // layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
     // Install 
     wiComponentService.on('add-logplot-event', function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
+    });
+
+    wiComponentService.on('project-unloaded-event', function () {
+        console.log('project-unloaded-event');
+        // layoutManager.removeAllRightTabs();
     });
 
     $(document).ready(function () {

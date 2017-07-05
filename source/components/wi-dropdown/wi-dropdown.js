@@ -8,7 +8,8 @@ function Controller(wiComponentService) {
         label: '',
         layout: 'icon-top',
         icon: 'project-new-32x32',
-        disabled: false
+        disabled: false,
+        initialState: {}
     };
 
     this.onClick = function () {
@@ -19,16 +20,22 @@ function Controller(wiComponentService) {
         if (self.name) wiComponentService.putComponent(self.name, self);
 
         if (self.container === 'ribbon' || self.container === 'explorer') {
-            wiComponentService.on('open-project-success-event', function () {
-                self.disabled = 'false';
-            })
+            this.default.initialState.disabled = self.isDisabled() + '';
+
+            wiComponentService.on('project-loaded-event', function () {
+                self.disabled = "false";
+            });
+
+            wiComponentService.on('project-unloaded-event', function () {
+                self.disabled = self.default.initialState.disabled;
+            });
         }
     };
 
     this.isDisabled = function () {
-        if (self.disabled === 'true'){
+        if (self.disabled === 'true') {
             return true;
-        } else if (self.disabled === 'false'){
+        } else if (self.disabled === 'false') {
             return false;
         } else {
             return self.default.disabled;
