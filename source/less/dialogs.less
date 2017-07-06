@@ -18,6 +18,36 @@ img {
 	padding: 4px 12px;
 }
 
+// .modal-w800{
+// 	width: 800px;
+// }
+
+.modal-1000{
+	width: 1000px;
+	label[class^=col-]{
+		padding: 0px;
+	}
+}
+
+.modal-body{
+	padding: 10px 25px;
+	h5{
+		margin:10px 0 20px 0; 
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+	}
+	h5:after {
+		position: absolute;
+		content: "";
+		height: 1px;
+		background-color: #e5e5e5;
+		width: 100%;
+		margin-left: 10px;
+		top: 50%;
+	}
+}
+
 .modal-content {
     border: 10px solid rgba(175,209,244,.5);
     border-radius: 6px;
@@ -25,6 +55,7 @@ img {
 
 .modal-footer{
 	padding: 15px 20px 15px;
+	margin-top:0; 
 } 
 
 .modal-footer button {
@@ -83,6 +114,9 @@ img {
 .small-text {
 	font-size: 11px;
 }
+.normal-text {
+	font-size: 12px;
+}
 .condensed-text {
 	letter-spacing: -1px;
 }
@@ -101,3 +135,16 @@ input[required] {
 .modal-backdrop.in{
 	opacity: 0;
 }
+
+.black-btn{
+	background: #282828;
+	padding: 2px 15px;
+	border: 1px solid #282828;
+	color: #fff;
+	&:hover{
+		background: red;
+		border: 1px solid red;
+		color: #fff;
+	}
+}
+
