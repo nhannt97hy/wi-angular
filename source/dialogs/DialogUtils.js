@@ -1,30 +1,31 @@
 /**
  * Created by cuong on 6/15/2017.
  */
-exports.newProjectDialog = function ($scope, ModalService, callback) {
-    function ModalController(close, $http) {
+exports.newProjectDialog = function ($mainScope, ModalService, callback) {
+    function ModalController($scope, close, $http) {
+        let self = this;
+        this.data = null;
 
         this.onOkButtonClicked = function () {
-            let data = {
-                "type": "project",
-                "name": "Test-Project",
-                "company": "",
-                "department": "",
-                "description": ""
+            self.data = {
+                name: $scope.name,
+                company: $scope.company,
+                department: $scope.department,
+                description: $scope.description
             };
-
-            $http.post('http://localhost:3000/project/new', data).then(
-                function (response) {
-                    console.log('response', response.data);
-
-                    if (response.data && response.data.code === 200) {
-                        return close(response.data.content, 500);
-                    }
-                },
-                function (err) {
-                    console.log('response error', err);
-                }
-            );
+            console.log("This data: ", self.data);
+            // $http.post('http://54.169.109.34/project/new', data).then(
+            //     function (response) {
+            //         console.log('response', response.data);
+            //
+            //         if (response.data && response.data.code === 200) {
+            //             return close(response.data.content, 500);
+            //         }
+            //     },
+            //     function (err) {
+            //         console.log('response error', err);
+            //     }
+            // );
         };
 
         this.onCancelButtonClicked = function () {
