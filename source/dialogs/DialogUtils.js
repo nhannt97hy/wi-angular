@@ -1,34 +1,33 @@
 /**
  * Created by cuong on 6/15/2017.
  */
-exports.newProjectDialog = function ($scope, ModalService) {
-    var self = this;
-    console.log("new project dialog");
-    function ModalController($scope, close,$http) {
-        this.close = function (ret) {
-            close(ret, 500); // close, but give 500ms for bootstrap to animate
+exports.newProjectDialog = function ($scope, ModalService, callback) {
+    function ModalController(close, $http) {
+
+        this.onOkButtonClicked = function () {
+            let data = {
+                "type": "project",
+                "name": "Test-Project",
+                "company": "",
+                "department": "",
+                "description": ""
+            };
+
+            $http({
+                method : 'GET',
+                url : '54.255.212.141/'
+            }).then(function (req, res) {
+
+            });
+
+            close(data, 500); // close, but give 500ms for bootstrap to animate
         };
 
-        this.onOK = function () {
-            $scope.newProjectInfo = {
-                name: $scope.projectName,
-                company: $scope.company,
-                department: $scope.department,
-                description: $scope.descriptions
-            };
-            // getProjectList();
-            console.log($scope.newProjectInfo);
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            // close(null, 500);
         }
-        // function getProjectList(){
-        //     console.log("ok");
-        //     $http({
-        //         method: "POST",
-        //         url : "http://54.169.109.34/project/list"
-        //     }).then(function getData(res){
-        //         console.log($scope.res.data);
-        //     });
-        // };
-
+    }
 
 
     }
@@ -38,51 +37,56 @@ exports.newProjectDialog = function ($scope, ModalService) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            console.log("Modal finally close: ", ret);
+
+            if (data) {
+                callback(data);
+            }
         });
     });
 };
-exports.openProjectDialog = function($scope, ModalService, callback) {
+exports.openProjectDialog = function ($scope, ModalService, callback) {
     function ModalController($scope, close) {
         console.log("modal controller created");
-        this.close = function(retValue) {
+        this.close = function (retValue) {
             console.log("returnValue:", retValue);
             close(retValue);
         }
     }
+
     ModalService.showModal({
         templateUrl: 'open-project/open-project-modal.html',
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if( ret ) {
+            if (ret) {
                 callback(ret);
             }
         })
     });
 }
-exports.confirmDialog = function(ModalService, titleMessage, confirmMessage, callback) {
+exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, callback) {
     function ModalController($scope, close) {
         this.title = titleMessage;
         this.confirmMsg = confirmMessage;
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
         templateUrl: "confirm/confirm-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -90,172 +94,172 @@ exports.confirmDialog = function(ModalService, titleMessage, confirmMessage, cal
     });
 }
 
-exports.unitSettingDialog = function(ModalService, callback) {
+exports.unitSettingDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         this.defaultData = {
-            Default : {
+            Default: {
                 unitSystem: "Default",
-                caliper : "in", 
-                neutron : "v/v",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "psi",
-                bitSize : "in",
-                density : "g/cm3",
-                concentration : "v/v",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+                caliper: "in",
+                neutron: "v/v",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "psi",
+                bitSize: "in",
+                density: "g/cm3",
+                concentration: "v/v",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            Canadian : {
-                unitSystem : "Canadian",
-                caliper : "cm", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/m",
-                pressure : "psi",
-                bitSize : "cm",
-                density : "kg/m3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+            Canadian: {
+                unitSystem: "Canadian",
+                caliper: "cm",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/m",
+                pressure: "psi",
+                bitSize: "cm",
+                density: "kg/m3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            English : {
-                unitSystem : "English",
-                caliper : "in", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "psi",
-                bitSize : "in",
-                density : "g/cm3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+            English: {
+                unitSystem: "English",
+                caliper: "in",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "psi",
+                bitSize: "in",
+                density: "g/cm3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            Metric : {
-                unitSystem : "Metric",
-                caliper : "cm", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "mBar",
-                bitSize : "cm",
-                density : "g/cm3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+            Metric: {
+                unitSystem: "Metric",
+                caliper: "cm",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "mBar",
+                bitSize: "cm",
+                density: "g/cm3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            Russian : {
-                unitSystem : "Russian",
-                caliper : "cm", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "mBar",
-                bitSize : "cm",
-                density : "g/cm3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"                 
+            Russian: {
+                unitSystem: "Russian",
+                caliper: "cm",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "mBar",
+                bitSize: "cm",
+                density: "g/cm3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             }
         };
         this.allData = {
-            unitSystem : ["Default", "Canadian", "English", "Metric", "Russian"],
-            caliper : ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
-            neutron : ["v/v", "Trac", "%", "pu", "imp/min"],
-            gammaRay : ["api", "GAPI", "uR/h", "GAMA"], 
-            acoustic : ["us/ft", "us/m"],
-            pressure : ["psi", "Pa", "kPa", "MPa", "mBar", "Bar", "kg/m2", "atm", "torr"],
-            bitSize : ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
-            density : ["g/cm3", "kg/m3"],
-            concentration : ["v/v", "%", "ppm", "kpp", "m", "1/L", "mS/m", "1/kg", "dB/m", "mV", "galUS/min", "mD/cP", "b/elec", "b/cm3", "m3/d", "MV"],
-            permeability : ["mD", "D"],
-            porosity : ["v/v", "m3/m3", "ft3/ft3", "%", "imp/min", "ratio"],
-            angle : ["deg", "dega", "grad", "rad"],
-            resistivity : ["ohm.m", "ratio"],
-            saturation : ["v/v", "m3/m3", "ft3/ft3",  "%", "ratio"],
-            temperature : ["degC", "degF"],
-            volume : ["v/v", "cm3", "L.m"],
-            sp : ["mv"],
-            length : ["m"],
-            time : ["s"],
-            area : ["m2"],
-            flow : ["t"],
-            speed : ["m/s", "m2", "ft/h", "ratio", "ft/s", "m/min", "rpm", "mn/m"],
-            force : ["N"]
+            unitSystem: ["Default", "Canadian", "English", "Metric", "Russian"],
+            caliper: ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
+            neutron: ["v/v", "Trac", "%", "pu", "imp/min"],
+            gammaRay: ["api", "GAPI", "uR/h", "GAMA"],
+            acoustic: ["us/ft", "us/m"],
+            pressure: ["psi", "Pa", "kPa", "MPa", "mBar", "Bar", "kg/m2", "atm", "torr"],
+            bitSize: ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
+            density: ["g/cm3", "kg/m3"],
+            concentration: ["v/v", "%", "ppm", "kpp", "m", "1/L", "mS/m", "1/kg", "dB/m", "mV", "galUS/min", "mD/cP", "b/elec", "b/cm3", "m3/d", "MV"],
+            permeability: ["mD", "D"],
+            porosity: ["v/v", "m3/m3", "ft3/ft3", "%", "imp/min", "ratio"],
+            angle: ["deg", "dega", "grad", "rad"],
+            resistivity: ["ohm.m", "ratio"],
+            saturation: ["v/v", "m3/m3", "ft3/ft3", "%", "ratio"],
+            temperature: ["degC", "degF"],
+            volume: ["v/v", "cm3", "L.m"],
+            sp: ["mv"],
+            length: ["m"],
+            time: ["s"],
+            area: ["m2"],
+            flow: ["t"],
+            speed: ["m/s", "m2", "ft/h", "ratio", "ft/s", "m/min", "rpm", "mn/m"],
+            force: ["N"]
         };
         function copyObj(sourceObj, destObj) {
-            for( var attr in sourceObj ) {
+            for (var attr in sourceObj) {
                 destObj[attr] = sourceObj[attr];
             }
         };
         this.selectedData = {};
         var self = this;
         copyObj(self.defaultData.Default, self.selectedData);
-        this.setDefault = function(){
+        this.setDefault = function () {
             copyObj(self.defaultData.Default, self.selectedData);
         };
-        this.changeDefault = function(){
+        this.changeDefault = function () {
             switch (self.selectedData.unitSystem) {
                 case "Default":
                     copyObj(self.defaultData.Default, self.selectedData);
@@ -278,18 +282,19 @@ exports.unitSettingDialog = function(ModalService, callback) {
             }
         };
         console.log(self.selectedData.unitSystem)
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
-            
-        }                    
+
+        }
     }
+
     ModalService.showModal({
         templateUrl: "unit-setting/unit-setting-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -298,20 +303,21 @@ exports.unitSettingDialog = function(ModalService, callback) {
 
 }
 
-exports.addNewDialog = function(ModalService, callbak) {
+exports.addNewDialog = function (ModalService, callbak) {
     function ModalController($scope, close) {
 
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
         templateUrl: "add-new/add-new-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -319,31 +325,33 @@ exports.addNewDialog = function(ModalService, callbak) {
     });
 }
 
-exports.wellHeaderDialog = function(ModalService, callback) {
+exports.wellHeaderDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         this.wellHeader = ["well1", "well2", "well3"];
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
         templateUrl: "well-header/well-header-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
     });
 }
-exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
+exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
     console.log(DialogUtils);
     function ModalController($scope, close) {
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
+<<<<<<< HEAD
         };
 
 
@@ -370,13 +378,14 @@ exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
 
         }
     }
+
     ModalService.showModal({
         templateUrl: "depth-conversion/depth-conversion-modal.html",
-        controller : ModalController,
-        controllerAs : "wiModal"
-    }).then(function(modal) {
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -384,28 +393,29 @@ exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
     });
 }
 
-exports.curveAliasDialog = function(ModalService, callback) {
+exports.curveAliasDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
-        this.addCurveName = function(curveAlias){
+        this.addCurveName = function (curveAlias) {
 
         }
-        this.isSelected = function(item) {
+        this.isSelected = function (item) {
             console.log(item);
             return "";
         }
-        
-        
-        this.close = function(ret) {
+
+
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
-        templateUrl : "curve-alias/curve-alias-modal.html",
-        controller : ModalController,
-        controllerAs : "wiModal"
-    }).then(function(modal) {
+        templateUrl: "curve-alias/curve-alias-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -413,9 +423,9 @@ exports.curveAliasDialog = function(ModalService, callback) {
     });
 }
 
-exports.familyEditDialog = function(ModalService, callback) {
+exports.familyEditDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
@@ -424,9 +434,9 @@ exports.familyEditDialog = function(ModalService, callback) {
         templateUrl: "family-edit/family-edit-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
