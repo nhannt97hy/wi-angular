@@ -10,14 +10,18 @@ exports.newProjectDialog = function ($scope, ModalService, callback) {
                 "description": ""
             };
 
-            $http({
-                method : 'GET',
-                url : '54.255.212.141/'
-            }).then(function (req, res) {
+            $http.post('http://localhost:3000/project/new', data).then(
+                function (response) {
+                    console.log('response', response.data);
 
-            });
-
-            close(data, 500); // close, but give 500ms for bootstrap to animate
+                    if (response.data && response.data.code === 200) {
+                        return close(response.data.content, 500);
+                    }
+                },
+                function (err) {
+                    console.log('response error', err);
+                }
+            );
         };
 
         this.onCancelButtonClicked = function () {
