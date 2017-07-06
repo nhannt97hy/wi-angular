@@ -8,41 +8,50 @@
 
             </div>
             <div class="modal-body">
-                <div class="">
-                    <form class="form-horizontal" action="" name="modalNewProject">
-                        <div class="form-group">
-                          <label class="control-label col-sm-3" for="projectName">Project name:</label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" value="" id="projectName" name="projectName" ng-model="projectName" required>
+                <form class="form-horizontal" action="" name="modalNewProject">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="projectName">Project name:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="" id="projectName" name="projectName"
+                                   ng-model="projectName"
+                                   ng-click="wiModal.error = null"
+                                   required>
                             <span ng-show ="modalNewProject.projectName.$dirty && modalNewProject.projectName.$error.required">Required*</span>
-                          </div>
                         </div>
-                        <div class="form-group">
-                          <label class="control-label col-sm-3" for="location">Location:</label>
-                          <div class="col-sm-9">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="location">Location:</label>
+                        <div class="col-sm-9">
                             <div class="area text-center">Browser Location</div>
-                          </div>
                         </div>
-                        <div class="form-group">
-                          <label class="control-label col-sm-3" for="company">Company</label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" value="" id="company" name="company" ng-model="company">
-                          </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="company">Company</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="" id="company" name="company"
+                                   ng-model="company"
+                                   ng-click="wiModal.error = null">
                         </div>
-                        <div class="form-group">
-                          <label class="control-label col-sm-3" for="department">Department:</label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" value="" id="department" name="department" ng-model="department">
-                          </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="department">Department:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="" id="department" name="department"
+                                   ng-model="department"
+                                   ng-click="wiModal.error = null">
                         </div>
-                        <div class="form-group">
-                          <label class="control-label col-sm-3" for="descriptions">Descriptions:</label>
-                          <div class="col-sm-9">
-                            <textarea class="form-control" rows="8" value="" id="descriptions" name="descriptions" ng-model="descriptions"></textarea>
-                          </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="descriptions">Descriptions:</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" rows="8" value="" id="descriptions" name="descriptions"
+                                      ng-model="descriptions"
+                                      ng-click="wiModal.error = null"></textarea>
                         </div>
-                      </form>
-                </div>
+                    </div>
+                </form>
+
+                <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default" data-dismiss="modal"><span class="ok-16x16"></span>&nbsp;OK</button>

@@ -1,5 +1,7 @@
 exports.newProjectDialog = function ($scope, ModalService, callback) {
     function ModalController(close, $http) {
+        let self = this;
+        this.error = null;
 
         this.onOkButtonClicked = function () {
             let data = {
@@ -16,6 +18,10 @@ exports.newProjectDialog = function ($scope, ModalService, callback) {
 
                     if (response.data && response.data.code === 200) {
                         return close(response.data.content, 500);
+                    } else if (response.data) {
+                        self.error = response.data.reason;
+                    } else {
+                        self.error = 'Something went wrong!';
                     }
                 },
                 function (err) {
@@ -46,12 +52,41 @@ exports.newProjectDialog = function ($scope, ModalService, callback) {
         });
     });
 };
-exports.openProjectDialog = function ($scope, ModalService, callback) {
-    function ModalController($scope, close) {
-        console.log("modal controller created");
-        this.close = function (retValue) {
-            console.log("returnValue:", retValue);
-            close(retValue);
+
+exports.openProjectDialog = function ($mainScope, ModalService, callback) {
+    function ModalController($scope, close, $http) {
+        this.error = null;
+
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+
+            // test
+            let data = {
+                "idProject": $scope.projectName,
+            };
+
+            $http.post('http://localhost:3000/project/info', data).then(
+                function (response) {
+                    console.log('response', response.data);
+
+                    if (response.data && response.data.code === 200) {
+                        return close(response.data.content, 500);
+                    } else if (response.data) {
+                        self.error = response.data.reason;
+                    } else {
+                        self.error = 'Something went wrong!';
+                    }
+                },
+                function (err) {
+                    self.error = err;
+                }
+            );
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            // close(null, 500);
         }
     }
 
@@ -61,11 +96,12 @@ exports.openProjectDialog = function ($scope, ModalService, callback) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (ret) {
-                callback(ret);
+
+            if (data) {
+                callback(data);
             }
         })
     });
