@@ -1,31 +1,42 @@
-/**
- * Created by cuong on 6/15/2017.
- */
 exports.newProjectDialog = function ($mainScope, ModalService, callback) {
     function ModalController($scope, close, $http) {
         let self = this;
-        this.data = null;
+        this.error = null;
 
         this.onOkButtonClicked = function () {
-            self.data = {
+            let data = {
                 name: $scope.name,
                 company: $scope.company,
                 department: $scope.department,
                 description: $scope.description
             };
-            console.log("This data: ", self.data);
-            // $http.post('http://54.169.109.34/project/new', data).then(
-            //     function (response) {
-            //         console.log('response', response.data);
-            //
-            //         if (response.data && response.data.code === 200) {
-            //             return close(response.data.content, 500);
-            //         }
-            //     },
-            //     function (err) {
-            //         console.log('response error', err);
-            //     }
-            // );
+            console.log("This data: ", data);
+
+            let request = {
+                url: 'http://54.169.109.34/project/new',
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json'
+                },
+                data: data
+            };
+
+            $http(request).then(
+                function (response) {
+                    console.log('response', response.data);
+
+                    if (response.data && response.data.code === 200) {
+                        return close(response.data.content, 500);
+                    } else if (response.data) {
+                        self.error = response.data.reason;
+                    } else {
+                        self.error = 'Something went wrong!';
+                    }
+                },
+                function (err) {
+                    self.error = err;
+                }
+            );
         };
 
         this.onCancelButtonClicked = function () {
@@ -50,12 +61,41 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
         });
     });
 };
-exports.openProjectDialog = function ($scope, ModalService, callback) {
-    function ModalController($scope, close) {
-        console.log("modal controller created");
-        this.close = function (retValue) {
-            console.log("returnValue:", retValue);
-            close(retValue);
+
+exports.openProjectDialog = function ($mainScope, ModalService, callback) {
+    function ModalController($scope, close, $http) {
+        this.error = null;
+
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+
+            // test
+            let data = {
+                "idProject": $scope.projectName,
+            };
+
+            $http.post('http://localhost:3000/project/info', data).then(
+                function (response) {
+                    console.log('response', response.data);
+
+                    if (response.data && response.data.code === 200) {
+                        return close(response.data.content, 500);
+                    } else if (response.data) {
+                        self.error = response.data.reason;
+                    } else {
+                        self.error = 'Something went wrong!';
+                    }
+                },
+                function (err) {
+                    self.error = err;
+                }
+            );
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            // close(null, 500);
         }
     }
 
@@ -65,11 +105,12 @@ exports.openProjectDialog = function ($scope, ModalService, callback) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (ret) {
-                callback(ret);
+
+            if (data) {
+                callback(data);
             }
         })
     });
@@ -360,21 +401,21 @@ exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
         this.selectWell = "well1";
         this.selectWellList = ["well1", "well2", "well3"];
         this.originalsDepth = {
-            step : 5,
-            topDepth : 200,
-            bottomDepth : 500
+            step: 5,
+            topDepth: 200,
+            bottomDepth: 500
         };
 
-        this.runClick = function(){
+        this.runClick = function () {
             console.log("Click run");
-            DialogUtils.confirmDialog(ModalService, "Depth Conversion ", "Change wells depth and step?", function(ret) {
+            DialogUtils.confirmDialog(ModalService, "Depth Conversion ", "Change wells depth and step?", function (ret) {
                 console.log(ret);
                 $scope.newDepth = {
-                    step : $scope.step,
-                    topDepth : $scope.topDepth,
-                    bottomDepth : $scope.bottomDepth,
-                    fixed : $scope.fixed
-            };
+                    step: $scope.step,
+                    topDepth: $scope.topDepth,
+                    bottomDepth: $scope.bottomDepth,
+                    fixed: $scope.fixed
+                };
                 console.log($scope.newDepth);
             });
 
@@ -446,9 +487,9 @@ exports.familyEditDialog = function (ModalService, callback) {
     });
 }
 
-exports.blankLogplotDialog = function(ModalService, callback) {
+exports.blankLogplotDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
 
@@ -463,9 +504,9 @@ exports.blankLogplotDialog = function(ModalService, callback) {
         templateUrl: "blank-logplot/blank-logplot-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
