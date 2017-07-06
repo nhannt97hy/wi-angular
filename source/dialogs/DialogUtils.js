@@ -16,7 +16,7 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                 url: 'http://54.169.109.34/project/new',
                 method: 'POST',
                 headers: {
-                    'Content-Type' : 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 data: data
             };
@@ -24,7 +24,6 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
             $http(request).then(
                 function (response) {
                     console.log('response', response.data);
-
                     if (response.data && response.data.code === 200) {
                         return close(response.data.content, 500);
                     } else if (response.data) {
@@ -489,19 +488,101 @@ exports.familyEditDialog = function (ModalService, callback) {
 
 exports.blankLogplotDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "blankPlotlog"
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
         this.close = function (ret) {
             close(ret);
-        }
-
-        $scope.name = "BlankLogplot";
-
-        this.onOk = function () {
-            console.log($scope.name);
         }
     }
 
     ModalService.showModal({
         templateUrl: "blank-logplot/blank-logplot-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.tripleComboDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "TripleCombo"
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "triple-combo/triple-combo-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.densityNeutronDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "DensityNeutron";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "density-neutron/density-neutron-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.resistivitySonicDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "ResistivitySonic";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "resistivity-sonic/resistivity-sonic-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
