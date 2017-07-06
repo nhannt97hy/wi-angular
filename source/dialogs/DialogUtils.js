@@ -29,8 +29,6 @@ exports.newProjectDialog = function ($scope, ModalService, callback) {
         }
     }
 
-
-    }
     ModalService.showModal({
         templateUrl: 'new-project/new-project-modal.html',
         controller: ModalController,
@@ -351,7 +349,6 @@ exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
     function ModalController($scope, close) {
         this.close = function (ret) {
             close(ret);
-<<<<<<< HEAD
         };
 
 
