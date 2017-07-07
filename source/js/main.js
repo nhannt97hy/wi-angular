@@ -38,6 +38,7 @@ let dragMan = {
 let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
+let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 
 let app = angular.module('wiapp',
@@ -59,6 +60,7 @@ let app = angular.module('wiapp',
         wiElementReady.name,
         wiRightClick.name,
 
+        wiApiService.name,
         wiComponentService.name,
         'angularModalService'
     ]);

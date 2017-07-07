@@ -1,5 +1,5 @@
 exports.newProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, $http) {
+    function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
 
@@ -12,31 +12,15 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
             };
             console.log("This data: ", data);
 
-            let request = {
-                url: 'http://54.169.109.34/project/new',
-                method: 'POST',
-                headers: {
-                    'Content-Type' : 'application/json'
-                },
-                data: data
-            };
+            wiApiService.post('/project/new', data)
+                .then(function (response) {
+                    console.log('response', response);
 
-            $http(request).then(
-                function (response) {
-                    console.log('response', response.data);
-
-                    if (response.data && response.data.code === 200) {
-                        return close(response.data.content, 500);
-                    } else if (response.data) {
-                        self.error = response.data.reason;
-                    } else {
-                        self.error = 'Something went wrong!';
-                    }
-                },
-                function (err) {
-                    self.error = err;
-                }
-            );
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                });
         };
 
         this.onCancelButtonClicked = function () {
@@ -63,34 +47,25 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
 };
 
 exports.openProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, $http) {
+    function ModalController($scope, close, wiApiService) {
+        let self = this;
         this.error = null;
 
-        let self = this;
-
         this.onOkButtonClicked = function () {
-
             // test
             let data = {
-                "idProject": $scope.projectName,
+                "idProject": self.projectName,
             };
 
-            $http.post('http://localhost:3000/project/info', data).then(
-                function (response) {
-                    console.log('response', response.data);
+            wiApiService.post('/project/info', data)
+                .then(function (response) {
+                    console.log('response', response);
 
-                    if (response.data && response.data.code === 200) {
-                        return close(response.data.content, 500);
-                    } else if (response.data) {
-                        self.error = response.data.reason;
-                    } else {
-                        self.error = 'Something went wrong!';
-                    }
-                },
-                function (err) {
-                    self.error = err;
-                }
-            );
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                });
         };
 
         this.onCancelButtonClicked = function () {

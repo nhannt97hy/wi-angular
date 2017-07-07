@@ -36,13 +36,7 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 }
 // APP Utils
 function projectOpen(wiComponentService, projectData, $timeout) {
-    console.log(projectData);
-
-    // perform REST API call to load project using data
-    $timeout(function () {
-        let mockTreeData = TREE_CONFIG_TEST_3;
-        wiComponentService.emit('project-loaded-event', mockTreeData);
-    }, 2000);
+    wiComponentService.emit('project-loaded-event', TREE_CONFIG_TEST_3);
 
 }
 
