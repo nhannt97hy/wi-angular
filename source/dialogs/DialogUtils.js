@@ -1,5 +1,5 @@
 exports.newProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, $http) {
+    function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
 
@@ -12,30 +12,16 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
             };
             console.log("This data: ", data);
 
-            let request = {
-                url: 'http://54.169.109.34/project/new',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                data: data
-            };
 
-            $http(request).then(
-                function (response) {
-                    console.log('response', response.data);
-                    if (response.data && response.data.code === 200) {
-                        return close(response.data.content, 500);
-                    } else if (response.data) {
-                        self.error = response.data.reason;
-                    } else {
-                        self.error = 'Something went wrong!';
-                    }
-                },
-                function (err) {
-                    self.error = err;
-                }
-            );
+            wiApiService.post('/project/new', data)
+                .then(function (response) {
+                    console.log('response', response);
+
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                });
         };
 
         this.onCancelButtonClicked = function () {
@@ -62,39 +48,52 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
 };
 
 exports.openProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, $http) {
-        this.error = null;
-
+    function ModalController($scope, close, wiApiService) {
         let self = this;
+        this.error = null;
+        this.projects = [];
+        this.idProject = null;
+        this.disabled = false;
+        this.selectedProject = {};
+
+        wiApiService.post('/project/list', null)
+            .then(function (projects) {
+                console.log('response', projects);
+
+                self.projects = projects;
+            })
+            .catch(function (err) {
+                return self.error = err;
+            })
+            .then(function () {
+                $scope.$apply();
+            });
+        this.fillInfo = function () {
+            self.selectedProject = self.projects[self.idProject];
+        }
 
         this.onOkButtonClicked = function () {
-
-            // test
+            self.disabled = true;
             let data = {
-                "idProject": $scope.projectName,
+                idProject : self.idProject
             };
 
-            $http.post('http://localhost:3000/project/info', data).then(
-                function (response) {
-                    console.log('response', response.data);
+            wiApiService.post('/project/info', data)
+                .then(function (response) {
+                    console.log('response', response);
 
-                    if (response.data && response.data.code === 200) {
-                        return close(response.data.content, 500);
-                    } else if (response.data) {
-                        self.error = response.data.reason;
-                    } else {
-                        self.error = 'Something went wrong!';
-                    }
-                },
-                function (err) {
-                    self.error = err;
-                }
-            );
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
+                });
         };
 
         this.onCancelButtonClicked = function () {
             console.log('onCancelButtonClicked');
-            // close(null, 500);
         }
     }
 
