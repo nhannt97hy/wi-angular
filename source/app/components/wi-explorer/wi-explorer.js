@@ -1,7 +1,7 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, WiWell, $timeout) {
+function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -12,8 +12,10 @@ function Controller($scope, wiComponentService, WiWell, $timeout) {
 
         wiComponentService.on('project-loaded-event', function (project) {
             console.log('project data: ', project);
-            self.treeConfig = utils.getTreeviewConfig();
+            // self.treeConfig = utils.getTreeviewConfig();
+            self.treeConfig = (new WiTreeConfig()).config;
 
+            console.log('self.treeConfig', self.treeConfig);
             // parse config from data
             // inject child item to origin config
             let wells = parseWells(project);
