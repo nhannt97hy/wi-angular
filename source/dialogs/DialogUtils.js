@@ -50,11 +50,27 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
+        this.projects = [];
+        this.idProject = null;
+        this.disabled = false;
+
+        wiApiService.post('/project/list', null)
+            .then(function (projects) {
+                console.log('response', projects);
+
+                self.projects = projects;
+            })
+            .catch(function (err) {
+                return self.error = err;
+            })
+            .then(function () {
+                $scope.$apply();
+            });
 
         this.onOkButtonClicked = function () {
-            // test
+            self.disabled = true;
             let data = {
-                "idProject": self.projectName,
+                idProject : self.idProject
             };
 
             wiApiService.post('/project/info', data)
@@ -65,6 +81,9 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
                 })
                 .catch(function (err) {
                     return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
                 });
         };
 
