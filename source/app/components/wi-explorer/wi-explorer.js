@@ -3,16 +3,13 @@ const moduleName = 'wi-explorer';
 
 function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
+    self.treeviewName = self.name + 'treeview';
 
     this.$onInit = function () {
-        self.treeviewName = self.name + 'treeview';
-        // hide for test
         $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-        let utils = wiComponentService.getComponent('UTILS');
 
         wiComponentService.on('project-loaded-event', function (project) {
             console.log('project data: ', project);
-            // self.treeConfig = utils.getTreeviewConfig();
             self.treeConfig = (new WiTreeConfig()).config;
 
             console.log('self.treeConfig', self.treeConfig);
