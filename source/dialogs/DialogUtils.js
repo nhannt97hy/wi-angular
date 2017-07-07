@@ -48,7 +48,7 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
 };
 
 exports.openProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, WiWell) {
         let self = this;
         this.error = null;
         this.projects = [];
@@ -112,7 +112,8 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
             }
         })
     });
-}
+};
+
 exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, callback) {
     function ModalController($scope, close) {
         this.title = titleMessage;

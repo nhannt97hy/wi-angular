@@ -1,5 +1,5 @@
 const wiServiceName = 'WiProject';
-const moduleName = 'wi-project-service';
+const moduleName = 'wi-project';
 
 let app = angular.module(moduleName, []);
 app.factory(wiServiceName, function ($http) {

@@ -7,8 +7,6 @@ app.factory(wiServiceName, function () {
     let handlers = {};
 
     return {
-        // treeFunctions: {},
-
         getComponent: function (componentName) {
             return __Controllers[componentName];
         },

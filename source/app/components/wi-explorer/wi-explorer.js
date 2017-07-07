@@ -1,24 +1,24 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, $timeout, wiComponentService) {
+function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
+    self.treeviewName = self.name + 'treeview';
 
     this.$onInit = function () {
-        // hide for test
         $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
 
-        /**
-         id: Date.now(),
-         "type": "project",
-         "name": "Test-Project",
-         "company": "UET",
-         "department": "FIT",
-         "description": "blablabla"
-         */
-        wiComponentService.on('project-loaded-event', function (data) {
-            self.treeConfig = data;
-            console.log('project data: ', data);
+        wiComponentService.on('project-loaded-event', function (project) {
+            console.log('project data: ', project);
+            self.treeConfig = (new WiTreeConfig()).config;
+
+            console.log('self.treeConfig', self.treeConfig);
+            // parse config from data
+            // inject child item to origin config
+            let wells = parseWells(project);
+            $timeout(function () {
+                pushWellsToTreeConfig(wells);
+            });
         });
 
         wiComponentService.on('project-unloaded-event', function () {
@@ -27,6 +27,27 @@ function Controller($scope, $timeout, wiComponentService) {
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
+
+    function parseWells(project) {
+        let wells = [];
+
+        for (let well of project.wells){
+            let wiWellTemp = new WiWell(well);
+            wells.push(wiWellTemp);
+        }
+
+        return wells;
+    }
+
+    function pushWellsToTreeConfig(wells) {
+        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
+
+        if (wiRootTreeviewComponent){
+            for (let well of wells) {
+                wiRootTreeviewComponent.addItemToFirst('wells', well);
+            }
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);
