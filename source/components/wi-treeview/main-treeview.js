@@ -20,7 +20,8 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
             children: []
         };
 
-        wiComponentService.getComponent('MyTreeview').addItem(parentName, item);
+        // wiComponentService.getComponent('MyTreeview').addItem(parentName, item);
+        wiComponentService.getComponent('MyTreeview').addItemToFirst(parentName, item);
     };
 
     wiComponentService.treeFunctions = TREE_FUNCTIONS;

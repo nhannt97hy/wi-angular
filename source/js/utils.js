@@ -35,19 +35,30 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
     }
 }
 // APP Utils
-function projectOpen(wiComponentService, projectData, $timeout) {
-    wiComponentService.emit('project-loaded-event', TREE_CONFIG_TEST_3);
+function projectOpen(wiComponentService, projectData) {
+    wiComponentService.emit('project-loaded-event', projectData);
 
 }
 
 function projectClose(wiComponentService) {
     wiComponentService.emit('project-unloaded-event');
 }
+
+function getTreeviewConfig() {
+    return TREE_CONFIG_TEST_3;
+}
+
+function getDefaultTreeItem() {
+    return DEFAULT_TREE_ITEM;
+}
+
 exports.objcpy = objcpy;
 exports.isEqual = isEqual;
 exports.bindFunctions = bindFunctions;
 exports.projectOpen = projectOpen;
 exports.projectClose = projectClose;
+exports.getTreeviewConfig = getTreeviewConfig;
+exports.getDefaultTreeItem = getDefaultTreeItem;
 
 /**
  MOCK TEST
@@ -288,3 +299,15 @@ var TREE_CONFIG_TEST_3 = [
     }
 ];
 
+var DEFAULT_TREE_ITEM = {
+    name: '',
+    type: '',
+    data: {
+        icon: 'project-new-16x16',
+        label: '',
+        description: '',
+        childExpanded: false,
+        properties: {}
+    },
+    children: []
+};

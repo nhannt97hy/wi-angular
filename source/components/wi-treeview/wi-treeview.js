@@ -42,7 +42,10 @@ function Controller($scope, wiComponentService) {
     };
 
     this.getItemActiveName = function () {
-        return wiComponentService.getComponent('WiExplorer').itemActiveName;
+        let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
+        if (wiExplorerCtrl) {
+            return wiExplorerCtrl.itemActiveName;
+        }
     };
 
     this.addItem = function (parentName, item) {
@@ -51,10 +54,16 @@ function Controller($scope, wiComponentService) {
         if (parentItem) parentItem.children.push(item);
     };
 
+    this.addItemToFirst = function (parentName, item) {
+        let parentItem = getItemByName(parentName);
+
+        if (parentItem) parentItem.children.unshift(item);
+    };
+
     function getItemByName(name) {
         let itemSelect = null;
 
-        for (let item of self.items) {
+        for (let item of self.config) {
             if (item.name === name) {
                 return item;
             }

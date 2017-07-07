@@ -38,6 +38,10 @@ let dragMan = {
 let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
+// models
+let wiTreeItem = require('./wi-tree-item.model.js');
+let wiWell = require('./wi-well.model.js');
+
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 
@@ -59,6 +63,10 @@ let app = angular.module('wiapp',
 
         wiElementReady.name,
         wiRightClick.name,
+
+        // models
+        wiTreeItem.name,
+        wiWell.name,
 
         wiApiService.name,
         wiComponentService.name,
