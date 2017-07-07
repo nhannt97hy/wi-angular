@@ -594,3 +594,84 @@ exports.resistivitySonicDialog = function (ModalService, callback) {
         });
     });
 }
+exports.threeTracksBlankDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "3TracksBlank";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "3-tracks-blank/3-tracks-blank-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.inputCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "inputCurve";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "input-curve/input-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.lithoSynCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "lithoSynCurveDialog";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "litho-syn-curve/litho-syn-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
