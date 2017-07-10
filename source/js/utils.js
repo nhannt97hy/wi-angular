@@ -28,7 +28,9 @@ function isEqual(a, b) {
 
     return true;
 }
-
+var openProject = {
+    idProject : null
+}
 function bindFunctions(destHandlers, sourceHandlers, thisObj) {
     for (let handler in sourceHandlers) {
         destHandlers[handler] = sourceHandlers[handler].bind(thisObj);
@@ -37,7 +39,6 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 // APP Utils
 function projectOpen(wiComponentService, projectData) {
     wiComponentService.emit('project-loaded-event', projectData);
-
 }
 
 function projectClose(wiComponentService) {

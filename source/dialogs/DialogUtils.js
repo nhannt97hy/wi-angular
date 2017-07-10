@@ -55,7 +55,6 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
         this.idProject = null;
         this.disabled = false;
         this.selectedProject = {};
-
         wiApiService.post('/project/list', null)
             .then(function (projects) {
                 console.log('response', projects);
@@ -68,8 +67,22 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
             .then(function () {
                 $scope.$apply();
             });
+
         this.fillInfo = function () {
-            self.selectedProject = self.projects[self.idProject];
+            console.log("test", self.projects, self.idProject, self.projects[self.idProject]);
+            /*Dang co gi ?
+                self.projects ==> mang of prj. Moi prj co prj.idProject
+                self.idProject
+            Cai em can!
+                self.selectedProject = cai gi do DUNG
+            self.selectedProject = self.projects[self.idProject]*/
+
+            self.projects.forEach(function(item) {
+                if (self.idProject == item.idProject) {
+                    self.selectedProject = item;
+                }
+            });
+            console.log(self.selectedProject);
         }
 
         this.onOkButtonClicked = function () {
@@ -346,11 +359,30 @@ exports.unitSettingDialog = function (ModalService, callback) {
 
 }
 
-exports.addNewDialog = function (ModalService, callbak) {
-    function ModalController($scope, close) {
+exports.addNewDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService) {
+        let self = this;
+        this.onOkButtonClicked = function () {
+            let data = {
+                name: $scope.name,
+                topDepth: $scope.topDepth,
+                bottomDepth: $scope.bottomDepth,
+                step: $scope.step
+            };
+            // console.log("data: ", data);
+            wiApiService.post('/project/well/new', data)
+                .then(function (response) {
+                    console.log('response', response);
 
-        this.close = function (ret) {
-            close(ret);
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                });
+
+        }
+        this.onCancelButtonClicked = function () {
+            console.log("oncCancelButtonClicked");
         }
     }
 
