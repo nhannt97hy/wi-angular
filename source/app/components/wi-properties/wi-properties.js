@@ -8,12 +8,17 @@ function Controller(wiComponentService) {
         if (self.name) wiComponentService.putComponent(self.name, self);
 
         wiComponentService.on('update-properties', doUpdateListConfig);
+        wiComponentService.on('project-unloaded-event', cleanList);
     };
 
     function doUpdateListConfig(newConfig) {
         self.listConfig = newConfig;
 
         console.log('doUpdateListConfig', newConfig)
+    }
+
+    function cleanList() {
+        self.listConfig = null;
     }
 
     this.updateListConfig = function(newConfig) {
