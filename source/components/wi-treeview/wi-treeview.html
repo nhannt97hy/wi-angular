@@ -2,21 +2,22 @@
     <div class="wi-parent-node"
          ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
          data-curve="{{wiTreeview.config[$index].name}}">
-        <i aria-hidden="true" class="fa icon-expanded"
-           ng-class="
+        <div class="wi-parent-content">
+            <i aria-hidden="true" class="fa icon-expanded"
+               ng-class="
                {'fa-caret-down': item.data.childExpanded,
                'fa-caret-right': !item.data.childExpanded,
                'wi-hidden': item.children == null || item.children.length == 0}"
-           ng-click="wiTreeview.onCollapse($index)"></i>
-        <div ng-click="wiTreeview.onClick($index)"
-             ng-dblclick="wiTreeview.onDoubleClick($index)">
-            <div>
+               ng-click="wiTreeview.onCollapse($index)"></i>
+            <div ng-click="wiTreeview.onClick($index)"
+                 ng-dblclick="wiTreeview.onDoubleClick($index)">
                 <img class="{{item.data.icon}}" alt="img item treeview">
                 <span>{{item.data.label}}</span>
             </div>
-            <div class="wi-parent-description text-right" ng-show="item.data.description">
-                {{item.data.description}}
-            </div>
+        </div>
+
+        <div class="wi-parent-description text-right" ng-show="item.data.description">
+            {{item.data.description}}
         </div>
     </div>
 
