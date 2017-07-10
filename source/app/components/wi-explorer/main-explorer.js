@@ -3,9 +3,25 @@ let wiTreeview = require('./wi-treeview');
 let wiToolbar = require('./wi-toolbar');
 let wiButton = require('./wi-button');
 
+// models
+let wiTreeConfig = require('./wi-tree-config.model');
+let wiTreeItem = require('./wi-tree-item.model');
+let wiWell = require('./wi-well.model');
+
 let wiComponentService = require('./wi-component-service');
 
-let app = angular.module('helloapp', [wiToolbar.name, wiButton.name, wiExplorer.name, wiTreeview.name, wiComponentService.name]);
+let app = angular.module('helloapp',
+    [
+        wiToolbar.name,
+        wiButton.name,
+        wiExplorer.name,
+        wiTreeview.name,
+
+        wiTreeConfig.name,
+        wiTreeItem.name,
+        wiWell.name,
+
+        wiComponentService.name]);
 
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.myConfig = TREE_CONFIG_TEST;

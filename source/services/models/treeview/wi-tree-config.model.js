@@ -1,5 +1,5 @@
 const wiServiceName = 'WiTreeConfig';
-const moduleName = 'wi-tree-config';
+const moduleName = 'wi-tree-config-model';
 
 let app = angular.module(moduleName, []);
 app.factory(wiServiceName, function () {

@@ -6,7 +6,7 @@ wi-treeview {
     .wi-treeview-container {
         display: block;
         cursor: pointer;
-        padding: 5px 0 5px 10px;
+        padding: 2px 0 2px 10px;
         border-bottom: 1px dotted #ddd;
         wi-treeview{
             border: none;
@@ -26,7 +26,16 @@ wi-treeview {
                 border-left: 1px dotted #ddd;
             }
             .icon-expanded {
-                min-width: 8px;
+                min-width: 16px;
+                height: 16px;
+            }
+
+            .wi-parent-content {
+                display: flex;
+
+                &>div {
+                    flex: 1;
+                }
             }
         }
 

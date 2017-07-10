@@ -39,6 +39,8 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 // models
+let wiProperty = require('./wi-property.model');
+let wiListview = require('./wi-listview.model');
 let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
@@ -66,6 +68,8 @@ let app = angular.module('wiapp',
         wiRightClick.name,
 
         // models
+        wiProperty.name,
+        wiListview.name,
         wiTreeConfig.name,
         wiTreeItem.name,
         wiWell.name,
@@ -130,8 +134,9 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
 
+    wiComponentService.putComponent('LAYOUT_MANAGER', layoutManager);
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
     // layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 

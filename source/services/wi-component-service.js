@@ -5,6 +5,7 @@ let app = angular.module(moduleName, []);
 app.factory(wiServiceName, function () {
     let __Controllers = {};
     let handlers = {};
+    let _state = {};
 
     return {
         getComponent: function (componentName) {
@@ -27,6 +28,13 @@ app.factory(wiServiceName, function () {
             __Controllers[componentName] = controller;
         },
 
+        setState: function (stateName, state) {
+            _state[stateName] = state;
+        },
+        getState: function (stateName) {
+            return _state[stateName];
+        },
+
         on: function (eventName, handlerCb) {
             let eventHandlers = handlers[eventName];
             if (!Array.isArray(eventHandlers)) {
@@ -42,8 +50,12 @@ app.factory(wiServiceName, function () {
                     handler(data);
                 })
             }
-        }
+        },
+
+        // state name
+        ITEM_ACTIVE_STATE: 'item-active-state'
     };
 });
 
 exports.name = moduleName;
+
