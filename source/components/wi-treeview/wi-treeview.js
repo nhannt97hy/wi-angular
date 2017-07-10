@@ -1,7 +1,7 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller($scope, wiComponentService) {
+function Controller(wiComponentService) {
     let self = this;
 
     this.$onInit = function () {
@@ -10,23 +10,23 @@ function Controller($scope, wiComponentService) {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    this.onClick = function ($index) {
+    this.onCollapse = function ($index) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
+    };
 
-        if (!self.config[$index].children || self.config[$index].children.length === 0) {
-            let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
-            wiExplorerCtrl.itemActiveName = self.config[$index].name;
+    this.onClick = function ($index) {
+        wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
 
-            if (self.config[$index].data.properties)
-                wiComponentService.emit('update-properties', self.config[$index].data.properties);
-        }
+        if (self.config[$index].data.properties)
+            wiComponentService.emit('update-properties', self.config[$index].data.properties);
     };
 
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
-        }
-        else {
+        } else if (self.config[$index].children && self.config[$index].length !== 0){
+            self.onCollapse($index);
+        } else {
             let treeFunctions = wiComponentService.getComponent('TREE_FUNCTIONS');
             if (treeFunctions) {
                 // get func from component service
@@ -42,10 +42,7 @@ function Controller($scope, wiComponentService) {
     };
 
     this.getItemActiveName = function () {
-        let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
-        if (wiExplorerCtrl) {
-            return wiExplorerCtrl.itemActiveName;
-        }
+        return wiComponentService.getState(wiComponentService.ITEM_ACTIVE_STATE);
     };
 
     this.addItem = function (parentName, item) {
