@@ -64,7 +64,6 @@ function putLeft(templateId, title) {
     //layoutManager.root.contentItems[0].contentItems[0].addChild({
     layoutManager.root.getItemsById('left')[0].addChild({
         type: 'component',
-        id: templateId,
         componentName: 'wi-block',
         componentState: {
             templateId: templateId
@@ -76,7 +75,6 @@ function putRight(templateId, title) {
     //layoutManager.root.contentItems[0].contentItems[1].addChild({
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
-        id: templateId,
         componentName: 'wi-block',
         componentState: {
             templateId: templateId
@@ -116,14 +114,9 @@ function removeAllRightTabs() {
     // });
 }
 
-function isComponentExist(templateId) {
-    return (layoutManager.root.getItemsById(templateId).length ? true : false);
-}
-
 exports.createLayout = createLayout;
 exports.putLeft = putLeft;
 exports.putRight = putRight;
 exports.putWiLogPlotRight = putWiLogPlotRight;
 exports.putWiLogPlotLeft = putWiLogPlotLeft;
 exports.removeAllRightTabs = removeAllRightTabs;
-exports.isComponentExist = isComponentExist;
