@@ -39,6 +39,8 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 // models
+let wiProperty = require('./wi-property.model');
+let wiListview = require('./wi-listview.model');
 let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
@@ -66,6 +68,8 @@ let app = angular.module('wiapp',
         wiRightClick.name,
 
         // models
+        wiProperty.name,
+        wiListview.name,
         wiTreeConfig.name,
         wiTreeItem.name,
         wiWell.name,

@@ -1,8 +1,8 @@
 const wiServiceName = 'WiWell';
-const moduleName = 'wi-well';
+const moduleName = 'wi-well-model';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function (WiTreeItem) {
+app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
     /**
      * Sample item from server
      bottomDepth:"50"
@@ -24,11 +24,29 @@ app.factory(wiServiceName, function (WiTreeItem) {
             defaultTreeItem.name = well['idWell'];
             defaultTreeItem.data.icon = 'well-16x16';
             defaultTreeItem.data.label = well['name'];
+            defaultTreeItem.data.properties = parsePropertiesList(well);
+
+            // angular.copy(well, defaultTreeItem.data.properties);
         } catch (err) {
             console.error('Parse well model has error', err);
         }
 
         angular.extend(self, defaultTreeItem);
+    }
+
+    function parsePropertiesList(well) {
+        let property = new WiProperty();
+        property.addNewItemListview('depths', 'Depths', {
+            'Bottom Depth': well.bottomDepth,
+            'Step': well.step,
+            'Top Depth': well.topDepth,
+        });
+        property.addNewItemListview('informations', 'Informations', {
+            'Name': well.name,
+            'Unit': 'M'
+        });
+
+        return property;
     }
 
     return WiWell;

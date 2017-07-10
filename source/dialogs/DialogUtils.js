@@ -73,7 +73,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
                 idProject : self.idProject
             };
 
-            wiApiService.post('/project/info', data)
+            wiApiService.post('/project/fullinfo', data)
                 .then(function (response) {
                     console.log('response', response);
 

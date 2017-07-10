@@ -1,7 +1,7 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller(wiComponentService) {
+function Controller(wiComponentService, WiProperty) {
     let self = this;
 
     this.$onInit = function () {
@@ -17,8 +17,11 @@ function Controller(wiComponentService) {
     this.onClick = function ($index) {
         wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
 
-        if (self.config[$index].data.properties)
-            wiComponentService.emit('update-properties', self.config[$index].data.properties);
+        if (self.config[$index].data.properties) {
+            wiComponentService.emit('update-properties', self.config[$index].data.properties.listConfig);
+
+            console.log('properties', self.config[$index].data.properties.listConfig);
+        }
     };
 
     this.onDoubleClick = function ($index) {
