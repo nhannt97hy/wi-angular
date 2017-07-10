@@ -61,7 +61,6 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     let newComponent = new Object();
     let attrObject = new Object();
     attrObject.name = getValueAtCell(row, nameCol, sheet);
-    console.log('attrObject.name', attrObject.name);
 
     attrCols.forEach(function (col) {
         let value = getValueAtCell(row, col, sheet);
