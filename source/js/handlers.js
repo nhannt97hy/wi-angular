@@ -12,10 +12,10 @@ exports.OpenProjectButtonClicked = function () {
     console.log('OpenProjectButtoon is clicked');
     var wiComponentService = this.wiComponentService;
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
+    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function(projectData) {
         var utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
-    });
+    } );
 };
 
 exports.CloseProjectButtonClicked = function () {
@@ -49,11 +49,6 @@ exports.SaveProjectAsButtonClicked = function () {
 
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
-    if (!layoutManager.isComponentExist('explorer-block')) {
-        layoutManager.putLeft('explorer-block', 'Project');
-    }
 };
 
 exports.WorkflowsButtonClicked = function () {
@@ -62,11 +57,6 @@ exports.WorkflowsButtonClicked = function () {
 
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
-    if (!layoutManager.isComponentExist('property-block')) {
-        layoutManager.putLeft('property-block', 'Properties');
-    }
 };
 
 exports.ExitButtonClicked = function () {
@@ -75,9 +65,7 @@ exports.ExitButtonClicked = function () {
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (ret) {
         console.log("User choose: " + ret);
-        if (ret) {
-            window.close();
-        }
+        window.close();
     })
 };
 
@@ -512,3 +500,4 @@ exports.AboutButtonClicked = function () {
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
+

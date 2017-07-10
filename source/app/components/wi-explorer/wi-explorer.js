@@ -4,11 +4,21 @@ const moduleName = 'wi-explorer';
 function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
     self.treeviewName = self.name + 'treeview';
+
     this.$onInit = function () {
         $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-        let utils = wiComponentService.getComponent('UTILS');
+
         wiComponentService.on('project-loaded-event', function (project) {
-            utils.pushProjectToExplorer(project, WiTreeConfig, WiWell, $timeout);
+            console.log('project data: ', project);
+            self.treeConfig = (new WiTreeConfig()).config;
+
+            console.log('self.treeConfig', self.treeConfig);
+            // parse config from data
+            // inject child item to origin config
+            let wells = parseWells(project);
+            $timeout(function () {
+                pushWellsToTreeConfig(wells);
+            });
         });
 
         wiComponentService.on('project-unloaded-event', function () {
