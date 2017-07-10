@@ -18,7 +18,11 @@ function Controller(wiComponentService) {
         wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
 
         if (self.config[$index].data.properties)
+        {
             wiComponentService.emit('update-properties', self.config[$index].data.properties);
+
+            console.log('properties', self.config[$index].data.properties);
+        }
     };
 
     this.onDoubleClick = function ($index) {

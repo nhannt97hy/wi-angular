@@ -1,5 +1,5 @@
 const wiServiceName = 'WiTreeItem';
-const moduleName = 'wi-tree-item';
+const moduleName = 'wi-tree-item-model';
 
 let app = angular.module(moduleName, []);
 app.factory(wiServiceName, function () {
