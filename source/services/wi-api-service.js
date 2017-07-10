@@ -24,7 +24,7 @@ app.factory(wiServiceName, function ($http) {
                         } else if (response.data) {
                             return reject(response.data.reason);
                         } else {
-                            return reject('Something went wrong!')
+                            return reject('Something went wrong!');
                         }
                     },
                     reject

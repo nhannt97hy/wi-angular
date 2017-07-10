@@ -31,13 +31,22 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
             console.error('Parse well model has error', err);
         }
 
-        console.log('well', self)
-
         angular.extend(self, defaultTreeItem);
     }
 
     function parsePropertiesList(well) {
+        let property = new WiProperty();
+        property.addNewItemListview('depths', 'Depths', {
+            'Bottom Depth': well.bottomDepth,
+            'Step': well.step,
+            'Top Depth': well.topDepth,
+        });
+        property.addNewItemListview('informations', 'Informations', {
+            'Name': well.name,
+            'Unit': 'M'
+        });
 
+        return property;
     }
 
     return WiWell;
