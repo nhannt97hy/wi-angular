@@ -28,8 +28,8 @@ let DTRACK_CFG = {
 function getCurveFromName(name) {
     var nSamples = 1000;
     var samples = new Array();
-    for( let i = 0; i < nSamples; i++ ) {
-        samples.push({y:i, x: Math.random()});
+    for (let i = 0; i < nSamples; i++) {
+        samples.push({y: i, x: Math.random()});
     }
     return samples;
 }
@@ -37,7 +37,7 @@ function getCurveFromName(name) {
 function Controller($scope, wiComponentService) {
     var self = this;
     var tracks = new Array();
-    this.addTrack = function() {
+    this.addTrack = function () {
         var graph = wiComponentService.getComponent('GRAPH');
         var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         //track.trackPointer(true);
@@ -45,8 +45,8 @@ function Controller($scope, wiComponentService) {
         self.setDepthRangeFromSlidingBar();
         track.doPlot();
         var dragMan = wiComponentService.getComponent('DRAG_MAN');
-        track.onDrop(function(){
-            if( dragMan.dragging ) {
+        track.onDrop(function () {
+            if (dragMan.dragging) {
                 console.log('mouseover');
                 if (dragMan.cancelingId) {
                     clearTimeout(dragMan.cancelingId);
@@ -81,7 +81,7 @@ function Controller($scope, wiComponentService) {
         });
     };
 
-    this.setDepthRangeFromSlidingBar = function() {
+    this.setDepthRangeFromSlidingBar = function () {
         var slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         var maxDepth = self.getMaxDepth();
 
@@ -96,7 +96,7 @@ function Controller($scope, wiComponentService) {
             if (track.getYMax) return track.getYMax();
             return -1;
         });
-        return (maxDepth > 0)?maxDepth: 100000;
+        return (maxDepth > 0) ? maxDepth : 100000;
     };
 
     this.setData = function (trackIdx, data) {
@@ -112,7 +112,7 @@ function Controller($scope, wiComponentService) {
         tracks.forEach(function (track) {
             track.doPlot();
             //if( track.trackPointer ) track.trackPointer(true);
-        } );
+        });
     }
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -120,15 +120,19 @@ function Controller($scope, wiComponentService) {
             wiComponentService.putComponent(self.name, self);
         }
     };
-    this.contextMenu = function(event) {
-        console.log('context menu', event, event.button == 2);
 
-        if(event.button != 2) return;
-        event.stopPropagation();
+    this.contextMenu = function (event) {
+        console.log('context menu', event, event.button == 2);
+        // event.preventDefault();
+
+        // if (event.button != 2) {
+        //     return event.stopPropagation();
+        // }
+
         wiComponentService.getComponent('ContextMenu').open(event.clientX, event.clientY, [{
             name: "NewDepthTrack",
             label: "Add depth track",
-            handler: function() {
+            handler: function () {
                 self.addDepthTrack();
             }
         }, {
@@ -136,8 +140,14 @@ function Controller($scope, wiComponentService) {
         }, {
             name: "NewLogTrack",
             label: "Add new track ... ",
-            handler: function() {
+            handler: function () {
                 self.addTrack();
+            }
+        },{
+            name: "hhhhh",
+            label: "HHHHHHHH",
+            handler: function() {
+                console.log(self);
             }
         }]);
     }

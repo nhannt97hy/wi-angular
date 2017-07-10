@@ -25,7 +25,16 @@ wi-treeview {
                 border-left: 1px dotted #ddd;
             }
             .icon-expanded {
-                min-width: 8px;
+                min-width: 16px;
+                height: 16px;
+            }
+
+            .wi-parent-content {
+                display: flex;
+
+                &>div {
+                    flex: 1;
+                }
             }
         }
 

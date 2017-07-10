@@ -4,6 +4,7 @@ let scopeObj;
 let layoutConfig = {
     settings: {
         hasHeaders: true,
+        showMaximiseIcon: false,
         showCloseIcon: false,
         showPopoutIcon: false
     },
@@ -101,9 +102,21 @@ function putWiLogPlotLeft(logPlotName, title) {
         title: title
     });
 }
+function removeAllRightTabs() {
+    console.log('removeAllRightTabs');
+    // layoutManager.root.getItemsById('right')[0].removeChild({
+    //     type: 'component',
+    //     componentName: 'html-block'
+    //     // componentState: {
+    //     //     html: '<wi-logplot name="' + logPlotName + '"></wi-logplot>'
+    //     // },
+    //     // title: title
+    // });
+}
 
 exports.createLayout = createLayout;
 exports.putLeft = putLeft;
 exports.putRight = putRight;
 exports.putWiLogPlotRight = putWiLogPlotRight;
 exports.putWiLogPlotLeft = putWiLogPlotLeft;
+exports.removeAllRightTabs = removeAllRightTabs;

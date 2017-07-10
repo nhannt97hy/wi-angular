@@ -1,42 +1,51 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller($scope, wiComponentService) {
+function Controller(wiComponentService, WiProperty) {
     let self = this;
 
     this.$onInit = function () {
-        self.items = self.config;
+        // self.items = self.config;
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    this.onClick = function ($index) {
+    this.onCollapse = function ($index) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
+    };
 
-        if (!self.config[$index].children || self.config[$index].children.length === 0) {
-            let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
-            wiExplorerCtrl.itemActiveName = self.config[$index].name;
+    this.onClick = function ($index) {
+        wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
 
-            wiComponentService.emit('update-properties', self.config[$index].data.properties);
+        if (self.config[$index].data.properties) {
+            wiComponentService.emit('update-properties', self.config[$index].data.properties.listConfig);
+
+            console.log('properties', self.config[$index].data.properties.listConfig);
         }
     };
 
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
-        } 
-        else {
+        } else if (self.config[$index].children && self.config[$index].length !== 0){
+            self.onCollapse($index);
+        } else {
             let treeFunctions = wiComponentService.getComponent('TREE_FUNCTIONS');
             if (treeFunctions) {
                 // get func from component service
-                treeFunctions[self.config[$index].type]();
-                //wiComponentService.treeFunctions[self.config[$index].type]();
+                if (self.config && self.config[$index] && self.config[$index].type
+                    && treeFunctions[self.config[$index].type]) {
+                    treeFunctions[self.config[$index].type]();
+                }
+                else {
+                    console.error(treeFunctions, self.config, self.config[$index]);
+                }
             }
         }
     };
 
     this.getItemActiveName = function () {
-        return wiComponentService.getComponent('WiExplorer').itemActiveName;
+        return wiComponentService.getState(wiComponentService.ITEM_ACTIVE_STATE);
     };
 
     this.addItem = function (parentName, item) {
@@ -45,10 +54,16 @@ function Controller($scope, wiComponentService) {
         if (parentItem) parentItem.children.push(item);
     };
 
+    this.addItemToFirst = function (parentName, item) {
+        let parentItem = getItemByName(parentName);
+
+        if (parentItem) parentItem.children.unshift(item);
+    };
+
     function getItemByName(name) {
         let itemSelect = null;
 
-        for (let item of self.items) {
+        for (let item of self.config) {
             if (item.name === name) {
                 return item;
             }
