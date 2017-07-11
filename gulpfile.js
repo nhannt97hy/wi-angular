@@ -241,7 +241,7 @@ function xlsxToHTML(xlsxFile, configFile) {
 
 gulp.task('gen-template', ['gen-wi-logplot-template', 'gen-wi-explorer-template'], function () {
     var configFile = 'config/ribbon-config.js';
-    var xlsxFile = './Wi-UI.xlsx';
+    var xlsxFile = './Wi-UI.Tung.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 

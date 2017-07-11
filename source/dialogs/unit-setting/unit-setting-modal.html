@@ -1,89 +1,89 @@
 <div class="modal fade">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.close()" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"><span class="project-open-16x16"></span>&nbsp;FRMUnitSettings</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body">              
               <form class="form-horizontal" action="" name="modalUnitSetting">
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="unitSystem">Unit System</label>
+                      <label class="control-label col-sm-4 " for="unitSystem">Unit System</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.unitSystem" name="unitSystem" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.allData.unitSystem track by item" ng-change="wiModal.changeDefault();"></select>
                       </div>
                     </div>
                   </div>
-                  <div class="col-sm-6">
-                    <button class="btn btn-default" ng-click="wiModal.setDefault();">Default</button>
+                  <div class="col-sm-6 text-right">
+                    <button class="btn btn-default black-btn" ng-click="wiModal.setDefault();">Default</button>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="caliper">Caliper</label>
+                      <label class="control-label col-sm-4 " for="caliper">Caliper</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.caliper" name="caliper" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.allData.caliper track by item"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="neutron">Neutron</label>
+                      <label class="control-label col-sm-4 " for="neutron">Neutron</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.neutron" name="neutron" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.neutron track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="gammaRay">Gamma Ray</label>
+                      <label class="control-label col-sm-4 " for="gammaRay">Gamma Ray</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.gammaRay" name="gammaRay" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.gammaRay track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="acoustic">Acoustic</label>
+                      <label class="control-label col-sm-4 " for="acoustic">Acoustic</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.acoustic" name="acoustic" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.acoustic track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="pressure">Pressure</label>
+                      <label class="control-label col-sm-4 " for="pressure">Pressure</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.pressure" name="pressure" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.pressure track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="bitSize">BitSize</label>
+                      <label class="control-label col-sm-4 " for="bitSize">BitSize</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.bitSize" name="bitSize" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.bitSize track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="density">Density</label>
+                      <label class="control-label col-sm-4 " for="density">Density</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.density" name="density" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.density track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="concentration">Concentration</label>
+                      <label class="control-label col-sm-4 " for="concentration">Concentration</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.concentration" name="concentration" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.concentration track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="permeability">Permeability</label>
+                      <label class="control-label col-sm-4 " for="permeability">Permeability</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.permeability" name="permeability" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.permeability track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="porosity">Porosity</label>
+                      <label class="control-label col-sm-4 " for="porosity">Porosity</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.porosity" name="porosity" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.porosity track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="angle">Angle</label>
+                      <label class="control-label col-sm-4 " for="angle">Angle</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.angle" name="angle" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.angle track by x"></select>
                       </div>
@@ -91,67 +91,67 @@
                   </div>                 
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="resistivity">Resistivity</label>
+                      <label class="control-label col-sm-4 " for="resistivity">Resistivity</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.resistivity" name="resistivity" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.resistivity track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="saturation">Saturation</label>
+                      <label class="control-label col-sm-4 " for="saturation">Saturation</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.saturation" name="saturation" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.saturation track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="temperature">Temperature</label>
+                      <label class="control-label col-sm-4 " for="temperature">Temperature</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.temperature" name="temperature" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.temperature track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="volume">Volume</label>
+                      <label class="control-label col-sm-4 " for="volume">Volume</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.volume" name="volume" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.volume track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="sp">Sp</label>
+                      <label class="control-label col-sm-4 " for="sp">Sp</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.sp" name="sp" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.sp track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="length">Length</label>
+                      <label class="control-label col-sm-4 " for="length">Length</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.length" name="length" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.length track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="time">Time</label>
+                      <label class="control-label col-sm-4 " for="time">Time</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.time" name="time" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.time track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="area">Area</label>
+                      <label class="control-label col-sm-4 " for="area">Area</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.area" name="area" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.area track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="flow">Flow</label>
+                      <label class="control-label col-sm-4 " for="flow">Flow</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.flow" name="flow" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.flow track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="speed">Speed</label>
+                      <label class="control-label col-sm-4 " for="speed">Speed</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.speed" name="speed" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.speed track by x"></select>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label col-sm-4 small-text" for="force">Force</label>
+                      <label class="control-label col-sm-4 " for="force">Force</label>
                       <div class="col-sm-8">
                         <select ng-model="wiModal.selectedData.force" name="force" value="" class="form-control wi-form-control" ng-options="x for x in wiModal.allData.force track by x"></select>
                       </div>

@@ -56,13 +56,14 @@ function Controller(wiComponentService, WiProperty) {
 
     this.addItemToFirst = function (parentName, item) {
         let parentItem = getItemByName(parentName);
-
-        if (parentItem) parentItem.children.unshift(item);
+        if (parentItem) {
+            parentItem.children.unshift(item);
+        }
     };
 
     function getItemByName(name) {
         let itemSelect = null;
-
+        console.log(self.config);
         for (let item of self.config) {
             if (item.name === name) {
                 return item;

@@ -11,7 +11,7 @@ app.factory(wiServiceName, function () {
                 data: {
                     icon: 'wells-16x16',
                     label: 'Wells',
-                    description: '',
+                    unit: '',
                     childExpanded: false,
                     properties: {}
                 },
@@ -22,7 +22,7 @@ app.factory(wiServiceName, function () {
                         data: {
                             icon: 'well-16x16',
                             label: 'Bach Ho',
-                            description: '',
+                            unit: '',
                             childExpanded: false,
                             properties: {}
                         },
@@ -33,7 +33,7 @@ app.factory(wiServiceName, function () {
                                 data: {
                                     icon: 'curve-data-16x16',
                                     label: 'Data',
-                                    description: '',
+                                    unit: '',
                                     childExpanded: false,
                                     properties: {}
                                 },
@@ -44,7 +44,7 @@ app.factory(wiServiceName, function () {
                                         data: {
                                             icon: 'depth-blank-16x16',
                                             label: 'Depth',
-                                            description: 'M'
+                                            unit: 'M'
                                         }
                                     }
                                 ]
@@ -55,7 +55,7 @@ app.factory(wiServiceName, function () {
                                 data: {
                                     icon: 'curve-data-16x16',
                                     label: 'Data2',
-                                    description: '',
+                                    unit: '',
                                     childExpanded: false,
                                     properties: {}
                                 },
@@ -66,7 +66,7 @@ app.factory(wiServiceName, function () {
                                         data: {
                                             icon: 'depth-blank-16x16',
                                             label: 'Depth',
-                                            description: 'M'
+                                            unit: 'M'
                                         }
                                     }
                                 ]
@@ -79,7 +79,7 @@ app.factory(wiServiceName, function () {
                         data: {
                             icon: 'project-new-16x16',
                             label: 'Raw data',
-                            description: '',
+                            unit: '',
                             childExpanded: false,
                             properties: {}
                         },
@@ -91,7 +91,7 @@ app.factory(wiServiceName, function () {
                         data: {
                             icon: 'project-new-16x16',
                             label: 'Intepretation Model',
-                            description: '',
+                            unit: '',
                             childExpanded: false,
                             properties: {}
                         },
@@ -103,7 +103,7 @@ app.factory(wiServiceName, function () {
                         data: {
                             icon: 'user-define-16x16',
                             label: 'User Defined',
-                            description: '',
+                            unit: '',
                             childExpanded: false,
                             properties: {}
                         },
@@ -115,7 +115,7 @@ app.factory(wiServiceName, function () {
                         data: {
                             icon: 'logplot-blank-16x16',
                             label: 'Logplot',
-                            description: '',
+                            unit: '',
                             childExpanded: false,
                             properties: {}
                         },
@@ -127,7 +127,7 @@ app.factory(wiServiceName, function () {
                         data: {
                             icon: 'crossplot-blank-16x16',
                             label: 'CrossPlot',
-                            description: '',
+                            unit: '',
                             childExpanded: false,
                             properties: {}
                         },

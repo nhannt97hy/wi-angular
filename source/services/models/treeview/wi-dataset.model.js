@@ -2,7 +2,7 @@ const wiServiceName = 'WiDataset';
 const moduleName = 'wi-dataset-model';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function (WiTreeItem, WiCurve, WiDepth) {
+app.factory(wiServiceName, function (WiTreeItem, WiCurve, WiDepth, WiProperty) {
     /**
      * Sample item from server
      createdAt:"2017-07-10T10:17:30.000Z"
@@ -13,7 +13,7 @@ app.factory(wiServiceName, function (WiTreeItem, WiCurve, WiDepth) {
      updatedAt:"2017-07-10T10:17:30.000Z"
      */
 
-    function WiDataset(dataset) {
+    function WiDataset(dataset, wellName) {
         let self = this;
         let defaultTreeItem = new WiTreeItem();
         angular.copy(defaultTreeItem, self);
@@ -23,6 +23,7 @@ app.factory(wiServiceName, function (WiTreeItem, WiCurve, WiDepth) {
             self.name = dataset['idDataset'] + 'dataset';
             self.data.icon = 'curve-data-16x16';
             self.data.label = dataset['name'];
+            self.data.properties = parsePropertiesList(dataset, wellName);
 
             // parse depth
             // let depthTreeItem = new WiDepth(dataset.depth);
@@ -30,18 +31,30 @@ app.factory(wiServiceName, function (WiTreeItem, WiCurve, WiDepth) {
             let depthTreeItem = new WiDepth({
                 idDepth: Math.random() * 10000,
                 name: 'depth mock'
-            });
+            }, dataset);
             self.children.push(depthTreeItem);
 
             if (dataset.curves) {
                 for(let curve of dataset.curves) {
-                    let curveTreeItem = new WiCurve(curve);
+                    let curveTreeItem = new WiCurve(curve, dataset);
                     self.children.push(curveTreeItem);
                 }
             }
         } catch (err) {
             console.error('Parse dataset model has error', err);
         }
+
+
+    }
+
+    function parsePropertiesList(dataset, wellName) {
+        let property = new WiProperty();
+        property.addNewItemListview('properties', 'Properties', {
+            'Name': dataset['name'],
+            'Well': wellName
+        });
+
+        return property;
     }
 
     return WiDataset;

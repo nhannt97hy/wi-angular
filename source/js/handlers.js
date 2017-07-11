@@ -12,10 +12,10 @@ exports.OpenProjectButtonClicked = function () {
     console.log('OpenProjectButtoon is clicked');
     var wiComponentService = this.wiComponentService;
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function(projectData) {
+    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
         var utils = self.wiComponentService.getComponent('UTILS');
-            utils.projectOpen(self.wiComponentService, projectData);
-    } );
+        utils.projectOpen(self.wiComponentService, projectData);
+    });
 };
 
 exports.CloseProjectButtonClicked = function () {
@@ -49,6 +49,17 @@ exports.SaveProjectAsButtonClicked = function () {
 
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    let utils = wiComponentService.getComponent('UTILS');
+    if (!layoutManager.isComponentExist('explorer-block')) {
+        layoutManager.putLeft('explorer-block', 'Project');
+        console.log(utils.openProject);
+        if (utils.openProject.valid) {
+            console.log(utils.openProject);
+            wiComponentService.emit('project-loaded-event', utils.openProject);
+        }
+    }
 };
 
 exports.WorkflowsButtonClicked = function () {
@@ -57,6 +68,11 @@ exports.WorkflowsButtonClicked = function () {
 
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    if (!layoutManager.isComponentExist('property-block')) {
+        layoutManager.putLeft('property-block', 'Properties');
+    }
 };
 
 exports.ExitButtonClicked = function () {

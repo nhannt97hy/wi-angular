@@ -46,6 +46,7 @@ div.lm_content {
 
 .label_treeview{
     border-bottom: 1px solid #cacbd3;
+    border-top: 1px solid #cacbd3;
     background: rgba(248,248,249,1);
     background: -moz-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
     background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(248,248,249,1)), color-stop(100%, rgba(242,243,244,1)));
@@ -59,12 +60,11 @@ div.lm_content {
         display: inline-block;
         text-indent: 10px;
     }
-    span:first-child{
-        border-right: 1px solid #cacbd3;
-        width: 75%;
-    }
+    span:first-child{}
     span:last-child{
-        width: 25%;
+        width: 100px;
+        border-left: 1px solid #cacbd3;
+        float: right;
     }
 }
 .block-right {
@@ -90,6 +90,24 @@ label.flex-row {
 
 .height65 button{
     height: 65px;
+}
+
+.height-auto{
+    width: 100%;
+    button{
+        height: auto;
+        width: 100%;
+        text-align: left;
+        text-indent: 5px;
+        padding: 5px 0;
+        & > p{
+            width: 130px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+    }    
 }
 
 .width-290{
