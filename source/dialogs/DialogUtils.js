@@ -1,9 +1,11 @@
 exports.newProjectDialog = function ($mainScope, ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
+        this.disabled = false;
         this.error = null;
 
         this.onOkButtonClicked = function () {
+            self.disabled = true;
             let data = {
                 name: $scope.name,
                 company: $scope.company,
@@ -21,6 +23,9 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                 })
                 .catch(function (err) {
                     return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
                 });
         };
 
