@@ -1,21 +1,21 @@
 wi-treeview {
     display: block;
     background: #fff;
-    border-bottom: 1px solid #cacbd3;
+    //border-bottom: 1px solid #cacbd3;
     font-size: 13px;
     .wi-treeview-container {
         display: block;
         cursor: pointer;
-        padding: 2px 0 2px 10px;
-        border-bottom: 1px dotted #ddd;
+        padding: 2px 0 2px 18px;
+        //border-bottom: 1px dotted #ddd;
         wi-treeview{
             border: none;
-            border-left: 1px dotted #cacbd3;
+            //border-left: 1px dotted #cacbd3;
         }
         .wi-parent-node {
             position: relative;
             
-            .wi-parent-description {
+            .wi-parent-unit {
                 position: absolute;
                 right: 0;
                 top: 0;
@@ -23,7 +23,7 @@ wi-treeview {
                 width: 25%; // use fixed width here!
                 overflow:hidden;
                 padding-right: 0.5em;
-                border-left: 1px dotted #ddd;
+                //border-left: 1px dotted #ddd;
             }
             .icon-expanded {
                 min-width: 16px;
@@ -32,6 +32,10 @@ wi-treeview {
 
             .wi-parent-content {
                 display: flex;
+
+                &>i {
+                    color: #333;
+                }
 
                 &>div {
                     flex: 1;
