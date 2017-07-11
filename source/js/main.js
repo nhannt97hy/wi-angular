@@ -143,7 +143,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
-    // layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
     // Install 
     wiComponentService.on('add-logplot-event', function (title) {
