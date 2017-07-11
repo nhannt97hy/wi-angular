@@ -55,6 +55,7 @@ function pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, 
     self.treeConfig = (new WiTreeConfig()).config;
 
     console.log('self.treeConfig----', self.treeConfig, project);
+    if (!project.wells) return;
     // parse config from data
     // inject child item to origin config
     let wells = [];
