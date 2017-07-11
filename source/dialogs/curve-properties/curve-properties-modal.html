@@ -1,0 +1,159 @@
+<div class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><span class="curve-properties-16x16"></span>&nbsp;Curve Properties</h4>
+                <h5 class="modal-infomation-title">&nbsp;Well Infomation</h5>
+            </div>
+            <div class="modal-body">
+                <div class="">
+                    <form class="form-horizontal" action="" name="modalAddNew">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3" for="wellName"><span class=""></span>Well</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control wi-form-control" value="" id="wellName" name="wellName" ng-model="name">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h5>Header</h5>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3" for="curveName"><span class=""></span>Name</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control wi-form-control" value="" id="curveName" name="curveName" ng-model="curveName">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3" for="alias"><span class=""></span>Alias</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control wi-form-control" value="" id="alias" name="alias" ng-model="alias">
+                                    </div>
+                                </div>
+                                <div class="checkShow">
+                                    <input type="checkbox" ng-model="showHeader" checked>Show header &nbsp;
+                                    <input type="checkbox" ng-model="showDataset">Show Dataset
+                                </div>
+                                <div class="scales">
+                                    <h5>Scales</h5>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5" for="minValue">Min value</label>
+                                        <div class="col-sm-7">
+                                            <input type="number" class="form-control wi-form-control" value="" id="minValue" name="minValue" ng-model="minValue">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5" for="maxValue">Max value</label>
+                                        <div class="col-sm-7">
+                                            <input type="number" class="form-control wi-form-control" value="" id="maxValue" name="maxValue" ng-model="maxValue">
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" ng-model="autoScale">&nbsp;Auto value scales <br><br>
+                                    <div class="minDepth">
+                                        <p class="col-sm-5">Min Depth: </p>
+                                        <p class="col-sm-7">12345</p>
+                                    </div>
+                                    <div class="maxDepth">
+                                        <p class="col-sm-5">Max Depth: </p>
+                                        <p class="col-sm-7">12345</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <h5>Sample</h5>
+                                <div class="sample">
+
+                                </div>
+                            </div>
+                            <div class="interpolation">
+                                <h5>Interpolation</h5>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Display mode</label>
+                                        <div class="col-sm-7">
+                                            <select ng-model="wiModal.defaultElement.displayMode" name="displayMode" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.displayMode track by item"></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Wrap mode</label>
+                                        <div class="col-sm-7">
+                                            <select ng-model="wiModal.defaultElement.wrapMode" name="wrapMode" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.wrapMode track by item"></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Symbol Type</label>
+                                        <div class="col-sm-7">
+                                            <select ng-model="wiModal.defaultElement.symbolType" name="symbolType" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.symbolType track by item"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Block Position</label>
+                                        <div class="col-sm-7">
+                                            <select ng-model="wiModal.defaultElement.blockPosition" name="blockPosition" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.blockPosition track by item"></select>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" ng-model="ignore">Ignore Missing Values
+                                    <br>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Symbol Size</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" name="symbolSize" class="form-control" ng-model="symbolSize">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"></div>
+                                        <div class="col-sm-5">
+                                            <input type="button" value="Edit..." class="form-control wi-form-control" ng-model="edit">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dislayType">
+                                <h5>Display type</h5>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Log/Linear</label>
+                                        <div class="col-sm-7">
+                                            <select ng-model="wiModal.logLinear" class="form-control wi-form-control" ng-change="" required>
+                                                <option ng-repeat="item in wiModal.logLinear"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5">Line Stype</div>
+                                        <div class="col-sm-5">
+                                            <input type="button" value="Edit..." class="form-control wi-form-control" ng-model="edit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5 normal-text">Display As</label>
+                                        <div class="col-sm-7">
+                                            <select ng-model="wiModal.displayAs" class="form-control wi-form-control" ng-change="">
+                                                <option ng-repeat="item in wiModal.displayAs"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="" class="btn btn-default" data-dismiss="modal"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" data-dismiss="modal"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default" data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

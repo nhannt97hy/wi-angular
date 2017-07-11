@@ -702,7 +702,7 @@ exports.lithoSynCurveDialog = function (ModalService, callback) {
 }
 
 exports.addCurveDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, wiComponentService) {
         let error = null;
         let self = this;
 
@@ -717,6 +717,46 @@ exports.addCurveDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "add-curve/add-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.curvePropertiesDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+
+        this.interpolationData = {
+            displayMode : ["Line", "Symbol", "Both", "None"],
+            wrapMode : ["None", "Left", "Right", "Both"],
+            symbolType : ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            blockPosition : ["None", "Start", "Middle", "End", "None"]
+        }
+        this.defaultElement = {
+            displayMode : "Line",
+            wrapMode : "None",
+            symbolType: "Circle",
+            blockPosition: "None"
+        }
+        // this.displayMode = ["Line", "Symbol", "Both", "None"];
+
+        this.onOkButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-properties/curve-properties-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
