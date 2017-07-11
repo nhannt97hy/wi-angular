@@ -31,12 +31,12 @@ app.factory(wiServiceName, function (WiTreeItem, WiCurve, WiDepth, WiProperty) {
             let depthTreeItem = new WiDepth({
                 idDepth: Math.random() * 10000,
                 name: 'depth mock'
-            });
+            }, dataset);
             self.children.push(depthTreeItem);
 
             if (dataset.curves) {
                 for(let curve of dataset.curves) {
-                    let curveTreeItem = new WiCurve(curve);
+                    let curveTreeItem = new WiCurve(curve, dataset);
                     self.children.push(curveTreeItem);
                 }
             }

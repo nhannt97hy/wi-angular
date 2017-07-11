@@ -13,7 +13,7 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
      updatedAt:"2017-07-10T10:17:30.000Z"
      */
 
-    function WiCurve(curve, well) {
+    function WiCurve(curve, dataset) {
         let self = this;
         let defaultTreeItem = new WiTreeItem();
         angular.copy(defaultTreeItem, self);
@@ -21,20 +21,36 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
         try {
             self.type = 'curve';
             self.name = curve['idCurve'] + 'curve';
-            self.data.icon = 'curve-data-16x16';
+            // self.data.icon = 'curve-data-16x16';
             self.data.label = curve['name'];
-            self.data.properties = parsePropertiesList(curve, well);
+            self.data.properties = parsePropertiesList(curve, dataset);
 
         } catch (err) {
             console.error('Parse curve model has error', err);
         }
     }
 
-    function parsePropertiesList(curve, well) {
+    function parsePropertiesList(depth, dataset) {
         let property = new WiProperty();
-        property.addNewItemListview('properties', 'Properties', {
-            'Name': dataset['name'],
-            'Well': wellName
+        property.addNewItemListview('depths', 'Depths', {
+            'End Depth': '',
+            'Start Depth': '',
+        });
+        property.addNewItemListview('informations', 'Informations', {
+            'Alias': '',
+            'Curve Set Name': '',
+            'Data File Path': "",
+            'DataType' : '',
+            'ExportName': '',
+            'Family': '',
+            'Name': 'Depth',
+            'Unit': '',
+            'Well Name': '',
+        });
+        property.addNewItemListview('values', 'Values', {
+            'Max Value': '',
+            'Mean Value': '',
+            'Min Value': '',
         });
 
         return property;
