@@ -60,6 +60,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
         this.idProject = null;
         this.disabled = false;
         this.selectedProject = {};
+
         wiApiService.post('/project/list', null)
             .then(function (projects) {
                 console.log('response', projects);
@@ -75,11 +76,11 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
 
         this.fillInfo = function () {
             self.projects.forEach(function(item) {
-                if (self.idProject == item.idProject) {
+                if (self.idProject === item.idProject) {
                     self.selectedProject = item;
                 }
             });
-        }
+        };
 
         this.onOkButtonClicked = function () {
             self.disabled = true;
