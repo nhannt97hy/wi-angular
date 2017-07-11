@@ -2,7 +2,7 @@ const wiServiceName = 'WiCurve';
 const moduleName = 'wi-curve-model';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function (WiTreeItem) {
+app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
     /**
      * Sample item from server
      createdAt:"2017-07-10T10:17:30.000Z"
@@ -13,7 +13,7 @@ app.factory(wiServiceName, function (WiTreeItem) {
      updatedAt:"2017-07-10T10:17:30.000Z"
      */
 
-    function WiCurve(curve) {
+    function WiCurve(curve, well) {
         let self = this;
         let defaultTreeItem = new WiTreeItem();
         angular.copy(defaultTreeItem, self);
@@ -23,9 +23,21 @@ app.factory(wiServiceName, function (WiTreeItem) {
             self.name = curve['idCurve'] + 'curve';
             self.data.icon = 'curve-data-16x16';
             self.data.label = curve['name'];
+            self.data.properties = parsePropertiesList(curve, well);
+
         } catch (err) {
             console.error('Parse curve model has error', err);
         }
+    }
+
+    function parsePropertiesList(curve, well) {
+        let property = new WiProperty();
+        property.addNewItemListview('properties', 'Properties', {
+            'Name': dataset['name'],
+            'Well': wellName
+        });
+
+        return property;
     }
 
     return WiCurve;

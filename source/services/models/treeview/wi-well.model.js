@@ -31,7 +31,7 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
                 for (let dataset of well.datasets) {
                     console.log('dataset in well', dataset);
 
-                    let datasetTreeItem = new WiDataset(dataset);
+                    let datasetTreeItem = new WiDataset(dataset, well['name']);
                     console.log('datasetTreeItem', datasetTreeItem);
 
                     self.children.push(datasetTreeItem);
