@@ -28,6 +28,9 @@ function isEqual(a, b) {
 
     return true;
 }
+var openProject = {
+    valid: false
+};
 
 function bindFunctions(destHandlers, sourceHandlers, thisObj) {
     for (let handler in sourceHandlers) {
@@ -37,14 +40,16 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 // APP Utils
 function projectOpen(wiComponentService, projectData) {
     wiComponentService.emit('project-loaded-event', projectData);
-
+    objcpy(openProject, projectData);
+    openProject.valid = true;
 }
 
 function projectClose(wiComponentService) {
     wiComponentService.emit('project-unloaded-event');
+    openProject.valid = false;
 }
 
-function pushProjectToExplorer1(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
+function pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
     console.log('project data: ', project);
     self.treeConfig = (new WiTreeConfig()).config;
 
@@ -71,5 +76,5 @@ exports.isEqual = isEqual;
 exports.bindFunctions = bindFunctions;
 exports.projectOpen = projectOpen;
 exports.projectClose = projectClose;
-
-exports.pushProjectToExplorer = pushProjectToExplorer1;
+exports.pushProjectToExplorer = pushProjectToExplorer;
+exports.openProject = openProject;

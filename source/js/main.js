@@ -39,6 +39,9 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 // models
+let wiDepth = require('./wi-depth.model');
+let wiCurve = require('./wi-curve.model');
+let wiDataset = require('./wi-dataset.model');
 let wiProperty = require('./wi-property.model');
 let wiListview = require('./wi-listview.model');
 let wiTreeConfig = require('./wi-tree-config.model');
@@ -68,6 +71,9 @@ let app = angular.module('wiapp',
         wiRightClick.name,
 
         // models
+        wiDepth.name,
+        wiCurve.name,
+        wiDataset.name,
         wiProperty.name,
         wiListview.name,
         wiTreeConfig.name,

@@ -9,7 +9,7 @@ app.factory(wiServiceName, function () {
         data: {
             icon: 'project-new-16x16',
             label: '',
-            description: '',
+            unit: '',
             childExpanded: false,
             properties: {}
         },
@@ -19,7 +19,7 @@ app.factory(wiServiceName, function () {
     function WiTreeItem() {
         let self = this;
 
-        angular.extend(self, DEFAULT_TREE_ITEM);
+        angular.copy(DEFAULT_TREE_ITEM, self);
     }
 
     return WiTreeItem;
