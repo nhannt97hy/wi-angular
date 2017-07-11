@@ -1,9 +1,11 @@
 exports.newProjectDialog = function ($mainScope, ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
+        this.disabled = false;
         this.error = null;
 
         this.onOkButtonClicked = function () {
+            self.disabled = true;
             let data = {
                 name: $scope.name,
                 company: $scope.company,
@@ -21,6 +23,9 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                 })
                 .catch(function (err) {
                     return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
                 });
         };
 
@@ -48,13 +53,14 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
 };
 
 exports.openProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, wiApiService, WiWell) {
+    function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
         this.projects = [];
         this.idProject = null;
         this.disabled = false;
         this.selectedProject = {};
+
         wiApiService.post('/project/list', null)
             .then(function (projects) {
                 console.log('response', projects);
@@ -74,7 +80,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
                     self.selectedProject = item;
                 }
             });
-        }
+        };
 
         this.onOkButtonClicked = function () {
             self.disabled = true;
@@ -689,6 +695,34 @@ exports.lithoSynCurveDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "litho-syn-curve/litho-syn-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.addCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService) {
+        let error = null;
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "add-curve/add-curve-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

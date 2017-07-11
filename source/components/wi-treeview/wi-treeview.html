@@ -17,7 +17,9 @@
             </div>
         </div>
 
-        <div class="wi-parent-unit text-right" ng-show="item.data.unit">
+        <div class="wi-parent-unit text-right" ng-show="item.data.unit"
+             ng-click="wiTreeview.onClick($index)"
+             ng-dblclick="wiTreeview.onDoubleClick($index)">
             {{item.data.unit}}
         </div>
     </div>

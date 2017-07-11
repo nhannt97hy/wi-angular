@@ -27,10 +27,10 @@ function Controller(wiComponentService, WiProperty) {
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
-        } else if (self.config[$index].children && self.config[$index].length !== 0) {
+        } else if (self.config[$index].children && self.config[$index].children.length !== 0){
             self.onCollapse($index);
         } else {
-            let treeFunctions = wiComponentService.getComponent('TREE_FUNCTIONS');
+            let treeFunctions = wiComponentService.getComponent(wiComponentService.TREE_FUNCTIONS);
             if (treeFunctions) {
                 // get func from component service
                 if (self.config && self.config[$index] && self.config[$index].type
@@ -38,7 +38,7 @@ function Controller(wiComponentService, WiProperty) {
                     treeFunctions[self.config[$index].type]();
                 }
                 else {
-                    console.error(treeFunctions, self.config, self.config[$index]);
+                    console.log(treeFunctions, self.config, self.config[$index]);
                 }
             }
         }
