@@ -76,7 +76,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
 
         this.fillInfo = function () {
             self.projects.forEach(function(item) {
-                if (self.idProject === item.idProject) {
+                if (self.idProject == item.idProject) {
                     self.selectedProject = item;
                 }
             });
