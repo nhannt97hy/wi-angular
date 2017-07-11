@@ -9,10 +9,10 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
         $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
 
         wiComponentService.on('project-loaded-event', function (project) {
-            console.log('project data: ', project);
+            // console.log('project data: ', project);
             self.treeConfig = (new WiTreeConfig()).config;
 
-            console.log('self.treeConfig', self.treeConfig);
+            // console.log('self.treeConfig', self.treeConfig);
             // parse config from data
             // inject child item to origin config
             let wells = parseWells(project);
