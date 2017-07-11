@@ -2,54 +2,57 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"><span class="project-new-16x16"></span>&nbsp;New Project</h4>                
+                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal"
+                        aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title"><span class="project-new-16x16"></span>&nbsp;New Project</h4>
 
             </div>
             <div class="modal-body">
                 <div class="">
-                    <h5 class="modal-infomation-title"><span class="project-normal-16x16"></span>&nbsp;Project Infomation</h5>
+                    <h5 class="modal-infomation-title"><span class="project-normal-16x16"></span>&nbsp;Project
+                        Infomation</h5>
                     <form class="form-horizontal" action="" name="modalNewProject">
                         <div class="form-group">
-                          <label class="control-label col-sm-3" for="name">Project name:</label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" value="" id="name" name="name" ng-model="name" required>
-                            <span ng-show ="modalNewProject.name.$dirty && modalNewProject.name.$error.required">Required*</span>
-                          </div>
+                            <label class="control-label col-sm-3" for="name">Project name:</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="" id="name" name="name" ng-model="name"
+                                       required>
+                                <span ng-show="modalNewProject.name.$dirty && modalNewProject.name.$error.required">Required*</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-3" for="company">Company</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" value="" id="company" name="company"
-                                   ng-model="company"
-                                   ng-click="wiModal.error = null">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="company">Company</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="" id="company" name="company"
+                                       ng-model="company"
+                                       ng-click="wiModal.error = null">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-3" for="department">Department:</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" value="" id="department" name="department"
-                                   ng-model="department"
-                                   ng-click="wiModal.error = null">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="department">Department:</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="" id="department" name="department"
+                                       ng-model="department"
+                                       ng-click="wiModal.error = null">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-3" for="description">Description:</label>
-                        <div class="col-sm-9">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="description">Description:</label>
+                            <div class="col-sm-9">
                             <textarea class="form-control" rows="8" value="" id="description" name="description"
                                       ng-model="description"
                                       ng-click="wiModal.error = null">
                             </textarea>
+                            </div>
                         </div>
-                    </div>
-                </form>
-
+                    </form>
+                </div>
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
-                        ng-disabled="!modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid)"
+                        ng-disabled="wiModal.disabled || !modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid)"
                         ng-click="wiModal.onOkButtonClicked()">
                     <span class="ok-16x16"></span>&nbsp;OK
                 </button>

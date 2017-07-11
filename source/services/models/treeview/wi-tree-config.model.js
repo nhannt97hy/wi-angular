@@ -17,63 +17,6 @@ app.factory(wiServiceName, function () {
                 },
                 children: [
                     {
-                        name: 'bachho',
-                        type: 'item11',
-                        data: {
-                            icon: 'well-16x16',
-                            label: 'Bach Ho',
-                            unit: '',
-                            childExpanded: false,
-                            properties: {}
-                        },
-                        children: [
-                            {
-                                name: 'Data',
-                                type: 'data',
-                                data: {
-                                    icon: 'curve-data-16x16',
-                                    label: 'Data',
-                                    unit: '',
-                                    childExpanded: false,
-                                    properties: {}
-                                },
-                                children: [
-                                    {
-                                        name: 'depth',
-                                        type: 'depth',
-                                        data: {
-                                            icon: 'depth-blank-16x16',
-                                            label: 'Depth',
-                                            unit: 'M'
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                name: 'data1',
-                                type: 'data',
-                                data: {
-                                    icon: 'curve-data-16x16',
-                                    label: 'Data2',
-                                    unit: '',
-                                    childExpanded: false,
-                                    properties: {}
-                                },
-                                children: [
-                                    {
-                                        name: 'depth1',
-                                        type: 'depth',
-                                        data: {
-                                            icon: 'depth-blank-16x16',
-                                            label: 'Depth',
-                                            unit: 'M'
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
                         name: 'rawdata',
                         type: 'rawdata',
                         data: {

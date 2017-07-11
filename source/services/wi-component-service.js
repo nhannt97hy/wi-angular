@@ -52,8 +52,22 @@ app.factory(wiServiceName, function () {
             }
         },
 
+        // component
+        LOGPLOT_HANDLERS: 'LOGPLOT_HANDLERS',
+        TREE_FUNCTIONS: 'tree-functions',
+        GLOBAL_HANDLERS: 'GLOBAL_HANDLERS',
+        GRAPH: 'GRAPH',
+        DRAG_MAN: 'DRAG_MAN',
+        DIALOG_UTILS:'DIALOG_UTILS',
+        LAYOUT_MANAGER: 'LAYOUT_MANAGER',
+        UTILS: 'UTILS',
+
         // state name
-        ITEM_ACTIVE_STATE: 'item-active-state'
+        ITEM_ACTIVE_STATE: 'item-active-state',
+
+        // event
+        ADD_LOGPLOT_EVENT: 'add-logplot-event',
+        PROJECT_UNLOADED_EVENT: 'project-unloaded-event'
     };
 });
 

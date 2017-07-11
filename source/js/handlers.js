@@ -1,19 +1,21 @@
 exports.NewProjectButtonClicked = function () {
     console.log('NewProjectButton is clicked ');
+    let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.newProjectDialog(this.$scope, this.ModalService, function (data) {
-        console.log('data from modal', data);
+        let utils = self.wiComponentService.getComponent('UTILS');
+        utils.projectOpen(self.wiComponentService, data);
     });
 }
 
 exports.OpenProjectButtonClicked = function () {
-    var self = this;
+    let self = this;
     console.log('OpenProjectButtoon is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
-        var utils = self.wiComponentService.getComponent('UTILS');
+        let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
     });
 };
