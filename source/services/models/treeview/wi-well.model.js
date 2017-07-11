@@ -22,18 +22,20 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
 
         try {
             self.type = 'well';
-            self.name = well['idWell'];
+            self.name = well['idWell'] + 'well';
             self.data.icon = 'well-16x16';
             self.data.label = well['name'];
             self.data.properties = parsePropertiesList(well);
 
-            for(let dataset of well.datasets) {
-                console.log('dataset in well', dataset);
+            if (well.datasets) {
+                for (let dataset of well.datasets) {
+                    console.log('dataset in well', dataset);
 
-                let datasetTreeItem = new WiDataset(dataset);
-                console.log('datasetTreeItem', datasetTreeItem);
+                    let datasetTreeItem = new WiDataset(dataset);
+                    console.log('datasetTreeItem', datasetTreeItem);
 
-                self.children.push(datasetTreeItem);
+                    self.children.push(datasetTreeItem);
+                }
             }
         } catch (err) {
             console.error('Parse well model has error', err);
