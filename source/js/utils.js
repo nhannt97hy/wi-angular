@@ -47,6 +47,7 @@ function projectOpen(wiComponentService, projectData) {
 function projectClose(wiComponentService) {
     wiComponentService.emit('project-unloaded-event');
     openProject.valid = false;
+    openProject = {};
 }
 
 exports.objcpy = objcpy;
