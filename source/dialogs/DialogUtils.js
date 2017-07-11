@@ -48,7 +48,7 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
 };
 
 exports.openProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, wiApiService, WiWell) {
+    function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
         this.projects = [];
@@ -689,6 +689,34 @@ exports.lithoSynCurveDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "litho-syn-curve/litho-syn-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.addCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService) {
+        let error = null;
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "add-curve/add-curve-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
