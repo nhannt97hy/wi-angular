@@ -49,6 +49,11 @@ exports.SaveProjectAsButtonClicked = function () {
 
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    if (!layoutManager.isComponentExist('explorer-block')) {
+        layoutManager.putLeft('explorer-block', 'Project');
+    }
 };
 
 exports.WorkflowsButtonClicked = function () {
@@ -57,6 +62,11 @@ exports.WorkflowsButtonClicked = function () {
 
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    if (!layoutManager.isComponentExist('property-block')) {
+        layoutManager.putLeft('property-block', 'Properties');
+    }
 };
 
 exports.ExitButtonClicked = function () {

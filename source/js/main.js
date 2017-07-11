@@ -133,9 +133,9 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     wiComponentService.putComponent('DRAG_MAN', dragMan);
     /* ======================================== */
     wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
-
+    wiComponentService.putComponent('LAYOUT_MANAGER', layoutManager);
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
     // layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
