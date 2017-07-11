@@ -69,20 +69,11 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
             });
 
         this.fillInfo = function () {
-            console.log("test", self.projects, self.idProject, self.projects[self.idProject]);
-            /*Dang co gi ?
-                self.projects ==> mang of prj. Moi prj co prj.idProject
-                self.idProject
-            Cai em can!
-                self.selectedProject = cai gi do DUNG
-            self.selectedProject = self.projects[self.idProject]*/
-
             self.projects.forEach(function(item) {
                 if (self.idProject == item.idProject) {
                     self.selectedProject = item;
                 }
             });
-            console.log(self.selectedProject);
         }
 
         this.onOkButtonClicked = function () {
@@ -93,7 +84,6 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
 
             wiApiService.post('/project/fullinfo', data)
                 .then(function (response) {
-                    console.log('response', response);
 
                     return close(response, 500);
                 })
@@ -358,18 +348,21 @@ exports.unitSettingDialog = function (ModalService, callback) {
     });
 
 }
-
+// add new well
 exports.addNewDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, wiComponentService) {
         let self = this;
         this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+            let projectData = utils.openProject;
             let data = {
                 name: $scope.name,
+                idProject: projectData.idProject,
                 topDepth: $scope.topDepth,
                 bottomDepth: $scope.bottomDepth,
                 step: $scope.step
             };
-            // console.log("data: ", data);
+            console.log("data: ", data);
             wiApiService.post('/project/well/new', data)
                 .then(function (response) {
                     console.log('response', response);

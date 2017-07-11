@@ -29,8 +29,9 @@ function isEqual(a, b) {
     return true;
 }
 var openProject = {
-    idProject : null
-}
+    valid: false
+};
+
 function bindFunctions(destHandlers, sourceHandlers, thisObj) {
     for (let handler in sourceHandlers) {
         destHandlers[handler] = sourceHandlers[handler].bind(thisObj);
@@ -39,10 +40,13 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 // APP Utils
 function projectOpen(wiComponentService, projectData) {
     wiComponentService.emit('project-loaded-event', projectData);
+    objcpy(openProject, projectData);
+    openProject.valid = true;
 }
 
 function projectClose(wiComponentService) {
     wiComponentService.emit('project-unloaded-event');
+    openProject.valid = false;
 }
 
 exports.objcpy = objcpy;
@@ -50,3 +54,4 @@ exports.isEqual = isEqual;
 exports.bindFunctions = bindFunctions;
 exports.projectOpen = projectOpen;
 exports.projectClose = projectClose;
+exports.openProject = openProject;

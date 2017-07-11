@@ -14,7 +14,7 @@ exports.OpenProjectButtonClicked = function () {
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openProjectDialog(this.$scope, this.ModalService, function(projectData) {
         var utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, projectData);
+            utils.projectOpen(self.wiComponentService, projectData);
     } );
 };
 
