@@ -19,7 +19,7 @@ app.factory(wiServiceName, function () {
     function WiTreeItem() {
         let self = this;
 
-        angular.extend(self, DEFAULT_TREE_ITEM);
+        angular.copy(DEFAULT_TREE_ITEM, self);
     }
 
     return WiTreeItem;
