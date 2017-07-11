@@ -56,9 +56,7 @@ function Controller(wiComponentService, WiProperty) {
 
     this.addItemToFirst = function (parentName, item) {
         let parentItem = getItemByName(parentName);
-        console.log('parentItem:', parentName, parentItem);
         if (parentItem) {
-            console.log('++++++++', item);
             parentItem.children.unshift(item);
         }
     };

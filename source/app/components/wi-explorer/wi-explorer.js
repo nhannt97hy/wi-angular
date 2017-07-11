@@ -16,27 +16,6 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
         });
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
-
-    function parseWells(project) {
-        let wells = [];
-
-        for (let well of project.wells) {
-            let wiWellTemp = new WiWell(well);
-            wells.push(wiWellTemp);
-        }
-
-        return wells;
-    }
-
-    function pushWellsToTreeConfig(wells) {
-        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
-
-        if (wiRootTreeviewComponent) {
-            for (let well of wells) {
-                wiRootTreeviewComponent.addItemToFirst('wells', well);
-            }
-        }
-    }
 }
 
 let app = angular.module(moduleName, []);
