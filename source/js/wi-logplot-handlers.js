@@ -15,7 +15,7 @@ exports.Test1ButtonClicked = function() {
 
     idx = myPlot.addTrack();
 
-    myPlot.setData(idx, genSamples(10000));
+    myPlot.addCurve(idx, genSamples(10000));
 
     var maxDepth = myPlot.getMaxDepth();
 
