@@ -6,9 +6,7 @@ function Controller(wiComponentService, WiProperty) {
 
     this.$onInit = function () {
         // self.items = self.config;
-
         if (self.name) wiComponentService.putComponent(self.name, self);
-        console.log('contextmenuholder:', self.contextmenuholder);
     };
 
     this.onCollapse = function ($index) {

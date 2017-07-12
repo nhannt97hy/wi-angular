@@ -200,7 +200,74 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "New LogPlot",
                         icon: "logplot-new-16x16",
                         handler: function () {
-                        }
+                        },
+                        childContextMenu: [
+                            {
+                                name: "BlankLogPlot",
+                                label: "Blank Log Plot",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "3TracksBlank",
+                                label: "3 Tracks Blank",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "OpenTemplate",
+                                label: "Open Template",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                separator: '1'
+                            }, {
+                                name: "DensityNeutron",
+                                label: "Density Neutron",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "ResistivitySonic",
+                                label: "Resistivity Sonic",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "TripleCombo",
+                                label: "Triple Combo",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "InputCurves",
+                                label: "Input Curves",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SynCurves",
+                                label: "Syn. Curves",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "LithoSynCurves",
+                                label: "Litho + Syn. Curves",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                separator: '1'
+                            }, {
+                                name: "Result",
+                                label: "Result",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }
+                        ]
                     }, {
                         separator: '1'
                     }
@@ -212,7 +279,84 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "New CrossPlot",
                         icon: "crossplot-new-16x16",
                         handler: function () {
-                        }
+                        },
+                        childContextMenu: [
+                            {
+                                name: "BlankCrossPlot",
+                                label: "Blank Cross Plot",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                separator: '1'
+                            }, {
+                                name: "NeutronGamma",
+                                label: "Neutron Gamma",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "NeutronSonic",
+                                label: "Neutron Sonic",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "NeutronRt",
+                                label: "Neutron Rt",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "DensityGamma",
+                                label: "Density Gamma",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "DensityRt",
+                                label: "Density Rt",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicDensity",
+                                label: "Sonic Density",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicRt",
+                                label: "Sonic Rt",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicPhiTotal",
+                                label: "Sonic PHI_TOTAL",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicGamma",
+                                label: "Sonic Gamma",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "RtRxo",
+                                label: "Rt_Rxo",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "PickettPlot",
+                                label: "Pickett Plot",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }
+                        ]
                     }, {
                         separator: '1'
                     }
