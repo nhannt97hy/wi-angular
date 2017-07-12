@@ -39,6 +39,7 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 // APP Utils
 function projectOpen(wiComponentService, projectData) {
     wiComponentService.emit('project-loaded-event', projectData);
+
     objcpy(openProject, projectData);
 }
 
@@ -50,6 +51,8 @@ function pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, 
     console.log('project data: ', project);
     self.treeConfig = (new WiTreeConfig()).config;
     console.log('self.treeConfig', self.treeConfig);
+
+    if (!project.wells) return;
     // parse config from data
     // inject child item to origin config
     let wells = [];
