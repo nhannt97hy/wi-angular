@@ -3,51 +3,369 @@ const moduleName = 'wi-explorer';
 
 function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
-    self.treeviewName = self.name + 'treeview';
 
     this.$onInit = function () {
+        self.treeviewName = self.name + 'treeview';
         $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-
+        let utils = wiComponentService.getComponent('UTILS');
         wiComponentService.on('project-loaded-event', function (project) {
-            console.log('project data: ', project);
-            self.treeConfig = (new WiTreeConfig()).config;
-
-            console.log('self.treeConfig', self.treeConfig);
-            // parse config from data
-            // inject child item to origin config
-            let wells = parseWells(project);
-            $timeout(function () {
-                pushWellsToTreeConfig(wells);
-            });
+            utils.pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
-
         wiComponentService.on('project-unloaded-event', function () {
             self.treeConfig = {};
         });
-
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    function parseWells(project) {
-        let wells = [];
-
-        for (let well of project.wells){
-            let wiWellTemp = new WiWell(well);
-            wells.push(wiWellTemp);
-        }
-
-        return wells;
-    }
-
-    function pushWellsToTreeConfig(wells) {
-        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
-
-        if (wiRootTreeviewComponent){
-            for (let well of wells) {
-                wiRootTreeviewComponent.addItemToFirst('wells', well);
+    this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
+        return [
+            {
+                name: "Expand",
+                label: "Expand",
+                icon: "expand-16x16",
+                handler: function () {
+                    treeviewCtrl.expand($index);
+                }
+            }, {
+                name: "Collapse",
+                label: "Collapse",
+                icon: "collapse-16x16",
+                handler: function () {
+                    treeviewCtrl.collapse($index);
+                }
+            }, {
+                name: "ExpandAll",
+                label: "Expand All",
+                icon: "expand-all-16x16",
+                handler: function () {
+                    treeviewCtrl.expandAll();
+                }
+            }, {
+                name: "CollapseAll",
+                label: "Collapse All",
+                icon: "collapse-all-16x16",
+                handler: function () {
+                    treeviewCtrl.collapseAll();
+                }
             }
+        ]
+    }
+
+    this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
+        switch (configType) {
+            case 'well':
+                return [
+                    {
+                        name: "CreateNewWell",
+                        label: "Create New Well",
+                        icon: "well-new-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportASCII",
+                        label: "Import ASCII",
+                        icon: "ascii-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportMultiASCII",
+                        label: "Import Multi ASCII",
+                        icon: "ascii-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportLAS",
+                        label: "Import LAS",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportMultiLAS",
+                        label: "Import Multi LAS",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportDLIS",
+                        label: "Import DLIS",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "IntervalCoreLoader",
+                        label: "Interval/Core Loader",
+                        icon: "load-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "MultiwellCoreLoader",
+                        label: "Multi-well Core Loader",
+                        icon: "load-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportWellHeader",
+                        label: "Import Well Header",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportWellTop",
+                        label: "Import Well Top",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "NewDataset",
+                        label: "New Dataset",
+                        icon: "dataset-new-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ZoneManager",
+                        label: "Zone Manager",
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "Group",
+                        label: "Group",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'data':
+                return [
+                    {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16"
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'intepretationmodel':
+                return [
+                    {
+                        name: "NewInterpretationModel",
+                        label: "New Interpretation Model",
+                        icon: "workflow-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'userdefined':
+                return [
+                    {
+                        name: "NewZoneSet",
+                        label: "New Zone Set",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ZoneManager",
+                        label: "Zone Manager",
+                        icon: "zone-management-16x16"
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'logplot':
+                return [
+                    {
+                        name: "NewLogPlot",
+                        label: "New LogPlot",
+                        icon: "logplot-new-16x16",
+                        handler: function () {
+                        },
+                        childContextMenu: [
+                            {
+                                name: "BlankLogPlot",
+                                label: "Blank Log Plot",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "3TracksBlank",
+                                label: "3 Tracks Blank",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "OpenTemplate",
+                                label: "Open Template",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                separator: '1'
+                            }, {
+                                name: "DensityNeutron",
+                                label: "Density Neutron",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "ResistivitySonic",
+                                label: "Resistivity Sonic",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "TripleCombo",
+                                label: "Triple Combo",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "InputCurves",
+                                label: "Input Curves",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SynCurves",
+                                label: "Syn. Curves",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "LithoSynCurves",
+                                label: "Litho + Syn. Curves",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                separator: '1'
+                            }, {
+                                name: "Result",
+                                label: "Result",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }
+                        ]
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'crossplot':
+                return [
+                    {
+                        name: "NewCrossPlot",
+                        label: "New CrossPlot",
+                        icon: "crossplot-new-16x16",
+                        handler: function () {
+                        },
+                        childContextMenu: [
+                            {
+                                name: "BlankCrossPlot",
+                                label: "Blank Cross Plot",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                separator: '1'
+                            }, {
+                                name: "NeutronGamma",
+                                label: "Neutron Gamma",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "NeutronSonic",
+                                label: "Neutron Sonic",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "NeutronRt",
+                                label: "Neutron Rt",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "DensityGamma",
+                                label: "Density Gamma",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "DensityRt",
+                                label: "Density Rt",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicDensity",
+                                label: "Sonic Density",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicRt",
+                                label: "Sonic Rt",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicPhiTotal",
+                                label: "Sonic PHI_TOTAL",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "SonicGamma",
+                                label: "Sonic Gamma",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "RtRxo",
+                                label: "Rt_Rxo",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }, {
+                                name: "PickettPlot",
+                                label: "Pickett Plot",
+                                icon: "",
+                                handler: function () {
+                                }
+                            }
+                        ]
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            default:
+                return [];
         }
     }
+
 }
 
 let app = angular.module(moduleName, []);

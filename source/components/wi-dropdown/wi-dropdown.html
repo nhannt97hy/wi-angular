@@ -1,5 +1,6 @@
 <div class="dropdown">
-    <button class="dropdown-toggle" type="button" data-toggle="dropdown"
+    <button class="dropdown-toggle dropdown-{{wiDropdown.type || wiDropdown.config.type || wiDropdown.default.type}}"
+            type="button" data-toggle="dropdown"
             ng-click="wiDropdown.onClick()"
             ng-disabled='wiDropdown.isDisabled()'>
         <img class="{{wiDropdown.icon || wiDropdown.config.icon || wiDropdown.default.icon}}" alt="icon wi-dropdown">

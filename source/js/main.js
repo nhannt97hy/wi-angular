@@ -39,6 +39,8 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 // models
+let wiDepth = require('./wi-depth.model');
+let wiCurve = require('./wi-curve.model');
 let wiDataset = require('./wi-dataset.model');
 let wiProperty = require('./wi-property.model');
 let wiListview = require('./wi-listview.model');
@@ -69,6 +71,8 @@ let app = angular.module('wiapp',
         wiRightClick.name,
 
         // models
+        wiDepth.name,
+        wiCurve.name,
         wiDataset.name,
         wiProperty.name,
         wiListview.name,
@@ -82,9 +86,9 @@ let app = angular.module('wiapp',
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS
-    wiComponentService.putComponent('UTILS', utils);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
-    wiComponentService.putComponent('LOGPLOT_HANDLERS', logplotHandlers);
+    wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
 
 
     // SETUP HANDLER FUNCTIONS
@@ -114,11 +118,11 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         ModalService: ModalService,
         $timeout: $timeout
     });
-    wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
-    wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
+    wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
+    wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
 
     // Hook globalHandler into $scope
-    $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
+    $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
 
     // config explorer block - treeview
@@ -131,22 +135,23 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     $scope.myPropertiesConfig = {};
 
     /* ========== IMPORTANT! ================== */
-    wiComponentService.putComponent('GRAPH', graph);
-    wiComponentService.putComponent('DRAG_MAN', dragMan);
+    wiComponentService.putComponent(wiComponentService.GRAPH, graph);
+    wiComponentService.putComponent(wiComponentService.DRAG_MAN, dragMan);
     /* ======================================== */
-    wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
+    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    wiComponentService.putComponent(wiComponentService.LAYOUT_MANAGER, layoutManager);
 
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
-    // layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
     // Install 
-    wiComponentService.on('add-logplot-event', function (title) {
+    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
 
-    wiComponentService.on('project-unloaded-event', function () {
+    wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
         // layoutManager.removeAllRightTabs();
     });

@@ -1,7 +1,8 @@
 <div class="wi-treeview-container" ng-repeat="item in wiTreeview.config track by $index">
     <div class="wi-parent-node"
          ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
-         data-curve="{{wiTreeview.config[$index].name}}">
+         data-curve="{{wiTreeview.config[$index].name}}"
+         wi-right-click="wiTreeview.showContextMenu($event, $index)">
         <div class="wi-parent-content">
             <i aria-hidden="true" class="fa icon-expanded"
                ng-class="
@@ -16,12 +17,14 @@
             </div>
         </div>
 
-        <div class="wi-parent-description text-right" ng-show="item.data.description">
-            {{item.data.description}}
+        <div class="wi-parent-unit text-right" ng-show="item.data.unit"
+             ng-click="wiTreeview.onClick($index)"
+             ng-dblclick="wiTreeview.onDoubleClick($index)">
+            {{item.data.unit}}
         </div>
     </div>
 
     <div ng-show="item.data.childExpanded">
-        <wi-treeview config="item.children"></wi-treeview>
+        <wi-treeview contextmenuholder={{wiTreeview.contextmenuholder}} config="item.children"></wi-treeview>
     </div>
 </div>

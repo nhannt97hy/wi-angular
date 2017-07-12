@@ -1,9 +1,11 @@
 exports.newProjectDialog = function ($mainScope, ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
+        this.disabled = false;
         this.error = null;
 
         this.onOkButtonClicked = function () {
+            self.disabled = true;
             let data = {
                 name: $scope.name,
                 company: $scope.company,
@@ -11,6 +13,7 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                 description: $scope.description
             };
             console.log("This data: ", data);
+
 
             wiApiService.post('/project/new', data)
                 .then(function (response) {
@@ -20,6 +23,9 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                 })
                 .catch(function (err) {
                     return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
                 });
         };
 
@@ -47,12 +53,13 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
 };
 
 exports.openProjectDialog = function ($mainScope, ModalService, callback) {
-    function ModalController($scope, close, wiApiService, WiWell) {
+    function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
         this.projects = [];
         this.idProject = null;
         this.disabled = false;
+        this.selectedProject = {};
 
         wiApiService.post('/project/list', null)
             .then(function (projects) {
@@ -67,6 +74,14 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
                 $scope.$apply();
             });
 
+        this.fillInfo = function () {
+            self.projects.forEach(function(item) {
+                if (self.idProject == item.idProject) {
+                    self.selectedProject = item;
+                }
+            });
+        };
+
         this.onOkButtonClicked = function () {
             self.disabled = true;
             let data = {
@@ -75,7 +90,6 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
 
             wiApiService.post('/project/fullinfo', data)
                 .then(function (response) {
-                    console.log('response', response);
 
                     return close(response, 500);
                 })
@@ -340,12 +354,34 @@ exports.unitSettingDialog = function (ModalService, callback) {
     });
 
 }
+// add new well
+exports.addNewDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService, wiComponentService) {
+        let self = this;
+        this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+            let projectData = utils.openProject;
+            let data = {
+                name: $scope.name,
+                idProject: projectData.idProject,
+                topDepth: $scope.topDepth,
+                bottomDepth: $scope.bottomDepth,
+                step: $scope.step
+            };
+            console.log("data: ", data);
+            wiApiService.post('/project/well/new', data)
+                .then(function (response) {
+                    console.log('response', response);
 
-exports.addNewDialog = function (ModalService, callbak) {
-    function ModalController($scope, close) {
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                });
 
-        this.close = function (ret) {
-            close(ret);
+        }
+        this.onCancelButtonClicked = function () {
+            console.log("oncCancelButtonClicked");
         }
     }
 
@@ -483,19 +519,359 @@ exports.familyEditDialog = function (ModalService, callback) {
 
 exports.blankLogplotDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "blankPlotlog"
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
         this.close = function (ret) {
             close(ret);
-        }
-
-        $scope.name = "BlankLogplot";
-
-        this.onOk = function () {
-            console.log($scope.name);
         }
     }
 
     ModalService.showModal({
         templateUrl: "blank-logplot/blank-logplot-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.tripleComboDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "TripleCombo"
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "triple-combo/triple-combo-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.densityNeutronDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "DensityNeutron";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "density-neutron/density-neutron-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.resistivitySonicDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "ResistivitySonic";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "resistivity-sonic/resistivity-sonic-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.threeTracksBlankDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "3TracksBlank";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "3-tracks-blank/3-tracks-blank-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.inputCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "inputCurve";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "input-curve/input-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.lithoSynCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "lithoSynCurveDialog";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "litho-syn-curve/litho-syn-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.addCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService, wiComponentService) {
+        let error = null;
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "add-curve/add-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.lineStyleDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        this.onOkButtonClicked = function () {
+
+        };
+        this.onApplyButtonClicked = function () {
+
+        };
+        this.onCancelButtonClicked = function () {
+
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "line-style/line-style-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        // let utils = wiComponentService.getComponent('UTILS');
+        // let projectData = utils.openProject;
+        // console.log("dataaa ",projectData);
+
+        this.selectData = {
+            displayMode : ["Line", "Symbol", "Both", "None"],
+            wrapMode : ["None", "Left", "Right", "Both"],
+            symbolType : ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            blockPosition : ["None", "Start", "Middle", "End", "None"],
+            logLinear : ["Linear", "Logarithmic"],
+            displayAs : ["Normal", "Culmulative", "Mirror", "Pid"]
+        };
+        this.defaultElement = {
+            displayMode : "Line",
+            wrapMode : "None",
+            symbolType: "Circle",
+            blockPosition: "None",
+            logLinear : "Linear",
+            displayAs : "Normal"
+        };
+        this.changeOther = function () {
+            switch (self.defaultElement.displayMode) {
+                case "Line":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", true);
+                    $('#blockPosition').prop("disabled", false);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", true);
+                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editLineStyle').prop("disabled", false);
+                    break;
+                case "Symbol":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", false);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", false);
+                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editLineStyle').prop("disabled", true);
+                    break;
+                case "Both":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", false);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", false);
+                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editLineStyle').prop("disabled", false);
+                    break;
+                case "None":
+                    $('#wrapMode').prop("disabled", true);
+                    $('#symbolType').prop("disabled", true);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", true);
+                    $('#symbolSize').prop("disabled", true);
+                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editLineStyle').prop("disabled", true);
+                    break;
+                default:
+                    console.log("Error: NULL");
+                    break;
+            }
+        };
+        this.onEditLineButtonClicked = function () {
+            DialogUtils.lineStyleDialog(ModalService, function () {
+                console.log("Line Style");
+            });
+        };
+        this.onOkButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-properties/curve-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            $('.modal-dialog').draggable();
+            callback(ret);
+        });
+    });
+};
+exports.importLASDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+
+        $('.selectFile').bind("click", function () {
+            $('#selected').click();
+        });
+        this.onLoadButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "import-LAS/import-LAS-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

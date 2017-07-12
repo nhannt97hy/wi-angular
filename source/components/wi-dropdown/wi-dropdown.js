@@ -6,6 +6,7 @@ function Controller(wiComponentService) {
 
     this.default = {
         label: '',
+        type: 'normal',
         layout: 'icon-top',
         icon: 'project-new-32x32',
         disabled: false,
@@ -52,6 +53,7 @@ app.component(componentName, {
     bindings: {
         config: '<',
         name: '@',
+        type: '@',
         label: '@',
         layout: '@',
         icon: '@',

@@ -9,7 +9,7 @@ app.factory(wiServiceName, function () {
         data: {
             icon: 'project-new-16x16',
             label: '',
-            description: '',
+            unit: '',
             childExpanded: false,
             properties: {}
         },
