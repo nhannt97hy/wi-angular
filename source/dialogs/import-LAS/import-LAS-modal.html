@@ -1,27 +1,53 @@
 <div class='modal fade'>
-    <div class='modal-dialog lg-modal'>
+    <div class='modal-dialog modal-lg'>
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4>Load LAS file</h4>
+                <h5>Select File</h5>
             </div>
-            <div class="modal-body text-center">
+            <div class="modal-body">
                 <form class="form-horizontal" action="" name="modalImportLAS">
                     <div class="row">
                         <div class="form-group">
-                            <h5>Select File</h5>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control wi-form-control" value="" id="" ng-model="fileSelected">
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control" value="" id="" ng-model="fileSelected">
                             </div>
-                            <div class="col-sm-3">
-                                <button class="selectFile">Select</button>
+                            <div class="col-sm-5">
+                                <label for="selected" class="btn btn-default">Select</label>
                                 <input id="selected" type="file" style="display: none;"/>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-7">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <td>LAS Name</td>
+                                    <td>Input Name</td>
+                                    <td>Unit</td>
+                                    <td>Load&nbsp;<input type="checkbox" ng-model="allLas"></td>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>
 
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" ng-checked="allLas">
+
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="col-sm-5">
                             <div class="row">
@@ -73,55 +99,57 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-8">
-                                    <h5 class="small-text">LAS file</h5>
+                                    <h5 class="normal-text">LAS file</h5>
                                     <div class="form-group">
                                         <label class="control-label col-sm-6 tiny-text" for="step">Step</label>
                                         <div class="col-sm-6">
                                             <input type="number" id="step" value="" name="step"
-                                                   ng-model="step" class="form-control wi-form-control" disabled>
+                                                   ng-model="wiModal.file.step" class="form-control wi-form-control" disabled>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-sm-6 tiny-text" for="topDepth">Top Depth</label>
                                         <div class="col-sm-6">
                                             <input type="number" id="topDepth" value="" name="topDepth"
-                                                   ng-model="topDepth" class="form-control wi-form-control" disabled>
+                                                   ng-model="wiModal.file.topDepth" class="form-control wi-form-control" disabled>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-sm-6 tiny-text" for="bottomDepth">Bottom Depth</label>
                                         <div class="col-sm-6">
                                             <input type="number" id="bottomDepth" value="" name="bottomDepth"
-                                                   ng-model="bottomDepth" class="form-control wi-form-control" disabled>
+                                                   ng-model="wiModal.file.bottomDepth" class="form-control wi-form-control" disabled>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <label class="control-label col-sm-6 tiny-text" for="depthUnit">Depth Unit</label>
                                         <div class="col-sm-6">
-                                            <input type="text" id="depthUnit" value="" name="depthUnit"
-                                                   ng-model="depthUnit" class="form-control wi-form-control" disabled>
+                                            <select ng-model="wiModal.file.depthUnit" name="depthUnit" value=""
+                                                    class="form-control wi-form-control"
+                                                    ng-options="x for x in wiModal.depthUnit track by x" disabled></select>
                                         </div>
                                     </div>
 
                                 </div>
                                 <div class="col-sm-4">
-                                    <h5 class="small-text">LAS input</h5>
+                                    <h5 class="normal-text">LAS input</h5>
                                     <div class="form-group">
                                         <input type="number" id="step" value="" name="step"
-                                               ng-model="step" class="form-control wi-form-control" disabled>
+                                               ng-model="wiModal.inputLAS.step" class="form-control wi-form-control" disabled>
                                     </div>
                                     <div class="form-group">
                                         <input type="number" id="topDepth" value="" name="topDepth"
-                                               ng-model="topDepth" class="form-control wi-form-control">
+                                               ng-model="wiModal.inputLAS.topDepth" class="form-control wi-form-control">
                                     </div>
                                     <div class="form-group">
                                         <input type="number" id="bottomDepth" value="" name="bottomDepth"
-                                               ng-model="bottomDepth" class="form-control wi-form-control">
+                                               ng-model="wiModal.inputLAS.bottomDepth" class="form-control wi-form-control">
                                     </div>
                                     <div class="form-group">
-                                        <input type="text" id="depthUnit" value="" name="depthUnit"
-                                               ng-model="depthUnit" class="form-control wi-form-control">
+                                        <select ng-model="wiModal.inputLAS.depthUnit" name="depthUnit" value=""
+                                                class="form-control wi-form-control"
+                                                ng-options="x for x in wiModal.depthUnit track by x"></select>
                                     </div>
                                 </div>
                             </div>
@@ -132,7 +160,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
+                <button class='btn btn-default' ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()' data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

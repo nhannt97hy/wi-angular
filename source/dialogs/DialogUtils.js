@@ -859,17 +859,36 @@ exports.importLASDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         let error = null;
         let self = this;
+        this.objcpy = function (destObj, sourceObj) {
+            if (destObj) {
+                for (let attr in sourceObj) {
+                    destObj[attr] = sourceObj[attr];
+                }
+            }
+        };
+        this.depthUnit = ["M", "Ft"];
+        this.fileLAS = {
+            step: 123,
+            topDepth: 312,
+            bottomDepth: 123,
+            depthUnit: "M"
+        };
+        this.file = {};
+        this.objcpy(this.file, this.fileLAS);
+        this.inputLAS = {};
+        this.objcpy(this.inputLAS, this.fileLAS);
 
-        $('.selectFile').bind("click", function () {
-            $('#selected').click();
-        });
         this.onLoadButtonClicked = function () {
+            console.log(self.inputLAS);
+            if (self.inputLAS.topDepth < self.fileLAS.topDepth || self.inputLAS.topDepth > self.fileLAS.bottomDepth) {
+                console.log("Input top depth couldn't less than las top depth or greater than las bottom depth");
+            }
+        };
 
-        }
         this.onCancelButtonClicked = function () {
-        }
+            console.log("onCancelButtonClicked");
+        };
     }
-
     ModalService.showModal({
         templateUrl: "import-LAS/import-LAS-modal.html",
         controller: ModalController,
