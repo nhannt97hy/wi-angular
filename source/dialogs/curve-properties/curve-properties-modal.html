@@ -15,7 +15,7 @@
                                 <div class="form-group">
                                     <label class="control-label col-sm-3" for="wellName"><span class=""></span>Well</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control wi-form-control" value="" id="wellName" name="wellName" ng-model="name">
+                                        <input type="text" class="form-control wi-form-control" value="" id="wellName" name="wellName" ng-model="name" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -26,7 +26,7 @@
                                 <div class="form-group">
                                     <label class="control-label col-sm-3" for="curveName"><span class=""></span>Name</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control wi-form-control" value="" id="curveName" name="curveName" ng-model="curveName">
+                                        <input type="text" class="form-control wi-form-control" value="" id="curveName" name="curveName" ng-model="curveName" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -68,7 +68,7 @@
                             <div class="col-sm-6">
                                 <h5>Sample</h5>
                                 <div class="sample">
-
+                                    Curve Style
                                 </div>
                             </div>
                             <div class="interpolation">
@@ -77,19 +77,29 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Display mode</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.defaultElement.displayMode" name="displayMode" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.displayMode track by item"></select>
+                                            <select ng-model="wiModal.defaultElement.displayMode"
+                                                    name="displayMode" id="displayMode" value=""
+                                                    class="form-control wi-form-control"
+                                                    ng-options="item for item in wiModal.selectData.displayMode track by item"
+                                                    ng-change="wiModal.changeOther();"></select>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Wrap mode</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.defaultElement.wrapMode" name="wrapMode" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.wrapMode track by item"></select>
+                                            <select ng-model="wiModal.defaultElement.wrapMode"
+                                                    name="wrapMode" id="wrapMode" value=""
+                                                    class="form-control wi-form-control"
+                                                    ng-options="item for item in wiModal.selectData.wrapMode track by item"></select>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Symbol Type</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.defaultElement.symbolType" name="symbolType" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.symbolType track by item"></select>
+                                            <select ng-model="wiModal.defaultElement.symbolType"
+                                                    name="symbolType" id="symbolType" value=""
+                                                    class="form-control wi-form-control"
+                                                    ng-options="item for item in wiModal.selectData.symbolType track by item" disabled="true"></select>
                                         </div>
                                     </div>
                                 </div>
@@ -97,21 +107,28 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Block Position</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.defaultElement.blockPosition" name="blockPosition" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.interpolationData.blockPosition track by item"></select>
+                                            <select ng-model="wiModal.defaultElement.blockPosition"
+                                                    name="blockPosition" value="" id="blockPosition"
+                                                    class="form-control wi-form-control"
+                                                    ng-options="item for item in wiModal.selectData.blockPosition track by item"></select>
                                         </div>
                                     </div>
-                                    <input type="checkbox" ng-model="ignore">Ignore Missing Values
+                                    <input type="checkbox" ng-model="ignore" id="ignore">Ignore Missing Values
                                     <br>
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Symbol Size</label>
                                         <div class="col-sm-5">
-                                            <input type="number" name="symbolSize" class="form-control" ng-model="symbolSize">
+                                            <input type="number" name="symbolSize" id="symbolSize"
+                                                   class="form-control wi-form-control"
+                                                   ng-model="symbolSize" disabled="true">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-sm-5"></div>
                                         <div class="col-sm-5">
-                                            <input type="button" value="Edit..." class="form-control wi-form-control" ng-model="edit">
+                                            <button type="button" ng-click="wiModal.onEditLineButtonClicked();"
+                                                    id="editSymbolSize"
+                                                    class="btn btn-default" disabled="true">&nbsp;Edit</button>
                                         </div>
                                     </div>
                                 </div>
@@ -122,15 +139,17 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Log/Linear</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.logLinear" class="form-control wi-form-control" ng-change="" required>
-                                                <option ng-repeat="item in wiModal.logLinear"></option>
-                                            </select>
+                                            <select ng-model="wiModal.defaultElement.logLinear"
+                                                    name="logLinear" value="" class="form-control wi-form-control"
+                                                    ng-options="item for item in wiModal.selectData.logLinear track by item"></select>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-sm-5">Line Stype</div>
                                         <div class="col-sm-5">
-                                            <input type="button" value="Edit..." class="form-control wi-form-control" ng-model="edit">
+                                            <button type="button" id="editLineStyle"
+                                                    ng-click="wiModal.onEditLineButtonClicked();"
+                                                    class="btn btn-default">&nbsp;Edit</button>
                                         </div>
                                     </div>
                                 </div>
@@ -138,9 +157,7 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Display As</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.displayAs" class="form-control wi-form-control" ng-change="">
-                                                <option ng-repeat="item in wiModal.displayAs"></option>
-                                            </select>
+                                            <select ng-model="wiModal.defaultElement.displayAs" name="displayAs" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.selectData.displayAs track by item"></select>
                                         </div>
                                     </div>
                                 </div>

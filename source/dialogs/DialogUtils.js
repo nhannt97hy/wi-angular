@@ -734,25 +734,105 @@ exports.addCurveDialog = function (ModalService, callback) {
         });
     });
 }
-exports.curvePropertiesDialog = function (ModalService, callback) {
+
+exports.lineStyleDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        this.onOkButtonClicked = function () {
+
+        };
+        this.onApplyButtonClicked = function () {
+
+        };
+        this.onCancelButtonClicked = function () {
+
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "line-style/line-style-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
     function ModalController($scope, close) {
         let error = null;
         let self = this;
+        // let utils = wiComponentService.getComponent('UTILS');
+        // let projectData = utils.openProject;
+        // console.log("dataaa ",projectData);
 
-        this.interpolationData = {
+        this.selectData = {
             displayMode : ["Line", "Symbol", "Both", "None"],
             wrapMode : ["None", "Left", "Right", "Both"],
             symbolType : ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
-            blockPosition : ["None", "Start", "Middle", "End", "None"]
-        }
+            blockPosition : ["None", "Start", "Middle", "End", "None"],
+            logLinear : ["Linear", "Logarithmic"],
+            displayAs : ["Normal", "Culmulative", "Mirror", "Pid"]
+        };
         this.defaultElement = {
             displayMode : "Line",
             wrapMode : "None",
             symbolType: "Circle",
-            blockPosition: "None"
-        }
-        // this.displayMode = ["Line", "Symbol", "Both", "None"];
-
+            blockPosition: "None",
+            logLinear : "Linear",
+            displayAs : "Normal"
+        };
+        this.changeOther = function () {
+            switch (self.defaultElement.displayMode) {
+                case "Line":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", true);
+                    $('#blockPosition').prop("disabled", false);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", true);
+                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editLineStyle').prop("disabled", false);
+                    break;
+                case "Symbol":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", false);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", false);
+                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editLineStyle').prop("disabled", true);
+                    break;
+                case "Both":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", false);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", false);
+                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editLineStyle').prop("disabled", false);
+                    break;
+                case "None":
+                    $('#wrapMode').prop("disabled", true);
+                    $('#symbolType').prop("disabled", true);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", true);
+                    $('#symbolSize').prop("disabled", true);
+                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editLineStyle').prop("disabled", true);
+                    break;
+                default:
+                    console.log("Error: NULL");
+                    break;
+            }
+        };
+        this.onEditLineButtonClicked = function () {
+            DialogUtils.lineStyleDialog(ModalService, function () {
+                console.log("Line Style");
+            });
+        };
         this.onOkButtonClicked = function () {
 
         }
@@ -763,6 +843,35 @@ exports.curvePropertiesDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "curve-properties/curve-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            $('.modal-dialog').draggable();
+            callback(ret);
+        });
+    });
+};
+exports.importLASDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+
+        $('.selectFile').bind("click", function () {
+            $('#selected').click();
+        });
+        this.onLoadButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "import-LAS/import-LAS-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

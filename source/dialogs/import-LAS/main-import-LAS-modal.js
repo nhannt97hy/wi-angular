@@ -3,7 +3,7 @@ var app = angular.module('app', ['angularModalService']);
 
 app.controller('SampleController', function($scope, ModalService) {
     $scope.show = function() {
-        DialogUtils.curvePropertiesDialog(ModalService, DialogUtils, function(ret) {
+        DialogUtils.importLASDialog(ModalService, function(ret) {
             console.log(ret);
         });
     }
