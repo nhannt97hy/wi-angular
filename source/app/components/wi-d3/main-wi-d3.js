@@ -7,7 +7,7 @@ let app = angular.module('helloapp', [wiD3.name, wiContextMenu.name, wiComponent
 app.controller('WiDummy', function ($scope, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);
 
-    $scope.doClick = function() {
+    $scope.doClick = function () {
         let myPlot = wiComponentService.getComponent('myPlot');
         let idx = myPlot.addTrack();
         myPlot.setCurve(idx, genSamples(1000));
@@ -17,8 +17,8 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     function genSamples(nSamples) {
         let samples = [];
-        for( let i = 0; i < nSamples; i++ ) {
-            samples.push({y:i, x: Math.random()});
+        for (let i = 0; i < nSamples; i++) {
+            samples.push({y: i, x: Math.random()});
         }
         return samples;
     }

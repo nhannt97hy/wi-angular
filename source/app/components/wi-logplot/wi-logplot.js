@@ -20,7 +20,6 @@ function Controller($scope, wiComponentService, ModalService) {
             ModalService: ModalService,
             wiLogplot: self
         });
-        //$scope.handlers = wiComponentService.getComponent("GLOBAL_HANDLERS");
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };

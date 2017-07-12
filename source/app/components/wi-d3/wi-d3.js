@@ -28,8 +28,8 @@ let DTRACK_CFG = {
 function getCurveFromName(name) {
     var nSamples = 1000;
     var samples = new Array();
-    for( let i = 0; i < nSamples; i++ ) {
-        samples.push({y:i, x: Math.random()});
+    for (let i = 0; i < nSamples; i++) {
+        samples.push({y: i, x: Math.random()});
     }
     return samples;
 }
@@ -103,7 +103,7 @@ function Controller($scope, wiComponentService) {
         });
     };
 
-    this.setDepthRangeFromSlidingBar = function() {
+    this.setDepthRangeFromSlidingBar = function () {
         var slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         var maxDepth = self.getMaxDepth();
 
@@ -117,7 +117,7 @@ function Controller($scope, wiComponentService) {
             if (track.getYMax) return track.getYMax();
             return -1;
         });
-        return (maxDepth > 0)?maxDepth: 100000;
+        return (maxDepth > 0) ? maxDepth : 100000;
     };
 
     this.getCurrentTrackIdx = function() {
@@ -210,7 +210,7 @@ function Controller($scope, wiComponentService) {
         wiComponentService.getComponent('ContextMenu').open(event.clientX, event.clientY, [{
             name: "NewDepthTrack",
             label: "Add depth track",
-            handler: function() {
+            handler: function () {
                 self.addDepthTrack();
             }
         }, {
@@ -218,8 +218,14 @@ function Controller($scope, wiComponentService) {
         }, {
             name: "NewLogTrack",
             label: "Add new track ... ",
-            handler: function() {
+            handler: function () {
                 self.addTrack();
+            }
+        },{
+            name: "hhhhh",
+            label: "HHHHHHHH",
+            handler: function() {
+                console.log(self);
             }
         }]);
     }

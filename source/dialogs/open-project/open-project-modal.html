@@ -2,58 +2,34 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal"
+                        aria-hidden="true">&times;
+                </button>
                 <h4 class="modal-title"><span class="project-open-16x16"></span>&nbsp;Open Project</h4>
             </div>
             <div class="modal-body">
-              <div class="">
-                  <form class="form-horizontal" action="" name="modalOpenProject">
-                  	<div class="form-group">
-                        <div class="col-sm-12">
-                          <div class="area text-center padding-50px">
-                          	Open project 
-                          </div>
-                        </div>
-                      </div>
-                  	<h4 class="modal-infomation-title"><span class="project-normal-16x16"></span>&nbsp;Project Information</h4>
-                      
-                      <div class="form-group">
-                        <label class="control-label col-sm-3" for="projectName">Project name:</label>
-                        <div class="col-sm-9">
-                          <input type="text" class="form-control" value="" name="projectName" ng-model="wiModal.projectName" required>
-                          <span ng-show ="modalOpenProject.projectName.$dirty && modalOpenProject.projectName.$error.required">Required*</span>
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="control-label col-sm-3" for="project-name">Company</label>
-                        <div class="col-sm-9">
-                          <input type="text" class="form-control" value="" name="company" ng-model="wiModal.company">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="control-label col-sm-3" for="department">Department:</label>
-                        <div class="col-sm-9">
-                          <input type="text" class="form-control" value="" name="department" ng-model="wiModal.department">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="control-label col-sm-3" for="createDate">Create date:</label>
-                        <div class="col-sm-9">
-                          <input type="datetime-local" class="form-control" value="{{ date | date: 'yyyy-MM-dd' }}" name="createDate" ng-model="wiModal.createDate">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="control-label col-sm-3" for="descriptions">Descriptions:</label>
-                        <div class="col-sm-9">
-                          <textarea class="form-control" rows="8" value="" name="descriptions" ng-model="wiModal.descriptions"></textarea>
-                        </div>
-                      </div>
-                    </form>
-              </div>
+                <form class="form-horizontal" action="" name="modalOpenProject">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Project name:</label>
+
+                        <select ng-model="wiModal.idProject">
+                            <option ng-repeat="project in wiModal.projects" value="{{project.idProject}}">{{project.name}}</option>
+                        </select>
+
+                    </div>
+                </form>
+
+                <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.close(wiModal.projectName);" class="btn btn-default" data-dismiss="modal" ng-disabled="!modalOpenProject.$dirty || (modalOpenProject.$dirty && modalOpenProject.$invalid)"><span class="ok-16x16"></span>&nbsp;OK</button>
-                <button type="button" ng-click="wiModal.close('Cancel click')" class="btn btn-default" data-dismiss="modal"><span class="cancel-16x16"></span>&nbsp;Cancel</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"
+                        ng-disabled="wiModal.disabled || !modalOpenProject.$dirty || (modalOpenProject.$dirty && modalOpenProject.$invalid)">
+                    <span class="ok-16x16"></span>&nbsp;OK
+                </button>
+                <button type="button" class="btn btn-default"
+                        ng-click="wiModal.onCancelButtonClicked()"
+                        data-dismiss="modal"><span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
             </div>
         </div>
     </div>

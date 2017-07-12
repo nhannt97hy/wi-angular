@@ -24,10 +24,10 @@ function sheetToJson(workbook, sheetName, attrCols) {
         if (isInt(index)) {
             componentArr[index] = buildComponent(R, 1, worksheet, attrCols);
         } else {
-            let indexTree = index.toString().split(".");
-            let temp = componentArr[indexTree[0]];
+            var indexTree = index.toString().trim().split(".");
+            var temp = componentArr[indexTree[0]];
             indexTree.forEach(function (branch, i) {
-                if (i === 0 || i === indexTree.length - 1) return;
+                if (i == 0 || i == indexTree.length - 1) return;
                 temp = temp.children[branch];
             });
             if (typeof temp != 'undefined') {
@@ -53,15 +53,18 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     let FIELD = new Object();
     attrCols.forEach(function (col) {
         let value = getValueAtCell(0, col, sheet);
+        // console.log('buildComponent, col', col);
+        // console.log('buildComponent, value', value);
+
         FIELD[col] = value;
     });
     let newComponent = new Object();
     let attrObject = new Object();
     attrObject.name = getValueAtCell(row, nameCol, sheet);
-    console.log('attrObject.name', attrObject.name);
 
     attrCols.forEach(function (col) {
-        attrObject[FIELD[col]] = getValueAtCell(row, col, sheet);
+        let value = getValueAtCell(row, col, sheet);
+        if (value && value !== 'undefined') attrObject[FIELD[col]] = value;
     });
     let dependency = getValueAtCell(row, 2, sheet);
 
@@ -100,11 +103,12 @@ function printToFile(fileName, content) {
 exports.xlsxToJson = function (xlsxFile, configFile) {
     //let processTabInfos = require('./config.js').processTabInfos;
     let processTabInfos = require('./' + configFile).processTabInfos;
+    let colProcessArr = require('./' + configFile).colProcesses;
     //let workbook = XLSX.readFile('../Wi-UI.xlsx');
     console.log(xlsxFile);
     let workbook = XLSX.readFile(xlsxFile);
     processTabInfos.forEach(function (item) {
-        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, [5, 6, 7, 8, 9, 10])));
+        printToFile(item.file, JSON.stringify(sheetToJson(workbook, item.tab, colProcessArr)));
     });
 };
 

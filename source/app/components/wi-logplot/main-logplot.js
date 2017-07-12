@@ -7,7 +7,9 @@ let graph = require('./visualize/visualize.js');
 console.log('graph:', graph);
 let wiD3 = require('./wi-d3.js');
 let wiLogplot = require('./wi-logplot.js');
-let wiElementReadyDirective = require('./wi-element-ready-directive');
+let wiElementReadyDirective = require('./wi-element-ready');
+
+let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
 
