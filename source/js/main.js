@@ -28,7 +28,7 @@ let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
 
-let graph = require('./graph');
+let graph = require('./visualize/visualize');
 let dragMan = {
     dragging: false,
     draggedObj: null,

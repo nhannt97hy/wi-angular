@@ -1,40 +1,32 @@
+var Curve = require('./visualize-curve.js').Curve;
+var DepthTrack = require('./visualize-depth-track.js').DepthTrack;
+
+var Utils = require('./visualize-utils.js');
+
+var roundUp = Utils.roundUp;
+var roundDown = Utils.roundDown;
+var appendTrack = Utils.appendTrack;
+var invertColor = Utils.invertColor;
+
+
+exports.createLogTrack = function(config, domElem) {
+    var plot = new Plot(config);
+    plot.init(domElem);
+    return plot;
+}
+exports.createDepthTrack = function(config, domElem) {
+    var depthTrack = new DepthTrack(config);
+    depthTrack.init(domElem);
+    return depthTrack;
+}
+
+
 var registeredPlots = new Array();
 setInterval(function() {
     registeredPlots.forEach(function(plot) {
         if(plot.periodicTask) plot.periodicTask();
     });
 }, 2000);
-
-function roundUp(value, granularity) {
-    return Math.ceil(value / granularity) * granularity;
-}
-function roundDown(value, granularity) {
-    return Math.floor(value / granularity) * granularity;
-}
-
-function appendTrackHeader(plotArea, container, trackName) {
-    container.append('div')
-        .attr('class', 'track-header text-center')
-            .append('label')
-            .attr('class', 'track-name text-center')
-                .text(trackName);
-    container.append('div')
-        .attr('class', 'vresizer')
-        .call(d3.drag()
-            .on('drag', function() {
-                var plotHeight = container.select('.plot-container').node().clientHeight;
-                d3.select(plotArea).selectAll('.plot-container')
-                    .style('height', (plotHeight - d3.event.dy) + "px");
-            })
-        );
-}
-
-function appendDepthHeader(base, unit) {
-    var trackHeader = base.selectAll('.track-header');
-    trackHeader.append('label')
-        .attr('class', 'data-header double-height text-center')
-        .text(unit);
-}
 
 function appendToTrackHeader(base, dataSetName, unit, minVal, maxVal) {
     var unitHeaderData = [minVal, unit, maxVal];
@@ -61,125 +53,32 @@ function appendToTrackHeader(base, dataSetName, unit, minVal, maxVal) {
                 .text(function(d) { return d; });
 }
 
-function appendTrack(baseElement, trackName, plotWidth) {
-    var compensator;
-    var minPlotWidth = plotWidth;
-    var trackContainer = d3.select(baseElement).append('div')
-        .attr('class', 'track-container')
-        .style('width', plotWidth + 'px');
-    appendTrackHeader(baseElement, trackContainer, trackName);
-    var resizer = d3.select(baseElement).append('div')
-        .attr('class', 'resizer')
-        .call(d3.drag()
-            .on('start', function() {
-                compensator = 0;
-            })
-            .on('drag', function() {
-                compensator += d3.event.dx;
-                if (( plotWidth + compensator ) > minPlotWidth) {
-                    plotWidth += compensator;
-                    compensator = 0;
-                    trackContainer.style('width', plotWidth + 'px');
-                }
-            })
-        );
-    trackContainer.append('div')
-        .attr('class', 'plot-container');
-    return trackContainer;
+function removeFromTrackHeader(base, idx) {
+    base.selectAll('.data-header')
+        .filter(function(d, i) { return i == idx; })
+        .remove();
+
+    base.selectAll('.unit-header')
+        .filter(function(d, i) { return i == idx; })
+        .remove();
 }
 
-function DepthTrack(config) {
-    var self = this;
-    var _viewportX = new Array(), _viewportY = new Array();
-    
-    if( !config ) {
-        console.error("config must not be null");
-        return;
-    }
-    var unit = config.unit || 'm';
-    var root;
-    var base;
-    var svg;
-    var clientRect;
-    var yAxisGroup;
-    var yAxisGroup1;
-    var transformY;
-    var yAxisClass = 'depthtrack';
-    var yNTicks = config.yNTicks || 20;
-    var plotWidth = config.plotWidth || 200;
-    var yStep = config.yStep || 1.0;
-    var yFormatter = d3.format(config.yFormatter || 'g');
-    var xPadding = config.xPadding || 0, yPadding = config.yPadding || 0;
-    this.getYStep = function() { 
-        return yStep; 
-    }
-    this.init = function(baseElement) {
-        root = appendTrack(baseElement, 'Depth', plotWidth);
-        base = root.select('.plot-container');
-        appendDepthHeader(root, unit);
-        clientRect = base.node().getBoundingClientRect();
 
-        svg = base.append('svg')
-                .attr('width', clientRect.width)
-                .attr('height', clientRect.height);
-        yAxisGroup = svg.append('g')
-            .attr('class', yAxisClass)
-            .attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-        yAxisGroup1 = svg.append('g')
-            .attr('class', yAxisClass);
-            //.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-        new ResizeSensor(base.node(), function() {
-            clientRect = base.node().getBoundingClientRect();
-
-            svg.attr('width', clientRect.width)
-                .attr('height', clientRect.height);
-            yAxisGroup.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-            if( _viewportY.length == 2 ) _doPlot();
-        });
-    }
-    function _doPlot() {
-        transformY = d3.scaleLinear().domain(_viewportY).range([yPadding, clientRect.height - yPadding]);
-        function setupAxes() {
-            var start = roundUp(_viewportY[0], yStep);
-            var end = roundDown(_viewportY[1], yStep);
-            var yAxis = d3.axisLeft(transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
-                .tickFormat(yFormatter)
-                .tickSize(5);
-            var yAxis1 = d3.axisRight(transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
-                .tickFormat('')
-                .tickSize(5);
-
-            yAxisGroup.call(yAxis);
-            yAxisGroup1.call(yAxis1);
-        }
-        setupAxes();
-    }
-    this.doPlot = function() {
-        _doPlot();
-    }
-    this.setYRange = function(vY) {
-        _viewportY[0] = vY[0];
-        _viewportY[1] = vY[1];
-    }
-}
 function Plot(config) {
     var self = this;
-    var _data, _viewportX = new Array(), _viewportY = new Array();
+    var _viewportX = new Array(), _viewportY = new Array();
     if( !config ) {
         console.error("config must not be null");
         return;
     }
+    var _curves = new Array();
     var refLine;
     var refX = 10;
     var root;
     var base;
     var svg;
-    var canvas;
     var clientRect;
     var translateOpts = new Object();
-    var ctx;
     var xAxisGroup, yAxisGroup;
     var transformX;
     var transformY;
@@ -191,9 +90,13 @@ function Plot(config) {
     var yStep = config.yStep || 1.0;
 
     var xPadding = config.xPadding || 0, yPadding = config.yPadding || 0;
-    var xFormatter = d3.format(config.xFormatter || 'g'), 
+    var xFormatter = d3.format(config.xFormatter || 'g'),
         yFormatter = d3.format(config.yFormatter || 'g');
-    
+
+    var usedColors = d3.set();
+    var refLineColor = '#3e3e3e';
+    var shading = false;
+    var currentCurveIdx = -1;
 
     var axisCfg = {
         top: function(transformX) {
@@ -209,15 +112,17 @@ function Plot(config) {
             return d3.axisRight(transformY);
         }
     }
-    this.getYStep = function() { 
-        return yStep; 
+    this.getYStep = function() {
+        return yStep;
     }
     this.getYMax = function() {
-        if (!_data || _data.length == 0) return null;
-        return (_data.length - 1) * yStep;
+        if (_curves.length == 0) return null;
+        let curvesData = _curves.map(function(c) { return c.getData(); });
+        let mergedCurvesData = [].concat.apply([], curvesData);
+        return yStep * d3.max(mergedCurvesData, function(d) { return d.y });
     }
     this.getYMin = function() {
-        if (!_data || _data.length == 0) return null;
+        if (_curves.length == 0) return null;
         return 0;
     }
     function updateTranslateOpts(translateOpts, clientRect) {
@@ -232,15 +137,9 @@ function Plot(config) {
         clientRect = base.node().getBoundingClientRect();
         updateTranslateOpts(translateOpts, clientRect);
 
-        canvas = base.append('canvas')
-                .attr('width', clientRect.width)
-                .attr('height', clientRect.height);
-        
         svg = base.append('svg')
                 .attr('width', clientRect.width)
                 .attr('height', clientRect.height);
-
-        ctx = canvas.node().getContext('2d');
 
         // Axes
         xAxisGroup = svg.append('g')
@@ -255,29 +154,36 @@ function Plot(config) {
                 .attr('x2', refX)
                 .attr('y1', 0)
                 .attr('y2', clientRect.height)
-                .attr('style', 'stroke:green; stroke-width:4')
+                .attr('style', 'stroke:' + refLineColor +'; stroke-width:4')
                 .call(d3.drag().on('drag', function(){
-                    console.log('drag');
                     refX = d3.event.x;
-                    refX = (refX > clientRect.width)?clientRect.width:refX;
-                    refX = (refX < xPadding)?xPadding:refX;
+                    refX = (refX > clientRect.width-2) ? clientRect.width-2 : refX;
+                    refX = (refX < xPadding+2) ? xPadding+2 : refX;
                     _doPlot();
                 }))
                 .raise();
         new ResizeSensor(base.node(), function() {
+            var previousWidth = clientRect.width;
             clientRect = base.node().getBoundingClientRect();
-            console.log('ResizeSensor size changed:', clientRect);
 
             updateTranslateOpts(translateOpts, clientRect);
 
-            canvas
-                .attr('width', clientRect.width)
-                .attr('height', clientRect.height);
+            refX = clientRect.width / previousWidth * refX;
+
+            refLine
+                .attr('x1', refX)
+                .attr('x2', refX);
+
             svg
                 .attr('width', clientRect.width)
                 .attr('height', clientRect.height);
+
             xAxisGroup.attr('transform', translateOpts[xAxisPosition]);
             yAxisGroup.attr('transform', translateOpts[yAxisPosition]);
+
+            _curves.forEach(function(curve) {
+                curve.adjustSize(clientRect);
+            });
             _doPlot();
         });
     }
@@ -286,6 +192,13 @@ function Plot(config) {
             dropCallback();
         });
     }
+
+    this.onMouseDown = function(mouseDownCallback) {
+        base.on('mousedown', function() {
+            mouseDownCallback();
+        });
+    }
+
     function _doPlot() {
         var axisRange = {
             top: [yPadding, clientRect.height - yPadding],
@@ -310,60 +223,23 @@ function Plot(config) {
             xAxisGroup.call(xAxis);
             yAxisGroup.call(yAxis);
         }
-        function plotOnCanvas() {
-            ctx.clearRect(0, 0, clientRect.width, clientRect.height);
-            if( _data ) {
-                var plotSamples = _data.filter(function(item){
-                    var ret =(item.x >= _viewportX[0] && 
-                           item.x <= _viewportX[1] && 
-                           item.y * yStep >= _viewportY[0] &&
-                           item.y * yStep <= _viewportY[1]);
-                    return ret;
-                });
-                console.log('plotSamples:', plotSamples);
-                /* draw shade */
-                var gradient = ctx.createLinearGradient(refX - 2, 0, refX + 2, 0);
-                gradient.addColorStop(0, 'red');
-                gradient.addColorStop(1, 'blue');
-                //ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-                ctx.fillStyle = gradient;
-                ctx.lineWidth = 0;
-                ctx.beginPath();
-                ctx.moveTo(refX, transformY(plotSamples[0].y * yStep));
-                plotSamples.forEach(function(item) {
-                    ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
-                });
-                ctx.lineTo(refX, transformY(plotSamples[plotSamples.length - 1].y * yStep));
-                ctx.closePath();
-                ctx.fill();
-
-                /* draw curve */
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(transformX(plotSamples[0].x), transformY(plotSamples[0].y * yStep));
-                plotSamples.forEach(function(item) {
-                    ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
-                });
-                ctx.stroke();
-            }
-        }
         function drawRefLine() {
             refLine.attr('x1', refX)
                 .attr('x2', refX)
                 .attr('y1', 0)
                 .attr('y2', clientRect.height)
-                .attr('stroke', 'green')
+                .attr('stroke', refLineColor)
                 .raise();
         }
         setupAxes();
         drawRefLine();
-        plotOnCanvas();
+        self.plotAllCurves();
     }
 
     this.doPlot = function() {
         _doPlot();
     }
+
     this.plotPoint = function(samples, viewportX, viewportY) {
         _data = samples;
         _viewportX[0] = viewportX[0];
@@ -372,6 +248,27 @@ function Plot(config) {
         _viewportY[1] = viewportY[1];
         _doPlot();
     }
+
+    this.plotAllCurves = function() {
+        for (var i = 0; i < _curves.length; i ++) {
+            if (i == currentCurveIdx) {
+                _curves[i].doPlot(_viewportX, _viewportY, transformX, transformY, shading, 2, refX, yStep);
+            }
+            else {
+                _curves[i].doPlot(_viewportX, _viewportY, transformX, transformY, shading, 1, refX, yStep);
+            }
+        }
+    }
+
+    this.highlight = function(idx) {
+        currentCurveIdx = idx;
+        self.plotAllCurves();
+    }
+
+    this.getCurves = function() {
+        return _curves;
+    }
+
     this.onClick = function(callback) {
         svg.on('click', function() {callback();});
     }
@@ -402,7 +299,7 @@ function Plot(config) {
                 return d.y2;
             })
             .style('stroke', 'red');
-            
+
         var tooltip = svg.append('text')
             .attr('class', 'wi-tooltip')
             .attr('y', coordinate[1])
@@ -436,10 +333,85 @@ function Plot(config) {
                 .on('mouseleave', null);
         }
     }
-    this.setData = function(data, dataSetName, unit, min, max) {
-        appendToTrackHeader(root, dataSetName, unit, min, max);
-        _data = data;
+
+    function _genColor() {
+        function rand(x) {
+            return Math.floor(Math.random() * x);
+        }
+
+        const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+        let color, invertedColor;
+        for (let i = 0; i <= _curves.length; i++)  {
+            if (i >= DEFAULT_COLORS.length) {
+                do {
+                    color = d3.rgb(rand(255), rand(255), rand(255)).toString();
+                }
+                while (usedColors.has(color));
+            }
+            else {
+                color = d3.color(DEFAULT_COLORS[i]).toString();
+            }
+            invertedColor = invertColor(color).toString();
+            if (!usedColors.has(color) && !usedColors.has(invertedColor)) {
+                usedColors.add(color);
+                usedColors.add(invertedColor);
+                break;
+            }
+        }
+        return color;
     }
+
+    this.addCurve = function(data, dataSetName, unit, min, max) {
+        appendToTrackHeader(root, dataSetName, unit, min, max);
+
+        let curve = new Curve({ color: _genColor() });
+        curve.init(base, data);
+        _curves.push(curve);
+    }
+
+    this.toggleShading = function() {
+        shading = !shading;
+    }
+
+    this.removeCurve = function() {
+        if (currentCurveIdx < 0) return;
+        let curve = _curves[currentCurveIdx];
+        usedColors.remove(curve.getColor());
+        usedColors.remove(curve.getInvertedColor());
+        curve.destroy();
+
+        removeFromTrackHeader(root, currentCurveIdx);
+
+        let idx = _curves.splice(currentCurveIdx, 1)[0];
+        currentCurveIdx = -1;
+        return idx;
+
+    }
+
+    this.removeAllCurves = function() {
+        usedColors.clear();
+        _curves.forEach(function(c) {
+            c.destroy();
+        });
+        _curves = [];
+    }
+
+    this.setColor = function(color) {
+        if (currentCurveIdx < 0) return false;
+        let d3Color = d3.color(color);
+        if (!d3Color) return false;
+        let d3ColorString = d3Color.toString();
+        if (usedColors.has(d3ColorString)) return false;
+
+        usedColors.add(d3ColorString);
+        usedColors.add(invertColor(d3Color).toString());
+        usedColors.remove(_curves[currentCurveIdx].getColor());
+        usedColors.remove(_curves[currentCurveIdx].getInvertedColor());
+
+        _curves[currentCurveIdx].setColor(d3ColorString);
+        return true;
+    }
+
     this.setYRange = function(vY) {
         _viewportY[0] = vY[0];
         _viewportY[1] = vY[1];
@@ -449,8 +421,11 @@ function Plot(config) {
         _viewportX[1] = vX[1];
     }
     this.adjustXRange = function(kFactor) {
-        if( _data ) {
-            var tempVport= d3.extent(_data, function(d) { return d.x; });
+        if( _curves.length > 0) {
+            let curvesData = _curves.map(function(c) { return c.getData(); });
+            let mergedCurvesData = [].concat.apply([], curvesData);
+            let tempVport= d3.extent(mergedCurvesData, function(d) { return d.x; });
+
             _viewportX[0] = 0;
             _viewportX[1] = tempVport[1] * kFactor;
         }
@@ -461,14 +436,4 @@ function Plot(config) {
             svg.selectAll('.wi-tooltip, .tooltipBg, .tooltipLine').remove();
     }
     registeredPlots.push(this);
-}
-exports.createLogTrack = function(config, domElem) {
-    var plot = new Plot(config);
-    plot.init(domElem);
-    return plot;
-}
-exports.createDepthTrack = function(config, domElem) {
-    var depthTrack = new DepthTrack(config);
-    depthTrack.init(domElem);
-    return depthTrack;
 }
