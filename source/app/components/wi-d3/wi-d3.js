@@ -124,7 +124,7 @@ function Controller($scope, wiComponentService) {
         return currentTrackIdx;
     };
 
-    this.setColor = function(trackIx, color) {
+    this.setColor = function(trackIdx, color) {
         if (trackIdx < 0 || trackIdx >= tracks.length) return;
         if (tracks[trackIdx].setColor && tracks[trackIdx].setColor(color)) {
             tracks[trackIdx].doPlot();

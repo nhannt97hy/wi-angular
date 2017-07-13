@@ -72,7 +72,7 @@ function Curve(config) {
             // if (r != 0 && g != 0 && b != 0 && a!= 127) console.log(r,g,b,a);
             // tmpColor = d3.rgb(r, g, b).toString();
             // if ((tmpColor == color || tmpColor == invertedColor) && a != 127)
-            if ((r > 0 || g > 0 || b > 0) && a != 127)
+            if ((r > 0 || g > 0 || b > 0 || a > 0) && a != 127)
                 return true;
         }
 
