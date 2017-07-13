@@ -866,23 +866,43 @@ exports.importLASDialog = function (ModalService, callback) {
                 }
             }
         };
+        // var file = this.lasFile;
+        this.chooseFile = function (){
+
+        }
         this.depthUnit = ["M", "Ft"];
         this.fileLAS = {
-            step: 123,
-            topDepth: 312,
-            bottomDepth: 123,
+            step: 10,
+            topDepth: 100,
+            bottomDepth: 500,
             depthUnit: "M"
         };
+        this.listLAS =[{
+            lasName: "LAS1",
+            inputName: "Name1",
+            unit: "M"
+        },
+        {
+            lasName: "LAS2",
+            inputName: "Name2",
+            unit: "Ft"
+        }
+        ];
+
         this.file = {};
         this.objcpy(this.file, this.fileLAS);
         this.inputLAS = {};
         this.objcpy(this.inputLAS, this.fileLAS);
 
         this.onLoadButtonClicked = function () {
-            console.log(self.inputLAS);
             if (self.inputLAS.topDepth < self.fileLAS.topDepth || self.inputLAS.topDepth > self.fileLAS.bottomDepth) {
-                console.log("Input top depth couldn't less than las top depth or greater than las bottom depth");
-            }
+                err = "Input top depth couldn't less than las top depth or greater than las bottom depth";
+            };
+            if (self.inputLAS.bottomDepth > self.fileLAS.bottomDepth || self.inputLAS.bottomDepth < self.fileLAS.bottomDepth) {
+                err = "Input bottom depth couldn't less than las top depth or greater than las bottom depth";
+            };
+            console.log(err);
+
         };
 
         this.onCancelButtonClicked = function () {

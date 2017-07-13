@@ -14,38 +14,35 @@
                                 <input type="text" class="form-control" value="" id="" ng-model="fileSelected">
                             </div>
                             <div class="col-sm-5">
-                                <label for="selected" class="btn btn-default">Select</label>
-                                <input id="selected" type="file" style="display: none;"/>
+                                <label for="selected" class="btn btn-default" ng-click="wiModal.chooseFile();">Select</label>
+                                <input id="selected" type="file" file-model="wiModal.lasFile" style="display: none;"/>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-7">
-                            <table class="table">
+                            <table class="table table-bordered">
                                 <thead>
-                                <tr>
-                                    <td>LAS Name</td>
-                                    <td>Input Name</td>
-                                    <td>Unit</td>
-                                    <td>Load&nbsp;<input type="checkbox" ng-model="allLas"></td>
-                                </tr>
+                                    <tr class="text-center">
+                                        <td>LAS Name</td>
+                                        <td>Input Name</td>
+                                        <td>Unit</td>
+                                        <td>Load&nbsp;<input type="checkbox" ng-model="allLas"></td>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>
-
-                                    </td>
-                                    <td>
-
-                                    </td>
-                                    <td>
-
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" ng-checked="allLas">
-
-                                    </td>
-                                </tr>
+                                    <tr ng-repeat="las in wiModal.listLAS">
+                                        <td><input type="text" ng-model="las.lasName"
+                                                   class="form-control" style="border: none" disabled>
+                                        </td>
+                                        <td><input type="text" ng-model="las.inputName"
+                                                   class="form-control" style="border: none">
+                                        </td>
+                                        <td><input type="text" ng-model="las.unit"
+                                                   class="form-control" style="border: none">
+                                        </td>
+                                        <td class="text-center"><input type="checkbox" ng-checked="allLas"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
