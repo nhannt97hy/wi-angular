@@ -35,13 +35,6 @@ function getCurveFromName(name) {
 }
 
 function Controller($scope, wiComponentService) {
-<<<<<<< HEAD
-    var self = this;
-    var tracks = new Array();
-    this.addLogTrack = function () {
-        var graph = wiComponentService.getComponent('GRAPH');
-        var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
-=======
     let self = this;
     let _tracks = new Array();
     let currentTrackIdx = -1;
@@ -57,7 +50,6 @@ function Controller($scope, wiComponentService) {
     this.addTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
->>>>>>> 3aed175615aab4568583daf12f5a30a08a346dc0
         //track.trackPointer(true);
         let len = _tracks.push(track);
         currentTrackIdx = len - 1;
@@ -235,7 +227,7 @@ function Controller($scope, wiComponentService) {
         }
     };
 
-    this.contextMenu = function (event) {
+    this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')

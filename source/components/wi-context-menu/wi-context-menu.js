@@ -39,7 +39,7 @@ function Controller($scope, wiComponentService) {
             let left = contextMenuElement.offsetLeft;
             if (top + height >= backdropHeight) {
                 top = backdropHeight - height - 5;
-                $(".context-menu-wrapper").css('top',top);
+                $($(".context-menu-wrapper").get(i)).css('top',top);
             }
             if (left + width >= backdropWidth) {
                 left = backdropWidth - width - 5;

@@ -197,7 +197,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                 return [
                     {
                         name: "NewLogPlot",
-                        label: "New LogPlot",
+                        label: "New LogPlot ...",
                         icon: "logplot-new-16x16",
                         handler: function () {
                         },
