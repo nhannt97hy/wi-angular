@@ -251,6 +251,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "SwitchToLogarithmic",
                     label: "Switch To Logarithmic",
+                    icon: 'logarithmic-switch-16x16',
                     handler: function () {
                         console.log('Switch To Logarithmic');
                     }
@@ -261,6 +262,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "AddDepthTrack",
                     label: "Add Depth Track",
+                    icon: 'depth-axis-add-16x16',
                     handler: function () {
                         self.addDepthTrack();
                     }
@@ -268,6 +270,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "AddLogTrack",
                     label: "Add Log Track",
+                    icon: 'logplot-blank-16x16',
                     handler: function () {
                         self.addTrack();
                     }
@@ -275,6 +278,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "AddZonationTrack",
                     label: "Add Zonation Track",
+                    icon: 'zonation-track-add-16x16',
                     handler: function () {
                         console.log('Switch To Logarithmic');
                     }
@@ -285,6 +289,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "AddMaker",
                     label: "Add Maker",
+                    icon: 'marker-add-16x16',
                     handler: function () {
                         console.log('Switch To Logarithmic');
                     }
@@ -292,6 +297,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "Add Annotation",
                     label: "Add Annotation",
+                    icon: 'annotation-16x16',
                     handler: function () {
                         console.log('Switch To Logarithmic');
                     }
@@ -299,6 +305,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "Add Image",
                     label: "Add Image",
+                    icon: 'image-add-16x16',
                     handler: function () {
                         console.log('Switch To Logarithmic');
                     }
@@ -306,6 +313,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "Create Shading",
                     label: "Create Shading",
+                    icon: 'shading-add-16x16',
                     handler: function () {
                         console.log('Create Shading');
                     }
@@ -316,6 +324,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "DuplicateTrack",
                     label: "Duplicate Track",
+                    icon: 'track-duplicate-16x16',
                     handler: function () {
                         console.log('Switch To Logarithmic');
                     }
@@ -323,6 +332,7 @@ function Controller($scope, wiComponentService) {
                 {
                     name: "DeleteTrack",
                     label: "Delete Track",
+                    icon: 'track-delete-16x16',
                     handler: function () {
                         self.removeCurrentTrack();
                     }
