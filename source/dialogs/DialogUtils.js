@@ -39,6 +39,7 @@ exports.newProjectDialog = function ($scope, ModalService) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
