@@ -40,7 +40,7 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 function projectOpen(wiComponentService, projectData) {
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
 
-    wiComponentService.emit('project-loaded-event', projectData);
+    wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 
     // todo: change to wiComponentService
     objcpy(openProject, projectData);

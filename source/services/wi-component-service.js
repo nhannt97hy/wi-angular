@@ -22,8 +22,8 @@ app.factory(wiServiceName, function () {
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
         putComponent: function (componentName, controller) {
-            // console.log('put component');
-            // console.log('componentName', componentName);
+            console.log('put component');
+            console.log('componentName', componentName);
 
             __Controllers[componentName] = controller;
         },
@@ -68,6 +68,7 @@ app.factory(wiServiceName, function () {
 
         // event
         ADD_LOGPLOT_EVENT: 'add-logplot-event',
+        PROJECT_LOADED_EVENT: 'project-loaded-event',
         PROJECT_UNLOADED_EVENT: 'project-unloaded-event'
     };
 });

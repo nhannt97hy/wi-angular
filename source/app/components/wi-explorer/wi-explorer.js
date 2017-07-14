@@ -6,14 +6,18 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
 
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
-        $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-        let utils = wiComponentService.getComponent('UTILS');
-        wiComponentService.on('project-loaded-event', function (project) {
-            utils.pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout);
+        $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
+            let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
-        wiComponentService.on('project-unloaded-event', function () {
+
+        wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
             self.treeConfig = {};
         });
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
