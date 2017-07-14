@@ -921,4 +921,148 @@ exports.importLASDialog = function (ModalService, callback) {
             callback(ret);
         });
     });
+};
+
+exports.trackPropertiesDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.propertyTab = 'general';
+        this.showTitle = false;
+        this.showLabel = false;
+        this.setTitle = function () {
+            if (self.showTitle == true) {
+                $('#title').prop("disabled", true);
+                $('#topJust').prop("disabled", true);
+                $('#bottomJust').prop("disabled", true);
+            }else {
+                $('#title').prop("disabled", false);
+                $('#topJust').prop("disabled", false);
+                $('#bottomJust').prop("disabled", false);
+            }
+        };
+        this.setLabel = function () {
+            if (self.showLabel == true) {
+                $('#format').prop("disabled", true);
+                $('#font').prop("disabled", true);
+                $('#preview').prop("disabled", true);
+            }else {
+                $('#format').prop("disabled", false);
+                $('#font').prop("disabled", false);
+                $('#preview').prop("disabled", false);
+            }
+        };
+        this.setValueGrid = function () {
+            if (self.showValueGrid == true) {
+                $('#majorTicks').prop("disabled", true);
+                $('#minorTicks').prop("disabled", true);
+            }else{
+                $('#majorTicks').prop("disabled", false);
+                $('#minorTicks').prop("disabled", false);
+            }
+        };
+        this.header = {
+            title : "Track1",
+            topJust : ["center", "left", "right"],
+            bottomJust : ["center", "left", "right"]
+        };
+        this.topJust = "center";
+        this.bottomJust = "center";
+
+        this.curveName = ["DTCO3", "ECGR"];
+        this.logLinear = ["Logarithmic", "Linear"];
+        this.displayMode = ["Line", "Symbol", "Both", "None"];
+        this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
+
+        this.colorTrack = "#888";
+        this.getColor = function () {
+            console.log("pick: ", self.colorTrack);
+        };
+
+        this.setClickedRow = function(index){
+            self.selectedRow = index;           
+        }
+        // this.curveAttr = [];
+        self.curveAttr = [
+            {
+                curveName : "ECGR",
+                alias : "ECGR",
+                leftScale : "20",
+                rightScale : "200",
+                logLinear : "Linear",
+                displayMode : "",
+                lineStyle : "",
+                displayAs : ""
+            }, 
+            {
+                curveName : "DTCO3",
+                alias : "DTCO3",
+                leftScale : "10",
+                rightScale : "100",
+                logLinear : "Logarithmic",
+                displayMode : "Line",
+                lineStyle : "",
+                displayAs : "Normal"
+            },
+            {
+                curveName : "balla",
+                alias : "balal",
+                leftScale : "10",
+                rightScale : "100",
+                logLinear : "Logarithmic",
+                displayMode : "Line",
+                lineStyle : "",
+                displayAs : "Normal"
+            },
+            {
+                curveName : "curveName",
+                alias : "blalalal",
+                leftScale : "10",
+                rightScale : "100",
+                logLinear : "Logarithmic",
+                displayMode : "Line",
+                lineStyle : "",
+                displayAs : "Normal"
+            }
+        ];
+        this.hide = function (index) {
+            // self.curveAttr = [];
+            index = null;
+        }
+        
+        this.arrowUp = function (index) {
+            self.selectedRow = index;
+            for(let i = 0; i < self.curveAttr.length; i++) {
+                index = self.curveAttr.indexOf(this.curveAttr[i]);
+                console.log("index:", index);
+                if (index > 0) {
+                    let itemToMove = this.curveAttr.splice(index, 1);
+                    console.log("item: ", itemToMove[0]);
+                    this.curveAttr.splice(index-1, 0, itemToMove[0]);                
+                }
+            }
+        };
+        this.arrowDown = function (index) {        
+        };
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.onCancelButtonClicked = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "track-properties/track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
 }
