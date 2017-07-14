@@ -82,7 +82,10 @@ let app = angular.module('wiapp',
 
         wiApiService.name,
         wiComponentService.name,
-        'angularModalService'
+        'angularModalService',
+
+        // 3rd lib
+        'ngFileUpload'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS

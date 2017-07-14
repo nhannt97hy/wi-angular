@@ -856,53 +856,13 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
     });
 };
 exports.importLASDialog = function (ModalService, callback) {
-    function ModalController($scope, close) {
-        let error = null;
+    function ModalController($scope, close, Upload) {
         let self = this;
-        this.objcpy = function (destObj, sourceObj) {
-            if (destObj) {
-                for (let attr in sourceObj) {
-                    destObj[attr] = sourceObj[attr];
-                }
-            }
-        };
-        // var file = this.lasFile;
-        this.chooseFile = function (){
 
-        }
-        this.depthUnit = ["M", "Ft"];
-        this.fileLAS = {
-            step: 10,
-            topDepth: 100,
-            bottomDepth: 500,
-            depthUnit: "M"
-        };
-        this.listLAS =[{
-            lasName: "LAS1",
-            inputName: "Name1",
-            unit: "M"
-        },
-        {
-            lasName: "LAS2",
-            inputName: "Name2",
-            unit: "Ft"
-        }
-        ];
-
-        this.file = {};
-        this.objcpy(this.file, this.fileLAS);
-        this.inputLAS = {};
-        this.objcpy(this.inputLAS, this.fileLAS);
+        console.log('ng upload', Upload);
 
         this.onLoadButtonClicked = function () {
-            if (self.inputLAS.topDepth < self.fileLAS.topDepth || self.inputLAS.topDepth > self.fileLAS.bottomDepth) {
-                err = "Input top depth couldn't less than las top depth or greater than las bottom depth";
-            };
-            if (self.inputLAS.bottomDepth > self.fileLAS.bottomDepth || self.inputLAS.bottomDepth < self.fileLAS.bottomDepth) {
-                err = "Input bottom depth couldn't less than las top depth or greater than las bottom depth";
-            };
-            console.log(err);
-
+            console.log('las file: ', self.lasFile);
         };
 
         this.onCancelButtonClicked = function () {
@@ -915,10 +875,11 @@ exports.importLASDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            callback(data);
         });
     });
-}
+};
