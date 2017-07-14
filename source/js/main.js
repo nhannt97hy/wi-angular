@@ -37,6 +37,7 @@ let dragMan = {
 
 let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
+let wiOnFinishRender = require('./wi-on-finish-render');
 
 // models
 let wiDepth = require('./wi-depth.model');
@@ -69,6 +70,7 @@ let app = angular.module('wiapp',
 
         wiElementReady.name,
         wiRightClick.name,
+        wiOnFinishRender.name,
 
         // models
         wiDepth.name,
