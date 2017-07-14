@@ -24,11 +24,11 @@ function ButtonController(wiComponentService) {
         if (self.container === 'ribbon' || self.container === 'explorer') {
             this.default.initialState.disabled = self.isDisabled() + '';
 
-            wiComponentService.on('project-loaded-event', function () {
+            wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
                 self.disabled = "false";
             });
 
-            wiComponentService.on('project-unloaded-event', function () {
+            wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
                 self.disabled = self.default.initialState.disabled;
             });
         }
