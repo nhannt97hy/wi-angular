@@ -57,10 +57,7 @@ exports.ProjectButtonClicked = function () {
     if (!layoutManager.isComponentExist('explorer-block')) {
         layoutManager.putLeft('explorer-block', 'Project');
         console.log(utils.openProject);
-        if (utils.openProject.valid) {
-            console.log(utils.openProject);
-            wiComponentService.emit('project-loaded-event', utils.openProject);
-        }
+        wiComponentService.emit('project-loaded-event', utils.openProject);
     }
 };
 

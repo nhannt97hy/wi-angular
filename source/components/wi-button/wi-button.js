@@ -9,7 +9,7 @@ function ButtonController(wiComponentService) {
         label: '',
         tooltip: '',
         layout: 'icon-top',
-        icon: 'project-new-16x16',
+        // icon: 'project-new-16x16',
         disabled: false,
         initialState: {}
     };

@@ -29,7 +29,7 @@ function getCurveFromName(name) {
     var nSamples = 1000;
     var samples = new Array();
     for (let i = 0; i < nSamples; i++) {
-        samples.push({y: i, x: Math.random()});
+        samples.push({ y: i, x: Math.random() });
     }
     return samples;
 }
@@ -37,7 +37,7 @@ function getCurveFromName(name) {
 function Controller($scope, wiComponentService) {
     var self = this;
     var tracks = new Array();
-    this.addTrack = function () {
+    this.addLogTrack = function () {
         var graph = wiComponentService.getComponent('GRAPH');
         var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         //track.trackPointer(true);
@@ -121,35 +121,95 @@ function Controller($scope, wiComponentService) {
         }
     };
 
-    this.contextMenu = function (event) {
-        console.log('context menu', event, event.button == 2);
-        // event.preventDefault();
-
-        // if (event.button != 2) {
-        //     return event.stopPropagation();
-        // }
-
-        wiComponentService.getComponent('ContextMenu').open(event.clientX, event.clientY, [{
-            name: "NewDepthTrack",
-            label: "Add depth track",
+    const defaultD3CtxMenu = [
+        {
+            name: "TrackPropertites",
+            label: "Track Propertites",
+            icon: "",
             handler: function () {
-                self.addDepthTrack();
+
+            }
+        }, {
+            name: "SwitchToLogarithmic",
+            label: "Switch To Logarithmic",
+            icon: "logarithmic-switch-16x16",
+            handler: function () {
+
             }
         }, {
             separator: '1'
         }, {
-            name: "NewLogTrack",
-            label: "Add new track ... ",
+            name: "AddDepthTrack",
+            label: "Add Depth Track",
+            icon: "depth-axis-add-16x16",
             handler: function () {
-                self.addTrack();
+                self.addDepthTrack();
             }
-        },{
-            name: "hhhhh",
-            label: "HHHHHHHH",
-            handler: function() {
-                console.log(self);
+        }, {
+            name: "AddLogTrack",
+            label: "Add Log Track",
+            icon: "logplot-blank-16x16",
+            handler: function () {
+                self.addLogTrack();
             }
-        }]);
+        }, {
+            name: "AddZonationTrack",
+            label: "Add Zonation Track",
+            icon: "zonation-track-add-16x16",
+            handler: function () {
+
+            }
+        }, {
+            separator: '1'
+        }, {
+            name: "AddMarker",
+            label: "Add Marker",
+            icon: "marker-add-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "AddAnnotation",
+            label: "Add Annotation",
+            icon: "annotation-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "AddImage",
+            label: "Add Image",
+            icon: "image-add-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "CreateShading",
+            label: "Create Shading",
+            icon: "shading-add-16x16",
+            handler: function () {
+
+            }
+        }, {
+            separator: '1'
+        }, {
+            name: "DuplicateTrack",
+            label: "Duplicate Track",
+            icon: "track-duplicate-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "DeleteTrack",
+            label: "Delete Track",
+            icon: "track-delete-16x16",
+            handler: function () {
+
+            }
+        }
+    ]
+    this.showContextMenu = function ($event) {
+        let contextMenu = defaultD3CtxMenu;
+        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 }
 

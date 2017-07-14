@@ -284,7 +284,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                             {
                                 name: "BlankCrossPlot",
                                 label: "Blank Cross Plot",
-                                icon: "",
+                                icon: "crossplot-new-16x16",
                                 handler: function () {
                                 }
                             }, {
@@ -328,7 +328,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                             }, {
                                 name: "SonicRt",
                                 label: "Sonic Rt",
-                                icon: "",
+                                icon: "crossplot-new-16x16",
                                 handler: function () {
                                 }
                             }, {

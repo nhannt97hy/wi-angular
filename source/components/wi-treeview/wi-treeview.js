@@ -119,8 +119,8 @@ function Controller(wiComponentService, WiProperty) {
         let contextMenuHolderCtrl = wiComponentService.getComponent(self.contextmenuholder);
         let defaultContextMenu = contextMenuHolderCtrl.getDefaultTreeviewCtxMenu($index, self);
         let itemContextMenu = contextMenuHolderCtrl.getItemTreeviewCtxMenu(configType, self);
-        self.contextMenu = itemContextMenu.concat(defaultContextMenu);
-        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, self.contextMenu);
+        let contextMenu = itemContextMenu.concat(defaultContextMenu);
+        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 }
 
