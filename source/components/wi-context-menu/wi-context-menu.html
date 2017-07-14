@@ -1,6 +1,6 @@
 <div ng-show="wiContextMenu.shown" ng-click="wiContextMenu.dismissAll()" wi-right-click="wiContextMenu.dismissAll()" class="context-menu-backdrop">
     <div ng-repeat="contextMenu in wiContextMenu.contextMenus"
-         wi-element-ready="wiContextMenu.ngRepeatFinished(contextMenu.buttons)"
+         wi-element-ready="wiContextMenu.ngRepeatFinished()"
          class="context-menu-wrapper"
          style="top:{{contextMenu.top}}px; left:{{contextMenu.left}}px;min-width: 200px">
         <wi-button ng-repeat='button in contextMenu.buttons track by $index'

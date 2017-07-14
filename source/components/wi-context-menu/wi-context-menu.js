@@ -25,10 +25,10 @@ function Controller($scope, wiComponentService) {
         // console.log('contextmenus', self.contextMenus);
         self.shown = true;
     };
-    this.ngRepeatFinished = function (buttons) {
+    this.ngRepeatFinished = function () {
         let contextMenuElements = $(".context-menu-wrapper");
-        console.log(contextMenuElements);
-        let contextMenuBackdrop = contextMenuElements[0].offsetParent;
+        let firstCxtMenuElement = contextMenuElements[0];
+        let contextMenuBackdrop = firstCxtMenuElement.offsetParent;
         let backdropHeight = contextMenuBackdrop.offsetHeight;
         let backdropWidth = contextMenuBackdrop.offsetWidth;
         for (let i = 0; i < contextMenuElements.length; i++) {
@@ -39,11 +39,17 @@ function Controller($scope, wiComponentService) {
             let left = contextMenuElement.offsetLeft;
             if (top + height >= backdropHeight) {
                 top = backdropHeight - height - 5;
-                $($(".context-menu-wrapper").get(i)).css('top',top);
+                $($(".context-menu-wrapper").get(i)).css('top', top);
             }
             if (left + width >= backdropWidth) {
-                left = backdropWidth - width - 5;
-                $(".context-menu-wrapper").css('left',left);
+                if (i === 0) {
+                    left = backdropWidth - width - 5;
+                    $(".context-menu-wrapper").css('left', left);
+                } else {
+                    parentMenuWidth = firstCxtMenuElement.offsetWidth;
+                    left = backdropWidth - width - parentMenuWidth - 5;
+                    $($(".context-menu-wrapper").get(i)).css('left', left);
+                }
             }
         }
     }
