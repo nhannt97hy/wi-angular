@@ -61,6 +61,7 @@ app.factory(wiServiceName, function () {
         DIALOG_UTILS:'DIALOG_UTILS',
         LAYOUT_MANAGER: 'LAYOUT_MANAGER',
         UTILS: 'UTILS',
+        PROJECT_LOADED: 'project-loaded',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',

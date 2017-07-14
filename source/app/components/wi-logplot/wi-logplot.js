@@ -5,6 +5,7 @@ function Controller($scope, wiComponentService, ModalService) {
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
+    // console.log(utils);
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
     this.$onInit = function () {

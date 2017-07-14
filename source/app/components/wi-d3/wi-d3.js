@@ -26,8 +26,8 @@ let DTRACK_CFG = {
 };
 
 function getCurveFromName(name) {
-    var nSamples = 1000;
-    var samples = new Array();
+    let nSamples = 1000;
+    let samples = new Array();
     for (let i = 0; i < nSamples; i++) {
         samples.push({ y: i, x: Math.random() });
     }
@@ -35,27 +35,44 @@ function getCurveFromName(name) {
 }
 
 function Controller($scope, wiComponentService) {
+<<<<<<< HEAD
     var self = this;
     var tracks = new Array();
     this.addLogTrack = function () {
         var graph = wiComponentService.getComponent('GRAPH');
         var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
+=======
+    let self = this;
+    let _tracks = new Array();
+    let currentTrackIdx = -1;
+    let previousTrackIdx = -1;
+
+    this.getCurrentTrack = function () {
+        return _tracks[currentTrackIdx];
+    };
+    this.getCurrentTrackIdx = function () {
+        return currentTrackIdx;
+    };
+
+    this.addTrack = function () {
+        let graph = wiComponentService.getComponent('GRAPH');
+        let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
+>>>>>>> 3aed175615aab4568583daf12f5a30a08a346dc0
         //track.trackPointer(true);
-        var len = tracks.push(track);
+        let len = _tracks.push(track);
+        currentTrackIdx = len - 1;
         self.setDepthRangeFromSlidingBar();
         track.doPlot();
-        var dragMan = wiComponentService.getComponent('DRAG_MAN');
+        let dragMan = wiComponentService.getComponent('DRAG_MAN');
         track.onDrop(function () {
             if (dragMan.dragging) {
-                console.log('mouseover');
                 if (dragMan.cancelingId) {
                     clearTimeout(dragMan.cancelingId);
                     dragMan.cancellingId = null;
                     dragMan.dragging = false;
-                    var data = getCurveFromName(dragMan.draggedObj);
-                    var max = 1;
-                    console.log('data:', data);
-                    track.setData(data, dragMan.draggedObj, 'm3', 0, max);
+                    let data = getCurveFromName(dragMan.draggedObj);
+                    let max = 1;
+                    track.addCurve(data, dragMan.draggedObj, 'm3', 0, max);
                     self.setDepthRangeFromSlidingBar();
                     track.adjustXRange(1);
                     track.doPlot();
@@ -63,153 +80,254 @@ function Controller($scope, wiComponentService) {
                 }
             }
         }, dragMan);
+        track.onMouseDown(function () {
+            previousTrackIdx = currentTrackIdx;
+            currentTrackIdx = _tracks.indexOf(track);
+            _clearHighlight();
+
+            let i;
+            let curves = _tracks[currentTrackIdx].getCurves();
+            for (i = 0; i < curves.length; i++) {
+                if (curves[i].nearPoint(d3.event.offsetX, d3.event.offsetY))
+                    break;
+            }
+            i = i == curves.length ? -1 : i;
+            _tracks[currentTrackIdx].highlight(i);
+        });
         return len - 1;
     };
 
     this.addDepthTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
-        let len = tracks.push(track);
+        let len = _tracks.push(track);
         self.setDepthRangeFromSlidingBar();
         self.plot(len - 1);
+
+        track.onMouseDown(function () {
+            previousTrackIdx = currentTrackIdx;
+            currentTrackIdx = _tracks.indexOf(track);
+            _clearHighlight();
+        });
         return len - 1;
     };
 
+    this.addCurve = function (trackIdx, data, curveName, curveUnit) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        if (!_tracks[trackIdx].addCurve) return;
+        let curveIdx = _tracks[trackIdx].addCurve(data, curveName, curveUnit, 0, 200);
+        _tracks[trackIdx].adjustXRange(1);
+        self.setDepthRangeFromSlidingBar();
+        _tracks[trackIdx].doPlot();
+    };
+
+    this.addShading = function (trackIdx, leftCurveIdx, rightCurveIdx, config) {
+        config = typeof config != 'object' ? {} : config;
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return false;
+        if (!_tracks[trackIdx].addShading) return false;
+        _tracks[trackIdx].addShading(leftCurveIdx, rightCurveIdx, config);
+        _tracks[trackIdx].doPlot();
+    };
+
     this.setDepthRange = function (deepRange) {
-        tracks.forEach(function (track) {
+        _tracks.forEach(function (track) {
             track.setYRange(deepRange);
         });
     };
 
     this.setDepthRangeFromSlidingBar = function () {
-        var slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
-        var maxDepth = self.getMaxDepth();
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = self.getMaxDepth();
 
-        var low = slidingBar.slidingBarState.top * maxDepth / 100;
-        var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-        console.log(slidingBar.slidingBarState, low, high, maxDepth);
+        let low = slidingBar.slidingBarState.top * maxDepth / 100;
+        let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
         self.setDepthRange([low, high]);
     };
 
     this.getMaxDepth = function () {
-        var maxDepth = d3.max(tracks, function (track) {
+        let maxDepth = d3.max(_tracks, function (track) {
             if (track.getYMax) return track.getYMax();
             return -1;
         });
         return (maxDepth > 0) ? maxDepth : 100000;
     };
 
-    this.setData = function (trackIdx, data) {
-        tracks[trackIdx].setData(data, 'Rock', 'm3', 0, 200);
-        tracks[trackIdx].adjustXRange(1);
+    this.setColor = function (trackIdx, color) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        if (_tracks[trackIdx].setColor && _tracks[trackIdx].setColor(color)) {
+            _tracks[trackIdx].doPlot();
+        }
     };
 
+    this.removeCurve = function (trackIdx, curveIdx) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return false;
+        if (!_tracks[trackIdx].removeCurve) return false;
+        return _tracks[trackIdx].removeCurve(curveIdx);
+    };
+
+    this.removeCurrentCurve = function () {
+        return self.removeCurve(currentTrackIdx, _tracks[currentTrackIdx].getCurrentCurveIdx());
+    };
+
+    this.removeCurrentTrack = function () {
+        self.removeTrack(self.getCurrentTrackIdx());
+    };
+
+    this.removeTrack = function (trackIdx) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        if (trackIdx == currentTrackIdx) {
+            currentTrackIdx = -1;
+        }
+        else if (trackIdx < currentTrackIdx) {
+            currentTrackIdx -= 1;
+        }
+        previousTrackIdx = -1;
+        if (_tracks[trackIdx].removeAllCurves) {
+            _tracks[trackIdx].removeAllCurves();
+        }
+        let base = d3.select(document.getElementById(self.plotAreaId));
+        base.selectAll('.track-container')
+            .filter(function (d, i) {
+                return i == trackIdx;
+            })
+            .remove();
+
+        base.selectAll('.track-resizer')
+            .filter(function (d, i) {
+                return i == trackIdx;
+            })
+            .remove();
+
+        _tracks.splice(trackIdx, 1);
+    }
+
     this.plot = function (trackIdx) {
-        tracks[trackIdx].doPlot();
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        _tracks[trackIdx].doPlot();
+    };
+
+    this.toggleShading = function (trackIdx) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        _tracks[trackIdx].toggleShading();
+        this.plot(trackIdx);
     };
 
     this.plotAll = function () {
-        tracks.forEach(function (track) {
+        _tracks.forEach(function (track) {
             track.doPlot();
             //if( track.trackPointer ) track.trackPointer(true);
         });
+    };
+
+    function _clearHighlight() {
+        if (previousTrackIdx >= 0
+            && previousTrackIdx != currentTrackIdx
+            && _tracks[previousTrackIdx].highlight) {
+            _tracks[previousTrackIdx].highlight(-1);
+        }
     }
+
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
+            wiComponentService.emit(self.name);
         }
     };
 
-    const defaultD3CtxMenu = [
-        {
-            name: "TrackPropertites",
-            label: "Track Propertites",
-            icon: "",
-            handler: function () {
-
-            }
-        }, {
-            name: "SwitchToLogarithmic",
-            label: "Switch To Logarithmic",
-            icon: "logarithmic-switch-16x16",
-            handler: function () {
-
-            }
-        }, {
-            separator: '1'
-        }, {
-            name: "AddDepthTrack",
-            label: "Add Depth Track",
-            icon: "depth-axis-add-16x16",
-            handler: function () {
-                self.addDepthTrack();
-            }
-        }, {
-            name: "AddLogTrack",
-            label: "Add Log Track",
-            icon: "logplot-blank-16x16",
-            handler: function () {
-                self.addLogTrack();
-            }
-        }, {
-            name: "AddZonationTrack",
-            label: "Add Zonation Track",
-            icon: "zonation-track-add-16x16",
-            handler: function () {
-
-            }
-        }, {
-            separator: '1'
-        }, {
-            name: "AddMarker",
-            label: "Add Marker",
-            icon: "marker-add-16x16",
-            handler: function () {
-
-            }
-        }, {
-            name: "AddAnnotation",
-            label: "Add Annotation",
-            icon: "annotation-16x16",
-            handler: function () {
-
-            }
-        }, {
-            name: "AddImage",
-            label: "Add Image",
-            icon: "image-add-16x16",
-            handler: function () {
-
-            }
-        }, {
-            name: "CreateShading",
-            label: "Create Shading",
-            icon: "shading-add-16x16",
-            handler: function () {
-
-            }
-        }, {
-            separator: '1'
-        }, {
-            name: "DuplicateTrack",
-            label: "Duplicate Track",
-            icon: "track-duplicate-16x16",
-            handler: function () {
-
-            }
-        }, {
-            name: "DeleteTrack",
-            label: "Delete Track",
-            icon: "track-delete-16x16",
-            handler: function () {
-
-            }
-        }
-    ]
-    this.showContextMenu = function ($event) {
-        let contextMenu = defaultD3CtxMenu;
-        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
+    this.contextMenu = function (event) {
+        if (event.button != 2) return;
+        event.stopPropagation();
+        wiComponentService.getComponent('ContextMenu')
+            .open(event.clientX, event.clientY, [
+                {
+                    name: "TrackProperties",
+                    label: "Track Properties",
+                    icon: 'track-properties-16x16',
+                    handler: function () {
+                        console.log('Track properties');
+                    }
+                },
+                {
+                    name: "SwitchToLogarithmic",
+                    label: "Switch To Logarithmic",
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "AddDepthTrack",
+                    label: "Add Depth Track",
+                    handler: function () {
+                        self.addDepthTrack();
+                    }
+                },
+                {
+                    name: "AddLogTrack",
+                    label: "Add Log Track",
+                    handler: function () {
+                        self.addTrack();
+                    }
+                },
+                {
+                    name: "AddZonationTrack",
+                    label: "Add Zonation Track",
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "AddMaker",
+                    label: "Add Maker",
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "Add Annotation",
+                    label: "Add Annotation",
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "Add Image",
+                    label: "Add Image",
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "Create Shading",
+                    label: "Create Shading",
+                    handler: function () {
+                        console.log('Create Shading');
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "DuplicateTrack",
+                    label: "Duplicate Track",
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "DeleteTrack",
+                    label: "Delete Track",
+                    handler: function () {
+                        self.removeCurrentTrack();
+                    }
+                },
+            ]);
     }
 }
 

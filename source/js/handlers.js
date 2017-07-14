@@ -129,6 +129,11 @@ exports.ImportMultiASCIIButtonClicked = function () {
 
 exports.ImportLASButtonClicked = function () {
     console.log('ImportLASButton is clicked');
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importLASDialog(this.ModalService, function (ret) {
+        console.log("User Choose: " + ret);
+    })
 };
 
 exports.ImportMultiLASButtonClicked = function () {

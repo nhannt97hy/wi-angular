@@ -9,10 +9,11 @@
     <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-toolbar.css' rel='stylesheet'>
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
+    <link href='css/wi-context-menu.css' rel='stylesheet'>
     <link href='css/wi-logplot.css' rel='stylesheet'>
-
-    <link rel="stylesheet" href="css/graph.css">
+    <link href='css/wi-context-menu.css' rel='stylesheet'>
     <link rel="stylesheet" href="css/wi-d3.css">
+    <link rel="stylesheet" href="css/graph.css">
 
     <link rel="stylesheet" href="css/sprite_32.css">
     <link rel="stylesheet" href="css/sprite_16.css">
@@ -20,11 +21,10 @@
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
-
+    <script src="vendor/js/angular-modal-service.min.js"></script>
     <script src="vendor/js/jquery-ui.js"></script>
     <script src="vendor/js/d3.min.js"></script>
     <script src="vendor/js/ResizeSensor.js"></script>
-
 
     <script src="js/main-logplot.js.bundle.js"></script>
 
@@ -37,8 +37,20 @@
     <div style="width: 1000px; height: 500px; border: 1px solid green; display: flex">
         <wi-logplot name="myPlot" style="flex: 1"></wi-logplot>
     </div>
-    <wi-button name="buttontest" label="Test button" icon="help-32x32" handler="handlers.Button1ButtonClicked"></wi-button>
-    <button ng-click='doClick()'>Add Track</button>
+    <wi-button name='depthTrackButton' label='depth track' handler='depthTrackButtonClick'></wi-button>
+    <wi-button name='trackButton' label='track' handler='trackButtonClick'></wi-button>
+    <wi-button name='addData1Button' label='add data 1' handler='addData1ButtonClick'></wi-button>
+    <wi-button name='addData2Button' label='add data 2' handler='addData2ButtonClick'></wi-button>
+    <wi-button name='toggleShadingButton' label='toggle shading' handler='toggleShadingButtonClick'></wi-button>
+    <div class='form-group'>
+        <label> Color: </label>
+        <input type='text' ng-model='color'>
+        <button ng-click='changeColor()'>change color</button>
+    </div>
+    <wi-button name='removeCurveButton' label='remove curve' handler='removeCurveButtonClick'></wi-button>
+    <wi-button name='removeTrackButton' label='remove track' handler='removeTrackButtonClick'></wi-button>
+    <wi-button name='addShadingkButton' label='add shading' handler='addShadingButtonClick'></wi-button>
+    <wi-context-menu name='ContextMenu'></wi-context-menu>
 </div>
 </body>
 </html>

@@ -856,18 +856,49 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
     });
 };
 exports.importLASDialog = function (ModalService, callback) {
-    function ModalController($scope, close) {
-        let error = null;
+    function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
 
-        $('.selectFile').bind("click", function () {
-            $('#selected').click();
-        });
-        this.onLoadButtonClicked = function () {
+        this.lasFile = null;
+        this.selectedWell = null;
+        this.selectedDataset = null;
 
-        }
+        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+        console.log('projectLoaded', self.projectLoaded);
+
+        this.onLoadButtonClicked = function () {
+            console.log('las file: ', self.lasFile);
+            console.log('selectedWell: ', self.selectedWell);
+            console.log('selectedDataset: ', self.selectedDataset);
+
+            let payloadParams = {
+                id_project: self.projectLoaded.idProject
+            };
+
+            if (self.selectedWell) {
+                payloadParams.id_well = self.selectedWell.idWell;
+            }
+
+            if (self.selectedDataset) {
+                payloadParams.id_dataset = self.selectedDataset.idDataset;
+            }
+
+            payloadParams.file= self.lasFile;
+
+            wiApiService.postWithFile('/file', payloadParams)
+                .then(function (wellDataResponse) {
+                    console.log('wellDataResponse', wellDataResponse);
+                })
+                .catch(function (err) {
+                    console.log('err', err);
+                });
+        };
+
         this.onCancelButtonClicked = function () {
-        }
+            console.log("onCancelButtonClicked");
+            close(null, 100);
+        };
     }
 
     ModalService.showModal({
@@ -876,10 +907,11 @@ exports.importLASDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            callback(data);
         });
     });
-}
+};
