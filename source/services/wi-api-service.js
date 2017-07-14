@@ -47,14 +47,18 @@ app.factory(wiServiceName, function ($http, Upload) {
 
                 Upload.upload(configUpload).then(
                     function (responseSuccess) {
-                        console.log('responseSuccess', responseSuccess);
-
-                        return resolve(responseSuccess);
+                        if (responseSuccess.data && responseSuccess.data.content){
+                            return resolve(responseSuccess.data.content);
+                        } else {
+                            return reject('Response is invalid!');
+                        }
                     },
                     function (responseError) {
-                        console.log('responseError', responseError);
-
-                        return reject(responseError);
+                        if (responseError.data && responseError.data.content){
+                            return reject(responseError.data.reason);
+                        } else {
+                            return reject(responseError);
+                        }
                     },
                     function (evt) {
                         let progress = Math.round(100.0 * evt.loaded / evt.total);
