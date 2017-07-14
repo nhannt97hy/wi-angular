@@ -38,8 +38,11 @@ function bindFunctions(destHandlers, sourceHandlers, thisObj) {
 }
 // APP Utils
 function projectOpen(wiComponentService, projectData) {
+    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
+
     wiComponentService.emit('project-loaded-event', projectData);
 
+    // todo: change to wiComponentService
     objcpy(openProject, projectData);
 }
 
