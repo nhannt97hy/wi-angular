@@ -13,7 +13,8 @@ app.factory(wiServiceName, function ($http, Upload) {
                     url: BASE_URL + route,
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Referrer-Policy': 'no-referrer'
                     },
                     data: payload
                 };
@@ -38,6 +39,9 @@ app.factory(wiServiceName, function ($http, Upload) {
                 let configUpload = {
                     url: BASE_URL + route,
                     // url: 'http://localhost:3000' + route,
+                    headers: {
+                        'Referrer-Policy': 'no-referrer'
+                    },
                     data: dataPayload
                 };
 
