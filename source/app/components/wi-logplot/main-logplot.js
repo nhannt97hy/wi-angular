@@ -56,11 +56,6 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         wiD3Ctrl.addCurve(trackIdx, genSamples([1,2], [0,1000]), 'Data2', 'kg');
     }
 
-    $scope.toggleShadingButtonClick = function() {
-        let trackIdx = wiD3Ctrl.getCurrentTrackIdx();
-        wiD3Ctrl.toggleShading(trackIdx);
-    }
-
     $scope.changeColor = function() {
         wiD3Ctrl.setColor(wiD3Ctrl.getCurrentTrackIdx(), $scope.color);
     }

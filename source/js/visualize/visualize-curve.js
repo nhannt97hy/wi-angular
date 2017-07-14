@@ -1,6 +1,6 @@
 let invertColor = require('./visualize-utils.js').invertColor;
 
-exports.Curve = Curve;
+module.exports = Curve;
 
 function Curve(config) {
     let self = this;
@@ -37,6 +37,8 @@ function Curve(config) {
     this.getData = function() { return _data; };
     this.getName = function() { return _name; };
     this.getColor = function() { return color; };
+
+    this.setName = function(name) { _name = name; };
 
     this.getInvertedColor = function() {
         return invertedColor;

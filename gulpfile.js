@@ -319,6 +319,9 @@ gulp.task('deploy', function () {
 });
 
 gulp.task('build-visualize', ['appcomponent', 'js'], function() {
-    gulp.src(['build/js/main-logplot.js'])
+    gulp.src([
+        'build/js/main-logplot.js',
+        'build/js/main.js'
+    ])
         .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
 });

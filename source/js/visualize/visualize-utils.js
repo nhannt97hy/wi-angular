@@ -19,11 +19,13 @@ function invertColor(color) {
 }
 
 function appendTrackHeader(plotArea, container, trackName) {
-    container.append('div')
-        .attr('class', 'track-header text-center')
-            .append('label')
-            .attr('class', 'track-name text-center')
-                .text(trackName);
+    let trackHeader = container.append('div')
+        .attr('class', 'track-header text-center');
+
+    trackHeader.append('label')
+        .attr('class', 'track-name text-center')
+            .text(trackName);
+
     container.append('div')
         .attr('class', 'vresizer')
         .call(d3.drag()
@@ -33,6 +35,7 @@ function appendTrackHeader(plotArea, container, trackName) {
                     .style('height', (plotHeight - d3.event.dy) + "px");
             })
         );
+    return trackHeader;
 }
 
 function appendTrack(baseElement, trackName, plotWidth) {
@@ -41,6 +44,7 @@ function appendTrack(baseElement, trackName, plotWidth) {
     var trackContainer = d3.select(baseElement).append('div')
         .attr('class', 'track-container')
         .style('width', plotWidth + 'px');
+
     appendTrackHeader(baseElement, trackContainer, trackName);
     var resizer = d3.select(baseElement).append('div')
         .attr('class', 'resizer track-resizer')

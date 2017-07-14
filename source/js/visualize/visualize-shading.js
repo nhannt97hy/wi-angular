@@ -1,4 +1,4 @@
-exports.Shading = Shading;
+module.exports = Shading;
 
 function Shading(config) {
     let self = this;
@@ -8,7 +8,7 @@ function Shading(config) {
     let _leftCurve;
     let _rightCurve;
     let _color = config.color || 'green';
-    let _name = config.name;
+    let _name = config.name || 'Noname';
 
     this.init = function(plotContainer, leftCurve, rightCurve) {
         _leftCurve = leftCurve;
@@ -23,9 +23,7 @@ function Shading(config) {
         return self;
     }
 
-    this.destroy = function() {
-        canvas.remove();
-    }
+    this.destroy = function() { canvas.remove(); };
 
     this.adjustSize = function(rect) {
         clientRect = rect;
@@ -41,7 +39,7 @@ function Shading(config) {
     this.doPlot = function(viewportX, viewportY, transformX, transformY, refX, yStep) {
         ctx.clearRect(0, 0, clientRect.width, clientRect.height);
 
-        let filteredData = [_leftCurve.getData(), _rightCurve.getData().reverse()].map(function(data) {
+        let filteredData = [_leftCurve.getData(), _rightCurve.getData().slice().reverse()].map(function(data) {
             return data.filter(function(item) {
                 let ret = (item.x >= viewportX[0] &&
                    item.x <= viewportX[1] &&
@@ -61,7 +59,6 @@ function Shading(config) {
         plotSamples.forEach(function(item) {
             ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
         });
-        ctx.closePath();
         ctx.fill();
     }
 }

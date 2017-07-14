@@ -1,6 +1,6 @@
-let Curve = require('./visualize-curve.js').Curve;
-let Shading = require('./visualize-shading.js').Shading;
-let DepthTrack = require('./visualize-depth-track.js').DepthTrack;
+let Curve = require('./visualize-curve.js');
+let Shading = require('./visualize-shading.js');
+let DepthTrack = require('./visualize-depth-track.js');
 
 let Utils = require('./visualize-utils.js');
 
@@ -21,66 +21,33 @@ exports.createDepthTrack = function(config, domElem) {
     return depthTrack;
 }
 
-
-let registeredPlots = new Array();
+let registeredPlots = [];
 setInterval(function() {
     registeredPlots.forEach(function(plot) {
         if(plot.periodicTask) plot.periodicTask();
     });
 }, 2000);
 
-function appendToTrackHeader(base, dataSetName, unit, minVal, maxVal) {
-    let unitHeaderData = [minVal, unit, maxVal];
-    let trackHeader = base.selectAll('.track-header');
-    let temp = trackHeader.append('label')
-        .attr('class', 'data-header text-center')
-        .text(dataSetName);
-
-    trackHeader.append('label')
-        .attr('class', 'unit-header flex-row')
-        .selectAll('div').data(unitHeaderData).enter()
-            .append('div')
-                .attr('class', function(d, i) {
-                    switch(i) {
-                        case 0:
-                            return 'text-left';
-                        case 1:
-                            return 'flex-1 text-center';
-                        case 2:
-                            return 'text-right';
-                    }
-                    return '';
-                })
-                .text(function(d) { return d; });
-}
-
-function removeFromTrackHeader(base, idx) {
-    base.selectAll('.data-header')
-        .filter(function(d, i) { return i == idx; })
-        .remove();
-
-    base.selectAll('.unit-header')
-        .filter(function(d, i) { return i == idx; })
-        .remove();
-}
-
-
 function Plot(config) {
+    config = typeof config === 'object' ? config : {};
     let self = this;
-    let _viewportX = new Array(), _viewportY = new Array();
-    if( !config ) {
-        console.error("config must not be null");
-        return;
-    }
-    let _curves = new Array();
-    let _shadings = new Array();
+
+    let _curves = [];
+    let _shadings = [];
+    let _curveHeaders = [];
+    let _shadingHeaders = [];
+    let _viewportX = [];
+    let _viewportY = [];
+
+    let trackContainer;
+    let plotContainer;
+    let headerContainer;
+    let clientRect;
+    let svg;
+
     let refLine;
     let refX = 10;
-    let root;
-    let base;
-    let svg;
-    let clientRect;
-    let translateOpts = new Object();
+    let translateOpts = {};
     let xAxisGroup, yAxisGroup;
     let transformX;
     let transformY;
@@ -92,8 +59,8 @@ function Plot(config) {
     let yStep = config.yStep || 1.0;
 
     let xPadding = config.xPadding || 0, yPadding = config.yPadding || 0;
-    let xFormatter = d3.format(config.xFormatter || 'g'),
-        yFormatter = d3.format(config.yFormatter || 'g');
+    let xFormatter = d3.format(config.xFormatter || 'g');
+    let yFormatter = d3.format(config.yFormatter || 'g');
 
     let usedColors = d3.set();
     let refLineColor = '#3e3e3e';
@@ -101,23 +68,19 @@ function Plot(config) {
     let currentCurveIdx = -1;
 
     let axisCfg = {
-        top: function(transformX) {
-            return d3.axisTop(transformX);
-        },
-        bottom: function(transformX) {
-            return d3.axisBottom(transformX);
-        },
-        left: function(transformY) {
-            return d3.axisLeft(transformY);
-        },
-        right: function(transformY) {
-            return d3.axisRight(transformY);
-        }
+        top: function(transformX) { return d3.axisTop(transformX); },
+        bottom: function(transformX) { return d3.axisBottom(transformX); },
+        left: function(transformY) { return d3.axisLeft(transformY); },
+        right: function(transformY) { return d3.axisRight(transformY); }
     }
 
+    /* Getter Begin */
     this.getYStep = function() { return yStep; };
     this.getCurves = function() { return _curves; };
+    this.getCurveHeaders = function() { return _curveHeaders; };
     this.getCurrentCurveIdx = function() { return currentCurveIdx; };
+    this.getCurrentCurve = function() { return _curves[currentCurveIdx]; };
+    /* Getter End */
 
     this.getYMax = function() {
         if (_curves.length == 0) return null;
@@ -126,10 +89,7 @@ function Plot(config) {
         return yStep * d3.max(mergedCurvesData, function(d) { return d.y });
     }
 
-    this.getYMin = function() {
-        if (_curves.length == 0) return null;
-        return 0;
-    }
+    this.getYMin = function() { return (_curves.length == 0) ? null : 0; };
 
     function updateTranslateOpts(translateOpts, clientRect) {
         translateOpts.top = 'translate(0, ' + yPadding + ')';
@@ -138,12 +98,14 @@ function Plot(config) {
         translateOpts.right = 'translate(' + (clientRect.width - xPadding) + ', 0)';
     }
     this.init = function(baseElement) {
-        root = appendTrack(baseElement, 'Track', plotWidth);
-        base = root.select('.plot-container');
-        clientRect = base.node().getBoundingClientRect();
+        trackContainer = appendTrack(baseElement, 'Track', plotWidth);
+        plotContainer = trackContainer.select('.plot-container');
+        headerContainer = trackContainer.select('.track-header');
+
+        clientRect = plotContainer.node().getBoundingClientRect();
         updateTranslateOpts(translateOpts, clientRect);
 
-        svg = base.append('svg')
+        svg = plotContainer.append('svg')
                 .attr('width', clientRect.width)
                 .attr('height', clientRect.height);
 
@@ -168,9 +130,9 @@ function Plot(config) {
                     _doPlot();
                 }))
                 .raise();
-        new ResizeSensor(base.node(), function() {
+        new ResizeSensor(plotContainer.node(), function() {
             let previousWidth = clientRect.width;
-            clientRect = base.node().getBoundingClientRect();
+            clientRect = plotContainer.node().getBoundingClientRect();
 
             updateTranslateOpts(translateOpts, clientRect);
 
@@ -196,88 +158,15 @@ function Plot(config) {
             _doPlot();
         });
     }
-    this.onDrop = function(dropCallback){
-        base.on('mouseover', function() {
-            dropCallback();
-        });
-    }
-
-    this.onMouseDown = function(mouseDownCallback) {
-        base.on('mousedown', function() {
-            mouseDownCallback();
-        });
-    }
-
-    function _doPlot() {
-        let axisRange = {
-            top: [yPadding, clientRect.height - yPadding],
-            bottom: [yPadding, clientRect.height - yPadding].reverse(),
-            left: [xPadding, clientRect.width - xPadding],
-            right: [xPadding, clientRect.width - xPadding].reverse()
-        }
-        transformX = d3.scaleLinear().domain(_viewportX).range(axisRange[yAxisPosition]);
-        transformY = d3.scaleLinear().domain(_viewportY).range(axisRange[xAxisPosition]);
-        function setupAxes() {
-            let xAxis = axisCfg[xAxisPosition](transformX)
-                .tickValues(d3.range(_viewportX[0], _viewportX[1], (_viewportX[1] - _viewportX[0])/xNTicks))
-                .tickFormat("")
-                .tickSize(-(clientRect.height - 2 * yPadding));
-            let start = roundUp(_viewportY[0], yStep);
-            let end = roundDown(_viewportY[1], yStep);
-            let yAxis = axisCfg[yAxisPosition](transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
-                .tickFormat(yFormatter)
-                .tickSize(-(clientRect.width - 2 * xPadding));
-
-            xAxisGroup.call(xAxis);
-            yAxisGroup.call(yAxis);
-        }
-        function drawRefLine() {
-            refLine.attr('x1', refX)
-                .attr('x2', refX)
-                .attr('y1', 0)
-                .attr('y2', clientRect.height)
-                .attr('stroke', refLineColor)
-                .raise();
-        }
-        setupAxes();
-        drawRefLine();
-        self.plotAllCurves();
-        self.plotAllShadings();
-    }
 
     this.doPlot = function() {
         _doPlot();
     }
 
-    this.plotCurve = function(curveIdx) {
-        if (curveIdx == currentCurveIdx) {
-            _curves[curveIdx].doPlot(_viewportX, _viewportY, transformX, transformY, shading, 2, refX, yStep);
-        }
-        else {
-            _curves[curveIdx].doPlot(_viewportX, _viewportY, transformX, transformY, shading, 1, refX, yStep);
-        }
-    }
-
-    this.plotAllCurves = function() {
-        for (let i = 0; i < _curves.length; i ++) {
-            self.plotCurve(i);
-        }
-    }
-
     this.highlight = function(idx) {
         currentCurveIdx = idx;
         self.plotAllCurves();
-    }
-
-    this.plotAllShadings = function() {
-        for (let i = 0; i < _shadings.length; i ++) {
-            _shadings[i].doPlot(_viewportX, _viewportY, transformX, transformY, refX, yStep);
-        }
-    }
-
-    this.onClick = function(callback) {
-        svg.on('click', function() {callback();});
+        _highlightCurveHeader();
     }
 
     let freshness = 0;
@@ -341,43 +230,17 @@ function Plot(config) {
         }
     }
 
-    function _genColor() {
-        function rand(x) {
-            return Math.floor(Math.random() * x);
-        }
-
-        const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
-        let color, invertedColor;
-        for (let i = 0; i <= _curves.length; i++)  {
-            if (i >= DEFAULT_COLORS.length) {
-                do {
-                    color = d3.rgb(rand(255), rand(255), rand(255)).toString();
-                }
-                while (usedColors.has(color));
-            }
-            else {
-                color = d3.color(DEFAULT_COLORS[i]).toString();
-            }
-            invertedColor = invertColor(color).toString();
-            if (!usedColors.has(color) && !usedColors.has(invertedColor)) {
-                usedColors.add(color);
-                usedColors.add(invertedColor);
-                break;
-            }
-        }
-        return color;
-    }
-
+    /* Curve Begin */
     this.addCurve = function(data, dataSetName, unit, min, max) {
-        appendToTrackHeader(root, dataSetName, unit, min, max);
+        _addCurveHeader(dataSetName, unit, min, max);
 
-        let curve = new Curve({ color: _genColor() });
-        curve.init(base, data);
-        return _curves.push(curve) -1;
-    }
-
-    this.toggleShading = function() {
-        shading = !shading;
+        let curve = new Curve({
+            color: _genColor(),
+            name: dataSetName
+        });
+        curve.init(plotContainer, data);
+        let idx = _curves.push(curve) -1;
+        return idx;
     }
 
     this.removeCurve = function(curveIdx) {
@@ -387,9 +250,9 @@ function Plot(config) {
         usedColors.remove(curve.getInvertedColor());
         curve.destroy();
 
-        removeFromTrackHeader(root, curveIdx);
-
+        _removeCurveHeader(curveIdx);
         _curves.splice(curveIdx, 1)[0];
+        _curveHeaders.splice(curveIdx, 1)[0];
 
         if (curveIdx == currentCurveIdx)
             currentCurveIdx = -1;
@@ -397,28 +260,72 @@ function Plot(config) {
             currentCurveIdx -= 1;
     };
 
-    this.removeCurrentCurve = function() { self.removeCurve(currentCurveIdx); };
+    this.removeCurrentCurve = function() {
+        self.removeCurve(currentCurveIdx);
+    };
 
     this.removeAllCurves = function() {
         usedColors.clear();
-        _curves.forEach(function(c) {
-            c.destroy();
-        });
+        for (let i = 0; i < _curves.length; i ++) {
+            _curves[i].destroy();
+            _removeCurveHeader(i);
+        }
         _curves = [];
+        _curveHeaders = [];
+        currentCurveIdx = -1;
     };
 
+    this.plotCurve = function(curveIdx) {
+        let lineWidth = curveIdx == currentCurveIdx ? 2 : 1;
+        _curves[curveIdx].doPlot(_viewportX, _viewportY, transformX, transformY, shading, lineWidth, refX, yStep);
+    };
+
+    this.plotAllCurves = function() {
+        for (let i = 0; i < _curves.length; i ++) {
+            self.plotCurve(i);
+        }
+    };
+    /* Curve End */
+
+    /* Shading Begin */
     this.addShading = function(leftCurveIdx, rightCurveIdx, config) {
         config = typeof config != 'object' ? {} : config;
-        console.log('Add shading in plot');
         let leftCurve = _curves[leftCurveIdx];
         let rightCurve = _curves[rightCurveIdx];
         let shading = new Shading({
             color: config.color || _genColor(),
             name: config.name || (leftCurve.getName() + ' - ' + rightCurve.getName())
         });
-        shading.init(base, leftCurve, rightCurve);
+        shading.init(plotContainer, leftCurve, rightCurve);
         _shadings.push(shading);
-    }
+    };
+
+    this.plotShading = function(shadingIdx) {
+        _shadings[shadingIdx].doPlot(_viewportX, _viewportY, transformX, transformY, refX, yStep);
+    };
+
+    this.plotAllShadings = function() {
+        for (let i = 0; i < _shadings.length; i ++) {
+            self.plotShading(i);
+        }
+    };
+    /* Shading End */
+
+    /* Event Begin */
+    this.onDrop = function(dropCallback){
+        plotContainer.on('mouseover', function() {
+            dropCallback();
+        });
+    };
+
+    this.onPlotMouseDown = function(cb) {
+        plotContainer.on('mousedown', cb);
+    };
+
+    this.onHeaderMouseDown = function(cb) {
+        headerContainer.on('mousedown',cb);
+    };
+    /* Event End */
 
     this.setColor = function(color) {
         if (currentCurveIdx < 0) return false;
@@ -454,6 +361,114 @@ function Plot(config) {
             _viewportX[1] = tempVport[1] * kFactor;
         }
     }
+
+    function _doPlot() {
+        let axisRange = {
+            top: [yPadding, clientRect.height - yPadding],
+            bottom: [yPadding, clientRect.height - yPadding].reverse(),
+            left: [xPadding, clientRect.width - xPadding],
+            right: [xPadding, clientRect.width - xPadding].reverse()
+        }
+        transformX = d3.scaleLinear().domain(_viewportX).range(axisRange[yAxisPosition]);
+        transformY = d3.scaleLinear().domain(_viewportY).range(axisRange[xAxisPosition]);
+        function setupAxes() {
+            let xAxis = axisCfg[xAxisPosition](transformX)
+                .tickValues(d3.range(_viewportX[0], _viewportX[1], (_viewportX[1] - _viewportX[0])/xNTicks))
+                .tickFormat("")
+                .tickSize(-(clientRect.height - 2 * yPadding));
+            let start = roundUp(_viewportY[0], yStep);
+            let end = roundDown(_viewportY[1], yStep);
+            let yAxis = axisCfg[yAxisPosition](transformY)
+                .tickValues(d3.range(start, end, (end - start)/yNTicks))
+                .tickFormat(yFormatter)
+                .tickSize(-(clientRect.width - 2 * xPadding));
+
+            xAxisGroup.call(xAxis);
+            yAxisGroup.call(yAxis);
+        }
+        function drawRefLine() {
+            refLine.attr('x1', refX)
+                .attr('x2', refX)
+                .attr('y1', 0)
+                .attr('y2', clientRect.height)
+                .attr('stroke', refLineColor)
+                .raise();
+        }
+        setupAxes();
+        drawRefLine();
+        self.plotAllCurves();
+        self.plotAllShadings();
+    }
+
+    function _genColor() {
+        function rand(x) {
+            return Math.floor(Math.random() * x);
+        }
+
+        const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+        let color, invertedColor;
+        for (let i = 0; i <= _curves.length; i++)  {
+            if (i >= DEFAULT_COLORS.length) {
+                do {
+                    color = d3.rgb(rand(255), rand(255), rand(255)).toString();
+                }
+                while (usedColors.has(color));
+            }
+            else {
+                color = d3.color(DEFAULT_COLORS[i]).toString();
+            }
+            invertedColor = invertColor(color).toString();
+            if (!usedColors.has(color) && !usedColors.has(invertedColor)) {
+                usedColors.add(color);
+                usedColors.add(invertedColor);
+                break;
+            }
+        }
+        return color;
+    }
+
+    function _addCurveHeader(dataSetName, unit, minVal, maxVal) {
+        let unitHeaderData = [minVal, unit, maxVal];
+        let curveHeader = headerContainer.append('div')
+            .attr('class', 'curve-header');
+
+        curveHeader.append('label')
+            .attr('class', 'data-header text-center')
+            .text(dataSetName);
+
+        curveHeader.append('label')
+            .attr('class', 'unit-header flex-row')
+            .selectAll('div').data(unitHeaderData).enter()
+                .append('div')
+                    .attr('class', function(d, i) {
+                        switch(i) {
+                            case 0:
+                                return 'text-left';
+                            case 1:
+                                return 'flex-1 text-center';
+                            case 2:
+                                return 'text-right';
+                        }
+                        return '';
+                    })
+                    .text(function(d) { return d; });
+
+        _curveHeaders.push(curveHeader);
+    }
+
+    function _removeCurveHeader(curveIdx) {
+        headerContainer.selectAll('.curve-header')
+            .filter(function(d, i) { return i == curveIdx; })
+            .remove();
+    }
+
+    function _highlightCurveHeader() {
+        _curveHeaders.forEach(function(h, i) {
+            let bgColor = i == currentCurveIdx ? 'red' : 'transparent';
+            h.style('background-color', bgColor);
+        });
+    }
+
     const trackerLifetime = 1 * 1000; // 1 seconds
     this.periodicTask = function() {
         if( Date.now() - freshness > trackerLifetime )
