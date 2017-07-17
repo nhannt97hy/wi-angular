@@ -31,6 +31,7 @@
                                 <select name="selectWell" class="form-control wi-form-control"
                                         ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
                                         ng-model="wiModal.selectedWell">
+                                    <option value=""></option>
                                 </select>
                             </div>
                         </div>
@@ -68,6 +69,7 @@
                                 <select name="datasetName" class="form-control wi-form-control"
                                         ng-options="datasetOption.name for datasetOption in wiModal.selectedWell.datasets"
                                         ng-model="wiModal.selectedDataset">
+                                    <option value=""></option>
                                 </select>
                             </div>
                         </div>
@@ -76,7 +78,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
+                <button class='btn btn-default'
+                        ng-disabled='!wiModal.lasFile || wiModal.isDisabled'
+                        ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

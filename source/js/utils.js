@@ -1,15 +1,14 @@
 'use strict';
 
-//Utils for object checking and object cloning
-function objcpy(destObj, sourceObj) {
+exports.objcpy = function (destObj, sourceObj) {
     if (destObj) {
         for (let attr in sourceObj) {
             destObj[attr] = sourceObj[attr];
         }
     }
-}
+};
 
-function isEqual(a, b) {
+exports.isEqual = function (a, b) {
     if (!a || !b) return false;
     let aProps = Object.getOwnPropertyNames(a);
     let bProps = Object.getOwnPropertyNames(b);
@@ -27,30 +26,24 @@ function isEqual(a, b) {
     }
 
     return true;
-}
-var openProject = {
 };
 
-function bindFunctions(destHandlers, sourceHandlers, thisObj) {
+exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     for (let handler in sourceHandlers) {
         destHandlers[handler] = sourceHandlers[handler].bind(thisObj);
     }
-}
-// APP Utils
-function projectOpen(wiComponentService, projectData) {
+};
+
+exports.projectOpen = function (wiComponentService, projectData) {
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
-
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+};
 
-    // todo: change to wiComponentService
-    objcpy(openProject, projectData);
-}
-
-function projectClose(wiComponentService) {
+exports.projectClose = function (wiComponentService) {
     wiComponentService.emit('project-unloaded-event');
-}
+};
 
-function pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
+exports.pushProjectToExplorer = function (self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
     console.log('project data: ', project);
     self.treeConfig = (new WiTreeConfig()).config;
     console.log('self.treeConfig', self.treeConfig);
@@ -71,12 +64,27 @@ function pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, 
             }
         }
     });
-}
+};
 
-exports.objcpy = objcpy;
-exports.isEqual = isEqual;
-exports.bindFunctions = bindFunctions;
-exports.projectOpen = projectOpen;
-exports.projectClose = projectClose;
-exports.pushProjectToExplorer = pushProjectToExplorer;
-exports.openProject = openProject;
+exports.updateWellProject = function (wiComponentService, well) {
+    // update well
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+    console.log('well sddddd', well)
+    console.log('project sddddd', project)
+
+    if (!project) return;
+
+    if (!Array.isArray(project.wells)) {
+        project.wells = [];
+        project.wells.push(well);
+    } else {
+        for (let i = 0; i < project.wells.length; i++) {
+            if (project.wells[i].idWell == well.idWell) {
+                project.wells[i] = well;
+            }
+        }
+    }
+
+    wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
+};

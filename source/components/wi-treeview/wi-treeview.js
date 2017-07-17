@@ -6,12 +6,13 @@ function Controller(wiComponentService, WiProperty, WiWell) {
 
     this.$onInit = function () {
         // self.items = self.config;
-        if (self.name) wiComponentService.putComponent(self.name, self);
+        if (self.name) {
+            wiComponentService.putComponent(self.name, self);
 
-        wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
-            console.log('tree view UPDATE_WELL_EVENT');
-            self.updateWellItem(well);
-        });
+            wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
+                self.updateWellItem(well);
+            });
+        }
     };
 
     this.onCollapse = function ($index) {
