@@ -856,69 +856,64 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
     });
 };
 exports.importLASDialog = function (ModalService, callback) {
-    function ModalController($scope, close) {
-        let error = null;
+    function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
-        this.objcpy = function (destObj, sourceObj) {
-            if (destObj) {
-                for (let attr in sourceObj) {
-                    destObj[attr] = sourceObj[attr];
-                }
-            }
-        };
-        // var file = this.lasFile;
-        this.chooseFile = function (){
 
-        }
-        this.depthUnit = ["M", "Ft"];
-        this.fileLAS = {
-            step: 10,
-            topDepth: 100,
-            bottomDepth: 500,
-            depthUnit: "M"
-        };
-        this.listLAS =[{
-            lasName: "LAS1",
-            inputName: "Name1",
-            unit: "M"
-        },
-        {
-            lasName: "LAS2",
-            inputName: "Name2",
-            unit: "Ft"
-        }
-        ];
+        this.lasFile = null;
+        this.selectedWell = null;
+        this.selectedDataset = null;
 
-        this.file = {};
-        this.objcpy(this.file, this.fileLAS);
-        this.inputLAS = {};
-        this.objcpy(this.inputLAS, this.fileLAS);
+        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+        console.log('projectLoaded', self.projectLoaded);
 
         this.onLoadButtonClicked = function () {
-            if (self.inputLAS.topDepth < self.fileLAS.topDepth || self.inputLAS.topDepth > self.fileLAS.bottomDepth) {
-                err = "Input top depth couldn't less than las top depth or greater than las bottom depth";
-            };
-            if (self.inputLAS.bottomDepth > self.fileLAS.bottomDepth || self.inputLAS.bottomDepth < self.fileLAS.bottomDepth) {
-                err = "Input bottom depth couldn't less than las top depth or greater than las bottom depth";
-            };
-            console.log(err);
+            console.log('las file: ', self.lasFile);
+            console.log('selectedWell: ', self.selectedWell);
+            console.log('selectedDataset: ', self.selectedDataset);
 
+            let payloadParams = {
+                id_project: self.projectLoaded.idProject
+            };
+
+            if (self.selectedWell) {
+                payloadParams.id_well = self.selectedWell.idWell;
+            }
+
+            if (self.selectedDataset) {
+                payloadParams.id_dataset = self.selectedDataset.idDataset;
+            }
+
+            payloadParams.file= self.lasFile;
+
+            wiApiService.postWithFile('/file', payloadParams)
+                .then(function (data) {
+                    console.log('well response', data);
+
+                    return close(data.well, 500);
+                })
+                .catch(function (err) {
+                    console.log('err', err);
+                });
         };
 
         this.onCancelButtonClicked = function () {
             console.log("onCancelButtonClicked");
+            close(null, 100);
         };
     }
+
     ModalService.showModal({
         templateUrl: "import-LAS/import-LAS-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            callback(data);
         });
     });
 };
@@ -978,10 +973,7 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
         this.getColor = function () {
             console.log("pick: ", self.colorTrack);
         };
-
-        this.setClickedRow = function(index){
-            self.selectedRow = index;           
-        }
+        
         // this.curveAttr = [];
         self.curveAttr = [
             {
@@ -1025,32 +1017,135 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
                 displayAs : "Normal"
             }
         ];
-        this.hide = function (index) {
-            // self.curveAttr = [];
-            index = null;
-        }
-        
-        this.arrowUp = function (index) {
-            self.selectedRow = index;
-            for(let i = 0; i < self.curveAttr.length; i++) {
-                index = self.curveAttr.indexOf(this.curveAttr[i]);
-                console.log("index:", index);
-                if (index > 0) {
-                    let itemToMove = this.curveAttr.splice(index, 1);
-                    console.log("item: ", itemToMove[0]);
-                    this.curveAttr.splice(index-1, 0, itemToMove[0]);                
+        this.shadingAttr = [
+            {
+                left : {
+                    curveName: "DTCO3",
+                    fixedValue : "fixed1"
+                },
+                right : {
+                    curveName: "DTCO3-3",
+                    fixedValue : "fixed2"
+                },
+                shadingName : "shading1",
+                shadingStyle : "Fill Pattern",
+                fillPattern : "",
+                variableShading : ""
+            },
+            {
+                left : {
+                    curveName: "DTCO3-1",
+                    fixedValue : "fixed11"
+                },
+                right : {
+                    curveName: "DTCO3-3-1",
+                    fixedValue : "fixed21"
+                },
+                shadingName : "shading1",
+                shadingStyle : "Fill Pattern",
+                fillPattern : "",
+                variableShading : ""
+            },
+            {
+                left : {
+                    curveName: "DTCO3-2",
+                    fixedValue : "fixed12"
+                },
+                right : {
+                    curveName: "DTCO3-3-2",
+                    fixedValue : "fixed22"
+                },
+                shadingName : "shading1",
+                shadingStyle : "Fill Pattern",
+                fillPattern : "",
+                variableShading : ""
+            }
+        ];
+        this.selectedCurve = {};
+        this.selectedShading = {};
+
+        this.setClickedRowCurve = function(index){
+            self.selectedRow = index; 
+            self.selectedCurve = self.curveAttr[index];
+        };
+
+        this.removeRow = function(){      
+            console.log("###", self.selectedCurve.curveName);
+
+            let idx = -1;     
+            let newCurveAttr = eval( self.curveAttr );
+            for( let i = 0; i < newCurveAttr.length; i++ ) {
+                if( newCurveAttr[i] === self.selectedCurve ) {
+                    idx = i;
+                    break;
                 }
             }
+            self.curveAttr.splice( idx, 1 );        
         };
-        this.arrowDown = function (index) {        
+        this.arrowUpCurve = function () {
+            let prevIdx = -1;
+            let idx = self.curveAttr.indexOf(self.selectedCurve);
+            console.log(idx);
+            if (idx-1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx > 0) {
+                let moveCurve = self.curveAttr.splice(idx, 1)
+                console.log(moveCurve[0])
+                self.curveAttr.splice(idx-1, 0, moveCurve[0]);
+            };
+            self.setClickedRowCurve(idx-1);
+
         };
-        this.onOkButtonClicked = function () {
-            self.name = $scope.name;
-            console.log(self.name);
-        }
+        this.arrowDownCurve = function () {      
+            let prevIdx = self.curveAttr.length;
+            let idx = self.curveAttr.indexOf(self.selectedCurve);
+            console.log(idx);
+            if (idx+1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx < self.curveAttr.length-1) {
+                let moveCurve = self.curveAttr.splice(idx, 1)
+                console.log(moveCurve[0])
+                self.curveAttr.splice(idx+1, 0, moveCurve[0]);                
+            }  
+            self.setClickedRowCurve(idx+1);
+        };
+
+        //tab Shading
+
+        this.setClickedRowShading = function(index){
+            self.selectedRowShading = index; 
+            self.selectedShading = self.shadingAttr[index];
+        };
+        this.arrowUpShading = function () {
+            let prevIdx = -1;
+            let idx = self.shadingAttr.indexOf(self.selectedShading);
+            console.log(idx);
+            if (idx-1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx > 0) {
+                let moveShading = self.shadingAttr.splice(idx, 1)
+                console.log(moveShading[0])
+                self.shadingAttr.splice(idx-1, 0, moveShading[0]);
+            };
+            self.setClickedRowShading(idx-1);
+
+        };
+        this.arrowDownShading = function () {      
+            let prevIdx = self.shadingAttr.length;
+            let idx = self.shadingAttr.indexOf(self.selectedShading);
+            console.log(idx);
+            if (idx+1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx < self.shadingAttr.length-1) {
+                let moveShading = self.shadingAttr.splice(idx, 1)
+                console.log(moveShading[0])
+                self.shadingAttr.splice(idx+1, 0, moveShading[0]);                
+            }  
+            self.setClickedRowShading(idx+1);
+        };
         this.onCancelButtonClicked = function (ret) {
             close(ret);
-        }
+        };
     }
 
     ModalService.showModal({
@@ -1065,4 +1160,4 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
             callback(ret);
         });
     });
-}
+};

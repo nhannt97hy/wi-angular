@@ -146,7 +146,7 @@
                                     <tr ng-model="wiModal.selectedCurve" 
                                         ng-repeat="curve in wiModal.curveAttr" 
                                         ng-class="{'selected':$index == wiModal.selectedRow}" 
-                                        ng-click="wiModal.setClickedRow($index)">
+                                        ng-click="wiModal.setClickedRowCurve($index)">
                                         <td>
                                             <select ng-model="curve.curveName" name="curveName" 
                                             value="" class="form-control wi-form-control"
@@ -188,10 +188,18 @@
                                 </table>
                             </div>
                             <div class="col-sm-1">
-                                <button type="button" class="btn btn-default" ng-click="wiModal.arrowUp();"><span class="arrow-up-16x16"></span></button>
-                                <button type="button" class="btn btn-default" ng-click="wiModal.arrowDown();"><span class="arrow-down-16x16"></span></button>
-                                <button type="button" class="btn btn-default" ng-click="wiModal.show();"><span class="ok-16x16"></span></button>
-                                <button type="button" class="btn btn-default" ng-click="wiModal.hide();"><span class="delete-16x16"></span></button>
+                                <button type="button" class="btn btn-default" 
+                                        ng-click="wiModal.arrowUpCurve();">
+                                    <span class="arrow-up-16x16"></span>
+                                </button>
+                                <button type="button" class="btn btn-default" 
+                                        ng-click="wiModal.arrowDownCurve();">
+                                    <span class="arrow-down-16x16"></span>
+                                </button>
+                                <button type="button" class="btn btn-default" 
+                                        ng-click="wiModal.removeRow();">
+                                    <span class="delete-16x16"></span>
+                                </button>
                             </div>
                         </div>
                         <div ng-switch-when="shading">
@@ -218,7 +226,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr ng-repeat="shading in wiModal.shadingAttr">
+                                        <tr ng-model="wiModal.selectedShading"    
+                                            ng-repeat="shading in wiModal.shadingAttr" 
+                                            ng-class="{'selected':$index == wiModal.selectedRowShading}" 
+                                            ng-click="wiModal.setClickedRowShading($index)"
+                                            >
                                             <td>
                                                 <select ng-model="shading.left.curveName" 
                                                         name="curveName"  value="" 
@@ -262,8 +274,10 @@
                                 </table>
                             </div>
                             <div class="col-sm-1">
-                                <button type="button" class="btn btn-default"><span class="arrow-up-16x16"></span></button>
-                                <button type="button" class="btn btn-default"><span class="arrow-down-16x16"></span></button>
+                                <button type="button" class="btn btn-default" 
+                                    ng-click="wiModal.arrowUpShading()"><span class="arrow-up-16x16"></span></button>
+                                <button type="button" class="btn btn-default"
+                                    ng-click="wiModal.arrowDownShading()"><span class="arrow-down-16x16"></span></button>
                             </div>
                         </div>
                     </div>
