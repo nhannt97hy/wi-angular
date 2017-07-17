@@ -31,7 +31,7 @@ function Controller(wiComponentService, WiProperty, WiWell) {
     this.onDoubleClick = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
-        } else if (self.config[$index].children && self.config[$index].children.length !== 0){
+        } else if (self.config[$index].children && self.config[$index].children.length !== 0) {
             self.onCollapse($index);
         } else {
             let treeFunctions = wiComponentService.getComponent(wiComponentService.TREE_FUNCTIONS);
@@ -131,24 +131,53 @@ function Controller(wiComponentService, WiProperty, WiWell) {
 
     this.expand = function ($index) {
         self.config[$index].data.childExpanded = true;
+        for (let child of self.config[$index].children) {
+            child.data.childExpanded = true;
+        }
     };
     this.collapse = function ($index) {
         self.config[$index].data.childExpanded = false;
+        for (let child of self.config[$index].children) {
+            child.data.childExpanded = false;
+        }
     };
 
-    this.expandAll = function () {
-        for (let config of self.config) {
+    this.expandAll = function (rootConfig) {
+        for (let config of rootConfig) {
             config.data.childExpanded = true;
+            expandAll(config.children);
         }
     };
 
-    this.collapseAll = function () {
-        for (let config of self.config) {
+    function expandAll(children) {
+        if (!children) {
+            return;
+        }
+        for (let child of children) {
+            child.data.childExpanded = true;
+            expandAll(child.children);
+        }
+    }
+
+    this.collapseAll = function (rootConfig) {
+        for (let config of rootConfig) {
             config.data.childExpanded = false;
+            collapseAll(config.children);
         }
     };
+
+    function collapseAll(children) {
+        if (!children) {
+            return;
+        }
+        for (let child of children) {
+            child.data.childExpanded = false;
+            collapseAll(child.children);
+        }
+    }
 
     this.showContextMenu = function ($event, $index) {
+        console.log('self.name', self.name);
         console.log('$index', $index);
         console.log('self.config', self.config);
         let configType = self.config[$index].type;
@@ -168,7 +197,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         config: '<',
-        contextmenuholder:'@'
+        contextmenuholder: '@'
     }
 });
 

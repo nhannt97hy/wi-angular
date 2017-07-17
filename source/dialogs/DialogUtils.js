@@ -917,3 +917,66 @@ exports.importLASDialog = function (ModalService, callback) {
         });
     });
 };
+
+exports.importMultiLASDialog = function (ModalService, callback) {
+    function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
+        let self = this;
+
+        this.lasFile = null;
+        this.selectedWell = null;
+        this.selectedDataset = null;
+
+        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+        console.log('projectLoaded', self.projectLoaded);
+
+        this.onLoadButtonClicked = function () {
+            console.log('las file: ', self.lasFile);
+            console.log('selectedWell: ', self.selectedWell);
+            console.log('selectedDataset: ', self.selectedDataset);
+
+            let payloadParams = {
+                id_project: self.projectLoaded.idProject
+            };
+
+            if (self.selectedWell) {
+                payloadParams.id_well = self.selectedWell.idWell;
+            }
+
+            if (self.selectedDataset) {
+                payloadParams.id_dataset = self.selectedDataset.idDataset;
+            }
+
+            payloadParams.file= self.lasFile;
+
+            wiApiService.postWithFile('/file', payloadParams)
+                .then(function (well) {
+                    console.log('well response', well);
+
+                    return close(well, 500);
+                })
+                .catch(function (err) {
+                    console.log('err', err);
+                });
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "import-multi-LAS/import-multi-LAS-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            callback(data);
+        });
+    });
+};

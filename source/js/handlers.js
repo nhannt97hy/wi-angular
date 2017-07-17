@@ -140,6 +140,13 @@ exports.ImportLASButtonClicked = function () {
 
 exports.ImportMultiLASButtonClicked = function () {
     console.log('ImportMultiLASButton is clicked');
+    let self = this;
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importMultiLASDialog(this.ModalService, function (well) {
+        if (well) {
+            self.wiComponentService.emit(self.wiComponentService.UPDATE_WELL_EVENT, well);
+        }
+    })
 };
 
 exports.Interval_CoreLoaderButtonClicked = function () {
@@ -523,3 +530,17 @@ exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
 
+exports.CollapseProjectButtonClicked = function () {
+    let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
+    let rootConfig = rootTreeviewCtrl.config;
+    var expaned = false;
+    for (let child of rootConfig) {
+        expaned = child.data.childExpanded;
+        if (!expaned) break;
+    }
+    if (expaned) {
+        rootTreeviewCtrl.collapseAll(rootConfig);
+    } else {
+        rootTreeviewCtrl.expandAll(rootConfig);
+    }
+};
