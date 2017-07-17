@@ -1,4 +1,4 @@
-<div class='modal fade'>
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
     <div class='modal-dialog modal-lg'>
         <div class="modal-content">
             <div class="modal-header">
@@ -69,10 +69,7 @@
                                 <select name="datasetName" class="form-control wi-form-control"
                                         ng-options="datasetOption.name for datasetOption in wiModal.selectedWell.datasets"
                                         ng-model="wiModal.selectedDataset">
-<<<<<<< HEAD
-=======
                                     <option value=""></option>
->>>>>>> 82092e58d4599d1ce5cf8044ad6a68f4e982f690
                                 </select>
                             </div>
                         </div>
@@ -81,13 +78,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-<<<<<<< HEAD
-                <button class='btn btn-default' ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
-=======
                 <button class='btn btn-default'
                         ng-disabled='!wiModal.lasFile || wiModal.isDisabled'
                         ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
->>>>>>> 82092e58d4599d1ce5cf8044ad6a68f4e982f690
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

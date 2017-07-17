@@ -93,6 +93,9 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     // Logplot Handlers
     wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
 
+    // dependency 3rd component
+    // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
+
 
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};

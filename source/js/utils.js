@@ -88,3 +88,10 @@ exports.updateWellProject = function (wiComponentService, well) {
 
     wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
 };
+
+// exports.parseTime = function (wiComponentService, time) {
+//     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
+//     let timestamp = 'DD-MM-YYYY, h:mm:ss a';
+//
+//     return moment(time).format(timestamp);
+// };
