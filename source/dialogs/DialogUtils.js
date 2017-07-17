@@ -75,7 +75,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
             });
 
         this.fillInfo = function () {
-            self.projects.forEach(function(item) {
+            self.projects.forEach(function (item) {
                 if (self.idProject == item.idProject) {
                     self.selectedProject = item;
                 }
@@ -85,7 +85,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
         this.onOkButtonClicked = function () {
             self.disabled = true;
             let data = {
-                idProject : self.idProject
+                idProject: self.idProject
             };
 
             wiApiService.post('/project/fullinfo', data)
@@ -359,8 +359,7 @@ exports.addNewDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService) {
         let self = this;
         this.onOkButtonClicked = function () {
-            let utils = wiComponentService.getComponent('UTILS');
-            let projectData = utils.openProject;
+            let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             let data = {
                 name: $scope.name,
                 idProject: projectData.idProject,
@@ -747,6 +746,7 @@ exports.lineStyleDialog = function (ModalService, callback) {
 
         };
     }
+
     ModalService.showModal({
         templateUrl: "line-style/line-style-modal.html",
         controller: ModalController,
@@ -770,20 +770,20 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
         // console.log("dataaa ",projectData);
 
         this.selectData = {
-            displayMode : ["Line", "Symbol", "Both", "None"],
-            wrapMode : ["None", "Left", "Right", "Both"],
-            symbolType : ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
-            blockPosition : ["None", "Start", "Middle", "End", "None"],
-            logLinear : ["Linear", "Logarithmic"],
-            displayAs : ["Normal", "Culmulative", "Mirror", "Pid"]
+            displayMode: ["Line", "Symbol", "Both", "None"],
+            wrapMode: ["None", "Left", "Right", "Both"],
+            symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            blockPosition: ["None", "Start", "Middle", "End", "None"],
+            logLinear: ["Linear", "Logarithmic"],
+            displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
         this.defaultElement = {
-            displayMode : "Line",
-            wrapMode : "None",
+            displayMode: "Line",
+            wrapMode: "None",
             symbolType: "Circle",
             blockPosition: "None",
-            logLinear : "Linear",
-            displayAs : "Normal"
+            logLinear: "Linear",
+            displayAs: "Normal"
         };
         this.changeOther = function () {
             switch (self.defaultElement.displayMode) {
@@ -856,12 +856,13 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
     });
 };
 exports.importLASDialog = function (ModalService, callback) {
-    function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
+    function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
 
         this.lasFile = null;
         this.selectedWell = null;
         this.selectedDataset = null;
+        this.isDisabled = false;
 
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -871,6 +872,10 @@ exports.importLASDialog = function (ModalService, callback) {
             console.log('las file: ', self.lasFile);
             console.log('selectedWell: ', self.selectedWell);
             console.log('selectedDataset: ', self.selectedDataset);
+
+            if (!self.lasFile) return;
+
+            self.isDisabled = true;
 
             let payloadParams = {
                 id_project: self.projectLoaded.idProject
@@ -884,7 +889,7 @@ exports.importLASDialog = function (ModalService, callback) {
                 payloadParams.id_dataset = self.selectedDataset.idDataset;
             }
 
-            payloadParams.file= self.lasFile;
+            payloadParams.file = self.lasFile;
 
             wiApiService.postWithFile('/file', payloadParams)
                 .then(function (well) {
@@ -894,6 +899,9 @@ exports.importLASDialog = function (ModalService, callback) {
                 })
                 .catch(function (err) {
                     console.log('err', err);
+                })
+                .then(function () {
+                    self.isDisabled = false;
                 });
         };
 
