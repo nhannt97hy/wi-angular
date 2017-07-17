@@ -4,7 +4,8 @@
     <div class="wi-parent-node"
          ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
          data-curve="{{wiTreeview.config[$index].name}}"
-         wi-right-click="wiTreeview.showContextMenu($event, $index)">
+         wi-right-click="wiTreeview.showContextMenu($event, $index)"
+         wi-element-ready="wiTreeview.onReady()">
         <div class="wi-parent-content">
             <div class="icon-expanded"
                  ng-click="wiTreeview.onCollapse($index)">

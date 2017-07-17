@@ -86,6 +86,31 @@ exports.updateWellProject = function (wiComponentService, well) {
     wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
 };
 
+exports.setupCurveDraggable = function (wiComponentService) {
+    let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+
+    $('.wi-parent-node').draggable({
+        start: function (event, ui) {
+            console.log('start', ui.helper.attr('data-curve'));
+            dragMan.dragging = true;
+            dragMan.draggedObj = ui.helper.attr('data-curve');
+        },
+        stop: function (event, ui) {
+            dragMan.cancelingId = setTimeout(function () {
+                console.log('stop');
+                dragMan.dragging = false;
+                dragMan.draggedObj = null;
+                dragMan.cancelingId = null;
+            }, 1000);
+        },
+        appendTo: 'body',
+        revert: false,
+        scroll: false,
+        helper: 'clone',
+        containment: 'document'
+    });
+};
+
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';

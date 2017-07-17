@@ -26,6 +26,7 @@ let DTRACK_CFG = {
 };
 
 function getCurveFromName(name) {
+    console.log("-", name);
     let nSamples = 1000;
     let samples = new Array();
     for (let i = 0; i < nSamples; i++) {
@@ -206,12 +207,14 @@ function Controller($scope, wiComponentService) {
     }
 
     function _onTrackDropCallback(track) {
-        let dragMan = wiComponentService.getComponent('DRAG_MAN');
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         if (dragMan.dragging) {
+            console.log('hhhh');
             if (dragMan.cancelingId) {
-                clearTimeout(dragMan.cancelingId);
-                dragMan.cancellingId = null;
-                dragMan.dragging = false;
+                //clearTimeout(dragMan.cancelingId);
+                //dragMan.cancellingId = null;
+                //dragMan.dragging = false;
+                console.log('TUNG');
                 let data = getCurveFromName(dragMan.draggedObj);
                 let max = 1;
                 track.addCurve(data, dragMan.draggedObj, 'm3', 0, max);

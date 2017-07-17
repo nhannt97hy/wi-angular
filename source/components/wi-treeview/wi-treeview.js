@@ -14,6 +14,12 @@ function Controller(wiComponentService, WiProperty, WiWell) {
         }
     };
 
+    this.onReady = function () {
+        console.log('treeview onready');
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        utils.setupCurveDraggable(wiComponentService);
+    };
+
     this.onCollapse = function ($index) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
     };
