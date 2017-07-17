@@ -3,8 +3,8 @@
             class="button-{{wiButton.type || wiButton.config.type || wiButton.default.type}}"
             data-toggle="tooltip" data-placement="bottom" title="{{wiButton.tooltip || wiButton.config.tooltip || wiButton.default.tooltip}}"
             ng-disabled='wiButton.isDisabled()'
-            wi-element-ready="wiButton.initTooltip()">
-        <img class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}" alt="icon wi-button">
+            wi-element-ready="wiButton.initTooltip() ">
+        <img ng-if="wiButton.icon" class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}" alt="icon wi-button">
         <p class="{{wiButton.layout || wiButton.config.layout || wiButton.default.layout}}"
         ng-show="wiButton.label != null || wiButton.config.label != null">
             {{wiButton.label || wiButton.config.label || wiButton.default.label}}</p>

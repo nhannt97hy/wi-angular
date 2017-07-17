@@ -3,7 +3,7 @@ var roundUp = utils.roundUp;
 var roundDown = utils.roundDown;
 var appendTrack = utils.appendTrack;
 
-exports.DepthTrack = DepthTrack;
+module.exports = DepthTrack;
 
 function appendDepthHeader(base, unit) {
     var trackHeader = base.selectAll('.track-header');
@@ -89,7 +89,7 @@ function DepthTrack(config) {
     }
 
     this.onMouseDown = function(mouseDownCallback) {
-        base.on('mousedown', function() {
+        root.on('mousedown', function() {
             mouseDownCallback();
         });
     }

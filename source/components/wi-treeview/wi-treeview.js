@@ -1,12 +1,17 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller(wiComponentService, WiProperty) {
+function Controller(wiComponentService, WiProperty, WiWell) {
     let self = this;
 
     this.$onInit = function () {
         // self.items = self.config;
         if (self.name) wiComponentService.putComponent(self.name, self);
+
+        wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
+            console.log('tree view UPDATE_WELL_EVENT');
+            self.updateWellItem(well);
+        });
     };
 
     this.onCollapse = function ($index) {
@@ -60,6 +65,35 @@ function Controller(wiComponentService, WiProperty) {
         }
     };
 
+    this.updateWellItem = function (well) {
+        let wellSelected = self.findWellById(well.idWell);
+
+        let newWell = new WiWell(well);
+
+        if (wellSelected) {
+            angular.copy(wellSelected, newWell);
+        } else {
+            let wells = getItemByName('wells');
+
+            if (wells) wells.children.unshift(newWell);
+        }
+    };
+
+    this.findWellById = function (idWell) {
+        let wells = getItemByName('wells');
+        let wellName = idWell + 'well';
+
+        if (!wells) return null;
+
+        for (let itemTree of wells.children) {
+            if (itemTree.type === 'well' && itemTree.name === wellName) {
+                return itemTree;
+            }
+        }
+
+        return null;
+    };
+
     function getItemByName(name) {
         let itemSelect = null;
         for (let item of self.config) {
@@ -104,13 +138,13 @@ function Controller(wiComponentService, WiProperty) {
         for (let config of self.config) {
             config.data.childExpanded = true;
         }
-    }
+    };
 
     this.collapseAll = function () {
         for (let config of self.config) {
             config.data.childExpanded = false;
         }
-    }
+    };
 
     this.showContextMenu = function ($event, $index) {
         console.log('$index', $index);
@@ -119,8 +153,8 @@ function Controller(wiComponentService, WiProperty) {
         let contextMenuHolderCtrl = wiComponentService.getComponent(self.contextmenuholder);
         let defaultContextMenu = contextMenuHolderCtrl.getDefaultTreeviewCtxMenu($index, self);
         let itemContextMenu = contextMenuHolderCtrl.getItemTreeviewCtxMenu(configType, self);
-        self.contextMenu = itemContextMenu.concat(defaultContextMenu);
-        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, self.contextMenu);
+        let contextMenu = itemContextMenu.concat(defaultContextMenu);
+        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 }
 

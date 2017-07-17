@@ -61,13 +61,16 @@ app.factory(wiServiceName, function () {
         DIALOG_UTILS:'DIALOG_UTILS',
         LAYOUT_MANAGER: 'LAYOUT_MANAGER',
         UTILS: 'UTILS',
+        PROJECT_LOADED: 'project-loaded',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',
 
         // event
         ADD_LOGPLOT_EVENT: 'add-logplot-event',
-        PROJECT_UNLOADED_EVENT: 'project-unloaded-event'
+        PROJECT_LOADED_EVENT: 'project-loaded-event',
+        PROJECT_UNLOADED_EVENT: 'project-unloaded-event',
+        UPDATE_WELL_EVENT: 'update-well-event',
     };
 });
 

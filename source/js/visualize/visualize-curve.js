@@ -1,16 +1,16 @@
-var invertColor = require('./visualize-utils.js').invertColor;
+let invertColor = require('./visualize-utils.js').invertColor;
 
-exports.Curve = Curve;
+module.exports = Curve;
 
 function Curve(config) {
-    var self = this;
-    var canvas;
-    var ctx;
-    var clientRect;
-    var _data;
-    var color = config.color || 'blue';
-    var shadingColor, invertedColor, invertedShadingColor;
-    var _shading;
+    let self = this;
+    let canvas;
+    let ctx;
+    let clientRect;
+    let _data;
+    let color = config.color || 'blue';
+    let _name = config.name || 'Noname';
+    let _shading;
 
     this.init = function(plotContainer, data) {
         _data = data;
@@ -34,13 +34,11 @@ function Curve(config) {
         invertedShadingColor = d3.rgb(d3InvertedColor.r, d3InvertedColor.g, d3InvertedColor.b, 0.5).toString();
     }
 
-    this.getData = function() {
-        return _data;
-    }
+    this.getData = function() { return _data; };
+    this.getName = function() { return _name; };
+    this.getColor = function() { return color; };
 
-    this.getColor = function() {
-        return color;
-    }
+    this.setName = function(name) { _name = name; };
 
     this.getInvertedColor = function() {
         return invertedColor;
@@ -69,10 +67,7 @@ function Curve(config) {
             b = imgData.data[i * 4 + 2];
             a = imgData.data[i * 4 + 3];
 
-            // if (r != 0 && g != 0 && b != 0 && a!= 127) console.log(r,g,b,a);
-            // tmpColor = d3.rgb(r, g, b).toString();
-            // if ((tmpColor == color || tmpColor == invertedColor) && a != 127)
-            if ((r > 0 || g > 0 || b > 0) && a != 127)
+            if ((r > 0 || g > 0 || b > 0 || a > 0) && a != 127)
                 return true;
         }
 
@@ -86,14 +81,13 @@ function Curve(config) {
     this.doPlot = function(viewportX, viewportY, transformX, transformY, shading, lineWidth, refX, yStep) {
         _shading = shading;
         ctx.clearRect(0, 0, clientRect.width, clientRect.height);
-        var plotSamples = _data.filter(function(item) {
-            var ret =(item.x >= viewportX[0] &&
+        let plotSamples = _data.filter(function(item) {
+            let ret =(item.x >= viewportX[0] &&
                    item.x <= viewportX[1] &&
                    item.y * yStep >= viewportY[0] &&
                    item.y * yStep <= viewportY[1]);
             return ret;
         });
-
         if (plotSamples.length == 0) return;
 
         /* draw shade */
