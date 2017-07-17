@@ -15,68 +15,7 @@ app.factory(wiServiceName, function () {
                     childExpanded: false,
                     properties: {}
                 },
-                children: [
-                    {
-                        name: 'rawdata',
-                        type: 'rawdata',
-                        data: {
-                            icon: 'project-new-16x16',
-                            label: 'Raw data',
-                            unit: '',
-                            childExpanded: false,
-                            properties: {}
-                        },
-                        children: []
-                    },
-                    {
-                        name: 'intepretationmodel',
-                        type: 'intepretationmodel',
-                        data: {
-                            icon: 'project-new-16x16',
-                            label: 'Intepretation Model',
-                            unit: '',
-                            childExpanded: false,
-                            properties: {}
-                        },
-                        children: []
-                    },
-                    {
-                        name: 'userdefined',
-                        type: 'userdefined',
-                        data: {
-                            icon: 'user-define-16x16',
-                            label: 'User Defined',
-                            unit: '',
-                            childExpanded: false,
-                            properties: {}
-                        },
-                        children: []
-                    },
-                    {
-                        name: 'logplot',
-                        type: 'logplot',
-                        data: {
-                            icon: 'logplot-blank-16x16',
-                            label: 'Logplot',
-                            unit: '',
-                            childExpanded: false,
-                            properties: {}
-                        },
-                        children: []
-                    },
-                    {
-                        name: 'crossplot',
-                        type: 'crossplot',
-                        data: {
-                            icon: 'crossplot-blank-16x16',
-                            label: 'CrossPlot',
-                            unit: '',
-                            childExpanded: false,
-                            properties: {}
-                        },
-                        children: []
-                    }
-                ]
+                children: []
             }
         ]
     };

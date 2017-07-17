@@ -26,37 +26,44 @@ let DTRACK_CFG = {
 };
 
 function getCurveFromName(name) {
-    var nSamples = 1000;
-    var samples = new Array();
+    let nSamples = 1000;
+    let samples = new Array();
     for (let i = 0; i < nSamples; i++) {
-        samples.push({y: i, x: Math.random()});
+        samples.push({ y: i, x: Math.random() });
     }
     return samples;
 }
 
 function Controller($scope, wiComponentService) {
-    var self = this;
-    var tracks = new Array();
-    var currentTrackIdx = -1;
-    var previousTrackIdx = -1;
+    let self = this;
+    let _tracks = new Array();
+    let currentTrackIdx = -1;
+    let previousTrackIdx = -1;
 
-    this.addTrack = function() {
-        var graph = wiComponentService.getComponent('GRAPH');
-        var track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
+    this.getCurrentTrack = function () {
+        return _tracks[currentTrackIdx];
+    };
+    this.getCurrentTrackIdx = function () {
+        return currentTrackIdx;
+    };
+
+    this.addTrack = function () {
+        let graph = wiComponentService.getComponent('GRAPH');
+        let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         //track.trackPointer(true);
-        var len = tracks.push(track);
-        currentTrackIdx = len -1;
+        let len = _tracks.push(track);
+        currentTrackIdx = len - 1;
         self.setDepthRangeFromSlidingBar();
         track.doPlot();
-        var dragMan = wiComponentService.getComponent('DRAG_MAN');
-        track.onDrop(function(){
-            if( dragMan.dragging ) {
+        let dragMan = wiComponentService.getComponent('DRAG_MAN');
+        track.onDrop(function () {
+            if (dragMan.dragging) {
                 if (dragMan.cancelingId) {
                     clearTimeout(dragMan.cancelingId);
                     dragMan.cancellingId = null;
                     dragMan.dragging = false;
-                    var data = getCurveFromName(dragMan.draggedObj);
-                    var max = 1;
+                    let data = getCurveFromName(dragMan.draggedObj);
+                    let max = 1;
                     track.addCurve(data, dragMan.draggedObj, 'm3', 0, max);
                     self.setDepthRangeFromSlidingBar();
                     track.adjustXRange(1);
@@ -64,91 +71,110 @@ function Controller($scope, wiComponentService) {
                     dragMan.draggedObj = null;
                 }
             }
-        }, dragMan);
-        track.onMouseDown(function() {
-            previousTrackIdx = currentTrackIdx;
-            currentTrackIdx = tracks.indexOf(track);
-            _clearHighlight();
-
-            let i;
-            let curves = tracks[currentTrackIdx].getCurves();
-            for (i = 0; i < curves.length; i ++) {
-                if (curves[i].nearPoint(d3.event.offsetX, d3.event.offsetY))
-                    break;
-            }
-            i = i == curves.length ? -1 : i;
-            tracks[currentTrackIdx].highlight(i);
         });
+
+        track.onPlotMouseDown(function() { _onPlotMouseDownCallback(track); });
+        track.onHeaderMouseDown(function() { _onHeaderMouseDownCallback(track); });
+
         return len - 1;
     };
 
     this.addDepthTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
-        let len = tracks.push(track);
+        let len = _tracks.push(track);
         self.setDepthRangeFromSlidingBar();
         self.plot(len - 1);
 
-        track.onMouseDown(function() {
+        track.onMouseDown(function () {
             previousTrackIdx = currentTrackIdx;
-            currentTrackIdx = tracks.indexOf(track);
-            _clearHighlight();
+            currentTrackIdx = _tracks.indexOf(track);
+            _clearPreviousHighlight();
         });
         return len - 1;
     };
 
+    this.addCurve = function (trackIdx, data, curveName, curveUnit) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+
+        let track = _tracks[trackIdx];
+        if (!track.addCurve) return;
+        let curveIdx = track.addCurve(data, curveName, curveUnit, 0, 200);
+        track.adjustXRange(1);
+        self.setDepthRangeFromSlidingBar();
+        track.doPlot();
+
+        let curveHeader = track.getCurveHeaders()[curveIdx];
+        curveHeader.on('mousedown', function() {
+            d3.event.stopPropagation();
+            previousTrackIdx = currentTrackIdx;
+            currentTrackIdx = _tracks.indexOf(track);
+            _clearPreviousHighlight();
+
+            let currentCurveIdx = track.getCurveHeaders().indexOf(curveHeader);
+            track.highlight(currentCurveIdx);
+            if (d3.event.button == 2) {
+                _curveOnRightClick();
+            }
+        });
+    };
+
+    this.addShading = function (trackIdx, leftCurveIdx, rightCurveIdx, config) {
+        config = typeof config != 'object' ? {} : config;
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return false;
+        if (!_tracks[trackIdx].addShading) return false;
+        _tracks[trackIdx].addShading(leftCurveIdx, rightCurveIdx, config);
+        _tracks[trackIdx].doPlot();
+    };
+
     this.setDepthRange = function (deepRange) {
-        tracks.forEach(function (track) {
+        _tracks.forEach(function (track) {
             track.setYRange(deepRange);
         });
     };
 
     this.setDepthRangeFromSlidingBar = function () {
-        var slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
-        var maxDepth = self.getMaxDepth();
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = self.getMaxDepth();
 
-        var low = slidingBar.slidingBarState.top * maxDepth / 100;
-        var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
+        let low = slidingBar.slidingBarState.top * maxDepth / 100;
+        let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
         self.setDepthRange([low, high]);
     };
 
     this.getMaxDepth = function () {
-        var maxDepth = d3.max(tracks, function (track) {
+        let maxDepth = d3.max(_tracks, function (track) {
             if (track.getYMax) return track.getYMax();
             return -1;
         });
         return (maxDepth > 0) ? maxDepth : 100000;
     };
 
-    this.getCurrentTrackIdx = function() {
-        return currentTrackIdx;
-    };
-
-    this.setColor = function(trackIx, color) {
-        if (trackIdx < 0 || trackIdx >= tracks.length) return;
-        if (tracks[trackIdx].setColor && tracks[trackIdx].setColor(color)) {
-            tracks[trackIdx].doPlot();
-        }
-    }
-
-    this.addCurve = function (trackIdx, data, curveName, curveUnit) {
-        if (trackIdx < 0 || trackIdx >= tracks.length) return;
-        if (tracks[trackIdx].addCurve) {
-            tracks[trackIdx].addCurve(data, curveName, curveUnit, 0, 200);
-            tracks[trackIdx].adjustXRange(1);
+    this.setColor = function (trackIdx, color) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        if (_tracks[trackIdx].setColor && _tracks[trackIdx].setColor(color)) {
+            _tracks[trackIdx].doPlot();
         }
     };
 
-    this.removeSelectedCurve = function() {
-        if (currentTrackIdx >= 0 && tracks[currentTrackIdx].removeCurve) {
-            tracks[currentTrackIdx].removeCurve();
-            tracks[currentTrackIdx].doPlot();
-        }
+    this.removeCurve = function (trackIdx, curveIdx) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return false;
+        if (!_tracks[trackIdx].removeCurve) return false;
+        return _tracks[trackIdx].removeCurve(curveIdx);
     };
 
 
-    this.removeTrack = function(trackIdx) {
-        if (trackIdx < 0 || trackIdx >= tracks.length) return;
+    this.removeCurrentCurve = function() {
+        if (!_tracks[currentTrackIdx].getCurrentCurveIdx) return false;
+        return self.removeCurve(currentTrackIdx, _tracks[currentTrackIdx].getCurrentCurveIdx());
+    };
+
+    this.removeCurrentTrack = function () {
+        self.removeTrack(self.getCurrentTrackIdx());
+    };
+
+    this.removeTrack = function (trackIdx) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
         if (trackIdx == currentTrackIdx) {
             currentTrackIdx = -1;
         }
@@ -156,46 +182,84 @@ function Controller($scope, wiComponentService) {
             currentTrackIdx -= 1;
         }
         previousTrackIdx = -1;
-        if (tracks[trackIdx].removeAllCurves) {
-            tracks[trackIdx].removeAllCurves();
+        if (_tracks[trackIdx].removeAllCurves) {
+            _tracks[trackIdx].removeAllCurves();
         }
         let base = d3.select(document.getElementById(self.plotAreaId));
         base.selectAll('.track-container')
-            .filter(function(d, i) { return i == trackIdx; })
+            .filter(function (d, i) {
+                return i == trackIdx;
+            })
             .remove();
 
         base.selectAll('.track-resizer')
-            .filter(function(d, i) { return i == trackIdx; })
+            .filter(function (d, i) {
+                return i == trackIdx;
+            })
             .remove();
 
-        tracks.splice(trackIdx, 1);
+        _tracks.splice(trackIdx, 1);
     }
 
     this.plot = function (trackIdx) {
-        if (trackIdx < 0 || trackIdx >= tracks.length) return;
-        tracks[trackIdx].doPlot();
-    };
-
-    this.toggleShading = function(trackIdx) {
-        if (trackIdx < 0 || trackIdx >= tracks.length) return;
-        tracks[trackIdx].toggleShading();
-        this.plot(trackIdx);
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+        _tracks[trackIdx].doPlot();
     };
 
     this.plotAll = function () {
-        tracks.forEach(function (track) {
+        _tracks.forEach(function (track) {
             track.doPlot();
             //if( track.trackPointer ) track.trackPointer(true);
-        } );
+        });
     };
 
-    function _clearHighlight() {
-        if (previousTrackIdx >= 0
-            && previousTrackIdx != currentTrackIdx
-            && tracks[previousTrackIdx].highlight) {
-            tracks[previousTrackIdx].highlight(-1);
+
+    /* Private Begin */
+    function _onPlotMouseDownCallback(track) {
+        previousTrackIdx = currentTrackIdx;
+        currentTrackIdx = _tracks.indexOf(track);
+        _clearPreviousHighlight();
+
+        let i;
+        let curves = _tracks[currentTrackIdx].getCurves();
+        for (i = 0; i < curves.length; i ++) {
+            if (curves[i].nearPoint(d3.event.offsetX, d3.event.offsetY))
+                break;
+        }
+        i = i == curves.length ? -1 : i;
+        _tracks[currentTrackIdx].highlight(i);
+        if (i >= 0 && d3.event.button == 2) {
+            _curveOnRightClick();
         }
     }
+
+    function _onHeaderMouseDownCallback(track) {
+        previousTrackIdx = currentTrackIdx;
+        currentTrackIdx = _tracks.indexOf(track);
+        _clearPreviousHighlight();
+        _tracks[currentTrackIdx].highlight(-1);
+    }
+
+    function _clearPreviousHighlight() {
+        if (previousTrackIdx >= 0
+            && previousTrackIdx != currentTrackIdx
+            && _tracks[previousTrackIdx].highlight) {
+            _tracks[previousTrackIdx].highlight(-1);
+        }
+    }
+
+    function _curveOnRightClick() {
+        d3.event.stopPropagation();
+        console.log('Curve Right Click');
+        wiComponentService.getComponent('ContextMenu').open(d3.event.clientX, d3.event.clientY, [{
+            name: "RemoveCurve",
+            label: "Remove Curve",
+            handler: function () {
+                self.removeCurrentCurve();
+            }
+        }]);
+    }
+    /* Private End */
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -204,30 +268,110 @@ function Controller($scope, wiComponentService) {
             wiComponentService.emit(self.name);
         }
     };
-    this.contextMenu = function(event) {
-        if(event.button != 2) return;
+
+    this.showContextMenu = function (event) {
+        if (event.button != 2) return;
         event.stopPropagation();
-        wiComponentService.getComponent('ContextMenu').open(event.clientX, event.clientY, [{
-            name: "NewDepthTrack",
-            label: "Add depth track",
-            handler: function () {
-                self.addDepthTrack();
-            }
-        }, {
-            separator: '1'
-        }, {
-            name: "NewLogTrack",
-            label: "Add new track ... ",
-            handler: function () {
-                self.addTrack();
-            }
-        },{
-            name: "hhhhh",
-            label: "HHHHHHHH",
-            handler: function() {
-                console.log(self);
-            }
-        }]);
+        wiComponentService.getComponent('ContextMenu')
+            .open(event.clientX, event.clientY, [
+                {
+                    name: "TrackProperties",
+                    label: "Track Properties",
+                    icon: 'track-properties-16x16',
+                    handler: function () {
+                        console.log('Track properties');
+                    }
+                },
+                {
+                    name: "SwitchToLogarithmic",
+                    label: "Switch To Logarithmic",
+                    icon: 'logarithmic-switch-16x16',
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "AddDepthTrack",
+                    label: "Add Depth Track",
+                    icon: 'depth-axis-add-16x16',
+                    handler: function () {
+                        self.addDepthTrack();
+                    }
+                },
+                {
+                    name: "AddLogTrack",
+                    label: "Add Log Track",
+                    icon: 'logplot-blank-16x16',
+                    handler: function () {
+                        self.addTrack();
+                    }
+                },
+                {
+                    name: "AddZonationTrack",
+                    label: "Add Zonation Track",
+                    icon: 'zonation-track-add-16x16',
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "AddMaker",
+                    label: "Add Maker",
+                    icon: 'marker-add-16x16',
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "Add Annotation",
+                    label: "Add Annotation",
+                    icon: 'annotation-16x16',
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "Add Image",
+                    label: "Add Image",
+                    icon: 'image-add-16x16',
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "Create Shading",
+                    label: "Create Shading",
+                    icon: 'shading-add-16x16',
+                    handler: function () {
+                        console.log('Create Shading');
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "DuplicateTrack",
+                    label: "Duplicate Track",
+                    icon: 'track-duplicate-16x16',
+                    handler: function () {
+                        console.log('Switch To Logarithmic');
+                    }
+                },
+                {
+                    name: "DeleteTrack",
+                    label: "Delete Track",
+                    icon: 'track-delete-16x16',
+                    handler: function () {
+                        self.removeCurrentTrack();
+                    }
+                },
+            ]);
     }
 }
 

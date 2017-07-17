@@ -75,7 +75,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
             });
 
         this.fillInfo = function () {
-            self.projects.forEach(function(item) {
+            self.projects.forEach(function (item) {
                 if (self.idProject == item.idProject) {
                     self.selectedProject = item;
                 }
@@ -85,7 +85,7 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
         this.onOkButtonClicked = function () {
             self.disabled = true;
             let data = {
-                idProject : self.idProject
+                idProject: self.idProject
             };
 
             wiApiService.post('/project/fullinfo', data)
@@ -359,8 +359,7 @@ exports.addNewDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService) {
         let self = this;
         this.onOkButtonClicked = function () {
-            let utils = wiComponentService.getComponent('UTILS');
-            let projectData = utils.openProject;
+            let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             let data = {
                 name: $scope.name,
                 idProject: projectData.idProject,
@@ -747,6 +746,7 @@ exports.lineStyleDialog = function (ModalService, callback) {
 
         };
     }
+
     ModalService.showModal({
         templateUrl: "line-style/line-style-modal.html",
         controller: ModalController,
@@ -770,20 +770,20 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
         // console.log("dataaa ",projectData);
 
         this.selectData = {
-            displayMode : ["Line", "Symbol", "Both", "None"],
-            wrapMode : ["None", "Left", "Right", "Both"],
-            symbolType : ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
-            blockPosition : ["None", "Start", "Middle", "End", "None"],
-            logLinear : ["Linear", "Logarithmic"],
-            displayAs : ["Normal", "Culmulative", "Mirror", "Pid"]
+            displayMode: ["Line", "Symbol", "Both", "None"],
+            wrapMode: ["None", "Left", "Right", "Both"],
+            symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            blockPosition: ["None", "Start", "Middle", "End", "None"],
+            logLinear: ["Linear", "Logarithmic"],
+            displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
         this.defaultElement = {
-            displayMode : "Line",
-            wrapMode : "None",
+            displayMode: "Line",
+            wrapMode: "None",
             symbolType: "Circle",
             blockPosition: "None",
-            logLinear : "Linear",
-            displayAs : "Normal"
+            logLinear: "Linear",
+            displayAs: "Normal"
         };
         this.changeOther = function () {
             switch (self.defaultElement.displayMode) {
@@ -856,6 +856,77 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
     });
 };
 exports.importLASDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiComponentService, wiApiService) {
+        let self = this;
+
+        this.lasFile = null;
+        this.selectedWell = null;
+        this.selectedDataset = null;
+        this.isDisabled = false;
+
+        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+        console.log('projectLoaded', self.projectLoaded);
+
+        this.onLoadButtonClicked = function () {
+            console.log('las file: ', self.lasFile);
+            console.log('selectedWell: ', self.selectedWell);
+            console.log('selectedDataset: ', self.selectedDataset);
+
+            if (!self.lasFile) return;
+
+            self.isDisabled = true;
+
+            let payloadParams = {
+                id_project: self.projectLoaded.idProject
+            };
+
+            if (self.selectedWell) {
+                payloadParams.id_well = self.selectedWell.idWell;
+            }
+
+            if (self.selectedDataset) {
+                payloadParams.id_dataset = self.selectedDataset.idDataset;
+            }
+
+            payloadParams.file = self.lasFile;
+
+            wiApiService.postWithFile('/file', payloadParams)
+                .then(function (well) {
+                    console.log('well response', well);
+
+                    return close(well, 500);
+                })
+                .catch(function (err) {
+                    console.log('err', err);
+                })
+                .then(function () {
+                    self.isDisabled = false;
+                });
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "import-LAS/import-LAS-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            callback(data);
+        });
+    });
+};
+
+exports.importMultiLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
 
@@ -887,10 +958,10 @@ exports.importLASDialog = function (ModalService, callback) {
             payloadParams.file= self.lasFile;
 
             wiApiService.postWithFile('/file', payloadParams)
-                .then(function (data) {
-                    console.log('well response', data);
+                .then(function (well) {
+                    console.log('well response', well);
 
-                    return close(data.well, 500);
+                    return close(well, 500);
                 })
                 .catch(function (err) {
                     console.log('err', err);
@@ -904,7 +975,7 @@ exports.importLASDialog = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: "import-LAS/import-LAS-modal.html",
+        templateUrl: "import-multi-LAS/import-multi-LAS-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
@@ -914,250 +985,6 @@ exports.importLASDialog = function (ModalService, callback) {
             $('body').removeClass('modal-open');
 
             callback(data);
-        });
-    });
-};
-
-exports.trackPropertiesDialog = function (ModalService, callback) {
-    function ModalController($scope, close) {
-        let error = null;
-        let self = this;
-        $scope.propertyTab = 'general';
-        this.showTitle = false;
-        this.showLabel = false;
-        this.setTitle = function () {
-            if (self.showTitle == true) {
-                $('#title').prop("disabled", true);
-                $('#topJust').prop("disabled", true);
-                $('#bottomJust').prop("disabled", true);
-            }else {
-                $('#title').prop("disabled", false);
-                $('#topJust').prop("disabled", false);
-                $('#bottomJust').prop("disabled", false);
-            }
-        };
-        this.setLabel = function () {
-            if (self.showLabel == true) {
-                $('#format').prop("disabled", true);
-                $('#font').prop("disabled", true);
-                $('#preview').prop("disabled", true);
-            }else {
-                $('#format').prop("disabled", false);
-                $('#font').prop("disabled", false);
-                $('#preview').prop("disabled", false);
-            }
-        };
-        this.setValueGrid = function () {
-            if (self.showValueGrid == true) {
-                $('#majorTicks').prop("disabled", true);
-                $('#minorTicks').prop("disabled", true);
-            }else{
-                $('#majorTicks').prop("disabled", false);
-                $('#minorTicks').prop("disabled", false);
-            }
-        };
-        this.header = {
-            title : "Track1",
-            topJust : ["center", "left", "right"],
-            bottomJust : ["center", "left", "right"]
-        };
-        this.topJust = "center";
-        this.bottomJust = "center";
-
-        this.curveName = ["DTCO3", "ECGR"];
-        this.logLinear = ["Logarithmic", "Linear"];
-        this.displayMode = ["Line", "Symbol", "Both", "None"];
-        this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
-
-        this.colorTrack = "#888";
-        this.getColor = function () {
-            console.log("pick: ", self.colorTrack);
-        };
-        
-        // this.curveAttr = [];
-        self.curveAttr = [
-            {
-                curveName : "ECGR",
-                alias : "ECGR",
-                leftScale : "20",
-                rightScale : "200",
-                logLinear : "Linear",
-                displayMode : "",
-                lineStyle : "",
-                displayAs : ""
-            }, 
-            {
-                curveName : "DTCO3",
-                alias : "DTCO3",
-                leftScale : "10",
-                rightScale : "100",
-                logLinear : "Logarithmic",
-                displayMode : "Line",
-                lineStyle : "",
-                displayAs : "Normal"
-            },
-            {
-                curveName : "balla",
-                alias : "balal",
-                leftScale : "10",
-                rightScale : "100",
-                logLinear : "Logarithmic",
-                displayMode : "Line",
-                lineStyle : "",
-                displayAs : "Normal"
-            },
-            {
-                curveName : "curveName",
-                alias : "blalalal",
-                leftScale : "10",
-                rightScale : "100",
-                logLinear : "Logarithmic",
-                displayMode : "Line",
-                lineStyle : "",
-                displayAs : "Normal"
-            }
-        ];
-        this.shadingAttr = [
-            {
-                left : {
-                    curveName: "DTCO3",
-                    fixedValue : "fixed1"
-                },
-                right : {
-                    curveName: "DTCO3-3",
-                    fixedValue : "fixed2"
-                },
-                shadingName : "shading1",
-                shadingStyle : "Fill Pattern",
-                fillPattern : "",
-                variableShading : ""
-            },
-            {
-                left : {
-                    curveName: "DTCO3-1",
-                    fixedValue : "fixed11"
-                },
-                right : {
-                    curveName: "DTCO3-3-1",
-                    fixedValue : "fixed21"
-                },
-                shadingName : "shading1",
-                shadingStyle : "Fill Pattern",
-                fillPattern : "",
-                variableShading : ""
-            },
-            {
-                left : {
-                    curveName: "DTCO3-2",
-                    fixedValue : "fixed12"
-                },
-                right : {
-                    curveName: "DTCO3-3-2",
-                    fixedValue : "fixed22"
-                },
-                shadingName : "shading1",
-                shadingStyle : "Fill Pattern",
-                fillPattern : "",
-                variableShading : ""
-            }
-        ];
-        this.selectedCurve = {};
-        this.selectedShading = {};
-
-        this.setClickedRowCurve = function(index){
-            self.selectedRow = index; 
-            self.selectedCurve = self.curveAttr[index];
-        };
-
-        this.removeRow = function(){      
-            console.log("###", self.selectedCurve.curveName);
-
-            let idx = -1;     
-            let newCurveAttr = eval( self.curveAttr );
-            for( let i = 0; i < newCurveAttr.length; i++ ) {
-                if( newCurveAttr[i] === self.selectedCurve ) {
-                    idx = i;
-                    break;
-                }
-            }
-            self.curveAttr.splice( idx, 1 );        
-        };
-        this.arrowUpCurve = function () {
-            let prevIdx = -1;
-            let idx = self.curveAttr.indexOf(self.selectedCurve);
-            console.log(idx);
-            if (idx-1 == prevIdx) {
-                prevIdx = idx
-            } else if (idx > 0) {
-                let moveCurve = self.curveAttr.splice(idx, 1)
-                console.log(moveCurve[0])
-                self.curveAttr.splice(idx-1, 0, moveCurve[0]);
-            };
-            self.setClickedRowCurve(idx-1);
-
-        };
-        this.arrowDownCurve = function () {      
-            let prevIdx = self.curveAttr.length;
-            let idx = self.curveAttr.indexOf(self.selectedCurve);
-            console.log(idx);
-            if (idx+1 == prevIdx) {
-                prevIdx = idx
-            } else if (idx < self.curveAttr.length-1) {
-                let moveCurve = self.curveAttr.splice(idx, 1)
-                console.log(moveCurve[0])
-                self.curveAttr.splice(idx+1, 0, moveCurve[0]);                
-            }  
-            self.setClickedRowCurve(idx+1);
-        };
-
-        //tab Shading
-
-        this.setClickedRowShading = function(index){
-            self.selectedRowShading = index; 
-            self.selectedShading = self.shadingAttr[index];
-        };
-        this.arrowUpShading = function () {
-            let prevIdx = -1;
-            let idx = self.shadingAttr.indexOf(self.selectedShading);
-            console.log(idx);
-            if (idx-1 == prevIdx) {
-                prevIdx = idx
-            } else if (idx > 0) {
-                let moveShading = self.shadingAttr.splice(idx, 1)
-                console.log(moveShading[0])
-                self.shadingAttr.splice(idx-1, 0, moveShading[0]);
-            };
-            self.setClickedRowShading(idx-1);
-
-        };
-        this.arrowDownShading = function () {      
-            let prevIdx = self.shadingAttr.length;
-            let idx = self.shadingAttr.indexOf(self.selectedShading);
-            console.log(idx);
-            if (idx+1 == prevIdx) {
-                prevIdx = idx
-            } else if (idx < self.shadingAttr.length-1) {
-                let moveShading = self.shadingAttr.splice(idx, 1)
-                console.log(moveShading[0])
-                self.shadingAttr.splice(idx+1, 0, moveShading[0]);                
-            }  
-            self.setClickedRowShading(idx+1);
-        };
-        this.onCancelButtonClicked = function (ret) {
-            close(ret);
-        };
-    }
-
-    ModalService.showModal({
-        templateUrl: "track-properties/track-properties-modal.html",
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        modal.element.modal();
-        modal.close.then(function (ret) {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            callback(ret);
         });
     });
 };

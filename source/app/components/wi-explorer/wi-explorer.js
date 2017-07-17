@@ -42,14 +42,16 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                 label: "Expand All",
                 icon: "expand-all-16x16",
                 handler: function () {
-                    treeviewCtrl.expandAll();
+                    let rootConfig = wiComponentService.getComponent(self.treeviewName).config;
+                    treeviewCtrl.expandAll(rootConfig);
                 }
             }, {
                 name: "CollapseAll",
                 label: "Collapse All",
                 icon: "collapse-all-16x16",
                 handler: function () {
-                    treeviewCtrl.collapseAll();
+                    let rootConfig = wiComponentService.getComponent(self.treeviewName).config;
+                    treeviewCtrl.collapseAll(rootConfig);
                 }
             }
         ]
