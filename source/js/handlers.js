@@ -1,517 +1,521 @@
-exports.NewProjectButtonClicked = function() {
-    console.log('NewProjectButton is clicked ', this);
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.$scope, this.ModalService );
+exports.NewProjectButtonClicked = function () {
+    console.log('NewProjectButton is clicked ');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.newProjectDialog(this.$scope, this.ModalService, function (data) {
+        let utils = self.wiComponentService.getComponent('UTILS');
+        utils.projectOpen(self.wiComponentService, data);
+    });
 }
 
-exports.OpenProjectButtonClicked = function() {
+exports.OpenProjectButtonClicked = function () {
+    let self = this;
     console.log('OpenProjectButtoon is clicked');
-    console.log('Do click');
-    var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
-    if (!myPlot) return;
-    var slidingBar = this.wiComponentService.getComponent('myLogPlotSlidingbar');
-    if (!slidingBar) return;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
+        let utils = self.wiComponentService.getComponent('UTILS');
+        utils.projectOpen(self.wiComponentService, projectData);
+    });
+};
 
-    var idx = myPlot.addDepthTrack();
-
-    idx = myPlot.addTrack();
-
-    myPlot.setData(idx, genSamples(1000));
-
-    var maxDepth = myPlot.getMaxDepth();
-
-    var low = slidingBar.slidingBarState.top * maxDepth / 100;
-    var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-    console.log(slidingBar.slidingBarState, low, high, maxDepth);
-    myPlot.setDepthRange([low, high]);
-    myPlot.plotAll();
-    // var myPlot = this.wiComponentService.getComponent('myLogPlotD3Area');
-    // if (!myPlot) return;
-    // var slidingBar = this.wiComponentService.getComponent('myLogPlotSlidingbar');
-    // if (!slidingBar) return;
-    //
-    // var idx = myPlot.addDepthTrack();
-    //
-    // idx = myPlot.addTrack();
-    //
-    // myPlot.setData(idx, genSamples(10000));
-    //
-    // var maxDepth = myPlot.getMaxDepth();
-    //
-    // var low = slidingBar.slidingBarState.top * maxDepth / 100;
-    // var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-    // console.log(slidingBar.slidingBarState, low, high, maxDepth);
-    // myPlot.setDepthRange([low, high]);
-    // myPlot.plotAll();
-}
-
-exports.CloseProjectButtonClicked = function() {
+exports.CloseProjectButtonClicked = function () {
+    let self = this;
     console.log('CloseProjectButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function(yesOrNo){
-        console.log("User choose: "+yesOrNo);
+    var utils = this.wiComponentService.getComponent('UTILS');
+    var DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
+        if (yesOrNo) {
+            utils.projectClose(self.wiComponentService);
+        }
     })
-}
+};
 
-exports.UnitSettingsButtonClicked = function() {
+exports.UnitSettingsButtonClicked = function () {
     console.log('UnitSettingsButton is clicked');
     var wiComponentService = this.wiComponentService;
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.unitSettingDialog(this.ModalService, function(ret) {
+    DialogUtils.unitSettingDialog(this.ModalService, function (ret) {
         console.log("User Choose: " + ret);
     })
-}
+};
 
-exports.SaveProjectButtonClicked = function() {
+exports.SaveProjectButtonClicked = function () {
     console.log('SaveProjectButton is clicked');
-}
+};
 
-exports.SaveProjectAsButtonClicked = function() {
+exports.SaveProjectAsButtonClicked = function () {
     console.log('SaveProjectAsButton is clicked');
-}
+};
 
-exports.ProjectButtonClicked = function() {
+exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
-}
+    var wiComponentService = this.wiComponentService;
+    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    let utils = wiComponentService.getComponent('UTILS');
+    if (!layoutManager.isComponentExist('explorer-block')) {
+        layoutManager.putLeft('explorer-block', 'Project');
+        console.log(utils.openProject);
+        if (utils.openProject.valid) {
+            console.log(utils.openProject);
+            wiComponentService.emit('project-loaded-event', utils.openProject);
+        }
+    }
+};
 
-exports.WorkflowsButtonClicked = function() {
+exports.WorkflowsButtonClicked = function () {
     console.log('WorkflowsButton is clicked');
-}
+};
 
-exports.PropertyGridButtonClicked = function() {
+exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
-}
+    var wiComponentService = this.wiComponentService;
+    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    if (!layoutManager.isComponentExist('property-block')) {
+        layoutManager.putLeft('property-block', 'Properties');
+    }
+};
 
-exports.ExitButtonClicked = function() {
+exports.ExitButtonClicked = function () {
     console.log('ExitButton is clicked');
     var wiComponentService = this.wiComponentService;
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function(ret) {
+    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (ret) {
         console.log("User choose: " + ret);
+        window.close();
     })
-}
+};
 
-exports.AddNewButtonClicked = function() {
+exports.AddNewButtonClicked = function () {
     console.log('AddNewButton is clicked');
     var wiComponentService = this.wiComponentService;
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.addNewDialog(this.ModalService, function(ret) {
+    DialogUtils.addNewDialog(this.ModalService, function (ret) {
         console.log("User Choose: " + ret);
     })
-}
+};
 
-exports.WellHeaderButtonClicked = function() {
+exports.WellHeaderButtonClicked = function () {
     console.log('WellHeaderButton is clicked');
     var wiComponentService = this.wiComponentService;
     var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.wellHeaderDialog(this.ModalService, function(ret) {
+    DialogUtils.wellHeaderDialog(this.ModalService, function (ret) {
         console.log("User choose: " + ret);
     })
-}
+};
 
-exports.DepthConversionButtonClicked = function() {
+exports.DepthConversionButtonClicked = function () {
     console.log('DepthConversionButton is clicked');
-}
+    var wiComponentService = this.wiComponentService;
+    var DialogsUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogsUtils.depthConversionDialog(this.ModalService, this.DialogUtils, function (ret) {
+        console.log("User choose: " + ret);
+    })
+};
 
-exports.CurveAliasButtonClicked = function() {
+exports.CurveAliasButtonClicked = function () {
     console.log('CurveAliasButton is clicked');
-}
+};
 
-exports.FamilyEditButtonClicked = function() {
+exports.FamilyEditButtonClicked = function () {
     console.log('FamilyEditButton is clicked');
-}
+};
 
-exports.ImportASCIIButtonClicked = function() {
+exports.ImportASCIIButtonClicked = function () {
     console.log('ImportASCIIButton is clicked');
-}
+};
 
-exports.ImportMultiASCIIButtonClicked = function() {
+exports.ImportMultiASCIIButtonClicked = function () {
     console.log('ImportMultiASCIIButton is clicked');
-}
+};
 
-exports.ImportLASButtonClicked = function() {
+exports.ImportLASButtonClicked = function () {
     console.log('ImportLASButton is clicked');
-}
+};
 
-exports.ImportMultiLASButtonClicked = function() {
+exports.ImportMultiLASButtonClicked = function () {
     console.log('ImportMultiLASButton is clicked');
-}
+};
 
-exports.Interval_CoreLoaderButtonClicked = function() {
+exports.Interval_CoreLoaderButtonClicked = function () {
     console.log('Interval/CoreLoaderButton is clicked');
-}
+};
 
-exports.Multi_wellCoreLoaderButtonClicked = function() {
+exports.Multi_wellCoreLoaderButtonClicked = function () {
     console.log('Multi-wellCoreLoaderButton is clicked');
-}
+};
 
-exports.ImportWellHeaderButtonClicked = function() {
+exports.ImportWellHeaderButtonClicked = function () {
     console.log('ImportWellHeaderButton is clicked');
-}
+};
 
-exports.ImportWellTopButtonClicked = function() {
+exports.ImportWellTopButtonClicked = function () {
     console.log('ImportWellTopButton is clicked');
-}
+};
 
-exports.ExportASCIIButtonClicked = function() {
+exports.ExportASCIIButtonClicked = function () {
     console.log('ExportASCIIButton is clicked');
-}
+};
 
-exports.ExportMultiASCIIButtonClicked = function() {
+exports.ExportMultiASCIIButtonClicked = function () {
     console.log('ExportMultiASCIIButton is clicked');
-}
+};
 
-exports.ExportLASButtonClicked = function() {
+exports.ExportLASButtonClicked = function () {
     console.log('ExportLASButton is clicked');
-}
+};
 
-exports.ExportMultiLASButtonClicked = function() {
+exports.ExportMultiLASButtonClicked = function () {
     console.log('ExportMultiLASButton is clicked');
-}
+};
 
-exports.ExportCoreDataButtonClicked = function() {
+exports.ExportCoreDataButtonClicked = function () {
     console.log('ExportCoreDataButton is clicked');
-}
+};
 
-exports.Multi_wellCoreLoaderButtonClicked = function() {
+exports.Multi_wellCoreLoaderButtonClicked = function () {
     console.log('Multi-wellCoreLoaderButton is clicked');
-}
+};
 
-exports.ExportWellHeaderButtonClicked = function() {
+exports.ExportWellHeaderButtonClicked = function () {
     console.log('ExportWellHeaderButton is clicked');
-}
+};
 
-exports.ExportWellTopButtonClicked = function() {
+exports.ExportWellTopButtonClicked = function () {
     console.log('ExportWellTopButton is clicked');
-}
+};
 
-exports.BlankLogplotButtonClicked = function() {
+exports.BlankLogplotButtonClicked = function () {
     console.log('BlankLogplotButton is clicked');
-}
+    var wiComponentService = this.wiComponentService;
+    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.blankLogplotDialog(this.ModalService, function (ret) {
+        console.log("User Choose: " + ret);
+    })
+};
 
-exports.TrippleComboButtonClicked = function() {
+exports.TrippleComboButtonClicked = function () {
     console.log('TrippleComboButton is clicked');
-}
+};
 
-exports.DensityNeutronButtonClicked = function() {
+exports.DensityNeutronButtonClicked = function () {
     console.log('DensityNeutronButton is clicked');
-}
+};
 
-exports.ResistivitySonicButtonClicked = function() {
+exports.ResistivitySonicButtonClicked = function () {
     console.log('ResistivitySonicButton is clicked');
-}
+};
 
-exports.TriTracksBlankButtonClicked = function() {
+exports.TriTracksBlankButtonClicked = function () {
     console.log('3TracksBlankButton is clicked');
-}
+};
 
-exports.InputCurveButtonClicked = function() {
+exports.InputCurveButtonClicked = function () {
     console.log('InputCurveButton is clicked');
-}
+};
 
-exports.LithoPlusSyn_CurveButtonClicked = function() {
+exports.LithoPlusSyn_CurveButtonClicked = function () {
     console.log('Litho+Syn.CurveButton is clicked');
-}
+};
 
-exports.Syn_CurveButtonClicked = function() {
+exports.Syn_CurveButtonClicked = function () {
     console.log('Syn.CurveButton is clicked');
-}
+};
 
-exports.ResultButtonClicked = function() {
+exports.ResultButtonClicked = function () {
     console.log('ResultButton is clicked');
-}
+};
 
-exports.BlankCrossPlotButtonClicked = function() {
+exports.BlankCrossPlotButtonClicked = function () {
     console.log('BlankCrossPlotButton is clicked');
-}
+};
 
-exports.SonicPHI_TOTALButtonClicked = function() {
+exports.SonicPHI_TOTALButtonClicked = function () {
     console.log('SonicPHI_TOTALButton is clicked');
-}
+};
 
-exports.NeutronDensityButtonClicked = function() {
+exports.NeutronDensityButtonClicked = function () {
     console.log('NeutronDensityButton is clicked');
-}
+};
 
-exports.NeutronGammaButtonClicked = function() {
+exports.NeutronGammaButtonClicked = function () {
     console.log('NeutronGammaButton is clicked');
-}
+};
 
-exports.SonicGammaButtonClicked = function() {
+exports.SonicGammaButtonClicked = function () {
     console.log('SonicGammaButton is clicked');
-}
+};
 
-exports.NeuTronSonicButtonClicked = function() {
+exports.NeuTronSonicButtonClicked = function () {
     console.log('NeuTronSonicButton is clicked');
-}
+};
 
-exports.DenityGammaButtonClicked = function() {
+exports.DenityGammaButtonClicked = function () {
     console.log('DenityGammaButton is clicked');
-}
+};
 
-exports.NeuTronRtButtonClicked = function() {
+exports.NeuTronRtButtonClicked = function () {
     console.log('NeuTronRtButton is clicked');
-}
+};
 
-exports.DensitySonicButtonClicked = function() {
+exports.DensitySonicButtonClicked = function () {
     console.log('DensitySonicButton is clicked');
-}
+};
 
-exports.DensityRtButtonClicked = function() {
+exports.DensityRtButtonClicked = function () {
     console.log('DensityRtButton is clicked');
-}
+};
 
-exports.SonicDensityButtonClicked = function() {
+exports.SonicDensityButtonClicked = function () {
     console.log('SonicDensityButton is clicked');
-}
+};
 
-exports.SonicRtButtonClicked = function() {
+exports.SonicRtButtonClicked = function () {
     console.log('SonicRtButton is clicked');
-}
+};
 
-exports.RtRx0ButtonClicked = function() {
+exports.RtRx0ButtonClicked = function () {
     console.log('RtRx0Button is clicked');
-}
+};
 
-exports.PickettButtonClicked = function() {
+exports.PickettButtonClicked = function () {
     console.log('PickettButton is clicked');
-}
+};
 
-exports.BlankHistogramButtonClicked = function() {
+exports.BlankHistogramButtonClicked = function () {
     console.log('BlankHistogramButton is clicked');
-}
+};
 
-exports.PHI_TOTALButtonClicked = function() {
+exports.PHI_TOTALButtonClicked = function () {
     console.log('PHI_TOTALButton is clicked');
-}
+};
 
-exports.GammaRayButtonClicked = function() {
+exports.GammaRayButtonClicked = function () {
     console.log('GammaRayButton is clicked');
-}
+};
 
-exports.NeutronButtonClicked = function() {
+exports.NeutronButtonClicked = function () {
     console.log('NeutronButton is clicked');
-}
+};
 
-exports.DensityButtonClicked = function() {
+exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
-}
+};
 
-exports.SonicButtonClicked = function() {
+exports.SonicButtonClicked = function () {
     console.log('SonicButton is clicked');
-}
+};
 
-exports.SallowResistivityButtonClicked = function() {
+exports.SallowResistivityButtonClicked = function () {
     console.log('SallowResistivityButton is clicked');
-}
+};
 
-exports.DeepResistivityButtonClicked = function() {
+exports.DeepResistivityButtonClicked = function () {
     console.log('DeepResistivityButton is clicked');
-}
+};
 
-exports.MSFLHistogramButtonClicked = function() {
+exports.MSFLHistogramButtonClicked = function () {
     console.log('MSFLHistogramButton is clicked');
-}
+};
 
-exports.AddCurveButtonClicked = function() {
+exports.AddCurveButtonClicked = function () {
     console.log('AddCurveButton is clicked');
-}
+};
 
-exports.EditTextCurveButtonClicked = function() {
+exports.EditTextCurveButtonClicked = function () {
     console.log('EditTextCurveButton is clicked');
-}
+};
 
-exports.CurveListing_EditButtonClicked = function() {
+exports.CurveListing_EditButtonClicked = function () {
     console.log('CurveListing/EditButton is clicked');
-}
+};
 
-exports.InteractiveCurveEditButtonClicked = function() {
+exports.InteractiveCurveEditButtonClicked = function () {
     console.log('InteractiveCurveEditButton is clicked');
-}
+};
 
-exports.InteractiveBaselineShiftButtonClicked = function() {
+exports.InteractiveBaselineShiftButtonClicked = function () {
     console.log('InteractiveBaselineShiftButton is clicked');
-}
+};
 
-exports.SplitCurvesButtonClicked = function() {
+exports.SplitCurvesButtonClicked = function () {
     console.log('SplitCurvesButton is clicked');
-}
+};
 
-exports.InteractiveCurveSplitButtonClicked = function() {
+exports.InteractiveCurveSplitButtonClicked = function () {
     console.log('InteractiveCurveSplitButton is clicked');
-}
+};
 
-exports.MergeCurvesButtonClicked = function() {
+exports.MergeCurvesButtonClicked = function () {
     console.log('MergeCurvesButton is clicked');
-}
+};
 
-exports.CurvesHeaderButtonClicked = function() {
+exports.CurvesHeaderButtonClicked = function () {
     console.log('CurvesHeaderButton is clicked');
-}
+};
 
-exports.FillDataGapsButtonClicked = function() {
+exports.FillDataGapsButtonClicked = function () {
     console.log('FillDataGapsButton is clicked');
-}
+};
 
-exports.CurveFilterButtonClicked = function() {
+exports.CurveFilterButtonClicked = function () {
     console.log('CurveFilterButton is clicked');
-}
+};
 
-exports.CurveConvolutionButtonClicked = function() {
+exports.CurveConvolutionButtonClicked = function () {
     console.log('CurveConvolutionButton is clicked');
-}
+};
 
-exports.CurveDeconvolutionButtonClicked = function() {
+exports.CurveDeconvolutionButtonClicked = function () {
     console.log('CurveDeconvolutionButton is clicked');
-}
+};
 
-exports.CurveDerivativeButtonClicked = function() {
+exports.CurveDerivativeButtonClicked = function () {
     console.log('CurveDerivativeButton is clicked');
-}
+};
 
-exports.CurveRescaleButtonClicked = function() {
+exports.CurveRescaleButtonClicked = function () {
     console.log('CurveRescaleButton is clicked');
-}
+};
 
-exports.CurveComrarisonButtonClicked = function() {
+exports.CurveComrarisonButtonClicked = function () {
     console.log('CurveComrarisonButton is clicked');
-}
+};
 
-exports.CurveAverageButtonClicked = function() {
+exports.CurveAverageButtonClicked = function () {
     console.log('CurveAverageButton is clicked');
-}
+};
 
-exports.FormationResistivityButtonClicked = function() {
+exports.FormationResistivityButtonClicked = function () {
     console.log('FormationResistivityButton is clicked');
-}
+};
 
-exports.Badhole_Coal_SaltButtonClicked = function() {
+exports.Badhole_Coal_SaltButtonClicked = function () {
     console.log('Badhole/Coal/SaltButton is clicked');
-}
+};
 
-exports.UserFormulaButtonClicked = function() {
+exports.UserFormulaButtonClicked = function () {
     console.log('UserFormulaButton is clicked');
-}
+};
 
-exports.UserProgramButtonClicked = function() {
+exports.UserProgramButtonClicked = function () {
     console.log('UserProgramButton is clicked');
-}
+};
 
-exports.PythonProgramButtonClicked = function() {
+exports.PythonProgramButtonClicked = function () {
     console.log('PythonProgramButton is clicked');
-}
+};
 
-exports.TVDConversionButtonClicked = function() {
+exports.TVDConversionButtonClicked = function () {
     console.log('TVDConversionButton is clicked');
-}
+};
 
-exports.PCAAnalysisButtonClicked = function() {
+exports.PCAAnalysisButtonClicked = function () {
     console.log('PCAAnalysisButton is clicked');
-}
+};
 
-exports.Multi_LinearRegressionButtonClicked = function() {
+exports.Multi_LinearRegressionButtonClicked = function () {
     console.log('Multi-LinearRegressionButton is clicked');
-}
+};
 
-exports.NeuralNetworkButtonClicked = function() {
+exports.NeuralNetworkButtonClicked = function () {
     console.log('NeuralNetworkButton is clicked');
-}
+};
 
-exports.EditZonesButtonClicked = function() {
+exports.EditZonesButtonClicked = function () {
     console.log('EditZonesButton is clicked');
-}
+};
 
-exports.InputCurvesButtonClicked = function() {
+exports.InputCurvesButtonClicked = function () {
     console.log('InputCurvesButton is clicked');
-}
+};
 
-exports.InputFuidButtonClicked = function() {
+exports.InputFuidButtonClicked = function () {
     console.log('InputFuidButton is clicked');
-}
+};
 
-exports.BuildMineralParametersButtonClicked = function() {
+exports.BuildMineralParametersButtonClicked = function () {
     console.log('BuildMineralParametersButton is clicked');
-}
+};
 
-exports.InputMineralZonesButtonClicked = function() {
+exports.InputMineralZonesButtonClicked = function () {
     console.log('InputMineralZonesButton is clicked');
-}
+};
 
-exports.Multi_MineralSolverButtonClicked = function() {
+exports.Multi_MineralSolverButtonClicked = function () {
     console.log('Multi-MineralSolverButton is clicked');
-}
+};
 
-exports.ClayMineralsVolumeButtonClicked = function() {
+exports.ClayMineralsVolumeButtonClicked = function () {
     console.log('ClayMineralsVolumeButton is clicked');
-}
+};
 
-exports.Fracture_VugPorosityButtonClicked = function() {
+exports.Fracture_VugPorosityButtonClicked = function () {
     console.log('Fracture-VugPorosityButton is clicked');
-}
+};
 
-exports.OpenPorosityButtonClicked = function() {
+exports.OpenPorosityButtonClicked = function () {
     console.log('OpenPorosityButton is clicked');
-}
+};
 
-exports.SecondaryPorosityButtonClicked = function() {
+exports.SecondaryPorosityButtonClicked = function () {
     console.log('SecondaryPorosityButton is clicked');
-}
+};
 
-exports.FracturePorosityButtonClicked = function() {
+exports.FracturePorosityButtonClicked = function () {
     console.log('FracturePorosityButton is clicked');
-}
+};
 
-exports.FilteringFractureButtonClicked = function() {
+exports.FilteringFractureButtonClicked = function () {
     console.log('FilteringFractureButton is clicked');
-}
+};
 
-exports.MicroAndMacroPorosityButtonClicked = function() {
+exports.MicroAndMacroPorosityButtonClicked = function () {
     console.log('Micro&MacroPorosityButton is clicked');
-}
+};
 
-exports.WaterSaturationButtonClicked = function() {
+exports.WaterSaturationButtonClicked = function () {
     console.log('WaterSaturationButton is clicked');
-}
+};
 
-exports.PermeabilityButtonClicked = function() {
+exports.PermeabilityButtonClicked = function () {
     console.log('PermeabilityButton is clicked');
-}
+};
 
-exports.CutoffandSummationButtonClicked = function() {
+exports.CutoffandSummationButtonClicked = function () {
     console.log('CutoffandSummationButton is clicked');
-}
+};
 
-exports.FilteringButtonClicked = function() {
+exports.FilteringButtonClicked = function () {
     console.log('FilteringButton is clicked');
-}
+};
 
-exports.BasicAnalysisButtonClicked = function() {
+exports.BasicAnalysisButtonClicked = function () {
     console.log('BasicAnalysisButton is clicked');
-}
+};
 
-exports.ClayVolumeButtonClicked = function() {
+exports.ClayVolumeButtonClicked = function () {
     console.log('ClayVolumeButton is clicked');
-}
+};
 
-exports.PorosityAndWaterSaturationButtonClicked = function() {
+exports.PorosityAndWaterSaturationButtonClicked = function () {
     console.log('Porosity&WaterSaturationButton is clicked');
-}
+};
 
-exports.CutoffandSummationButtonClicked = function() {
+exports.CutoffandSummationButtonClicked = function () {
     console.log('CutoffandSummationButton is clicked');
-}
+};
 
-exports.HelpButtonClicked = function() {
+exports.HelpButtonClicked = function () {
     console.log('HelpButton is clicked');
-}
+};
 
-exports.AboutButtonClicked = function() {
+exports.AboutButtonClicked = function () {
     console.log('AboutButton is clicked');
-}
+};
 
-exports.UnlockButtonClicked = function() {
+exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
-}
+};
 

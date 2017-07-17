@@ -2,7 +2,7 @@
     <button ng-if='wiButton.separator != "1"' ng-click="wiButton.onClick()"
             class="button-{{wiButton.type || wiButton.config.type || wiButton.default.type}}"
             data-toggle="tooltip" data-placement="bottom" title="{{wiButton.tooltip || wiButton.config.tooltip || wiButton.default.tooltip}}"
-            ng-disabled="wiButton.disabled"
+            ng-disabled='wiButton.isDisabled()'
             wi-element-ready="wiButton.initTooltip()">
         <img class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}" alt="icon wi-button">
         <p class="{{wiButton.layout || wiButton.config.layout || wiButton.default.layout}}"

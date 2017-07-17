@@ -10,57 +10,68 @@
 					<div class="row">
 						<div class="col-sm-7">
 							<div class="form-group">
-				                <label class="control-label col-sm-5" for="well">Select well</label>
-				                <div class="col-sm-7">
+				                <label class="control-label col-sm-4" for="well">Select well</label>
+				                <div class="col-sm-8">
 			                  		<select ng-model="wiModal.selectWell" name="selectWell" ng-options="item for item in wiModal.selectWellList track by item" class="form-control"></select>
 				                </div>
 				            </div>
 		              	</div>
+						<div class="col-sm-offset-5"></div>
 					</div>
 					<div class="row">
-						
+						<div class="col-sm-7">
+							<div class="col-sm-4">
+							</div>
+							<div class="col-sm-8">
+								<p><span class="depth-blank-16x16"></span>&nbsp;Originals Depths</p>
+							</div>
+						</div>
+						<div class="col-sm-4">
+							<p><span class="depth-blank-16x16"></span>&nbsp;New Depth</p>
+						</div>
+						<div class="col-sm-offsert-1"></div>
 					</div>
 					<div class="row">
 						<div class="col-sm-7">
 							<div class="form-group">
-	                          <label class="control-label col-sm-5" for="step">Step</label>
-	                          <div class="col-sm-7">
-	                            <input type="number" class="form-control" value="" id="originalStep" name="step" ng-model="wiModal.originalStep">
+	                          <label class="control-label col-sm-4" for="step">Step</label>
+	                          <div class="col-sm-8">
+	                            <input type="number" class="form-control" value="" id="originalStep" name="step" ng-model="wiModal.originalsDepth.step">
 	                          </div>
 	                        </div>
 							<div class="form-group">
-	                          <label class="control-label col-sm-5" for="topDepth">Top Depth</label>
-	                          <div class="col-sm-7">
-	                            <input type="number" class="form-control" value="" id="originalTopDepth" name="topDepth" ng-model="wiModal.originalTopDepth">
+	                          <label class="control-label col-sm-4" for="topDepth">Top Depth</label>
+	                          <div class="col-sm-8">
+	                            <input type="number" class="form-control" value="" id="originalTopDepth" name="topDepth" ng-model="wiModal.originalsDepth.topDepth">
 	                          </div>
 	                        </div>
 							<div class="form-group">
-	                          <label class="control-label col-sm-5" for="bottomDepth">Bottom Depth</label>
-	                          <div class="col-sm-7">
-	                            <input type="number" class="form-control" value="" id="originalBottomDepth" name="bottomDepth" ng-model="originalBottomDepth">
+	                          <label class="control-label col-sm-4 small-text" for="bottomDepth">Bottom Depth</label>
+	                          <div class="col-sm-8">
+	                            <input type="number" class="form-control" value="" id="originalBottomDepth" name="bottomDepth" ng-model="wiModal.originalsDepth.bottomDepth">
 	                          </div>
 	                        </div>
 						</div>
 						<div class="col-sm-4">
 							<div class="form-group">
-								<input type="number" class="form-control" value="" id="newStep" name="step" ng-model="newStep">
+								<input type="number" class="form-control" value="" id="newStep" name="step" ng-model="step">
 							</div>
 							<div class="form-group">
-								<input type="number" class="form-control" value="" id="newTopDepth" name="topDepth" ng-model="newTopDepth">
+								<input type="number" class="form-control" value="" id="newTopDepth" name="topDepth" ng-model="topDepth">
 							</div>
 							<div class="form-group">
-								<input type="number" class="form-control" value="" id="newBottomDepth" name="bottomDepth" ng-model="newBottomDepth">
+								<input type="number" class="form-control" value="" id="newBottomDepth" name="bottomDepth" ng-model="bottomDepth">
 							</div>
 							<div class="areaWrap">
 								<label>
-									<input type="radio" name="fixed" value="topFixed" ng-model="wiModal.fixed" ng-checked="true">&nbsp;Fixed Top
+									<input type="radio" name="fixed" value="topFixed" ng-model="fixed" ng-checked="true">&nbsp;Fixed Top
 								</label><br>
 								<label>
-									<input type="radio" name="fixed" value="bottomFixed" ng-model="wiModal.fixed">&nbsp;Fixed Bottom
+									<input type="radio" name="fixed" value="bottomFixed" ng-model="fixed">&nbsp;Fixed Bottom
 								</label>
-								{{wiModal.fixed}}
 							</div>
 						</div>
+						<div class="col-sm-offset-1"></div>
 					</div>
 				</form>
 			</div>

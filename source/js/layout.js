@@ -4,6 +4,7 @@ let scopeObj;
 let layoutConfig = {
     settings: {
         hasHeaders: true,
+        showMaximiseIcon: false,
         showCloseIcon: false,
         showPopoutIcon: false
     },
@@ -63,6 +64,7 @@ function putLeft(templateId, title) {
     //layoutManager.root.contentItems[0].contentItems[0].addChild({
     layoutManager.root.getItemsById('left')[0].addChild({
         type: 'component',
+        id: templateId,
         componentName: 'wi-block',
         componentState: {
             templateId: templateId
@@ -74,6 +76,7 @@ function putRight(templateId, title) {
     //layoutManager.root.contentItems[0].contentItems[1].addChild({
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
+        id: templateId,
         componentName: 'wi-block',
         componentState: {
             templateId: templateId
@@ -101,9 +104,26 @@ function putWiLogPlotLeft(logPlotName, title) {
         title: title
     });
 }
+function removeAllRightTabs() {
+    console.log('removeAllRightTabs');
+    // layoutManager.root.getItemsById('right')[0].removeChild({
+    //     type: 'component',
+    //     componentName: 'html-block'
+    //     // componentState: {
+    //     //     html: '<wi-logplot name="' + logPlotName + '"></wi-logplot>'
+    //     // },
+    //     // title: title
+    // });
+}
+
+function isComponentExist(templateId) {
+    return (layoutManager.root.getItemsById(templateId).length ? true : false);
+}
 
 exports.createLayout = createLayout;
 exports.putLeft = putLeft;
 exports.putRight = putRight;
 exports.putWiLogPlotRight = putWiLogPlotRight;
 exports.putWiLogPlotLeft = putWiLogPlotLeft;
+exports.removeAllRightTabs = removeAllRightTabs;
+exports.isComponentExist = isComponentExist;

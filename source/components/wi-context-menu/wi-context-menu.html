@@ -1,13 +1,16 @@
-<div ng-if="wiContextMenu.shown" ng-click="wiContextMenu.dismiss();" class="context-menu-backdrop">
-    <div class="context-menu-wrapper" style="top:{{wiContextMenu.top}}px; left:{{wiContextMenu.left}}px">
-        <wi-button ng-repeat='button in wiContextMenu.buttons' 
-            name='{{wiContextMenu.name + "." + button.name}}'
-            icon='{{button.icon}}'
-            layout='icon-left'
-            label='{{button.label}}'
-            type='small'
-            handler="button.handler"
-            separator='{{button.separator}}'
-            ></wi-button>
+<div ng-show="wiContextMenu.shown" ng-click="wiContextMenu.dismissAll()" wi-right-click="wiContextMenu.dismissAll()" class="context-menu-backdrop">
+    <div ng-repeat="contextMenu in wiContextMenu.contextMenus"
+         class="context-menu-wrapper"
+         style="top:{{contextMenu.top}}px; left:{{contextMenu.left}}px;">
+        <wi-button ng-repeat='button in contextMenu.buttons track by $index'
+                   name='{{contextMenu.name + "." + button.name}}'
+                   icon='{{button.icon}}'
+                   layout='icon-left'
+                   label='{{button.label}}'
+                   type='small'
+                   handler="button.handler"
+                   separator='{{button.separator}}'
+                   ng-mouseover='wiContextMenu.showChildContextMenu(button, $event, $index)'>
+        </wi-button>
     </div>
 </div>

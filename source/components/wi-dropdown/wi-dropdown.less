@@ -25,6 +25,14 @@ wi-dropdown {
       filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d6e2fd', endColorstr='#e9ecf7', GradientType=0 ); 
       box-shadow: inset 0px 1px 5px 0px rgba(0,0,0,0.15);
     }
+
+    &:disabled {
+        opacity: 0.5;
+        background: none;
+        border: none;
+        cursor: not-allowed;
+        box-shadow:none;
+    }
   }
 
   wi-button {
@@ -44,4 +52,13 @@ wi-dropdown {
     margin: auto;
     display: block;
   }
+
+  .dropdown-normal {
+    padding: 5px;
+  }
+
+  .dropdown-small {
+    padding: 5px;
+  }
 }
+

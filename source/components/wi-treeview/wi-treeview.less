@@ -1,20 +1,20 @@
 wi-treeview {
     display: block;
     background: #fff;
-    border-bottom: 1px solid #cacbd3;
+    //border-bottom: 1px solid #cacbd3;
     font-size: 13px;
     .wi-treeview-container {
         display: block;
         cursor: pointer;
-        padding: 5px 0 5px 10px;
+        padding: 3px 0 3px 10px;
         wi-treeview{
             border: none;
-            border-left: 1px dotted #cacbd3;
+            //border-left: 1px dotted #cacbd3;
         }
         .wi-parent-node {
             position: relative;
             
-            .wi-parent-description {
+            .wi-parent-unit {
                 position: absolute;
                 right: 0;
                 top: 0;
@@ -22,15 +22,39 @@ wi-treeview {
                 width: 100px; // use fixed width here!
                 overflow:hidden;
                 padding-right: 0.5em;
-                border-left: 1px dotted #ddd;
+                line-height: 22px;
+                //border-left: 1px dotted #ddd;
             }
             .icon-expanded {
-                min-width: 8px;
+                min-width: 16px;
+                height: 16px;
+            }
+
+            .wi-parent-content {
+                display: flex;
+
+                &>i {
+                    color: #333;
+                    margin-top: 4px;
+                }
+
+                &>div {
+                    flex: 1;
+                    span{
+                        vertical-align: -webkit-baseline-middle;
+                    }
+                }
             }
         }
 
         .item-active {
-            color: blue;
+            color: #000;
+            font-weight: bold;
+            .wi-parent-content{
+                & > div{
+                    background: #f0f0f0;
+                }
+            }
         }
     }
 

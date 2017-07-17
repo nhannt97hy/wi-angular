@@ -28,15 +28,27 @@ let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
 
-let graph = require('./graph');
+let graph = require('./visualize/visualize');
 let dragMan = {
     dragging: false,
     draggedObj: null,
     cancelingId: null
 };
 
-let wiElementReadyDirective = require('./wi-element-ready-directive');
+let wiElementReady = require('./wi-element-ready');
+let wiRightClick = require('./wi-right-click');
 
+// models
+let wiDepth = require('./wi-depth.model');
+let wiCurve = require('./wi-curve.model');
+let wiDataset = require('./wi-dataset.model');
+let wiProperty = require('./wi-property.model');
+let wiListview = require('./wi-listview.model');
+let wiTreeConfig = require('./wi-tree-config.model');
+let wiTreeItem = require('./wi-tree-item.model');
+let wiWell = require('./wi-well.model');
+
+let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 
 let app = angular.module('wiapp',
@@ -55,75 +67,104 @@ let app = angular.module('wiapp',
         wiExplorer.name,
         wiProperties.name,
 
-        wiElementReadyDirective.name,
+        wiElementReady.name,
+        wiRightClick.name,
 
+        // models
+        wiDepth.name,
+        wiCurve.name,
+        wiDataset.name,
+        wiProperty.name,
+        wiListview.name,
+        wiTreeConfig.name,
+        wiTreeItem.name,
+        wiWell.name,
+
+        wiApiService.name,
         wiComponentService.name,
         'angularModalService'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS
-    wiComponentService.putComponent('UTILS', utils);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
-    wiComponentService.putComponent('LOGPLOT_HANDLERS', logplotHandlers);
+    wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
 
 
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
     utils.bindFunctions(globalHandlers, handlers, {
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
-        });
-//    utils.bindFunctions(globalHandlers, logplotHandlers, $scope, wiComponentService, ModalService);
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService,
+        $timeout: $timeout
+    });
+    utils.bindFunctions(globalHandlers, logplotHandlers, {
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService,
+        $timeout: $timeout
+    });
     utils.bindFunctions(globalHandlers, explorerHandlers, {
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
-        });
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService,
+        $timeout: $timeout
+    });
     utils.bindFunctions(treeHandlers, treeviewHandlers, {
-            $scope: $scope,
-            wiComponentService: wiComponentService,
-            ModalService: ModalService
-        });
-    wiComponentService.putComponent('GLOBAL_HANDLERS', globalHandlers);
-    wiComponentService.putComponent('TREE_FUNCTIONS', treeHandlers);
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        ModalService: ModalService,
+        $timeout: $timeout
+    });
+    wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
+    wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
 
     // Hook globalHandler into $scope
-    $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
+    $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
 
     // config explorer block - treeview
-    $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
+    // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
+    $scope.myTreeviewConfig = {};
     //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block
-    $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    $scope.myPropertiesConfig = {};
 
     /* ========== IMPORTANT! ================== */
-    wiComponentService.putComponent('GRAPH', graph);
-    wiComponentService.putComponent('DRAG_MAN', dragMan);
+    wiComponentService.putComponent(wiComponentService.GRAPH, graph);
+    wiComponentService.putComponent(wiComponentService.DRAG_MAN, dragMan);
     /* ======================================== */
-    wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
+    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    wiComponentService.putComponent(wiComponentService.LAYOUT_MANAGER, layoutManager);
 
     layoutManager.createLayout('myLayout', $scope, $compile);
-    layoutManager.putLeft('explorer-block', 'Explorer');
+    layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
     layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
     // Install 
-    wiComponentService.on('add-logplot-event', function (title) {
+    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
-    $(document).ready(function() {
+
+    wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
+        console.log('project-unloaded-event');
+        // layoutManager.removeAllRightTabs();
+    });
+
+    $(document).ready(function () {
         $('.wi-parent-node').draggable({
-            start: function(event, ui) {
+            start: function (event, ui) {
                 console.log('start', ui.helper.attr('data-curve'));
                 dragMan.dragging = true;
                 dragMan.draggedObj = ui.helper.attr('data-curve');
             },
-            stop: function(event, ui) {
-                dragMan.cancelingId = setTimeout(function() {
+            stop: function (event, ui) {
+                dragMan.cancelingId = setTimeout(function () {
                     console.log('stop');
                     dragMan.dragging = false;
                     dragMan.draggedObj = null;

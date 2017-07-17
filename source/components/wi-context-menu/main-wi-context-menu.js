@@ -1,9 +1,11 @@
 let wiButton = require('./wi-button.js');
 let wiContextMenu = require('./wi-context-menu.js');
 
+let wiRightClick = require('./wi-right-click');
+
 let wiComponentService = require('./wi-component-service');
 
-let app = angular.module('helloapp', [wiContextMenu.name, wiButton.name, wiComponentService.name]);
+let app = angular.module('helloapp', [wiContextMenu.name, wiButton.name, wiRightClick.name, wiComponentService.name]);
 app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.buttonClick = function(event) {
         var contextMenu = wiComponentService.getComponent('ContextMenu1');

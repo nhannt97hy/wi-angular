@@ -1,36 +1,38 @@
-/**
- * Created by cuong on 6/15/2017.
- */
-exports.newProjectDialog = function ($scope, ModalService) {
-    var self = this;
-    console.log("new project dialog");
-    function ModalController($scope, close) {
-        this.close = function (ret) {
-            close(ret, 500); // close, but give 500ms for bootstrap to animate
+exports.newProjectDialog = function ($mainScope, ModalService, callback) {
+    function ModalController($scope, close, wiApiService) {
+        let self = this;
+        this.disabled = false;
+        this.error = null;
+
+        this.onOkButtonClicked = function () {
+            self.disabled = true;
+            let data = {
+                name: $scope.name,
+                company: $scope.company,
+                department: $scope.department,
+                description: $scope.description
+            };
+            console.log("This data: ", data);
+
+
+            wiApiService.post('/project/new', data)
+                .then(function (response) {
+                    console.log('response', response);
+
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
+                });
         };
 
-        this.onOK = function () {
-            // if (typeof $scope.name == 'undefined') {
-            //     var err = 'NewProject: Project Name is required!';
-            //     return {error: err};
-            // } else if (typeof $scope.location == 'undefined') {
-            //     var err = 'NewProject: Location is required';
-            //     return {error: err};
-            // } else {
-                // $scope.newProjectInfo{
-                //     name: $scope.projectName,
-                //     company: $scope.company,
-                //     department: $scope.department,
-                //     description: $scope.description
-                // }
-            // console.log($scope.newProjectInfo);
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            // close(null, 500);
         }
-        // $http({
-        //     method : 'GET',
-        //     url : '54.255.212.141/'
-        // }).then(function newProject(req, res) {
-        //     $scope.newProjectInfo = req.data.projectInfo;
-        // });
     }
 
     ModalService.showModal({
@@ -39,50 +41,108 @@ exports.newProjectDialog = function ($scope, ModalService) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+
         modal.element.draggable();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            console.log("Modal finally close: ", ret);
+
+            if (data) {
+                callback(data);
+            }
         });
     });
 };
-exports.openProjectDialog = function($scope, ModalService, callback) {
-    function ModalController($scope, close) {
-        console.log("modal controller created");
-        this.close = function(retValue) {
-            console.log("returnValue:", retValue);
-            close(retValue);
+
+exports.openProjectDialog = function ($mainScope, ModalService, callback) {
+    function ModalController($scope, close, wiApiService) {
+        let self = this;
+        this.error = null;
+        this.projects = [];
+        this.idProject = null;
+        this.disabled = false;
+        this.selectedProject = {};
+
+        wiApiService.post('/project/list', null)
+            .then(function (projects) {
+                console.log('response', projects);
+
+                self.projects = projects;
+            })
+            .catch(function (err) {
+                return self.error = err;
+            })
+            .then(function () {
+                $scope.$apply();
+            });
+
+        this.fillInfo = function () {
+            self.projects.forEach(function(item) {
+                if (self.idProject == item.idProject) {
+                    self.selectedProject = item;
+                }
+            });
+        };
+
+        this.onOkButtonClicked = function () {
+            self.disabled = true;
+            let data = {
+                idProject : self.idProject
+            };
+
+            wiApiService.post('/project/fullinfo', data)
+                .then(function (response) {
+
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                })
+                .then(function () {
+                    self.disabled = false;
+                });
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
         }
     }
+
     ModalService.showModal({
         templateUrl: 'open-project/open-project-modal.html',
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            if (data) {
+                callback(data);
+            }
         })
     });
-}
-exports.confirmDialog = function(ModalService, titleMessage, confirmMessage, callback) {
+};
+
+exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, callback) {
     function ModalController($scope, close) {
         this.title = titleMessage;
         this.confirmMsg = confirmMessage;
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
         templateUrl: "confirm/confirm-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -90,172 +150,172 @@ exports.confirmDialog = function(ModalService, titleMessage, confirmMessage, cal
     });
 }
 
-exports.unitSettingDialog = function(ModalService, callback) {
+exports.unitSettingDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         this.defaultData = {
-            Default : {
+            Default: {
                 unitSystem: "Default",
-                caliper : "in", 
-                neutron : "v/v",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "psi",
-                bitSize : "in",
-                density : "g/cm3",
-                concentration : "v/v",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+                caliper: "in",
+                neutron: "v/v",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "psi",
+                bitSize: "in",
+                density: "g/cm3",
+                concentration: "v/v",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            Canadian : {
-                unitSystem : "Canadian",
-                caliper : "cm", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/m",
-                pressure : "psi",
-                bitSize : "cm",
-                density : "kg/m3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+            Canadian: {
+                unitSystem: "Canadian",
+                caliper: "cm",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/m",
+                pressure: "psi",
+                bitSize: "cm",
+                density: "kg/m3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            English : {
-                unitSystem : "English",
-                caliper : "in", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "psi",
-                bitSize : "in",
-                density : "g/cm3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+            English: {
+                unitSystem: "English",
+                caliper: "in",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "psi",
+                bitSize: "in",
+                density: "g/cm3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            Metric : {
-                unitSystem : "Metric",
-                caliper : "cm", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "mBar",
-                bitSize : "cm",
-                density : "g/cm3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"    
+            Metric: {
+                unitSystem: "Metric",
+                caliper: "cm",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "mBar",
+                bitSize: "cm",
+                density: "g/cm3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             },
-            Russian : {
-                unitSystem : "Russian",
-                caliper : "cm", 
-                neutron : "%",
-                gammaRay : "api",
-                acoustic : "us/ft",
-                pressure : "mBar",
-                bitSize : "cm",
-                density : "g/cm3",
-                concentration : "ppm",
-                permeability : "mD",
-                porosity : "v/v",
-                angle : "deg",
-                resistivity : "ohm.m",
-                saturation : "v/v",
-                temperature : "degC",
-                volume : "v/v",
-                sp : "mv",
-                length : "m",
-                time : "s",
-                area : "m2",
-                flow : "t",
-                speed : "m/s",
-                force : "N"                 
+            Russian: {
+                unitSystem: "Russian",
+                caliper: "cm",
+                neutron: "%",
+                gammaRay: "api",
+                acoustic: "us/ft",
+                pressure: "mBar",
+                bitSize: "cm",
+                density: "g/cm3",
+                concentration: "ppm",
+                permeability: "mD",
+                porosity: "v/v",
+                angle: "deg",
+                resistivity: "ohm.m",
+                saturation: "v/v",
+                temperature: "degC",
+                volume: "v/v",
+                sp: "mv",
+                length: "m",
+                time: "s",
+                area: "m2",
+                flow: "t",
+                speed: "m/s",
+                force: "N"
             }
         };
         this.allData = {
-            unitSystem : ["Default", "Canadian", "English", "Metric", "Russian"],
-            caliper : ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
-            neutron : ["v/v", "Trac", "%", "pu", "imp/min"],
-            gammaRay : ["api", "GAPI", "uR/h", "GAMA"], 
-            acoustic : ["us/ft", "us/m"],
-            pressure : ["psi", "Pa", "kPa", "MPa", "mBar", "Bar", "kg/m2", "atm", "torr"],
-            bitSize : ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
-            density : ["g/cm3", "kg/m3"],
-            concentration : ["v/v", "%", "ppm", "kpp", "m", "1/L", "mS/m", "1/kg", "dB/m", "mV", "galUS/min", "mD/cP", "b/elec", "b/cm3", "m3/d", "MV"],
-            permeability : ["mD", "D"],
-            porosity : ["v/v", "m3/m3", "ft3/ft3", "%", "imp/min", "ratio"],
-            angle : ["deg", "dega", "grad", "rad"],
-            resistivity : ["ohm.m", "ratio"],
-            saturation : ["v/v", "m3/m3", "ft3/ft3",  "%", "ratio"],
-            temperature : ["degC", "degF"],
-            volume : ["v/v", "cm3", "L.m"],
-            sp : ["mv"],
-            length : ["m"],
-            time : ["s"],
-            area : ["m2"],
-            flow : ["t"],
-            speed : ["m/s", "m2", "ft/h", "ratio", "ft/s", "m/min", "rpm", "mn/m"],
-            force : ["N"]
+            unitSystem: ["Default", "Canadian", "English", "Metric", "Russian"],
+            caliper: ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
+            neutron: ["v/v", "Trac", "%", "pu", "imp/min"],
+            gammaRay: ["api", "GAPI", "uR/h", "GAMA"],
+            acoustic: ["us/ft", "us/m"],
+            pressure: ["psi", "Pa", "kPa", "MPa", "mBar", "Bar", "kg/m2", "atm", "torr"],
+            bitSize: ["in", "m", "cm", "Ft", "1.Ft", "mm", "um"],
+            density: ["g/cm3", "kg/m3"],
+            concentration: ["v/v", "%", "ppm", "kpp", "m", "1/L", "mS/m", "1/kg", "dB/m", "mV", "galUS/min", "mD/cP", "b/elec", "b/cm3", "m3/d", "MV"],
+            permeability: ["mD", "D"],
+            porosity: ["v/v", "m3/m3", "ft3/ft3", "%", "imp/min", "ratio"],
+            angle: ["deg", "dega", "grad", "rad"],
+            resistivity: ["ohm.m", "ratio"],
+            saturation: ["v/v", "m3/m3", "ft3/ft3", "%", "ratio"],
+            temperature: ["degC", "degF"],
+            volume: ["v/v", "cm3", "L.m"],
+            sp: ["mv"],
+            length: ["m"],
+            time: ["s"],
+            area: ["m2"],
+            flow: ["t"],
+            speed: ["m/s", "m2", "ft/h", "ratio", "ft/s", "m/min", "rpm", "mn/m"],
+            force: ["N"]
         };
         function copyObj(sourceObj, destObj) {
-            for( var attr in sourceObj ) {
+            for (var attr in sourceObj) {
                 destObj[attr] = sourceObj[attr];
             }
         };
         this.selectedData = {};
         var self = this;
         copyObj(self.defaultData.Default, self.selectedData);
-        this.setDefault = function(){
+        this.setDefault = function () {
             copyObj(self.defaultData.Default, self.selectedData);
         };
-        this.changeDefault = function(){
+        this.changeDefault = function () {
             switch (self.selectedData.unitSystem) {
                 case "Default":
                     copyObj(self.defaultData.Default, self.selectedData);
@@ -278,18 +338,20 @@ exports.unitSettingDialog = function(ModalService, callback) {
             }
         };
         console.log(self.selectedData.unitSystem)
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
-            
-        }                    
+
+        }
     }
+
     ModalService.showModal({
         templateUrl: "unit-setting/unit-setting-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -297,21 +359,45 @@ exports.unitSettingDialog = function(ModalService, callback) {
     });
 
 }
+// add new well
+exports.addNewDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService, wiComponentService) {
+        let self = this;
+        this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+            let projectData = utils.openProject;
+            let data = {
+                name: $scope.name,
+                idProject: projectData.idProject,
+                topDepth: $scope.topDepth,
+                bottomDepth: $scope.bottomDepth,
+                step: $scope.step
+            };
+            console.log("data: ", data);
+            wiApiService.post('/project/well/new', data)
+                .then(function (response) {
+                    console.log('response', response);
 
-exports.addNewDialog = function(ModalService, callbak) {
-    function ModalController($scope, close) {
+                    return close(response, 500);
+                })
+                .catch(function (err) {
+                    return self.error = err;
+                });
 
-        this.close = function(ret) {
-            close(ret);
+        }
+        this.onCancelButtonClicked = function () {
+            console.log("oncCancelButtonClicked");
         }
     }
+
     ModalService.showModal({
         templateUrl: "add-new/add-new-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -319,46 +405,68 @@ exports.addNewDialog = function(ModalService, callbak) {
     });
 }
 
-exports.wellHeaderDialog = function(ModalService, callback) {
+exports.wellHeaderDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         this.wellHeader = ["well1", "well2", "well3"];
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
         templateUrl: "well-header/well-header-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
     });
 }
-exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
+exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
     console.log(DialogUtils);
     function ModalController($scope, close) {
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
-        }
-        this.runClick = function(){
+        };
+
+
+        this.selectWell = "well1";
+        this.selectWellList = ["well1", "well2", "well3"];
+        this.originalsDepth = {
+            step: 5,
+            topDepth: 200,
+            bottomDepth: 500
+        };
+
+        this.runClick = function () {
             console.log("Click run");
-            DialogUtils.confirmDialog(ModalService, "Run ", "Project", function(ret) {
+            DialogUtils.confirmDialog(ModalService, "Depth Conversion ", "Change wells depth and step?", function (ret) {
                 console.log(ret);
+                $scope.newDepth = {
+                    step: $scope.step,
+                    topDepth: $scope.topDepth,
+                    bottomDepth: $scope.bottomDepth,
+                    fixed: $scope.fixed
+                };
+                console.log($scope.newDepth);
             });
+
         }
     }
+
     ModalService.showModal({
         templateUrl: "depth-conversion/depth-conversion-modal.html",
-        controller : ModalController,
-        controllerAs : "wiModal"
-    }).then(function(modal) {
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -366,28 +474,29 @@ exports.depthConversionDialog = function(ModalService, DialogUtils, callback) {
     });
 }
 
-exports.curveAliasDialog = function(ModalService, callback) {
+exports.curveAliasDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
-        this.addCurveName = function(curveAlias){
+        this.addCurveName = function (curveAlias) {
 
         }
-        this.isSelected = function(item) {
+        this.isSelected = function (item) {
             console.log(item);
             return "";
         }
-        
-        
-        this.close = function(ret) {
+
+
+        this.close = function (ret) {
             close(ret);
         }
     }
+
     ModalService.showModal({
-        templateUrl : "curve-alias/curve-alias-modal.html",
-        controller : ModalController,
-        controllerAs : "wiModal"
-    }).then(function(modal) {
+        templateUrl: "curve-alias/curve-alias-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
@@ -395,9 +504,9 @@ exports.curveAliasDialog = function(ModalService, callback) {
     });
 }
 
-exports.familyEditDialog = function(ModalService, callback) {
+exports.familyEditDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
-        this.close = function(ret) {
+        this.close = function (ret) {
             close(ret);
         }
     }
@@ -406,9 +515,388 @@ exports.familyEditDialog = function(ModalService, callback) {
         templateUrl: "family-edit/family-edit-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function(modal) {
+    }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function(ret) {
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.blankLogplotDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "blankPlotlog"
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "blank-logplot/blank-logplot-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.tripleComboDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "TripleCombo"
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "triple-combo/triple-combo-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.densityNeutronDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "DensityNeutron";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "density-neutron/density-neutron-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.resistivitySonicDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "ResistivitySonic";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "resistivity-sonic/resistivity-sonic-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.threeTracksBlankDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "3TracksBlank";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "3-tracks-blank/3-tracks-blank-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.inputCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "inputCurve";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "input-curve/input-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.lithoSynCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.name = "lithoSynCurveDialog";
+        this.onOkButtonClicked = function () {
+            self.name = $scope.name;
+            console.log(self.name);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "litho-syn-curve/litho-syn-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.addCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService, wiComponentService) {
+        let error = null;
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+            let utils = wiComponentService.getComponent('UTILS');
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "add-curve/add-curve-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.lineStyleDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        this.onOkButtonClicked = function () {
+
+        };
+        this.onApplyButtonClicked = function () {
+
+        };
+        this.onCancelButtonClicked = function () {
+
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "line-style/line-style-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        // let utils = wiComponentService.getComponent('UTILS');
+        // let projectData = utils.openProject;
+        // console.log("dataaa ",projectData);
+
+        this.selectData = {
+            displayMode : ["Line", "Symbol", "Both", "None"],
+            wrapMode : ["None", "Left", "Right", "Both"],
+            symbolType : ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            blockPosition : ["None", "Start", "Middle", "End", "None"],
+            logLinear : ["Linear", "Logarithmic"],
+            displayAs : ["Normal", "Culmulative", "Mirror", "Pid"]
+        };
+        this.defaultElement = {
+            displayMode : "Line",
+            wrapMode : "None",
+            symbolType: "Circle",
+            blockPosition: "None",
+            logLinear : "Linear",
+            displayAs : "Normal"
+        };
+        this.changeOther = function () {
+            switch (self.defaultElement.displayMode) {
+                case "Line":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", true);
+                    $('#blockPosition').prop("disabled", false);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", true);
+                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editLineStyle').prop("disabled", false);
+                    break;
+                case "Symbol":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", false);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", false);
+                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editLineStyle').prop("disabled", true);
+                    break;
+                case "Both":
+                    $('#wrapMode').prop("disabled", false);
+                    $('#symbolType').prop("disabled", false);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", false);
+                    $('#symbolSize').prop("disabled", false);
+                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editLineStyle').prop("disabled", false);
+                    break;
+                case "None":
+                    $('#wrapMode').prop("disabled", true);
+                    $('#symbolType').prop("disabled", true);
+                    $('#blockPosition').prop("disabled", true);
+                    $('#ignore').prop("disabled", true);
+                    $('#symbolSize').prop("disabled", true);
+                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editLineStyle').prop("disabled", true);
+                    break;
+                default:
+                    console.log("Error: NULL");
+                    break;
+            }
+        };
+        this.onEditLineButtonClicked = function () {
+            DialogUtils.lineStyleDialog(ModalService, function () {
+                console.log("Line Style");
+            });
+        };
+        this.onOkButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-properties/curve-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            $('.modal-dialog').draggable();
+            callback(ret);
+        });
+    });
+};
+exports.importLASDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+
+        $('.selectFile').bind("click", function () {
+            $('#selected').click();
+        });
+        this.onLoadButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "import-LAS/import-LAS-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);

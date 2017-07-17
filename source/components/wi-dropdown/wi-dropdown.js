@@ -6,17 +6,42 @@ function Controller(wiComponentService) {
 
     this.default = {
         label: '',
+        type: 'normal',
         layout: 'icon-top',
-        icon: 'project-new-32x32'
+        icon: 'project-new-32x32',
+        disabled: false,
+        initialState: {}
     };
 
     this.onClick = function () {
         if (self.handler) self.handler();
     };
 
-    this.$onInit = function() {
+    this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
+
+        if (self.container === 'ribbon' || self.container === 'explorer') {
+            this.default.initialState.disabled = self.isDisabled() + '';
+
+            wiComponentService.on('project-loaded-event', function () {
+                self.disabled = "false";
+            });
+
+            wiComponentService.on('project-unloaded-event', function () {
+                self.disabled = self.default.initialState.disabled;
+            });
+        }
     };
+
+    this.isDisabled = function () {
+        if (self.disabled === 'true') {
+            return true;
+        } else if (self.disabled === 'false') {
+            return false;
+        } else {
+            return self.default.disabled;
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -28,10 +53,13 @@ app.component(componentName, {
     bindings: {
         config: '<',
         name: '@',
+        type: '@',
         label: '@',
         layout: '@',
         icon: '@',
-        handler: '<'
+        handler: '<',
+        disabled: '@',
+        container: '@'
     }
 });
 
