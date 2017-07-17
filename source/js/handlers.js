@@ -85,11 +85,13 @@ exports.ExitButtonClicked = function () {
 };
 
 exports.AddNewButtonClicked = function () {
-    console.log('AddNewButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.addNewDialog(this.ModalService, function (ret) {
-        console.log("User Choose: " + ret);
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+
+    DialogUtils.addNewDialog(this.ModalService, function (newWell) {
+        if (newWell) utils.updateWellProject(wiComponentService, newWell);
     })
 };
 

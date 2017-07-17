@@ -70,9 +70,6 @@ exports.updateWellProject = function (wiComponentService, well) {
     // update well
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
-    console.log('well sddddd', well)
-    console.log('project sddddd', project)
-
     if (!project) return;
 
     if (!Array.isArray(project.wells)) {
