@@ -2,12 +2,19 @@ exports.roundUp = roundUp;
 exports.roundDown = roundDown;
 exports.invertColor = invertColor;
 exports.appendTrack = appendTrack;
+exports.removeTrack = removeTrack;
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
 }
 function roundDown(value, granularity) {
     return Math.floor(value / granularity) * granularity;
+}
+
+function clip(val, extent) {
+    if (val > extent[1]) return extent[1];
+    if (val < extent[0]) return extent[0];
+    return val;
 }
 
 function invertColor(color) {
@@ -19,34 +26,62 @@ function invertColor(color) {
 }
 
 function appendTrackHeader(plotArea, container, trackName) {
-    let trackHeader = container.append('div')
-        .attr('class', 'track-header text-center');
+    let headerViewport = container.append('div')
+        .attr('class', 'track-header-viewport text-center')
 
-    trackHeader.append('label')
+    let nameLabel = headerViewport.append('label')
         .attr('class', 'track-name text-center')
             .text(trackName);
+
+    let header = headerViewport.append('div')
+        .attr('class', 'track-header')
+        .style('top', nameLabel.node().clientHeight + 3 + 'px')
+
+    function _headerScrollCallback(header) {
+        let rowHeight = nameLabel.node().clientHeight;
+        let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -rowHeight*2 -6: rowHeight*2 + 6);
+        let top = parseInt(header.style('top').replace('px', '')) + dy;
+        let maxTop = rowHeight + 3;
+        let minTop = headerViewport.node().clientHeight - header.node().clientHeight + 2;
+
+
+        top = minTop < maxTop ? clip(top, [minTop, maxTop]) : maxTop;
+        header.style('top', top + 'px');
+    }
+
+    header
+        .on('mousewheel', function() {
+            _headerScrollCallback(d3.select(this));
+        })
+        .call(d3.drag().on('drag', function() {
+            _headerScrollCallback(d3.select(this))
+        }));
 
     container.append('div')
         .attr('class', 'vresizer')
         .call(d3.drag()
             .on('drag', function() {
-                var plotHeight = container.select('.plot-container').node().clientHeight;
+                let plotHeight = container.select('.plot-container').node().clientHeight;
                 d3.select(plotArea).selectAll('.plot-container')
-                    .style('height', (plotHeight - d3.event.dy) + "px");
+                    .style('height', (plotHeight - d3.event.dy) + 'px');
+
+                d3.select(plotArea).selectAll('.track-header').each(function(h) {
+                    _headerScrollCallback(d3.select(this));
+                })
             })
         );
-    return trackHeader;
 }
 
 function appendTrack(baseElement, trackName, plotWidth) {
-    var compensator;
-    var minPlotWidth = plotWidth;
-    var trackContainer = d3.select(baseElement).append('div')
+    let compensator;
+    let minPlotWidth = plotWidth;
+    let root = d3.select(baseElement);
+    let trackContainer = root.append('div')
         .attr('class', 'track-container')
         .style('width', plotWidth + 'px');
 
     appendTrackHeader(baseElement, trackContainer, trackName);
-    var resizer = d3.select(baseElement).append('div')
+    let resizer = root.append('div')
         .attr('class', 'resizer track-resizer')
         .call(d3.drag()
             .on('start', function() {
@@ -66,14 +101,17 @@ function appendTrack(baseElement, trackName, plotWidth) {
     return trackContainer;
 }
 
+function removeTrack(idx, baseElement) {
+    let base = d3.select(baseElement);
+    base.selectAll('.track-container')
+        .filter(function (d, i) {
+            return i == idx;
+        })
+        .remove();
 
-/*exports.createLogTrack = function(config, domElem) {
-    var plot = new Plot(config);
-    plot.init(domElem);
-    return plot;
+    base.selectAll('.track-resizer')
+        .filter(function (d, i) {
+            return i == idx;
+        })
+        .remove();
 }
-exports.createDepthTrack = function(config, domElem) {
-    var depthTrack = new DepthTrack(config);
-    depthTrack.init(domElem);
-    return depthTrack;
-}*/
