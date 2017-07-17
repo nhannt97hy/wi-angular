@@ -21,8 +21,8 @@ function DepthTrack(config) {
         return;
     }
     var unit = config.unit || 'm';
-    var root;
-    var base;
+    var trackContainer;
+    var plotContainer;
     var svg;
     var clientRect;
     var yAxisGroup;
@@ -38,12 +38,12 @@ function DepthTrack(config) {
         return yStep;
     }
     this.init = function(baseElement) {
-        root = appendTrack(baseElement, 'Depth', plotWidth);
-        base = root.select('.plot-container');
-        appendDepthHeader(root, unit);
-        clientRect = base.node().getBoundingClientRect();
+        trackContainer = appendTrack(baseElement, 'Depth', plotWidth);
+        plotContainer = trackContainer.select('.plot-container');
+        appendDepthHeader(trackContainer, unit);
+        clientRect = plotContainer.node().getBoundingClientRect();
 
-        svg = base.append('svg')
+        svg = plotContainer.append('svg')
                 .attr('width', clientRect.width)
                 .attr('height', clientRect.height);
         yAxisGroup = svg.append('g')
@@ -52,8 +52,8 @@ function DepthTrack(config) {
         yAxisGroup1 = svg.append('g')
             .attr('class', yAxisClass);
             //.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-        new ResizeSensor(base.node(), function() {
-            clientRect = base.node().getBoundingClientRect();
+        new ResizeSensor(plotContainer.node(), function() {
+            clientRect = plotContainer.node().getBoundingClientRect();
 
             svg.attr('width', clientRect.width)
                 .attr('height', clientRect.height);
@@ -89,7 +89,7 @@ function DepthTrack(config) {
     }
 
     this.onMouseDown = function(mouseDownCallback) {
-        root.on('mousedown', function() {
+        trackContainer.on('mousedown', function() {
             mouseDownCallback();
         });
     }
