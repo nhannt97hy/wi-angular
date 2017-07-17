@@ -57,9 +57,8 @@ function Controller($scope, wiComponentService) {
         self.setDepthRangeFromSlidingBar();
         track.doPlot();
 
-        track.onDrop(function () {
-            _onTrackDropCallback(track);
-        });
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        track.onDrop(dragMan, self);
         track.onPlotMouseDown(function() {
             _onPlotMouseDownCallback(track);
         });
@@ -83,11 +82,8 @@ function Controller($scope, wiComponentService) {
         return len - 1;
     };
 
-    this.addCurve = function (trackIdx, data, curveName, curveUnit) {
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
-
-        let track = _tracks[trackIdx];
-        if (!track.addCurve) return;
+    /* Tung add this */
+    this.addCurveToTrack = function(track, data, curveName, curveUnit) {
         let curveIdx = track.addCurve(data, curveName, curveUnit, 0, 200);
         track.adjustXRange(1);
         self.setDepthRangeFromSlidingBar();
@@ -103,6 +99,14 @@ function Controller($scope, wiComponentService) {
                 _curveOnRightClick();
             }
         });
+    }
+
+    this.addCurve = function (trackIdx, data, curveName, curveUnit) {
+        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
+
+        let track = _tracks[trackIdx];
+        if (!track.addCurve) return;
+        self.addCurveToTrack(track, data, curveName, curveUnit);
     };
 
     this.addShading = function (trackIdx, leftCurveIdx, rightCurveIdx, config) {
@@ -203,26 +207,6 @@ function Controller($scope, wiComponentService) {
             && previousTrackIdx != currentTrackIdx
             && _tracks[previousTrackIdx].highlight) {
             _tracks[previousTrackIdx].highlight(-1);
-        }
-    }
-
-    function _onTrackDropCallback(track) {
-        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        if (dragMan.dragging) {
-            console.log('hhhh');
-            if (dragMan.cancelingId) {
-                //clearTimeout(dragMan.cancelingId);
-                //dragMan.cancellingId = null;
-                //dragMan.dragging = false;
-                console.log('TUNG');
-                let data = getCurveFromName(dragMan.draggedObj);
-                let max = 1;
-                track.addCurve(data, dragMan.draggedObj, 'm3', 0, max);
-                self.setDepthRangeFromSlidingBar();
-                track.adjustXRange(1);
-                track.doPlot();
-                dragMan.draggedObj = null;
-            }
         }
     }
 

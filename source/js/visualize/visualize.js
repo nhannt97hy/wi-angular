@@ -316,10 +316,18 @@ function Plot(config) {
     /* Shading End */
 
     /* Event Begin */
-    this.onDrop = function(dropCallback){
-        plotContainer.on('mouseover', function() {
-            dropCallback();
-        });
+    this.onDrop = function(dragMan, wiD3Ctrl){
+        plotContainer
+            .on('mouseover', function() {
+                if( !dragMan.dragging ) return;
+                dragMan.wiD3Ctrl = wiD3Ctrl;
+                dragMan.track = self;
+            })
+            .on('mouseleave', function() {
+                if( !dragMan.dragging ) return;
+                dragMan.wiD3Ctrl = null;
+                dragMan.track = null;
+            });
     };
 
     this.onPlotMouseDown = function(cb) {

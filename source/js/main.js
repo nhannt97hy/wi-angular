@@ -31,8 +31,8 @@ let treeviewHandlers = require('./wi-treeview-handlers');
 let graph = require('./visualize/visualize');
 let dragMan = {
     dragging: false,
-    draggedObj: null,
-    cancelingId: null
+    wiD3Ctrl: null,
+    track: null
 };
 
 let wiElementReady = require('./wi-element-ready');
