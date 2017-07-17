@@ -71,7 +71,9 @@ function Controller(wiComponentService, WiProperty, WiWell) {
         let newWell = new WiWell(well);
 
         if (wellSelected) {
-            angular.copy(wellSelected, newWell);
+            angular.copy(newWell, wellSelected);
+
+            console.log('wellSelected', wellSelected);
         } else {
             let wells = getItemByName('wells');
 

@@ -887,10 +887,10 @@ exports.importLASDialog = function (ModalService, callback) {
             payloadParams.file= self.lasFile;
 
             wiApiService.postWithFile('/file', payloadParams)
-                .then(function (data) {
-                    console.log('well response', data);
+                .then(function (well) {
+                    console.log('well response', well);
 
-                    return close(data.well, 500);
+                    return close(well, 500);
                 })
                 .catch(function (err) {
                     console.log('err', err);
