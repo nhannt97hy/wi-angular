@@ -5,7 +5,9 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
         this.error = null;
 
         this.onOkButtonClicked = function () {
+            self.error = '';
             self.disabled = true;
+
             let data = {
                 name: $scope.name,
                 company: $scope.company,
@@ -26,6 +28,8 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                 })
                 .then(function () {
                     self.disabled = false;
+
+                    $scope.$apply();
                 });
         };
 
@@ -83,7 +87,9 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
         };
 
         this.onOkButtonClicked = function () {
+            self.error = '';
             self.disabled = true;
+
             let data = {
                 idProject: self.idProject
             };
@@ -98,6 +104,8 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
                 })
                 .then(function () {
                     self.disabled = false;
+
+                    $scope.$apply();
                 });
         };
 
@@ -363,6 +371,7 @@ exports.addNewDialog = function (ModalService, callback) {
         let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
         this.onOkButtonClicked = function () {
+            self.error = '';
             self.isDisabled = true;
 
             let data = {
@@ -386,6 +395,8 @@ exports.addNewDialog = function (ModalService, callback) {
                 })
                 .then(function () {
                     self.isDisabled = false;
+
+                    $scope.$apply();
                 });
         };
 

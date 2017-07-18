@@ -90,7 +90,7 @@ function genSamples() {
     let nSamples = 1000;
     let samples = new Array();
     for (let i = 0; i < nSamples; i++) {
-        samples.push({ y: i, x: Math.random() });
+        samples.push({y: i, x: Math.random()});
     }
     return samples;
 }
@@ -118,6 +118,10 @@ exports.setupCurveDraggable = function (wiComponentService) {
         helper: 'clone',
         containment: 'document'
     });
+};
+
+exports.createNewBlankLogPlot = function (wiComponentService, logPlot) {
+    wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logPlot.title);
 };
 
 // exports.parseTime = function (wiComponentService, time) {
