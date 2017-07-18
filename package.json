@@ -2,6 +2,7 @@
   "name": "wi-angular",
   "version": "1.0.0",
   "description": "",
+  "main": "build/js/index.js",
   "dependencies": {
     "angular-bootstrap-colorpicker": "^3.0.31",
     "del": "^2.2.2",
