@@ -758,7 +758,10 @@ exports.addCurveDialog = function (ModalService, callback) {
 
 exports.lineStyleDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
-
+        this.lineColor = '#cecece';
+        this.getColor = function () {
+            console.log("pick: ", self.lineColor);
+        };
         this.onOkButtonClicked = function () {
 
         };
@@ -862,7 +865,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
         };
         this.onOkButtonClicked = function () {
 
-        }
+        };
         this.onCancelButtonClicked = function () {
             console.log("onCancelButtonClicked");
         }
@@ -1021,14 +1024,14 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
         this.showTitle = false;
         this.showLabel = false;
         this.setTitle = function () {
-            if (self.showTitle == true) {
-                $('#title').prop("disabled", true);
-                $('#topJust').prop("disabled", true);
-                $('#bottomJust').prop("disabled", true);
-            }else {
+            if (self.showTitle != true) {
                 $('#title').prop("disabled", false);
                 $('#topJust').prop("disabled", false);
                 $('#bottomJust').prop("disabled", false);
+            } else {
+                $('#title').prop("disabled", true);
+                $('#topJust').prop("disabled", true);
+                $('#bottomJust').prop("disabled", true);
             }
         };
         this.setLabel = function () {

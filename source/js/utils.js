@@ -131,10 +131,9 @@ exports.createNewBlankLogPlot = function (wiComponentService, logPlot) {
 //     return moment(time).format(timestamp);
 // };
 
-exports.TrackProperties = function () {
-    let wiComponentService = this.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+exports.trackProperties = function (ModalService, wiComponentService) {
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
-        console.log("User choose: " + ret);
-    })
+       console.log("OKOK");
+    });
 };

@@ -35,7 +35,7 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService) {
+function Controller($scope, wiComponentService, ModalService) {
     let self = this;
     let _tracks = new Array();
     let currentTrackIdx = -1;
@@ -254,6 +254,7 @@ function Controller($scope, wiComponentService) {
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, [
                 {
@@ -262,6 +263,7 @@ function Controller($scope, wiComponentService) {
                     icon: 'track-properties-16x16',
                     handler: function () {
                         console.log('Track properties');
+                        utils.trackProperties(ModalService, wiComponentService);
                     }
                 },
                 {
@@ -357,7 +359,7 @@ function Controller($scope, wiComponentService) {
     }
 }
 
-let app = angular.module(moduleName, []);
+let app = angular.module(moduleName, ['angularModalService']);
 app.component(componentName, {
     templateUrl: 'wi-d3.html',
     controller: Controller,
