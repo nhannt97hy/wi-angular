@@ -747,6 +747,7 @@ exports.addCurveDialog = function (ModalService, callback) {
 
 exports.lineStyleDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
+
         this.onOkButtonClicked = function () {
 
         };
@@ -806,6 +807,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", true);
                     $('#editSymbolSize').prop("disabled", true);
                     $('#editLineStyle').prop("disabled", false);
+                    $('#sample').text('Line Style');
                     break;
                 case "Symbol":
                     $('#wrapMode').prop("disabled", false);
@@ -815,6 +817,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", false);
                     $('#editSymbolSize').prop("disabled", false);
                     $('#editLineStyle').prop("disabled", true);
+                    $('#sample').text('Symbol Style ');
                     break;
                 case "Both":
                     $('#wrapMode').prop("disabled", false);
@@ -824,6 +827,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", false);
                     $('#editSymbolSize').prop("disabled", false);
                     $('#editLineStyle').prop("disabled", false);
+                    $('#sample').text('Both Style ');
                     break;
                 case "None":
                     $('#wrapMode').prop("disabled", true);
@@ -833,6 +837,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", true);
                     $('#editSymbolSize').prop("disabled", true);
                     $('#editLineStyle').prop("disabled", true);
+                    $('#sample').text(' ');
                     break;
                 default:
                     console.log("Error: NULL");

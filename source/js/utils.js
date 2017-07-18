@@ -126,3 +126,11 @@ exports.setupCurveDraggable = function (wiComponentService) {
 //
 //     return moment(time).format(timestamp);
 // };
+
+exports.TrackProperties = function () {
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
+        console.log("User choose: " + ret);
+    })
+};
