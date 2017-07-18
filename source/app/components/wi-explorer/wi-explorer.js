@@ -214,6 +214,13 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
+                                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+                                    // mock plot data
+                                    let logplot = {
+                                        title: 'Mock Blank Plot'
+                                    };
+                                    utils.createNewBlankLogPlot(wiComponentService, logplot);
                                 }
                             }, {
                                 name: "3TracksBlank",
