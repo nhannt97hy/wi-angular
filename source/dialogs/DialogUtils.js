@@ -353,21 +353,27 @@ exports.unitSettingDialog = function (ModalService, callback) {
         });
     });
 
-}
+};
 // add new well
 exports.addNewDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService) {
         let self = this;
+        this.isDisabled = false;
+
+        let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
         this.onOkButtonClicked = function () {
-            let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            self.isDisabled = true;
+
             let data = {
-                name: $scope.name,
+                name: self.wellName,
                 idProject: projectData.idProject,
-                topDepth: $scope.topDepth,
-                bottomDepth: $scope.bottomDepth,
-                step: $scope.step
+                topDepth: self.topDepth,
+                bottomDepth: self.bottomDepth,
+                step: self.step
             };
-            console.log("data: ", data);
+            console.log("data new well: ", data);
+
             wiApiService.post('/project/well/new', data)
                 .then(function (response) {
                     console.log('response', response);
@@ -375,28 +381,33 @@ exports.addNewDialog = function (ModalService, callback) {
                     return close(response, 500);
                 })
                 .catch(function (err) {
+                    console.error('new well', err);
                     return self.error = err;
+                })
+                .then(function () {
+                    self.isDisabled = false;
                 });
+        };
 
-        }
         this.onCancelButtonClicked = function () {
             console.log("oncCancelButtonClicked");
         }
     }
 
     ModalService.showModal({
-        templateUrl: "add-new/add-new-modal.html",
+        templateUrl: "add-new-well/add-new-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            callback(data);
         });
     });
-}
+};
 
 exports.wellHeaderDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
@@ -865,8 +876,6 @@ exports.importLASDialog = function (ModalService, callback) {
         this.isDisabled = false;
 
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-        console.log('projectLoaded', self.projectLoaded);
 
         this.onLoadButtonClicked = function () {
             console.log('las file: ', self.lasFile);

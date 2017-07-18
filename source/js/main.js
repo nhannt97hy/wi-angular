@@ -31,8 +31,8 @@ let treeviewHandlers = require('./wi-treeview-handlers');
 let graph = require('./visualize/visualize');
 let dragMan = {
     dragging: false,
-    draggedObj: null,
-    cancelingId: null
+    wiD3Ctrl: null,
+    track: null
 };
 
 let wiElementReady = require('./wi-element-ready');
@@ -162,26 +162,26 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         // layoutManager.removeAllRightTabs();
     });
 
-    $(document).ready(function () {
-        $('.wi-parent-node').draggable({
-            start: function (event, ui) {
-                console.log('start', ui.helper.attr('data-curve'));
-                dragMan.dragging = true;
-                dragMan.draggedObj = ui.helper.attr('data-curve');
-            },
-            stop: function (event, ui) {
-                dragMan.cancelingId = setTimeout(function () {
-                    console.log('stop');
-                    dragMan.dragging = false;
-                    dragMan.draggedObj = null;
-                    dragMan.cancelingId = null;
-                }, 1000);
-            },
-            appendTo: 'body',
-            revert: false,
-            scroll: false,
-            helper: 'clone',
-            containment: 'document'
-        });
-    });
+    // $(document).ready(function () {
+    //     $('.wi-parent-node').draggable({
+    //         start: function (event, ui) {
+    //             console.log('start', ui.helper.attr('data-curve'));
+    //             dragMan.dragging = true;
+    //             dragMan.draggedObj = ui.helper.attr('data-curve');
+    //         },
+    //         stop: function (event, ui) {
+    //             dragMan.cancelingId = setTimeout(function () {
+    //                 console.log('stop');
+    //                 dragMan.dragging = false;
+    //                 dragMan.draggedObj = null;
+    //                 dragMan.cancelingId = null;
+    //             }, 1000);
+    //         },
+    //         appendTo: 'body',
+    //         revert: false,
+    //         scroll: false,
+    //         helper: 'clone',
+    //         containment: 'document'
+    //     });
+    // });
 });

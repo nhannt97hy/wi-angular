@@ -16,6 +16,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
             self.treeConfig = {};
+            wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, '');
         });
 
         if (self.name) wiComponentService.putComponent(self.name, self);

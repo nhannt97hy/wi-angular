@@ -9,6 +9,9 @@ let roundDown = Utils.roundDown;
 let appendTrack = Utils.appendTrack;
 let invertColor = Utils.invertColor;
 
+exports.removeTrack = function(trackIdx, domElem) {
+    Utils.removeTrack(trackIdx, domElem);
+}
 
 exports.createLogTrack = function(config, domElem) {
     let plot = new Plot(config);
@@ -20,6 +23,7 @@ exports.createDepthTrack = function(config, domElem) {
     depthTrack.init(domElem);
     return depthTrack;
 }
+
 
 let registeredPlots = [];
 setInterval(function() {
@@ -312,10 +316,18 @@ function Plot(config) {
     /* Shading End */
 
     /* Event Begin */
-    this.onDrop = function(dropCallback){
-        plotContainer.on('mouseover', function() {
-            dropCallback();
-        });
+    this.onDrop = function(dragMan, wiD3Ctrl){
+        plotContainer
+            .on('mouseover', function() {
+                if( !dragMan.dragging ) return;
+                dragMan.wiD3Ctrl = wiD3Ctrl;
+                dragMan.track = self;
+            })
+            .on('mouseleave', function() {
+                if( !dragMan.dragging ) return;
+                dragMan.wiD3Ctrl = null;
+                dragMan.track = null;
+            });
     };
 
     this.onPlotMouseDown = function(cb) {
@@ -323,7 +335,7 @@ function Plot(config) {
     };
 
     this.onHeaderMouseDown = function(cb) {
-        headerContainer.on('mousedown',cb);
+        trackContainer.select('.track-header-viewport').on('mousedown',cb);
     };
     /* Event End */
 
@@ -464,7 +476,7 @@ function Plot(config) {
 
     function _highlightCurveHeader() {
         _curveHeaders.forEach(function(h, i) {
-            let bgColor = i == currentCurveIdx ? 'red' : 'transparent';
+            let bgColor = i == currentCurveIdx ? 'rgba(255,0,0,0.2)' : 'transparent';
             h.style('background-color', bgColor);
         });
     }
