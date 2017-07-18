@@ -78,7 +78,11 @@ function appendTrack(baseElement, trackName, plotWidth) {
     let root = d3.select(baseElement);
     let trackContainer = root.append('div')
         .attr('class', 'track-container')
-        .style('width', plotWidth + 'px');
+        .style('width', plotWidth + 'px')
+        .on('contextmenu', function() {
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+        })
 
     appendTrackHeader(baseElement, trackContainer, trackName);
     let resizer = root.append('div')
@@ -96,8 +100,14 @@ function appendTrack(baseElement, trackName, plotWidth) {
                 }
             })
         );
-    trackContainer.append('div')
-        .attr('class', 'plot-container');
+    let existedPlot = d3.select('.plot-container')
+    let plotContainer = trackContainer.append('div')
+        .attr('class', 'plot-container')
+
+    if (!existedPlot.empty()) {
+        plotContainer.style('height', existedPlot.style('height'));
+    }
+
     return trackContainer;
 }
 
