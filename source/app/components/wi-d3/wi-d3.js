@@ -35,7 +35,7 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService, ModalService) {
+function Controller($scope, wiComponentService, $timeout, ModalService) {
     let self = this;
     let _tracks = new Array();
     let currentTrackIdx = -1;
@@ -58,7 +58,7 @@ function Controller($scope, wiComponentService, ModalService) {
         track.doPlot();
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        track.onDrop(dragMan, self);
+        track.configMouseMovementEventForDropping(dragMan, self);
         track.onPlotMouseDown(function() {
             _onPlotMouseDownCallback(track);
         });
@@ -82,9 +82,13 @@ function Controller($scope, wiComponentService, ModalService) {
         return len - 1;
     };
 
-    /* Tung add this */
     this.addCurveToTrack = function(track, data, curveName, curveUnit) {
-        let curveIdx = track.addCurve(data, curveName, curveUnit, 0, 200);
+        let curveIdx = track.addCurve(data, {
+           name: curveName,
+           unit: curveUnit,
+           minX: 0,
+           maxX: 200
+        });
         track.adjustXRange(1);
         self.setDepthRangeFromSlidingBar();
         track.doPlot();
@@ -94,7 +98,7 @@ function Controller($scope, wiComponentService, ModalService) {
             _setCurrentTrackIdx(_tracks.indexOf(track));
 
             let currentCurveIdx = track.getCurveHeaders().indexOf(curveHeader);
-            track.highlight(currentCurveIdx);
+            track.setCurrentCurveIdx(currentCurveIdx);
             if (d3.event.button == 2) {
                 _curveOnRightClick();
             }
@@ -142,8 +146,8 @@ function Controller($scope, wiComponentService, ModalService) {
 
     this.setColor = function (trackIdx, color) {
         if (trackIdx < 0 || trackIdx >= _tracks.length) return;
-        if (_tracks[trackIdx].setColor && _tracks[trackIdx].setColor(color)) {
-            _tracks[trackIdx].doPlot();
+        if (_tracks[trackIdx].setCurrentCurveColor) {
+            _tracks[trackIdx].setCurrentCurveColor(color);
         }
     };
 
@@ -205,8 +209,8 @@ function Controller($scope, wiComponentService, ModalService) {
     function _clearPreviousHighlight() {
         if (previousTrackIdx >= 0
             && previousTrackIdx != currentTrackIdx
-            && _tracks[previousTrackIdx].highlight) {
-            _tracks[previousTrackIdx].highlight(-1);
+            && _tracks[previousTrackIdx].setCurrentCurveIdx) {
+            _tracks[previousTrackIdx].setCurrentCurveIdx(-1);
         }
     }
 
@@ -220,7 +224,7 @@ function Controller($scope, wiComponentService, ModalService) {
                 break;
         }
         i = i == curves.length ? -1 : i;
-        _tracks[currentTrackIdx].highlight(i);
+        _tracks[currentTrackIdx].setCurrentCurveIdx(i);
         if (i >= 0 && d3.event.button == 2) {
             _curveOnRightClick();
         }
@@ -228,18 +232,21 @@ function Controller($scope, wiComponentService, ModalService) {
 
     function _onHeaderMouseDownCallback(track) {
         _setCurrentTrackIdx(_tracks.indexOf(track));
-        _tracks[currentTrackIdx].highlight(-1);
+        _tracks[currentTrackIdx].setCurrentCurveIdx(-1);
     }
 
     function _curveOnRightClick() {
-        console.log('Curve Right Click');
-        // wiComponentService.getComponent('ContextMenu').open(d3.event.clientX, d3.event.clientY, [{
-        //     name: "RemoveCurve",
-        //     label: "Remove Curve",
-        //     handler: function () {
-        //         self.removeCurrentCurve();
-        //     }
-        // }]);
+        let posX = d3.event.clientX, posY = d3.event.clientY;
+        d3.event.stopPropagation();
+        $timeout(function() {
+            wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
+                name: "RemoveCurve",
+                label: "Remove Curve",
+                handler: function () {
+                    self.removeCurrentCurve();
+                }
+            }]);
+        });
     }
     /* Private End */
 
@@ -254,7 +261,6 @@ function Controller($scope, wiComponentService, ModalService) {
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, [
                 {
@@ -263,7 +269,13 @@ function Controller($scope, wiComponentService, ModalService) {
                     icon: 'track-properties-16x16',
                     handler: function () {
                         console.log('Track properties');
-                        utils.trackProperties(ModalService, wiComponentService);
+
+                        //ModalService
+                        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                        DialogUtils.newProjectDialog(ModalService, function (data) {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            utils.projectOpen(self.wiComponentService, data);
+                        });
                     }
                 },
                 {
@@ -359,7 +371,7 @@ function Controller($scope, wiComponentService, ModalService) {
     }
 }
 
-let app = angular.module(moduleName, ['angularModalService']);
+let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-d3.html',
     controller: Controller,
