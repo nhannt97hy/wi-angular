@@ -58,7 +58,7 @@ function Controller($scope, wiComponentService) {
         track.doPlot();
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        track.onDrop(dragMan, self);
+        track.configMouseMovementEventForDropping(dragMan, self);
         track.onPlotMouseDown(function() {
             _onPlotMouseDownCallback(track);
         });
