@@ -96,9 +96,21 @@ function Controller($scope, wiComponentService) {
                 tempTopHandler = parentHeight - self.tinyWindow.height;
             }
 
-            $(self.handleId).css('top', tempTopHandler + 'px');
+            updateSlidingHandler(tempTopHandler, self.tinyWindow.height, parentHeight);
+        }
 
-            updateState(tempTopHandler, self.tinyWindow.height, parentHeight);
+        function updateSlidingHandler(top, height) {
+            $(self.handleId).css('top', top + 'px');
+            $(self.handleId).css('height', height + 'px');
+
+            updateState(top, height, parentHeight);
+        }
+
+        this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
+            let top = Math.round((topPercent * parentHeight) / 100);
+            let height = Math.round((rangePercent * parentHeight) / 100);
+
+            updateSlidingHandler(top, height);
         }
     };
 }
@@ -113,20 +125,6 @@ app.component(componentName, {
         name: '@'
     }
 });
-
-// app.directive('elemReady', function ($parse) {
-//     return {
-//         restrict: 'A',
-//         link: function ($scope, elem, attrs) {
-//             elem.ready(function () {
-//                 $scope.$apply(function () {
-//                     let func = $parse(attrs.elemReady);
-//                     func($scope);
-//                 })
-//             })
-//         }
-//     }
-// });
 
 exports.name = moduleName;
 exports.componentName = componentName;
