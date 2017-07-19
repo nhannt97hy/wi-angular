@@ -486,25 +486,20 @@ function LogTrack(config) {
         plotContainer.on('mouseover', cb);
     }
 
-    this.configMouseMovementEventForDropping = function(dragMan, wiD3Ctrl){
-        plotContainer
-            .on('mouseover', function() {
-                if( !dragMan.dragging ) return;
-                dragMan.wiD3Ctrl = wiD3Ctrl;
-                dragMan.track = self;
-            })
-            .on('mouseleave', function() {
-                if( !dragMan.dragging ) return;
-                dragMan.wiD3Ctrl = null;
-                dragMan.track = null;
-            });
+    /**
+     * Register event when mouse leave the plot area
+     */
+    this.onPlotMouseLeave = function(cb) {
+        plotContainer.on('mouseleave', cb);
     }
 
     /**
      * Register event when mouse down the plot area
      */
     this.onPlotMouseDown = function(cb) {
-        plotContainer.on('mousedown', cb);
+        plotContainer
+            .on('mousedown', cb)
+            .on('contextmenu', cb);
     }
 
     /**

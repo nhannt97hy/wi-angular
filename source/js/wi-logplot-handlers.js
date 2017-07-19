@@ -13,11 +13,11 @@ exports.EditFormatButtonClicked = function() {
     var slidingBar = this.wiComponentService.getSlidingBar(this.wiLogplot.name);
     if (!slidingBar) return;
 
-    var idx = myPlot.addDepthTrack();
+    myPlot.addDepthTrack();
 
-    idx = myPlot.addTrack();
+    var track = myPlot.addLogTrack();
 
-    myPlot.addCurve(idx, genSamples(10000));
+    myPlot.addCurveToTrack(track, genSamples(10000), 'Data', 'm3');
 
     var maxDepth = myPlot.getMaxDepth();
 

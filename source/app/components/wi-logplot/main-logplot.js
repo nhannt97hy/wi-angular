@@ -41,23 +41,21 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     }
 
     $scope.trackButtonClick = function() {
-        wiD3Ctrl.addTrack();
+        wiD3Ctrl.addLogTrack();
     }
 
     $scope.addData1ButtonClick = function() {
-        let trackIdx = wiD3Ctrl.getCurrentTrackIdx();
-        if (trackIdx == -1) return;
-        wiD3Ctrl.addCurve(trackIdx, genSamples([0,1], [0,1000]), 'Data1', 'm3');
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addCurveToTrack(track, genSamples([0,1], [0,1000]), 'Data1', 'm3');
     }
 
     $scope.addData2ButtonClick = function() {
-        let trackIdx = wiD3Ctrl.getCurrentTrackIdx();
-        if (trackIdx == -1) return;
-        wiD3Ctrl.addCurve(trackIdx, genSamples([1,2], [0,1000]), 'Data2', 'kg');
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1000]), 'Data2', 'kg');
     }
 
     $scope.changeColor = function() {
-        wiD3Ctrl.setColor(wiD3Ctrl.getCurrentTrackIdx(), $scope.color);
+        wiD3Ctrl.setColor(wiD3Ctrl.getCurrentTrack(), $scope.color);
     }
 
     $scope.removeCurveButtonClick = function() {
@@ -65,12 +63,12 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     }
 
     $scope.removeTrackButtonClick = function() {
-        wiD3Ctrl.removeTrack(wiD3Ctrl.getCurrentTrackIdx());
+        wiD3Ctrl.removeTrack(wiD3Ctrl.getCurrentTrack());
     }
 
     $scope.addShadingButtonClick = function() {
-        let trackIdx = wiD3Ctrl.getCurrentTrackIdx()
-        wiD3Ctrl.addShading(trackIdx, 0, 1, {});
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addShadingToTrack(track, 0, 1, {});
     }
 
     function genSamples(extentX, extentY) {
