@@ -41,6 +41,8 @@ function Controller($scope, wiComponentService) {
 
         // call apply to call all parent scope watcher
         $scope.$apply();
+
+        console.log('updateState');
     }
 
     this.$onInit = function () {
