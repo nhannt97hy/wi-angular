@@ -85,7 +85,8 @@ let app = angular.module('wiapp',
         'angularModalService',
 
         // 3rd lib
-        'ngFileUpload'
+        'ngFileUpload',
+        'kendo.directives'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS

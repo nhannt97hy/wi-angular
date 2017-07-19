@@ -268,13 +268,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                     label: "Track Properties",
                     icon: 'track-properties-16x16',
                     handler: function () {
-                        console.log('Track properties');
-
-                        //ModalService
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                        DialogUtils.newProjectDialog(ModalService, function (data) {
-                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-                            utils.projectOpen(self.wiComponentService, data);
+
+                        DialogUtils.trackPropertiesDialog(ModalService, DialogUtils, function(data) {
+                            console.log(data);
                         });
                     }
                 },
