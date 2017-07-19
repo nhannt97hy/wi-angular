@@ -114,7 +114,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.track = null;
             if (wiD3Ctrl && track) {
                 getCurveDataByName(apiService, ui.helper.attr('data'), function (err, data) {
-                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, ui.helper.attr('data'), 'm3');
+                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, {
+                        name: ui.helper.attr('data'),
+                        unit: 'm3'
+                    });
                 });
             }
         },
