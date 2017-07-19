@@ -3,7 +3,7 @@ exports.NewProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.$scope, this.ModalService, function (data) {
+    DialogUtils.newProjectDialog(this.ModalService, function (data) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, data);
     });
@@ -13,7 +13,7 @@ exports.OpenProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
+    DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
     });
