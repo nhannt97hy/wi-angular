@@ -30,7 +30,6 @@ function Controller($scope, wiComponentService, ModalService) {
         let low = max * self.slidingBar.slidingBarState.top / 100;
         let high = max * ( self.slidingBar.slidingBarState.top + self.slidingBar.slidingBarState.range ) / 100;
         wiD3Controller.setDepthRange([low, high]);
-        wiD3Controller.plotAll();
     };
 
     this.getSlidingbarCtrl = function () {
