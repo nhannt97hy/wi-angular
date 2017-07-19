@@ -92,7 +92,7 @@ exports.AddNewButtonClicked = function () {
 
     DialogUtils.addNewDialog(this.ModalService, function (newWell) {
         if (newWell) utils.updateWellProject(wiComponentService, newWell);
-    })
+    });
 };
 
 exports.WellHeaderButtonClicked = function () {
@@ -137,7 +137,7 @@ exports.ImportLASButtonClicked = function () {
         if (well) {
             utils.updateWellProject(self.wiComponentService, well);
         }
-    })
+    });
 };
 
 exports.ImportMultiLASButtonClicked = function () {

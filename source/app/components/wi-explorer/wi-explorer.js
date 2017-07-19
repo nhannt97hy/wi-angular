@@ -1,7 +1,7 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
+function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -67,6 +67,12 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "Create New Well",
                         icon: "well-new-16x16",
                         handler: function () {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+                            DialogUtils.addNewDialog(ModalService, function (newWell) {
+                                if (newWell) utils.updateWellProject(wiComponentService, newWell);
+                            });
                         }
                     }, {
                         name: "ImportASCII",
@@ -85,6 +91,13 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "Import LAS",
                         icon: "las-import-16x16",
                         handler: function () {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                            DialogUtils.importLASDialog(ModalService, function (well) {
+                                if (well) {
+                                    utils.updateWellProject(wiComponentService, well);
+                                }
+                            });
                         }
                     }, {
                         name: "ImportMultiLAS",
