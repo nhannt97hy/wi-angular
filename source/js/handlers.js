@@ -531,18 +531,3 @@ exports.AboutButtonClicked = function () {
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
-
-exports.CollapseProjectButtonClicked = function () {
-    let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
-    let rootConfig = rootTreeviewCtrl.config;
-    var expaned = false;
-    for (let child of rootConfig) {
-        expaned = child.data.childExpanded;
-        if (!expaned) break;
-    }
-    if (expaned) {
-        rootTreeviewCtrl.collapseAll(rootConfig);
-    } else {
-        rootTreeviewCtrl.expandAll(rootConfig);
-    }
-};
