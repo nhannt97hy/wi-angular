@@ -6,7 +6,31 @@
                 <h4>Attribute</h4>
             </div>
             <div class="modal-body text-center">
-                <div class="area"></div>
+                <form class="form-horizontal" action="" name="modalLineStyle">
+                    <div class="row">
+                            <div class="form-group">
+                                <label class="control-label col-sm-5 normal-text" for="style">Line Style</label>
+                                <div class="col-sm-7">
+                                    <!--<select name="style" id="style"-->
+                                            <!--class="form-control wi-form-control"-->
+                                            <!--ng-model="wiModal.selectedStyle"-->
+                                            <!--ng-options="item in wiModal.styles">-->
+                                    <!--</select>-->
+                                </div>
+                            </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-sm-5 normal-text" for="color">Line Color</label>
+                            <div class="col-sm-7">
+                                <input kendo-color-picker k-palette="'websafe'"
+                                       class="form-control wi-form-control"
+                                       ng-model="wiModal.lineColor" ng-change="wiModal.getColor();"/>
+                                {{wiModal.lineColor}}
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>

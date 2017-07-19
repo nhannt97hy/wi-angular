@@ -1,9 +1,8 @@
 exports.NewProjectButtonClicked = function () {
-    console.log('NewProjectButton is clicked ');
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.$scope, this.ModalService, function (data) {
+    DialogUtils.newProjectDialog(this.ModalService, function (data) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, data);
     });
@@ -13,7 +12,7 @@ exports.OpenProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
+    DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
     });
@@ -21,7 +20,6 @@ exports.OpenProjectButtonClicked = function () {
 
 exports.CloseProjectButtonClicked = function () {
     let self = this;
-    console.log('CloseProjectButton is clicked');
     let utils = this.wiComponentService.getComponent('UTILS');
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
@@ -32,7 +30,6 @@ exports.CloseProjectButtonClicked = function () {
 };
 
 exports.UnitSettingsButtonClicked = function () {
-    console.log('UnitSettingsButton is clicked');
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.unitSettingDialog(this.ModalService, function (ret) {
@@ -92,7 +89,7 @@ exports.AddNewButtonClicked = function () {
 
     DialogUtils.addNewDialog(this.ModalService, function (newWell) {
         if (newWell) utils.updateWellProject(wiComponentService, newWell);
-    })
+    });
 };
 
 exports.WellHeaderButtonClicked = function () {
@@ -129,27 +126,17 @@ exports.ImportMultiASCIIButtonClicked = function () {
     console.log('ImportMultiASCIIButton is clicked');
 };
 
-exports.ImportLASButtonClicked = function () {
-    let self = this;
-    let utils = this.wiComponentService.getComponent(self.wiComponentService.UTILS);
-    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importLASDialog(this.ModalService, function (well) {
-        if (well) {
-            utils.updateWellProject(self.wiComponentService, well);
-        }
-    })
-};
-
-exports.ImportMultiLASButtonClicked = function () {
-    console.log('ImportMultiLASButton is clicked');
-    let self = this;
-    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importMultiLASDialog(this.ModalService, function (well) {
-        if (well) {
-            self.wiComponentService.emit(self.wiComponentService.UPDATE_WELL_EVENT, well);
-        }
-    })
-};
+// todo: remove
+// exports.ImportMultiLASButtonClicked = function () {
+//     console.log('ImportMultiLASButton is clicked');
+//     let self = this;
+//     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+//     DialogUtils.importMultiLASDialog(this.ModalService, function (well) {
+//         if (well) {
+//             self.wiComponentService.emit(self.wiComponentService.UPDATE_WELL_EVENT, well);
+//         }
+//     })
+// };
 
 exports.Interval_CoreLoaderButtonClicked = function () {
     console.log('Interval/CoreLoaderButton is clicked');
@@ -530,19 +517,4 @@ exports.AboutButtonClicked = function () {
 
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
-};
-
-exports.CollapseProjectButtonClicked = function () {
-    let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
-    let rootConfig = rootTreeviewCtrl.config;
-    var expaned = false;
-    for (let child of rootConfig) {
-        expaned = child.data.childExpanded;
-        if (!expaned) break;
-    }
-    if (expaned) {
-        rootTreeviewCtrl.collapseAll(rootConfig);
-    } else {
-        rootTreeviewCtrl.expandAll(rootConfig);
-    }
 };

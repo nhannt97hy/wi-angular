@@ -85,7 +85,8 @@ let app = angular.module('wiapp',
         'angularModalService',
 
         // 3rd lib
-        'ngFileUpload'
+        'ngFileUpload',
+        'kendo.directives'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS
@@ -161,27 +162,4 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         console.log('project-unloaded-event');
         // layoutManager.removeAllRightTabs();
     });
-
-    // $(document).ready(function () {
-    //     $('.wi-parent-node').draggable({
-    //         start: function (event, ui) {
-    //             console.log('start', ui.helper.attr('data-curve'));
-    //             dragMan.dragging = true;
-    //             dragMan.draggedObj = ui.helper.attr('data-curve');
-    //         },
-    //         stop: function (event, ui) {
-    //             dragMan.cancelingId = setTimeout(function () {
-    //                 console.log('stop');
-    //                 dragMan.dragging = false;
-    //                 dragMan.draggedObj = null;
-    //                 dragMan.cancelingId = null;
-    //             }, 1000);
-    //         },
-    //         appendTo: 'body',
-    //         revert: false,
-    //         scroll: false,
-    //         helper: 'clone',
-    //         containment: 'document'
-    //     });
-    // });
 });

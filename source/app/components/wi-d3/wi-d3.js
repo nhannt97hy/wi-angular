@@ -35,31 +35,44 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService, $timeout) {
+function Controller($scope, wiComponentService, $timeout, ModalService) {
     let self = this;
     let _tracks = new Array();
-    let currentTrackIdx = -1;
-    let previousTrackIdx = -1;
+    let _currentTrack = null;
+    let _previousTrack = null;
+    let _depthRange = [0, 100000];
 
     this.getCurrentTrack = function () {
-        return _tracks[currentTrackIdx];
-    };
-    this.getCurrentTrackIdx = function () {
-        return currentTrackIdx;
-    };
+        return _currentTrack
+    }
 
-    this.addTrack = function () {
+    this.getTracks = function() {
+        return _tracks;
+    }
+
+    this.addLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
-        //track.trackPointer(true);
-        let len = _tracks.push(track);
-        _setCurrentTrackIdx(len -1);
-        self.setDepthRangeFromSlidingBar();
-        track.doPlot();
+        _tracks.push(track);
+        _setCurrentTrack(track);
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        track.onDrop(dragMan, self);
-
+        track.onPlotMouseOver(function() {
+            if( !dragMan.dragging ) return;
+            dragMan.wiD3Ctrl = self;
+            dragMan.track = track;
+        });
+        track.onPlotMouseLeave(function() {
+            if( !dragMan.dragging ) return;
+            dragMan.wiD3Ctrl = null;
+            dragMan.track = null;
+        });
+        track.onPlotMouseWheel(function() {
+            _onPlotMouseWheelCallback(track);
+        });
         track.onPlotMouseDown(function() {
             _onPlotMouseDownCallback(track);
         });
@@ -67,178 +80,210 @@ function Controller($scope, wiComponentService, $timeout) {
             _onHeaderMouseDownCallback(track);
         });
 
-        return len - 1;
+        return track;
     };
 
     this.addDepthTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
-        let len = _tracks.push(track);
-        _setCurrentTrackIdx(len -1);
-        self.setDepthRangeFromSlidingBar();
-        self.plot(len - 1);
+        _tracks.push(track);
+        _setCurrentTrack(track);
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
+
         track.onMouseDown(function () {
-            _setCurrentTrackIdx(_tracks.indexOf(track));
+            _setCurrentTrack(track);
         });
-        return len - 1;
+        return track;
     };
 
-    this.addCurveToTrack = function(track, data, curveName, curveUnit) {
-        let curveIdx = track.addCurve(data, {
-           name: curveName,
-           unit: curveUnit,
-           minX: 0,
-           maxX: 200
-        });
+    this.addCurveToTrack = function(track, data, config) {
+        if (!track || !track.addCurve) return;
+        let curveIdx = track.addCurve(data, config);
         track.adjustXRange(1);
-        self.setDepthRangeFromSlidingBar();
-        track.doPlot();
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
 
         let curveHeader = track.getCurveHeaders()[curveIdx];
-        curveHeader.on('mousedown', function() {
-            _setCurrentTrackIdx(_tracks.indexOf(track));
+        curveHeader
+            .on('mousedown', function() {
+                _setCurrentTrack(track);
 
-            let currentCurveIdx = track.getCurveHeaders().indexOf(curveHeader);
-            track.setCurrentCurveIdx(currentCurveIdx);
-            if (d3.event.button == 2) {
-                _curveOnRightClick();
-            }
-        });
+                let currentCurveIdx = track.getCurveHeaders().indexOf(curveHeader);
+                track.setCurrentCurveIdx(currentCurveIdx);
+                if (d3.event.button == 2) {
+                    _curveOnRightClick();
+                }
+            })
+            .on('contextmenu', function() {
+                d3.event.stopPropagation();
+                d3.event.preventDefault();
+            })
     }
 
-    this.addCurve = function (trackIdx, data, curveName, curveUnit) {
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
-
-        let track = _tracks[trackIdx];
-        if (!track.addCurve) return;
-        self.addCurveToTrack(track, data, curveName, curveUnit);
-    };
-
-    this.addShading = function (trackIdx, leftCurveIdx, rightCurveIdx, config) {
+    this.addShadingToTrack = function (track, leftCurveIdx, rightCurveIdx, config) {
+        if (!track || !track.addShading) return;
         config = typeof config != 'object' ? {} : config;
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return false;
-        if (!_tracks[trackIdx].addShading) return false;
-        _tracks[trackIdx].addShading(leftCurveIdx, rightCurveIdx, config);
-        _tracks[trackIdx].doPlot();
+        track.addShading(leftCurveIdx, rightCurveIdx, config);
+        self.plot(track);
     };
 
-    this.setDepthRange = function (deepRange) {
-        _tracks.forEach(function (track) {
-            track.setYRange(deepRange);
+    this.setDepthRange = function(depthRange) {
+        _depthRange = depthRange;
+        _tracks.forEach(function(track) {
+            track.setViewportY(depthRange);
         });
+        self.plotAll();
     };
 
-    this.setDepthRangeFromSlidingBar = function () {
+    this.setDepthRangeForTrack = function(track, depthRange) {
+        if (_depthRange[0] != depthRange[0] || _depthRange[1] != depthRange[1]) {
+            self.setDepthRange(depthRange);
+        }
+        else {
+            track.setViewportY(depthRange);
+            self.plot(track);
+            _depthRange = depthRange;
+        }
+    }
+
+    this.getDepthRangeFromSlidingBar = function() {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
 
         let low = slidingBar.slidingBarState.top * maxDepth / 100;
         let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-        self.setDepthRange([low, high]);
-    };
+        return [low, high];
+    }
+
+    this.adjustSlidingBarFromDepthRange = function(vY) {
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = self.getMaxDepth();
+
+        let top = Math.round(vY[0] * 100 / maxDepth);
+        let range = Math.round(vY[1] * 100 / maxDepth) - top;
+        slidingBar.updateSlidingHandlerByPercent(top, range || 1);
+    }
 
     this.getMaxDepth = function () {
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getYMax) return track.getYMax();
             return -1;
         });
-        return (maxDepth > 0) ? maxDepth : 100000;
+
+        _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
+        return _maxDepth;
     };
 
-    this.setColor = function (trackIdx, color) {
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
-        if (_tracks[trackIdx].setCurrentCurveColor) {
-            _tracks[trackIdx].setCurrentCurveColor(color);
+    this.setColor = function (track, color) {
+        if (track && track.setCurrentCurveColor) {
+            track.setCurrentCurveColor(color);
         }
     };
 
     this.removeCurrentCurve = function() {
-        if (!_tracks[currentTrackIdx].getCurrentCurveIdx) return false;
-        return self.removeCurve(currentTrackIdx, _tracks[currentTrackIdx].getCurrentCurveIdx());
+        if (!_currentTrack.getCurrentCurveIdx) return;
+        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurveIdx());
     };
 
-    this.removeCurve = function (trackIdx, curveIdx) {
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return false;
-        if (!_tracks[trackIdx].removeCurve) return false;
-        return _tracks[trackIdx].removeCurve(curveIdx);
+    this.removeCurveFromTrack = function (track, curveIdx) {
+        if (!track || !track.removeCurve) return;
+        track.removeCurve(curveIdx);
     };
 
     this.removeCurrentTrack = function () {
-        return self.removeTrack(currentTrackIdx);
+        return self.removeTrack(_currentTrack);
     };
 
-    this.removeTrack = function (trackIdx) {
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
-        if (trackIdx == currentTrackIdx) {
-            currentTrackIdx = -1;
+    this.removeTrack = function (track) {
+        let trackIdx = _tracks.indexOf(track);
+        if (trackIdx < 0) return;
+
+        if (track == _currentTrack) {
+            _currentTrack = null;
         }
-        else if (trackIdx < currentTrackIdx) {
-            currentTrackIdx -= 1;
-        }
-        previousTrackIdx = -1;
-        if (_tracks[trackIdx].removeAllCurves) {
-            _tracks[trackIdx].removeAllCurves();
+        _previousTrack = null;
+        if (track.removeAllCurves) {
+            track.removeAllCurves();
         }
 
         let graph = wiComponentService.getComponent('GRAPH');
         graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
 
         _tracks.splice(trackIdx, 1);
-        return trackIdx;
     }
 
-    this.plot = function (trackIdx) {
-        if (trackIdx < 0 || trackIdx >= _tracks.length) return;
-        _tracks[trackIdx].doPlot();
+    this.plot = function (track) {
+        if (track && track.doPlot) track.doPlot();
     };
 
     this.plotAll = function () {
         _tracks.forEach(function (track) {
             track.doPlot();
-            //if( track.trackPointer ) track.trackPointer(true);
         });
     };
 
 
     /* Private Begin */
-    function _setCurrentTrackIdx(idx) {
-        previousTrackIdx = currentTrackIdx;
-        currentTrackIdx = idx;
+    function _setCurrentTrack(track) {
+        _previousTrack = _currentTrack;
+        _currentTrack = track;
         _clearPreviousHighlight();
     }
 
     function _clearPreviousHighlight() {
-        if (previousTrackIdx >= 0
-            && previousTrackIdx != currentTrackIdx
-            && _tracks[previousTrackIdx].setCurrentCurveIdx) {
-            _tracks[previousTrackIdx].setCurrentCurveIdx(-1);
+        if (_previousTrack != null
+            && _previousTrack != _currentTrack
+            && _previousTrack.setCurrentCurveIdx) {
+            _previousTrack.setCurrentCurveIdx(-1);
         }
     }
 
     function _onPlotMouseDownCallback(track) {
-        _setCurrentTrackIdx(_tracks.indexOf(track));
+        _setCurrentTrack(track);
 
         let i;
-        let curves = _tracks[currentTrackIdx].getCurves();
+        let curves = _currentTrack.getCurves();
         for (i = 0; i < curves.length; i ++) {
             if (curves[i].nearPoint(d3.event.offsetX, d3.event.offsetY))
                 break;
         }
         i = i == curves.length ? -1 : i;
-        _tracks[currentTrackIdx].setCurrentCurveIdx(i);
+        _currentTrack.setCurrentCurveIdx(i);
         if (i >= 0 && d3.event.button == 2) {
             _curveOnRightClick();
         }
     }
 
+    function _onPlotMouseWheelCallback(track) {
+        let range = _depthRange[1] - _depthRange[0];
+        let low, high, maxDepth = self.getMaxDepth();
+        let yStep = track.getYStep();
+        if (d3.event.deltaY < 0) {
+            low = _depthRange[0] - range*0.2;
+            high = _depthRange[1] + range*0.2;
+        }
+        else {
+            low = _depthRange[0] + range*0.2;
+            high = _depthRange[1] - range*0.2;
+        }
+        low = low < 0 ? 0 : Math.floor(low / yStep) * yStep;
+        high = high > maxDepth ? maxDepth : Math.ceil(high / yStep) * yStep;
+        self.setDepthRange([low, high]);
+        self.adjustSlidingBarFromDepthRange([low, high]);
+    }
+
     function _onHeaderMouseDownCallback(track) {
-        _setCurrentTrackIdx(_tracks.indexOf(track));
-        _tracks[currentTrackIdx].setCurrentCurveIdx(-1);
+        _setCurrentTrack(track);
+        _currentTrack.setCurrentCurveIdx(-1);
     }
 
     function _curveOnRightClick() {
         let posX = d3.event.clientX, posY = d3.event.clientY;
         d3.event.stopPropagation();
+        d3.event.preventDefault();
         $timeout(function() {
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveCurve",
@@ -269,7 +314,11 @@ function Controller($scope, wiComponentService, $timeout) {
                     label: "Track Properties",
                     icon: 'track-properties-16x16',
                     handler: function () {
-                        console.log('Track properties');
+                        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+                        DialogUtils.trackPropertiesDialog(ModalService, DialogUtils, function(data) {
+                            console.log(data);
+                        });
                     }
                 },
                 {
@@ -296,7 +345,7 @@ function Controller($scope, wiComponentService, $timeout) {
                     label: "Add Log Track",
                     icon: 'logplot-blank-16x16',
                     handler: function () {
-                        self.addTrack();
+                        self.addLogTrack();
                     }
                 },
                 {

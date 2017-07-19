@@ -79,10 +79,6 @@ function appendTrack(baseElement, trackName, plotWidth) {
     let trackContainer = root.append('div')
         .attr('class', 'track-container')
         .style('width', plotWidth + 'px')
-        .on('contextmenu', function() {
-            d3.event.preventDefault();
-            d3.event.stopPropagation();
-        })
 
     appendTrackHeader(baseElement, trackContainer, trackName);
     let resizer = root.append('div')

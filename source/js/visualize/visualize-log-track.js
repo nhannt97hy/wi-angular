@@ -141,7 +141,8 @@ function LogTrack(config) {
         if (_curves.length == 0) return null;
         let curvesData = _curves.map(function(c) { return c.getData(); });
         let mergedCurvesData = [].concat.apply([], curvesData);
-        return yStep * d3.max(mergedCurvesData, function(d) { return d.y });
+        let max = d3.max(mergedCurvesData, function(d) { return d.y });
+        return roundUp(max, 100) * yStep;
     }
 
     /** @return {Number} Mininum y value, null if there is no curve */
@@ -149,6 +150,13 @@ function LogTrack(config) {
         if (_curves.length == 0) return null;
         return 0;
     };
+
+    /**
+     * @return {Array} y range of viewport
+     */
+    this.getViewportY = function() {
+        return _viewportY;
+    }
 
     /** @todo Pending */
     this.setXAxisPosition = function(val) {}
@@ -184,7 +192,7 @@ function LogTrack(config) {
      * Set y range of viewport
      * @param {Array} vY - Start and end y coordinates within which data is shown
      */
-    this.setYRange = function(vY) {
+    this.setViewportY = function(vY) {
         _viewportY[0] = vY[0];
         _viewportY[1] = vY[1];
     }
@@ -486,25 +494,27 @@ function LogTrack(config) {
         plotContainer.on('mouseover', cb);
     }
 
-    this.onDrop = function(dragMan, wiD3Ctrl){
-        plotContainer
-            .on('mouseover', function() {
-                if( !dragMan.dragging ) return;
-                dragMan.wiD3Ctrl = wiD3Ctrl;
-                dragMan.track = self;
-            })
-            .on('mouseleave', function() {
-                if( !dragMan.dragging ) return;
-                dragMan.wiD3Ctrl = null;
-                dragMan.track = null;
-            });
+    /**
+     * Register event when mouse leave the plot area
+     */
+    this.onPlotMouseLeave = function(cb) {
+        plotContainer.on('mouseleave', cb);
+    }
+
+    /**
+     * Register event when mouse wheel on the plot area
+     */
+    this.onPlotMouseWheel = function(cb) {
+        plotContainer.on('mousewheel', cb);
     }
 
     /**
      * Register event when mouse down the plot area
      */
     this.onPlotMouseDown = function(cb) {
-        plotContainer.on('mousedown', cb);
+        plotContainer
+            .on('mousedown', cb)
+            .on('contextmenu', cb);
     }
 
     /**
