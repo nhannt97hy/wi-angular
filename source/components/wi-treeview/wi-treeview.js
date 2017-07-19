@@ -1,10 +1,11 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller(wiComponentService, WiProperty, WiWell) {
+function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     let self = this;
 
     this.$onInit = function () {
+        // if it is rootview
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
 
@@ -15,9 +16,11 @@ function Controller(wiComponentService, WiProperty, WiWell) {
     };
 
     this.onReady = function () {
-        console.log('treeview onready');
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        utils.setupCurveDraggable(wiComponentService);
+
+        let typeItemDragable = 'curve';
+        let element = $('.wi-parent-node' + `[type='${typeItemDragable}']`);
+        utils.setupCurveDraggable(element, wiComponentService, wiApiService);
     };
 
     this.onCollapse = function ($index) {

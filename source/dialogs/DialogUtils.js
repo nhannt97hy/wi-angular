@@ -24,11 +24,10 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                     return close(response, 500);
                 })
                 .catch(function (err) {
+                    self.disabled = false;
                     return self.error = err;
                 })
                 .then(function () {
-                    self.disabled = false;
-
                     $scope.$apply();
                 });
         };
@@ -96,15 +95,13 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
 
             wiApiService.post('/project/fullinfo', data)
                 .then(function (response) {
-
                     return close(response, 500);
                 })
                 .catch(function (err) {
+                    self.disabled = false;
                     return self.error = err;
                 })
                 .then(function () {
-                    self.disabled = false;
-
                     $scope.$apply();
                 });
         };
@@ -391,11 +388,10 @@ exports.addNewDialog = function (ModalService, callback) {
                 })
                 .catch(function (err) {
                     console.error('new well', err);
+                    self.isDisabled = false;
                     return self.error = err;
                 })
                 .then(function () {
-                    self.isDisabled = false;
-
                     $scope.$apply();
                 });
         };
@@ -927,10 +923,8 @@ exports.importLASDialog = function (ModalService, callback) {
                 })
                 .catch(function (err) {
                     console.log('err', err);
-                })
-                .then(function () {
                     self.isDisabled = false;
-                });
+                })
         };
 
         this.onCancelButtonClicked = function () {

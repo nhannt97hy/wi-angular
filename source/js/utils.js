@@ -86,19 +86,23 @@ exports.updateWellProject = function (wiComponentService, well) {
     wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
 };
 
-function genSamples() {
-    let nSamples = 1000;
-    let samples = new Array();
-    for (let i = 0; i < nSamples; i++) {
-        samples.push({y: i, x: Math.random()});
-    }
-    return samples;
+function getCurveDataByName(apiService, idCurve, callback) {
+    apiService.post(apiService.CURVE, {idCurve})
+        .then(function (curve) {
+            console.log('curve data', curve);
+            callback(null, curve);
+        })
+        .catch(function (err) {
+            console.error('getCurveDataByName', err);
+
+            callback(err);
+        });
 }
 
-exports.setupCurveDraggable = function (wiComponentService) {
+exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
     let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
 
-    $('.wi-parent-node').draggable({
+    element.draggable({
         start: function (event, ui) {
             dragMan.dragging = true;
         },
@@ -109,7 +113,9 @@ exports.setupCurveDraggable = function (wiComponentService) {
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
             if (wiD3Ctrl && track) {
-                wiD3Ctrl.addCurveToTrack(track, genSamples(), ui.helper.attr('data-curve'), 'm3');
+                getCurveDataByName(apiService, ui.helper.attr('data'), function (err, data) {
+                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, ui.helper.attr('data'), 'm3');
+                });
             }
         },
         appendTo: 'body',
