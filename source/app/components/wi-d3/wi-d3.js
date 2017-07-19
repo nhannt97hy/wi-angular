@@ -40,6 +40,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     let _tracks = new Array();
     let _currentTrack = null;
     let _previousTrack = null;
+    let _depthRange = [0, 100000];
 
     this.getCurrentTrack = function () {
         return _currentTrack
@@ -52,14 +53,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     this.addLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
-        //track.trackPointer(true);
-        let len = _tracks.push(track);
+        _tracks.push(track);
         _setCurrentTrack(track);
-        self.setDepthRangeFromSlidingBar();
-        track.doPlot();
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-
         track.onPlotMouseOver(function() {
             if( !dragMan.dragging ) return;
             dragMan.wiD3Ctrl = self;
@@ -69,6 +69,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
             if( !dragMan.dragging ) return;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
+        });
+        track.onPlotMouseWheel(function() {
+            _onPlotMouseWheelCallback(track);
         });
         track.onPlotMouseDown(function() {
             _onPlotMouseDownCallback(track);
@@ -83,10 +86,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     this.addDepthTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
-        let len = _tracks.push(track);
+        _tracks.push(track);
         _setCurrentTrack(track);
-        self.setDepthRangeFromSlidingBar();
-        self.plot(track);
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
+
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
@@ -97,8 +102,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         if (!track || !track.addCurve) return;
         let curveIdx = track.addCurve(data, config);
         track.adjustXRange(1);
-        self.setDepthRangeFromSlidingBar();
-        track.doPlot();
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
 
         let curveHeader = track.getCurveHeaders()[curveIdx];
         curveHeader
@@ -121,30 +127,54 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         if (!track || !track.addShading) return;
         config = typeof config != 'object' ? {} : config;
         track.addShading(leftCurveIdx, rightCurveIdx, config);
-        track.doPlot();
+        self.plot(track);
     };
 
-    this.setDepthRange = function (deepRange) {
-        _tracks.forEach(function (track) {
-            track.setYRange(deepRange);
+    this.setDepthRange = function(depthRange) {
+        _depthRange = depthRange;
+        _tracks.forEach(function(track) {
+            track.setViewportY(depthRange);
         });
+        self.plotAll();
     };
 
-    this.setDepthRangeFromSlidingBar = function () {
+    this.setDepthRangeForTrack = function(track, depthRange) {
+        if (_depthRange[0] != depthRange[0] || _depthRange[1] != depthRange[1]) {
+            self.setDepthRange(depthRange);
+        }
+        else {
+            track.setViewportY(depthRange);
+            self.plot(track);
+            _depthRange = depthRange;
+        }
+    }
+
+    this.getDepthRangeFromSlidingBar = function() {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
 
         let low = slidingBar.slidingBarState.top * maxDepth / 100;
         let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-        self.setDepthRange([low, high]);
-    };
+        return [low, high];
+    }
+
+    this.adjustSlidingBarFromDepthRange = function(vY) {
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = self.getMaxDepth();
+
+        let top = Math.round(vY[0] * 100 / maxDepth);
+        let range = Math.round(vY[1] * 100 / maxDepth) - top;
+        slidingBar.updateSlidingHandlerByPercent(top, range || 1);
+    }
 
     this.getMaxDepth = function () {
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getYMax) return track.getYMax();
             return -1;
         });
-        return (maxDepth > 0) ? maxDepth : 100000;
+
+        _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
+        return _maxDepth;
     };
 
     this.setColor = function (track, color) {
@@ -154,8 +184,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     };
 
     this.removeCurrentCurve = function() {
-        if (!_currentTrack.getCurrentCurveIdx) return false;
-        return self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurveIdx());
+        if (!_currentTrack.getCurrentCurveIdx) return;
+        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurveIdx());
     };
 
     this.removeCurveFromTrack = function (track, curveIdx) {
@@ -225,6 +255,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         if (i >= 0 && d3.event.button == 2) {
             _curveOnRightClick();
         }
+    }
+
+    function _onPlotMouseWheelCallback(track) {
+        let range = _depthRange[1] - _depthRange[0];
+        let low, high, maxDepth = self.getMaxDepth();
+        let yStep = track.getYStep();
+        if (d3.event.deltaY < 0) {
+            low = _depthRange[0] - range*0.2;
+            high = _depthRange[1] + range*0.2;
+        }
+        else {
+            low = _depthRange[0] + range*0.2;
+            high = _depthRange[1] - range*0.2;
+        }
+        low = low < 0 ? 0 : Math.floor(low / yStep) * yStep;
+        high = high > maxDepth ? maxDepth : Math.ceil(high / yStep) * yStep;
+        self.setDepthRange([low, high]);
+        self.adjustSlidingBarFromDepthRange([low, high]);
     }
 
     function _onHeaderMouseDownCallback(track) {

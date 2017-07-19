@@ -25,7 +25,6 @@ exports.EditFormatButtonClicked = function() {
     var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
     console.log(slidingBar.slidingBarState, low, high, maxDepth);
     myPlot.setDepthRange([low, high]);
-    myPlot.plotAll();
 }
 
 exports.SaveAsLogplotButtonClicked = function() {

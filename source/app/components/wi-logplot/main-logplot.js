@@ -51,7 +51,7 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     $scope.addData2ButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1000]), 'Data2', 'kg');
+        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1100]), 'Data2', 'kg');
     }
 
     $scope.changeColor = function() {

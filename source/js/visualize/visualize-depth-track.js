@@ -109,7 +109,11 @@ function DepthTrack(config) {
     this.doPlot = function() {
         _doPlot();
     }
-    this.setYRange = function(vY) {
+
+    /**
+     * Set y range for viewport
+     */
+    this.setViewportY = function(vY) {
         _viewportY[0] = vY[0];
         _viewportY[1] = vY[1];
     }

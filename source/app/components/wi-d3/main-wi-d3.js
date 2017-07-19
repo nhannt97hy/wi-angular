@@ -12,7 +12,6 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         let track = myPlot.addLogTrack();
         myPlot.addCurveToTrack(track, genSamples(1000), 'Data', 'm3');
         myPlot.setDepthRange([10, 100]);
-        myPlot.plotAll();
     };
 
     function genSamples(nSamples) {
