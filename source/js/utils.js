@@ -125,7 +125,9 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         revert: false,
         scroll: false,
         helper: 'clone',
-        containment: 'document'
+        containment: 'document',
+        cursor: 'move',
+        cursorAt: {top: 0, left: 0}
     });
 };
 

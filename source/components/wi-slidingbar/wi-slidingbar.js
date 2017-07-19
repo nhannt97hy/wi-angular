@@ -6,8 +6,12 @@ const MIN_RANGE = 1;
 function Controller($scope, wiComponentService) {
     let self = this;
 
-    this.tinyWindow = null;
     let parentHeight = 0;
+    this.tinyWindow = {
+        top: 0,
+        height: 0
+    };
+    // tiny windows %
     this.slidingBarState = {
         top: 0,
         range: MIN_RANGE
@@ -15,15 +19,25 @@ function Controller($scope, wiComponentService) {
 
     function update(ui) {
         parentHeight = parseInt($(self.contentId).height());
+        let tempTinyWindowsHeight = self.tinyWindow.height;
+        let tempTinyWindowsTop = self.tinyWindow.top;
 
         if (ui.size) {
-            self.tinyWindow.height = (ui.size.height > parentHeight) ? parentHeight : ui.size.height;
+            tempTinyWindowsHeight = (ui.size.height > parentHeight) ? parentHeight : ui.size.height;
         }
         if (ui.position) {
-            self.tinyWindow.top = (ui.position.top > 0) ? ui.position.top : 0;
+            tempTinyWindowsTop = (ui.position.top > 0) ? ui.position.top : 0;
         }
-        self.slidingBarState.top = Math.round(self.tinyWindow.top / parentHeight * 100);
-        self.slidingBarState.range = Math.round(self.tinyWindow.height / parentHeight * 100);
+
+        updateState(tempTinyWindowsTop, tempTinyWindowsHeight, parentHeight);
+    }
+
+    function updateState(top, height, parentHeight) {
+        self.slidingBarState.top = Math.round(top / parentHeight * 100);
+        self.slidingBarState.range = Math.round(height / parentHeight * 100);
+
+        self.tinyWindow.height = height;
+        self.tinyWindow.top = top;
 
         // call apply to call all parent scope watcher
         $scope.$apply();
@@ -69,17 +83,24 @@ function Controller($scope, wiComponentService) {
         $(self.handleId).on("drag", function (event, ui) {
             update(ui);
         });
-    };
-    /*
-     this.setSlidingHandleHeight = function () {
-     console.log('set slidingHandleHeight');
-     parentHeight = parseInt($(self.contentId).height());
 
-     let initialHeight = Math.round(parentHeight * MIN_RANGE / 100);
-     $(self.handleId).height(initialHeight);
-     self.tinyWindow.height = initialHeight;
-     }
-     */
+        $(self.contentId).on("mousewheel", onMouseWheel);
+        $(self.handleId).on("mousewheel", onMouseWheel);
+
+        function onMouseWheel(event) {
+            let tempTopHandler = self.tinyWindow.top + event.deltaY;
+
+            if (tempTopHandler < 0) {
+                tempTopHandler = 0;
+            } else if (tempTopHandler + self.tinyWindow.height > parentHeight) {
+                tempTopHandler = parentHeight - self.tinyWindow.height;
+            }
+
+            $(self.handleId).css('top', tempTopHandler + 'px');
+
+            updateState(tempTopHandler, self.tinyWindow.height, parentHeight);
+        }
+    };
 }
 
 let app = angular.module(moduleName, []);
