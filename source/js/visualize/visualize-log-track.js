@@ -486,7 +486,7 @@ function LogTrack(config) {
         plotContainer.on('mouseover', cb);
     }
 
-    this.onDrop = function(dragMan, wiD3Ctrl){
+    this.configMouseMovementEventForDropping = function(dragMan, wiD3Ctrl){
         plotContainer
             .on('mouseover', function() {
                 if( !dragMan.dragging ) return;
