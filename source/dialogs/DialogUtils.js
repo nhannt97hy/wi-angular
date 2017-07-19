@@ -1,4 +1,4 @@
-exports.newProjectDialog = function ($mainScope, ModalService, callback) {
+exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.disabled = false;
@@ -55,7 +55,7 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
     });
 };
 
-exports.openProjectDialog = function ($mainScope, ModalService, callback) {
+exports.openProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
