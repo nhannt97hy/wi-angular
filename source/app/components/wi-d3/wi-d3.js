@@ -95,7 +95,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
-        return track;
+        // return track;
     };
 
     this.addCurveToTrack = function(track, data, config) {
