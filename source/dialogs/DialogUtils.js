@@ -772,6 +772,15 @@ exports.addCurveDialog = function (ModalService, callback) {
 exports.lineStyleDialog = function (ModalService, callback, options) {
     function ModalController($scope, close) {
         this.lineColor = "#0000ff";
+        this.style = {
+            name : 'dotted',
+            param : '2, 2'
+        };
+        this.width = {
+            name : '1',
+            param : 1
+        };
+
         if(options.defaultColor){
             this.lineColor = options.defaultColor;
         };
@@ -781,10 +790,7 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
         if(options.defaultWidth){
             this.width = options.defaultWidth;
         }
-        this.style = {
-            name : 'dotted',
-            param : '2, 2'
-        };
+        
         this.styles =[
             {
                 name: 'solid',
@@ -810,12 +816,8 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
                 name : 'dash2dot',
                 param : '10, 4, 2, 4, 2, 4'
             }
-
         ];
-        this.width = {
-            name : '1',
-            param : 1
-        };
+        
 
         this.widthes = [
             {
@@ -858,15 +860,20 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
                 name : "10",
                 param : 10
             }
-        ]
+        ];
+        this.options = {};
         this.getColor = function () {
-            console.log("pick: ", self.lineColor);
         };
         this.onOkButtonClicked = function () {
-
+            console.log("LO: ", self.options);
         };
         this.onApplyButtonClicked = function () {
-
+            self.options = {
+                lineColor : this.lineColor,
+                width : this.width,
+                style : this.style
+            };
+            console.log("Line options: ", self.options);
         };
         this.onCancelButtonClicked = function () {
 
@@ -879,7 +886,6 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -1057,6 +1063,8 @@ exports.importLASDialog = function (ModalService, callback) {
 exports.importMultiLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
+        this.disabled = false;
+        this.error = null;
 
         this.lasFiles = [];
         this.selectedWells = [];
@@ -1065,9 +1073,22 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
         console.log('projectLoaded', self.projectLoaded);
+
         $scope.fileIndex = 0;
         this.onFileClick = function($index) {
             $scope.fileIndex = $index;
+        }
+
+        this.onRemoveFileClick = function() {
+            self.lasFiles.splice($scope.fileIndex,1);
+            self.selectedWells.splice($scope.fileIndex,1);
+            self.selectedDatasets.splice($scope.fileIndex,1);
+        }
+
+        this.onRemoveAllFilesClick = function() {
+            this.lasFiles = [];
+            this.selectedWells = [];
+            this.selectedDatasets = [];
         }
 
         this.onLoadButtonClicked = function () {
@@ -1122,13 +1143,57 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
+exports.fillPatternSettingDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
+        let self = this;
+        this.disabled = false;
+        this.error = null;
+
+        this.onOkButtonClicked = function () {
+            self.error = '';
+            self.disabled = true;
+
+            
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            // close(null, 500);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'fill-pattern-setting/fill-pattern-setting-modal.html',
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+
+        modal.element.draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (data) {
+                callback(data);
+            }
+        });
+    });
+};
+exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
+    function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
         this.disabled = false;
         this.showTitle = false;
         this.showLabel = false;
+
+        this.lineOptions = {};
+
+        console.log("Wi", wiComponentService);
+        let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
+        console.log("Ex", wiExplorerCtrl);
+        
         function fillCurveAttrArray () {
             return [
                 {
@@ -1137,9 +1202,9 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                     leftScale : 20,
                     rightScale : 200,
                     logLinear : "Linear",
-                    displayMode : "",
-                    lineStyle : "",
-                    displayAs : ""
+                    displayMode : "Line",
+                    lineStyle : self.lineOptions,
+                    displayAs : "Normal"
                 },
                 {
                     curveName : "DTCO3",
@@ -1148,11 +1213,11 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                     rightScale : 100,
                     logLinear : "Logarithmic",
                     displayMode : "Line",
-                    lineStyle : "",
+                    lineStyle : self.lineOptions,
                     displayAs : "Normal"
                 }
             ];
-        }
+        };
         function fillShadingAttrArray() {
             return [
                 {
@@ -1199,10 +1264,10 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                 }
             ];
 
-        }
+        };
         function getDatasets () {
             return ['dataset1', 'dataset2'];
-        }
+        };
         function getFullData () {
             return [
                 {
@@ -1215,7 +1280,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                             rightScale : 10,
                             logLinear : "Logarithmic",
                             displayMode : "Line",
-                            lineStyle : "",
+                            lineStyle : self.lineOptions,
                             displayAs : "Normal"
                         },
                         {
@@ -1225,7 +1290,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                             rightScale : 20,
                             logLinear : "Linear",
                             displayMode : "Line",
-                            lineStyle : "",
+                            lineStyle : self.lineOptions,
                             displayAs : "Normal"
                         }
                     ]
@@ -1266,7 +1331,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                     ]
                 }
             ];
-        }
+        };
         this.setTitle = function () {
             if (self.showTitle != true) {
                 $('#title').prop("disabled", false);
@@ -1306,24 +1371,27 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         this.topJust = "center";
         this.bottomJust = "center";
 
-        this.curveName = ["DTCO3", "ECGR"];
+        // this.curveName = ["DTCO3", "ECGR"];
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
         this.colorTrack = "#fff";
         this.getColor = function () {
+            // TODO:
             console.log("pick: ", self.colorTrack);
         };
 
         self.curveAttr = fillCurveAttrArray();
         this.shadingAttr = fillShadingAttrArray();
 
-        this.selectedCurve = {};
-        this.selectedShading = {};
+        // this.selectedCurve = null;
+        // this.selectedShading = {};
+
         this.datasets = getDatasets();
         this.fillDataset = getFullData();
         this.selectDataset = getFullData();
+
         this.setClickedRowCurve = function(index){
             self.selectedRow = index; 
             self.selectedCurve = self.curveAttr[index];
@@ -1354,7 +1422,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                 self.curveAttr.splice(idx-1, 0, moveCurve[0]);
             };
             self.setClickedRowCurve(idx-1);
-        }
+        };
         
         this.arrowDownCurve = function () {      
             let prevIdx = self.curveAttr.length;
@@ -1404,21 +1472,11 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         };
         this.addRow = function () {
                 self.fillDataset.push({});
-        }
+        };
         this.lineStyleButtonClicked = function () {
             DialogUtils.lineStyleDialog(ModalService, function () {
-                
-            },{
-                defaultColor : '#00ff00',
-                defaultStyle : {
-                    name : 'dotted',
-                    param : '2, 2'
-                },
-                defaultWidth : {
-                    name : "3",
-                    param : 3
-                }
-            });
+
+            }, self.lineOptions);
         };
         this.onCancelButtonClicked = function () {
             console.log("onCancelButtonClicked");
@@ -1432,11 +1490,10 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        // modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(data);
+            // callback(data);
         });
     });
 };
