@@ -247,12 +247,12 @@ gulp.task('gen-template', ['gen-wi-logplot-template', 'gen-wi-explorer-template'
 
 gulp.task('gen-wi-logplot-template', function () {
     var configFile = 'config/wi-logplot.config.js';
-    var xlsxFile = './Wi-LogPlot.xlsx';
+    var xlsxFile = './Wi-LogPlot.Nam.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 gulp.task('gen-wi-explorer-template', function () {
     var configFile = 'config/wi-explorer.config.js';
-    var xlsxFile = './Wi-Explorer.xlsx';
+    var xlsxFile = './Wi-Explorer.Nam.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 
@@ -267,7 +267,7 @@ gulp.task('gen-functions', ['gen-wi-logplot-functions', 'gen-wi-explorer-functio
 
 gulp.task('gen-wi-logplot-functions', function () {
     var configFile = 'config/wi-logplot.config.js';
-    var xlsxFile = './Wi-LogPlot.xlsx';
+    var xlsxFile = './Wi-LogPlot.Nam.xlsx';
     var templateFile = 'source/js/wi-logplot-handlers.js.tmpl';
 
     var wiUI = require('./preprocess/excel-to-json.js');
@@ -276,7 +276,7 @@ gulp.task('gen-wi-logplot-functions', function () {
 
 gulp.task('gen-wi-explorer-functions', function () {
     var configFile = 'config/wi-explorer.config.js';
-    var xlsxFile = './Wi-Explorer.xlsx';
+    var xlsxFile = './Wi-Explorer.Nam.xlsx';
     var templateFile = 'source/js/wi-explorer-handlers.js.tmpl';
 
     var wiUI = require('./preprocess/excel-to-json.js');
