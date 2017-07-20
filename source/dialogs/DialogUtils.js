@@ -1126,7 +1126,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
     function ModalController($scope, close) {
         let error = null;
         let self = this;
-        $scope.propertyTab = 'general';
+        this.disabled = false;
         this.showTitle = false;
         this.showLabel = false;
         function fillCurveAttrArray () {
@@ -1432,7 +1432,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.element.draggable();
+        // modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
