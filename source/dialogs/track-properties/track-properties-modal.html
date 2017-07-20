@@ -156,55 +156,6 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- <tr ng-model="wiModal.selectedCurve"
-                                                    ng-repeat="curve in wiModal.curveAttr"
-                                                    ng-class="{'selected':$index == wiModal.selectedRow}"
-                                                    ng-click="wiModal.setClickedRowCurve($index)">
-                                                    <td>
-                                                        <select ng-model="wiModal.dataset"
-                                                                class="form-control wi-form-control"
-                                                                ng-options="item for item in wiModal.datasets track by item"
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select ng-model="curve.curveName" name="curveName"
-                                                                value="" class="form-control wi-form-control"
-                                                                ng-options="item for item in wiModal.curveName track by item"></select>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" ng-model="curve.alias"
-                                                               class="form-control wi-form-control"
-                                                                size="10">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" ng-model="curve.leftScale"
-                                                               class="form-control wi-form-control"
-                                                                size="10">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" ng-model="curve.rightScale"
-                                                               class="form-control wi-form-control"
-                                                                size="10">
-                                                    </td>
-                                                    <td>
-                                                        <select ng-model="curve.logLinear" name="log"
-                                                                value="" class="form-control wi-form-control"
-                                                                ng-options="item for item in wiModal.logLinear track by item"></select>
-                                                    </td>
-                                                    <td>
-                                                        <select ng-model="curve.displayMode" name="displayMode"
-                                                                value="" class="form-control wi-form-control"
-                                                                ng-options="item for item in wiModal.displayMode track by item"></select>
-                                                    </td>
-                                                    <td>
-                                                        <button ng-click="wiModal.lineStyleButtonClicked();">Edit...</button>
-                                                    </td>
-                                                    <td>
-                                                        <select ng-model="curve.displayAs" name="displayAs"
-                                                                value="" class="form-control wi-form-control"
-                                                                ng-options="item for item in wiModal.displayAs track by item"></select>
-                                                    </td>
-                                                </tr> -->
                                                 <tr ng-repeat="getData in wiModal.fillDataset"
                                                     ng-class="{'selected':$index == wiModal.selectedRow}"
                                                     ng-click="wiModal.setClickedRowCurve($index)">
