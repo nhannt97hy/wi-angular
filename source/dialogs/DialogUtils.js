@@ -1065,9 +1065,22 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
         console.log('projectLoaded', self.projectLoaded);
+
         $scope.fileIndex = 0;
         this.onFileClick = function($index) {
             $scope.fileIndex = $index;
+        }
+
+        this.onRemoveFileClick = function() {
+            self.lasFiles.splice($scope.fileIndex,1);
+            self.selectedWells.splice($scope.fileIndex,1);
+            self.selectedDatasets.splice($scope.fileIndex,1);
+        }
+
+        this.onRemoveAllFilesClick = function() {
+            this.lasFiles = [];
+            this.selectedWells = [];
+            this.selectedDatasets = [];
         }
 
         this.onLoadButtonClicked = function () {
