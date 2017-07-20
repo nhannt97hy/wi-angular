@@ -3,7 +3,7 @@ const moduleName = 'wi-slidingbar';
 
 const MIN_RANGE = 1;
 
-function Controller($scope, wiComponentService) {
+function Controller($scope, wiComponentService, $timeout) {
     let self = this;
 
     let parentHeight = 0;
@@ -11,7 +11,7 @@ function Controller($scope, wiComponentService) {
         top: 0,
         height: 0
     };
-    // tiny windows %
+    // tiny windows by percent
     this.slidingBarState = {
         top: 0,
         range: MIN_RANGE
@@ -29,7 +29,9 @@ function Controller($scope, wiComponentService) {
             tempTinyWindowsTop = (ui.position.top > 0) ? ui.position.top : 0;
         }
 
-        updateState(tempTinyWindowsTop, tempTinyWindowsHeight, parentHeight);
+        $timeout(function () {
+            updateState(tempTinyWindowsTop, tempTinyWindowsHeight, parentHeight);
+        });
     }
 
     function updateState(top, height, parentHeight) {
@@ -38,11 +40,6 @@ function Controller($scope, wiComponentService) {
 
         self.tinyWindow.height = height;
         self.tinyWindow.top = top;
-
-        // call apply to call all parent scope watcher
-        $scope.$apply();
-
-        console.log('updateState');
     }
 
     this.$onInit = function () {
@@ -105,15 +102,47 @@ function Controller($scope, wiComponentService) {
             $(self.handleId).css('top', top + 'px');
             $(self.handleId).css('height', height + 'px');
 
-            updateState(top, height, parentHeight);
+            $timeout(function () {
+                updateState(top, height, parentHeight);
+            });
         }
 
         this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
-            let top = Math.round((topPercent * parentHeight) / 100);
-            let height = Math.round((rangePercent * parentHeight) / 100);
+            let newTop = Math.round((topPercent * parentHeight) / 100);
+            let newHeight = Math.round((rangePercent * parentHeight) / 100);
 
-            updateSlidingHandler(top, height);
-        }
+            if (newTop < 0) newTop = 0;
+
+            if (newHeight + newTop > parentHeight && newHeight <= parentHeight) {
+                newTop = parentHeight - newHeight;
+            } else if (newHeight + newTop > parentHeight && newHeight > parentHeight){
+                newTop = 0;
+                newHeight = parentHeight;
+            }
+
+            updateSlidingHandler(newTop, newHeight);
+        };
+
+        this.updateRangeSlidingHandler = function (rangePercent) {
+            self.updateSlidingHandlerByPercent(self.slidingBarState.top, rangePercent);
+        };
+
+        this.zoomIn = function () {
+            let deltaRange = 4;
+            let newRange = self.slidingBarState.range - (deltaRange * 2);
+            let newTop = self.slidingBarState.top + deltaRange;
+
+            if (newRange <= 0) return;
+
+            self.updateSlidingHandlerByPercent(newTop, newRange);
+        };
+
+        this.zoomOut = function () {
+            let deltaRange = 4;
+            let newRange = self.slidingBarState.range + (deltaRange * 2);
+            let newTop = self.slidingBarState.top - deltaRange;
+            self.updateSlidingHandlerByPercent(newTop, newRange);
+        };
     };
 }
 
