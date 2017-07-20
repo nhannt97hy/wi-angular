@@ -44,6 +44,8 @@ exports.newProjectDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+
+        modal.element.draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -117,6 +119,7 @@ exports.openProjectDialog = function (ModalService, callback) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -143,6 +146,7 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -351,6 +355,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -407,6 +412,7 @@ exports.addNewDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -430,6 +436,7 @@ exports.wellHeaderDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -475,6 +482,7 @@ exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -526,6 +534,7 @@ exports.familyEditDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -554,6 +563,7 @@ exports.blankLogplotDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -581,6 +591,7 @@ exports.tripleComboDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -608,6 +619,7 @@ exports.densityNeutronDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -635,6 +647,7 @@ exports.resistivitySonicDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -662,6 +675,7 @@ exports.threeTracksBlankDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -689,6 +703,7 @@ exports.inputCurveDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -716,6 +731,7 @@ exports.lithoSynCurveDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -744,6 +760,7 @@ exports.addCurveDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -752,9 +769,96 @@ exports.addCurveDialog = function (ModalService, callback) {
     });
 }
 
-exports.lineStyleDialog = function (ModalService, callback) {
+exports.lineStyleDialog = function (ModalService, callback, options) {
     function ModalController($scope, close) {
-        this.lineColor = '#cecece';
+        this.lineColor = "#0000ff";
+        if(options.defaultColor){
+            this.lineColor = options.defaultColor;
+        };
+        if(options.defaultStyle){
+            this.style = options.defaultStyle;
+        };
+        if(options.defaultWidth){
+            this.width = options.defaultWidth;
+        }
+        this.style = {
+            name : 'dotted',
+            param : '2, 2'
+        };
+        this.styles =[
+            {
+                name: 'solid',
+                param: '10, 0'
+            },
+            {
+                name : 'none',
+                param : '0, 10'
+            },
+            {
+                name : 'dotted',
+                param : '2, 2'
+            },
+            {
+                name : 'dashed',
+                param : '8, 2'
+            },
+            {
+                name : 'dashdot',
+                param : '10, 4, 2, 4'
+            },
+            {
+                name : 'dash2dot',
+                param : '10, 4, 2, 4, 2, 4'
+            }
+
+        ];
+        this.width = {
+            name : '1',
+            param : 1
+        };
+
+        this.widthes = [
+            {
+                name : "1",
+                param : 1
+            },
+            {
+                name : "2",
+                param : 2
+            },
+            {
+                name : "3",
+                param : 3
+            },
+            {
+                name : "4",
+                param : 4
+            },
+            {
+                name : "5",
+                param : 5
+            },
+            {
+                name : "6",
+                param : 6
+            },
+            {
+                name : "7",
+                param : 7
+            },
+            {
+                name : "8",
+                param : 8
+            },
+            {
+                name : "9",
+                param : 9
+            },
+            {
+                name : "10",
+                param : 10
+            }
+        ]
         this.getColor = function () {
             console.log("pick: ", self.lineColor);
         };
@@ -775,6 +879,7 @@ exports.lineStyleDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -873,6 +978,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        modal.element.draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -1016,13 +1122,151 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-exports.trackPropertiesDialog = function (ModalService, callback) {
+exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
     function ModalController($scope, close) {
         let error = null;
         let self = this;
-        $scope.propertyTab = 'general';
+        this.disabled = false;
         this.showTitle = false;
         this.showLabel = false;
+        function fillCurveAttrArray () {
+            return [
+                {
+                    curveName : "ECGR",
+                    alias : "ECGR",
+                    leftScale : 20,
+                    rightScale : 200,
+                    logLinear : "Linear",
+                    displayMode : "",
+                    lineStyle : "",
+                    displayAs : ""
+                },
+                {
+                    curveName : "DTCO3",
+                    alias : "DTCO3",
+                    leftScale : 10,
+                    rightScale : 100,
+                    logLinear : "Logarithmic",
+                    displayMode : "Line",
+                    lineStyle : "",
+                    displayAs : "Normal"
+                }
+            ];
+        }
+        function fillShadingAttrArray() {
+            return [
+                {
+                    left : {
+                        curveName: "DTCO3",
+                        fixedValue : "fixed1"
+                    },
+                    right : {
+                        curveName: "DTCO3-3",
+                        fixedValue : "fixed2"
+                    },
+                    shadingName : "shading1",
+                    shadingStyle : "Fill Pattern",
+                    fillPattern : "",
+                    variableShading : ""
+                },
+                {
+                    left : {
+                        curveName: "DTCO3-1",
+                        fixedValue : "fixed11"
+                    },
+                    right : {
+                        curveName: "DTCO3-3-1",
+                        fixedValue : "fixed21"
+                    },
+                    shadingName : "shading1",
+                    shadingStyle : "Fill Pattern",
+                    fillPattern : "",
+                    variableShading : ""
+                },
+                {
+                    left : {
+                        curveName: "DTCO3-2",
+                        fixedValue : "fixed12"
+                    },
+                    right : {
+                        curveName: "DTCO3-3-2",
+                        fixedValue : "fixed22"
+                    },
+                    shadingName : "shading1",
+                    shadingStyle : "Fill Pattern",
+                    fillPattern : "",
+                    variableShading : ""
+                }
+            ];
+
+        }
+        function getDatasets () {
+            return ['dataset1', 'dataset2'];
+        }
+        function getFullData () {
+            return [
+                {
+                    name : "dataset1",
+                    content : [
+                        {
+                            curveName: "DTCO3",
+                            alias : "DTCO3",
+                            leftScale : 1000,
+                            rightScale : 10,
+                            logLinear : "Logarithmic",
+                            displayMode : "Line",
+                            lineStyle : "",
+                            displayAs : "Normal"
+                        },
+                        {
+                            curveName: "ECGR",
+                            alias : "ECGR",
+                            leftScale : 2000,
+                            rightScale : 20,
+                            logLinear : "Linear",
+                            displayMode : "Line",
+                            lineStyle : "",
+                            displayAs : "Normal"
+                        }
+                    ]
+                },
+                {
+                    name : "dataset2",
+                    content : [
+                        {
+                            curveName: "DTCO3",
+                            alias : "DTCO3",
+                            leftScale : 1000,
+                            rightScale : 10,
+                            logLinear : "Logarithmic",
+                            displayMode : "Line",
+                            lineStyle : "",
+                            displayAs : "Normal"
+                        },
+                        {
+                            curveName: "ECGR",
+                            alias : "ECGR",
+                            leftScale : 2000,
+                            rightScale : 20,
+                            logLinear : "Linear",
+                            displayMode : "Line",
+                            lineStyle : "",
+                            displayAs : "Normal"
+                        },
+                        {
+                            curveName: "ECGRRRRR",
+                            alias : "ECGR",
+                            leftScale : 2000,
+                            rightScale : 20,
+                            logLinear : "Linear",
+                            displayMode : "Line",
+                            lineStyle : "",
+                            displayAs : "Normal"
+                        }
+                    ]
+                }
+            ];
+        }
         this.setTitle = function () {
             if (self.showTitle != true) {
                 $('#title').prop("disabled", false);
@@ -1067,101 +1311,19 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
-        this.colorTrack = "#888";
+        this.colorTrack = "#fff";
         this.getColor = function () {
             console.log("pick: ", self.colorTrack);
         };
-        
-        // this.curveAttr = [];
-        self.curveAttr = [
-            {
-                curveName : "ECGR",
-                alias : "ECGR",
-                leftScale : "20",
-                rightScale : "200",
-                logLinear : "Linear",
-                displayMode : "",
-                lineStyle : "",
-                displayAs : ""
-            }, 
-            {
-                curveName : "DTCO3",
-                alias : "DTCO3",
-                leftScale : "10",
-                rightScale : "100",
-                logLinear : "Logarithmic",
-                displayMode : "Line",
-                lineStyle : "",
-                displayAs : "Normal"
-            },
-            {
-                curveName : "balla",
-                alias : "balal",
-                leftScale : "10",
-                rightScale : "100",
-                logLinear : "Logarithmic",
-                displayMode : "Line",
-                lineStyle : "",
-                displayAs : "Normal"
-            },
-            {
-                curveName : "curveName",
-                alias : "blalalal",
-                leftScale : "10",
-                rightScale : "100",
-                logLinear : "Logarithmic",
-                displayMode : "Line",
-                lineStyle : "",
-                displayAs : "Normal"
-            }
-        ];
-        this.shadingAttr = [
-            {
-                left : {
-                    curveName: "DTCO3",
-                    fixedValue : "fixed1"
-                },
-                right : {
-                    curveName: "DTCO3-3",
-                    fixedValue : "fixed2"
-                },
-                shadingName : "shading1",
-                shadingStyle : "Fill Pattern",
-                fillPattern : "",
-                variableShading : ""
-            },
-            {
-                left : {
-                    curveName: "DTCO3-1",
-                    fixedValue : "fixed11"
-                },
-                right : {
-                    curveName: "DTCO3-3-1",
-                    fixedValue : "fixed21"
-                },
-                shadingName : "shading1",
-                shadingStyle : "Fill Pattern",
-                fillPattern : "",
-                variableShading : ""
-            },
-            {
-                left : {
-                    curveName: "DTCO3-2",
-                    fixedValue : "fixed12"
-                },
-                right : {
-                    curveName: "DTCO3-3-2",
-                    fixedValue : "fixed22"
-                },
-                shadingName : "shading1",
-                shadingStyle : "Fill Pattern",
-                fillPattern : "",
-                variableShading : ""
-            }
-        ];
+
+        self.curveAttr = fillCurveAttrArray();
+        this.shadingAttr = fillShadingAttrArray();
+
         this.selectedCurve = {};
         this.selectedShading = {};
-
+        this.datasets = getDatasets();
+        this.fillDataset = getFullData();
+        this.selectDataset = getFullData();
         this.setClickedRowCurve = function(index){
             self.selectedRow = index; 
             self.selectedCurve = self.curveAttr[index];
@@ -1240,7 +1402,24 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
             }  
             self.setClickedRowShading(idx+1);
         };
-
+        this.addRow = function () {
+                self.fillDataset.push({});
+        }
+        this.lineStyleButtonClicked = function () {
+            DialogUtils.lineStyleDialog(ModalService, function () {
+                
+            },{
+                defaultColor : '#00ff00',
+                defaultStyle : {
+                    name : 'dotted',
+                    param : '2, 2'
+                },
+                defaultWidth : {
+                    name : "3",
+                    param : 3
+                }
+            });
+        };
         this.onCancelButtonClicked = function () {
             console.log("onCancelButtonClicked");
             close(null, 100);
@@ -1253,7 +1432,8 @@ exports.trackPropertiesDialog = function (ModalService, callback) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (data) {
+        // modal.element.draggable();
+        modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(data);

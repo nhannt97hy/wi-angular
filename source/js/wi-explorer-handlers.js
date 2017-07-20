@@ -18,7 +18,14 @@ exports.ImportLASButtonClicked = function () {
 }
 
 exports.ImportMultiLASButtonClicked = function () {
-    console.log('ImportMultiLASButton is clicked');
+    let self = this;
+    let utils = this.wiComponentService.getComponent(self.wiComponentService.UTILS);
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importMultiLASDialog(this.ModalService, function (wells) {
+        if (wells) {
+            utils.updateWellsProject(self.wiComponentService, wells);
+        }
+    })
 }
 
 exports.ImportDLISButtonClicked = function () {
