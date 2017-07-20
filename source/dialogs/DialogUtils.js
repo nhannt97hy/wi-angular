@@ -1193,31 +1193,32 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         console.log("Wi", wiComponentService);
         let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
         console.log("Ex", wiExplorerCtrl);
+        console.log('treeConfig:', wiExplorerCtrl.treeConfig);
         
-        function fillCurveAttrArray () {
-            return [
-                {
-                    curveName : "ECGR",
-                    alias : "ECGR",
-                    leftScale : 20,
-                    rightScale : 200,
-                    logLinear : "Linear",
-                    displayMode : "Line",
-                    lineStyle : self.lineOptions,
-                    displayAs : "Normal"
-                },
-                {
-                    curveName : "DTCO3",
-                    alias : "DTCO3",
-                    leftScale : 10,
-                    rightScale : 100,
-                    logLinear : "Logarithmic",
-                    displayMode : "Line",
-                    lineStyle : self.lineOptions,
-                    displayAs : "Normal"
-                }
-            ];
-        };
+        // function fillCurveAttrArray () {
+        //     return [
+        //         {
+        //             curveName : "ECGR",
+        //             alias : "ECGR",
+        //             leftScale : 20,
+        //             rightScale : 200,
+        //             logLinear : "Linear",
+        //             displayMode : "Line",
+        //             lineStyle : self.lineOptions,
+        //             displayAs : "Normal"
+        //         },
+        //         {
+        //             curveName : "DTCO3",
+        //             alias : "DTCO3",
+        //             leftScale : 10,
+        //             rightScale : 100,
+        //             logLinear : "Logarithmic",
+        //             displayMode : "Line",
+        //             lineStyle : self.lineOptions,
+        //             displayAs : "Normal"
+        //         }
+        //     ];
+        // };
         function fillShadingAttrArray() {
             return [
                 {
@@ -1382,7 +1383,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
             console.log("pick: ", self.colorTrack);
         };
 
-        self.curveAttr = fillCurveAttrArray();
+        // self.curveAttr = fillCurveAttrArray();
         this.shadingAttr = fillShadingAttrArray();
 
         // this.selectedCurve = null;

@@ -165,7 +165,7 @@
                                                                 ng-options="dataset as dataset.name for dataset in wiModal.selectDataset track by dataset.name"></select>
                                                     </td> 
                                                     <td>
-                                                        <select ng-model="wiModal.curveAttr[$index]" 
+                                                        <select ng-model="wiModal.fillDataset[$index].content" 
                                                                 class="form-control wi-form-control" 
                                                                 ng-options="selectCurve as selectCurve.curveName for selectCurve in wiModal.fillDataset[$index].content track by selectCurve.curveName">
                                                         </select>
