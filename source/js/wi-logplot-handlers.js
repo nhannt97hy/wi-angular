@@ -143,11 +143,11 @@ exports.ViewWholeWellButtonClicked = function() {
 };
 
 exports.AddDepthAxisButtonClicked = function() {
-    console.log('AddDepthAxisButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().addDepthTrack();
 };
 
 exports.NewTrackButtonClicked = function() {
-    console.log('NewTrackButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().addLogTrack();
 };
 
 exports.DuplicateTrackButtonClicked = function() {
@@ -155,7 +155,7 @@ exports.DuplicateTrackButtonClicked = function() {
 };
 
 exports.DeleteTrackButtonClicked = function() {
-    console.log('DeleteTrackButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().removeCurrentTrack();
 };
 
 exports.AddMarkerButtonClicked = function() {
