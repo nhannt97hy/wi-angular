@@ -56,6 +56,7 @@ app.factory(wiServiceName, function () {
         LOGPLOT_HANDLERS: 'LOGPLOT_HANDLERS',
         TREE_FUNCTIONS: 'tree-functions',
         GLOBAL_HANDLERS: 'GLOBAL_HANDLERS',
+        WI_EXPLORER_HANDLERS: 'wi-explorer-handlers',
         GRAPH: 'GRAPH',
         DRAG_MAN: 'DRAG_MAN',
         DIALOG_UTILS:'DIALOG_UTILS',

@@ -6,7 +6,8 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
 
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
-        $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+        $scope.handlers = wiComponentService.getComponent(wiComponentService.WI_EXPLORER_HANDLERS);
+        self.handlers = $scope.handlers;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
@@ -58,71 +59,83 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
         ]
     }
 
+
     this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
+        const defaultWellCtxMenu = [
+            {
+                name: "CreateNewWell",
+                label: "Create New Well",
+                icon: "well-new-16x16",
+                handler: function () {
+                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+                    DialogUtils.addNewDialog(ModalService, function (newWell) {
+                        if (newWell) utils.updateWellProject(wiComponentService, newWell);
+                    });
+                }
+            }, {
+                name: "ImportASCII",
+                label: "Import ASCII",
+                icon: "ascii-import-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportMultiASCII",
+                label: "Import Multi ASCII",
+                icon: "ascii-import-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportLAS",
+                label: "Import LAS",
+                icon: "las-import-16x16",
+                handler: function () {
+                    self.handlers.ImportLASButtonClicked();
+                }
+            }, {
+                name: "ImportMultiLAS",
+                label: "Import Multi LAS",
+                icon: "las-import-16x16",
+                handler: function () {
+                    self.handlers.ImportMultiLASButtonClicked();
+                }
+            }, {
+                name: "ImportDLIS",
+                label: "Import DLIS",
+                icon: "",
+                handler: function () {
+                }
+            }, {
+                name: "IntervalCoreLoader",
+                label: "Interval/Core Loader",
+                icon: "load-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "MultiwellCoreLoader",
+                label: "Multi-well Core Loader",
+                icon: "load-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportWellHeader",
+                label: "Import Well Header",
+                icon: "las-import-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportWellTop",
+                label: "Import Well Top",
+                icon: "las-import-16x16",
+                handler: function () {
+                }
+            }
+        ]
         switch (configType) {
             case 'wells':
-                return [
+                return defaultWellCtxMenu.concat([
                     {
-                        name: "CreateNewWell",
-                        label: "Create New Well",
-                        icon: "well-new-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportASCII",
-                        label: "Import ASCII",
-                        icon: "ascii-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportMultiASCII",
-                        label: "Import Multi ASCII",
-                        icon: "ascii-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportLAS",
-                        label: "Import LAS",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportMultiLAS",
-                        label: "Import Multi LAS",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportDLIS",
-                        label: "Import DLIS",
-                        icon: "",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "IntervalCoreLoader",
-                        label: "Interval/Core Loader",
-                        icon: "load-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "MultiwellCoreLoader",
-                        label: "Multi-well Core Loader",
-                        icon: "load-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportWellHeader",
-                        label: "Import Well Header",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportWellTop",
-                        label: "Import Well Top",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
                         name: "GroupManager",
                         label: "Group Manager",
                         icon: "",
@@ -139,83 +152,10 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                     }, {
                         separator: '1'
                     }
-                ];
+                ]);
             case 'well':
-                return [
+                return defaultWellCtxMenu.concat([
                     {
-                        name: "CreateNewWell",
-                        label: "Create New Well",
-                        icon: "well-new-16x16",
-                        handler: function () {
-                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-                            DialogUtils.addNewDialog(ModalService, function (newWell) {
-                                if (newWell) utils.updateWellProject(wiComponentService, newWell);
-                            });
-                        }
-                    }, {
-                        name: "ImportASCII",
-                        label: "Import ASCII",
-                        icon: "ascii-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportMultiASCII",
-                        label: "Import Multi ASCII",
-                        icon: "ascii-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportLAS",
-                        label: "Import LAS",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                            DialogUtils.importLASDialog(ModalService, function (well) {
-                                if (well) {
-                                    utils.updateWellProject(wiComponentService, well);
-                                }
-                            });
-                        }
-                    }, {
-                        name: "ImportMultiLAS",
-                        label: "Import Multi LAS",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportDLIS",
-                        label: "Import DLIS",
-                        icon: "",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "IntervalCoreLoader",
-                        label: "Interval/Core Loader",
-                        icon: "load-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "MultiwellCoreLoader",
-                        label: "Multi-well Core Loader",
-                        icon: "load-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportWellHeader",
-                        label: "Import Well Header",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportWellTop",
-                        label: "Import Well Top",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
                         name: "NewDataset",
                         label: "New Dataset",
                         icon: "dataset-new-16x16",
@@ -248,7 +188,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                     }, {
                         separator: '1'
                     }
-                ];
+                ]);
             case 'data':
                 return [
                     {

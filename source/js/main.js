@@ -103,6 +103,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
+    let wiExplorerHandlers = {};
     utils.bindFunctions(globalHandlers, handlers, {
         $scope: $scope,
         wiComponentService: wiComponentService,
@@ -115,7 +116,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         ModalService: ModalService,
         $timeout: $timeout
     });
-    utils.bindFunctions(globalHandlers, explorerHandlers, {
+    utils.bindFunctions(wiExplorerHandlers, explorerHandlers, {
         $scope: $scope,
         wiComponentService: wiComponentService,
         ModalService: ModalService,
@@ -129,6 +130,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     });
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
+    wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
