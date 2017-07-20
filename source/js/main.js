@@ -153,13 +153,13 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     layoutManager.putLeft('property-block', 'Properties');
     layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
-    // Install 
+    // Install TEST
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
-        // layoutManager.removeAllRightTabs();
+        layoutManager.removeAllRightTabs();
     });
 });

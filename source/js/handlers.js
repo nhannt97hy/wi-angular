@@ -74,10 +74,12 @@ exports.PropertyGridButtonClicked = function () {
 exports.ExitButtonClicked = function () {
     console.log('ExitButton is clicked');
     let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (ret) {
-        console.log("User choose: " + ret);
-        window.close();
+    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (isExit) {
+        if (isExit) {
+            utils.projectClose(wiComponentService);
+        }
     })
 };
 
