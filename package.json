@@ -31,6 +31,9 @@
   "repository": {
     "private": "true"
   },
-  "author": "minhnt95 and friends",
+  "author": {
+    "name": "minhnt95 and friends",
+    "email": "tienminh.uet@gmail.com"
+  },
   "license": "ISC"
 }
