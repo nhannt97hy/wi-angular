@@ -10,10 +10,16 @@
                 <form class="form-horizontal" action="" name="modalImportLAS">
                     <div class="row">
                         <div class="form-group">
-                            <div class="col-sm-5">
-                                <label for="selected" class="btn btn-default">Select</label>
+                            <div class="col-sm-12">
+                                <label for="selected" class="btn btn-default">Select files</label>
                                 <input id="selected" class="display-none" type="file" ngf-select multiple ng-model="wiModal.lasFiles" ngf-max-size="1000MB"
                                     required/>
+                                <button type="button" class="btn btn-default" ng-click="wiModal.onRemoveFileClick()">
+                                    <span class="delete-16x16"></span>&nbsp;Remove
+                                </button>
+                                <button type="button" class="btn btn-default" ng-click="wiModal.onRemoveAllFilesClick()">
+                                    <span class="clear-16x16"></span>&nbsp;Clear
+                                </button>
                             </div>
                         </div>
                     </div>

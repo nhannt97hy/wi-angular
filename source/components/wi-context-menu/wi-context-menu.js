@@ -78,11 +78,10 @@ function Controller($scope, wiComponentService) {
     }
     this.onMouseLeaveButton = function (button) {
         if (button.childContextMenu && button.childContextMenu.length) {
-            console.log('mouse leave menu with children');
             droppingMenu = button.childContextMenu;
             self.dismissChildCtxMenuTimeout = setTimeout(function () {
                 self.contextMenus.pop();
-            }, 100);
+            }, 200);
         } else {
             droppingMenu = [];
         }

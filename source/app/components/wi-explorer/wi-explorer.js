@@ -145,10 +145,34 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                         separator: '1'
                     }, {
                         name: "Sort",
-                        label: "Sort",
+                        label: "Sort ...",
                         icon: "",
                         handler: function () {
-                        }
+                        },
+                        childContextMenu: [
+                            {
+                                name: "SortNone",
+                                label: "None",
+                                icon: "",
+                                handler: function() {
+
+                                }
+                            }, {
+                                name: "SortAZ",
+                                label: "A-Z",
+                                icon: "arrow-down-16x16",
+                                handler: function() {
+
+                                }
+                            }, {
+                                name: "SortZA",
+                                label: "Z-A",
+                                icon: "arrow-up-16x16",
+                                handler: function() {
+                                    
+                                }
+                            }
+                        ]
                     }, {
                         separator: '1'
                     }
@@ -322,7 +346,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
             case 'crossplot':
                 return [
                     {
-                        name: "NewCrossPlot",
+                        name: "NewCrossPlot ...",
                         label: "New CrossPlot",
                         icon: "crossplot-new-16x16",
                         handler: function () {
