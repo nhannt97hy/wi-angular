@@ -1,8 +1,10 @@
 {
   "name": "wi-angular",
   "version": "1.0.0",
-  "description": "",
+  "description": "well insight web app with angular",
+  "main": "build/js/index.js",
   "dependencies": {
+    "angular-bootstrap-colorpicker": "^3.0.31",
     "del": "^2.2.2",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
@@ -28,6 +30,6 @@
   "repository": {
     "private": "true"
   },
-  "author": "",
+  "author": "minhnt95 and friends",
   "license": "ISC"
 }

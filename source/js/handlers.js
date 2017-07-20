@@ -3,18 +3,17 @@ exports.NewProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.$scope, this.ModalService, function (data) {
+    DialogUtils.newProjectDialog(this.ModalService, function (data) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, data);
     });
-}
+};
 
 exports.OpenProjectButtonClicked = function () {
     let self = this;
-    console.log('OpenProjectButtoon is clicked');
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
+    DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
     });
@@ -23,8 +22,8 @@ exports.OpenProjectButtonClicked = function () {
 exports.CloseProjectButtonClicked = function () {
     let self = this;
     console.log('CloseProjectButton is clicked');
-    var utils = this.wiComponentService.getComponent('UTILS');
-    var DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    let utils = this.wiComponentService.getComponent('UTILS');
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
         if (yesOrNo) {
             utils.projectClose(self.wiComponentService);
@@ -34,8 +33,8 @@ exports.CloseProjectButtonClicked = function () {
 
 exports.UnitSettingsButtonClicked = function () {
     console.log('UnitSettingsButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.unitSettingDialog(this.ModalService, function (ret) {
         console.log("User Choose: " + ret);
     })
@@ -51,16 +50,13 @@ exports.SaveProjectAsButtonClicked = function () {
 
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
-    let utils = wiComponentService.getComponent('UTILS');
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+
     if (!layoutManager.isComponentExist('explorer-block')) {
         layoutManager.putLeft('explorer-block', 'Project');
-        console.log(utils.openProject);
-        if (utils.openProject.valid) {
-            console.log(utils.openProject);
-            wiComponentService.emit('project-loaded-event', utils.openProject);
-        }
+
+        wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
     }
 };
 
@@ -70,8 +66,9 @@ exports.WorkflowsButtonClicked = function () {
 
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+
     if (!layoutManager.isComponentExist('property-block')) {
         layoutManager.putLeft('property-block', 'Properties');
     }
@@ -79,8 +76,8 @@ exports.PropertyGridButtonClicked = function () {
 
 exports.ExitButtonClicked = function () {
     console.log('ExitButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (ret) {
         console.log("User choose: " + ret);
         window.close();
@@ -88,11 +85,13 @@ exports.ExitButtonClicked = function () {
 };
 
 exports.AddNewButtonClicked = function () {
-    console.log('AddNewButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.addNewDialog(this.ModalService, function (ret) {
-        console.log("User Choose: " + ret);
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+
+    DialogUtils.addNewDialog(this.ModalService, function (newWell) {
+        if (newWell) utils.updateWellProject(wiComponentService, newWell);
     })
 };
 
@@ -131,11 +130,25 @@ exports.ImportMultiASCIIButtonClicked = function () {
 };
 
 exports.ImportLASButtonClicked = function () {
-    console.log('ImportLASButton is clicked');
+    let self = this;
+    let utils = this.wiComponentService.getComponent(self.wiComponentService.UTILS);
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importLASDialog(this.ModalService, function (well) {
+        if (well) {
+            utils.updateWellProject(self.wiComponentService, well);
+        }
+    })
 };
 
 exports.ImportMultiLASButtonClicked = function () {
     console.log('ImportMultiLASButton is clicked');
+    let self = this;
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importMultiLASDialog(this.ModalService, function (well) {
+        if (well) {
+            self.wiComponentService.emit(self.wiComponentService.UPDATE_WELL_EVENT, well);
+        }
+    })
 };
 
 exports.Interval_CoreLoaderButtonClicked = function () {
@@ -519,3 +532,17 @@ exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
 
+exports.CollapseProjectButtonClicked = function () {
+    let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
+    let rootConfig = rootTreeviewCtrl.config;
+    var expaned = false;
+    for (let child of rootConfig) {
+        expaned = child.data.childExpanded;
+        if (!expaned) break;
+    }
+    if (expaned) {
+        rootTreeviewCtrl.collapseAll(rootConfig);
+    } else {
+        rootTreeviewCtrl.expandAll(rootConfig);
+    }
+};

@@ -6,14 +6,19 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
 
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
-        $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-        let utils = wiComponentService.getComponent('UTILS');
-        wiComponentService.on('project-loaded-event', function (project) {
-            utils.pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout);
+        $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
+            let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
-        wiComponentService.on('project-unloaded-event', function () {
+
+        wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
             self.treeConfig = {};
+            wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, '');
         });
+
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
@@ -38,14 +43,16 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                 label: "Expand All",
                 icon: "expand-all-16x16",
                 handler: function () {
-                    treeviewCtrl.expandAll();
+                    let rootConfig = wiComponentService.getComponent(self.treeviewName).config;
+                    treeviewCtrl.expandAll(rootConfig);
                 }
             }, {
                 name: "CollapseAll",
                 label: "Collapse All",
                 icon: "collapse-all-16x16",
                 handler: function () {
-                    treeviewCtrl.collapseAll();
+                    let rootConfig = wiComponentService.getComponent(self.treeviewName).config;
+                    treeviewCtrl.collapseAll(rootConfig);
                 }
             }
         ]
@@ -197,7 +204,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                 return [
                     {
                         name: "NewLogPlot",
-                        label: "New LogPlot",
+                        label: "New LogPlot ...",
                         icon: "logplot-new-16x16",
                         handler: function () {
                         },
@@ -207,6 +214,13 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
+                                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+                                    // mock plot data
+                                    let logplot = {
+                                        title: 'Mock Blank Plot'
+                                    };
+                                    utils.createNewBlankLogPlot(wiComponentService, logplot);
                                 }
                             }, {
                                 name: "3TracksBlank",
@@ -284,7 +298,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                             {
                                 name: "BlankCrossPlot",
                                 label: "Blank Cross Plot",
-                                icon: "",
+                                icon: "crossplot-new-16x16",
                                 handler: function () {
                                 }
                             }, {
@@ -328,7 +342,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                             }, {
                                 name: "SonicRt",
                                 label: "Sonic Rt",
-                                icon: "",
+                                icon: "crossplot-new-16x16",
                                 handler: function () {
                                 }
                             }, {

@@ -1,0 +1,377 @@
+<div class="modal fade  data-backdrop="static" data-keyboard="false"">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Track Properties</h4>
+            </div>
+            <div class="modal-body">
+                    <wi-tabset>
+                        <wi-tab heading="General">
+                            <div class="container-fluid">
+                                <form action="" class="form-horizontal">
+                                    <div id="header">
+                                        <h5>Header</h5>
+                                        <div class="padding-left-20-percent">
+                                            <div class="form-group">
+                                                <div class="col-sm-7">
+                                                    <label for="showTitle" class="normal-text">Show title
+                                                        <input type="checkbox" id="showTitle" value="" name=""
+                                                               ng-model="wiModal.showTitle" ng-checked="wiModal.setTitle();">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 normal-text" for="title">Title</label>
+                                                <div class="col-sm-7">
+                                                    <input type="text" class="form-control wi-form-control"
+                                                           value="" name="title" id="title"
+                                                           ng-model="wiModal.header.title">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="topJust" class="control-label col-sm-5 normal-text">Top Justification</label>
+                                                <div class="col-sm-7">
+                                                    <select ng-model="wiModal.topJust" name="topJust" value=""
+                                                            class="form-control wi-form-control" id="topJust"
+                                                            ng-options="item for item in wiModal.header.topJust track by item">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="bottomJust" class="control-label col-sm-5 normal-text">Bottom Justification</label>
+                                                <div class="col-sm-7">
+                                                    <select ng-model="wiModal.bottomJust" name="bottomJust" value=""
+                                                            class="form-control wi-form-control" id="bottomJust"
+                                                            ng-options="item for item in wiModal.header.bottomJust track by item">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="label">
+                                        <h5>Label</h5>
+                                        <div class="padding-left-20-percent">
+                                            <div class="form-group">
+                                                <div class="col-sm-7">
+                                                    <label for="showLabel" class="normal-text">Show Label
+                                                        <input type="checkbox" id="showLabel" value=""
+                                                               ng-model="wiModal.showLabel" ng-checked="wiModal.setLabel();">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 normal-text" for="format">Format</label>
+                                                <div class="col-sm-7">
+                                                    <input type="text" class="form-control wi-form-control"
+                                                           value="" name="format" id="format"
+                                                           ng-model="wiModal.label.format">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="grid">
+                                        <h5>Grid</h5>
+                                        <div class="padding-left-20-percent">
+                                            <div class="form-group">
+                                                <div class="col-sm-7">
+                                                    <label for="showValueGrid" class="normal-text">Show Value Grid
+                                                <input type="checkbox" id="showValueGrid" value=""
+                                                       ng-model="wiModal.showValueGrid" ng-checked="wiModal.setValueGrid();">
+                                            </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 normal-text" for="majorTicks">Major ticks</label>
+                                                <div class="col-sm-7">
+                                                    <input type="number" class="form-control wi-form-control"
+                                                           value="" name="majorTicks" id="majorTicks"
+                                                           ng-model="wiModal.grid.majorTicks">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 normal-text" for="minorTicks">Minor ticks</label>
+                                                <div class="col-sm-7">
+                                                    <input type="number" class="form-control wi-form-control"
+                                                           value="" name="minorTicks" id="minorTicks"
+                                                           ng-model="wiModal.grid.minorTicks">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-7">
+                                                    <label for="showDepthGrid" class="normal-text">Show Depth Grid
+                                                <input type="checkbox" id="showDepthGrid" value=""
+                                                       ng-model="wiModal.showDepthGrid">
+                                            </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="geometry">
+                                        <h5>Geomatry</h5>
+                                        <div class="padding-left-20-percent">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 normal-text" for="width">Width (inchs)</label>
+                                                <div class="col-sm-7">
+                                                    <input type="number" class="form-control wi-form-control"
+                                                           value="" name="width"
+                                                           ng-model="wiModal.geomatry.width">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="color">
+                                        <h5>Color</h5>
+                                        <div class="padding-left-20-percent">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 normal-text" for="track">Track</label>
+                                                <div class="col-sm-7">
+                                                    <input kendo-color-picker k-palette="'websafe'"
+                                                           class="form-control wi-form-control"
+                                                           ng-model="wiModal.colorTrack" ng-change="wiModal.getColor();"/>
+                                                    {{wiModal.colorTrack}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </wi-tab>
+                        <wi-tab heading="Curve">
+                            <div class="container-fluid">
+                                <form action="" class="form-horizontal">
+                                    <div class="width-95-percent float-left">
+                                        <table class="font-size-10px table table-bordered curveTable">
+                                            <thead>
+                                                <tr>
+                                                    <td>Dataset</td>
+                                                    <td>Curve</td>
+                                                    <td>Alias</td>
+                                                    <td>Left Scale</td>
+                                                    <td>Right Scale</td>
+                                                    <td>Log/Linear</td>
+                                                    <td>Display Mode</td>
+                                                    <td>Line Style</td>
+                                                    <td>Display As</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- <tr ng-model="wiModal.selectedCurve"
+                                                    ng-repeat="curve in wiModal.curveAttr"
+                                                    ng-class="{'selected':$index == wiModal.selectedRow}"
+                                                    ng-click="wiModal.setClickedRowCurve($index)">
+                                                    <td>
+                                                        <select ng-model="wiModal.dataset"
+                                                                class="form-control wi-form-control"
+                                                                ng-options="item for item in wiModal.datasets track by item"
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select ng-model="curve.curveName" name="curveName"
+                                                                value="" class="form-control wi-form-control"
+                                                                ng-options="item for item in wiModal.curveName track by item"></select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" ng-model="curve.alias"
+                                                               class="form-control wi-form-control"
+                                                                size="10">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" ng-model="curve.leftScale"
+                                                               class="form-control wi-form-control"
+                                                                size="10">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" ng-model="curve.rightScale"
+                                                               class="form-control wi-form-control"
+                                                                size="10">
+                                                    </td>
+                                                    <td>
+                                                        <select ng-model="curve.logLinear" name="log"
+                                                                value="" class="form-control wi-form-control"
+                                                                ng-options="item for item in wiModal.logLinear track by item"></select>
+                                                    </td>
+                                                    <td>
+                                                        <select ng-model="curve.displayMode" name="displayMode"
+                                                                value="" class="form-control wi-form-control"
+                                                                ng-options="item for item in wiModal.displayMode track by item"></select>
+                                                    </td>
+                                                    <td>
+                                                        <button ng-click="wiModal.lineStyleButtonClicked();">Edit...</button>
+                                                    </td>
+                                                    <td>
+                                                        <select ng-model="curve.displayAs" name="displayAs"
+                                                                value="" class="form-control wi-form-control"
+                                                                ng-options="item for item in wiModal.displayAs track by item"></select>
+                                                    </td>
+                                                </tr> -->
+                                                <tr ng-repeat="getData in wiModal.fillDataset"
+                                                    ng-class="{'selected':$index == wiModal.selectedRow}"
+                                                    ng-click="wiModal.setClickedRowCurve($index)">
+                                                    <td>
+                                                        <select ng-model="wiModal.fillDataset[$index]" 
+                                                                class="form-control wi-form-control" 
+                                                                ng-options="dataset as dataset.name for dataset in wiModal.selectDataset track by dataset.name"></select>
+                                                    </td> 
+                                                    <td>
+                                                        <select ng-model="wiModal.curveAttr[$index]" 
+                                                                class="form-control wi-form-control" 
+                                                                ng-options="selectCurve as selectCurve.curveName for selectCurve in wiModal.fillDataset[$index].content track by selectCurve.curveName">
+                                                        </select>
+                                                    </td> 
+                                                    <td>
+                                                        <input type="text" class="form-control wi-form-control"
+                                                                ng-model="wiModal.curveAttr[$index].alias"
+                                                                size="10">
+                                                    </td>   
+                                                    <td>
+                                                        <input type="number" class="form-control wi-form-control"
+                                                                ng-model="wiModal.curveAttr[$index].leftScale"
+                                                                size="10">
+                                                    </td> 
+                                                    <td>
+                                                        <input type="number" class="form-control wi-form-control"
+                                                                ng-model="wiModal.curveAttr[$index].rightScale"
+                                                                size="10">
+                                                    </td> 
+                                                    <td>
+                                                        <select ng-model="wiModal.curveAttr[$index].logLinear" 
+                                                                class="form-control wi-form-control" 
+                                                                ng-options="selectLogLinear for selectLogLinear in wiModal.logLinear track by selectLogLinear">
+                                                        </select>
+                                                    </td> 
+                                                    <td>
+                                                        <select ng-model="wiModal.curveAttr[$index].displayMode" 
+                                                                class="form-control wi-form-control" 
+                                                                ng-options="display for display in wiModal.displayMode track by display">
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <button ng-click="wiModal.lineStyleButtonClicked();">
+                                                                Edit...
+                                                        </button>
+                                                    </td>  
+                                                    <td>
+                                                        <select ng-model="wiModal.curveAttr[$index].displayAs" 
+                                                                class="form-control wi-form-control" 
+                                                                ng-options="display for display in wiModal.displayAs track by display">
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="width-5-percent float-left padding-left-5px">
+                                        <button class="btn btn-default"
+                                                ng-click="wiModal.arrowUpCurve();">
+                                            <span class="arrow-up-16x16"></span>
+                                        </button>
+                                        <button class="btn btn-default"
+                                                ng-click="wiModal.arrowDownCurve();">
+                                            <span class="arrow-down-16x16"></span>
+                                        </button>
+                                        <button class="btn btn-default"
+                                                ng-click="wiModal.removeRow();">
+                                            <span class="delete-16x16"></span>
+                                        </button>
+                                        <button class="btn btn-default"
+                                                ng-click="wiModal.addRow();">
+                                            <span class="ok-16x16"></span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </wi-tab>
+                        <wi-tab heading="Shading">
+                            <div class="container-fluid">
+                                <form action="" class="form-horizontal">
+                                    <div class="col-sm-11">
+                                        <table class="table table-bordered shadingTable">
+                                            <thead>
+                                            <tr>
+                                                <td colspan="2">Left Side of Shading</td>
+                                                <td colspan="2">Right Side of Shading</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Curve Name</td>
+                                                <td>Fixed Name</td>
+                                                <td>Curve Name</td>
+                                                <td>Fixed Name</td>
+                                                <td>Shading Name</td>
+                                                <td>Shading Style</td>
+                                                <td>Fill Pattern</td>
+                                                <td>Variable Shading</td>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr ng-model="wiModal.selectedShading"
+                                                ng-repeat="shading in wiModal.shadingAttr"
+                                                ng-class="{'selected':$index == wiModal.selectedRowShading}"
+                                                ng-click="wiModal.setClickedRowShading($index)"
+                                            >
+                                                <td>
+                                                    <select ng-model="shading.left.curveName"
+                                                            name="curveName"  value=""
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.curveName track by item"></select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" ng-model="shading.left.fixedValue"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <select ng-model="shading.right.curveName"
+                                                            name="curveName"  value=""
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.curveName track by item"></select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" ng-model="shading.right.fixedValue"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="text" ng-model="shading.shadingName"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <select ng-model="shading.shadingStyle"
+                                                            name="shadingStyle"  value=""
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.shadingStyle track by item"></select>
+                                                </td>
+                                                <td>
+                                                    <input type="button" ng-model="shading.fillPattern"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="button" ng-model="shading.variableShading"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button type="button" class="btn btn-default"
+                                                ng-click="wiModal.arrowUpShading()"><span class="arrow-up-16x16"></span></button>
+                                        <button type="button" class="btn btn-default"
+                                                ng-click="wiModal.arrowDownShading()"><span class="arrow-down-16x16"></span></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </wi-tab>
+                    </wi-tabset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="" class="btn btn-default" data-dismiss="modal"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" data-dismiss="modal"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default" data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
