@@ -59,6 +59,86 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
 
     this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
         switch (configType) {
+            case 'wells':
+                return [
+                    {
+                        name: "CreateNewWell",
+                        label: "Create New Well",
+                        icon: "well-new-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportASCII",
+                        label: "Import ASCII",
+                        icon: "ascii-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportMultiASCII",
+                        label: "Import Multi ASCII",
+                        icon: "ascii-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportLAS",
+                        label: "Import LAS",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportMultiLAS",
+                        label: "Import Multi LAS",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportDLIS",
+                        label: "Import DLIS",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "IntervalCoreLoader",
+                        label: "Interval/Core Loader",
+                        icon: "load-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "MultiwellCoreLoader",
+                        label: "Multi-well Core Loader",
+                        icon: "load-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportWellHeader",
+                        label: "Import Well Header",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportWellTop",
+                        label: "Import Well Top",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "GroupManager",
+                        label: "Group Manager",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }, {
+                        name: "Sort",
+                        label: "Sort",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ];
             case 'well':
                 return [
                     {

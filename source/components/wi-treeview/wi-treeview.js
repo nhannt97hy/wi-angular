@@ -12,6 +12,9 @@ function Controller(wiComponentService, WiProperty, WiWell) {
             wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
                 self.updateWellItem(well);
             });
+            wiComponentService.on(wiComponentService.UPDATE_MULTI_WELLS_EVENT, function (wells) {
+                self.updateWellsItem(wells);
+            });
         }
     };
 
@@ -81,6 +84,12 @@ function Controller(wiComponentService, WiProperty, WiWell) {
             if (wells) wells.children.unshift(newWell);
         }
     };
+
+    this.updateWellsItem = function(wells) {
+        for(let well of wells) {
+            self.updateWellItem(well);
+        }
+    }
 
     this.findWellById = function (idWell) {
         let wells = getItemByName('wells');
