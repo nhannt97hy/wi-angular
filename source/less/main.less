@@ -36,7 +36,7 @@ span, h4, h5 {
 }
 .ribbon-wrapper {
     //max-height: 136px;
-    height: 136px;
+    height: 120px;
 }
 .status-bar {
     width: 100%;
@@ -49,6 +49,10 @@ span, h4, h5 {
 .lm_goldenlayout{
     padding: 5px 0px;
     background: none;
+}
+
+.lm_header .lm_tab.lm_active {
+    border-top: 2px solid blue;
 }
 
 div.lm_content {
@@ -100,7 +104,7 @@ label.flex-row {
 }
 
 .height65 button{
-    height: 65px;
+    height: 60px;
 }
 
 .height-auto{
@@ -145,22 +149,19 @@ label.flex-row {
     width: 150px;
 }
 
-.fix-btn-sm{
-    margin-right: 5px;
-}
-
 .fix-btn-sm p{ 
-    width: 105px;
+    width: 108px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    vertical-align: middle;
+    vertical-align: -webkit-baseline-middle;
     text-indent: 5px;
     text-align: left;
 }
 
 .fix-btn-sm button{
-    padding: 2px 5px;
+    padding: 0px 5px;
+    height: 20px;
 }
 
 wi-dropdown.fix-btn-sm{
@@ -182,6 +183,14 @@ wi-dropdown.fix-btn-sm span{
 
 .font-weight-700 {
     font-weight: 700;
+}
+
+.ui-widget.ui-widget-content{
+    background: #282828;
+    color: #fff;
+    border: none;
+    box-shadow: none;
+    text-indent: center;   
 }
 
 input[type].display-none {
@@ -206,3 +215,7 @@ input[type].display-none {
     -moz-animation-duration:0.2s;
     animation-duration:0.2s;
   }
+
+.display-inline-block {
+    display: inline-block;
+}

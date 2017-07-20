@@ -86,7 +86,9 @@ let app = angular.module('wiapp',
 
         // 3rd lib
         'ngFileUpload',
-        'kendo.directives'
+        'kendo.directives',
+        'ngSanitize', 
+        'ui.select'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS
@@ -155,13 +157,13 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     layoutManager.putLeft('property-block', 'Properties');
     layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
 
-    // Install 
+    // Install TEST
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (title) {
         layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
     });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
-        // layoutManager.removeAllRightTabs();
+        layoutManager.removeAllRightTabs();
     });
 });

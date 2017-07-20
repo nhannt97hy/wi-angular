@@ -11,7 +11,7 @@ wi-button, wi-toolbar-button {
             }
             & > p {
                 font-size: 12px;
-            }
+            }            
             &:hover{
                 border: 1px solid #b3b6ba;
                 border-radius:2px;
@@ -31,6 +31,10 @@ wi-button, wi-toolbar-button {
 
             &:disabled {
                 opacity: 0.5;
+                background: none;
+                border: none;
+                cursor: not-allowed;
+                box-shadow:none;
             }
         }
     }
@@ -50,10 +54,10 @@ wi-button, wi-toolbar-button {
 }
 
 .button-normal {
-    padding: 2px 5px 5px 5px;
+    padding: 0px 5px 0px 5px;
 }
 
 .button-small {
-    padding: 0px;
+    padding: 5px;
 }
 
