@@ -35,8 +35,8 @@ function LogTrack(config) {
     let _shadingHeaders = [];
     let _viewportX = [0, 1];
     let _viewportY = [];
-    let currentCurveIdx = -1;
-    let currentShadingIdx = -1;
+    let _currentCurve = null;
+    let _currentShading = null;
 
     let trackContainer;
     let plotContainer;
@@ -44,8 +44,6 @@ function LogTrack(config) {
     let clientRect;
     let svg;
 
-    let refLine;
-    let refX = 10;
     let translateOpts = {};
     let xAxisGroup, yAxisGroup;
     let transformX;
@@ -63,7 +61,6 @@ function LogTrack(config) {
     let yFormatter = d3.format(config.yFormatter || 'g');
 
     let usedColors = [];
-    let refLineColor = '#3e3e3e';
     let shading = false;
     let freshness = 0;
     let curvesRemoved = 0;
@@ -111,22 +108,16 @@ function LogTrack(config) {
     /** @return {Array} All shading objects in this track */
     this.getShadings = function() { return _shadings; }
 
-    /** @return {Number} Index of the current curve, -1 if no curve is set to be current */
-    this.getCurrentCurveIdx = function() { return currentCurveIdx; }
-
-    /** @return {Number} Index of the current shading, -1 if no shading is set to be current */
-    this.getCurrentShadingIdx = function() { return currentShadingIdx; }
-
     /** @return {Object} The current curve object */
-    this.getCurrentCurve = function() { return _curves[currentCurveIdx]; }
+    this.getCurrentCurve = function() { return _currentCurve; }
 
     /** @return {Object} The current shading object */
-    this.getCurrentShading = function() { return _shadings[currentShadingIdx]; }
+    this.getCurrentShading = function() { return _currentShading; }
 
     /** @return {Object} The current drawing (curve or shading) object */
     this.getCurrentDrawing = function() {
-        if (currentShadingIdx >= 0) return _shadings[currentShadingIdx];
-        if (currentCurveIdx >= 0) return _curves[currentCurveIdx];
+        if (_currentShading) return _currentShading;
+        if (_currentCurve) return _currentCurve;
         return null;
     }
 
@@ -199,20 +190,27 @@ function LogTrack(config) {
 
     /**
      * Set current curve and highlight the curve drawing and header
-     * @param {Number} idx - Index of the curve
+     * @param {Object} curve - The curve object
      */
-    this.setCurrentCurveIdx = function(idx) {
-        currentCurveIdx = idx;
-        self.plotAllCurves();
+    this.setCurrentCurve = function(curve) {
+        _currentCurve = curve;
+        _currentShading = null;
+        self.plotAllDrawings();
         _highlightCurveHeader();
+        _highlightShadingHeader();
     }
 
     /**
      * Set current shading and highlight the shading and header
-     * @param {Number} idx - Index of the shading
-     * @todos Pending
+     * @param {Object} shading - The shading object
      */
-    this.setCurrentShadingIdx = function(idx) {}
+    this.setCurrentShading = function(shading) {
+        _currentShading = shading;
+        _currentCurve = null;
+        self.plotAllDrawings();
+        _highlightCurveHeader();
+        _highlightShadingHeader();
+    }
 
     /**
      * Set color for current curve
@@ -229,7 +227,7 @@ function LogTrack(config) {
 
         usedColors.push(d3ColorString);
         curve.setColor(d3ColorString);
-        self.plotCurve(currentCurveIdx);
+        self.plotCurve(self.getCurrentCurve());
     }
 
     /**
@@ -238,7 +236,10 @@ function LogTrack(config) {
      */
     this.init = function(baseElement) {
         trackContainer = appendTrack(baseElement, 'Track', plotWidth);
-        plotContainer = trackContainer.select('.plot-container');
+        plotContainer = trackContainer
+            .select('.plot-container')
+            .on('mousedown', _onPlotMouseDownCallback);
+
         headerContainer = trackContainer.select('.track-header');
 
         clientRect = plotContainer.node().getBoundingClientRect();
@@ -256,30 +257,10 @@ function LogTrack(config) {
             .attr('class', yAxisClass)
             .attr('transform', translateOpts[yAxisPosition]);
 
-        refLine = svg.append('line').attr('class', 'ref-line')
-                .attr('x1', refX)
-                .attr('x2', refX)
-                .attr('y1', 0)
-                .attr('y2', clientRect.height)
-                .attr('style', 'stroke:' + refLineColor +'; stroke-width:4')
-                .call(d3.drag().on('drag', function(){
-                    refX = d3.event.x;
-                    refX = (refX > clientRect.width-2) ? clientRect.width-2 : refX;
-                    refX = (refX < xPadding+2) ? xPadding+2 : refX;
-                    _doPlot();
-                }))
-                .raise();
         new ResizeSensor(plotContainer.node(), function() {
-            let previousWidth = clientRect.width;
             clientRect = plotContainer.node().getBoundingClientRect();
 
             _updateTranslateOpts(translateOpts, clientRect);
-
-            refX = clientRect.width / previousWidth * refX;
-
-            refLine
-                .attr('x1', refX)
-                .attr('x2', refX);
 
             svg
                 .attr('width', clientRect.width)
@@ -294,12 +275,16 @@ function LogTrack(config) {
             _shadings.forEach(function(shading) {
                 shading.adjustSize(clientRect);
             });
-            _doPlot();
+            self.doPlot();
         });
     }
 
-    /** Draw axes and curves */
-    this.doPlot = function() { _doPlot(); }
+    /** Draw axes, curves and shadings */
+    this.doPlot = function() {
+        _plotAxes();
+        self.plotAllCurves();
+        self.plotAllShadings();
+    }
 
 
     /**
@@ -311,7 +296,7 @@ function LogTrack(config) {
      * @param {Number} [config.xMin] - Mininum x value to show. Default: auto detect
      * @param {Number} [config.xMax] - Maximum x value to show. Default: auto detect
      * @param {String} [config.color] - CSS color of new curve. Default: auto generate
-     * @return {Number} Index of created curve
+     * @return {Object} The created curve
      */
     this.addCurve = function(data, config) {
         config = typeof config != 'object' ? {} : config;
@@ -332,82 +317,155 @@ function LogTrack(config) {
         });
 
         curve.init(plotContainer, data);
-        let idx = _curves.push(curve) -1;
+        _curves.push(curve);
+        return curve;
+    }
 
-        return idx;
+    /**
+     * Add left shading to track
+     * @param {Object} curve - The curve to draw shading
+     * @param {Object} config - Configurations of new shading
+     * @param {String} [config.name] - Name of new shading. Default: auto generate
+     * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
+     * @returns {Object} The created shading
+     */
+    this.addLeftShading = function(curve, config) {
+        if (!curve) return;
+        return self.addShading(null, curve, null, config);
+    }
+
+    /**
+     * Add right shading to track
+     * @param {Object} curve - The curve to draw shading
+     * @param {Object} config - Configurations of new shading
+     * @param {String} [config.name] - Name of new shading. Default: auto generate
+     * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
+     * @returns {Object} The created shading
+     */
+    this.addRightShading = function(curve, config) {
+        if (!curve) return;
+        return self.addShading(curve, null, null, config);
+    }
+
+    /**
+     * Add pair shading to track
+     * @param {Object} firstCurve - The first curve to draw shading
+     * @param {Object} secondCurve - The second curve to draw shading
+     * @param {Object} config - Configurations of new shading
+     * @param {String} [config.name] - Name of new shading. Default: auto generate
+     * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
+     * @returns {Object} The created shading
+     */
+    this.addPairShading = function(firstCurve, secondCurve, config) {
+        if (!firstCurve || !secondCurve) return;
+        return self.addShading(firstCurve, secondCurve, null, config);
+    }
+
+
+    /**
+     * Add custom shading to track
+     * @param {Object} curve - The curve to draw shading
+     * @param {Number} refX - x coordinate of reference line
+     * @param {Object} config - Configurations of new shading
+     * @param {String} [config.name] - Name of new shading. Default: auto generate
+     * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
+     * @returns {Object} The created shading
+     */
+    this.addCustomShading = function(curve, refX, config) {
+        if (!curve) return;
+        let shading = self.addShading(curve, null, refX, config);
+
+        shading.onRefLineDrag(function(){
+            let rWidth = shading.getRefLineWidth();
+            let leftMost = rWidth / 2;
+            let rightMost = clientRect.width - rWidth / 2;
+            refX = d3.event.x;
+            refX = refX > rightMost ? rightMost : refX;
+            refX = refX < leftMost ? leftMost : refX;
+            shading.setRefX(refX);
+            self.plotShading(shading);
+        });
+        return shading;
     }
 
     /**
      * Add shading to track
-     * @param {Number} leftCurveIdx - Index of left curve, -1 if drawing left shading
-     * @param {Number} rightCurveIdx - Index of right curve, -1 if drawing right shading
+     * @param {Object} leftCurve - Left curve, null if drawing left shading
+     * @param {Object} rightCurve - Right curve, null if drawing right shading
+     * @param {Number} refX - x coordiate of reference line for custom shading
      * @param {Object} config - Configurations of new shading
      * @param {String} [config.name] - Name of new shading. Default: auto generate
-     * @param {String} [config.color] - CSS color of new shading. Default: auto generate
-     * @param {Number} [config.refX] - x coordiate of reference line for custom shading
-     * @returns {Number} Index of created shading
-     * @todos Pending
+     * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
+     * @returns {Object} The created shading
      */
-    this.addShading = function(leftCurveIdx, rightCurveIdx, config) {
+    this.addShading = function(leftCurve, rightCurve, refX, config) {
         config = typeof config != 'object' ? {} : config;
 
-        let leftCurve = _curves[leftCurveIdx];
-        let rightCurve = _curves[rightCurveIdx];
-        let color = config.color || _genColor();
+        let fillStyle = config.fillStyle || _genColor();
 
         let leftName = leftCurve ? leftCurve.getName() : 'left';
         let rightName = rightCurve ? rightCurve.getName() : 'right';
         let name = config.name || (leftName + ' - ' + rightName) ;
 
         let shading = new Shading({
-            color: color,
+            fillStyle:fillStyle,
             name: name,
-            refX: config.refX
+            refX: refX
         });
 
         shading.init(plotContainer, leftCurve, rightCurve);
-        let idx = _shadings.push(shading) -1;
-        return idx;
+        _shadings.push(shading);
+        return shading;
     }
 
     /**
      * Remove a curve from track
-     * @param {Number} curveIdx - Index of the curve to remove
+     * @param {Object} curve - The curve to remove
      */
-    this.removeCurve = function(curveIdx) {
-        if (curveIdx < 0 || curveIdx >= _curves.length) return;
-        let curve = _curves[curveIdx];
+    this.removeCurve = function(curve) {
+        if (!curve) return;
         usedColors.splice(usedColors.indexOf(curve.getColor()), 1);
         curve.destroy();
 
-        _removeCurveHeader(curveIdx);
-        _curves.splice(curveIdx, 1)[0];
-        _curveHeaders.splice(curveIdx, 1)[0];
+        let curveIdx = _curves.indexOf(curve);
+        _removeCurveHeader(curve);
+        _curves.splice(curveIdx, 1);
+        _curveHeaders.splice(curveIdx, 1);
 
-        if (curveIdx == currentCurveIdx)
-            currentCurveIdx = -1;
-        else if (curveIdx < currentCurveIdx)
-            currentCurveIdx -= 1;
+        if (curve == _currentCurve)
+            _currentCurve = null;
     }
 
     /**
      * Remove a shading from track
-     * @param {Number} shadingIdx - Index of the shading to remove
-     * @todos Pending
+     * @param {Object} shading - The shading to remove
      */
-    this.removeShading = function(shadingIdx) {}
+    this.removeShading = function(shading) {
+        if (!shading) return;
+        let d3Color = d3.color(shading.getFillStyle());
+        if (d3Color) {
+            usedColors.splice(usedColors.indexOf(d3Color.toString()), 1);
+        }
+        shading.destroy();
+        let idx = _shadings.indexOf(shading);
+        _shadings.splice(idx, 1);
 
-    /** Remove current curve from track */
+        if (shading == _currentShading)
+            _currentShading = null;
+    }
+
+    /**
+     * Remove current curve from track
+     */
     this.removeCurrentCurve = function() {
-        self.removeCurve(currentCurveIdx);
+        self.removeCurve(_currentCurve);
     }
 
     /**
      * Remove current shading from track
-     * @todos Pending
      */
     this.removeCurrentShading = function() {
-        self.removeShading(currentShadingIdx);
+        self.removeShading(_currentShading);
     }
 
     /**
@@ -421,14 +479,9 @@ function LogTrack(config) {
 
     /** Remove all curves from track */
     this.removeAllCurves = function() {
-        usedColors = [];
-        for (let i = 0; i < _curves.length; i ++) {
-            _curves[i].destroy();
-            _removeCurveHeader(i);
-        }
-        _curves = [];
-        _curveHeaders = [];
-        currentCurveIdx = -1;
+        _curves.forEach(function(c) {
+            self.removeCurve(c);
+        })
     }
 
     /**
@@ -446,11 +499,12 @@ function LogTrack(config) {
 
     /**
      * Plot one curve
-     * @param {Number} curveIdx - Index of the curve to plot
+     * @param {Object} curve - The curve to plot
      */
-    this.plotCurve = function(curveIdx) {
-        let lineWidth = curveIdx == currentCurveIdx ? 2 : 1;
-        _curves[curveIdx].doPlot(
+    this.plotCurve = function(curve) {
+        if (!curve) return;
+        let lineWidth = curve == self.getCurrentCurve() ? 2 : 1;
+        curve.doPlot(
             _viewportY,
             _getAxisRange(yAxisPosition),
             _getAxisRange(xAxisPosition),
@@ -466,15 +520,23 @@ function LogTrack(config) {
      * @param {Number} shadingIdx - Index of the shading to plot
      * @todos Pending
      */
-    this.plotShading = function(shadingIdx) {
-        _shadings[shadingIdx].doPlot(_viewportX, _viewportY, transformX, transformY, refX, yStep);
+    this.plotShading = function(shading) {
+        if (!shading) return;
+        shading.doPlot(
+            _viewportY,
+            _getAxisRange(yAxisPosition),
+            _getAxisRange(xAxisPosition),
+            {
+                yStep: yStep
+            }
+        );
     }
 
     /** Plot all curves */
     this.plotAllCurves = function() {
-        for (let i = 0; i < _curves.length; i ++) {
-            self.plotCurve(i);
-        }
+        _curves.forEach(function(curve) {
+            self.plotCurve(curve);
+        });
     }
 
     /**
@@ -482,9 +544,9 @@ function LogTrack(config) {
      * @todos Pending
      */
     this.plotAllShadings = function() {
-        for (let i = 0; i < _shadings.length; i ++) {
-            self.plotShading(i);
-        }
+        _shadings.forEach(function(shading) {
+            self.plotShading(shading);
+        });
     }
 
     /**
@@ -521,7 +583,10 @@ function LogTrack(config) {
      */
     this.onPlotMouseDown = function(cb) {
         plotContainer
-            .on('mousedown', cb)
+            .on('mousedown', function() {
+                _onPlotMouseDownCallback();
+                cb();
+            })
             .on('contextmenu', cb);
     }
 
@@ -609,36 +674,22 @@ function LogTrack(config) {
         }[axis];
     }
 
-    function _doPlot() {
+    function _plotAxes() {
         transformX = d3.scaleLinear().domain(_viewportX).range(_getAxisRange(yAxisPosition));
         transformY = d3.scaleLinear().domain(_viewportY).range(_getAxisRange(xAxisPosition));
-        function setupAxes() {
-            let xAxis = axisCfg[xAxisPosition](transformX)
-                .tickValues(d3.range(_viewportX[0], _viewportX[1], (_viewportX[1] - _viewportX[0])/xNTicks))
-                .tickFormat("")
-                .tickSize(-(clientRect.height - 2 * yPadding));
-            let start = roundUp(_viewportY[0], yStep);
-            let end = roundDown(_viewportY[1], yStep);
-            let yAxis = axisCfg[yAxisPosition](transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
-                .tickFormat(yFormatter)
-                .tickSize(-(clientRect.width - 2 * xPadding));
+        let xAxis = axisCfg[xAxisPosition](transformX)
+            .tickValues(d3.range(_viewportX[0], _viewportX[1], (_viewportX[1] - _viewportX[0])/xNTicks))
+            .tickFormat("")
+            .tickSize(-(clientRect.height - 2 * yPadding));
+        let start = roundUp(_viewportY[0], yStep);
+        let end = roundDown(_viewportY[1], yStep);
+        let yAxis = axisCfg[yAxisPosition](transformY)
+            .tickValues(d3.range(start, end, (end - start)/yNTicks))
+            .tickFormat(yFormatter)
+            .tickSize(-(clientRect.width - 2 * xPadding));
 
-            xAxisGroup.call(xAxis);
-            yAxisGroup.call(yAxis);
-        }
-        function drawRefLine() {
-            refLine.attr('x1', refX)
-                .attr('x2', refX)
-                .attr('y1', 0)
-                .attr('y2', clientRect.height)
-                .attr('stroke', refLineColor)
-                .raise();
-        }
-        setupAxes();
-        drawRefLine();
-        self.plotAllCurves();
-        self.plotAllShadings();
+        xAxisGroup.call(xAxis);
+        yAxisGroup.call(yAxis);
     }
 
     function _genColor() {
@@ -666,14 +717,14 @@ function LogTrack(config) {
         return color;
     }
 
-    function _addCurveHeader(dataSetName, unit, minVal, maxVal) {
+    function _addCurveHeader(name, unit, minVal, maxVal) {
         let unitHeaderData = [minVal, unit, maxVal];
         let curveHeader = headerContainer.append('div')
             .attr('class', 'curve-header');
 
         curveHeader.append('label')
             .attr('class', 'data-header text-center')
-            .text(dataSetName);
+            .text(name);
 
         curveHeader.append('label')
             .attr('class', 'unit-header flex-row')
@@ -695,7 +746,12 @@ function LogTrack(config) {
         _curveHeaders.push(curveHeader);
     }
 
-    function _removeCurveHeader(curveIdx) {
+    function _addShadingHeader(name, fillStyle) {
+
+    }
+
+    function _removeCurveHeader(curve) {
+        let curveIdx = _curves.indexOf(curve);
         headerContainer.selectAll('.curve-header')
             .filter(function(d, i) { return i == curveIdx; })
             .remove();
@@ -703,9 +759,33 @@ function LogTrack(config) {
 
     function _highlightCurveHeader() {
         _curveHeaders.forEach(function(h, i) {
-            let bgColor = i == currentCurveIdx ? 'rgba(255,0,0,0.2)' : 'transparent';
+            let bgColor = i == _curves.indexOf(_currentCurve) ? 'rgba(255,0,0,0.2)' : 'transparent';
             h.style('background-color', bgColor);
         });
+    }
+
+    function _highlightShadingHeader() {}
+
+    function _onPlotMouseDownCallback() {
+        let current = null;
+        _curves.forEach(function(c) {
+            if (!current && c.nearPoint(d3.event.offsetX, d3.event.offsetY)) {
+                current = c;
+                d3.event.curveMouseDown = true;
+            }
+        });
+        if (current) {
+            self.setCurrentCurve(current);
+            return;
+        }
+        _shadings.forEach(function(sh) {
+            if (!current && sh.nearPoint(d3.event.offsetX, d3.event.offsetY)) {
+                current = sh;
+                d3.event.shadingMouseDown = true;
+                return;
+            }
+        });
+        self.setCurrentShading(current);
     }
 
     const trackerLifetime = 1 * 1000; // 1 seconds

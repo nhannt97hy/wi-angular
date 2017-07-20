@@ -3,6 +3,7 @@ exports.roundDown = roundDown;
 exports.invertColor = invertColor;
 exports.appendTrack = appendTrack;
 exports.removeTrack = removeTrack;
+exports.isWithin = isWithin;
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
@@ -15,6 +16,13 @@ function clip(val, extent) {
     if (val > extent[1]) return extent[1];
     if (val < extent[0]) return extent[0];
     return val;
+}
+
+function isWithin(item, extentX, extentY) {
+    return (item.x >= extentX[0] &&
+       item.x <= extentX[1] &&
+       item.y >= extentY[0] &&
+       item.y <= extentY[1]);
 }
 
 function invertColor(color) {

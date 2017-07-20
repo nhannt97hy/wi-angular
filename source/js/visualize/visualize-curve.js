@@ -75,11 +75,22 @@ function Curve(config) {
     }
 
     /**
-     * Get scale property of curve
-     * @returns {String} Scale type of curve
+     * Get X range of curve
+     * @returns {Array} Range of x value to show
      */
-    this.getScale = function() {
-        return _scale;
+    this.getXRange = function(){
+        return [_xMin, _xMax];
+    }
+
+    /**
+     * Get scale function of curve
+     * @returns {Function} d3 scale function
+     */
+    this.getScaleFunc = function() {
+        return {
+            'linear': d3.scaleLinear,
+            'log': d3.scaleLog
+        }[_scale]
     }
 
     /**
@@ -194,13 +205,12 @@ function Curve(config) {
      * @param {Object} config
      * @param {Number} [config.lineWidth] - Width in pixel of the line. Default: 1
      * @param {Number} [config.yStep] - Step to scale y coordinate
-     * @param {Number} [config.xStep] - Step to scale x coordinate
      * @todos Pending
      */
     this.doPlot = function(domainY, rangeX, rangeY, config) {
-        let scaleFunc = _getScaleFunc();
+        let scaleFunc = self.getScaleFunc();
         let transformX = scaleFunc().domain([_xMin, _xMax]).range(rangeX);
-        let transformY = scaleFunc().domain(domainY).range(rangeY);
+        let transformY = d3.scaleLinear().domain(domainY).range(rangeY);
         let lineWidth = config.lineWidth || 1;
         let yStep = config.yStep || 1;
 
@@ -222,13 +232,6 @@ function Curve(config) {
             ctx.lineTo(transformX(item.x), transformY(item.y * yStep));
         });
         ctx.stroke();
-    }
-
-    function _getScaleFunc() {
-        return {
-            'linear': d3.scaleLinear,
-            'log': d3.scaleLog
-        }[_scale]
     }
 }
 

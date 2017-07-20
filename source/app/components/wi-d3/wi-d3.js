@@ -100,18 +100,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
 
     this.addCurveToTrack = function(track, data, config) {
         if (!track || !track.addCurve) return;
-        let curveIdx = track.addCurve(data, config);
+        let curve = track.addCurve(data, config);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
-        let curveHeader = track.getCurveHeaders()[curveIdx];
+        let idx = track.getCurves().indexOf(curve);
+        let curveHeader = track.getCurveHeaders()[idx];
         curveHeader
             .on('mousedown', function() {
                 _setCurrentTrack(track);
-
-                let currentCurveIdx = track.getCurveHeaders().indexOf(curveHeader);
-                track.setCurrentCurveIdx(currentCurveIdx);
+                track.setCurrentCurve(curve);
                 if (d3.event.button == 2) {
                     _curveOnRightClick();
                 }
@@ -119,14 +118,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
             .on('contextmenu', function() {
                 d3.event.stopPropagation();
                 d3.event.preventDefault();
-            })
+            });
     }
 
-    this.addShadingToTrack = function (track, leftCurveIdx, rightCurveIdx, config) {
-        if (!track || !track.addShading) return;
-        config = typeof config != 'object' ? {} : config;
-        track.addShading(leftCurveIdx, rightCurveIdx, config);
-        self.plot(track);
+    this.addLeftShadingToTrack = function (track, config) {
+        if (!track || !track.addLeftShading) return;
+        let shading = track.addLeftShading(track.getCurrentCurve(), config);
+        track.plotShading(shading);
+    };
+
+    this.addRightShadingToTrack = function (track, config) {
+        if (!track || !track.addRightShading) return;
+        let shading = track.addRightShading(track.getCurrentCurve(), config);
+        track.plotShading(shading);
+    };
+
+    this.addCustomShadingToTrack = function (track, value, config) {
+        if (!track || !track.addCustomShading) return;
+        let shading = track.addCustomShading(track.getCurrentCurve(), value, config);
+        track.plotShading(shading);
     };
 
     this.setDepthRange = function(depthRange) {
@@ -183,18 +193,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     };
 
     this.removeCurrentCurve = function() {
-        if (!_currentTrack.getCurrentCurveIdx) return;
-        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurveIdx());
-    };
+        if (!_currentTrack.getCurrentCurve) return;
+        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
+    }
 
-    this.removeCurveFromTrack = function (track, curveIdx) {
+    this.removeCurrentShading = function() {
+        if (!_currentTrack.getCurrentShading) return;
+        self.removeShadingFromTrack(_currentTrack, _currentTrack.getCurrentShading());
+    }
+
+    this.removeCurveFromTrack = function(track, curve) {
         if (!track || !track.removeCurve) return;
-        track.removeCurve(curveIdx);
-    };
+        track.removeCurve(curve);
+    }
+
+    this.removeShadingFromTrack = function(track, shading) {
+        if (!track || !track.removeShading) return;
+        track.removeShading(shading);
+    }
 
     this.removeCurrentTrack = function () {
         return self.removeTrack(_currentTrack);
-    };
+    }
 
     this.removeTrack = function (track) {
         let trackIdx = _tracks.indexOf(track);
@@ -242,17 +262,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
 
     function _onPlotMouseDownCallback(track) {
         _setCurrentTrack(track);
-
-        let i;
-        let curves = _currentTrack.getCurves();
-        for (i = 0; i < curves.length; i ++) {
-            if (curves[i].nearPoint(d3.event.offsetX, d3.event.offsetY))
-                break;
-        }
-        i = i == curves.length ? -1 : i;
-        _currentTrack.setCurrentCurveIdx(i);
-        if (i >= 0 && d3.event.button == 2) {
+        if (d3.event.curveMouseDown && d3.event.button == 2) {
             _curveOnRightClick();
+            return;
+        }
+
+        if (d3.event.shadingMouseDown && d3.event.button == 2) {
+            _shadingOnRightClick();
         }
     }
 
@@ -293,6 +309,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
             }]);
         });
     }
+
+    function _shadingOnRightClick() {
+        console.log('Shading on right click');
+    }
+
     /* Private End */
 
     this.$onInit = function () {

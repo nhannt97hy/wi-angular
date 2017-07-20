@@ -66,9 +66,23 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         wiD3Ctrl.removeTrack(wiD3Ctrl.getCurrentTrack());
     }
 
-    $scope.addShadingButtonClick = function() {
+    $scope.addLeftShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addShadingToTrack(track, 0, 1, {});
+        wiD3Ctrl.addLeftShadingToTrack(track, {});
+    }
+
+    $scope.addRightShadingButtonClick = function() {
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addRightShadingToTrack(track, {});
+    }
+
+    $scope.addCustomShadingButtonClick = function() {
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addCustomShadingToTrack(track, 10, {});
+    }
+
+    $scope.removeShadingButtonClick = function() {
+        wiD3Ctrl.removeCurrentShading();
     }
 
     function genSamples(extentX, extentY) {
