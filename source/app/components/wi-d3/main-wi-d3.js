@@ -9,10 +9,9 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     $scope.doClick = function () {
         let myPlot = wiComponentService.getComponent('myPlot');
-        let idx = myPlot.addTrack();
-        myPlot.setCurve(idx, genSamples(1000));
+        let track = myPlot.addLogTrack();
+        myPlot.addCurveToTrack(track, genSamples(1000), 'Data', 'm3');
         myPlot.setDepthRange([10, 100]);
-        myPlot.plotAll();
     };
 
     function genSamples(nSamples) {

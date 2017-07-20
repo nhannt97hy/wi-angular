@@ -32,6 +32,7 @@ let layoutConfig = {
         }
     ]
 };
+
 function createLayout(domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
@@ -45,23 +46,11 @@ function createLayout(domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
-
-        // container.on('shown', function (e) {
-        //     console.log('componentState', componentState)
-        // })
     });
-
-    // todo: remove test
-    // layoutManager.on('stackCreated' , function (stack) {
-    //     stack.on('activeContentItemChanged', function (contentItem) {
-    //         console.log('activeContentItemChanged contentItem', contentItem);
-    //     })
-    // });
 
     layoutManager.init();
 }
 function putLeft(templateId, title) {
-    //layoutManager.root.contentItems[0].contentItems[0].addChild({
     layoutManager.root.getItemsById('left')[0].addChild({
         type: 'component',
         id: templateId,
@@ -73,7 +62,6 @@ function putLeft(templateId, title) {
     });
 }
 function putRight(templateId, title) {
-    //layoutManager.root.contentItems[0].contentItems[1].addChild({
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
         id: templateId,
@@ -105,15 +93,15 @@ function putWiLogPlotLeft(logPlotName, title) {
     });
 }
 function removeAllRightTabs() {
-    console.log('removeAllRightTabs');
-    // layoutManager.root.getItemsById('right')[0].removeChild({
-    //     type: 'component',
-    //     componentName: 'html-block'
-    //     // componentState: {
-    //     //     html: '<wi-logplot name="' + logPlotName + '"></wi-logplot>'
-    //     // },
-    //     // title: title
-    // });
+    let childItems = getChildContentItems('right');
+    let childItemsLength = childItems.length;
+    for (let i = 0; i < childItemsLength; i++) {
+        let childItem = childItems[0];
+        layoutManager.root.getItemsById('right')[0].removeChild(childItem);
+    }
+}
+function getChildContentItems(itemId) {
+    return layoutManager.root.getItemsById(itemId)[0].contentItems;
 }
 
 function isComponentExist(templateId) {

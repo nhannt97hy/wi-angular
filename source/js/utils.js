@@ -76,14 +76,45 @@ exports.updateWellProject = function (wiComponentService, well) {
         project.wells = [];
         project.wells.push(well);
     } else {
+        let isNewWell = true;
         for (let i = 0; i < project.wells.length; i++) {
             if (project.wells[i].idWell == well.idWell) {
                 project.wells[i] = well;
+                isNewWell = false;
             }
+        }
+        if (isNewWell) {
+            project.wells.push(well);
         }
     }
 
     wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
+    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
+};
+
+exports.updateWellsProject = function (wiComponentService, wells) {
+    // update well
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    if (!project) return;
+    for (let well of wells) {
+        if (!Array.isArray(project.wells)) {
+            project.wells = [];
+            project.wells.push(well);
+        } else {
+            let isNewWell = true;
+            for (let i = 0; i < project.wells.length; i++) {
+                if (project.wells[i].idWell == well.idWell) {
+                    project.wells[i] = well;
+                    isNewWell = false;
+                }
+            }
+            if (isNewWell) {
+                project.wells.push(well);
+            }
+        }
+    }
+    wiComponentService.emit(wiComponentService.UPDATE_MULTI_WELLS_EVENT, wells);
+    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
 };
 
 function getCurveDataByName(apiService, idCurve, callback) {
@@ -114,7 +145,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.track = null;
             if (wiD3Ctrl && track) {
                 getCurveDataByName(apiService, ui.helper.attr('data'), function (err, data) {
-                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, ui.helper.attr('data'), 'm3');
+                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, {
+                        name: ui.helper.attr('data'),
+                        unit: 'm3'
+                    });
                 });
             }
         },
@@ -122,7 +156,9 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         revert: false,
         scroll: false,
         helper: 'clone',
-        containment: 'document'
+        containment: 'document',
+        cursor: 'move',
+        cursorAt: {top: 0, left: 0}
     });
 };
 

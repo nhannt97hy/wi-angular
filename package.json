@@ -24,12 +24,16 @@
     "gulp-less": "^3.3.0",
     "jsontoxml": "0.0.11",
     "run-sequence": "^1.2.2",
-    "xlsx": "^0.10.5"
+    "xlsx": "^0.10.5",
+    "mkdirp": "^0.5.1"
   },
   "scripts": {},
   "repository": {
     "private": "true"
   },
-  "author": "minhnt95 and friends",
+  "author": {
+    "name": "minhnt95 and friends",
+    "email": "tienminh.uet@gmail.com"
+  },
   "license": "ISC"
 }

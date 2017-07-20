@@ -1,7 +1,7 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
+function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -60,7 +60,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
 
     this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
         switch (configType) {
-            case 'well':
+            case 'wells':
                 return [
                     {
                         name: "CreateNewWell",
@@ -85,6 +85,99 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "Import LAS",
                         icon: "las-import-16x16",
                         handler: function () {
+                        }
+                    }, {
+                        name: "ImportMultiLAS",
+                        label: "Import Multi LAS",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportDLIS",
+                        label: "Import DLIS",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "IntervalCoreLoader",
+                        label: "Interval/Core Loader",
+                        icon: "load-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "MultiwellCoreLoader",
+                        label: "Multi-well Core Loader",
+                        icon: "load-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportWellHeader",
+                        label: "Import Well Header",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportWellTop",
+                        label: "Import Well Top",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "GroupManager",
+                        label: "Group Manager",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }, {
+                        name: "Sort",
+                        label: "Sort",
+                        icon: "",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'well':
+                return [
+                    {
+                        name: "CreateNewWell",
+                        label: "Create New Well",
+                        icon: "well-new-16x16",
+                        handler: function () {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+                            DialogUtils.addNewDialog(ModalService, function (newWell) {
+                                if (newWell) utils.updateWellProject(wiComponentService, newWell);
+                            });
+                        }
+                    }, {
+                        name: "ImportASCII",
+                        label: "Import ASCII",
+                        icon: "ascii-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportMultiASCII",
+                        label: "Import Multi ASCII",
+                        icon: "ascii-import-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        name: "ImportLAS",
+                        label: "Import LAS",
+                        icon: "las-import-16x16",
+                        handler: function () {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                            DialogUtils.importLASDialog(ModalService, function (well) {
+                                if (well) {
+                                    utils.updateWellProject(wiComponentService, well);
+                                }
+                            });
                         }
                     }, {
                         name: "ImportMultiLAS",

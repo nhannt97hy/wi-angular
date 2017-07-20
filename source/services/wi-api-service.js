@@ -68,8 +68,42 @@ app.factory(wiServiceName, function ($http, Upload) {
             });
         },
 
-        // route
+        postMultiFiles: function (route, dataPayload) {
+            return new Promise(function (resolve, reject) {
+                let configUpload = {
+                    url: BASE_URL + route,
+                    // url: 'http://localhost:3000' + route,
+                    headers: {
+                        'Referrer-Policy': 'no-referrer'
+                    },
+                    data: dataPayload
+                };
 
+                Upload.upload(configUpload).then(
+                    function (responseSuccess) {
+                        console.log('response', responseSuccess);
+                        if (responseSuccess.data && responseSuccess.data.content){
+                            return resolve(responseSuccess.data.content);
+                        } else {
+                            return reject('Response is invalid!');
+                        }
+                    },
+                    function (responseError) {
+                        if (responseError.data && responseError.data.content){
+                            return reject(responseError.data.reason);
+                        } else {
+                            return reject(responseError);
+                        }
+                    },
+                    function (evt) {
+                        let progress = Math.round(100.0 * evt.loaded / evt.total);
+                        console.log('evt upload', progress);
+                    }
+                );
+            });
+        },
+
+        // route
         CURVE: '/project/well/dataset/curve/getData'
     };
 });
