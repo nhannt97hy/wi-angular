@@ -33,7 +33,7 @@ function LogTrack(config) {
     let _shadings = [];
     let _curveHeaders = [];
     let _shadingHeaders = [];
-    let _viewportX = [];
+    let _viewportX = [0, 1];
     let _viewportY = [];
     let currentCurveIdx = -1;
     let currentShadingIdx = -1;
@@ -450,7 +450,15 @@ function LogTrack(config) {
      */
     this.plotCurve = function(curveIdx) {
         let lineWidth = curveIdx == currentCurveIdx ? 2 : 1;
-        _curves[curveIdx].doPlot(_viewportX, _viewportY, transformX, transformY, shading, lineWidth, refX, yStep);
+        _curves[curveIdx].doPlot(
+            _viewportY,
+            _getAxisRange(yAxisPosition),
+            _getAxisRange(xAxisPosition),
+            {
+                lineWidth: lineWidth,
+                yStep: yStep
+            }
+        )
     }
 
     /**
@@ -522,21 +530,6 @@ function LogTrack(config) {
      */
     this.onHeaderMouseDown = function(cb) {
         trackContainer.select('.track-header-viewport').on('mousedown',cb);
-    }
-
-    this.setXRange = function(vX) {
-        _viewportX[0] = vX[0];
-        _viewportX[1] = vX[1];
-    }
-    this.adjustXRange = function(kFactor) {
-        if( _curves.length > 0) {
-            let curvesData = _curves.map(function(c) { return c.getData(); });
-            let mergedCurvesData = [].concat.apply([], curvesData);
-            let tempVport= d3.extent(mergedCurvesData, function(d) { return d.x; });
-
-            _viewportX[0] = 0;
-            _viewportX[1] = tempVport[1] * kFactor;
-        }
     }
 
     function mousemoveHandler() {

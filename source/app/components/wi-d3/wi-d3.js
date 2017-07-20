@@ -101,7 +101,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     this.addCurveToTrack = function(track, data, config) {
         if (!track || !track.addCurve) return;
         let curveIdx = track.addCurve(data, config);
-        track.adjustXRange(1);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);

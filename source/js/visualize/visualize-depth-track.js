@@ -88,12 +88,13 @@ function DepthTrack(config) {
         function setupAxes() {
             var start = roundUp(_viewportY[0], yStep);
             var end = roundDown(_viewportY[1], yStep);
+            var step = (end - start) / yNTicks;
             var yAxis = d3.axisLeft(transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
+                .tickValues(d3.range(start, end + step, step))
                 .tickFormat(yFormatter)
                 .tickSize(5);
             var yAxis1 = d3.axisRight(transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
+                .tickValues(d3.range(start, end + step, step))
                 .tickFormat('')
                 .tickSize(5);
 
