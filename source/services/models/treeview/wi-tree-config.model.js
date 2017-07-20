@@ -7,7 +7,7 @@ app.factory(wiServiceName, function () {
         config: [
             {
                 name: 'wells',
-                type: 'item11000',
+                type: 'wells',
                 data: {
                     icon: 'wells-16x16',
                     label: 'Wells',

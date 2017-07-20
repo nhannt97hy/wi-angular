@@ -72,6 +72,7 @@ app.factory(wiServiceName, function () {
         PROJECT_LOADED_EVENT: 'project-loaded-event',
         PROJECT_UNLOADED_EVENT: 'project-unloaded-event',
         UPDATE_WELL_EVENT: 'update-well-event',
+        UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
     };
 });
 
