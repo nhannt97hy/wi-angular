@@ -1168,7 +1168,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback) {
     });
 };
 exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
-    function ModalController($scope, close) {
+    function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
         this.disabled = false;
@@ -1177,6 +1177,10 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
 
         this.lineOptions = {};
 
+        console.log("Wi", wiComponentService);
+        let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
+        console.log("Ex", wiExplorerCtrl);
+        
         function fillCurveAttrArray () {
             return [
                 {
@@ -1354,21 +1358,22 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         this.topJust = "center";
         this.bottomJust = "center";
 
-        this.curveName = ["DTCO3", "ECGR"];
+        // this.curveName = ["DTCO3", "ECGR"];
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
         this.colorTrack = "#fff";
         this.getColor = function () {
+            // TODO:
             console.log("pick: ", self.colorTrack);
         };
 
         self.curveAttr = fillCurveAttrArray();
         this.shadingAttr = fillShadingAttrArray();
 
-        this.selectedCurve = {};
-        this.selectedShading = {};
+        // this.selectedCurve = null;
+        // this.selectedShading = {};
 
         this.datasets = getDatasets();
         this.fillDataset = getFullData();
@@ -1475,7 +1480,7 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(data);
+            // callback(data);
         });
     });
 };
