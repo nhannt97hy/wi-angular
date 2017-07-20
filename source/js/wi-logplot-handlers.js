@@ -13,11 +13,11 @@ exports.EditFormatButtonClicked = function() {
     var slidingBar = this.wiComponentService.getSlidingBar(this.wiLogplot.name);
     if (!slidingBar) return;
 
-    var idx = myPlot.addDepthTrack();
+    myPlot.addDepthTrack();
 
-    idx = myPlot.addTrack();
+    var track = myPlot.addLogTrack();
 
-    myPlot.addCurve(idx, genSamples(10000));
+    myPlot.addCurveToTrack(track, genSamples(10000), 'Data', 'm3');
 
     var maxDepth = myPlot.getMaxDepth();
 
@@ -25,7 +25,6 @@ exports.EditFormatButtonClicked = function() {
     var high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
     console.log(slidingBar.slidingBarState, low, high, maxDepth);
     myPlot.setDepthRange([low, high]);
-    myPlot.plotAll();
 }
 
 exports.SaveAsLogplotButtonClicked = function() {

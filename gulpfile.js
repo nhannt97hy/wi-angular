@@ -318,10 +318,9 @@ gulp.task('deploy', function () {
         .pipe(deploy());
 });
 
-gulp.task('build-visualize', ['appcomponent', 'js'], function() {
+gulp.task('build-visualize', mainTasks, function() {
     gulp.src([
-        'build/js/main-logplot.js',
-        'build/js/main.js'
+        'build/js/main-logplot.js'
     ])
         .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
 });

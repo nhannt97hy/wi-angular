@@ -1,7 +1,7 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
+function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -16,6 +16,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
             self.treeConfig = {};
+            wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, '');
         });
 
         if (self.name) wiComponentService.putComponent(self.name, self);
@@ -146,6 +147,12 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "Create New Well",
                         icon: "well-new-16x16",
                         handler: function () {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+                            DialogUtils.addNewDialog(ModalService, function (newWell) {
+                                if (newWell) utils.updateWellProject(wiComponentService, newWell);
+                            });
                         }
                     }, {
                         name: "ImportASCII",
@@ -164,6 +171,13 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         label: "Import LAS",
                         icon: "las-import-16x16",
                         handler: function () {
+                            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                            DialogUtils.importLASDialog(ModalService, function (well) {
+                                if (well) {
+                                    utils.updateWellProject(wiComponentService, well);
+                                }
+                            });
                         }
                     }, {
                         name: "ImportMultiLAS",
@@ -293,6 +307,13 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
+                                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+                                    // mock plot data
+                                    let logplot = {
+                                        title: 'Mock Blank Plot'
+                                    };
+                                    utils.createNewBlankLogPlot(wiComponentService, logplot);
                                 }
                             }, {
                                 name: "3TracksBlank",

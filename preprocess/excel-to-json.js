@@ -68,10 +68,11 @@ function buildComponent(row, nameCol, sheet, attrCols) {
     });
     let dependency = getValueAtCell(row, 2, sheet);
 
-    newComponent.name = dependency.replace("wi", "wi-").toLowerCase();
+    newComponent.name = dependency.replace("wi", "wi-").toLowerCase().trim();
     if (newComponent.name === 'wi-button') {
         attrObject.handler = 'handlers.' + clickFunctionName(attrObject.name);
     }
+
     newComponent.attrs = attrObject;
     newComponent.children = [];
     return newComponent;

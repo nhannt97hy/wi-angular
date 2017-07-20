@@ -1,11 +1,13 @@
-exports.newProjectDialog = function ($mainScope, ModalService, callback) {
+exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.disabled = false;
         this.error = null;
 
         this.onOkButtonClicked = function () {
+            self.error = '';
             self.disabled = true;
+
             let data = {
                 name: $scope.name,
                 company: $scope.company,
@@ -22,10 +24,11 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
                     return close(response, 500);
                 })
                 .catch(function (err) {
+                    self.disabled = false;
                     return self.error = err;
                 })
                 .then(function () {
-                    self.disabled = false;
+                    $scope.$apply();
                 });
         };
 
@@ -52,7 +55,7 @@ exports.newProjectDialog = function ($mainScope, ModalService, callback) {
     });
 };
 
-exports.openProjectDialog = function ($mainScope, ModalService, callback) {
+exports.openProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.error = null;
@@ -83,21 +86,23 @@ exports.openProjectDialog = function ($mainScope, ModalService, callback) {
         };
 
         this.onOkButtonClicked = function () {
+            self.error = '';
             self.disabled = true;
+
             let data = {
                 idProject: self.idProject
             };
 
             wiApiService.post('/project/fullinfo', data)
                 .then(function (response) {
-
                     return close(response, 500);
                 })
                 .catch(function (err) {
+                    self.disabled = false;
                     return self.error = err;
                 })
                 .then(function () {
-                    self.disabled = false;
+                    $scope.$apply();
                 });
         };
 
@@ -353,21 +358,28 @@ exports.unitSettingDialog = function (ModalService, callback) {
         });
     });
 
-}
+};
 // add new well
 exports.addNewDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService) {
         let self = this;
+        this.isDisabled = false;
+
+        let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
         this.onOkButtonClicked = function () {
-            let projectData = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            self.error = '';
+            self.isDisabled = true;
+
             let data = {
-                name: $scope.name,
+                name: self.wellName,
                 idProject: projectData.idProject,
-                topDepth: $scope.topDepth,
-                bottomDepth: $scope.bottomDepth,
-                step: $scope.step
+                topDepth: self.topDepth,
+                bottomDepth: self.bottomDepth,
+                step: self.step
             };
-            console.log("data: ", data);
+            console.log("data new well: ", data);
+
             wiApiService.post('/project/well/new', data)
                 .then(function (response) {
                     console.log('response', response);
@@ -375,28 +387,34 @@ exports.addNewDialog = function (ModalService, callback) {
                     return close(response, 500);
                 })
                 .catch(function (err) {
+                    console.error('new well', err);
+                    self.isDisabled = false;
                     return self.error = err;
+                })
+                .then(function () {
+                    $scope.$apply();
                 });
+        };
 
-        }
         this.onCancelButtonClicked = function () {
             console.log("oncCancelButtonClicked");
         }
     }
 
     ModalService.showModal({
-        templateUrl: "add-new/add-new-modal.html",
+        templateUrl: "add-new-well/add-new-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            callback(data);
         });
     });
-}
+};
 
 exports.wellHeaderDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
@@ -736,6 +754,10 @@ exports.addCurveDialog = function (ModalService, callback) {
 
 exports.lineStyleDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
+        this.lineColor = '#cecece';
+        this.getColor = function () {
+            console.log("pick: ", self.lineColor);
+        };
         this.onOkButtonClicked = function () {
 
         };
@@ -795,6 +817,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", true);
                     $('#editSymbolSize').prop("disabled", true);
                     $('#editLineStyle').prop("disabled", false);
+                    $('#sample').text('Line Style');
                     break;
                 case "Symbol":
                     $('#wrapMode').prop("disabled", false);
@@ -804,6 +827,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", false);
                     $('#editSymbolSize').prop("disabled", false);
                     $('#editLineStyle').prop("disabled", true);
+                    $('#sample').text('Symbol Style ');
                     break;
                 case "Both":
                     $('#wrapMode').prop("disabled", false);
@@ -813,6 +837,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", false);
                     $('#editSymbolSize').prop("disabled", false);
                     $('#editLineStyle').prop("disabled", false);
+                    $('#sample').text('Both Style ');
                     break;
                 case "None":
                     $('#wrapMode').prop("disabled", true);
@@ -822,6 +847,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                     $('#symbolSize').prop("disabled", true);
                     $('#editSymbolSize').prop("disabled", true);
                     $('#editLineStyle').prop("disabled", true);
+                    $('#sample').text(' ');
                     break;
                 default:
                     console.log("Error: NULL");
@@ -835,7 +861,7 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
         };
         this.onOkButtonClicked = function () {
 
-        }
+        };
         this.onCancelButtonClicked = function () {
             console.log("onCancelButtonClicked");
         }
@@ -865,8 +891,6 @@ exports.importLASDialog = function (ModalService, callback) {
         this.isDisabled = false;
 
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-        console.log('projectLoaded', self.projectLoaded);
 
         this.onLoadButtonClicked = function () {
             console.log('las file: ', self.lasFile);
@@ -899,10 +923,8 @@ exports.importLASDialog = function (ModalService, callback) {
                 })
                 .catch(function (err) {
                     console.log('err', err);
-                })
-                .then(function () {
                     self.isDisabled = false;
-                });
+                })
         };
 
         this.onCancelButtonClicked = function () {
@@ -990,6 +1012,250 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
 
+            callback(data);
+        });
+    });
+};
+exports.trackPropertiesDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        $scope.propertyTab = 'general';
+        this.showTitle = false;
+        this.showLabel = false;
+        this.setTitle = function () {
+            if (self.showTitle != true) {
+                $('#title').prop("disabled", false);
+                $('#topJust').prop("disabled", false);
+                $('#bottomJust').prop("disabled", false);
+            } else {
+                $('#title').prop("disabled", true);
+                $('#topJust').prop("disabled", true);
+                $('#bottomJust').prop("disabled", true);
+            }
+        };
+        this.setLabel = function () {
+            if (self.showLabel == true) {
+                $('#format').prop("disabled", true);
+                $('#font').prop("disabled", true);
+                $('#preview').prop("disabled", true);
+            }else {
+                $('#format').prop("disabled", false);
+                $('#font').prop("disabled", false);
+                $('#preview').prop("disabled", false);
+            }
+        };
+        this.setValueGrid = function () {
+            if (self.showValueGrid == true) {
+                $('#majorTicks').prop("disabled", true);
+                $('#minorTicks').prop("disabled", true);
+            }else{
+                $('#majorTicks').prop("disabled", false);
+                $('#minorTicks').prop("disabled", false);
+            }
+        };
+        this.header = {
+            title : "Track1",
+            topJust : ["center", "left", "right"],
+            bottomJust : ["center", "left", "right"]
+        };
+        this.topJust = "center";
+        this.bottomJust = "center";
+
+        this.curveName = ["DTCO3", "ECGR"];
+        this.logLinear = ["Logarithmic", "Linear"];
+        this.displayMode = ["Line", "Symbol", "Both", "None"];
+        this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
+
+        this.colorTrack = "#888";
+        this.getColor = function () {
+            console.log("pick: ", self.colorTrack);
+        };
+        
+        // this.curveAttr = [];
+        self.curveAttr = [
+            {
+                curveName : "ECGR",
+                alias : "ECGR",
+                leftScale : "20",
+                rightScale : "200",
+                logLinear : "Linear",
+                displayMode : "",
+                lineStyle : "",
+                displayAs : ""
+            }, 
+            {
+                curveName : "DTCO3",
+                alias : "DTCO3",
+                leftScale : "10",
+                rightScale : "100",
+                logLinear : "Logarithmic",
+                displayMode : "Line",
+                lineStyle : "",
+                displayAs : "Normal"
+            },
+            {
+                curveName : "balla",
+                alias : "balal",
+                leftScale : "10",
+                rightScale : "100",
+                logLinear : "Logarithmic",
+                displayMode : "Line",
+                lineStyle : "",
+                displayAs : "Normal"
+            },
+            {
+                curveName : "curveName",
+                alias : "blalalal",
+                leftScale : "10",
+                rightScale : "100",
+                logLinear : "Logarithmic",
+                displayMode : "Line",
+                lineStyle : "",
+                displayAs : "Normal"
+            }
+        ];
+        this.shadingAttr = [
+            {
+                left : {
+                    curveName: "DTCO3",
+                    fixedValue : "fixed1"
+                },
+                right : {
+                    curveName: "DTCO3-3",
+                    fixedValue : "fixed2"
+                },
+                shadingName : "shading1",
+                shadingStyle : "Fill Pattern",
+                fillPattern : "",
+                variableShading : ""
+            },
+            {
+                left : {
+                    curveName: "DTCO3-1",
+                    fixedValue : "fixed11"
+                },
+                right : {
+                    curveName: "DTCO3-3-1",
+                    fixedValue : "fixed21"
+                },
+                shadingName : "shading1",
+                shadingStyle : "Fill Pattern",
+                fillPattern : "",
+                variableShading : ""
+            },
+            {
+                left : {
+                    curveName: "DTCO3-2",
+                    fixedValue : "fixed12"
+                },
+                right : {
+                    curveName: "DTCO3-3-2",
+                    fixedValue : "fixed22"
+                },
+                shadingName : "shading1",
+                shadingStyle : "Fill Pattern",
+                fillPattern : "",
+                variableShading : ""
+            }
+        ];
+        this.selectedCurve = {};
+        this.selectedShading = {};
+
+        this.setClickedRowCurve = function(index){
+            self.selectedRow = index; 
+            self.selectedCurve = self.curveAttr[index];
+        };
+
+        this.removeRow = function(){      
+            console.log("###", self.selectedCurve.curveName);
+
+            let idx = -1;     
+            let newCurveAttr = eval( self.curveAttr );
+            for( let i = 0; i < newCurveAttr.length; i++ ) {
+                if( newCurveAttr[i] === self.selectedCurve ) {
+                    idx = i;
+                    break;
+                }
+            }
+            self.curveAttr.splice( idx, 1 );        
+        };
+        this.arrowUpCurve = function () {
+            let prevIdx = -1;
+            let idx = self.curveAttr.indexOf(self.selectedCurve);
+            console.log(idx);
+            if (idx-1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx > 0) {
+                let moveCurve = self.curveAttr.splice(idx, 1)
+                console.log(moveCurve[0])
+                self.curveAttr.splice(idx-1, 0, moveCurve[0]);
+            };
+            self.setClickedRowCurve(idx-1);
+        }
+        
+        this.arrowDownCurve = function () {      
+            let prevIdx = self.curveAttr.length;
+            let idx = self.curveAttr.indexOf(self.selectedCurve);
+            console.log(idx);
+            if (idx+1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx < self.curveAttr.length-1) {
+                let moveCurve = self.curveAttr.splice(idx, 1)
+                console.log(moveCurve[0])
+                self.curveAttr.splice(idx+1, 0, moveCurve[0]);                
+            }  
+            self.setClickedRowCurve(idx+1);
+        };
+        //tab Shading
+
+        this.setClickedRowShading = function(index){
+            self.selectedRowShading = index; 
+            self.selectedShading = self.shadingAttr[index];
+        };
+        this.arrowUpShading = function () {
+            let prevIdx = -1;
+            let idx = self.shadingAttr.indexOf(self.selectedShading);
+            console.log(idx);
+            if (idx-1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx > 0) {
+                let moveShading = self.shadingAttr.splice(idx, 1)
+                console.log(moveShading[0])
+                self.shadingAttr.splice(idx-1, 0, moveShading[0]);
+            };
+            self.setClickedRowShading(idx-1);
+
+        };
+        this.arrowDownShading = function () {      
+            let prevIdx = self.shadingAttr.length;
+            let idx = self.shadingAttr.indexOf(self.selectedShading);
+            console.log(idx);
+            if (idx+1 == prevIdx) {
+                prevIdx = idx
+            } else if (idx < self.shadingAttr.length-1) {
+                let moveShading = self.shadingAttr.splice(idx, 1)
+                console.log(moveShading[0])
+                self.shadingAttr.splice(idx+1, 0, moveShading[0]);                
+            }  
+            self.setClickedRowShading(idx+1);
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log("onCancelButtonClicked");
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "track-properties/track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
             callback(data);
         });
     });

@@ -1,11 +1,11 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller(wiComponentService, WiProperty, WiWell) {
+function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     let self = this;
 
     this.$onInit = function () {
-        // self.items = self.config;
+        // if it is rootview
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
 
@@ -16,6 +16,14 @@ function Controller(wiComponentService, WiProperty, WiWell) {
                 self.updateWellsItem(wells);
             });
         }
+    };
+
+    this.onReady = function () {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        let typeItemDragable = 'curve';
+        let element = $('.wi-parent-node' + `[type='${typeItemDragable}']`);
+        utils.setupCurveDraggable(element, wiComponentService, wiApiService);
     };
 
     this.onCollapse = function ($index) {
@@ -76,8 +84,6 @@ function Controller(wiComponentService, WiProperty, WiWell) {
 
         if (wellSelected) {
             angular.copy(newWell, wellSelected);
-
-            console.log('wellSelected', wellSelected);
         } else {
             let wells = getItemByName('wells');
 
@@ -167,7 +173,7 @@ function Controller(wiComponentService, WiProperty, WiWell) {
             child.data.childExpanded = true;
             expandAll(child.children);
         }
-    }
+    };
 
     this.collapseAll = function (rootConfig) {
         for (let config of rootConfig) {
@@ -184,7 +190,7 @@ function Controller(wiComponentService, WiProperty, WiWell) {
             child.data.childExpanded = false;
             collapseAll(child.children);
         }
-    }
+    };
 
     this.showContextMenu = function ($event, $index) {
         console.log('self.name', self.name);

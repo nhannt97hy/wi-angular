@@ -70,9 +70,6 @@ exports.updateWellProject = function (wiComponentService, well) {
     // update well
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
-    console.log('well sddddd', well)
-    console.log('project sddddd', project)
-
     if (!project) return;
 
     if (!Array.isArray(project.wells)) {
@@ -118,4 +115,67 @@ exports.updateWellsProject = function (wiComponentService, wells) {
     }
     wiComponentService.emit(wiComponentService.UPDATE_MULTI_WELLS_EVENT, wells);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
+};
+
+function getCurveDataByName(apiService, idCurve, callback) {
+    apiService.post(apiService.CURVE, {idCurve})
+        .then(function (curve) {
+            console.log('curve data', curve);
+            callback(null, curve);
+        })
+        .catch(function (err) {
+            console.error('getCurveDataByName', err);
+
+            callback(err);
+        });
+}
+
+exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
+    let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+
+    element.draggable({
+        start: function (event, ui) {
+            dragMan.dragging = true;
+        },
+        stop: function (event, ui) {
+            dragMan.dragging = false;
+            let wiD3Ctrl = dragMan.wiD3Ctrl;
+            let track = dragMan.track;
+            dragMan.wiD3Ctrl = null;
+            dragMan.track = null;
+            if (wiD3Ctrl && track) {
+                getCurveDataByName(apiService, ui.helper.attr('data'), function (err, data) {
+                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, {
+                        name: ui.helper.attr('data'),
+                        unit: 'm3'
+                    });
+                });
+            }
+        },
+        appendTo: 'body',
+        revert: false,
+        scroll: false,
+        helper: 'clone',
+        containment: 'document',
+        cursor: 'move',
+        cursorAt: {top: 0, left: 0}
+    });
+};
+
+exports.createNewBlankLogPlot = function (wiComponentService, logPlot) {
+    wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logPlot.title);
+};
+
+// exports.parseTime = function (wiComponentService, time) {
+//     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
+//     let timestamp = 'DD-MM-YYYY, h:mm:ss a';
+//
+//     return moment(time).format(timestamp);
+// };
+
+exports.trackProperties = function (ModalService, wiComponentService) {
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
+       console.log("OKOK");
+    });
 };

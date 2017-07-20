@@ -1,9 +1,8 @@
 exports.NewProjectButtonClicked = function () {
-    console.log('NewProjectButton is clicked ');
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.$scope, this.ModalService, function (data) {
+    DialogUtils.newProjectDialog(this.ModalService, function (data) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, data);
     });
@@ -13,7 +12,7 @@ exports.OpenProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.openProjectDialog(this.$scope, this.ModalService, function (projectData) {
+    DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
     });
@@ -21,7 +20,6 @@ exports.OpenProjectButtonClicked = function () {
 
 exports.CloseProjectButtonClicked = function () {
     let self = this;
-    console.log('CloseProjectButton is clicked');
     let utils = this.wiComponentService.getComponent('UTILS');
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
@@ -32,7 +30,6 @@ exports.CloseProjectButtonClicked = function () {
 };
 
 exports.UnitSettingsButtonClicked = function () {
-    console.log('UnitSettingsButton is clicked');
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.unitSettingDialog(this.ModalService, function (ret) {
@@ -85,12 +82,14 @@ exports.ExitButtonClicked = function () {
 };
 
 exports.AddNewButtonClicked = function () {
-    console.log('AddNewButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.addNewDialog(this.ModalService, function (ret) {
-        console.log("User Choose: " + ret);
-    })
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+
+    DialogUtils.addNewDialog(this.ModalService, function (newWell) {
+        if (newWell) utils.updateWellProject(wiComponentService, newWell);
+    });
 };
 
 exports.WellHeaderButtonClicked = function () {
@@ -528,19 +527,4 @@ exports.AboutButtonClicked = function () {
 
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
-};
-
-exports.CollapseProjectButtonClicked = function () {
-    let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
-    let rootConfig = rootTreeviewCtrl.config;
-    var expaned = false;
-    for (let child of rootConfig) {
-        expaned = child.data.childExpanded;
-        if (!expaned) break;
-    }
-    if (expaned) {
-        rootTreeviewCtrl.collapseAll(rootConfig);
-    } else {
-        rootTreeviewCtrl.expandAll(rootConfig);
-    }
 };

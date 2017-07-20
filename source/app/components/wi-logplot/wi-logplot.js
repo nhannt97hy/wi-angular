@@ -3,9 +3,7 @@ const moduleName = 'wi-logplot';
 
 function Controller($scope, wiComponentService, ModalService) {
     let self = this;
-    let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
-    // console.log(utils);
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
     this.$onInit = function () {
@@ -26,15 +24,12 @@ function Controller($scope, wiComponentService, ModalService) {
 
     this.$doCheck = function () {
         if (!self.slidingBar) return;
-        if (!utils.isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
-            utils.objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
-            let wiD3Controller = self.getwiD3Ctrl();
-            let max = wiD3Controller.getMaxDepth();
-            let low = max * previousSlidingBarState.top / 100;
-            let high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
-            wiD3Controller.setDepthRange([low, high]);
-            wiD3Controller.plotAll();
-        }
+
+        let wiD3Controller = self.getwiD3Ctrl();
+        let max = wiD3Controller.getMaxDepth();
+        let low = max * self.slidingBar.slidingBarState.top / 100;
+        let high = max * ( self.slidingBar.slidingBarState.top + self.slidingBar.slidingBarState.range ) / 100;
+        wiD3Controller.setDepthRange([low, high]);
     };
 
     this.getSlidingbarCtrl = function () {

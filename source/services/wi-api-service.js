@@ -101,7 +101,10 @@ app.factory(wiServiceName, function ($http, Upload) {
                     }
                 );
             });
-        }
+        },
+
+        // route
+        CURVE: '/project/well/dataset/curve/getData'
     };
 });
 

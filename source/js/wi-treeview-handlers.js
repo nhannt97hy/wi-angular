@@ -18,7 +18,6 @@ exports.newitem = function () {
     console.log('newitem');
 };
 exports.logplot = function () {
-    console.log('$scope ', this.$scope);
     console.log('item logplot clicked');
     this.wiComponentService.emit('add-logplot-event', 'new logplot');
 };

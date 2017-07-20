@@ -1,8 +1,10 @@
 {
   "name": "wi-angular",
   "version": "1.0.0",
-  "description": "",
+  "description": "well insight web app with angular",
+  "main": "build/js/index.js",
   "dependencies": {
+    "angular-bootstrap-colorpicker": "^3.0.31",
     "del": "^2.2.2",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
@@ -22,12 +24,13 @@
     "gulp-less": "^3.3.0",
     "jsontoxml": "0.0.11",
     "run-sequence": "^1.2.2",
-    "xlsx": "^0.10.5"
+    "xlsx": "^0.10.5",
+    "mkdirp": "^0.5.1"
   },
   "scripts": {},
   "repository": {
     "private": "true"
   },
-  "author": "",
+  "author": "minhnt95 and friends",
   "license": "ISC"
 }

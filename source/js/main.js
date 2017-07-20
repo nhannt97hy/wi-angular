@@ -31,8 +31,8 @@ let treeviewHandlers = require('./wi-treeview-handlers');
 let graph = require('./visualize/visualize');
 let dragMan = {
     dragging: false,
-    draggedObj: null,
-    cancelingId: null
+    wiD3Ctrl: null,
+    track: null
 };
 
 let wiElementReady = require('./wi-element-ready');
@@ -85,13 +85,17 @@ let app = angular.module('wiapp',
         'angularModalService',
 
         // 3rd lib
-        'ngFileUpload'
+        'ngFileUpload',
+        'kendo.directives'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
     // UTIL FUNCTIONS
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
     wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
+
+    // dependency 3rd component
+    // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
 
 
     // SETUP HANDLER FUNCTIONS
@@ -157,28 +161,5 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
         // layoutManager.removeAllRightTabs();
-    });
-
-    $(document).ready(function () {
-        $('.wi-parent-node').draggable({
-            start: function (event, ui) {
-                console.log('start', ui.helper.attr('data-curve'));
-                dragMan.dragging = true;
-                dragMan.draggedObj = ui.helper.attr('data-curve');
-            },
-            stop: function (event, ui) {
-                dragMan.cancelingId = setTimeout(function () {
-                    console.log('stop');
-                    dragMan.dragging = false;
-                    dragMan.draggedObj = null;
-                    dragMan.cancelingId = null;
-                }, 1000);
-            },
-            appendTo: 'body',
-            revert: false,
-            scroll: false,
-            helper: 'clone',
-            containment: 'document'
-        });
     });
 });
