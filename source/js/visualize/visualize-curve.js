@@ -1,3 +1,5 @@
+let Utils = require('./visualize-utils');
+
 module.exports = Curve;
 
 /**
@@ -22,8 +24,8 @@ function Curve(config) {
     let _color = config.color || 'blue';
     let _name = config.name || 'Noname';
     let _unit = config.unit || 'm3';
-    let _xMin = config.xMin || 0;
-    let _xMax = config.xMax || 200;
+    let _xMin = config.xMin || null;
+    let _xMax = config.xMax || null;
     let _scale = config.scale || 'linear';
     let _header;
 
@@ -179,7 +181,13 @@ function Curve(config) {
      * @param {Array} data - Array of objects containing x, y coordinates
      */
     this.init = function(plotContainer, data) {
-        _data = data;
+        Utils.parseData(data);
+        _data = Utils.trimData(data);
+        Utils.interpolateData(_data);
+
+        _xMin = _xMin == null ? Utils.roundDown(d3.min(_data, function(d) { return d.x; }), 1) : _xMin;
+        _xMax = _xMax == null ? Utils.roundUp(d3.max(_data, function(d) { return d.x; }), 1) : _xMax;
+
         clientRect = plotContainer.node().getBoundingClientRect();
 
         canvas = plotContainer.append('canvas')

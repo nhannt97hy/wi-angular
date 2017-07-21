@@ -4,6 +4,9 @@ exports.invertColor = invertColor;
 exports.appendTrack = appendTrack;
 exports.removeTrack = removeTrack;
 exports.isWithin = isWithin;
+exports.trimData = trimData;
+exports.interpolateData = interpolateData;
+exports.parseData = parseData;
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
@@ -23,6 +26,34 @@ function isWithin(item, extentX, extentY) {
        item.x <= extentX[1] &&
        item.y >= extentY[0] &&
        item.y <= extentY[1]);
+}
+
+function trimData(data) {
+    let i = 0, j = data.length -1;
+    for (;i < data.length && data[i].x == null; i++);
+    for (;j >= 0 && data[j].x == null; j--);
+    if (i >= j) return [];
+    return data.slice(i, j+1);
+}
+
+function parseData(data) {
+    data.forEach(function(d) {
+        d.x = d.x == null ? null : parseInt(d.x);
+        d.y = d.y == null ? null : parseInt(d.y);
+    });
+}
+
+function interpolateData(data) {
+    let prev = 0;
+    let i, j;
+    for (i = 0; i < data.length; i ++) {
+        if (data[i].x == null) continue;
+        for (j = prev + 1; j < i; j ++) {
+            data[j].x = (data[j].y - data[prev].y) / (data[i].y - data[prev].y) * (data[i].x - data[prev].x) + data[prev].x;
+        }
+        prev = i;
+    }
+    return data;
 }
 
 function invertColor(color) {

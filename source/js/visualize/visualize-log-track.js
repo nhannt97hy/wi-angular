@@ -307,21 +307,21 @@ function LogTrack(config) {
 
         let name = config.name || ('Curve ' + (_curves.length + curvesRemoved));
         let unit = config.unit || 'm3';
-        let xMin = config.xMin || roundDown(d3.min(data, function(d) { return d.x; }), 1);
-        let xMax = config.xMax || roundUp(d3.max(data, function(d) { return d.x; }), 1);
         let color = config.color || _genColor();
 
         let curve = new Curve({
             color: color,
             name: name,
             unit: unit,
-            xMin: xMin,
-            xMax: xMax
+            xMin: config.xMin,
+            xMax: config.xMax
         });
+        curve.init(plotContainer, data);
+        let xMin = curve.getXMin();
+        let xMax = curve.getXMax();
 
         let header = _addCurveHeader(curve, name, unit, xMin, xMax);
         curve.setHeader(header);
-        curve.init(plotContainer, data);
         _curves.push(curve);
         return curve;
     }
