@@ -1,3 +1,4 @@
+let Track = require('./visualize-track.js');
 let Curve = require('./visualize-curve.js');
 let Shading = require('./visualize-shading.js');
 
@@ -24,6 +25,8 @@ module.exports = LogTrack;
  * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 0
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 0
  */
+LogTrack.prototype = Object.create(Track.prototype);
+LogTrack.prototype.constructor = LogTrack;
 
 function LogTrack(config) {
     config = typeof config === 'object' ? config : {};
@@ -220,6 +223,15 @@ function LogTrack(config) {
         usedColors.push(d3ColorString);
         curve.setColor(d3ColorString);
         self.plotCurve(self.getCurrentCurve());
+    }
+
+    /**
+     * Set background color for the track
+     * @param {String} color - CSS color string
+     */
+    this.setBackgroundColor = function(color) {
+        trackContainer
+            .style('background-color', color)
     }
 
     /**

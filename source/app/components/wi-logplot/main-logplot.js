@@ -2,6 +2,7 @@ let wiButton = require('./wi-button.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiSlidingbar = require('./wi-slidingbar.js');
 let wiContextMenu = require('./wi-context-menu.js');
+let wiDropdown = require('./wi-dropdown');
 
 let graph = require('./visualize/visualize.js');
 let wiD3 = require('./wi-d3.js');
@@ -24,7 +25,7 @@ let dragMan = {
 let app = angular.module('helloapp',
     [wiLogplot.name, wiButton.name, wiToolbar.name, wiSlidingbar.name, wiContextMenu.name, wiD3.name, wiComponentService.name,
         wiElementReadyDirective.name,
-        'angularModalService']);
+        'angularModalService', wiDropdown.name]);
 
 app.controller('WiDummy', function ($scope, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);

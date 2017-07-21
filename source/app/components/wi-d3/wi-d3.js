@@ -41,6 +41,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     let _currentTrack = null;
     let _previousTrack = null;
     let _depthRange = [0, 100000];
+    let _selectedColor = '#ffffe0';
 
     this.getCurrentTrack = function () {
         return _currentTrack
@@ -245,15 +246,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     function _setCurrentTrack(track) {
         _previousTrack = _currentTrack;
         _currentTrack = track;
+        _currentTrack.setBackgroundColor(_selectedColor);
         _clearPreviousHighlight();
     }
 
     function _clearPreviousHighlight() {
-        if (_previousTrack != null
-            && _previousTrack != _currentTrack
-            && _previousTrack.setCurrentCurve) {
-            _previousTrack.setCurrentCurve(null);
+        if (!_previousTrack) return;
+        if (_previousTrack != _currentTrack) {
+            if (_previousTrack.setCurrentCurve)
+                _previousTrack.setCurrentCurve(null);
+            _previousTrack.setBackgroundColor('transparent');
         }
+
     }
 
     function _onPlotMouseDownCallback(track) {
