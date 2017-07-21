@@ -1266,9 +1266,6 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
             ];
 
         };
-        function getDatasets () {
-            return ['dataset1', 'dataset2'];
-        };
         function getFullData () {
             return [
                 {
@@ -1330,6 +1327,21 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                             displayAs : "Normal"
                         }
                     ]
+                },
+                {
+                    name : "dataset3",
+                    content : [
+                        {
+                            curveName: "DTCO3",
+                            alias : "DTCO3",
+                            leftScale : 1000,
+                            rightScale : 10,
+                            logLinear : "Logarithmic",
+                            displayMode : "Line",
+                            lineStyle : "",
+                            displayAs : "Normal"
+                        }
+                    ]
                 }
             ];
         };
@@ -1383,58 +1395,55 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
             console.log("pick: ", self.colorTrack);
         };
 
-        // self.curveAttr = fillCurveAttrArray();
+        // self.fillDataset.content = fillCurveAttrArray();
         this.shadingAttr = fillShadingAttrArray();
 
-        // this.selectedCurve = null;
         // this.selectedShading = {};
 
-        this.datasets = getDatasets();
         this.fillDataset = getFullData();
         this.selectDataset = getFullData();
-
         this.setClickedRowCurve = function(index){
             self.selectedRow = index; 
-            self.selectedCurve = self.curveAttr[index];
+            self.selectedCurve = self.fillDataset[index];
         };
 
         this.removeRow = function(){      
-            console.log("###", self.selectedCurve.curveName);
+            console.log("###", self.selectedCurve.content);
 
             let idx = -1;     
-            let newCurveAttr = eval( self.curveAttr );
+            let newCurveAttr = eval( self.fillDataset );
             for( let i = 0; i < newCurveAttr.length; i++ ) {
                 if( newCurveAttr[i] === self.selectedCurve ) {
                     idx = i;
                     break;
                 }
             }
-            self.curveAttr.splice( idx, 1 );        
+            self.fillDataset.splice( idx, 1 );        
         };
         this.arrowUpCurve = function () {
             let prevIdx = -1;
-            let idx = self.curveAttr.indexOf(self.selectedCurve);
+            let idx = self.fillDataset.indexOf(self.selectedCurve);
             console.log(idx);
             if (idx-1 == prevIdx) {
                 prevIdx = idx
             } else if (idx > 0) {
-                let moveCurve = self.curveAttr.splice(idx, 1)
+                let moveCurve = self.fillDataset.splice(idx, 1)
                 console.log(moveCurve[0])
-                self.curveAttr.splice(idx-1, 0, moveCurve[0]);
+                self.fillDataset.splice(idx-1, 0, moveCurve[0]);
             };
             self.setClickedRowCurve(idx-1);
         };
         
         this.arrowDownCurve = function () {      
-            let prevIdx = self.curveAttr.length;
-            let idx = self.curveAttr.indexOf(self.selectedCurve);
+            let prevIdx = self.fillDataset.length;
+            let idx = self.fillDataset.indexOf(self.selectedCurve);
             console.log(idx);
             if (idx+1 == prevIdx) {
                 prevIdx = idx
-            } else if (idx < self.curveAttr.length-1) {
-                let moveCurve = self.curveAttr.splice(idx, 1)
+            } else if (idx < self.fillDataset.length-1) {
+                let moveCurve = self.fillDataset.splice(idx, 1)
                 console.log(moveCurve[0])
-                self.curveAttr.splice(idx+1, 0, moveCurve[0]);                
+                self.fillDataset.splice(idx+1, 0, moveCurve[0]);                
             }  
             self.setClickedRowCurve(idx+1);
         };

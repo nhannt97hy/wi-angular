@@ -156,43 +156,44 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr ng-repeat="getData in wiModal.fillDataset"
+                                                <tr ng-repeat="dataset in wiModal.fillDataset"
                                                     ng-class="{'selected':$index == wiModal.selectedRow}"
                                                     ng-click="wiModal.setClickedRowCurve($index)">
                                                     <td>
-                                                        <select ng-model="wiModal.fillDataset[$index]" 
+                                                        <select ng-model="dataset" 
                                                                 class="form-control wi-form-control" 
-                                                                ng-options="dataset as dataset.name for dataset in wiModal.selectDataset track by dataset.name"></select>
+                                                                ng-options="datasetName as datasetName.name for datasetName in wiModal.fillDataset track by datasetName.name">
+                                                        </select>
                                                     </td> 
                                                     <td>
-                                                        <select ng-model="wiModal.fillDataset[$index].content" 
+                                                        <select ng-model="dataset.content[$index].curveName" 
                                                                 class="form-control wi-form-control" 
-                                                                ng-options="selectCurve as selectCurve.curveName for selectCurve in wiModal.fillDataset[$index].content track by selectCurve.curveName">
+                                                                ng-options="curve as curve.curveName for curve in dataset.content track by curve.curveName">
                                                         </select>
                                                     </td> 
                                                     <td>
                                                         <input type="text" class="form-control wi-form-control"
-                                                                ng-model="wiModal.curveAttr[$index].alias"
+                                                                ng-model="dataset.content[$index].alias"
                                                                 size="10">
                                                     </td>   
                                                     <td>
                                                         <input type="number" class="form-control wi-form-control"
-                                                                ng-model="wiModal.curveAttr[$index].leftScale"
+                                                                ng-model="dataset.content[$index].leftScale"
                                                                 size="10">
                                                     </td> 
                                                     <td>
                                                         <input type="number" class="form-control wi-form-control"
-                                                                ng-model="wiModal.curveAttr[$index].rightScale"
+                                                                ng-model="dataset.content[$index].rightScale"
                                                                 size="10">
                                                     </td> 
                                                     <td>
-                                                        <select ng-model="wiModal.curveAttr[$index].logLinear" 
+                                                        <select ng-model="dataset.content[$index].logLinear" 
                                                                 class="form-control wi-form-control" 
                                                                 ng-options="selectLogLinear for selectLogLinear in wiModal.logLinear track by selectLogLinear">
                                                         </select>
                                                     </td> 
                                                     <td>
-                                                        <select ng-model="wiModal.curveAttr[$index].displayMode" 
+                                                        <select ng-model="dataset.content[$index].displayMode" 
                                                                 class="form-control wi-form-control" 
                                                                 ng-options="display for display in wiModal.displayMode track by display">
                                                         </select>
@@ -203,7 +204,7 @@
                                                         </button>
                                                     </td>  
                                                     <td>
-                                                        <select ng-model="wiModal.curveAttr[$index].displayAs" 
+                                                        <select ng-model="dataset.content[$index].displayAs" 
                                                                 class="form-control wi-form-control" 
                                                                 ng-options="display for display in wiModal.displayAs track by display">
                                                         </select>
