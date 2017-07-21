@@ -105,38 +105,34 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
-        let idx = track.getCurves().indexOf(curve);
-        let curveHeader = track.getCurveHeaders()[idx];
-        curveHeader
-            .on('mousedown', function() {
-                _setCurrentTrack(track);
-                track.setCurrentCurve(curve);
-                if (d3.event.button == 2) {
-                    _curveOnRightClick();
-                }
-            })
-            .on('contextmenu', function() {
-                d3.event.stopPropagation();
-                d3.event.preventDefault();
-            });
+        track.onCurveHeaderMouseDown(curve, function() {
+            _setCurrentTrack(track);
+            track.setCurrentCurve(curve);
+            if (d3.event.button == 2) {
+                _curveOnRightClick();
+            }
+        });
     }
 
     this.addLeftShadingToTrack = function (track, config) {
         if (!track || !track.addLeftShading) return;
         let shading = track.addLeftShading(track.getCurrentCurve(), config);
         track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
     this.addRightShadingToTrack = function (track, config) {
         if (!track || !track.addRightShading) return;
         let shading = track.addRightShading(track.getCurrentCurve(), config);
         track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
     this.addCustomShadingToTrack = function (track, value, config) {
         if (!track || !track.addCustomShading) return;
         let shading = track.addCustomShading(track.getCurrentCurve(), value, config);
         track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
     this.setDepthRange = function(depthRange) {
@@ -255,8 +251,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     function _clearPreviousHighlight() {
         if (_previousTrack != null
             && _previousTrack != _currentTrack
-            && _previousTrack.setCurrentCurveIdx) {
-            _previousTrack.setCurrentCurveIdx(-1);
+            && _previousTrack.setCurrentCurve) {
+            _previousTrack.setCurrentCurve(null);
         }
     }
 
@@ -270,6 +266,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         if (d3.event.shadingMouseDown && d3.event.button == 2) {
             _shadingOnRightClick();
         }
+    }
+
+    function _registerShadingHeaderMouseDownCallback(track, shading) {
+        track.onShadingHeaderMouseDown(shading, function() {
+            _setCurrentTrack(track);
+            if (d3.event.button == 2) {
+                _shadingOnRightClick();
+            }
+        })
     }
 
     function _onPlotMouseWheelCallback(track) {
@@ -292,7 +297,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
 
     function _onHeaderMouseDownCallback(track) {
         _setCurrentTrack(track);
-        _currentTrack.setCurrentCurveIdx(-1);
+        _currentTrack.setCurrentCurve(null);
+    }
+
+    function _shadingOnRightClick() {
+        let posX = d3.event.clientX, posY = d3.event.clientY;
+        d3.event.stopPropagation();
+        d3.event.preventDefault();
+        $timeout(function() {
+            wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
+                name: "RemoveShading",
+                label: "Remove Shading",
+                handler: function () {
+                    self.removeCurrentShading();
+                }
+            }]);
+        });
     }
 
     function _curveOnRightClick() {
@@ -308,10 +328,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                 }
             }]);
         });
-    }
-
-    function _shadingOnRightClick() {
-        console.log('Shading on right click');
     }
 
     /* Private End */

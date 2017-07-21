@@ -39,7 +39,8 @@ function appendTrackHeader(plotArea, container, trackName) {
 
     let nameLabel = headerViewport.append('label')
         .attr('class', 'track-name text-center')
-            .text(trackName);
+        .style('z-index', 2)
+        .text(trackName);
 
     let header = headerViewport.append('div')
         .attr('class', 'track-header')

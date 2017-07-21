@@ -24,6 +24,7 @@ function Shading(config) {
     let _fillStyle = config.fillStyle || 'green';
     let _name = config.name || 'Noname';
     let _refX = config.refX;
+    let _header;
 
     let refLineWidth = 2;
     let refLineColor = '#3e3e3e';
@@ -57,6 +58,13 @@ function Shading(config) {
     }
 
     /**
+     * Get header of the shading
+     */
+    this.getHeader = function() {
+        return _header;
+    }
+
+    /**
      * Set name property for the shading
      * @param {String} name - New name
      */
@@ -80,6 +88,20 @@ function Shading(config) {
         _refX = refX;
     }
 
+    /**
+     * Set header property of the shading
+     * @param {Object} header - shading header
+     */
+    this.setHeader = function(header) {
+        _header = header;
+    }
+
+    /**
+     * Re-insert the shading to the end of its parent
+     */
+    this.raise = function() {
+        canvas.raise();
+    }
 
     /**
      * Initialize DOM elements
@@ -97,10 +119,7 @@ function Shading(config) {
             .attr('height', clientRect.height);
 
         ctx = canvas.node().getContext('2d');
-
-        svg = plotContainer.append('svg')
-            .attr('width', clientRect.width)
-            .attr('height', clientRect.height);
+        svg = plotContainer.select('svg');
 
         if (_refX != null) {
             refLine = svg.append('line').attr('class', 'ref-line')
@@ -143,7 +162,7 @@ function Shading(config) {
      */
     this.destroy = function() {
         canvas.remove();
-        svg.remove();
+        if (_header) _header.remove();
     }
 
     /**

@@ -25,6 +25,7 @@ function Curve(config) {
     let _xMin = config.xMin || 0;
     let _xMax = config.xMax || 200;
     let _scale = config.scale || 'linear';
+    let _header;
 
     /**
      * Get data property of curve
@@ -94,6 +95,13 @@ function Curve(config) {
     }
 
     /**
+     * Get header of the curve
+     */
+    this.getHeader = function() {
+        return _header;
+    }
+
+    /**
      * Set name property for curve
      * @param {String} name - New name for curve
      */
@@ -140,6 +148,14 @@ function Curve(config) {
     }
 
     /**
+     * Set header property of the curve
+     * @param {Object} header - curve header
+     */
+    this.setHeader = function(header) {
+        _header = header;
+    }
+
+    /**
      * Adjust curve when bounding rectangle changes
      * @param {Object} rect - The bounding rectangle
      */
@@ -148,6 +164,13 @@ function Curve(config) {
         canvas
             .attr('width', clientRect.width)
             .attr('height', clientRect.height);
+    }
+
+    /**
+     * Re-insert the curve to the end of its parent
+     */
+    this.raise = function() {
+        canvas.raise();
     }
 
     /**
@@ -172,6 +195,7 @@ function Curve(config) {
      */
     this.destroy = function() {
         canvas.remove();
+        if (_header) _header.remove();
     }
 
     /**

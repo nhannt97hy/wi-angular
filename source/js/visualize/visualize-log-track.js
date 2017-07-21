@@ -31,8 +31,6 @@ function LogTrack(config) {
 
     let _curves = [];
     let _shadings = [];
-    let _curveHeaders = [];
-    let _shadingHeaders = [];
     let _viewportX = [0, 1];
     let _viewportY = [];
     let _currentCurve = null;
@@ -120,12 +118,6 @@ function LogTrack(config) {
         if (_currentCurve) return _currentCurve;
         return null;
     }
-
-    /** @return {Array} All headers for curves in this track */
-    this.getCurveHeaders = function() { return _curveHeaders; }
-
-    /** @return {Array} All headers for shadings in this track */
-    this.getShadingHeaders = function() { return _shadingHeaders; }
 
     /** @return {Number} Maximum y value among all curves, null if there is no curve */
     this.getYMax = function() {
@@ -306,7 +298,6 @@ function LogTrack(config) {
         let xMin = config.xMin || roundDown(d3.min(data, function(d) { return d.x; }), 1);
         let xMax = config.xMax || roundUp(d3.max(data, function(d) { return d.x; }), 1);
         let color = config.color || _genColor();
-        _addCurveHeader(name, unit, xMin, xMax);
 
         let curve = new Curve({
             color: color,
@@ -316,6 +307,8 @@ function LogTrack(config) {
             xMax: xMax
         });
 
+        let header = _addCurveHeader(curve, name, unit, xMin, xMax);
+        curve.setHeader(header);
         curve.init(plotContainer, data);
         _curves.push(curve);
         return curve;
@@ -405,7 +398,7 @@ function LogTrack(config) {
 
         let leftName = leftCurve ? leftCurve.getName() : 'left';
         let rightName = rightCurve ? rightCurve.getName() : 'right';
-        let name = config.name || (leftName + ' - ' + rightName) ;
+        let name = config.name || (leftName + ' - ' + rightName);
 
         let shading = new Shading({
             fillStyle:fillStyle,
@@ -413,6 +406,8 @@ function LogTrack(config) {
             refX: refX
         });
 
+        let header = _addShadingHeader(shading, name, fillStyle);
+        shading.setHeader(header);
         shading.init(plotContainer, leftCurve, rightCurve);
         _shadings.push(shading);
         return shading;
@@ -428,9 +423,7 @@ function LogTrack(config) {
         curve.destroy();
 
         let curveIdx = _curves.indexOf(curve);
-        _removeCurveHeader(curve);
         _curves.splice(curveIdx, 1);
-        _curveHeaders.splice(curveIdx, 1);
 
         if (curve == _currentCurve)
             _currentCurve = null;
@@ -503,7 +496,7 @@ function LogTrack(config) {
      */
     this.plotCurve = function(curve) {
         if (!curve) return;
-        let lineWidth = curve == self.getCurrentCurve() ? 2 : 1;
+        let lineWidth = curve == _currentCurve ? 2 : 1;
         curve.doPlot(
             _viewportY,
             _getAxisRange(yAxisPosition),
@@ -512,13 +505,13 @@ function LogTrack(config) {
                 lineWidth: lineWidth,
                 yStep: yStep
             }
-        )
+        );
+        if (curve == _currentCurve) curve.raise();
     }
 
     /**
      * Plot one shading
-     * @param {Number} shadingIdx - Index of the shading to plot
-     * @todos Pending
+     * @param {Object} shading - The shading to plot
      */
     this.plotShading = function(shading) {
         if (!shading) return;
@@ -530,6 +523,7 @@ function LogTrack(config) {
                 yStep: yStep
             }
         );
+        if (shading == _currentShading) shading.raise();
     }
 
     /** Plot all curves */
@@ -596,6 +590,31 @@ function LogTrack(config) {
     this.onHeaderMouseDown = function(cb) {
         trackContainer.select('.track-header-viewport').on('mousedown',cb);
     }
+
+    /**
+     * Register event when mouse down the shading header area
+     */
+    this.onShadingHeaderMouseDown = function(shading, cb) {
+        if (!shading) return;
+        shading.getHeader()
+            .on('mousedown', function() {
+                _onShadingHeaderMouseDownCallback(shading);
+                cb();
+            });
+    }
+
+    /**
+     * Register event when mouse down the curve header area
+     */
+    this.onCurveHeaderMouseDown = function(curve, cb) {
+        if (!curve) return;
+        curve.getHeader()
+            .on('mousedown', function() {
+                _onCurveHeaderMouseDownCallback(curve);
+                cb();
+            })
+    }
+
 
     function mousemoveHandler() {
         freshness = Date.now();
@@ -717,10 +736,17 @@ function LogTrack(config) {
         return color;
     }
 
-    function _addCurveHeader(name, unit, minVal, maxVal) {
+    function _addCurveHeader(curve, name, unit, minVal, maxVal) {
         let unitHeaderData = [minVal, unit, maxVal];
         let curveHeader = headerContainer.append('div')
-            .attr('class', 'curve-header');
+            .attr('class', 'curve-header')
+            .on('mousedown', function() {
+                _onCurveHeaderMouseDownCallback(curve);
+            })
+            .on('contextmenu', function() {
+                d3.event.stopPropagation();
+                d3.event.preventDefault();
+            });
 
         curveHeader.append('label')
             .attr('class', 'data-header text-center')
@@ -742,50 +768,98 @@ function LogTrack(config) {
                         return '';
                     })
                     .text(function(d) { return d; });
-
-        _curveHeaders.push(curveHeader);
+        return curveHeader;
     }
 
-    function _addShadingHeader(name, fillStyle) {
+    function _addShadingHeader(shading, name, fillStyle) {
+        let header = headerContainer.append('label')
+            .attr('class', 'shading-header')
+            .style('position', 'relative')
+            .style('padding', '2px 0 2px 0')
+            .on('mousedown', function() {
+                _onShadingHeaderMouseDownCallback(shading);
+            })
+            .on('contextmenu', function() {
+                d3.event.stopPropagation();
+                d3.event.preventDefault();
+            });
 
-    }
+        header.append('span')
+            .attr('class', 'shading-name-header text-center')
+            .style('background-color', 'white')
+            .style('border', '1px solid black')
+            .style('position', 'relative')
+            .style('padding', '0 2px 0 2px')
+            .style('z-index', 1)
+            .style('font-size', '10px')
+            .text(name);
 
-    function _removeCurveHeader(curve) {
-        let curveIdx = _curves.indexOf(curve);
-        headerContainer.selectAll('.curve-header')
-            .filter(function(d, i) { return i == curveIdx; })
-            .remove();
+        let rect = header.node().getBoundingClientRect();
+        let headerCanvas = header.append('canvas')
+            .attr('width', rect.width -2)
+            .attr('height', rect.height -2)
+            .style('position', 'absolute')
+            .style('cursor', 'default');
+
+        let headerCtx = headerCanvas.node().getContext('2d');
+        headerCtx.fillStyle = fillStyle;
+        headerCtx.fillRect(0, 0, rect.width, rect.height);
+        return header;
     }
 
     function _highlightCurveHeader() {
-        _curveHeaders.forEach(function(h, i) {
-            let bgColor = i == _curves.indexOf(_currentCurve) ? 'rgba(255,0,0,0.2)' : 'transparent';
-            h.style('background-color', bgColor);
+        _curves.forEach(function(c, i) {
+            let bgColor = c == _currentCurve ? 'rgba(255,128,128,0.5)' : 'transparent';
+            c.getHeader().style('background-color', bgColor);
         });
     }
 
-    function _highlightShadingHeader() {}
+    function _highlightShadingHeader() {
+        _shadings.forEach(function(sh, i) {
+            let bgColor = sh == _currentShading ? 'rgb(255,128, 128)' : 'white';
+            sh.getHeader().select('.shading-name-header')
+                .style('background-color', bgColor);
+        });
+    }
+
+    function _onCurveHeaderMouseDownCallback(curve) {
+        self.setCurrentCurve(curve);
+    }
+
+    function _onShadingHeaderMouseDownCallback(shading) {
+        self.setCurrentShading(shading);
+    }
 
     function _onPlotMouseDownCallback() {
         let current = null;
+        let x = d3.event.offsetX;
+        let y = d3.event.offsetY;
+
+        if (_currentCurve && _currentCurve.nearPoint(x, y)) {
+            d3.event.curveMouseDown = true;
+            return;
+        }
+        if (_currentShading && _currentShading.nearPoint(x, y)) {
+            d3.event.shadingMouseDown = true;
+            return;
+        }
+        _shadings.forEach(function(sh) {
+            if (!current && sh.nearPoint(x, y)) {
+                current = sh;
+                d3.event.shadingMouseDown = true;
+            }
+        });
+        if (current) {
+            self.setCurrentShading(current);
+            return;
+        }
         _curves.forEach(function(c) {
-            if (!current && c.nearPoint(d3.event.offsetX, d3.event.offsetY)) {
+            if (!current && c.nearPoint(x, y)) {
                 current = c;
                 d3.event.curveMouseDown = true;
             }
         });
-        if (current) {
-            self.setCurrentCurve(current);
-            return;
-        }
-        _shadings.forEach(function(sh) {
-            if (!current && sh.nearPoint(d3.event.offsetX, d3.event.offsetY)) {
-                current = sh;
-                d3.event.shadingMouseDown = true;
-                return;
-            }
-        });
-        self.setCurrentShading(current);
+        self.setCurrentCurve(current);
     }
 
     const trackerLifetime = 1 * 1000; // 1 seconds
