@@ -95,8 +95,8 @@ let app = angular.module('wiapp',
         'ui.select'
     ]);
 app.controller('AppController', function ($scope, $rootScope, $timeout,
-                                          $compile, wiComponentService,
-                                          ModalService, wiApiService) {
+    $compile, wiComponentService,
+    ModalService, wiApiService) {
     // UTIL FUNCTIONS
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
@@ -153,15 +153,15 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
 
     // mock logplot. remove when done
     let mockPlot = {
-        idLogplot: Date.now(),
+        idPlot: Date.now(),
         name: 'mock plot',
         option: 'blank-plot'
     };
-    layoutManager.putWiLogPlotRight('myLogPlot' + mockPlot.idLogplot, mockPlot);
+    layoutManager.putWiLogPlotRight('myLogPlot' + mockPlot.idPlot, mockPlot);
 
     // Install TEST
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
-        layoutManager.putWiLogPlotRight('myLogPlot' + logplotModel.idLogplot, logplotModel);
+        layoutManager.putWiLogPlotRight('myLogPlot' + logplotModel.idPlot, logplotModel);
     });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -170,7 +170,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     });
 
     // update size when container is resized
-    $(window).on('resize', function() {
+    $(window).on('resize', function () {
         layoutManager.updateSize();
     });
 });

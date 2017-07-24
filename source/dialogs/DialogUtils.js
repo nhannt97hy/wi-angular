@@ -1500,7 +1500,52 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
 
 exports.depthTrackPropertiesDialog = function(ModalService, callback) {
     function ModalController($scope, wiComponentService, close) {
-
+        let self = this;
+        let props = {
+            isShowTitle: true,
+            title : "Depth",
+            topJustification: "center",
+            bottomJustification: "center",
+            trackColor: '#ffffff',
+            width: 0.500,
+            depthType: null,
+            unitType: 'M',
+            decimals: 0
+        }
+        this.isShowTitle = props.isShowTitle;
+        this.title = props.title;
+        this.topJustification = props.topJustification;
+        this.bottomJustification = props.bottomJustification;
+        this.trackColor = props.trackColor;
+        this.width = props.width;
+        this.depthType = props.depthType;
+        this.unitType = props.unitType;
+        this.decimals = props.decimals;
+        // Dialog buttons
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+        function bindProps() {
+            props = {
+                isShowTitle: self.isShowTitle,
+                title : self.title,
+                topJustification: self.topJustification,
+                bottomJustification: self.bottomJustification,
+                trackColor: self.trackColor,
+                width: self.width,
+                depthType: self.depthType,
+                unitType: self.unitType,
+                decimals: self.decimals
+            }
+        }
     }
     ModalService.showModal({
         templateUrl: "depth-track-properties/depth-track-properties-modal.html",
@@ -1519,7 +1564,52 @@ exports.depthTrackPropertiesDialog = function(ModalService, callback) {
 
 exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
     function ModalController($scope, wiComponentService, close) {
-
+        let self = this;
+        let props = {
+            isShowTitle: true,
+            title : "New Zone",
+            topJustification: "center",
+            bottomJustification: "center",
+            trackColor: '#ffffff',
+            width: 0.500,
+            parameterSet: null,
+            zoneSets: [],
+            zoneSet: null
+        }
+        this.isShowTitle = props.isShowTitle;
+        this.title = props.title;
+        this.topJustification = props.topJustification;
+        this.bottomJustification = props.bottomJustification;
+        this.trackColor = props.trackColor;
+        this.width = props.width;
+        this.parameterSet = props.parameterSet;
+        this.zoneSets = props.zoneSets;
+        this.zoneSet = props.zoneSet;
+        // Dialog buttons
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+        function bindProps() {
+            props = {
+                isShowTitle: self.isShowTitle,
+                title : self.title,
+                topJustification: self.topJustification,
+                bottomJustification: self.bottomJustification,
+                trackColor: self.trackColor,
+                width: self.width,
+                parameterSet: self.parameterSet,
+                zoneSets: self.zoneSets,
+                zoneSet: self.zoneSet
+            }
+        }
     }
     ModalService.showModal({
         templateUrl: "zone-track-properties/zone-track-properties-modal.html",

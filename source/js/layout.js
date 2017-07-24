@@ -80,7 +80,7 @@ module.exports.putWiLogPlotRight = function(logPlotName, logplotModel) {
         type: 'component',
         componentName: 'html-block',
         componentState: {
-            html: '<wi-logplot name="' + logPlotName + '"' + 'id="' + logplotModel.idLogplot + '"></wi-logplot>'
+            html: '<wi-logplot name="' + logPlotName + '"' + 'id="' + logplotModel.idPlot + '"></wi-logplot>'
         },
         title: logplotModel.name
     });

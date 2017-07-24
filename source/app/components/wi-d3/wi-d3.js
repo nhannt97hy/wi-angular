@@ -361,14 +361,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     icon: 'track-properties-16x16',
                     handler: function () {
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                        //TODO: replace condition
+                        if (!_currentTrack) return;
                         if (_currentTrack.isLogTrack()) {
-                            DialogUtils.logTrackPropertiesDialog(ModalService, function (data) {
-                                console.log('trackpropertiesdata', data);
+                            DialogUtils.logTrackPropertiesDialog(ModalService, function (props) {
+                                if (props) {
+                                    console.log('logTrackPropertiesData', props);
+                                }
                             });
-                        }
-                        if (_currentTrack.isDepthTrack()) {
-                            //TODO
+                        } else if (_currentTrack.isDepthTrack()) {
+                            DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
+                                if (props) {
+                                    console.log('depthTrackPropertiesData', props);
+                                }
+                            });
+                        } else { //TODO: zoneTrack condition
+                            DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
+                                if (props) {
+                                    console.log('zoneTrackPropertiesData', props);
+                                }
+                            });
                         }
                     }
                 },

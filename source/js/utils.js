@@ -59,6 +59,8 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
     $timeout(function () {
         let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
         if (wiRootTreeviewComponent) {
+            wiRootTreeviewComponent.config[0].data.label = project.name;
+            wiRootTreeviewComponent.config[0].children = [];
             for (let well of wells) {
                 wiRootTreeviewComponent.addItemToFirst('wells', well);
             }
@@ -189,16 +191,15 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService) {
         });
 };
 
-function updateLogplotProject(wiComponentService, well, logplot) {
+exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
-    let selectWellProject = findWellProjectById(well.idWell, project);
+    let selectWellProject = findWellProjectById(idWell, project);
     if (!selectWellProject) return;
 
     if (!Array.isArray(selectWellProject.plots) || selectWellProject.plots.length === 0) {
         selectWellProject.plots = [];
         selectWellProject.plots.push(logplot);
-
         return;
     }
 
