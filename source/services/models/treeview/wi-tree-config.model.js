@@ -10,7 +10,7 @@ app.factory(wiServiceName, function () {
                 type: 'wells',
                 data: {
                     icon: 'wells-16x16',
-                    label: 'Wells',
+                    label: '',
                     unit: '',
                     childExpanded: false,
                     properties: {}

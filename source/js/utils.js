@@ -60,6 +60,7 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
         let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
         if (wiRootTreeviewComponent) {
             wiRootTreeviewComponent.config[0].data.label = project.name;
+            wiRootTreeviewComponent.config[0].children = [];
             for (let well of wells) {
                 wiRootTreeviewComponent.addItemToFirst('wells', well);
             }
