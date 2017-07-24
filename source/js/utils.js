@@ -177,23 +177,22 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService) {
     wiApiService.post(wiApiService.CREATE_PLOT, dataRequest)
         .then(function (newPlot) {
             console.log('newPlot', newPlot);
-            wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, dataRequest.name);
+            wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, dataRequest);
         })
         .catch(function (err) {
             console.error('err create new blank logplot', err);
         });
 };
 
-function updateLogplotProject(wiComponentService, well, logplot) {
+exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
-    let selectWellProject = findWellProjectById(well.idWell, project);
+    let selectWellProject = findWellProjectById(idWell, project);
     if (!selectWellProject) return;
 
     if (!Array.isArray(selectWellProject.plots) || selectWellProject.plots.length === 0) {
         selectWellProject.plots = [];
         selectWellProject.plots.push(logplot);
-
         return;
     }
 
