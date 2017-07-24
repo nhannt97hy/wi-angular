@@ -3,11 +3,14 @@
 </div>
 <div class="logplot-main-content">
     <div class='slidingbar'>
-        <wi-slidingbar name="{{wiLogplot.slidingbarName}}" ng-init="wiLogplot.getSlidingbarCtrl()">
+        <wi-slidingbar
+            name="{{wiLogplot.slidingbarName}}"
+            ng-init="wiLogplot.getSlidingbarCtrl()">
         </wi-slidingbar>
     </div>
     <div class="track-area">
         <wi-d3 style="width: 100%; flex: 1; display: flex;"
-               name='{{wiLogplot.wiD3AreaName}}'></wi-d3>
+               name='{{wiLogplot.wiD3AreaName}}'
+               wi-logplot-ctrl='wiLogplot'></wi-d3>
     </div>
 </div>

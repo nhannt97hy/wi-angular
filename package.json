@@ -1,7 +1,7 @@
 {
   "name": "wi-angular",
   "version": "1.0.0",
-  "description": "well insight web app with angular",
+  "description": "Well Insight web app",
   "main": "build/js/index.js",
   "dependencies": {
     "angular-bootstrap-colorpicker": "^3.0.31",
@@ -32,7 +32,7 @@
     "private": "true"
   },
   "author": {
-    "name": "minhnt95 and friends",
+    "name": "Well Insight team",
     "email": "tienminh.uet@gmail.com"
   },
   "license": "ISC"

@@ -47,6 +47,8 @@ let wiListview = require('./wi-listview.model');
 let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
+let wiLogplotsModel = require('./wi-logplots.model');
+let wiLogplotModel = require('./wi-logplot.model');
 
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
@@ -79,6 +81,8 @@ let app = angular.module('wiapp',
         wiTreeConfig.name,
         wiTreeItem.name,
         wiWell.name,
+        wiLogplotsModel.name,
+        wiLogplotModel.name,
 
         wiApiService.name,
         wiComponentService.name,
@@ -87,10 +91,12 @@ let app = angular.module('wiapp',
         // 3rd lib
         'ngFileUpload',
         'kendo.directives',
-        'ngSanitize', 
+        'ngSanitize',
         'ui.select'
     ]);
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService) {
+app.controller('AppController', function ($scope, $rootScope, $timeout,
+    $compile, wiComponentService,
+    ModalService, wiApiService) {
     // UTIL FUNCTIONS
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
@@ -104,30 +110,19 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     let globalHandlers = {};
     let treeHandlers = {};
     let wiExplorerHandlers = {};
-    utils.bindFunctions(globalHandlers, handlers, {
-        $scope: $scope,
-        wiComponentService: wiComponentService,
-        ModalService: ModalService,
-        $timeout: $timeout
-    });
-    utils.bindFunctions(globalHandlers, logplotHandlers, {
-        $scope: $scope,
-        wiComponentService: wiComponentService,
-        ModalService: ModalService,
-        $timeout: $timeout
-    });
-    utils.bindFunctions(wiExplorerHandlers, explorerHandlers, {
-        $scope: $scope,
-        wiComponentService: wiComponentService,
-        ModalService: ModalService,
-        $timeout: $timeout
-    });
-    utils.bindFunctions(treeHandlers, treeviewHandlers, {
-        $scope: $scope,
-        wiComponentService: wiComponentService,
-        ModalService: ModalService,
-        $timeout: $timeout
-    });
+
+    let functionBindingProp = {
+        $scope,
+        wiComponentService,
+        ModalService,
+        wiApiService,
+        $timeout
+    };
+
+    utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
+    utils.bindFunctions(globalHandlers, logplotHandlers, functionBindingProp);
+    utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
+    utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
@@ -155,15 +150,27 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
-    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+
+    // mock logplot. remove when done
+    let mockPlot = {
+        idPlot: Date.now(),
+        name: 'mock plot',
+        option: 'blank-plot'
+    };
+    layoutManager.putWiLogPlotRight('myLogPlot' + mockPlot.idPlot, mockPlot);
 
     // Install TEST
-    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (title) {
-        layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
+    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
+        layoutManager.putWiLogPlotRight('myLogPlot' + logplotModel.idPlot, logplotModel);
     });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
         layoutManager.removeAllRightTabs();
+    });
+
+    // update size when container is resized
+    $(window).on('resize', function () {
+        layoutManager.updateSize();
     });
 });

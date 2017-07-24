@@ -4,7 +4,7 @@
     <div class="wi-parent-node" type="{{wiTreeview.config[$index].type}}"
          ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
          data="{{wiTreeview.config[$index].id}}"
-         wi-right-click="wiTreeview.showContextMenu($event, $index)"
+         wi-right-click="wiTreeview.onClick($index); wiTreeview.showContextMenu($event, $index)"
          wi-element-ready="wiTreeview.onReady()">
         <div class="wi-parent-content">
             <div class="icon-expanded"

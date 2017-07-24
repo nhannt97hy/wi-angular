@@ -104,7 +104,9 @@ app.factory(wiServiceName, function ($http, Upload) {
         },
 
         // route
-        CURVE: '/project/well/dataset/curve/getData'
+        CURVE: '/project/well/dataset/curve/getData',
+        CREATE_PLOT: '/project/well/plot/new',
+        CREATE_DEPTH_AXIS: '/project/well/plot/depth-axis/new',
     };
 });
 

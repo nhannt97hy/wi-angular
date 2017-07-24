@@ -35,21 +35,21 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService, $timeout, ModalService) {
+function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
-    let _tracks = new Array();
+    let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _depthRange = [0, 100000];
     let _selectedColor = '#ffffe0';
 
     this.getCurrentTrack = function () {
-        return _currentTrack
-    }
+        return _currentTrack;
+    };
 
     this.getTracks = function() {
         return _tracks;
-    }
+    };
 
     this.addLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
@@ -84,7 +84,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         return track;
     };
 
-    this.addDepthTrack = function () {
+    this.addDepthTrack = function (callback) {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
@@ -96,7 +96,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
-        // return track;
+
+        // send http request
+        wiApiService.post()
+
     };
 
     this.addCurveToTrack = function(track, data, config) {
@@ -305,10 +308,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     }
 
     function _shadingOnRightClick() {
-        let posX = d3.event.clientX, posY = d3.event.clientY;
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        $timeout(function() {
+        //let posX = d3.event.clientX, posY = d3.event.clientY;
+        self.setContextMenu([{
+            name: "RemoveShading",
+            label: "Remove Shading",
+            handler: function () {
+                self.removeCurrentShading();
+            }
+        }]);
+        /*$timeout(function() {
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveShading",
                 label: "Remove Shading",
@@ -316,14 +324,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                     self.removeCurrentShading();
                 }
             }]);
-        });
+        });*/
     }
 
     function _curveOnRightClick() {
-        let posX = d3.event.clientX, posY = d3.event.clientY;
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        $timeout(function() {
+        //let posX = d3.event.clientX, posY = d3.event.clientY;
+        //console.log('-------------');
+        self.setContextMenu([{
+            name: "RemoveCurve",
+            label: "Remove Curve",
+            handler: function () {
+                self.removeCurrentCurve();
+            }
+        }]);
+        /*$timeout(function() {
+            console.log('++++++++++++', wiComponentService, wiComponentService.getComponent('ContextMenu'));
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveCurve",
                 label: "Remove Curve",
@@ -331,131 +346,154 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                     self.removeCurrentCurve();
                 }
             }]);
-        });
+        }, 1000);*/
     }
 
     /* Private End */
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
+
+        console.log('wiLogplotCtrl of wi-d3', self.wiLogplotCtrl);
+
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
     };
+    
+    var commonCtxMenu = [
+        {
+            name: "TrackProperties",
+            label: "Track Properties",
+            icon: 'track-properties-16x16',
+            handler: function () {
+                let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                if (!_currentTrack) return;
+                if (_currentTrack.isLogTrack()) {
+                    DialogUtils.logTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('logTrackPropertiesData', props);
+                        }
+                    });
+                } else if (_currentTrack.isDepthTrack()) {
+                    DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('depthTrackPropertiesData', props);
+                        }
+                    });
+                } else { //TODO: zoneTrack condition
+                    DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('zoneTrackPropertiesData', props);
+                        }
+                    });
+                }
+            }
+        },
+        {
+            name: "SwitchToLogarithmic",
+            label: "Switch To Logarithmic",
+            icon: 'logarithmic-switch-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "AddDepthTrack",
+            label: "Add Depth Track",
+            icon: 'depth-axis-add-16x16',
+            handler: function () {
+                self.addDepthTrack();
+            }
+        },
+        {
+            name: "AddLogTrack",
+            label: "Add Log Track",
+            icon: 'logplot-blank-16x16',
+            handler: function () {
+                self.addLogTrack();
+            }
+        },
+        {
+            name: "AddZonationTrack",
+            label: "Add Zonation Track",
+            icon: 'zonation-track-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "AddMaker",
+            label: "Add Maker",
+            icon: 'marker-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Add Annotation",
+            label: "Add Annotation",
+            icon: 'annotation-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Add Image",
+            label: "Add Image",
+            icon: 'image-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Create Shading",
+            label: "Create Shading",
+            icon: 'shading-add-16x16',
+            handler: function () {
+                console.log('Create Shading');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "DuplicateTrack",
+            label: "Duplicate Track",
+            icon: 'track-duplicate-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "DeleteTrack",
+            label: "Delete Track",
+            icon: 'track-delete-16x16',
+            handler: function () {
+                self.removeCurrentTrack();
+            }
+        },
+    ];
+
+    this.contextMenu = commonCtxMenu;
 
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
-            .open(event.clientX, event.clientY, [
-                {
-                    name: "TrackProperties",
-                    label: "Track Properties",
-                    icon: 'track-properties-16x16',
-                    handler: function () {
-                        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                        //TODO: replace condition
-                        if (_currentTrack.isLogTrack()) {
-                            DialogUtils.logTrackPropertiesDialog(ModalService, function (data) {
-                                console.log('trackpropertiesdata', data);
-                            });
-                        }
-                        if (_currentTrack.isDepthTrack()) {
-                            //TODO
-                        }
-                    }
-                },
-                {
-                    name: "SwitchToLogarithmic",
-                    label: "Switch To Logarithmic",
-                    icon: 'logarithmic-switch-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "AddDepthTrack",
-                    label: "Add Depth Track",
-                    icon: 'depth-axis-add-16x16',
-                    handler: function () {
-                        self.addDepthTrack();
-                    }
-                },
-                {
-                    name: "AddLogTrack",
-                    label: "Add Log Track",
-                    icon: 'logplot-blank-16x16',
-                    handler: function () {
-                        self.addLogTrack();
-                    }
-                },
-                {
-                    name: "AddZonationTrack",
-                    label: "Add Zonation Track",
-                    icon: 'zonation-track-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "AddMaker",
-                    label: "Add Maker",
-                    icon: 'marker-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Add Annotation",
-                    label: "Add Annotation",
-                    icon: 'annotation-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Add Image",
-                    label: "Add Image",
-                    icon: 'image-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Create Shading",
-                    label: "Create Shading",
-                    icon: 'shading-add-16x16',
-                    handler: function () {
-                        console.log('Create Shading');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "DeleteTrack",
-                    label: "Delete Track",
-                    icon: 'track-delete-16x16',
-                    handler: function () {
-                        self.removeCurrentTrack();
-                    }
-                },
-            ]);
+            .open(event.clientX, event.clientY, self.contextMenu, function() {
+                self.contextMenu = commonCtxMenu;
+            });
+    }
+    this.setContextMenu = function(ctxMenu) {
+        self.contextMenu = ctxMenu;
     }
 }
 
@@ -466,7 +504,8 @@ app.component(componentName, {
     controllerAs: componentName,
     transclude: true,
     bindings: {
-        name: '@'
+        name: '@',
+        wiLogplotCtrl: '<'
     }
 });
 

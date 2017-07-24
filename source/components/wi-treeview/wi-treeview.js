@@ -15,6 +15,9 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             wiComponentService.on(wiComponentService.UPDATE_MULTI_WELLS_EVENT, function (wells) {
                 self.updateWellsItem(wells);
             });
+            wiComponentService.on(wiComponentService.UPDATE_LOGPLOT_EVENT, function (logplot) {
+                self.updateLogplotItem(logplot);
+            });
         }
     };
 
@@ -32,6 +35,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
 
     this.onClick = function ($index) {
         wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
+        wiComponentService.putComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD, self.config[$index].data.payload);
 
         if (self.config[$index].data.properties) {
             wiComponentService.emit('update-properties', self.config[$index].data.properties.listConfig);
@@ -51,7 +55,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
                 // get func from component service
                 if (self.config && self.config[$index] && self.config[$index].type
                     && treeFunctions[self.config[$index].type]) {
-                    treeFunctions[self.config[$index].type]();
+                    treeFunctions[self.config[$index].type](self.config[$index].data.payload);
                 }
                 else {
                     console.log(treeFunctions, self.config, self.config[$index]);
@@ -95,7 +99,28 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         for(let well of wells) {
             self.updateWellItem(well);
         }
-    }
+    };
+
+    this.updateLogplotItem = function (logplot) {
+        let plotSelected = self.findWellById(logplot.idPlot);
+
+        let newPlotItem = new WiLogplotModel();
+
+        let newWell = new WiWell(well);
+
+        if (wellSelected) {
+            angular.copy(newWell, wellSelected);
+        } else {
+            let wells = getItemByName('wells');
+
+            if (wells) wells.children.unshift(newWell);
+        }
+    };
+
+    // item has id to identify
+    this.updateChildItem = function (parentItemName, item) {
+
+    };
 
     this.findWellById = function (idWell) {
         let wells = getItemByName('wells');
@@ -173,7 +198,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             child.data.childExpanded = true;
             expandAll(child.children);
         }
-    };
+    }
 
     this.collapseAll = function (rootConfig) {
         for (let config of rootConfig) {
@@ -190,7 +215,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             child.data.childExpanded = false;
             collapseAll(child.children);
         }
-    };
+    }
 
     this.showContextMenu = function ($event, $index) {
         console.log('self.name', self.name);
