@@ -75,16 +75,20 @@ function Controller($scope, wiComponentService, $timeout) {
         });
 
         $(self.handleId).on("resize", function (event, ui) {
+            event.stopPropagation();
             update(ui);
         });
 
         $(self.handleId).on("drag", function (event, ui) {
+            event.stopPropagation();
             update(ui);
         });
 
         new ResizeSensor($(self.contentId), function() {
-            self.refreshHandler();
-        })
+            let currentParentHeight = parseInt($(self.contentId).height());
+
+            if (currentParentHeight !== parentHeight) self.refreshHandler();
+        });
 
         $(self.contentId).on("mousewheel", onMouseWheel);
         $(self.handleId).on("mousewheel", onMouseWheel);
