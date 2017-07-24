@@ -59,6 +59,7 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
     $timeout(function () {
         let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
         if (wiRootTreeviewComponent) {
+            wiRootTreeviewComponent.config[0].data.label = project.name;
             for (let well of wells) {
                 wiRootTreeviewComponent.addItemToFirst('wells', well);
             }
