@@ -55,7 +55,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
                 // get func from component service
                 if (self.config && self.config[$index] && self.config[$index].type
                     && treeFunctions[self.config[$index].type]) {
-                    treeFunctions[self.config[$index].type]();
+                    treeFunctions[self.config[$index].type](self.config[$index].data.payload);
                 }
                 else {
                     console.log(treeFunctions, self.config, self.config[$index]);

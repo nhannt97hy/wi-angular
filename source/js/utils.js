@@ -175,7 +175,14 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService) {
     wiApiService.post(wiApiService.CREATE_PLOT, dataRequest)
         .then(function (newPlot) {
             console.log('newPlot', newPlot);
-            wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, dataRequest.name);
+
+            let mockPlot = {
+                idPlot: Date.now(),
+                name: 'mock plot',
+                option: 'blank-plot'
+            };
+
+            wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, mockPlot);
         })
         .catch(function (err) {
             console.error('err create new blank logplot', err);
@@ -224,6 +231,24 @@ function findWellProjectById(idWell, project) {
     for (let well of project.wells) {
         if (well.idWell == idWell) {
             return well;
+        }
+    }
+
+    return null;
+}
+
+exports.findLogplotModelById = function (logplotId, wiComponentService) {
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+    if (!project || !Array.isArray(project.wells)) return;
+
+    for (let well of project.wells) {
+        if (!Array.isArray(well.plots)) continue;
+
+        for (let plot of well.plots) {
+            if (plot.idPlot == logplotId) {
+                return plot;
+            }
         }
     }
 

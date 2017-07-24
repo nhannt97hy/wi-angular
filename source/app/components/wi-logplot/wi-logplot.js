@@ -5,7 +5,6 @@ function Controller($scope, wiComponentService, ModalService) {
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
-    // console.log(utils);
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
     this.$onInit = function () {
@@ -20,7 +19,6 @@ function Controller($scope, wiComponentService, ModalService) {
             ModalService: ModalService,
             wiLogplot: self
         });
-        //$scope.handlers = wiComponentService.getComponent("GLOBAL_HANDLERS");
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
@@ -36,6 +34,11 @@ function Controller($scope, wiComponentService, ModalService) {
             wiD3Controller.setDepthRange([low, high]);
             // wiD3Controller.plotAll();
         }
+    };
+
+    this.getLogplotModel = function () {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        return utils.findLogplotModelById(self.id);
     };
 
     this.getSlidingbarCtrl = function () {
@@ -54,7 +57,8 @@ app.component(componentName, {
     controllerAs: componentName,
     transclude: true,
     bindings: {
-        name: '@'
+        name: '@',
+        id: '@'
     }
 });
 

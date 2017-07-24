@@ -150,11 +150,18 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
-    layoutManager.putWiLogPlotRight('myLogPlot', 'my plot');
+
+    // mock logplot. remove when done
+    let mockPlot = {
+        idLogplot: Date.now(),
+        name: 'mock plot',
+        option: 'blank-plot'
+    };
+    layoutManager.putWiLogPlotRight('myLogPlot' + mockPlot.idLogplot, mockPlot);
 
     // Install TEST
-    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (title) {
-        layoutManager.putWiLogPlotRight('myLogPlot' + Date.now(), title);
+    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
+        layoutManager.putWiLogPlotRight('myLogPlot' + logplotModel.idLogplot, logplotModel);
     });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {

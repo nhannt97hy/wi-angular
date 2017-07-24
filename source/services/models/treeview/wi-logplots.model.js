@@ -2,7 +2,7 @@ const wiServiceName = 'WiLogplotsModel';
 const moduleName = 'wi-logplots-model';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function (WiTreeItem) {
+app.factory(wiServiceName, function (WiTreeItem, WiLogplotModel) {
     function WiLogplotsModel(well) {
         let self = this;
         let defaultTreeItem = new WiTreeItem();
@@ -15,6 +15,12 @@ app.factory(wiServiceName, function (WiTreeItem) {
             self.data.label = 'Logplot';
 
             angular.copy(well, self.data.payload);
+
+            for (let plot of well.plots) {
+                let plotItem = new WiLogplotModel(plot);
+
+                self.children.push(plotItem);
+            }
         } catch (err) {
             console.error('Parse logplots model has error', err);
         }

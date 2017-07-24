@@ -33,7 +33,7 @@ let layoutConfig = {
     ]
 };
 
-function createLayout(domId, $scope, $compile) {
+module.exports.createLayout = function(domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
     layoutManager = new GoldenLayout(layoutConfig, document.getElementById(domId));
@@ -50,7 +50,8 @@ function createLayout(domId, $scope, $compile) {
 
     layoutManager.init();
 }
-function putLeft(templateId, title) {
+
+module.exports.putLeft = function(templateId, title) {
     layoutManager.root.getItemsById('left')[0].addChild({
         type: 'component',
         id: templateId,
@@ -61,7 +62,8 @@ function putLeft(templateId, title) {
         title: title
     });
 }
-function putRight(templateId, title) {
+
+module.exports.putRight = function(templateId, title) {
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
         id: templateId,
@@ -72,27 +74,19 @@ function putRight(templateId, title) {
         title: title
     });
 }
-function putWiLogPlotRight(logPlotName, title) {
+
+module.exports.putWiLogPlotRight = function(logPlotName, logplotModel) {
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
         componentName: 'html-block',
         componentState: {
-            html: '<wi-logplot name="' + logPlotName + '"></wi-logplot>'
+            html: '<wi-logplot name="' + logPlotName + '"' + 'id="' + logplotModel.idLogplot + '"></wi-logplot>'
         },
-        title: title
+        title: logplotModel.name
     });
 }
-function putWiLogPlotLeft(logPlotName, title) {
-    layoutManager.root.getItemsById('left')[0].addChild({
-        type: 'component',
-        componentName: 'html-block',
-        componentState: {
-            html: '<wi-logplot name="' + logPlotName + '"></wi-logplot>'
-        },
-        title: title
-    });
-}
-function removeAllRightTabs() {
+
+module.exports.removeAllRightTabs = function() {
     let childItems = getChildContentItems('right');
     let childItemsLength = childItems.length;
     for (let i = 0; i < childItemsLength; i++) {
@@ -104,18 +98,10 @@ function getChildContentItems(itemId) {
     return layoutManager.root.getItemsById(itemId)[0].contentItems;
 }
 
-function isComponentExist(templateId) {
+module.exports.isComponentExist = function(templateId) {
     return (layoutManager.root.getItemsById(templateId).length ? true : false);
 }
 
 module.exports.updateSize = function() {
     layoutManager.updateSize();
 }
-
-exports.createLayout = createLayout;
-exports.putLeft = putLeft;
-exports.putRight = putRight;
-exports.putWiLogPlotRight = putWiLogPlotRight;
-exports.putWiLogPlotLeft = putWiLogPlotLeft;
-exports.removeAllRightTabs = removeAllRightTabs;
-exports.isComponentExist = isComponentExist;

@@ -341,6 +341,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
+
+        console.log('wiLogplotCtrl of wi-d3', self.wiLogplotCtrl);
+
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -469,7 +472,8 @@ app.component(componentName, {
     controllerAs: componentName,
     transclude: true,
     bindings: {
-        name: '@'
+        name: '@',
+        wiLogplotCtrl: '<'
     }
 });
 
