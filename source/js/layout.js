@@ -108,6 +108,10 @@ function isComponentExist(templateId) {
     return (layoutManager.root.getItemsById(templateId).length ? true : false);
 }
 
+module.exports.updateSize = function() {
+    layoutManager.updateSize();
+}
+
 exports.createLayout = createLayout;
 exports.putLeft = putLeft;
 exports.putRight = putRight;

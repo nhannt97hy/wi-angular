@@ -64,6 +64,7 @@ app.factory(wiServiceName, function () {
         UTILS: 'UTILS',
         // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
+        ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',
@@ -74,6 +75,7 @@ app.factory(wiServiceName, function () {
         PROJECT_UNLOADED_EVENT: 'project-unloaded-event',
         UPDATE_WELL_EVENT: 'update-well-event',
         UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
+        UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
     };
 });
 

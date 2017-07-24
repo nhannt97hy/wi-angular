@@ -58,7 +58,6 @@ function Controller($scope, wiComponentService, $timeout) {
             height: initialHeight * 4
         };
 
-
         // init tiny window height
         $(self.handleId).height(self.tinyWindow.height);
         $(self.handleId).css('top', self.tinyWindow.top + 'px');
@@ -76,11 +75,19 @@ function Controller($scope, wiComponentService, $timeout) {
         });
 
         $(self.handleId).on("resize", function (event, ui) {
+            event.stopPropagation();
             update(ui);
         });
 
         $(self.handleId).on("drag", function (event, ui) {
+            event.stopPropagation();
             update(ui);
+        });
+
+        new ResizeSensor($(self.contentId), function() {
+            let currentParentHeight = parseInt($(self.contentId).height());
+
+            if (currentParentHeight !== parentHeight) self.refreshHandler();
         });
 
         $(self.contentId).on("mousewheel", onMouseWheel);
@@ -105,6 +112,11 @@ function Controller($scope, wiComponentService, $timeout) {
             $timeout(function () {
                 updateState(top, height, parentHeight);
             });
+        }
+
+        this.refreshHandler = function() {
+            parentHeight = parseInt($(self.contentId).height());
+            self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
         }
 
         this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {

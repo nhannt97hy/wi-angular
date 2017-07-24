@@ -18,6 +18,7 @@ exports.newitem = function () {
     console.log('newitem');
 };
 exports.logplot = function () {
-    console.log('item logplot clicked');
+    // this.wiApiService.post(this.wiApiService.CREATE_PLOT, {});
+
     this.wiComponentService.emit('add-logplot-event', 'new logplot');
 };

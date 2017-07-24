@@ -35,21 +35,21 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService, $timeout, ModalService) {
+function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
-    let _tracks = new Array();
+    let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _depthRange = [0, 100000];
     let _selectedColor = '#ffffe0';
 
     this.getCurrentTrack = function () {
-        return _currentTrack
-    }
+        return _currentTrack;
+    };
 
     this.getTracks = function() {
         return _tracks;
-    }
+    };
 
     this.addLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
@@ -84,7 +84,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         return track;
     };
 
-    this.addDepthTrack = function () {
+    this.addDepthTrack = function (callback) {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
@@ -96,7 +96,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
-        // return track;
+
+        // send http request
+        wiApiService.post()
+
     };
 
     this.addCurveToTrack = function(track, data, config) {
