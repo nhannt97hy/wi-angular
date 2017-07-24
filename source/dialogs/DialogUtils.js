@@ -769,7 +769,7 @@ exports.addCurveDialog = function (ModalService, callback) {
     });
 }
 
-exports.lineStyleDialog = function (ModalService, callback, options) {
+exports.lineStyleDialog = function (ModalService, options, callback) {
     function ModalController($scope, close) {
         this.lineColor = "#0000ff";
         this.style = {
@@ -781,15 +781,15 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
             param : 1
         };
 
-        if(options.defaultColor){
-            this.lineColor = options.defaultColor;
-        };
-        if(options.defaultStyle){
-            this.style = options.defaultStyle;
-        };
-        if(options.defaultWidth){
-            this.width = options.defaultWidth;
-        }
+        // if(self.options.defaultColor){
+        //     this.lineColor = options.defaultColor;
+        // };
+        // if(options.defaultStyle){
+        //     this.style = options.defaultStyle;
+        // };
+        // if(options.defaultWidth){
+        //     this.width = options.defaultWidth;
+        // }
         
         this.styles =[
             {
@@ -817,8 +817,6 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
                 param : '10, 4, 2, 4, 2, 4'
             }
         ];
-        
-
         this.widthes = [
             {
                 name : "1",
@@ -861,11 +859,11 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
                 param : 10
             }
         ];
-        this.options = {};
-        this.getColor = function () {
+        this.options = {
         };
         this.onOkButtonClicked = function () {
             console.log("LO: ", self.options);
+            close(self.options);
         };
         this.onApplyButtonClicked = function () {
             self.options = {
@@ -873,6 +871,7 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
                 width : this.width,
                 style : this.style
             };
+            callback(self.options)
             console.log("Line options: ", self.options);
         };
         this.onCancelButtonClicked = function () {
@@ -889,6 +888,7 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+            console.log(ret);
             callback(ret);
         });
     });
@@ -1180,45 +1180,76 @@ exports.fillPatternSettingDialog = function (ModalService, callback) {
         });
     });
 };
-exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
+exports.logTrackPropertiesDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
-        this.disabled = false;
-        this.showTitle = false;
-        this.showLabel = false;
-
-        this.lineOptions = {};
-
-        console.log("Wi", wiComponentService);
-        let wiExplorerCtrl = wiComponentService.getComponent('WiExplorer');
-        console.log("Ex", wiExplorerCtrl);
-        console.log('treeConfig:', wiExplorerCtrl.treeConfig);
         
-        // function fillCurveAttrArray () {
-        //     return [
-        //         {
-        //             curveName : "ECGR",
-        //             alias : "ECGR",
-        //             leftScale : 20,
-        //             rightScale : 200,
-        //             logLinear : "Linear",
-        //             displayMode : "Line",
-        //             lineStyle : self.lineOptions,
-        //             displayAs : "Normal"
-        //         },
-        //         {
-        //             curveName : "DTCO3",
-        //             alias : "DTCO3",
-        //             leftScale : 10,
-        //             rightScale : 100,
-        //             logLinear : "Logarithmic",
-        //             displayMode : "Line",
-        //             lineStyle : self.lineOptions,
-        //             displayAs : "Normal"
-        //         }
-        //     ];
-        // };
+        const props = {
+            general: {
+                isShowTitle: true,
+                title : "New Track",
+                topJustification: "center",
+                bottomJustification: "center",
+                isShowLabels: false,
+                isShowEndLabels: true,
+                format: '',
+                isShowValueGrid: true,
+                majorTicks: 1,
+                minorTicks: 5,
+                isShowDepthGrid: true,
+                width: 2.000,
+                trackColor: '#ffffff'
+            },
+            curve: {
+                
+            },
+            shading: {
+            }
+        }
+        // Tab General
+        this.isShowTitle = props.general.isShowTitle;
+        this.title = props.general.title;
+        this.topJustification = props.general.topJustification;
+        this.bottomJustification = props.general.bottomJustification;
+
+        this.isShowLabels = props.general.isShowLabels;
+        this.isShowEndLabels = props.general.isShowEndLabels;
+        this.format = props.general.format;
+
+        this.isShowValueGrid = props.general.isShowValueGrid;
+        this.majorTicks = props.general.majorTicks;
+        this.minorTicks = props.general.minorTicks;
+        this.isShowDepthGrid = props.general.isShowDepthGrid;
+
+        this.width = props.general.width;
+        this.trackColor = props.general.trackColor;
+
+        // Tab Curve
+        /*function fillCurveAttrArray () {
+            return [
+                {
+                    curveName : "ECGR",
+                    alias : "ECGR",
+                    leftScale : 20,
+                    rightScale : 200,
+                    logLinear : "Linear",
+                    displayMode : "Line",
+                    lineStyle : self.lineOptions,
+                    displayAs : "Normal"
+                },
+                {
+                    curveName : "DTCO3",
+                    alias : "DTCO3",
+                    leftScale : 10,
+                    rightScale : 100,
+                    logLinear : "Logarithmic",
+                    displayMode : "Line",
+                    lineStyle : self.lineOptions,
+                    displayAs : "Normal"
+                }
+            ];
+        };*/
         function fillShadingAttrArray() {
             return [
                 {
@@ -1345,70 +1376,26 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
                 }
             ];
         };
-        this.setTitle = function () {
-            if (self.showTitle != true) {
-                $('#title').prop("disabled", false);
-                $('#topJust').prop("disabled", false);
-                $('#bottomJust').prop("disabled", false);
-            } else {
-                $('#title').prop("disabled", true);
-                $('#topJust').prop("disabled", true);
-                $('#bottomJust').prop("disabled", true);
-            }
-        };
-        this.setLabel = function () {
-            if (self.showLabel == true) {
-                $('#format').prop("disabled", true);
-                $('#font').prop("disabled", true);
-                $('#preview').prop("disabled", true);
-            }else {
-                $('#format').prop("disabled", false);
-                $('#font').prop("disabled", false);
-                $('#preview').prop("disabled", false);
-            }
-        };
-        this.setValueGrid = function () {
-            if (self.showValueGrid == true) {
-                $('#majorTicks').prop("disabled", true);
-                $('#minorTicks').prop("disabled", true);
-            }else{
-                $('#majorTicks').prop("disabled", false);
-                $('#minorTicks').prop("disabled", false);
-            }
-        };
-        this.header = {
-            title : "Track1",
-            topJust : ["center", "left", "right"],
-            bottomJust : ["center", "left", "right"]
-        };
-        this.topJust = "center";
-        this.bottomJust = "center";
-
         // this.curveName = ["DTCO3", "ECGR"];
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
-
-        this.colorTrack = "#fff";
-        this.getColor = function () {
-            // TODO:
-            console.log("pick: ", self.colorTrack);
-        };
-
         // self.fillDataset.content = fillCurveAttrArray();
         this.shadingAttr = fillShadingAttrArray();
-
         // this.selectedShading = {};
-
         this.fillDataset = getFullData();
-        this.selectDataset = getFullData();
+        this.lineStyleButtonClicked = function () {
+            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+            DialogUtils.lineStyleDialog(ModalService, self.lineOptions, function () {
+
+            });
+        };
         this.setClickedRowCurve = function(index){
             self.selectedRow = index; 
             self.selectedCurve = self.fillDataset[index];
         };
-
         this.removeRow = function(){      
-            console.log("###", self.selectedCurve.content);
+            console.log("self.selectedCurve.content", self.selectedCurve.content);
 
             let idx = -1;     
             let newCurveAttr = eval( self.fillDataset );
@@ -1433,7 +1420,6 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
             };
             self.setClickedRowCurve(idx-1);
         };
-        
         this.arrowDownCurve = function () {      
             let prevIdx = self.fillDataset.length;
             let idx = self.fillDataset.indexOf(self.selectedCurve);
@@ -1447,8 +1433,8 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
             }  
             self.setClickedRowCurve(idx+1);
         };
-        //tab Shading
 
+        //tab Shading
         this.setClickedRowShading = function(index){
             self.selectedRowShading = index; 
             self.selectedShading = self.shadingAttr[index];
@@ -1483,27 +1469,69 @@ exports.trackPropertiesDialog = function (ModalService, DialogUtils, callback) {
         this.addRow = function () {
                 self.fillDataset.push({});
         };
-        this.lineStyleButtonClicked = function () {
-            DialogUtils.lineStyleDialog(ModalService, function () {
 
-            }, self.lineOptions);
+        // Dialog buttons
+        this.onApplyButtonClicked = function () {
+            //close(props, 100);
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            close(props, 100);
         };
         this.onCancelButtonClicked = function () {
-            console.log("onCancelButtonClicked");
             close(null, 100);
         };
     }
 
     ModalService.showModal({
-        templateUrl: "track-properties/track-properties-modal.html",
+        templateUrl: "log-track-properties/log-track-properties-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        modal.close.then(function (ret) {
+        modal.element.draggable();
+        modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            // callback(data);
+            callback(data);
         });
     });
 };
+
+exports.depthTrackPropertiesDialog = function(ModalService, callback) {
+    function ModalController($scope, wiComponentService, close) {
+
+    }
+    ModalService.showModal({
+        templateUrl: "depth-track-properties/depth-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(data);
+        });
+    });
+};
+
+exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
+    function ModalController($scope, wiComponentService, close) {
+
+    }
+    ModalService.showModal({
+        templateUrl: "zone-track-properties/zone-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(data);
+        });
+    });
+}

@@ -355,10 +355,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                     icon: 'track-properties-16x16',
                     handler: function () {
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-                        DialogUtils.trackPropertiesDialog(ModalService, DialogUtils, function(data) {
-                            console.log(data);
-                        });
+                        //TODO: replace condition
+                        if (_currentTrack.isLogTrack()) {
+                            DialogUtils.logTrackPropertiesDialog(ModalService, function (data) {
+                                console.log('trackpropertiesdata', data);
+                            });
+                        }
+                        if (_currentTrack.isDepthTrack()) {
+                            //TODO
+                        }
                     }
                 },
                 {
