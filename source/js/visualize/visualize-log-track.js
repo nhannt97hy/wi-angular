@@ -592,8 +592,8 @@ function LogTrack(config) {
             .on('mousedown', function() {
                 _onPlotMouseDownCallback();
                 cb();
-            })
-            .on('contextmenu', cb);
+            });
+            //.on('contextmenu', cb);
     }
 
     /**

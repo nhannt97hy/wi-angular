@@ -47,7 +47,11 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
     console.log('project data: ', project);
     self.treeConfig = (new WiTreeConfig()).config;
     console.log('self.treeConfig', self.treeConfig);
-
+    $timeout(function () {
+        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
+        wiRootTreeviewComponent.config[0].data.label = project.name;
+        wiRootTreeviewComponent.config[0].children = [];
+    });
     if (!project.wells) return;
     // parse config from data
     // inject child item to origin config
@@ -59,8 +63,6 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
     $timeout(function () {
         let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
         if (wiRootTreeviewComponent) {
-            wiRootTreeviewComponent.config[0].data.label = project.name;
-            wiRootTreeviewComponent.config[0].children = [];
             for (let well of wells) {
                 wiRootTreeviewComponent.addItemToFirst('wells', well);
             }
@@ -121,7 +123,7 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 };
 
 function getCurveDataByName(apiService, idCurve, callback) {
-    apiService.post(apiService.CURVE, {idCurve})
+    apiService.post(apiService.CURVE, { idCurve })
         .then(function (curve) {
             console.log('curve data', curve);
             callback(null, curve);
@@ -161,7 +163,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: 'clone',
         containment: 'document',
         cursor: 'move',
-        cursorAt: {top: 0, left: 0}
+        cursorAt: { top: 0, left: 0 }
     });
 };
 
@@ -184,7 +186,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService) {
         });
 };
 
-exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
+exports.updateLogplotProject = function (wiComponentService, idWell, logplot) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
     let selectWellProject = findWellProjectById(idWell, project);
@@ -241,6 +243,6 @@ function findWellProjectById(idWell, project) {
 exports.trackProperties = function (ModalService, wiComponentService) {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
-       console.log("OKOK");
+        console.log("OKOK");
     });
 };

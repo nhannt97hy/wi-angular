@@ -308,10 +308,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _shadingOnRightClick() {
-        let posX = d3.event.clientX, posY = d3.event.clientY;
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        $timeout(function() {
+        //let posX = d3.event.clientX, posY = d3.event.clientY;
+        self.setContextMenu([{
+            name: "RemoveShading",
+            label: "Remove Shading",
+            handler: function () {
+                self.removeCurrentShading();
+            }
+        }]);
+        /*$timeout(function() {
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveShading",
                 label: "Remove Shading",
@@ -319,14 +324,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     self.removeCurrentShading();
                 }
             }]);
-        });
+        });*/
     }
 
     function _curveOnRightClick() {
-        let posX = d3.event.clientX, posY = d3.event.clientY;
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        $timeout(function() {
+        //let posX = d3.event.clientX, posY = d3.event.clientY;
+        //console.log('-------------');
+        self.setContextMenu([{
+            name: "RemoveCurve",
+            label: "Remove Curve",
+            handler: function () {
+                self.removeCurrentCurve();
+            }
+        }]);
+        /*$timeout(function() {
+            console.log('++++++++++++', wiComponentService, wiComponentService.getComponent('ContextMenu'));
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveCurve",
                 label: "Remove Curve",
@@ -334,7 +346,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     self.removeCurrentCurve();
                 }
             }]);
-        });
+        }, 1000);*/
     }
 
     /* Private End */
@@ -346,130 +358,139 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
     };
+    
+    var commonCtxMenu = [
+        {
+            name: "TrackProperties",
+            label: "Track Properties",
+            icon: 'track-properties-16x16',
+            handler: function () {
+                let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                if (!_currentTrack) return;
+                if (_currentTrack.isLogTrack()) {
+                    DialogUtils.logTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('logTrackPropertiesData', props);
+                        }
+                    });
+                } else if (_currentTrack.isDepthTrack()) {
+                    DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('depthTrackPropertiesData', props);
+                        }
+                    });
+                } else { //TODO: zoneTrack condition
+                    DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('zoneTrackPropertiesData', props);
+                        }
+                    });
+                }
+            }
+        },
+        {
+            name: "SwitchToLogarithmic",
+            label: "Switch To Logarithmic",
+            icon: 'logarithmic-switch-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "AddDepthTrack",
+            label: "Add Depth Track",
+            icon: 'depth-axis-add-16x16',
+            handler: function () {
+                self.addDepthTrack();
+            }
+        },
+        {
+            name: "AddLogTrack",
+            label: "Add Log Track",
+            icon: 'logplot-blank-16x16',
+            handler: function () {
+                self.addLogTrack();
+            }
+        },
+        {
+            name: "AddZonationTrack",
+            label: "Add Zonation Track",
+            icon: 'zonation-track-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "AddMaker",
+            label: "Add Maker",
+            icon: 'marker-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Add Annotation",
+            label: "Add Annotation",
+            icon: 'annotation-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Add Image",
+            label: "Add Image",
+            icon: 'image-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Create Shading",
+            label: "Create Shading",
+            icon: 'shading-add-16x16',
+            handler: function () {
+                console.log('Create Shading');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "DuplicateTrack",
+            label: "Duplicate Track",
+            icon: 'track-duplicate-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "DeleteTrack",
+            label: "Delete Track",
+            icon: 'track-delete-16x16',
+            handler: function () {
+                self.removeCurrentTrack();
+            }
+        },
+    ];
+
+    this.contextMenu = commonCtxMenu;
 
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
-            .open(event.clientX, event.clientY, [
-                {
-                    name: "TrackProperties",
-                    label: "Track Properties",
-                    icon: 'track-properties-16x16',
-                    handler: function () {
-                        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                        if (!_currentTrack) return;
-                        if (_currentTrack.isLogTrack()) {
-                            DialogUtils.logTrackPropertiesDialog(ModalService, function (props) {
-                                if (props) {
-                                    console.log('logTrackPropertiesData', props);
-                                }
-                            });
-                        } else if (_currentTrack.isDepthTrack()) {
-                            DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
-                                if (props) {
-                                    console.log('depthTrackPropertiesData', props);
-                                }
-                            });
-                        } else { //TODO: zoneTrack condition
-                            DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
-                                if (props) {
-                                    console.log('zoneTrackPropertiesData', props);
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    name: "SwitchToLogarithmic",
-                    label: "Switch To Logarithmic",
-                    icon: 'logarithmic-switch-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "AddDepthTrack",
-                    label: "Add Depth Track",
-                    icon: 'depth-axis-add-16x16',
-                    handler: function () {
-                        self.addDepthTrack();
-                    }
-                },
-                {
-                    name: "AddLogTrack",
-                    label: "Add Log Track",
-                    icon: 'logplot-blank-16x16',
-                    handler: function () {
-                        self.addLogTrack();
-                    }
-                },
-                {
-                    name: "AddZonationTrack",
-                    label: "Add Zonation Track",
-                    icon: 'zonation-track-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "AddMaker",
-                    label: "Add Maker",
-                    icon: 'marker-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Add Annotation",
-                    label: "Add Annotation",
-                    icon: 'annotation-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Add Image",
-                    label: "Add Image",
-                    icon: 'image-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Create Shading",
-                    label: "Create Shading",
-                    icon: 'shading-add-16x16',
-                    handler: function () {
-                        console.log('Create Shading');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "DeleteTrack",
-                    label: "Delete Track",
-                    icon: 'track-delete-16x16',
-                    handler: function () {
-                        self.removeCurrentTrack();
-                    }
-                },
-            ]);
+            .open(event.clientX, event.clientY, self.contextMenu, function() {
+                self.contextMenu = commonCtxMenu;
+            });
+    }
+    this.setContextMenu = function(ctxMenu) {
+        self.contextMenu = ctxMenu;
     }
 }
 
