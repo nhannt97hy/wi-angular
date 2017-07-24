@@ -41,6 +41,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _currentTrack = null;
     let _previousTrack = null;
     let _depthRange = [0, 100000];
+    let _selectedColor = '#ffffe0';
 
     this.getCurrentTrack = function () {
         return _currentTrack;
@@ -103,34 +104,39 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.addCurveToTrack = function(track, data, config) {
         if (!track || !track.addCurve) return;
-        let curveIdx = track.addCurve(data, config);
-        track.adjustXRange(1);
+        let curve = track.addCurve(data, config);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
-        let curveHeader = track.getCurveHeaders()[curveIdx];
-        curveHeader
-            .on('mousedown', function() {
-                _setCurrentTrack(track);
-
-                let currentCurveIdx = track.getCurveHeaders().indexOf(curveHeader);
-                track.setCurrentCurveIdx(currentCurveIdx);
-                if (d3.event.button == 2) {
-                    _curveOnRightClick();
-                }
-            })
-            .on('contextmenu', function() {
-                d3.event.stopPropagation();
-                d3.event.preventDefault();
-            })
+        track.onCurveHeaderMouseDown(curve, function() {
+            _setCurrentTrack(track);
+            track.setCurrentCurve(curve);
+            if (d3.event.button == 2) {
+                _curveOnRightClick();
+            }
+        });
     }
 
-    this.addShadingToTrack = function (track, leftCurveIdx, rightCurveIdx, config) {
-        if (!track || !track.addShading) return;
-        config = typeof config != 'object' ? {} : config;
-        track.addShading(leftCurveIdx, rightCurveIdx, config);
-        self.plot(track);
+    this.addLeftShadingToTrack = function (track, config) {
+        if (!track || !track.addLeftShading) return;
+        let shading = track.addLeftShading(track.getCurrentCurve(), config);
+        track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
+    };
+
+    this.addRightShadingToTrack = function (track, config) {
+        if (!track || !track.addRightShading) return;
+        let shading = track.addRightShading(track.getCurrentCurve(), config);
+        track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
+    };
+
+    this.addCustomShadingToTrack = function (track, value, config) {
+        if (!track || !track.addCustomShading) return;
+        let shading = track.addCustomShading(track.getCurrentCurve(), value, config);
+        track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
     this.setDepthRange = function(depthRange) {
@@ -187,18 +193,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.removeCurrentCurve = function() {
-        if (!_currentTrack.getCurrentCurveIdx) return;
-        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurveIdx());
-    };
+        if (!_currentTrack.getCurrentCurve) return;
+        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
+    }
 
-    this.removeCurveFromTrack = function (track, curveIdx) {
+    this.removeCurrentShading = function() {
+        if (!_currentTrack.getCurrentShading) return;
+        self.removeShadingFromTrack(_currentTrack, _currentTrack.getCurrentShading());
+    }
+
+    this.removeCurveFromTrack = function(track, curve) {
         if (!track || !track.removeCurve) return;
-        track.removeCurve(curveIdx);
-    };
+        track.removeCurve(curve);
+    }
+
+    this.removeShadingFromTrack = function(track, shading) {
+        if (!track || !track.removeShading) return;
+        track.removeShading(shading);
+    }
 
     this.removeCurrentTrack = function () {
         return self.removeTrack(_currentTrack);
-    };
+    }
 
     this.removeTrack = function (track) {
         let trackIdx = _tracks.indexOf(track);
@@ -233,31 +249,39 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _setCurrentTrack(track) {
         _previousTrack = _currentTrack;
         _currentTrack = track;
+        _currentTrack.setBackgroundColor(_selectedColor);
         _clearPreviousHighlight();
     }
 
     function _clearPreviousHighlight() {
-        if (_previousTrack != null
-            && _previousTrack != _currentTrack
-            && _previousTrack.setCurrentCurveIdx) {
-            _previousTrack.setCurrentCurveIdx(-1);
+        if (!_previousTrack) return;
+        if (_previousTrack != _currentTrack) {
+            if (_previousTrack.setCurrentCurve)
+                _previousTrack.setCurrentCurve(null);
+            _previousTrack.setBackgroundColor('transparent');
         }
+
     }
 
     function _onPlotMouseDownCallback(track) {
         _setCurrentTrack(track);
-
-        let i;
-        let curves = _currentTrack.getCurves();
-        for (i = 0; i < curves.length; i ++) {
-            if (curves[i].nearPoint(d3.event.offsetX, d3.event.offsetY))
-                break;
-        }
-        i = i == curves.length ? -1 : i;
-        _currentTrack.setCurrentCurveIdx(i);
-        if (i >= 0 && d3.event.button == 2) {
+        if (d3.event.curveMouseDown && d3.event.button == 2) {
             _curveOnRightClick();
+            return;
         }
+
+        if (d3.event.shadingMouseDown && d3.event.button == 2) {
+            _shadingOnRightClick();
+        }
+    }
+
+    function _registerShadingHeaderMouseDownCallback(track, shading) {
+        track.onShadingHeaderMouseDown(shading, function() {
+            _setCurrentTrack(track);
+            if (d3.event.button == 2) {
+                _shadingOnRightClick();
+            }
+        })
     }
 
     function _onPlotMouseWheelCallback(track) {
@@ -280,7 +304,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _onHeaderMouseDownCallback(track) {
         _setCurrentTrack(track);
-        _currentTrack.setCurrentCurveIdx(-1);
+        _currentTrack.setCurrentCurve(null);
+    }
+
+    function _shadingOnRightClick() {
+        let posX = d3.event.clientX, posY = d3.event.clientY;
+        d3.event.stopPropagation();
+        d3.event.preventDefault();
+        $timeout(function() {
+            wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
+                name: "RemoveShading",
+                label: "Remove Shading",
+                handler: function () {
+                    self.removeCurrentShading();
+                }
+            }]);
+        });
     }
 
     function _curveOnRightClick() {
@@ -297,6 +336,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }]);
         });
     }
+
     /* Private End */
 
     this.$onInit = function () {
@@ -318,10 +358,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     icon: 'track-properties-16x16',
                     handler: function () {
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-                        DialogUtils.trackPropertiesDialog(ModalService, DialogUtils, function(data) {
-                            console.log(data);
-                        });
+                        //TODO: replace condition
+                        if (_currentTrack.isLogTrack()) {
+                            DialogUtils.logTrackPropertiesDialog(ModalService, function (data) {
+                                console.log('trackpropertiesdata', data);
+                            });
+                        }
+                        if (_currentTrack.isDepthTrack()) {
+                            //TODO
+                        }
                     }
                 },
                 {

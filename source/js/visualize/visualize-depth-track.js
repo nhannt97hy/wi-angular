@@ -1,4 +1,5 @@
 var utils = require('./visualize-utils.js');
+var Track = require('./visualize-track.js');
 var roundUp = utils.roundUp;
 var roundDown = utils.roundDown;
 var appendTrack = utils.appendTrack;
@@ -6,7 +7,7 @@ var appendTrack = utils.appendTrack;
 module.exports = DepthTrack;
 
 function appendDepthHeader(base, unit) {
-    var trackHeader = base.selectAll('.track-header');
+    var trackHeader = base.selectAll('.track-header-viewport');
     trackHeader.append('label')
         .attr('class', 'data-header double-height text-center')
         .text(unit);
@@ -28,6 +29,9 @@ function appendDepthHeader(base, unit) {
  * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 0
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 0
  */
+DepthTrack.prototype = Object.create(Track.prototype);
+DepthTrack.prototype.constructor = DepthTrack;
+
 function DepthTrack(config) {
     var self = this;
     var _viewportX = new Array(), _viewportY = new Array();
@@ -52,6 +56,15 @@ function DepthTrack(config) {
     var xPadding = config.xPadding || 0, yPadding = config.yPadding || 0;
     this.getYStep = function() {
         return yStep;
+    }
+
+    /**
+     * Set background color for the track
+     * @param {String} color - CSS color string
+     */
+    this.setBackgroundColor = function(color) {
+        trackContainer
+            .style('background-color', color)
     }
 
     /**
@@ -88,12 +101,13 @@ function DepthTrack(config) {
         function setupAxes() {
             var start = roundUp(_viewportY[0], yStep);
             var end = roundDown(_viewportY[1], yStep);
+            var step = (end - start) / yNTicks;
             var yAxis = d3.axisLeft(transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
+                .tickValues(d3.range(start, end + step, step))
                 .tickFormat(yFormatter)
                 .tickSize(5);
             var yAxis1 = d3.axisRight(transformY)
-                .tickValues(d3.range(start, end, (end - start)/yNTicks))
+                .tickValues(d3.range(start, end + step, step))
                 .tickFormat('')
                 .tickSize(5);
 
@@ -124,4 +138,3 @@ function DepthTrack(config) {
         });
     }
 }
-

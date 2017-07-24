@@ -1,3 +1,5 @@
+let Utils = require('./visualize-utils');
+
 module.exports = Curve;
 
 /**
@@ -6,8 +8,8 @@ module.exports = Curve;
  * @param {Object} config - Configurations of new curve
  * @param {String} [config.name] - Name of new curve
  * @param {String} [config.unit] - Unit of data
- * @param {Number} [config.minX] - Mininum x value to show
- * @param {Number} [config.maxX] - Maximum x value to show
+ * @param {Number} [config.xMin] - Mininum x value to show
+ * @param {Number} [config.xMax] - Maximum x value to show
  * @param {String} [config.color] - CSS color of new curve
  * @param {String} [config.scale] - Scale type (linear or log)
  */
@@ -22,9 +24,10 @@ function Curve(config) {
     let _color = config.color || 'blue';
     let _name = config.name || 'Noname';
     let _unit = config.unit || 'm3';
-    let _xMin = config.minX || 0;
-    let _xMax = config.maxX || 200;
+    let _xMin = config.xMin || null;
+    let _xMax = config.xMax || null;
     let _scale = config.scale || 'linear';
+    let _header;
 
     /**
      * Get data property of curve
@@ -75,11 +78,29 @@ function Curve(config) {
     }
 
     /**
-     * Get scale property of curve
-     * @returns {String} Scale type of curve
+     * Get X range of curve
+     * @returns {Array} Range of x value to show
      */
-    this.getScale = function() {
-        return _scale;
+    this.getXRange = function(){
+        return [_xMin, _xMax];
+    }
+
+    /**
+     * Get scale function of curve
+     * @returns {Function} d3 scale function
+     */
+    this.getScaleFunc = function() {
+        return {
+            'linear': d3.scaleLinear,
+            'log': d3.scaleLog
+        }[_scale]
+    }
+
+    /**
+     * Get header of the curve
+     */
+    this.getHeader = function() {
+        return _header;
     }
 
     /**
@@ -129,6 +150,14 @@ function Curve(config) {
     }
 
     /**
+     * Set header property of the curve
+     * @param {Object} header - curve header
+     */
+    this.setHeader = function(header) {
+        _header = header;
+    }
+
+    /**
      * Adjust curve when bounding rectangle changes
      * @param {Object} rect - The bounding rectangle
      */
@@ -140,12 +169,25 @@ function Curve(config) {
     }
 
     /**
+     * Re-insert the curve to the end of its parent
+     */
+    this.raise = function() {
+        canvas.raise();
+    }
+
+    /**
      * Initialize DOM elements and bind data for the curve
      * @param {Object} plotContainer - The DOM element to contain the curve
      * @param {Array} data - Array of objects containing x, y coordinates
      */
     this.init = function(plotContainer, data) {
-        _data = data;
+        Utils.parseData(data);
+        _data = Utils.trimData(data);
+        Utils.interpolateData(_data);
+
+        _xMin = _xMin == null ? Utils.roundDown(d3.min(_data, function(d) { return d.x; }), 1) : _xMin;
+        _xMax = _xMax == null ? Utils.roundUp(d3.max(_data, function(d) { return d.x; }), 1) : _xMax;
+
         clientRect = plotContainer.node().getBoundingClientRect();
 
         canvas = plotContainer.append('canvas')
@@ -161,6 +203,7 @@ function Curve(config) {
      */
     this.destroy = function() {
         canvas.remove();
+        if (_header) _header.remove();
     }
 
     /**
@@ -188,23 +231,27 @@ function Curve(config) {
 
     /**
      * Actually draw the curve
-     * @param {Array} domainX
      * @param {Array} domainY
      * @param {Array} rangeX
      * @param {Array} rangeY
      * @param {Object} config
      * @param {Number} [config.lineWidth] - Width in pixel of the line. Default: 1
      * @param {Number} [config.yStep] - Step to scale y coordinate
-     * @param {Number} [config.xStep] - Step to scale x coordinate
      * @todos Pending
      */
-    this.doPlot = function(viewportX, viewportY, transformX, transformY, shading, lineWidth, refX, yStep) {
+    this.doPlot = function(domainY, rangeX, rangeY, config) {
+        let scaleFunc = self.getScaleFunc();
+        let transformX = scaleFunc().domain([_xMin, _xMax]).range(rangeX);
+        let transformY = d3.scaleLinear().domain(domainY).range(rangeY);
+        let lineWidth = config.lineWidth || 1;
+        let yStep = config.yStep || 1;
+
         ctx.clearRect(0, 0, clientRect.width, clientRect.height);
         let plotSamples = _data.filter(function(item) {
-            let ret =(item.x >= viewportX[0] &&
-                   item.x <= viewportX[1] &&
-                   item.y * yStep >= viewportY[0] &&
-                   item.y * yStep <= viewportY[1]);
+            let ret =(item.x >= _xMin &&
+                   item.x <= _xMax &&
+                   item.y * yStep >= domainY[0] &&
+                   item.y * yStep <= domainY[1]);
             return ret;
         });
         if (plotSamples.length == 0) return;

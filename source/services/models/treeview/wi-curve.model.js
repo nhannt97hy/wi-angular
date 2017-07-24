@@ -13,7 +13,7 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
             self.type = 'curve';
             self.name = curve['idCurve'] + 'curve';
             self.id = curve['idCurve'];
-            // self.data.icon = 'curve-data-16x16';
+            self.data.icon = 'curve-data-16x16';
             self.data.label = curve['name'];
             self.data.properties = parsePropertiesList(curve, dataset);
 
