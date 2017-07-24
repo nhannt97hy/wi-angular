@@ -11,9 +11,11 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty) {
 
         try {
             self.type = 'logplot';
-            self.name = logplot['idLogplot'] + 'logplot';
+            self.name = logplot['idPlot'] + 'logplot';
             self.data.icon = 'logplot-blank-16x16';
-            self.data.label = logplot['label'];
+            self.data.label = logplot['name'];
+
+            angular.copy(logplot, self.data.payload);
             // self.data.properties = parsePropertiesList(depth, dataset);
         } catch (err) {
             console.error('Parse logplot model has error', err);

@@ -17,8 +17,9 @@ exports.item2 = function () {
 exports.newitem = function () {
     console.log('newitem');
 };
-exports.logplot = function () {
+
+exports.logplot = function (logplot) {
     // this.wiApiService.post(this.wiApiService.CREATE_PLOT, {});
 
-    this.wiComponentService.emit('add-logplot-event', 'new logplot');
+    this.wiComponentService.emit('add-logplot-event', logplot);
 };
