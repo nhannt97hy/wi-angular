@@ -92,6 +92,7 @@ exports.updateWellProject = function (wiComponentService, well) {
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
 };
 
+// todo: refactor
 exports.updateWellsProject = function (wiComponentService, wells) {
     // update well
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
@@ -162,9 +163,72 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     });
 };
 
-exports.createNewBlankLogPlot = function (wiComponentService, logPlot) {
-    wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logPlot.title);
+exports.createNewBlankLogPlot = function (wiComponentService, wiApiService) {
+    let well = wiComponentService.getComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD);
+    console.log('well payload', well);
+
+    let dataRequest = {
+        idWell: well.idWell,
+        name: 'mock test',
+        option: 'blank-plot'
+    };
+    wiApiService.post(wiApiService.CREATE_PLOT, dataRequest)
+        .then(function (newPlot) {
+            console.log('newPlot', newPlot);
+            wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, dataRequest.name);
+        })
+        .catch(function (err) {
+            console.error('err create new blank logplot', err);
+        });
 };
+
+function updateLogplotProject(wiComponentService, well, logplot) {
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+    let selectWellProject = findWellProjectById(well.idWell, project);
+    if (!selectWellProject) return;
+
+    if (!Array.isArray(selectWellProject.plots) || selectWellProject.plots.length === 0) {
+        selectWellProject.plots = [];
+        selectWellProject.plots.push(logplot);
+
+        return;
+    }
+
+    for (let plot of selectWellProject.plots) {
+        if (!Array.isArray(project.wells)) {
+            project.wells = [];
+            project.wells.push(well);
+        } else {
+
+        }
+    }
+
+    let isNewPlot = true;
+    for (let i = 0; i < selectWellProject.plots.length; i++) {
+        if (selectWellProject.plots[i].idPlot == logplot.idPlot) {
+            selectWellProject.plots[i] = logplot;
+            isNewPlot = false;
+        }
+    }
+    if (isNewPlot) {
+        selectWellProject.plots.push(logplot);
+    }
+
+    wiComponentService.emit(wiComponentService.UPDATE_LOGPLOT_EVENT, logplot);
+    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
+}
+
+function findWellProjectById(idWell, project) {
+    if (!project || !Array.isArray(project.wells)) return;
+    for (let well of project.wells) {
+        if (well.idWell == idWell) {
+            return well;
+        }
+    }
+
+    return null;
+}
 
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);

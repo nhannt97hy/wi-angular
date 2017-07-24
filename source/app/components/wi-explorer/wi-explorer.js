@@ -1,7 +1,7 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConfig, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -57,7 +57,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                 }
             }
         ]
-    }
+    };
 
 
     this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
@@ -257,7 +257,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                         separator: '1'
                     }
                 ];
-            case 'logplot':
+            case 'logplots':
                 return [
                     {
                         name: "NewLogPlot",
@@ -277,7 +277,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                                     let logplot = {
                                         title: 'Mock Blank Plot'
                                     };
-                                    utils.createNewBlankLogPlot(wiComponentService, logplot);
+                                    utils.createNewBlankLogPlot(wiComponentService, wiApiService);
                                 }
                             }, {
                                 name: "3TracksBlank",
