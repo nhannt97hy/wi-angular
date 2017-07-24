@@ -1,6 +1,9 @@
-var Utils = require('./visualize-utils');
+let Utils = require('./visualize-utils');
+let Drawing = require('./visualize-drawing');
 
 module.exports = Shading;
+
+Utils.extend(Drawing, Shading);
 
 /**
  * Represents a Shading
@@ -9,268 +12,174 @@ module.exports = Shading;
  * @param {String} [config.name] - Name of new shading
  * @param {String} [config.fillStyle] - Canvas fill style
  * @param {Number} [config.refX] - x coordiate of reference line for custom shading
- * @todos Pending
  */
 function Shading(config) {
-    let self = this;
-    let canvas;
-    let ctx;
-    let svg;
-    let clientRect;
-    let refLine;
+    Drawing.call(this);
 
-    let _leftCurve;
-    let _rightCurve;
-    let _fillStyle = config.fillStyle || 'green';
-    let _name = config.name || 'Noname';
-    let _refX = config.refX;
-    let _header;
+    this.fillStyle = config.fillStyle || 'green';
+    this.name = config.name || 'Noname';
+    this.refX = config.refX;
 
-    let refLineWidth = 2;
-    let refLineColor = '#3e3e3e';
+    this.refLineWidth = 2;
+    this.refLineColor = '#3e3e3e';
+}
 
-    /**
-     * Get name property of the shading
-     */
-    this.getName = function() {
-        return _name;
-    }
+/**
+ * Get y extent of shading
+ * @returns {Array}
+ */
+Shading.prototype.getExtentY = function() {
+    let ys = [];
+    if (this.leftCurve) ys = ys.concat(this.leftCurve.getExtentY());
+    if (this.rightCurve) ys = ys.concat(this.rightCurve.getExtentY());
+    return [d3.min(ys), d3.max(ys)];
+}
 
-    /**
-     * Get fillStyle property of the shading
-     */
-    this.getFillStyle = function() {
-        return _fillStyle;
-    }
+/**
+ * Initialize DOM elements
+ * @param {Object} plotContainer - The DOM element to contain the shading
+ * @param {Object} leftCurve - Left curve, null if drawing left shading
+ * @param {Object} rightCurve - Right curve, null if drawing right shading
+ */
+Shading.prototype.init = function(plotContainer, leftCurve, rightCurve) {
+    this.leftCurve = leftCurve;
+    this.rightCurve = rightCurve;
+    this.clientRect = plotContainer.node().getBoundingClientRect();
 
-    /**
-     * Get refX property of the shading
-     */
-    this.getRefX = function() {
-        return _refX;
-    }
+    this.canvas = plotContainer.append('canvas')
+        .attr('width', this.clientRect.width)
+        .attr('height', this.clientRect.height);
 
-    /**
-     * Get width of reference line
-     */
-    this.getRefLineWidth = function() {
-        return refLineWidth;
-    }
+    this.ctx = this.canvas.node().getContext('2d');
+    this.svg = plotContainer.select('svg');
 
-    /**
-     * Get header of the shading
-     */
-    this.getHeader = function() {
-        return _header;
-    }
-
-    /**
-     * Set name property for the shading
-     * @param {String} name - New name
-     */
-    this.setName = function(name) {
-        _name = name;
-    }
-
-    /**
-     * Set fillStyle property for the shading
-     * @param {String|Object} fillStyle - New canvas fillStyle
-     */
-    this.setFillStyle = function(fillStyle) {
-        _fillStyle = fillStyle;
-    }
-
-    /**
-     * Set refX property of the shading
-     * @param {Number} refX - x coordinate of reference line
-     */
-    this.setRefX = function(refX) {
-        _refX = refX;
-    }
-
-    /**
-     * Set header property of the shading
-     * @param {Object} header - shading header
-     */
-    this.setHeader = function(header) {
-        _header = header;
-    }
-
-    /**
-     * Re-insert the shading to the end of its parent
-     */
-    this.raise = function() {
-        canvas.raise();
-    }
-
-    /**
-     * Initialize DOM elements
-     * @param {Object} plotContainer - The DOM element to contain the shading
-     * @param {Object} leftCurveIdx - Left curve, null if drawing left shading
-     * @param {Object} rightCurveIdx - Right curve, null if drawing right shading
-     */
-    this.init = function(plotContainer, leftCurve, rightCurve) {
-        _leftCurve = leftCurve;
-        _rightCurve = rightCurve;
-        clientRect = plotContainer.node().getBoundingClientRect();
-
-        canvas = plotContainer.append('canvas')
-            .attr('width', clientRect.width)
-            .attr('height', clientRect.height);
-
-        ctx = canvas.node().getContext('2d');
-        svg = plotContainer.select('svg');
-
-        if (_refX != null) {
-            refLine = svg.append('line').attr('class', 'ref-line')
-                .attr('x1', _refX)
-                .attr('x2', _refX)
-                .attr('y1', 0)
-                .attr('y2', clientRect.height)
-                .attr('style', 'stroke:' + refLineColor +'; stroke-width:' + refLineWidth)
-                .raise();
-        }
-
-        return self;
-    }
-
-    /**
-     * Adjust shading when bounding rectangle changes
-     * @param {Object} rect - The bounding rectangle
-     */
-    this.adjustSize = function(rect) {
-        canvas
-            .attr('width', rect.width)
-            .attr('height', rect.height);
-
-        svg
-            .attr('width', rect.width)
-            .attr('height', rect.height);
-
-        if (refLine) {
-            _refX = rect.width / clientRect.width * _refX;
-
-            refLine
-                .attr('x1', _refX)
-                .attr('x2', _refX);
-        }
-        clientRect = rect;
-    }
-
-    /**
-     * Destroy DOM elements of the shading
-     */
-    this.destroy = function() {
-        canvas.remove();
-        if (_header) _header.remove();
-    }
-
-    /**
-     * Check if the shading near a point
-     * @param {Number} x - x coordinate of the point
-     * @param {Number} y - y coordinate of the point
-     * @returns {Boolean}
-     */
-    this.nearPoint = function(x, y) {
-        let e = 1;
-        let imgData = ctx.getImageData(x-e, y-e, e*2, e*2);
-        let r, g, b, a;
-        for (let i = 0; i < imgData.width * imgData.height; i ++) {
-            r = imgData.data[i * 4];
-            g = imgData.data[i * 4 + 1];
-            b = imgData.data[i * 4 + 2];
-            a = imgData.data[i * 4 + 3];
-
-            if (r > 0 || g > 0 || b > 0 || a > 0)
-                return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Actually draw the shading
-     * @param {Array} domainY
-     * @param {Array} rangeX
-     * @param {Array} rangeY
-     * @param {Object} config
-     * @param {Number} [config.yStep] - Step to scale y coordinate
-     * @todos Pending
-     */
-    this.doPlot = function(domainY, rangeX, rangeY, config) {
-        if (_refX != null) _drawRefLine();
-        let yStep = config.yStep || 1;
-
-        let leftData = _prepareData(_leftCurve, domainY, rangeX, rangeY, yStep);
-        let rightData = _prepareData(_rightCurve, domainY, rangeX, rangeY, yStep).reverse();
-
-        if (leftData.length == 0 && rightData.length == 0) return;
-
-        if (leftData.length == 0) {
-            let x = _refX == null ? rangeX[0] : _refX;
-            leftData = [
-                {x: x, y: rangeY[0]},
-                {x: x, y: rangeY[1]}
-            ];
-        }
-
-        if (rightData.length == 0) {
-            let x = _refX == null ? rangeX[1] : _refX;
-            rightData = [
-                {x: x, y: rangeY[1]},
-                {x: x, y: rangeY[0]}
-            ];
-        }
-
-        let plotSamples = leftData.concat(rightData);
-
-        ctx.clearRect(0, 0, clientRect.width, clientRect.height);
-        ctx.fillStyle = _fillStyle;
-        ctx.lineWidth = 0;
-
-        ctx.beginPath();
-        ctx.moveTo(plotSamples[0].x, plotSamples[0].y);
-        plotSamples.forEach(function(item) {
-            ctx.lineTo(item.x, item.y);
-        });
-        ctx.fill();
-    }
-
-    /**
-     * Register drag event on ref line
-     * @param {Function} cb - Callback function
-     */
-    this.onRefLineDrag = function(cb) {
-        if (_refX != null)
-            refLine.call(d3.drag().on('drag', cb));
-    }
-
-
-    function _prepareData(curve, domainY, rangeX, rangeY, yStep) {
-        if (!curve) return [];
-
-        let scaleX = curve.getScaleFunc();
-        let transformX = scaleX().domain(curve.getXRange()).range(rangeX);
-        let transformY = d3.scaleLinear().domain(domainY).range(rangeY);
-        let data = curve.getData()
-            .filter(function(item) {
-                return Utils.isWithin(item, curve.getXRange(), [domainY[0] / yStep, domainY[1] / yStep]);
-            })
-            .map(function(item) {
-                return {
-                    x: transformX(item.x),
-                    y: transformY(item.y * yStep)
-                }
-            });
-        return data.slice();
-    }
-
-    function _drawRefLine() {
-        refLine.attr('x1', _refX)
-            .attr('x2', _refX)
+    if (this.refX != null) {
+        this.refLine = this.svg.append('line').attr('class', 'ref-line')
+            .attr('x1', this.refX)
+            .attr('x2', this.refX)
             .attr('y1', 0)
-            .attr('y2', clientRect.height)
-            .attr('stroke', refLineColor)
+            .attr('y2', this.clientRect.height)
+            .attr('style', 'stroke:' + this.refLineColor +'; stroke-width:' + this.refLineWidth)
             .raise();
     }
+    return this;
+}
+
+/**
+ * Destroy DOM element of the shading
+ */
+Shading.prototype.destroy = function() {
+    Drawing.prototype.destroy.call(this);
+    if (this.refLine) this.refLine.remove();
+}
+
+/**
+ * Adjust shading when bounding rectangle changes
+ * @param {Object} rect - The bounding rectangle
+ */
+Shading.prototype.adjustSize = function(rect) {
+    if (this.refLine) {
+        this.refX = rect.width / this.clientRect.width * this.refX;
+        this.refLine
+            .attr('x1', this.refX)
+            .attr('x2', this.refX);
+    }
+    Drawing.prototype.adjustSize.call(this, rect);
+    return this;
+}
+
+/**
+ * Check if the shading near a point
+ * @param {Number} x - x coordinate of the point
+ * @param {Number} y - y coordinate of the point
+ * @returns {Boolean}
+ */
+Shading.prototype.nearPoint = function(x, y) {
+    return Drawing.prototype.nearPoint.call(this, x, y, 1);
+}
+
+/**
+ * Actually draw the shading
+ * @param {Array} domainY
+ * @param {Array} rangeX
+ * @param {Array} rangeY
+ * @param {Object} config
+ */
+Shading.prototype.doPlot = function(domainY, rangeX, rangeY, config) {
+    if (this.refX != null) drawRefLine(this);
+
+    let leftData = prepareData(this.leftCurve, domainY, rangeX, rangeY);
+    let rightData = prepareData(this.rightCurve, domainY, rangeX, rangeY).reverse();
+
+    if (leftData.length == 0 && rightData.length == 0) return;
+
+    if (leftData.length == 0) {
+        let x = this.refX == null ? rangeX[0] : this.refX;
+        leftData = [
+            {x: x, y: rangeY[0]},
+            {x: x, y: rangeY[1]}
+        ];
+    }
+
+    if (rightData.length == 0) {
+        let x = this.refX == null ? rangeX[1] : this.refX;
+        rightData = [
+            {x: x, y: rangeY[1]},
+            {x: x, y: rangeY[0]}
+        ];
+    }
+
+    let plotSamples = leftData.concat(rightData);
+    let ctx = this.ctx;
+
+    ctx.clearRect(0, 0, this.clientRect.width, this.clientRect.height);
+    ctx.fillStyle = this.fillStyle;
+    ctx.lineWidth = 0;
+
+    ctx.beginPath();
+    ctx.moveTo(plotSamples[0].x, plotSamples[0].y);
+    plotSamples.forEach(function(item) {
+        ctx.lineTo(item.x, item.y);
+    });
+    ctx.fill();
+    return this;
+}
+
+/**
+ * Register drag event on ref line
+ * @param {Function} cb - Callback function
+ */
+Shading.prototype.onRefLineDrag = function(cb) {
+    if (this.refX != null)
+        this.refLine.call(d3.drag().on('drag', cb));
+    return this;
+}
+
+
+function prepareData(curve, domainY, rangeX, rangeY) {
+    if (!curve) return [];
+
+    let scaleX = curve.getScaleFunc();
+    let transformX = scaleX().domain(curve.getWindowX()).range(rangeX);
+    let transformY = d3.scaleLinear().domain(domainY).range(rangeY);
+    let data = curve.data
+        .filter(function(item) {
+            return Utils.isWithinYRange(item, domainY);
+        })
+        .map(function(item) {
+            return {
+                x: transformX(item.x),
+                y: transformY(item.y)
+            }
+        });
+    return data.slice();
+}
+
+function drawRefLine(shading) {
+    shading.refLine.attr('x1', shading.refX)
+        .attr('x2', shading.refX)
+        .attr('y1', 0)
+        .attr('y2', shading.clientRect.height)
+        .attr('stroke', shading.refLineColor)
+        .raise();
 }

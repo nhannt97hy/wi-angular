@@ -9,8 +9,7 @@ let TRACK_CFG = {
     yFormatter: '.2f',
     xPadding: 1,
     yPadding: 5,
-    yStep: 0.25,
-    plotWidth: 120
+    width: 120
 };
 
 let DTRACK_CFG = {
@@ -21,8 +20,7 @@ let DTRACK_CFG = {
     yFormatter: '.2f',
     xPadding: 1,
     yPadding: 5,
-    yStep: 0.25,
-    plotWidth: 60
+    width: 60
 };
 
 function getCurveFromName(name) {
@@ -108,10 +106,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
-
-        track.onCurveHeaderMouseDown(curve, function() {
+        track.onHeaderMouseDown(curve, function() {
             _setCurrentTrack(track);
-            track.setCurrentCurve(curve);
+            track.setCurrentDrawing(curve);
             if (d3.event.button == 2) {
                 _curveOnRightClick();
             }
@@ -142,7 +139,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.setDepthRange = function(depthRange) {
         _depthRange = depthRange;
         _tracks.forEach(function(track) {
-            track.setViewportY(depthRange);
+            track.windowY = depthRange;
         });
         self.plotAll();
     };
@@ -152,7 +149,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.setDepthRange(depthRange);
         }
         else {
-            track.setViewportY(depthRange);
+            track.windowY = depthRange;
             self.plot(track);
             _depthRange = depthRange;
         }
@@ -178,18 +175,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.getMaxDepth = function () {
         let maxDepth = d3.max(_tracks, function (track) {
-            if (track.getYMax) return track.getYMax();
+            if (track.getExtentY) return track.getExtentY()[1];
             return -1;
         });
-
         _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
         return _maxDepth;
-    };
-
-    this.setColor = function (track, color) {
-        if (track && track.setCurrentCurveColor) {
-            track.setCurrentCurveColor(color);
-        }
     };
 
     this.removeCurrentCurve = function() {
@@ -224,8 +214,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _currentTrack = null;
         }
         _previousTrack = null;
-        if (track.removeAllCurves) {
-            track.removeAllCurves();
+        if (track.removeAllDrawings) {
+            track.removeAllDrawings();
         }
 
         let graph = wiComponentService.getComponent('GRAPH');
@@ -256,8 +246,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;
         if (_previousTrack != _currentTrack) {
-            if (_previousTrack.setCurrentCurve)
-                _previousTrack.setCurrentCurve(null);
+            if (_previousTrack.setCurrentDrawing)
+                _previousTrack.setCurrentDrawing(null);
             _previousTrack.setBackgroundColor('transparent');
         }
 
@@ -265,18 +255,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _onPlotMouseDownCallback(track) {
         _setCurrentTrack(track);
-        if (d3.event.curveMouseDown && d3.event.button == 2) {
-            _curveOnRightClick();
-            return;
-        }
-
-        if (d3.event.shadingMouseDown && d3.event.button == 2) {
-            _shadingOnRightClick();
+        if (d3.event.currentDrawing && d3.event.button == 2) {
+            if (d3.event.currentDrawing.isCurve()) {
+                _curveOnRightClick();
+            }
+            else if (d3.event.currentDrawing.isShading()) {
+                _shadingOnRightClick();
+            }
         }
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
-        track.onShadingHeaderMouseDown(shading, function() {
+        track.onHeaderMouseDown(shading, function() {
             _setCurrentTrack(track);
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
@@ -287,7 +277,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _onPlotMouseWheelCallback(track) {
         let range = _depthRange[1] - _depthRange[0];
         let low, high, maxDepth = self.getMaxDepth();
-        let yStep = track.getYStep();
         if (d3.event.deltaY < 0) {
             low = _depthRange[0] - range*0.2;
             high = _depthRange[1] + range*0.2;
@@ -296,15 +285,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             low = _depthRange[0] + range*0.2;
             high = _depthRange[1] - range*0.2;
         }
-        low = low < 0 ? 0 : Math.floor(low / yStep) * yStep;
-        high = high > maxDepth ? maxDepth : Math.ceil(high / yStep) * yStep;
+        low = low < 0 ? 0 : Math.floor(low);
+        high = high > maxDepth ? maxDepth : Math.ceil(high);
         self.setDepthRange([low, high]);
         self.adjustSlidingBarFromDepthRange([low, high]);
     }
 
     function _onHeaderMouseDownCallback(track) {
         _setCurrentTrack(track);
-        _currentTrack.setCurrentCurve(null);
+        _currentTrack.setCurrentDrawing(null);
     }
 
     function _shadingOnRightClick() {
@@ -361,7 +350,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
     };
-    
+
     var commonCtxMenu = [
         {
             name: "TrackProperties",
