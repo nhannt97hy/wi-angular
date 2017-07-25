@@ -12,7 +12,8 @@ const changed = require('gulp-changed');
 const async = require('async');
 const fileInclude = require('gulp-file-include');
 const XLSX = require('xlsx');
-const workbook = XLSX.readFile('Wi-UI.xlsx');
+const workbook = XLSX.readFile('Wi-UI.Tung.xlsx');
+const rsync = require('gulp-rsync');
 const fs = require('fs');
 
 const BUILD_DIR = {
@@ -258,7 +259,7 @@ gulp.task('gen-wi-explorer-template', function () {
 
 gulp.task('gen-functions', ['gen-wi-logplot-functions', 'gen-wi-explorer-functions'], function () {
     var configFile = 'config/ribbon-config.js';
-    var xlsxFile = './Wi-UI.xlsx';
+    var xlsxFile = './Wi-UI.Tung.xlsx';
     var templateFile = 'source/js/handlers.js.tmpl';
 
     var wiUI = require('./preprocess/excel-to-json.js');
@@ -313,7 +314,24 @@ gulp.task('default', ['watch']);
 /**
  * Push build to gh-pages
  */
-gulp.task('deploy', function () {
+gulp.task('github-page', function () {
     return gulp.src("./build/**/*")
         .pipe(deploy());
+});
+
+gulp.task('build-visualize', mainTasks, function() {
+    gulp.src([
+        'build/js/main-logplot.js',
+        'build/js/main.js'
+    ])
+        .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
+});
+
+gulp.task('deploy', function() {
+    return gulp.src("./build/**/*")
+        .pipe(rsync({
+            root: "build/",
+            hostname: "centos@54.169.109.34",
+            destination:"/opt/wi-angular/build"
+        }));
 });

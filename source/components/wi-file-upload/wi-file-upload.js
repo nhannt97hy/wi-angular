@@ -1,10 +1,12 @@
 const componentName = 'wiFileUpload';
 const moduleName = 'wi-file-upload';
 
-function Controller(Upload, wiComponentService) {
+function Controller(Upload) {
     let self = this;
 
     this.uploadPic = function (file) {
+        console.log('file', file);
+
         file.upload = Upload.upload({
             url: 'http://localhost:3000/file',
             data: {file: file}
@@ -26,9 +28,9 @@ function Controller(Upload, wiComponentService) {
         );
     };
 
-    this.$onInit = function() {
-        if (self.name) wiComponentService.putComponent(self.name, this);
-    }
+    // this.$onInit = function() {
+    //     if (self.name) wiComponentService.putComponent(self.name, this);
+    // }
 }
 
 let app = angular.module(moduleName, ['ngFileUpload']);

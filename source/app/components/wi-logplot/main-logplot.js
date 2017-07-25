@@ -2,9 +2,9 @@ let wiButton = require('./wi-button.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiSlidingbar = require('./wi-slidingbar.js');
 let wiContextMenu = require('./wi-context-menu.js');
+let wiDropdown = require('./wi-dropdown');
 
 let graph = require('./visualize/visualize.js');
-console.log('graph:', graph);
 let wiD3 = require('./wi-d3.js');
 let wiLogplot = require('./wi-logplot.js');
 let wiElementReadyDirective = require('./wi-element-ready');
@@ -12,6 +12,7 @@ let wiElementReadyDirective = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
+let wiApiService = require('./wi-api-service')
 
 let utils = require('./utils');
 
@@ -22,10 +23,20 @@ let dragMan = {
 };
 
 
-let app = angular.module('helloapp',
-    [wiLogplot.name, wiButton.name, wiToolbar.name, wiSlidingbar.name, wiContextMenu.name, wiD3.name, wiComponentService.name,
-        wiElementReadyDirective.name,
-        'angularModalService']);
+let app = angular.module('helloapp', [
+    wiLogplot.name,
+    wiButton.name,
+    wiToolbar.name,
+    wiSlidingbar.name,
+    wiContextMenu.name,
+    wiD3.name,
+    wiComponentService.name,
+    wiElementReadyDirective.name,
+    'angularModalService',
+    'ngFileUpload',
+    wiDropdown.name,
+    wiApiService.name
+]);
 
 app.controller('WiDummy', function ($scope, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);
@@ -34,58 +45,56 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     var wiD3Ctrl = null;
     wiComponentService.on('myPlotD3Area', function(param) {
-        console.log('myPlotD3Area loaded', param);
         wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area');
     });
-
-    $scope.handlers = handlers;
 
     $scope.depthTrackButtonClick = function() {
         wiD3Ctrl.addDepthTrack();
     }
 
     $scope.trackButtonClick = function() {
-        var wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area');
-        wiD3Ctrl.addTrack();
+        wiD3Ctrl.addLogTrack();
     }
 
     $scope.addData1ButtonClick = function() {
-        console.log('addData1');
-        trackIdx = wiD3Ctrl.getCurrentTrackIdx();
-        if (trackIdx == -1) return;
-        wiD3Ctrl.addCurve(trackIdx, genSamples([0,1], [0,1000]), 'Data1', 'm3');
-        wiD3Ctrl.setDepthRangeFromSlidingBar();
-        wiD3Ctrl.plot(trackIdx);
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addCurveToTrack(track, genSamples([0,1], [0,1000]), {});
     }
 
     $scope.addData2ButtonClick = function() {
-        var wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area');
-        trackIdx = wiD3Ctrl.getCurrentTrackIdx();
-        if (trackIdx == -1) return;
-        wiD3Ctrl.addCurve(trackIdx, genSamples([1,2], [0,1000]), 'Data2', 'kg');
-        wiD3Ctrl.setDepthRangeFromSlidingBar();
-        wiD3Ctrl.plot(trackIdx);
-    }
-
-    $scope.toggleShadingButtonClick = function() {
-        var wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area');
-        trackIdx = wiD3Ctrl.getCurrentTrackIdx();
-        wiD3Ctrl.toggleShading(trackIdx);
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1100]), {});
     }
 
     $scope.changeColor = function() {
-        var wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area');
-        wiD3Ctrl.setColor(wiD3Ctrl.getCurrentTrackIdx(), $scope.color);
+        wiD3Ctrl.setColor(wiD3Ctrl.getCurrentTrack(), $scope.color);
     }
 
     $scope.removeCurveButtonClick = function() {
-        let wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area')
-        wiD3Ctrl.removeSelectedCurve();
+        wiD3Ctrl.removeCurrentCurve();
     }
 
     $scope.removeTrackButtonClick = function() {
-        let wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area')
-        wiD3Ctrl.removeTrack(wiD3Ctrl.getCurrentTrackIdx());
+        wiD3Ctrl.removeTrack(wiD3Ctrl.getCurrentTrack());
+    }
+
+    $scope.addLeftShadingButtonClick = function() {
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {});
+    }
+
+    $scope.addRightShadingButtonClick = function() {
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addRightShadingToTrack(track, track.getCurrentCurve(), {});
+    }
+
+    $scope.addCustomShadingButtonClick = function() {
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addCustomShadingToTrack(track, track.getCurrentCurve(), 10, {});
+    }
+
+    $scope.removeShadingButtonClick = function() {
+        wiD3Ctrl.removeCurrentShading();
     }
 
     function genSamples(extentX, extentY) {
@@ -98,17 +107,3 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         return samples;
     }
 });
-
-handlers = {
-    Button1ButtonClicked: function () {
-        console.log('Button1Button is clicked');
-    },
-
-    Button2ButtonClicked: function () {
-        console.log('Button2Button is clicked');
-    },
-
-    Button3ButtonClicked: function () {
-        console.log('Button3Button is clicked');
-    }
-};

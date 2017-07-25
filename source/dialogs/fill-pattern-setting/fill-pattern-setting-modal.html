@@ -1,0 +1,28 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal"
+                        aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title">Fill Pattern Setting</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" action="" name="modalOpenProject">
+                    
+                </form>
+
+                <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
+            </div>
+            <div class="modal-footer">
+                <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;OK
+                </button>
+                <button class="btn btn-default"
+                        ng-click="wiModal.onCancelButtonClicked()"
+                        data-dismiss="modal"><span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
