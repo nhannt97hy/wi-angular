@@ -894,10 +894,11 @@ exports.lineStyleDialog = function (ModalService, options, callback) {
     });
 }
 
-exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
-    function ModalController($scope, close) {
+exports.curvePropertiesDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         // let utils = wiComponentService.getComponent('UTILS');
         // let projectData = utils.openProject;
         // console.log("dataaa ",projectData);
@@ -970,11 +971,14 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                 console.log("Line Style");
             });
         };
+        this.onApplyButtonClicked = function () {
+            callback(self);
+        };
         this.onOkButtonClicked = function () {
-
+            close(self, 100);
         };
         this.onCancelButtonClicked = function () {
-            console.log("onCancelButtonClicked");
+            close(null, 100);
         }
     }
 

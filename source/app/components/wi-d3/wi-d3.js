@@ -41,11 +41,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _depthRange = [0, 100000];
     let _selectedColor = '#ffffe0';
 
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
     this.getCurrentTrack = function () {
         return _currentTrack;
     };
 
-    this.getTracks = function() {
+    this.getTracks = function () {
         return _tracks;
     };
 
@@ -59,23 +61,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.setDepthRangeForTrack(track, depthRange);
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        track.onPlotMouseOver(function() {
-            if( !dragMan.dragging ) return;
+        track.onPlotMouseOver(function () {
+            if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = self;
             dragMan.track = track;
         });
-        track.onPlotMouseLeave(function() {
-            if( !dragMan.dragging ) return;
+        track.onPlotMouseLeave(function () {
+            if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
         });
-        track.onPlotMouseWheel(function() {
+        track.onPlotMouseWheel(function () {
             _onPlotMouseWheelCallback(track);
         });
-        track.onPlotMouseDown(function() {
+        track.onPlotMouseDown(function () {
             _onPlotMouseDownCallback(track);
         });
-        track.onHeaderMouseDown(function() {
+        track.onHeaderMouseDown(function () {
             _onHeaderMouseDownCallback(track);
         });
 
@@ -100,13 +102,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     };
 
-    this.addCurveToTrack = function(track, data, config) {
+    this.addCurveToTrack = function (track, data, config) {
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
-        track.onHeaderMouseDown(curve, function() {
+        track.onHeaderMouseDown(curve, function () {
             _setCurrentTrack(track);
             track.setCurrentDrawing(curve);
             if (d3.event.button == 2) {
@@ -136,15 +138,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
-    this.setDepthRange = function(depthRange) {
+    this.setDepthRange = function (depthRange) {
         _depthRange = depthRange;
-        _tracks.forEach(function(track) {
+        _tracks.forEach(function (track) {
             track.windowY = depthRange;
         });
         self.plotAll();
     };
 
-    this.setDepthRangeForTrack = function(track, depthRange) {
+    this.setDepthRangeForTrack = function (track, depthRange) {
         if (_depthRange[0] != depthRange[0] || _depthRange[1] != depthRange[1]) {
             self.setDepthRange(depthRange);
         }
@@ -155,7 +157,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-    this.getDepthRangeFromSlidingBar = function() {
+    this.getDepthRangeFromSlidingBar = function () {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
 
@@ -164,7 +166,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return [low, high];
     }
 
-    this.adjustSlidingBarFromDepthRange = function(vY) {
+    this.adjustSlidingBarFromDepthRange = function (vY) {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
 
@@ -182,22 +184,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _maxDepth;
     };
 
-    this.removeCurrentCurve = function() {
+    this.removeCurrentCurve = function () {
         if (!_currentTrack.getCurrentCurve) return;
         self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
     }
 
-    this.removeCurrentShading = function() {
+    this.removeCurrentShading = function () {
         if (!_currentTrack.getCurrentShading) return;
         self.removeShadingFromTrack(_currentTrack, _currentTrack.getCurrentShading());
     }
 
-    this.removeCurveFromTrack = function(track, curve) {
+    this.removeCurveFromTrack = function (track, curve) {
         if (!track || !track.removeCurve) return;
         track.removeCurve(curve);
     }
 
-    this.removeShadingFromTrack = function(track, shading) {
+    this.removeShadingFromTrack = function (track, shading) {
         if (!track || !track.removeShading) return;
         track.removeShading(shading);
     }
@@ -207,21 +209,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.removeTrack = function (track) {
-        let trackIdx = _tracks.indexOf(track);
-        if (trackIdx < 0) return;
-
-        if (track == _currentTrack) {
-            _currentTrack = null;
-        }
-        _previousTrack = null;
-        if (track.removeAllDrawings) {
-            track.removeAllDrawings();
-        }
-
-        let graph = wiComponentService.getComponent('GRAPH');
-        graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
-
-        _tracks.splice(trackIdx, 1);
+        DialogUtils.confirmDialog(ModalService, "Delete Track", "Are you sure to delete track: " + track.name + "?", function (yes) {
+            if (yes) {
+                let trackIdx = _tracks.indexOf(track);
+                if (trackIdx < 0) return;
+        
+                if (track == _currentTrack) {
+                    _currentTrack = null;
+                }
+                _previousTrack = null;
+                if (track.removeAllDrawings) {
+                    track.removeAllDrawings();
+                }
+        
+                let graph = wiComponentService.getComponent('GRAPH');
+                graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
+        
+                _tracks.splice(trackIdx, 1);
+            }
+        })
     }
 
     this.plot = function (track) {
@@ -266,7 +272,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
-        track.onHeaderMouseDown(shading, function() {
+        track.onHeaderMouseDown(shading, function () {
             _setCurrentTrack(track);
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
@@ -278,12 +284,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let range = _depthRange[1] - _depthRange[0];
         let low, high, maxDepth = self.getMaxDepth();
         if (d3.event.deltaY < 0) {
-            low = _depthRange[0] - range*0.2;
-            high = _depthRange[1] + range*0.2;
+            low = _depthRange[0] - range * 0.2;
+            high = _depthRange[1] + range * 0.2;
         }
         else {
-            low = _depthRange[0] + range*0.2;
-            high = _depthRange[1] - range*0.2;
+            low = _depthRange[0] + range * 0.2;
+            high = _depthRange[1] - range * 0.2;
         }
         low = low < 0 ? 0 : Math.floor(low);
         high = high > maxDepth ? maxDepth : Math.ceil(high);
@@ -320,12 +326,72 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         //console.log('-------------');
         self.setContextMenu([{
+            name: "CurveProperties",
+            label: "Curve Properties",
+            icon: "curve-properties-16x16",
+            handler: function () {
+                DialogUtils.curvePropertiesDialog(ModalService, function(props) {
+                    if (props) {
+                        console.log(props);
+                    }
+                })
+            }
+        }, {
+            name: "EditCurve",
+            label: "Edit Curve",
+            icon: "edit-curve-text-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "DepthShift",
+            label: "Depth Shift",
+            icon: "",
+            handler: function () {
+
+            }
+        }, {
             name: "RemoveCurve",
             label: "Remove Curve",
+            icon: "curve-hide-16x16",
             handler: function () {
                 self.removeCurrentCurve();
             }
-        }]);
+        }, {
+            name: "BaseLineShift",
+            label: "BaseLine Shift",
+            handler: function () {
+
+            }
+        }, {
+            name: "ReverseDisplaay",
+            label: "Reverse Displaay",
+            handler: function () {
+
+            }
+        }, {
+            name: "CrossPlot",
+            label: "Cross plot",
+            icon: "crossplot-blank-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "Histogram",
+            label: "Histogram",
+            icon: "histogram-new-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "CreateShading",
+            label: "Create Shading",
+            icon: "shading-add-16x16",
+            handler: function () {
+
+            }
+        }
+        ]);
         /*$timeout(function() {
             console.log('++++++++++++', wiComponentService, wiComponentService.getComponent('ContextMenu'));
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
@@ -477,11 +543,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (event.button != 2) return;
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
-            .open(event.clientX, event.clientY, self.contextMenu, function() {
+            .open(event.clientX, event.clientY, self.contextMenu, function () {
                 self.contextMenu = commonCtxMenu;
             });
     }
-    this.setContextMenu = function(ctxMenu) {
+    this.setContextMenu = function (ctxMenu) {
         self.contextMenu = ctxMenu;
     }
 }
