@@ -1,12 +1,12 @@
 exports.roundUp = roundUp;
 exports.roundDown = roundDown;
-exports.invertColor = invertColor;
 exports.appendTrack = appendTrack;
 exports.removeTrack = removeTrack;
-exports.isWithin = isWithin;
+exports.isWithinYRange = isWithinYRange;
 exports.trimData = trimData;
 exports.interpolateData = interpolateData;
 exports.parseData = parseData;
+exports.extend = extend
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
@@ -15,17 +15,19 @@ function roundDown(value, granularity) {
     return Math.floor(value / granularity) * granularity;
 }
 
+function extend(base, sub) {
+    sub.prototype = Object.create(base.prototype);
+    sub.prototype.constructor = sub;
+}
+
 function clip(val, extent) {
     if (val > extent[1]) return extent[1];
     if (val < extent[0]) return extent[0];
     return val;
 }
 
-function isWithin(item, extentX, extentY) {
-    return (item.x >= extentX[0] &&
-       item.x <= extentX[1] &&
-       item.y >= extentY[0] &&
-       item.y <= extentY[1]);
+function isWithinYRange(item, extentY) {
+    return (item.y >= extentY[0] && item.y <= extentY[1]);
 }
 
 function trimData(data) {
@@ -38,8 +40,8 @@ function trimData(data) {
 
 function parseData(data) {
     data.forEach(function(d) {
-        d.x = d.x == null ? null : parseInt(d.x);
-        d.y = d.y == null ? null : parseInt(d.y);
+        d.x = d.x == null ? null : parseFloat(d.x);
+        d.y = d.y == null ? null : parseFloat(d.y);
     });
 }
 
@@ -54,14 +56,6 @@ function interpolateData(data) {
         prev = i;
     }
     return data;
-}
-
-function invertColor(color) {
-    let d3Color = d3.rgb(color)
-    d3Color.r = Math.floor(d3Color.r / 2);
-    d3Color.g = Math.floor(d3Color.g / 2);
-    d3Color.b = Math.floor(d3Color.b / 2);
-    return d3Color;
 }
 
 function appendTrackHeader(plotArea, container, trackName) {
@@ -92,6 +86,10 @@ function appendTrackHeader(plotArea, container, trackName) {
     header
         .on('mousewheel', function() {
             _headerScrollCallback(d3.select(this));
+        })
+        .on('mousedown', function() {
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
         })
         .call(d3.drag().on('drag', function() {
             _headerScrollCallback(d3.select(this))

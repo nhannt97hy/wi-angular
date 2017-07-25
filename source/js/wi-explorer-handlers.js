@@ -49,7 +49,14 @@ exports.ImportWellTopButtonClicked = function () {
 }
 
 exports.ReloadProjectButtonClicked = function () {
-    console.log('ReloadProjectButton is clicked');
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    utils.refreshProjectState(this.wiComponentService, this.wiApiService)
+        .then(function() {
+            console.log('reload project success');
+        })
+        .catch(function(err) {
+            console.log('reload project err', err);
+        })
 }
 
 exports.CollapseProjectButtonClicked = function () {

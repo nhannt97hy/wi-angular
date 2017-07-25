@@ -64,6 +64,7 @@ app.factory(wiServiceName, function () {
         UTILS: 'UTILS',
         // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
+        ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',
@@ -72,10 +73,11 @@ app.factory(wiServiceName, function () {
         ADD_LOGPLOT_EVENT: 'add-logplot-event',
         PROJECT_LOADED_EVENT: 'project-loaded-event',
         PROJECT_UNLOADED_EVENT: 'project-unloaded-event',
+        PROJECT_REFRESH_EVENT: 'project-refresh-event',
         UPDATE_WELL_EVENT: 'update-well-event',
         UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
+        UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
     };
 });
 
 exports.name = moduleName;
-

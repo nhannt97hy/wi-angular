@@ -2,7 +2,7 @@ const wiServiceName = 'WiWell';
 const moduleName = 'wi-well-model';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
+app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset, WiLogplotsModel) {
     function WiWell(well) {
         let self = this;
         let defaultTreeItem = new WiTreeItem();
@@ -43,18 +43,18 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
                 },
                 children: []
             },
-            {
-                name: 'logplot',
-                type: 'logplot',
-                data: {
-                    icon: 'logplot-blank-16x16',
-                    label: 'Logplot',
-                    unit: '',
-                    childExpanded: false,
-                    properties: {}
-                },
-                children: []
-            },
+            // {
+            //     name: 'logplots',
+            //     type: 'logplots',
+            //     data: {
+            //         icon: 'logplot-blank-16x16',
+            //         label: 'Logplot',
+            //         unit: '',
+            //         childExpanded: false,
+            //         properties: {}
+            //     },
+            //     children: []
+            // },
             {
                 name: 'crossplot',
                 type: 'crossplot',
@@ -89,6 +89,10 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
                     self.children.unshift(datasetTreeItem);
                 }
             }
+
+            let logplots = new WiLogplotsModel(well);
+            self.children.push(logplots);
+
         } catch (err) {
             console.error('Parse well model has error', err);
         }

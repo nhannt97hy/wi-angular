@@ -1,7 +1,7 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConfig, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -20,7 +20,40 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
             wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, '');
         });
 
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
+            let backupConfig = self.treeConfig;
+            let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+            utils.pushProjectToExplorer(self, projectRefresh, wiComponentService, WiTreeConfig, WiWell, $timeout);
+
+            console.log('backupConfig', backupConfig);
+            console.log('config', self.treeConfig);
+            $timeout(function() {
+                self.backupConfig(backupConfig, self.treeConfig);
+            });
+        });
+
         if (self.name) wiComponentService.putComponent(self.name, self);
+    };
+
+    this.backupConfig = function(previousConfig, currConfig) {
+        for (let preItem of previousConfig) {
+            for (let item of currConfig) {
+                if (preItem.name === item.name) {
+                    self.backupItemState(preItem, item);
+
+                    if (Array.isArray(preItem.children) && Array.isArray(item.children)) {
+                        self.backupConfig(preItem.children, item.children);
+                    }
+                }
+            }
+        }
+    };
+
+    this.backupItemState = function(preItem, currItem) {
+        if (!preItem || !currItem) return;
+
+        currItem.data.childExpanded = preItem.data.childExpanded;
     };
 
     this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
@@ -57,7 +90,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                 }
             }
         ]
-    }
+    };
 
 
     this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
@@ -169,7 +202,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                                 label: "Z-A",
                                 icon: "arrow-up-16x16",
                                 handler: function() {
-                                    
+
                                 }
                             }
                         ]
@@ -257,7 +290,7 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                         separator: '1'
                     }
                 ];
-            case 'logplot':
+            case 'logplots':
                 return [
                     {
                         name: "NewLogPlot",
@@ -271,13 +304,19 @@ function Controller($scope, wiComponentService, ModalService, WiWell, WiTreeConf
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
-                                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                                    DialogUtils.newBlankLogplotDialog(ModalService, function (data) {
+                                        // let utils = self.wiComponentService.getComponent('UTILS');
+                                        // utils.projectOpen(self.wiComponentService, data);
+                                    });
 
-                                    // mock plot data
-                                    let logplot = {
-                                        title: 'Mock Blank Plot'
-                                    };
-                                    utils.createNewBlankLogPlot(wiComponentService, logplot);
+                                    // let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                                    //
+                                    // // mock plot data
+                                    // let logplot = {
+                                    //     title: 'Mock Blank Plot'
+                                    // };
+                                    // utils.createNewBlankLogPlot(wiComponentService, wiApiService);
                                 }
                             }, {
                                 name: "3TracksBlank",
@@ -451,4 +490,3 @@ app.component(componentName, {
 });
 
 exports.name = moduleName;
-

@@ -10,12 +10,15 @@ function Controller($scope, wiComponentService) {
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
-
+    var onDismiss = null;
     this.dismissAll = function () {
         self.shown = false;
         self.contextMenus = [];
+        if ( onDismiss ) onDismiss();
+        onDismiss = null;
     };
-    this.open = function (x, y, buttons) {
+    this.open = function (x, y, buttons, onDismissCallback) {
+        onDismiss = onDismissCallback;
         if (!buttons || buttons.length === 0) return;
         let contextMenu = {};
         if (buttons) contextMenu.buttons = buttons;

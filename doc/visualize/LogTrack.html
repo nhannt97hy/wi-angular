@@ -49,7 +49,7 @@
 
 
 <div class="description">
-    Represents a LogTrack
+    Represents a log track
 </div>
 
 
@@ -261,39 +261,6 @@
 
         <tr>
             
-                <td class="name"><code>plotWidth</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Width in pixel of the bounding rectangle. Default: 200</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>xFormatter</code></td>
             
 
@@ -354,39 +321,6 @@
             
 
             <td class="description last">d3 formatter for numbers in y axis. Default: 'g'</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>yStep</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Step to scale y ordinate. Default: 1.0</td>
         </tr>
 
     
@@ -456,6 +390,39 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Width in pixel of the bounding rectangle. Default: 200</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -500,7 +467,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line28">line 28</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line24">line 24</a>
     </li></ul></dd>
     
 
@@ -554,7 +521,7 @@
     
 
     
-    <h4 class="name" id="addCurve"><span class="type-signature"></span>addCurve<span class="signature">(data, config)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="addCurve"><span class="type-signature"></span>addCurve<span class="signature">(data, config)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -731,7 +698,7 @@
 
         <tr>
             
-                <td class="name"><code>xMin</code></td>
+                <td class="name"><code>minX</code></td>
             
 
             <td class="type">
@@ -764,7 +731,7 @@
 
         <tr>
             
-                <td class="name"><code>xMax</code></td>
+                <td class="name"><code>maxX</code></td>
             
 
             <td class="type">
@@ -871,7 +838,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line308">line 308</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line199">line 199</a>
     </li></ul></dd>
     
 
@@ -898,7 +865,7 @@
 
         
 <div class="param-desc">
-    Index of created curve
+    The created curve
 </div>
 
 
@@ -909,7 +876,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
     </dd>
@@ -927,7 +894,7 @@
     
 
     
-    <h4 class="name" id="addShading"><span class="type-signature"></span>addShading<span class="signature">(leftCurveIdx, rightCurveIdx, config)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="addShading"><span class="type-signature"></span>addShading<span class="signature">(leftCurve, rightCurve, refX, config)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -971,13 +938,13 @@
 
         <tr>
             
-                <td class="name"><code>leftCurveIdx</code></td>
+                <td class="name"><code>leftCurve</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
             
@@ -987,14 +954,37 @@
 
             
 
-            <td class="description last">Index of left curve, -1 if drawing left shading</td>
+            <td class="description last">Left curve, null if drawing left shading</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>rightCurveIdx</code></td>
+                <td class="name"><code>rightCurve</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Right curve, null if drawing right shading</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>refX</code></td>
             
 
             <td class="type">
@@ -1010,7 +1000,7 @@
 
             
 
-            <td class="description last">Index of right curve, -1 if drawing right shading</td>
+            <td class="description last">x coordiate of reference line for custom shading</td>
         </tr>
 
     
@@ -1094,7 +1084,7 @@
 
         <tr>
             
-                <td class="name"><code>color</code></td>
+                <td class="name"><code>fillStyle</code></td>
             
 
             <td class="type">
@@ -1120,40 +1110,7 @@
 
             
 
-            <td class="description last">CSS color of new shading. Default: auto generate</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>refX</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">x coordiate of reference line for custom shading</td>
+            <td class="description last">Canvas fillStyle of new shading. Default: auto generate</td>
         </tr>
 
     
@@ -1201,7 +1158,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line343">line 343</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line228">line 228</a>
     </li></ul></dd>
     
 
@@ -1228,7 +1185,7 @@
 
         
 <div class="param-desc">
-    Index of created shading
+    The created shading
 </div>
 
 
@@ -1239,7 +1196,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
     </dd>
@@ -1265,7 +1222,7 @@
 
 
 <div class="description">
-    Draw axes and curves
+    Draw axes, curves and shadings
 </div>
 
 
@@ -1309,7 +1266,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line294">line 294</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line182">line 182</a>
     </li></ul></dd>
     
 
@@ -1350,109 +1307,9 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line121">line 121</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The current curve object
+<div class="description">
+    Get current curve object
 </div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getCurrentCurveIdx"><span class="type-signature"></span>getCurrentCurveIdx<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
 
 
 
@@ -1495,7 +1352,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line115">line 115</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -1521,114 +1378,6 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    Index of the current curve, -1 if no curve is set to be current
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getCurrentDrawing"><span class="type-signature"></span>getCurrentDrawing<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line127">line 127</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The current drawing (curve or shading) object
-</div>
-
 
 
 <dl>
@@ -1662,6 +1411,10 @@
 
 
 
+<div class="description">
+    Get current shading object
+</div>
+
 
 
 
@@ -1703,7 +1456,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line124">line 124</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -1729,10 +1482,6 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    The current shading object
-</div>
-
 
 
 <dl>
@@ -1759,214 +1508,6 @@
     
 
     
-    <h4 class="name" id="getCurrentShadingIdx"><span class="type-signature"></span>getCurrentShadingIdx<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line118">line 118</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Index of the current shading, -1 if no shading is set to be current
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getCurveHeaders"><span class="type-signature"></span>getCurveHeaders<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line134">line 134</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    All headers for curves in this track
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="getCurves"><span class="type-signature"></span>getCurves<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
 
@@ -1974,6 +1515,10 @@
 
 
 
+<div class="description">
+    Get all the curves
+</div>
+
 
 
 
@@ -2015,7 +1560,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line109">line 109</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -2041,10 +1586,6 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    All curve objects in this track
-</div>
-
 
 
 <dl>
@@ -2071,12 +1612,120 @@
     
 
     
-    <h4 class="name" id="getPlotWidth"><span class="type-signature"></span>getPlotWidth<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="getExtentY"><span class="type-signature"></span>getExtentY<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
 
     
 
 
+
+<div class="description">
+    Get extent of y value among all drawings, [-1, -1] if there is no drawing
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line101">line 101</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getShadings"><span class="type-signature"></span>getShadings<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get all the shadings
+</div>
 
 
 
@@ -2145,114 +1794,6 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    Width in pixel of the bounding rectangle
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getShadingHeaders"><span class="type-signature"></span>getShadingHeaders<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line137">line 137</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    All headers for shadings in this track
-</div>
-
 
 
 <dl>
@@ -2262,1254 +1803,6 @@
     <dd>
         
 <span class="param-type">Array</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getShadings"><span class="type-signature"></span>getShadings<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line112">line 112</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    All shading objects in this track
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getXAxisPosition"><span class="type-signature"></span>getXAxisPosition<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line79">line 79</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Position of x axis (top or bottom)
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getXFormatter"><span class="type-signature"></span>getXFormatter<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line94">line 94</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    d3 formatter for numbers in x axis
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getXNTicks"><span class="type-signature"></span>getXNTicks<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line85">line 85</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Number of ticks shown in x axis
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getXPadding"><span class="type-signature"></span>getXPadding<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line103">line 103</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Horizontal padding for inner drawings
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYAxisPosition"><span class="type-signature"></span>getYAxisPosition<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line82">line 82</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Position of y axis (left or right)
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYFormatter"><span class="type-signature"></span>getYFormatter<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line97">line 97</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    d3 formatter for numbers in y axis
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYMax"><span class="type-signature"></span>getYMax<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line140">line 140</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Maximum y value among all curves, null if there is no curve
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYMin"><span class="type-signature"></span>getYMin<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line148">line 148</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Mininum y value, null if there is no curve
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYNTicks"><span class="type-signature"></span>getYNTicks<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line88">line 88</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Number of ticks shown in y axis
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYPadding"><span class="type-signature"></span>getYPadding<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line106">line 106</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Vertical padding for inner drawings
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getYStep"><span class="type-signature"></span>getYStep<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line100">line 100</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Step to scale y ordinate
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
 
 
     </dd>
@@ -3580,7 +1873,93 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line231">line 231</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line135">line 135</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onCurveHeaderMouseDown"><span class="type-signature"></span>onCurveHeaderMouseDown<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Register event when mouse down the curve header area
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line435">line 435</a>
     </li></ul></dd>
     
 
@@ -3666,7 +2045,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line499">line 499</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line413">line 413</a>
     </li></ul></dd>
     
 
@@ -3752,7 +2131,93 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line492">line 492</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line400">line 400</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onPlotMouseLeave"><span class="type-signature"></span>onPlotMouseLeave<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Register event when mouse leave the plot area
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line386">line 386</a>
     </li></ul></dd>
     
 
@@ -3838,7 +2303,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line485">line 485</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line379">line 379</a>
     </li></ul></dd>
     
 
@@ -3872,7 +2337,7 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="plotAllCurves"><span class="type-signature"></span>plotAllCurves<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="onPlotMouseWheel"><span class="type-signature"></span>onPlotMouseWheel<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -3880,7 +2345,7 @@ param {Object} domElem - The DOM element to contain the track
 
 
 <div class="description">
-    Plot all curves
+    Register event when mouse wheel on the plot area
 </div>
 
 
@@ -3924,7 +2389,93 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line458">line 458</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line393">line 393</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onShadingHeaderMouseDown"><span class="type-signature"></span>onShadingHeaderMouseDown<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Register event when mouse down the shading header area
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line422">line 422</a>
     </li></ul></dd>
     
 
@@ -4010,7 +2561,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line477">line 477</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line369">line 369</a>
     </li></ul></dd>
     
 
@@ -4044,93 +2595,7 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="plotAllShadings"><span class="type-signature"></span>plotAllShadings<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Plot all shadings
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line468">line 468</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="plotCurve"><span class="type-signature"></span>plotCurve<span class="signature">(curveIdx)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="plotCurve"><span class="type-signature"></span>plotCurve<span class="signature">(curve)</span><span class="type-signature"></span></h4>
     
 
     
@@ -4174,13 +2639,13 @@ param {Object} domElem - The DOM element to contain the track
 
         <tr>
             
-                <td class="name"><code>curveIdx</code></td>
+                <td class="name"><code>curve</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
             
@@ -4190,7 +2655,7 @@ param {Object} domElem - The DOM element to contain the track
 
             
 
-            <td class="description last">Index of the curve to plot</td>
+            <td class="description last">The curve to plot</td>
         </tr>
 
     
@@ -4231,7 +2696,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line443">line 443</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line338">line 338</a>
     </li></ul></dd>
     
 
@@ -4265,7 +2730,142 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="plotShading"><span class="type-signature"></span>plotShading<span class="signature">(shadingIdx)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="plotDrawing"><span class="type-signature"></span>plotDrawing<span class="signature">(drawing)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Plot one draw (curve or shading)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>drawing</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The drawing to plot</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line328">line 328</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="plotShading"><span class="type-signature"></span>plotShading<span class="signature">(shading)</span><span class="type-signature"></span></h4>
     
 
     
@@ -4309,13 +2909,13 @@ param {Object} domElem - The DOM element to contain the track
 
         <tr>
             
-                <td class="name"><code>shadingIdx</code></td>
+                <td class="name"><code>shading</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
             
@@ -4325,7 +2925,7 @@ param {Object} domElem - The DOM element to contain the track
 
             
 
-            <td class="description last">Index of the shading to plot</td>
+            <td class="description last">The shading to plot</td>
         </tr>
 
     
@@ -4366,93 +2966,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line453">line 453</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="removeAllCurves"><span class="type-signature"></span>removeAllCurves<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Remove all curves from track
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line415">line 415</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line354">line 354</a>
     </li></ul></dd>
     
 
@@ -4494,7 +3008,7 @@ param {Object} domElem - The DOM element to contain the track
 
 
 <div class="description">
-    Remove all drawings (curves and shadings) from track
+    Remove all drawings from (curves and shadings) from track
 </div>
 
 
@@ -4538,93 +3052,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line437">line 437</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="removeAllShadings"><span class="type-signature"></span>removeAllShadings<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Remove all shadings from track
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line431">line 431</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line316">line 316</a>
     </li></ul></dd>
     
 
@@ -4710,7 +3138,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line393">line 393</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line295">line 295</a>
     </li></ul></dd>
     
 
@@ -4796,7 +3224,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line409">line 409</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line309">line 309</a>
     </li></ul></dd>
     
 
@@ -4882,7 +3310,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line401">line 401</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line302">line 302</a>
     </li></ul></dd>
     
 
@@ -4916,7 +3344,7 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="removeCurve"><span class="type-signature"></span>removeCurve<span class="signature">(curveIdx)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="removeCurve"><span class="type-signature"></span>removeCurve<span class="signature">(curve)</span><span class="type-signature"></span></h4>
     
 
     
@@ -4960,13 +3388,13 @@ param {Object} domElem - The DOM element to contain the track
 
         <tr>
             
-                <td class="name"><code>curveIdx</code></td>
+                <td class="name"><code>curve</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
             
@@ -4976,7 +3404,7 @@ param {Object} domElem - The DOM element to contain the track
 
             
 
-            <td class="description last">Index of the curve to remove</td>
+            <td class="description last">The curve object to remove</td>
         </tr>
 
     
@@ -5017,7 +3445,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line369">line 369</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line278">line 278</a>
     </li></ul></dd>
     
 
@@ -5051,7 +3479,142 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="removeShading"><span class="type-signature"></span>removeShading<span class="signature">(shadingIdx)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="removeDrawing"><span class="type-signature"></span>removeDrawing<span class="signature">(drawing)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Remove a drawing from track
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>drawing</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The curve or shading object to remove</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line263">line 263</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="removeShading"><span class="type-signature"></span>removeShading<span class="signature">(shading)</span><span class="type-signature"></span></h4>
     
 
     
@@ -5095,13 +3658,13 @@ param {Object} domElem - The DOM element to contain the track
 
         <tr>
             
-                <td class="name"><code>shadingIdx</code></td>
+                <td class="name"><code>shading</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
             
@@ -5111,7 +3674,7 @@ param {Object} domElem - The DOM element to contain the track
 
             
 
-            <td class="description last">Index of the shading to remove</td>
+            <td class="description last">The shading object to remove</td>
         </tr>
 
     
@@ -5152,7 +3715,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line390">line 390</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line287">line 287</a>
     </li></ul></dd>
     
 
@@ -5186,7 +3749,7 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="setCurrentCurveColor"><span class="type-signature"></span>setCurrentCurveColor<span class="signature">(color)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setBackgroundColor"><span class="type-signature"></span>setBackgroundColor<span class="signature">(color)</span><span class="type-signature"></span></h4>
     
 
     
@@ -5194,7 +3757,7 @@ param {Object} domElem - The DOM element to contain the track
 
 
 <div class="description">
-    Set color for current curve
+    Set background color for the track
 </div>
 
 
@@ -5287,7 +3850,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line213">line 213</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -5321,7 +3884,7 @@ param {Object} domElem - The DOM element to contain the track
     
 
     
-    <h4 class="name" id="setCurrentCurveIdx"><span class="type-signature"></span>setCurrentCurveIdx<span class="signature">(idx)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setCurrentDrawing"><span class="type-signature"></span>setCurrentDrawing<span class="signature">(drawing)</span><span class="type-signature"></span></h4>
     
 
     
@@ -5329,7 +3892,7 @@ param {Object} domElem - The DOM element to contain the track
 
 
 <div class="description">
-    Set current curve and highlight the curve drawing and header
+    Set current drawing and re-draw to highlight
 </div>
 
 
@@ -5365,13 +3928,13 @@ param {Object} domElem - The DOM element to contain the track
 
         <tr>
             
-                <td class="name"><code>idx</code></td>
+                <td class="name"><code>drawing</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Object</span>
 
 
             
@@ -5381,7 +3944,7 @@ param {Object} domElem - The DOM element to contain the track
 
             
 
-            <td class="description last">Index of the curve</td>
+            <td class="description last">The drawing to be current</td>
         </tr>
 
     
@@ -5422,7 +3985,7 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line196">line 196</a>
+        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line116">line 116</a>
     </li></ul></dd>
     
 
@@ -5430,1166 +3993,6 @@ param {Object} domElem - The DOM element to contain the track
 
     
 
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setCurrentShadingIdx"><span class="type-signature"></span>setCurrentShadingIdx<span class="signature">(idx)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Set current shading and highlight the shading and header
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>idx</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Index of the shading</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line207">line 207</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setPlotWidth"><span class="type-signature"></span>setPlotWidth<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line166">line 166</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setXAxisPosition"><span class="type-signature"></span>setXAxisPosition<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line154">line 154</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setXFormatter"><span class="type-signature"></span>setXFormatter<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line169">line 169</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setXNTicks"><span class="type-signature"></span>setXNTicks<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line160">line 160</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setXPadding"><span class="type-signature"></span>setXPadding<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line178">line 178</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setYAxisPosition"><span class="type-signature"></span>setYAxisPosition<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line157">line 157</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setYFormatter"><span class="type-signature"></span>setYFormatter<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line172">line 172</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setYNTicks"><span class="type-signature"></span>setYNTicks<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line163">line 163</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setYPadding"><span class="type-signature"></span>setYPadding<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line181">line 181</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setYRange"><span class="type-signature"></span>setYRange<span class="signature">(vY)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Set y range of viewport
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>vY</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Start and end y coordinates within which data is shown</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line187">line 187</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setYStep"><span class="type-signature"></span>setYStep<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-log-track.js.html">visualize-log-track.js</a>, <a href="visualize-log-track.js.html#line175">line 175</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Pending</li>
-        </ul>
-    </dd>
     
 </dl>
 
@@ -6626,13 +4029,13 @@ param {Object} domElem - The DOM element to contain the track
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-visualize.html">visualize</a></li></ul><h3>Classes</h3><ul><li><a href="Curve.html">Curve</a></li><li><a href="DepthTrack.html">DepthTrack</a></li><li><a href="LogTrack.html">LogTrack</a></li><li><a href="Shading.html">Shading</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-visualize.html">visualize</a></li></ul><h3>Classes</h3><ul><li><a href="Curve.html">Curve</a></li><li><a href="DepthTrack.html">DepthTrack</a></li><li><a href="Drawing.html">Drawing</a></li><li><a href="LogTrack.html">LogTrack</a></li><li><a href="Shading.html">Shading</a></li><li><a href="Track.html">Track</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Tue Jul 18 2017 18:12:00 GMT+0700 (ICT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Tue Jul 25 2017 14:30:25 GMT+0700 (ICT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -9,8 +9,7 @@ let TRACK_CFG = {
     yFormatter: '.2f',
     xPadding: 1,
     yPadding: 5,
-    yStep: 0.25,
-    plotWidth: 120
+    width: 120
 };
 
 let DTRACK_CFG = {
@@ -21,8 +20,7 @@ let DTRACK_CFG = {
     yFormatter: '.2f',
     xPadding: 1,
     yPadding: 5,
-    yStep: 0.25,
-    plotWidth: 60
+    width: 60
 };
 
 function getCurveFromName(name) {
@@ -35,21 +33,23 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService, $timeout, ModalService) {
+function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
-    let _tracks = new Array();
+    let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _depthRange = [0, 100000];
     let _selectedColor = '#ffffe0';
 
-    this.getCurrentTrack = function () {
-        return _currentTrack
-    }
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-    this.getTracks = function() {
+    this.getCurrentTrack = function () {
+        return _currentTrack;
+    };
+
+    this.getTracks = function () {
         return _tracks;
-    }
+    };
 
     this.addLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
@@ -61,30 +61,30 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         self.setDepthRangeForTrack(track, depthRange);
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        track.onPlotMouseOver(function() {
-            if( !dragMan.dragging ) return;
+        track.onPlotMouseOver(function () {
+            if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = self;
             dragMan.track = track;
         });
-        track.onPlotMouseLeave(function() {
-            if( !dragMan.dragging ) return;
+        track.onPlotMouseLeave(function () {
+            if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
         });
-        track.onPlotMouseWheel(function() {
+        track.onPlotMouseWheel(function () {
             _onPlotMouseWheelCallback(track);
         });
-        track.onPlotMouseDown(function() {
+        track.onPlotMouseDown(function () {
             _onPlotMouseDownCallback(track);
         });
-        track.onHeaderMouseDown(function() {
+        track.onHeaderMouseDown(function () {
             _onHeaderMouseDownCallback(track);
         });
 
         return track;
     };
 
-    this.addDepthTrack = function () {
+    this.addDepthTrack = function (callback) {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
@@ -96,50 +96,108 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
-        // return track;
+
+        // send http request
+        // wiApiService.post()
+
     };
 
-    this.addCurveToTrack = function(track, data, config) {
+    this.addCurveToTrack = function (track, data, config) {
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
-
         track.onCurveHeaderMouseDown(curve, function() {
             _setCurrentTrack(track);
-            track.setCurrentCurve(curve);
             if (d3.event.button == 2) {
                 _curveOnRightClick();
             }
         });
     }
 
-    this.addLeftShadingToTrack = function (track, config) {
-        if (!track || !track.addLeftShading) return;
-        let shading = track.addLeftShading(track.getCurrentCurve(), config);
+    this.addLeftShadingToTrack = function (track, curve, config) {
+        if (!track || !track.addShading) return;
+        let shading =track.addShading(null, curve, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
-    this.addRightShadingToTrack = function (track, config) {
-        if (!track || !track.addRightShading) return;
-        let shading = track.addRightShading(track.getCurrentCurve(), config);
+    this.addRightShadingToTrack = function (track, curve, config) {
+        if (!track || !track.addShading) return;
+        let shading = track.addShading(curve, null, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
-    this.addCustomShadingToTrack = function (track, value, config) {
-        if (!track || !track.addCustomShading) return;
-        let shading = track.addCustomShading(track.getCurrentCurve(), value, config);
+    this.addCustomShadingToTrack = function (track, curve, value, config) {
+        if (!track || !track.addShading) return;
+        let shading = track.addShading(curve, null, value, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
+
+    this.removeCurrentCurve = function() {
+        if (!_currentTrack.getCurrentCurve) return;
+        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
+    }
+
+    this.removeCurrentShading = function () {
+        if (!_currentTrack.getCurrentShading) return;
+        self.removeShadingFromTrack(_currentTrack, _currentTrack.getCurrentShading());
+    }
+
+    this.removeCurveFromTrack = function (track, curve) {
+        if (!track || !track.removeCurve) return;
+        track.removeCurve(curve);
+    }
+
+    this.removeShadingFromTrack = function (track, shading) {
+        if (!track || !track.removeShading) return;
+        track.removeShading(shading);
+    }
+
+    this.removeCurrentTrack = function () {
+        return self.removeTrack(_currentTrack);
+    }
+
+    this.removeTrack = function (track) {
+        DialogUtils.confirmDialog(ModalService, "Delete Track", "Are you sure to delete track: " + track.name + "?", function (yes) {
+            if (yes) {
+                let trackIdx = _tracks.indexOf(track);
+                if (trackIdx < 0) return;
+
+                if (track == _currentTrack) {
+                    _currentTrack = null;
+                }
+                _previousTrack = null;
+                if (track.removeAllDrawings) {
+                    track.removeAllDrawings();
+                }
+
+                let graph = wiComponentService.getComponent('GRAPH');
+                graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
+
+                _tracks.splice(trackIdx, 1);
+            }
+        })
+    }
+
+    this.plot = function (track) {
+        if (track && track.doPlot) track.doPlot();
+    };
+
+    this.plotAll = function () {
+        _tracks.forEach(function (track) {
+            track.doPlot();
+        });
+    };
+
 
     this.setDepthRange = function(depthRange) {
         _depthRange = depthRange;
         _tracks.forEach(function(track) {
-            track.setViewportY(depthRange);
+            track.windowY = depthRange;
         });
         self.plotAll();
     };
@@ -149,7 +207,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
             self.setDepthRange(depthRange);
         }
         else {
-            track.setViewportY(depthRange);
+            track.windowY = depthRange;
             self.plot(track);
             _depthRange = depthRange;
         }
@@ -175,72 +233,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
 
     this.getMaxDepth = function () {
         let maxDepth = d3.max(_tracks, function (track) {
-            if (track.getYMax) return track.getYMax();
+            if (track.getExtentY) return track.getExtentY()[1];
             return -1;
         });
-
         _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
         return _maxDepth;
     };
-
-    this.setColor = function (track, color) {
-        if (track && track.setCurrentCurveColor) {
-            track.setCurrentCurveColor(color);
-        }
-    };
-
-    this.removeCurrentCurve = function() {
-        if (!_currentTrack.getCurrentCurve) return;
-        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
-    }
-
-    this.removeCurrentShading = function() {
-        if (!_currentTrack.getCurrentShading) return;
-        self.removeShadingFromTrack(_currentTrack, _currentTrack.getCurrentShading());
-    }
-
-    this.removeCurveFromTrack = function(track, curve) {
-        if (!track || !track.removeCurve) return;
-        track.removeCurve(curve);
-    }
-
-    this.removeShadingFromTrack = function(track, shading) {
-        if (!track || !track.removeShading) return;
-        track.removeShading(shading);
-    }
-
-    this.removeCurrentTrack = function () {
-        return self.removeTrack(_currentTrack);
-    }
-
-    this.removeTrack = function (track) {
-        let trackIdx = _tracks.indexOf(track);
-        if (trackIdx < 0) return;
-
-        if (track == _currentTrack) {
-            _currentTrack = null;
-        }
-        _previousTrack = null;
-        if (track.removeAllCurves) {
-            track.removeAllCurves();
-        }
-
-        let graph = wiComponentService.getComponent('GRAPH');
-        graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
-
-        _tracks.splice(trackIdx, 1);
-    }
-
-    this.plot = function (track) {
-        if (track && track.doPlot) track.doPlot();
-    };
-
-    this.plotAll = function () {
-        _tracks.forEach(function (track) {
-            track.doPlot();
-        });
-    };
-
 
     /* Private Begin */
     function _setCurrentTrack(track) {
@@ -253,8 +251,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;
         if (_previousTrack != _currentTrack) {
-            if (_previousTrack.setCurrentCurve)
-                _previousTrack.setCurrentCurve(null);
+            if (_previousTrack.setCurrentDrawing)
+                _previousTrack.setCurrentDrawing(null);
             _previousTrack.setBackgroundColor('transparent');
         }
 
@@ -262,17 +260,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
 
     function _onPlotMouseDownCallback(track) {
         _setCurrentTrack(track);
-        if (d3.event.curveMouseDown && d3.event.button == 2) {
-            _curveOnRightClick();
-            return;
-        }
-
-        if (d3.event.shadingMouseDown && d3.event.button == 2) {
-            _shadingOnRightClick();
+        if (d3.event.currentDrawing && d3.event.button == 2) {
+            if (d3.event.currentDrawing.isCurve()) {
+                _curveOnRightClick();
+            }
+            else if (d3.event.currentDrawing.isShading()) {
+                _shadingOnRightClick();
+            }
         }
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
+        track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function() {
             _setCurrentTrack(track);
             if (d3.event.button == 2) {
@@ -284,31 +283,35 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
     function _onPlotMouseWheelCallback(track) {
         let range = _depthRange[1] - _depthRange[0];
         let low, high, maxDepth = self.getMaxDepth();
-        let yStep = track.getYStep();
         if (d3.event.deltaY < 0) {
-            low = _depthRange[0] - range*0.2;
-            high = _depthRange[1] + range*0.2;
+            low = _depthRange[0] - range * 0.2;
+            high = _depthRange[1] + range * 0.2;
         }
         else {
-            low = _depthRange[0] + range*0.2;
-            high = _depthRange[1] - range*0.2;
+            low = _depthRange[0] + range * 0.2;
+            high = _depthRange[1] - range * 0.2;
         }
-        low = low < 0 ? 0 : Math.floor(low / yStep) * yStep;
-        high = high > maxDepth ? maxDepth : Math.ceil(high / yStep) * yStep;
+        low = low < 0 ? 0 : Math.floor(low);
+        high = high > maxDepth ? maxDepth : Math.ceil(high);
         self.setDepthRange([low, high]);
         self.adjustSlidingBarFromDepthRange([low, high]);
     }
 
     function _onHeaderMouseDownCallback(track) {
         _setCurrentTrack(track);
-        _currentTrack.setCurrentCurve(null);
+        _currentTrack.setCurrentDrawing(null);
     }
 
     function _shadingOnRightClick() {
-        let posX = d3.event.clientX, posY = d3.event.clientY;
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        $timeout(function() {
+        //let posX = d3.event.clientX, posY = d3.event.clientY;
+        self.setContextMenu([{
+            name: "RemoveShading",
+            label: "Remove Shading",
+            handler: function () {
+                self.removeCurrentShading();
+            }
+        }]);
+        /*$timeout(function() {
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveShading",
                 label: "Remove Shading",
@@ -316,14 +319,81 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                     self.removeCurrentShading();
                 }
             }]);
-        });
+        });*/
     }
 
     function _curveOnRightClick() {
-        let posX = d3.event.clientX, posY = d3.event.clientY;
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        $timeout(function() {
+        //let posX = d3.event.clientX, posY = d3.event.clientY;
+        //console.log('-------------');
+        self.setContextMenu([{
+            name: "CurveProperties",
+            label: "Curve Properties",
+            icon: "curve-properties-16x16",
+            handler: function () {
+                DialogUtils.curvePropertiesDialog(ModalService, function(props) {
+                    if (props) {
+                        console.log(props);
+                    }
+                })
+            }
+        }, {
+            name: "EditCurve",
+            label: "Edit Curve",
+            icon: "edit-curve-text-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "DepthShift",
+            label: "Depth Shift",
+            icon: "",
+            handler: function () {
+
+            }
+        }, {
+            name: "RemoveCurve",
+            label: "Remove Curve",
+            icon: "curve-hide-16x16",
+            handler: function () {
+                self.removeCurrentCurve();
+            }
+        }, {
+            name: "BaseLineShift",
+            label: "BaseLine Shift",
+            handler: function () {
+
+            }
+        }, {
+            name: "ReverseDisplaay",
+            label: "Reverse Displaay",
+            handler: function () {
+
+            }
+        }, {
+            name: "CrossPlot",
+            label: "Cross plot",
+            icon: "crossplot-blank-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "Histogram",
+            label: "Histogram",
+            icon: "histogram-new-16x16",
+            handler: function () {
+
+            }
+        }, {
+            name: "CreateShading",
+            label: "Create Shading",
+            icon: "shading-add-16x16",
+            handler: function () {
+
+            }
+        }
+        ]);
+        /*$timeout(function() {
+            console.log('++++++++++++', wiComponentService, wiComponentService.getComponent('ContextMenu'));
             wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
                 name: "RemoveCurve",
                 label: "Remove Curve",
@@ -331,126 +401,154 @@ function Controller($scope, wiComponentService, $timeout, ModalService) {
                     self.removeCurrentCurve();
                 }
             }]);
-        });
+        }, 1000);*/
     }
 
     /* Private End */
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
+
+        console.log('wiLogplotCtrl of wi-d3', self.wiLogplotCtrl);
+
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
     };
 
+    var commonCtxMenu = [
+        {
+            name: "TrackProperties",
+            label: "Track Properties",
+            icon: 'track-properties-16x16',
+            handler: function () {
+                let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                if (!_currentTrack) return;
+                if (_currentTrack.isLogTrack()) {
+                    DialogUtils.logTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('logTrackPropertiesData', props);
+                        }
+                    });
+                } else if (_currentTrack.isDepthTrack()) {
+                    DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('depthTrackPropertiesData', props);
+                        }
+                    });
+                } else { //TODO: zoneTrack condition
+                    DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
+                        if (props) {
+                            console.log('zoneTrackPropertiesData', props);
+                        }
+                    });
+                }
+            }
+        },
+        {
+            name: "SwitchToLogarithmic",
+            label: "Switch To Logarithmic",
+            icon: 'logarithmic-switch-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "AddDepthTrack",
+            label: "Add Depth Track",
+            icon: 'depth-axis-add-16x16',
+            handler: function () {
+                self.addDepthTrack();
+            }
+        },
+        {
+            name: "AddLogTrack",
+            label: "Add Log Track",
+            icon: 'logplot-blank-16x16',
+            handler: function () {
+                self.addLogTrack();
+            }
+        },
+        {
+            name: "AddZonationTrack",
+            label: "Add Zonation Track",
+            icon: 'zonation-track-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "AddMaker",
+            label: "Add Maker",
+            icon: 'marker-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Add Annotation",
+            label: "Add Annotation",
+            icon: 'annotation-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Add Image",
+            label: "Add Image",
+            icon: 'image-add-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "Create Shading",
+            label: "Create Shading",
+            icon: 'shading-add-16x16',
+            handler: function () {
+                console.log('Create Shading');
+            }
+        },
+        {
+            separator: '1'
+        },
+        {
+            name: "DuplicateTrack",
+            label: "Duplicate Track",
+            icon: 'track-duplicate-16x16',
+            handler: function () {
+                console.log('Switch To Logarithmic');
+            }
+        },
+        {
+            name: "DeleteTrack",
+            label: "Delete Track",
+            icon: 'track-delete-16x16',
+            handler: function () {
+                self.removeCurrentTrack();
+            }
+        },
+    ];
+
+    this.contextMenu = commonCtxMenu;
+
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
-            .open(event.clientX, event.clientY, [
-                {
-                    name: "TrackProperties",
-                    label: "Track Properties",
-                    icon: 'track-properties-16x16',
-                    handler: function () {
-                        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-                        DialogUtils.trackPropertiesDialog(ModalService, DialogUtils, function(data) {
-                            console.log(data);
-                        });
-                    }
-                },
-                {
-                    name: "SwitchToLogarithmic",
-                    label: "Switch To Logarithmic",
-                    icon: 'logarithmic-switch-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "AddDepthTrack",
-                    label: "Add Depth Track",
-                    icon: 'depth-axis-add-16x16',
-                    handler: function () {
-                        self.addDepthTrack();
-                    }
-                },
-                {
-                    name: "AddLogTrack",
-                    label: "Add Log Track",
-                    icon: 'logplot-blank-16x16',
-                    handler: function () {
-                        self.addLogTrack();
-                    }
-                },
-                {
-                    name: "AddZonationTrack",
-                    label: "Add Zonation Track",
-                    icon: 'zonation-track-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "AddMaker",
-                    label: "Add Maker",
-                    icon: 'marker-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Add Annotation",
-                    label: "Add Annotation",
-                    icon: 'annotation-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Add Image",
-                    label: "Add Image",
-                    icon: 'image-add-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "Create Shading",
-                    label: "Create Shading",
-                    icon: 'shading-add-16x16',
-                    handler: function () {
-                        console.log('Create Shading');
-                    }
-                },
-                {
-                    separator: '1'
-                },
-                {
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        console.log('Switch To Logarithmic');
-                    }
-                },
-                {
-                    name: "DeleteTrack",
-                    label: "Delete Track",
-                    icon: 'track-delete-16x16',
-                    handler: function () {
-                        self.removeCurrentTrack();
-                    }
-                },
-            ]);
+            .open(event.clientX, event.clientY, self.contextMenu, function () {
+                self.contextMenu = commonCtxMenu;
+            });
+    }
+    this.setContextMenu = function (ctxMenu) {
+        self.contextMenu = ctxMenu;
     }
 }
 
@@ -461,7 +559,8 @@ app.component(componentName, {
     controllerAs: componentName,
     transclude: true,
     bindings: {
-        name: '@'
+        name: '@',
+        wiLogplotCtrl: '<'
     }
 });
 
