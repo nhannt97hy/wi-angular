@@ -543,18 +543,35 @@ exports.familyEditDialog = function (ModalService, callback) {
     });
 }
 
-exports.blankLogplotDialog = function (ModalService, callback) {
-    function ModalController($scope, close) {
-        let error = null;
+exports.newBlankLogplotDialog = function (ModalService, callback) {
+    function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
         let self = this;
-        $scope.name = "blankPlotlog"
+        // self.name = "BlankLogPlot";
+        self.error = null;
+        self.disabled = false;
+
         this.onOkButtonClicked = function () {
-            self.name = $scope.name;
-            console.log(self.name);
+            self.disabled = true;
+            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+            let newLogplot = null;
+            utils.createNewBlankLogPlot(wiComponentService, wiApiService, self.name)
+                .then(function(logplot) {
+                    newLogplot = logplot;
+                    return utils.refreshProjectState(wiComponentService, wiApiService);
+                })
+                .then(function() {
+                    utils.openLogplotTab(wiComponentService, newLogplot);
+
+                    close(newLogplot);
+                })
+                .catch(function(err) {
+                    console.error('newBlankLogplotDialog err', err);
+
+                    self.disabled = false;
+                });
         }
-        this.close = function (ret) {
-            close(ret);
-        }
+
     }
 
     ModalService.showModal({
@@ -564,24 +581,25 @@ exports.blankLogplotDialog = function (ModalService, callback) {
     }).then(function (modal) {
         modal.element.modal();
         modal.element.draggable();
-        modal.close.then(function (ret) {
+        modal.close.then(function (newPlot) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            if (callback) callback(newPlot);
         });
     });
 }
+
 exports.tripleComboDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         let error = null;
         let self = this;
-        $scope.name = "TripleCombo"
+        $scope.name = "TripleCombo";
+
         this.onOkButtonClicked = function () {
             self.name = $scope.name;
             console.log(self.name);
-        }
-        this.close = function (ret) {
-            close(ret);
+
         }
     }
 
@@ -595,6 +613,7 @@ exports.tripleComboDialog = function (ModalService, callback) {
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+
             callback(ret);
         });
     });
@@ -790,7 +809,7 @@ exports.lineStyleDialog = function (ModalService, options, callback) {
         // if(options.defaultWidth){
         //     this.width = options.defaultWidth;
         // }
-        
+
         this.styles =[
             {
                 name: 'solid',
@@ -1153,7 +1172,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback) {
             self.error = '';
             self.disabled = true;
 
-            
+
         };
 
         this.onCancelButtonClicked = function () {
@@ -1184,7 +1203,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
-        
+
         const props = {
             general: {
                 isShowTitle: true,
@@ -1202,7 +1221,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
                 trackColor: '#ffffff'
             },
             curve: {
-                
+
             },
             shading: {
             }
@@ -1391,13 +1410,13 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             });
         };
         this.setClickedRowCurve = function(index){
-            self.selectedRow = index; 
+            self.selectedRow = index;
             self.selectedCurve = self.fillDataset[index];
         };
-        this.removeRow = function(){      
+        this.removeRow = function(){
             console.log("self.selectedCurve.content", self.selectedCurve.content);
 
-            let idx = -1;     
+            let idx = -1;
             let newCurveAttr = eval( self.fillDataset );
             for( let i = 0; i < newCurveAttr.length; i++ ) {
                 if( newCurveAttr[i] === self.selectedCurve ) {
@@ -1405,7 +1424,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
                     break;
                 }
             }
-            self.fillDataset.splice( idx, 1 );        
+            self.fillDataset.splice( idx, 1 );
         };
         this.arrowUpCurve = function () {
             let prevIdx = -1;
@@ -1420,7 +1439,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             };
             self.setClickedRowCurve(idx-1);
         };
-        this.arrowDownCurve = function () {      
+        this.arrowDownCurve = function () {
             let prevIdx = self.fillDataset.length;
             let idx = self.fillDataset.indexOf(self.selectedCurve);
             console.log(idx);
@@ -1429,14 +1448,14 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             } else if (idx < self.fillDataset.length-1) {
                 let moveCurve = self.fillDataset.splice(idx, 1)
                 console.log(moveCurve[0])
-                self.fillDataset.splice(idx+1, 0, moveCurve[0]);                
-            }  
+                self.fillDataset.splice(idx+1, 0, moveCurve[0]);
+            }
             self.setClickedRowCurve(idx+1);
         };
 
         //tab Shading
         this.setClickedRowShading = function(index){
-            self.selectedRowShading = index; 
+            self.selectedRowShading = index;
             self.selectedShading = self.shadingAttr[index];
         };
         this.arrowUpShading = function () {
@@ -1453,7 +1472,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             self.setClickedRowShading(idx-1);
 
         };
-        this.arrowDownShading = function () {      
+        this.arrowDownShading = function () {
             let prevIdx = self.shadingAttr.length;
             let idx = self.shadingAttr.indexOf(self.selectedShading);
             console.log(idx);
@@ -1462,8 +1481,8 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             } else if (idx < self.shadingAttr.length-1) {
                 let moveShading = self.shadingAttr.splice(idx, 1)
                 console.log(moveShading[0])
-                self.shadingAttr.splice(idx+1, 0, moveShading[0]);                
-            }  
+                self.shadingAttr.splice(idx+1, 0, moveShading[0]);
+            }
             self.setClickedRowShading(idx+1);
         };
         this.addRow = function () {

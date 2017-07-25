@@ -165,31 +165,21 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     });
 };
 
-exports.createNewBlankLogPlot = function (wiComponentService, wiApiService) {
+exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName) {
     let well = wiComponentService.getComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD);
     console.log('well payload', well);
 
     let dataRequest = {
         idWell: well.idWell,
-        name: 'mock test',
+        name: logplotName,
         option: 'blank-plot'
     };
-    wiApiService.post(wiApiService.CREATE_PLOT, dataRequest)
-        .then(function (newPlot) {
-            console.log('newPlot', newPlot);
-
-            let mockPlot = {
-                idPlot: Date.now(),
-                name: 'mock plot',
-                option: 'blank-plot'
-            };
-
-            wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, mockPlot);
-        })
-        .catch(function (err) {
-            console.error('err create new blank logplot', err);
-        });
+    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
+
+exports.openLogplotTab = function (wiComponentService, logplot) {
+    wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logplot);
+}
 
 exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
@@ -267,5 +257,30 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
        console.log("OKOK");
+    });
+};
+
+exports.refreshProjectState = function(wiComponentService, wiApiService) {
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+    if (!project) return;
+
+    return new Promise(function(resolve, reject) {
+        let payload = {
+            idProject: project.idProject
+        };
+
+        wiApiService.post(wiApiService.GET_PROJECT, payload)
+            .then(function(projectRefresh) {
+                wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
+                wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
+
+                resolve();
+            })
+            .catch(function(err) {
+                console.error('refreshProjectState', err);
+
+                reject();
+            });
     });
 };

@@ -10,16 +10,18 @@ app.factory(wiServiceName, function (WiTreeItem, WiLogplotModel) {
 
         try {
             self.type = 'logplots';
-            self.name = 'logplots';
+            self.name = well.idWell + 'logplots';
             self.data.icon = 'logplot-blank-16x16';
             self.data.label = 'Logplot';
 
             angular.copy(well, self.data.payload);
 
-            for (let plot of well.plots) {
-                let plotItem = new WiLogplotModel(plot);
+            if (Array.isArray(well.plots)) {
+                for (let plot of well.plots) {
+                    let plotItem = new WiLogplotModel(plot);
 
-                self.children.push(plotItem);
+                    self.children.push(plotItem);
+                }
             }
         } catch (err) {
             console.error('Parse logplots model has error', err);

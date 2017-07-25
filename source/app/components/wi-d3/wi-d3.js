@@ -98,7 +98,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
 
         // send http request
-        wiApiService.post()
+        // wiApiService.post()
 
     };
 
