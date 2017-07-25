@@ -49,7 +49,7 @@
 
 
 <div class="description">
-    Represents a DepthTrack
+    Represents a depth track
 </div>
 
 
@@ -294,39 +294,6 @@
 
         <tr>
             
-                <td class="name"><code>plotWidth</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Width in pixel of the bounding rectangle. Default: 200</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>xFormatter</code></td>
             
 
@@ -387,39 +354,6 @@
             
 
             <td class="description last">d3 formatter for numbers in y axis. Default: 'g'</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>yStep</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Step to scale y ordinate. Default: 1.0</td>
         </tr>
 
     
@@ -489,6 +423,39 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Width in pixel of the bounding rectangle. Default: 200</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -533,7 +500,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line31">line 31</a>
+        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line23">line 23</a>
     </li></ul></dd>
     
 
@@ -639,7 +606,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line109">line 109</a>
+        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line80">line 80</a>
     </li></ul></dd>
     
 
@@ -726,7 +693,277 @@ param {Object} domElem - The DOM element to contain the track
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line61">line 61</a>
+        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line48">line 48</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onMouseDown"><span class="type-signature"></span>onMouseDown<span class="signature">(mouseDownCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Register event when mouse down the depth track
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>mouseDownCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line102">line 102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setBackgroundColor"><span class="type-signature"></span>setBackgroundColor<span class="signature">(color)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set background color for the track
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">CSS color string</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="visualize-depth-track.js.html">visualize-depth-track.js</a>, <a href="visualize-depth-track.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -770,13 +1007,13 @@ param {Object} domElem - The DOM element to contain the track
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-visualize.html">visualize</a></li></ul><h3>Classes</h3><ul><li><a href="Curve.html">Curve</a></li><li><a href="DepthTrack.html">DepthTrack</a></li><li><a href="LogTrack.html">LogTrack</a></li><li><a href="Shading.html">Shading</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-visualize.html">visualize</a></li></ul><h3>Classes</h3><ul><li><a href="Curve.html">Curve</a></li><li><a href="DepthTrack.html">DepthTrack</a></li><li><a href="Drawing.html">Drawing</a></li><li><a href="LogTrack.html">LogTrack</a></li><li><a href="Shading.html">Shading</a></li><li><a href="Track.html">Track</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Tue Jul 18 2017 18:12:00 GMT+0700 (ICT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Tue Jul 25 2017 14:30:25 GMT+0700 (ICT)
 </footer>
 
 <script> prettyPrint(); </script>

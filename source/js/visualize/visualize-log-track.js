@@ -43,7 +43,6 @@ function LogTrack(config) {
     this.yFormatter = d3.format(config.yFormatter || 'g');
 
     this.width = config.width || 200;
-    this.usedColors = [];
     this.freshness = 0;
     this.curvesRemoved = 0;
 
@@ -198,92 +197,23 @@ LogTrack.prototype.doPlot = function() {
  * @return {Object} The created curve
  */
 LogTrack.prototype.addCurve = function(data, config) {
-    let name = config.name || ('Curve ' + (this.getCurves().length + this.curvesRemoved));
-    let unit = config.unit || 'm3';
-    let color = config.color || this.genColor();
-    let curve = new Curve({
-        color: color,
-        name: name,
-        unit: unit,
-        minX: config.minX,
-        maxX: config.maxX
-    });
+    config.name = config.name || ('Curve ' + (this.getCurves().length + this.curvesRemoved));
+    if (!config.line && !config.symbol) {
+        config.line = {
+            color: this.genColor(),
+            width: 1,
+            dash: null
+        };
+    }
+    let curve = new Curve(config);
 
     curve.init(this.plotContainer, data);
-    let minX = curve.minX;
-    let maxX = curve.maxX;
-    curve.header = this.addCurveHeader(curve, name, unit, minX, maxX);
+    curve.header = this.addCurveHeader(curve, name, '', '', '');
     this.drawings.push(curve);
 
     return curve;
 }
 
-/**
- * Add left shading to track
- * @param {Object} curve - The curve to draw shading
- * @param {Object} config - Configurations of new shading
- * @param {String} [config.name] - Name of new shading. Default: auto generate
- * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
- * @returns {Object} The created shading
- */
-LogTrack.prototype.addLeftShading = function(curve, config) {
-    if (!curve) return;
-    return this.addShading(null, curve, null, config);
-}
-
-/**
- * Add right shading to track
- * @param {Object} curve - The curve to draw shading
- * @param {Object} config - Configurations of new shading
- * @param {String} [config.name] - Name of new shading. Default: auto generate
- * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
- * @returns {Object} The created shading
- */
-LogTrack.prototype.addRightShading = function(curve, config) {
-    if (!curve) return;
-    return this.addShading(curve, null, null, config);
-}
-
-/**
- * Add pair shading to track
- * @param {Object} firstCurve - The first curve to draw shading
- * @param {Object} secondCurve - The second curve to draw shading
- * @param {Object} config - Configurations of new shading
- * @param {String} [config.name] - Name of new shading. Default: auto generate
- * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
- * @returns {Object} The created shading
- */
-LogTrack.prototype.addPairShading = function(firstCurve, secondCurve, config) {
-    if (!firstCurve || !secondCurve) return;
-    return this.addShading(firstCurve, secondCurve, null, config);
-}
-
-
-/**
- * Add custom shading to track
- * @param {Object} curve - The curve to draw shading
- * @param {Number} refX - x coordinate of reference line
- * @param {Object} config - Configurations of new shading
- * @param {String} [config.name] - Name of new shading. Default: auto generate
- * @param {String} [config.fillStyle] - Canvas fillStyle of new shading. Default: auto generate
- * @returns {Object} The created shading
- */
-LogTrack.prototype.addCustomShading = function(curve, refX, config) {
-    if (!curve) return;
-    let self = this;
-    let shading = this.addShading(curve, null, refX, config);
-    shading.onRefLineDrag(function() {
-        let rWidth = shading.refLineWidth;
-        let leftMost = rWidth / 2;
-        let rightMost = self.clientRect.width - rWidth / 2;
-        refX = d3.event.x;
-        refX = refX > rightMost ? rightMost : refX;
-        refX = refX < leftMost ? leftMost : refX;
-        shading.refX = refX;
-        self.plotShading(shading);
-    });
-    return shading;
-}
 
 /**
  * Add shading to track
@@ -296,6 +226,7 @@ LogTrack.prototype.addCustomShading = function(curve, refX, config) {
  * @returns {Object} The created shading
  */
 LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
+    if (!leftCurve && !rightCurve) return;
     let fillStyle = config.fillStyle || this.genColor();
 
     let leftName = leftCurve ? leftCurve.name : 'left';
@@ -308,9 +239,19 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
         refX: refX
     });
 
+    let self = this;
     shading.init(this.plotContainer, leftCurve, rightCurve);
     shading.header = this.addShadingHeader(shading, name, fillStyle);
-
+    shading.onRefLineDrag(function() {
+        let rWidth = shading.refLineWidth;
+        let leftMost = rWidth / 2;
+        let rightMost = self.clientRect.width - rWidth / 2;
+        let refX = d3.event.x;
+        refX = refX > rightMost ? rightMost : refX;
+        refX = refX < leftMost ? leftMost : refX;
+        shading.refX = refX;
+        self.plotShading(shading);
+    });
     this.drawings.push(shading);
     return shading;
 }
@@ -321,14 +262,6 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
  */
 LogTrack.prototype.removeDrawing = function(drawing) {
     if (!drawing) return;
-
-    let usedColors = this.usedColors;
-
-    if (drawing.color)
-        usedColors.splice(usedColors.indexOf(drawing.color), 1);
-    else if (drawing.fillStyle && d3.color(drawing.fillStyle))
-        usedColors.splice(usedColors.indexOf(drawing.fillStyle), 1);
-
     drawing.destroy();
 
     let idx = this.drawings.indexOf(drawing);
@@ -381,7 +314,6 @@ LogTrack.prototype.removeCurrentDrawing = function() {
  * Remove all drawings from (curves and shadings) from track
  */
 LogTrack.prototype.removeAllDrawings = function() {
-    this.usedColors = [];
     this.currentDrawing = null;
     this.drawings.forEach(function(d) {
         d.destroy();
@@ -406,14 +338,11 @@ LogTrack.prototype.plotDrawing = function(drawing) {
 LogTrack.prototype.plotCurve = function(curve) {
     if (!curve) return;
     let self = this;
-    let lineWidth = curve == this.currentDrawing ? 2 : 1;
     curve.doPlot(
         self.windowY,
         self.getAxisRange(self.yAxisPosition),
         self.getAxisRange(self.xAxisPosition),
-        {
-            lineWidth: lineWidth
-        }
+        curve == self.currentDrawing
     );
     if (curve == this.currentDrawing) curve.raise();
 }
@@ -429,7 +358,7 @@ LogTrack.prototype.plotShading = function(shading) {
         self.windowY,
         self.getAxisRange(self.yAxisPosition),
         self.getAxisRange(self.xAxisPosition),
-        {}
+        shading == self.currentDrawing
     );
     if (shading == this.currentDrawing) shading.raise();
 }
@@ -495,7 +424,7 @@ LogTrack.prototype.onShadingHeaderMouseDown = function(shading, cb) {
     let self = this;
     shading.header
         .on('mousedown', function() {
-            self.onHeaderMouseDownCallback(shading);
+            self.onDrawingHeaderMouseDownCallback(shading);
             cb();
         });
 }
@@ -508,7 +437,7 @@ LogTrack.prototype.onCurveHeaderMouseDown = function(curve, cb) {
     let self = this;
     curve.header
         .on('mousedown', function() {
-            self.onHeaderMouseDownCallback(curve);
+            self.onDrawingHeaderMouseDownCallback(curve);
             cb();
         });
 }
@@ -555,21 +484,22 @@ LogTrack.prototype.genColor = function() {
     }
 
     const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+    let usedColors = [];
+    this.drawings.forEach(function(d) {
+        usedColors = usedColors.concat(d.getAllColors());
+    })
     let color;
     for (let i = 0; i <= this.drawings.length; i++)  {
         if (i >= DEFAULT_COLORS.length) {
             do {
                 color = d3.rgb(rand(255), rand(255), rand(255)).toString();
             }
-            while (this.usedColors.indexOf(color) >= 0);
+            while (usedColors.indexOf(color) >= 0);
         }
         else {
             color = d3.color(DEFAULT_COLORS[i]).toString();
         }
-        if (this.usedColors.indexOf(color) < 0) {
-            this.usedColors.push(color);
-            break;
-        }
+        if (usedColors.indexOf(color) < 0) break;
     }
     return color;
 }
@@ -580,11 +510,7 @@ LogTrack.prototype.addCurveHeader = function(curve, name, unit, minVal, maxVal) 
     let curveHeader = this.headerContainer.append('div')
         .attr('class', 'curve-header')
         .on('mousedown', function() {
-            self.onHeaderMouseDownCallback(curve);
-        })
-        .on('contextmenu', function() {
-            d3.event.stopPropagation();
-            d3.event.preventDefault();
+            self.onDrawingHeaderMouseDownCallback(curve);
         });
 
     curveHeader.append('label')
@@ -617,11 +543,7 @@ LogTrack.prototype.addShadingHeader = function(shading, name, fillStyle) {
         .style('position', 'relative')
         .style('padding', '2px 0 2px 0')
         .on('mousedown', function() {
-            self.onHeaderMouseDownCallback(shading);
-        })
-        .on('contextmenu', function() {
-            d3.event.stopPropagation();
-            d3.event.preventDefault();
+            self.onDrawingHeaderMouseDownCallback(shading);
         });
 
     header.append('span')
@@ -639,6 +561,8 @@ LogTrack.prototype.addShadingHeader = function(shading, name, fillStyle) {
         .attr('width', rect.width -2)
         .attr('height', rect.height -2)
         .style('position', 'absolute')
+        .style('left', 0)
+        .style('top', 0)
         .style('cursor', 'default');
 
     let headerCtx = headerCanvas.node().getContext('2d');
@@ -665,7 +589,7 @@ LogTrack.prototype.highlightHeader = function() {
 }
 
 
-LogTrack.prototype.onHeaderMouseDownCallback = function(drawing) {
+LogTrack.prototype.onDrawingHeaderMouseDownCallback = function(drawing) {
     this.setCurrentDrawing(drawing);
 }
 

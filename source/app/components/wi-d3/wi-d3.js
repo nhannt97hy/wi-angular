@@ -108,83 +108,36 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
-        track.onHeaderMouseDown(curve, function () {
+        track.onCurveHeaderMouseDown(curve, function() {
             _setCurrentTrack(track);
-            track.setCurrentDrawing(curve);
             if (d3.event.button == 2) {
                 _curveOnRightClick();
             }
         });
     }
 
-    this.addLeftShadingToTrack = function (track, config) {
-        if (!track || !track.addLeftShading) return;
-        let shading = track.addLeftShading(track.getCurrentCurve(), config);
+    this.addLeftShadingToTrack = function (track, curve, config) {
+        if (!track || !track.addShading) return;
+        let shading =track.addShading(null, curve, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
-    this.addRightShadingToTrack = function (track, config) {
-        if (!track || !track.addRightShading) return;
-        let shading = track.addRightShading(track.getCurrentCurve(), config);
+    this.addRightShadingToTrack = function (track, curve, config) {
+        if (!track || !track.addShading) return;
+        let shading = track.addShading(curve, null, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
-    this.addCustomShadingToTrack = function (track, value, config) {
-        if (!track || !track.addCustomShading) return;
-        let shading = track.addCustomShading(track.getCurrentCurve(), value, config);
+    this.addCustomShadingToTrack = function (track, curve, value, config) {
+        if (!track || !track.addShading) return;
+        let shading = track.addShading(curve, null, value, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
 
-    this.setDepthRange = function (depthRange) {
-        _depthRange = depthRange;
-        _tracks.forEach(function (track) {
-            track.windowY = depthRange;
-        });
-        self.plotAll();
-    };
-
-    this.setDepthRangeForTrack = function (track, depthRange) {
-        if (_depthRange[0] != depthRange[0] || _depthRange[1] != depthRange[1]) {
-            self.setDepthRange(depthRange);
-        }
-        else {
-            track.windowY = depthRange;
-            self.plot(track);
-            _depthRange = depthRange;
-        }
-    }
-
-    this.getDepthRangeFromSlidingBar = function () {
-        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
-        let maxDepth = self.getMaxDepth();
-
-        let low = slidingBar.slidingBarState.top * maxDepth / 100;
-        let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-        return [low, high];
-    }
-
-    this.adjustSlidingBarFromDepthRange = function (vY) {
-        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
-        let maxDepth = self.getMaxDepth();
-
-        let top = Math.round(vY[0] * 100 / maxDepth);
-        let range = Math.round(vY[1] * 100 / maxDepth) - top;
-        slidingBar.updateSlidingHandlerByPercent(top, range || 1);
-    }
-
-    this.getMaxDepth = function () {
-        let maxDepth = d3.max(_tracks, function (track) {
-            if (track.getExtentY) return track.getExtentY()[1];
-            return -1;
-        });
-        _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
-        return _maxDepth;
-    };
-
-    this.removeCurrentCurve = function () {
+    this.removeCurrentCurve = function() {
         if (!_currentTrack.getCurrentCurve) return;
         self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
     }
@@ -213,7 +166,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (yes) {
                 let trackIdx = _tracks.indexOf(track);
                 if (trackIdx < 0) return;
-        
+
                 if (track == _currentTrack) {
                     _currentTrack = null;
                 }
@@ -221,10 +174,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (track.removeAllDrawings) {
                     track.removeAllDrawings();
                 }
-        
+
                 let graph = wiComponentService.getComponent('GRAPH');
                 graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
-        
+
                 _tracks.splice(trackIdx, 1);
             }
         })
@@ -240,6 +193,52 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     };
 
+
+    this.setDepthRange = function(depthRange) {
+        _depthRange = depthRange;
+        _tracks.forEach(function(track) {
+            track.windowY = depthRange;
+        });
+        self.plotAll();
+    };
+
+    this.setDepthRangeForTrack = function(track, depthRange) {
+        if (_depthRange[0] != depthRange[0] || _depthRange[1] != depthRange[1]) {
+            self.setDepthRange(depthRange);
+        }
+        else {
+            track.windowY = depthRange;
+            self.plot(track);
+            _depthRange = depthRange;
+        }
+    }
+
+    this.getDepthRangeFromSlidingBar = function() {
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = self.getMaxDepth();
+
+        let low = slidingBar.slidingBarState.top * maxDepth / 100;
+        let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
+        return [low, high];
+    }
+
+    this.adjustSlidingBarFromDepthRange = function(vY) {
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = self.getMaxDepth();
+
+        let top = Math.round(vY[0] * 100 / maxDepth);
+        let range = Math.round(vY[1] * 100 / maxDepth) - top;
+        slidingBar.updateSlidingHandlerByPercent(top, range || 1);
+    }
+
+    this.getMaxDepth = function () {
+        let maxDepth = d3.max(_tracks, function (track) {
+            if (track.getExtentY) return track.getExtentY()[1];
+            return -1;
+        });
+        _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
+        return _maxDepth;
+    };
 
     /* Private Begin */
     function _setCurrentTrack(track) {
@@ -272,7 +271,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
-        track.onHeaderMouseDown(shading, function () {
+        track.setCurrentDrawing(shading);
+        track.onShadingHeaderMouseDown(shading, function() {
             _setCurrentTrack(track);
             if (d3.event.button == 2) {
                 _shadingOnRightClick();

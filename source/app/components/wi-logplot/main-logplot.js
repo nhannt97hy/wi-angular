@@ -12,6 +12,7 @@ let wiElementReadyDirective = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
+let wiApiService = require('./wi-api-service')
 
 let utils = require('./utils');
 
@@ -22,10 +23,20 @@ let dragMan = {
 };
 
 
-let app = angular.module('helloapp',
-    [wiLogplot.name, wiButton.name, wiToolbar.name, wiSlidingbar.name, wiContextMenu.name, wiD3.name, wiComponentService.name,
-        wiElementReadyDirective.name,
-        'angularModalService', wiDropdown.name]);
+let app = angular.module('helloapp', [
+    wiLogplot.name,
+    wiButton.name,
+    wiToolbar.name,
+    wiSlidingbar.name,
+    wiContextMenu.name,
+    wiD3.name,
+    wiComponentService.name,
+    wiElementReadyDirective.name,
+    'angularModalService',
+    'ngFileUpload',
+    wiDropdown.name,
+    wiApiService.name
+]);
 
 app.controller('WiDummy', function ($scope, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);
@@ -47,12 +58,12 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     $scope.addData1ButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCurveToTrack(track, genSamples([0,1], [0,1000]), 'Data1', 'm3');
+        wiD3Ctrl.addCurveToTrack(track, genSamples([0,1], [0,1000]), {});
     }
 
     $scope.addData2ButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1100]), 'Data2', 'kg');
+        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1100]), {});
     }
 
     $scope.changeColor = function() {
@@ -69,17 +80,17 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     $scope.addLeftShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addLeftShadingToTrack(track, {});
+        wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {});
     }
 
     $scope.addRightShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addRightShadingToTrack(track, {});
+        wiD3Ctrl.addRightShadingToTrack(track, track.getCurrentCurve(), {});
     }
 
     $scope.addCustomShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCustomShadingToTrack(track, 10, {});
+        wiD3Ctrl.addCustomShadingToTrack(track, track.getCurrentCurve(), 10, {});
     }
 
     $scope.removeShadingButtonClick = function() {

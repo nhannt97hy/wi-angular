@@ -87,6 +87,10 @@ function appendTrackHeader(plotArea, container, trackName) {
         .on('mousewheel', function() {
             _headerScrollCallback(d3.select(this));
         })
+        .on('mousedown', function() {
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+        })
         .call(d3.drag().on('drag', function() {
             _headerScrollCallback(d3.select(this))
         }));

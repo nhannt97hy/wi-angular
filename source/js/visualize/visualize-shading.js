@@ -15,6 +15,7 @@ Utils.extend(Drawing, Shading);
  */
 function Shading(config) {
     Drawing.call(this);
+    if (typeof config != 'object') config = {};
 
     this.fillStyle = config.fillStyle || 'green';
     this.name = config.name || 'Noname';
@@ -98,14 +99,21 @@ Shading.prototype.nearPoint = function(x, y) {
     return Drawing.prototype.nearPoint.call(this, x, y, 1);
 }
 
+Shading.prototype.getAllColors = function() {
+    let colors = [];
+    if (d3.color(this.fillStyle))
+        colors.push(d3.color(this.fillStyle).toString());
+    return colors;
+}
+
 /**
  * Actually draw the shading
  * @param {Array} domainY
  * @param {Array} rangeX
  * @param {Array} rangeY
- * @param {Object} config
+ * @param {Boolean} highlight
  */
-Shading.prototype.doPlot = function(domainY, rangeX, rangeY, config) {
+Shading.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
     if (this.refX != null) drawRefLine(this);
 
     let leftData = prepareData(this.leftCurve, domainY, rangeX, rangeY);
