@@ -313,7 +313,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
             for (var attr in sourceObj) {
                 destObj[attr] = sourceObj[attr];
             }
-        };
+        }
         this.selectedData = {};
         var self = this;
         copyObj(self.defaultData.Default, self.selectedData);
@@ -913,10 +913,11 @@ exports.lineStyleDialog = function (ModalService, options, callback) {
     });
 }
 
-exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
-    function ModalController($scope, close) {
+exports.curvePropertiesDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         // let utils = wiComponentService.getComponent('UTILS');
         // let projectData = utils.openProject;
         // console.log("dataaa ",projectData);
@@ -989,11 +990,14 @@ exports.curvePropertiesDialog = function (ModalService, DialogUtils, callback) {
                 console.log("Line Style");
             });
         };
+        this.onApplyButtonClicked = function () {
+            callback(self);
+        };
         this.onOkButtonClicked = function () {
-
+            close(self, 100);
         };
         this.onCancelButtonClicked = function () {
-            console.log("onCancelButtonClicked");
+            close(null, 100);
         }
     }
 
@@ -1199,7 +1203,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback) {
         });
     });
 };
-exports.logTrackPropertiesDialog = function (ModalService, callback) {
+exports.logTrackPropertiesDialog = function (ModalService, logplotModel, callback) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
@@ -1226,6 +1230,8 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             shading: {
             }
         }
+        console.log("Wi", logplotModel.well);
+
         // Tab General
         this.isShowTitle = props.general.isShowTitle;
         this.title = props.general.title;
@@ -1244,31 +1250,8 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
         this.width = props.general.width;
         this.trackColor = props.general.trackColor;
 
+
         // Tab Curve
-        /*function fillCurveAttrArray () {
-            return [
-                {
-                    curveName : "ECGR",
-                    alias : "ECGR",
-                    leftScale : 20,
-                    rightScale : 200,
-                    logLinear : "Linear",
-                    displayMode : "Line",
-                    lineStyle : self.lineOptions,
-                    displayAs : "Normal"
-                },
-                {
-                    curveName : "DTCO3",
-                    alias : "DTCO3",
-                    leftScale : 10,
-                    rightScale : 100,
-                    logLinear : "Logarithmic",
-                    displayMode : "Line",
-                    lineStyle : self.lineOptions,
-                    displayAs : "Normal"
-                }
-            ];
-        };*/
         function fillShadingAttrArray() {
             return [
                 {
@@ -1315,14 +1298,17 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
                 }
             ];
 
-        };
-        function getFullData () {
+        }
+        this.selectedCurve = [];
+        this.currentCurve = getCurrentCurve();
+
+        function getCurrentCurve () {
             return [
                 {
                     name : "dataset1",
-                    content : [
+                    curves : [
                         {
-                            curveName: "DTCO3",
+                            name: "DTCO3",
                             alias : "DTCO3",
                             leftScale : 1000,
                             rightScale : 10,
@@ -1332,76 +1318,106 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
                             displayAs : "Normal"
                         },
                         {
-                            curveName: "ECGR",
+                            name: "ECGR",
                             alias : "ECGR",
                             leftScale : 2000,
                             rightScale : 20,
                             logLinear : "Linear",
                             displayMode : "Line",
                             lineStyle : self.lineOptions,
-                            displayAs : "Normal"
-                        }
-                    ]
-                },
-                {
-                    name : "dataset2",
-                    content : [
-                        {
-                            curveName: "DTCO3",
-                            alias : "DTCO3",
-                            leftScale : 1000,
-                            rightScale : 10,
-                            logLinear : "Logarithmic",
-                            displayMode : "Line",
-                            lineStyle : "",
-                            displayAs : "Normal"
-                        },
-                        {
-                            curveName: "ECGR",
-                            alias : "ECGR",
-                            leftScale : 2000,
-                            rightScale : 20,
-                            logLinear : "Linear",
-                            displayMode : "Line",
-                            lineStyle : "",
-                            displayAs : "Normal"
-                        },
-                        {
-                            curveName: "ECGRRRRR",
-                            alias : "ECGR",
-                            leftScale : 2000,
-                            rightScale : 20,
-                            logLinear : "Linear",
-                            displayMode : "Line",
-                            lineStyle : "",
-                            displayAs : "Normal"
-                        }
-                    ]
-                },
-                {
-                    name : "dataset3",
-                    content : [
-                        {
-                            curveName: "DTCO3",
-                            alias : "DTCO3",
-                            leftScale : 1000,
-                            rightScale : 10,
-                            logLinear : "Logarithmic",
-                            displayMode : "Line",
-                            lineStyle : "",
                             displayAs : "Normal"
                         }
                     ]
                 }
-            ];
+            ]
+
         };
-        // this.curveName = ["DTCO3", "ECGR"];
+        function getFullData () {
+            // return [
+            //     {
+            //         name : "dataset1",
+            //         content : [
+            //             {
+            //                 curveName: "DTCO3",
+            //                 alias : "DTCO3",
+            //                 leftScale : 1000,
+            //                 rightScale : 10,
+            //                 logLinear : "Logarithmic",
+            //                 displayMode : "Line",
+            //                 lineStyle : self.lineOptions,
+            //                 displayAs : "Normal"
+            //             },
+            //             {
+            //                 curveName: "ECGR",
+            //                 alias : "ECGR",
+            //                 leftScale : 2000,
+            //                 rightScale : 20,
+            //                 logLinear : "Linear",
+            //                 displayMode : "Line",
+            //                 lineStyle : self.lineOptions,
+            //                 displayAs : "Normal"
+            //             }
+            //         ]
+            //     },
+            //     {
+            //         name : "dataset2",
+            //         content : [
+            //             {
+            //                 curveName: "DTCO3",
+            //                 alias : "DTCO3",
+            //                 leftScale : 1000,
+            //                 rightScale : 10,
+            //                 logLinear : "Logarithmic",
+            //                 displayMode : "Line",
+            //                 lineStyle : "",
+            //                 displayAs : "Normal"
+            //             },
+            //             {
+            //                 curveName: "ECGR",
+            //                 alias : "ECGR",
+            //                 leftScale : 2000,
+            //                 rightScale : 20,
+            //                 logLinear : "Linear",
+            //                 displayMode : "Line",
+            //                 lineStyle : "",
+            //                 displayAs : "Normal"
+            //             },
+            //             {
+            //                 curveName: "ECGRRRRR",
+            //                 alias : "ECGR",
+            //                 leftScale : 2000,
+            //                 rightScale : 20,
+            //                 logLinear : "Linear",
+            //                 displayMode : "Line",
+            //                 lineStyle : "",
+            //                 displayAs : "Normal"
+            //             }
+            //         ]
+            //     },
+            //     {
+            //         name : "dataset3",
+            //         content : [
+            //             {
+            //                 curveName: "DTCO3",
+            //                 alias : "DTCO3",
+            //                 leftScale : 1000,
+            //                 rightScale : 10,
+            //                 logLinear : "Logarithmic",
+            //                 displayMode : "Line",
+            //                 lineStyle : "",
+            //                 displayAs : "Normal"
+            //             }
+            //         ]
+            //     }
+            // ];
+            return logplotModel.well.datasets;
+        }
+
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
-        // self.fillDataset.content = fillCurveAttrArray();
+
         this.shadingAttr = fillShadingAttrArray();
-        // this.selectedShading = {};
         this.fillDataset = getFullData();
         this.lineStyleButtonClicked = function () {
             let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -1410,45 +1426,45 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             });
         };
         this.setClickedRowCurve = function(index){
-            self.selectedRow = index;
-            self.selectedCurve = self.fillDataset[index];
+            $scope.selectedRow = index;
+            self.selectedCurve = self.currentCurve[index];
         };
         this.removeRow = function(){
             console.log("self.selectedCurve.content", self.selectedCurve.content);
 
             let idx = -1;
-            let newCurveAttr = eval( self.fillDataset );
+            let newCurveAttr = eval( self.currentCurve );
             for( let i = 0; i < newCurveAttr.length; i++ ) {
                 if( newCurveAttr[i] === self.selectedCurve ) {
                     idx = i;
                     break;
                 }
             }
-            self.fillDataset.splice( idx, 1 );
+            self.currentCurve.splice( idx, 1 );
         };
         this.arrowUpCurve = function () {
             let prevIdx = -1;
-            let idx = self.fillDataset.indexOf(self.selectedCurve);
+            let idx = self.currentCurve.indexOf(self.selectedCurve);
             console.log(idx);
             if (idx-1 == prevIdx) {
                 prevIdx = idx
             } else if (idx > 0) {
-                let moveCurve = self.fillDataset.splice(idx, 1)
+                let moveCurve = self.currentCurve.splice(idx, 1)
                 console.log(moveCurve[0])
-                self.fillDataset.splice(idx-1, 0, moveCurve[0]);
-            };
+                self.currentCurve.splice(idx-1, 0, moveCurve[0]);
+            }
             self.setClickedRowCurve(idx-1);
         };
         this.arrowDownCurve = function () {
-            let prevIdx = self.fillDataset.length;
-            let idx = self.fillDataset.indexOf(self.selectedCurve);
+            let prevIdx = self.currentCurve.length;
+            let idx = self.currentCurve.indexOf(self.selectedCurve);
             console.log(idx);
             if (idx+1 == prevIdx) {
                 prevIdx = idx
-            } else if (idx < self.fillDataset.length-1) {
-                let moveCurve = self.fillDataset.splice(idx, 1)
+            } else if (idx < self.currentCurve.length-1) {
+                let moveCurve = self.currentCurve.splice(idx, 1)
                 console.log(moveCurve[0])
-                self.fillDataset.splice(idx+1, 0, moveCurve[0]);
+                self.currentCurve.splice(idx+1, 0, moveCurve[0]);
             }
             self.setClickedRowCurve(idx+1);
         };
@@ -1468,7 +1484,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
                 let moveShading = self.shadingAttr.splice(idx, 1)
                 console.log(moveShading[0])
                 self.shadingAttr.splice(idx-1, 0, moveShading[0]);
-            };
+            }
             self.setClickedRowShading(idx-1);
 
         };
@@ -1486,7 +1502,7 @@ exports.logTrackPropertiesDialog = function (ModalService, callback) {
             self.setClickedRowShading(idx+1);
         };
         this.addRow = function () {
-                self.fillDataset.push({});
+                self.currentCurve.push({});
         };
 
         // Dialog buttons

@@ -1,20 +1,12 @@
-var utils = require('./visualize-utils.js');
+var Utils = require('./visualize-utils.js');
 var Track = require('./visualize-track.js');
-var roundUp = utils.roundUp;
-var roundDown = utils.roundDown;
-var appendTrack = utils.appendTrack;
 
 module.exports = DepthTrack;
 
-function appendDepthHeader(base, unit) {
-    var trackHeader = base.selectAll('.track-header-viewport');
-    trackHeader.append('label')
-        .attr('class', 'data-header double-height text-center')
-        .text(unit);
-}
+Utils.extend(Track, DepthTrack);
 
 /**
- * Represents a DepthTrack
+ * Represents a depth track
  * @constructor
  * @param {Object} config - Contain configurations.
  * @param {String} [config.unit] - Depth unit. Default: 'm'
@@ -22,119 +14,100 @@ function appendDepthHeader(base, unit) {
  * @param {String} [config.yAxisPosition] - Position of the y axis. Default: 'left'
  * @param {Number} [config.xNTicks] - Number of ticks shown in x axis. Default: 4
  * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 20
- * @param {Number} [config.plotWidth] - Width in pixel of the bounding rectangle. Default: 200
  * @param {String} [config.xFormatter] - d3 formatter for numbers in x axis. Default: 'g'
  * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: 'g'
- * @param {Number} [config.yStep] - Step to scale y ordinate. Default: 1.0
  * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 0
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 0
+ * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 200
  */
-DepthTrack.prototype = Object.create(Track.prototype);
-DepthTrack.prototype.constructor = DepthTrack;
-
 function DepthTrack(config) {
-    var self = this;
-    var _viewportX = new Array(), _viewportY = new Array();
+    Track.call(this);
 
-    if( !config ) {
-        console.error("config must not be null");
-        return;
-    }
-    var unit = config.unit || 'm';
-    var trackContainer;
-    var plotContainer;
-    var svg;
-    var clientRect;
-    var yAxisGroup;
-    var yAxisGroup1;
-    var transformY;
-    var yAxisClass = 'depthtrack';
-    var yNTicks = config.yNTicks || 20;
-    var plotWidth = config.plotWidth || 200;
-    var yStep = config.yStep || 1.0;
-    var yFormatter = d3.format(config.yFormatter || 'g');
-    var xPadding = config.xPadding || 0, yPadding = config.yPadding || 0;
-    this.getYStep = function() {
-        return yStep;
-    }
+    this.windowY = [];
+    this.unit = config.unit || 'm';
+    this.yAxisClass = 'depthtrack';
+    this.yNTicks = config.yNTicks || 20;
+    this.width = config.width || 200;
+    this.yFormatter = d3.format(config.yFormatter || 'g');
+    this.xPadding = config.xPadding || 0;
+    this.yPadding = config.yPadding || 0;
+}
+/**
+ * Set background color for the track
+ * @param {String} color - CSS color string
+ */
+DepthTrack.prototype.setBackgroundColor = function(color) {
+    this.trackContainer
+        .style('background-color', color)
+}
 
-    /**
-     * Set background color for the track
-     * @param {String} color - CSS color string
-     */
-    this.setBackgroundColor = function(color) {
-        trackContainer
-            .style('background-color', color)
-    }
+/**
+ * Initialize DOM elements for the track
+ * param {Object} domElem - The DOM element to contain the track
+ */
+DepthTrack.prototype.init = function(baseElement) {
+    let self = this;
+    this.trackContainer = Utils.appendTrack(baseElement, 'Depth', this.width);
+    this.plotContainer = this.trackContainer.select('.plot-container');
+    appendDepthHeader(this.trackContainer, this.unit);
+    this.clientRect = this.plotContainer.node().getBoundingClientRect();
 
-    /**
-     * Initialize DOM elements for the track
-     * param {Object} domElem - The DOM element to contain the track
-     */
-    this.init = function(baseElement) {
-        trackContainer = appendTrack(baseElement, 'Depth', plotWidth);
-        plotContainer = trackContainer.select('.plot-container');
-        appendDepthHeader(trackContainer, unit);
-        clientRect = plotContainer.node().getBoundingClientRect();
+    this.svg = this.plotContainer.append('svg')
+            .attr('width', this.clientRect.width)
+            .attr('height', this.clientRect.height);
+    this.yAxisGroup = this.svg.append('g')
+        .attr('class', this.yAxisClass)
+        .attr('transform', 'translate(' + (this.clientRect.width - this.xPadding) + ', 0)');
+    this.yAxisGroup2 = this.svg.append('g')
+        .attr('class', this.yAxisClass);
+        //.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
 
-        svg = plotContainer.append('svg')
-                .attr('width', clientRect.width)
-                .attr('height', clientRect.height);
-        yAxisGroup = svg.append('g')
-            .attr('class', yAxisClass)
-            .attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-        yAxisGroup1 = svg.append('g')
-            .attr('class', yAxisClass);
-            //.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-        new ResizeSensor(plotContainer.node(), function() {
-            clientRect = plotContainer.node().getBoundingClientRect();
+    new ResizeSensor(self.plotContainer.node(), function() {
+        self.clientRect = self.plotContainer.node().getBoundingClientRect();
 
-            svg.attr('width', clientRect.width)
-                .attr('height', clientRect.height);
-            yAxisGroup.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
-            if( _viewportY.length == 2 ) _doPlot();
-        });
-    }
+        self.svg
+            .attr('width', self.clientRect.width)
+            .attr('height', self.clientRect.height);
+        self.yAxisGroup.attr('transform', 'translate(' + (self.clientRect.width - self.xPadding) + ', 0)');
+        if( self.windowY.length == 2 ) self.doPlot();
+    });
+}
 
-    function _doPlot() {
-        transformY = d3.scaleLinear().domain(_viewportY).range([yPadding, clientRect.height - yPadding]);
-        function setupAxes() {
-            var start = roundUp(_viewportY[0], yStep);
-            var end = roundDown(_viewportY[1], yStep);
-            var step = (end - start) / yNTicks;
-            var yAxis = d3.axisLeft(transformY)
-                .tickValues(d3.range(start, end + step, step))
-                .tickFormat(yFormatter)
-                .tickSize(5);
-            var yAxis1 = d3.axisRight(transformY)
-                .tickValues(d3.range(start, end + step, step))
-                .tickFormat('')
-                .tickSize(5);
 
-            yAxisGroup.call(yAxis);
-            yAxisGroup1.call(yAxis1);
-        }
-        setupAxes();
-    }
+/**
+ * Actually draw the track
+ */
+DepthTrack.prototype.doPlot = function () {
+    let transformY = d3.scaleLinear().domain(this.windowY).range([this.yPadding, this.clientRect.height - this.yPadding]);
+    var start = Utils.roundUp(this.windowY[0], 1);
+    var end = Utils.roundDown(this.windowY[1], 1);
+    var step = (end - start) / this.yNTicks;
+    var yAxis = d3.axisLeft(transformY)
+        .tickValues(d3.range(start, end + step, step))
+        .tickFormat(this.yFormatter)
+        .tickSize(5);
+    var yAxis1 = d3.axisRight(transformY)
+        .tickValues(d3.range(start, end + step, step))
+        .tickFormat('')
+        .tickSize(5);
 
-    /**
-     * Actually draw the track
-     */
-    this.doPlot = function() {
-        _doPlot();
-    }
+    this.yAxisGroup.call(yAxis);
+    this.yAxisGroup2.call(yAxis1);
+}
 
-    /**
-     * Set y range for viewport
-     */
-    this.setViewportY = function(vY) {
-        _viewportY[0] = vY[0];
-        _viewportY[1] = vY[1];
-    }
+/**
+ * Register event when mouse down the depth track
+ * @param {Function} mouseDownCallback
+ */
+DepthTrack.prototype.onMouseDown = function(mouseDownCallback) {
+    this.trackContainer.on('mousedown', function() {
+        mouseDownCallback();
+    });
+}
 
-    this.onMouseDown = function(mouseDownCallback) {
-        trackContainer.on('mousedown', function() {
-            mouseDownCallback();
-        });
-    }
+function appendDepthHeader(base, unit) {
+    var trackHeader = base.selectAll('.track-header-viewport');
+    trackHeader.append('label')
+        .attr('class', 'data-header double-height text-center')
+        .text(unit);
 }
