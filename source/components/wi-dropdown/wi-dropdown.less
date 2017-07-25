@@ -6,6 +6,22 @@ wi-dropdown {
   border-image-slice: 1;
   float: left;
 
+  .dropdown-small{
+    .icon-top{
+      display: inline;
+    }
+  }
+
+  .height-auto{
+    button{
+      padding: 5px 0;
+      height: auto;
+      & > p{
+        width: auto;;
+      }
+    }
+  }
+
   button{
     background: none;
     border:none; 
@@ -33,6 +49,8 @@ wi-dropdown {
         cursor: not-allowed;
         box-shadow:none;
     }
+
+    
   }
 
   wi-button {
@@ -42,6 +60,7 @@ wi-dropdown {
   .dropdown-menu {
     /*min-width: 0;*/
     padding: 0;
+    min-width:170px;
   }
 
   .icon-left {
