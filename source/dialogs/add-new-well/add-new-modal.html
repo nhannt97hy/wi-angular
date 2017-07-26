@@ -42,15 +42,13 @@
                                        ng-model="wiModal.step" required>
                             </div>
                         </div>
-                        <p>Leave blank for loading modules to auto create when loading first file</p>
+                        <p>Leave blank for loading modules to auto create when loading first file {{wiModal.isDisabled}}</p>
                     </form>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
-                        ng-disabled="!wiModal.wellName || !wiModal.topDepth
-                            || !wiModal.bottomDepth || !wiModal.step
-                            || wiModal.isDisabled"
+                        ng-disabled="!wiModal.wellName || !wiModal.topDepth || !wiModal.bottomDepth || !wiModal.step || wiModal.isDisabled"
                         ng-click="wiModal.onOkButtonClicked();"><span class="ok-16x16"></span>&nbsp;OK
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"

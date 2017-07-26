@@ -12,7 +12,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-            utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
+            let projectModel = utils.projectToTreeConfig(projectLoaded);
+            self.treeConfig = [projectModel];
+            //utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -33,6 +35,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             });
         });
 
+        WIEXPLORER = self;
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
@@ -93,7 +96,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
     };
 
 
-    this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
+    this.getItemTreeviewCtxMenu = function (nodeType, treeviewCtrl) {
         const defaultWellCtxMenu = [
             {
                 name: "CreateNewWell",
@@ -104,6 +107,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
                     DialogUtils.addNewDialog(ModalService, function (newWell) {
+                        console.log(newWell);
                         if (newWell) utils.updateWellProject(wiComponentService, newWell);
                     });
                 }
@@ -165,7 +169,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 }
             }
         ]
-        switch (configType) {
+        switch (nodeType) {
+            case 'project':
             case 'wells':
                 return defaultWellCtxMenu.concat([
                     {
@@ -247,6 +252,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }
                 ]);
             case 'data':
+            case 'dataset':
                 return [
                     {
                         name: "Rename",
@@ -476,6 +482,34 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         }
     }
 
+    function toListConfig(currentNode) {
+        let config = {
+            name: currentNode.name,
+            heading: currentNode.name,
+            data: new Array()
+        }
+        for (var key in currentNode.properties) {
+            if (currentNode.properties.hasOwnProperty(key)) {
+                config.data.push({key:key, value:currentNode.properties[key]});
+            }
+        };
+        return [config];
+    }
+    // Select tree node and update wi-properties
+    this.selectHandler = function(currentNode) {
+        function visit(node, callback) {
+            callback(node);
+            if (node.children) node.children.forEach(function(child){visit(child, callback);});
+        }
+        self.treeConfig.forEach(function(item) {
+            visit(item, function(node) {
+                if(node.data) node.data.selected = false;
+            });
+        });
+
+        if( currentNode.data ) currentNode.data.selected = true;
+        wiComponentService.emit('update-properties', toListConfig(currentNode));
+    }
 }
 
 let app = angular.module(moduleName, []);

@@ -13,8 +13,6 @@ function Controller(wiComponentService) {
 
     function doUpdateListConfig(newConfig) {
         self.listConfig = newConfig;
-
-        console.log('doUpdateListConfig', newConfig)
     }
 
     function cleanList() {
