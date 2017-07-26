@@ -788,52 +788,53 @@ exports.addCurveDialog = function (ModalService, callback) {
     });
 }
 
-exports.lineStyleDialog = function (ModalService, options, callback) {
+exports.lineStyleDialog = function (ModalService, callback, options) {
     function ModalController($scope, close) {
-        this.lineColor = "#0000ff";
-        this.style = {
-            name : 'dotted',
-            param : '2, 2'
-        };
-        this.width = {
-            name : '1',
-            param : 1
-        };
+        var self = this;
+        console.log(options);
 
-        // if(self.options.defaultColor){
-        //     this.lineColor = options.defaultColor;
-        // };
-        // if(options.defaultStyle){
-        //     this.style = options.defaultStyle;
-        // };
-        // if(options.defaultWidth){
-        //     this.width = options.defaultWidth;
-        // }
-
+        if (options) {
+            this.options = options;
+        }
+        else {
+            this.options = {
+                display: true,
+                lineColor: "#0000ff",
+                lineStyle: {
+                    name: 'solid',
+                    param: [10, 0]
+                },
+                lineWidth: {
+                    name: '1',
+                    param: 1
+                }
+            };
+        }
+        console.log("Op", this.options);
         this.styles =[
             {
                 name: 'solid',
-                param: '10, 0'
+                param: [10, 0]
             },
             {
                 name : 'none',
-                param : '0, 10'
+                param : [0, 10]
             },
             {
                 name : 'dotted',
-                param : '2, 2'
+                param : [2, 2]
             },
             {
                 name : 'dashed',
-                param : '8, 2'
+                param : [8, 2]
             },
             {
                 name : 'dashdot',
-                param : '10, 4, 2, 4'
+                param : [10, 4, 2, 4]
             },
             {
                 name : 'dash2dot',
-                param : '10, 4, 2, 4, 2, 4'
+                param : [10, 4, 2, 4, 2, 4]
             }
         ];
         this.widthes = [
@@ -878,23 +879,13 @@ exports.lineStyleDialog = function (ModalService, options, callback) {
                 param : 10
             }
         ];
-        this.options = {
-        };
         this.onOkButtonClicked = function () {
-            console.log("LO: ", self.options);
+            console.log("optionsss: ", self.options);
             close(self.options);
         };
-        this.onApplyButtonClicked = function () {
-            self.options = {
-                lineColor : this.lineColor,
-                width : this.width,
-                style : this.style
-            };
-            callback(self.options)
-            console.log("Line options: ", self.options);
-        };
-        this.onCancelButtonClicked = function () {
 
+        this.onCancelButtonClicked = function () {
+            close(null);
         };
     }
 
@@ -913,21 +904,57 @@ exports.lineStyleDialog = function (ModalService, options, callback) {
     });
 }
 
-exports.curvePropertiesDialog = function (ModalService, callback) {
-    function ModalController($scope, wiComponentService, close) {
+
+exports.curvePropertiesDialog = function (ModalService, wiComponentService, DialogUtils, currentCurve, callback) {
+    let thisModalController = null;
+    function ModalController($scope, close) {
         let error = null;
         let self = this;
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        thisModalController = this;
         // let utils = wiComponentService.getComponent('UTILS');
         // let projectData = utils.openProject;
         // console.log("dataaa ",projectData);
+        let extentY = currentCurve.getExtentY();
 
+        this.curveOptions = {
+            name : currentCurve.name,
+            alias: currentCurve.alias,
+            minValue: currentCurve.minX,
+            maxValue: currentCurve.maxX,
+            autoScale: false,
+            logLinear: currentCurve.scale,
+            minDepth: extentY[0],
+            maxDepth: extentY[1]
+        };
+        this.lineOptions = {
+            display: true,
+            lineColor: "#00ffff",
+            lineStyle: {
+                name: 'solid',
+                param: [10, 0]
+            },
+            lineWidth: {
+                name: '1',
+                param: 1
+            }
+        };
+        this.symbolOptions = {
+            display: false,
+            symbolColor : '#00ffff',
+            symbolStyle: {
+                name: 'circle', // cross, diamond, star, triangle, dot, plus
+                size: 4
+            }
+        }
+        this.drawSample = function () {
+            displayLine(self.lineOptions, self.symbolOptions);
+        }
         this.selectData = {
             displayMode: ["Line", "Symbol", "Both", "None"],
             wrapMode: ["None", "Left", "Right", "Both"],
             symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
             blockPosition: ["None", "Start", "Middle", "End", "None"],
-            logLinear: ["Linear", "Logarithmic"],
+            logLinear: ["linear", "log"],
             displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
         this.defaultElement = {
@@ -938,17 +965,68 @@ exports.curvePropertiesDialog = function (ModalService, callback) {
             logLinear: "Linear",
             displayAs: "Normal"
         };
+        function displayLine(lineOptions, symbolOptions) {
+            let sample = $('#sample')[0];
+            let context = sample.getContext('2d');
+            context.clearRect(0, 0, sample.width, sample.height);
+            var x = [5, 50, 100, 150, 195];
+            var y = [180, 40, 20, 40, 180];
+            function drawSegment (context, x1, y1, x2, y2) {
+                let lineColor = lineOptions.lineColor;
+                let lineWidth = lineOptions.lineWidth.param;
+                let lineStyle = lineOptions.lineStyle.param;
+                context.beginPath();
+                context.strokeStyle = lineColor;
+                context.lineWidth = lineWidth;
+                context.setLineDash(lineStyle);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+                context.stroke();
+            }
+            function drawSymbol(context, x, y, style) {
+                switch (style.symbolStyle.name) {
+                    case "circle":
+                        context.beginPath();
+                        context.strokeStyle = style.symbolColor;
+                        context.arc(x, y, style.symbolStyle.size, 0, 2*Math.PI);
+                        context.closePath();
+                        context.stroke();
+                        break;
+                    case "dot":
+                        // context.strokeStyle = style.symbolColor;
+                        // context.arc(x, y, 1, 0)
+                        break;
+                    case "square":
+                        break;
+                }
+                console.log('Draw symbol');
+            }
+            for (let i = 0; i < x.length-1; i++) {
+                if( lineOptions && lineOptions.display )
+                    drawSegment(context, x[i], y[i], x[i + 1], y[i + 1]);
+            }
+            for (let i = 0; i < x.length; i++) {
+                if( symbolOptions && symbolOptions.display ) {
+                    drawSymbol(context, x[i], y[i], self.symbolOptions);
+                }
+            }
+
+        }
+        this.canvasClicked = function () {
+            console.log("Canvas");
+        }
         this.changeOther = function () {
             switch (self.defaultElement.displayMode) {
                 case "Line":
                     $('#wrapMode').prop("disabled", false);
                     $('#symbolType').prop("disabled", true);
-                    $('#blockPosition').prop("disabled", false);
+                    $("#blockPosition").prop("disabled", false);
                     $('#ignore').prop("disabled", false);
                     $('#symbolSize').prop("disabled", true);
-                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editSymbolStyle').prop("disabled", true);
                     $('#editLineStyle').prop("disabled", false);
-                    $('#sample').text('Line Style');
+                    self.lineOptions.display = true;
+                    self.symbolOptions.display = false;
                     break;
                 case "Symbol":
                     $('#wrapMode').prop("disabled", false);
@@ -956,9 +1034,11 @@ exports.curvePropertiesDialog = function (ModalService, callback) {
                     $('#blockPosition').prop("disabled", true);
                     $('#ignore').prop("disabled", false);
                     $('#symbolSize').prop("disabled", false);
-                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editSymbolStyle').prop("disabled", false);
                     $('#editLineStyle').prop("disabled", true);
                     $('#sample').text('Symbol Style ');
+                    self.lineOptions.display = false;
+                    self.symbolOptions.display = true;
                     break;
                 case "Both":
                     $('#wrapMode').prop("disabled", false);
@@ -966,9 +1046,11 @@ exports.curvePropertiesDialog = function (ModalService, callback) {
                     $('#blockPosition').prop("disabled", true);
                     $('#ignore').prop("disabled", false);
                     $('#symbolSize').prop("disabled", false);
-                    $('#editSymbolSize').prop("disabled", false);
+                    $('#editSymbolStyle').prop("disabled", false);
                     $('#editLineStyle').prop("disabled", false);
                     $('#sample').text('Both Style ');
+                    self.lineOptions.display = true;
+                    self.symbolOptions.display = true;
                     break;
                 case "None":
                     $('#wrapMode').prop("disabled", true);
@@ -976,22 +1058,33 @@ exports.curvePropertiesDialog = function (ModalService, callback) {
                     $('#blockPosition').prop("disabled", true);
                     $('#ignore').prop("disabled", true);
                     $('#symbolSize').prop("disabled", true);
-                    $('#editSymbolSize').prop("disabled", true);
+                    $('#editSymbolStyle').prop("disabled", true);
                     $('#editLineStyle').prop("disabled", true);
                     $('#sample').text(' ');
+                    self.lineOptions.display = false;
+                    self.symbolOptions.display = false;
                     break;
                 default:
                     console.log("Error: NULL");
                     break;
             }
+            self.drawSample();
         };
-        this.onEditLineButtonClicked = function () {
-            DialogUtils.lineStyleDialog(ModalService, function () {
-                console.log("Line Style");
-            });
+        this.onEditLineStyleButtonClicked = function () {
+            DialogUtils.lineStyleDialog(ModalService, function (options) {
+                console.log("options", options);
+                lineOptions = options;
+                self.drawSample();
+            }, self.lineOptions);
         };
+        // this.onEditSymbolStyleButtonClicked = function () {
+        //     DialogUtils.symbolStyleDialog(ModalService, function (options) {
+        //
+        //     });
+        // };
         this.onApplyButtonClicked = function () {
             callback(self);
+            console.log(self);
         };
         this.onOkButtonClicked = function () {
             close(self, 100);
@@ -1008,6 +1101,7 @@ exports.curvePropertiesDialog = function (ModalService, callback) {
     }).then(function (modal) {
         modal.element.modal();
         modal.element.draggable();
+        thisModalController.drawSample();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -1203,7 +1297,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback) {
         });
     });
 };
-exports.logTrackPropertiesDialog = function (ModalService, logplotModel, callback) {
+exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _currentTrack, callback) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
@@ -1230,7 +1324,8 @@ exports.logTrackPropertiesDialog = function (ModalService, logplotModel, callbac
             shading: {
             }
         }
-        console.log("Wi", logplotModel.well);
+        console.log("Wi", WiLogplotModel);
+        console.log("currentTrack", _currentTrack);
 
         // Tab General
         this.isShowTitle = props.general.isShowTitle;
@@ -1410,7 +1505,7 @@ exports.logTrackPropertiesDialog = function (ModalService, logplotModel, callbac
             //         ]
             //     }
             // ];
-            return logplotModel.well.datasets;
+            return WiLogplotModel.datasets;
         }
 
         this.logLinear = ["Logarithmic", "Linear"];
@@ -1421,9 +1516,9 @@ exports.logTrackPropertiesDialog = function (ModalService, logplotModel, callbac
         this.fillDataset = getFullData();
         this.lineStyleButtonClicked = function () {
             let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-            DialogUtils.lineStyleDialog(ModalService, self.lineOptions, function () {
+            DialogUtils.lineStyleDialog(ModalService, function () {
 
-            });
+            }, self.lineOptions);
         };
         this.setClickedRowCurve = function(index){
             $scope.selectedRow = index;

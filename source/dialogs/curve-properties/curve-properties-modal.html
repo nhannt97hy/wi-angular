@@ -26,13 +26,16 @@
                                 <div class="form-group">
                                     <label class="control-label col-sm-3" for="curveName"><span class=""></span>Name</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control wi-form-control" value="" id="curveName" name="curveName" ng-model="curveName" disabled>
+                                        <input type="text" class="form-control wi-form-control"
+                                               value="" id="curveName" name="curveName" ng-model="wiModal.curveOptions.name" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="control-label col-sm-3" for="alias"><span class=""></span>Alias</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control wi-form-control" value="" id="alias" name="alias" ng-model="alias">
+                                        <input type="text" class="form-control wi-form-control"
+                                               value="" id="alias" name="alias"
+                                               ng-model="wiModal.curveOptions.alias">
                                     </div>
                                 </div>
                                 <div class="checkShow">
@@ -44,32 +47,41 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-5" for="minValue">Min value</label>
                                         <div class="col-sm-7">
-                                            <input type="number" class="form-control wi-form-control" value="" id="minValue" name="minValue" ng-model="minValue">
+                                            <input type="number" class="form-control wi-form-control"
+                                                   value="" id="minValue" name="minValue"
+                                                   ng-model="wiModal.curveOptions.minValue">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-sm-5" for="maxValue">Max value</label>
                                         <div class="col-sm-7">
-                                            <input type="number" class="form-control wi-form-control" value="" id="maxValue" name="maxValue" ng-model="maxValue">
+                                            <input type="number" class="form-control wi-form-control"
+                                                   value="" id="maxValue" name="maxValue"
+                                                   ng-model="wiModal.curveOptions.maxValue">
                                         </div>
                                     </div>
-                                    <input type="checkbox" ng-model="autoScale">&nbsp;Auto value scales <br><br>
+                                    <input type="checkbox" ng-model="wiModal.curveOptions.autoScale">&nbsp;Auto value scales <br><br>
                                     <div class="minDepth">
                                         <p class="col-sm-5">Min Depth: </p>
-                                        <p class="col-sm-7">12345</p>
+                                        <p class="col-sm-7">
+                                            {{wiModal.curveOptions.minDepth}}
+                                        </p>
                                     </div>
                                     <div class="maxDepth">
                                         <p class="col-sm-5">Max Depth: </p>
-                                        <p class="col-sm-7">12345</p>
+                                        <p class="col-sm-7">
+                                            {{wiModal.curveOptions.maxDepth}}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-sm-6">
                                 <h5>Sample</h5>
-                                <div id="sample">
-                                    Line Style
-                                </div>
+                                <canvas id="sample" width="200" height="200" style="border:1px solid blue"
+                                        ng-click="wiModal.canvasClicked();">
+
+                                </canvas>
                             </div>
                             <div class="interpolation">
                                 <h5>Interpolation</h5>
@@ -99,7 +111,8 @@
                                             <select ng-model="wiModal.defaultElement.symbolType"
                                                     name="symbolType" id="symbolType" value=""
                                                     class="form-control wi-form-control"
-                                                    ng-options="item for item in wiModal.selectData.symbolType track by item" disabled="true"></select>
+                                                    ng-options="item for item in wiModal.selectData.symbolType track by item" disabled="true">
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -110,7 +123,8 @@
                                             <select ng-model="wiModal.defaultElement.blockPosition"
                                                     name="blockPosition" value="" id="blockPosition"
                                                     class="form-control wi-form-control"
-                                                    ng-options="item for item in wiModal.selectData.blockPosition track by item"></select>
+                                                    ng-options="item for item in wiModal.selectData.blockPosition track by item">
+                                            </select>
                                         </div>
                                     </div>
                                     <input type="checkbox" ng-model="ignore" id="ignore">Ignore Missing Values
@@ -119,15 +133,18 @@
                                         <label class="control-label col-sm-5 normal-text">Symbol Size</label>
                                         <div class="col-sm-5">
                                             <input type="number" name="symbolSize" id="symbolSize"
+                                                   min="1" max="50"
                                                    class="form-control wi-form-control"
-                                                   ng-model="symbolSize" disabled="true">
+                                                   ng-model="wiModal.symbolOptions.symbolStyle.size"
+                                                   ng-change="wiModal.changeOther();"
+                                                   disabled="true">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-sm-5"></div>
                                         <div class="col-sm-5">
-                                            <button type="button" ng-click="wiModal.onEditLineButtonClicked();"
-                                                    id="editSymbolSize"
+                                            <button type="button" ng-click="wiModal.onEditSymbolStyleButtonClicked();"
+                                                    id="editSymbolStyle"
                                                     class="btn btn-default" disabled="true">&nbsp;Edit</button>
                                         </div>
                                     </div>
@@ -139,16 +156,17 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Log/Linear</label>
                                         <div class="col-sm-7">
-                                            <select ng-model="wiModal.defaultElement.logLinear"
+                                            <select ng-model="wiModal.curveOptions.logLinear"
                                                     name="logLinear" value="" class="form-control wi-form-control"
-                                                    ng-options="item for item in wiModal.selectData.logLinear track by item"></select>
+                                                    ng-options="item for item in wiModal.selectData.logLinear track by item">
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-sm-5">Line Stype</div>
                                         <div class="col-sm-5">
                                             <button type="button" id="editLineStyle"
-                                                    ng-click="wiModal.onEditLineButtonClicked();"
+                                                    ng-click="wiModal.onEditLineStyleButtonClicked();"
                                                     class="btn btn-default">&nbsp;Edit</button>
                                         </div>
                                     </div>
