@@ -50,10 +50,157 @@ exports.projectClose = function (wiComponentService) {
     wiComponentService.emit('project-unloaded-event');
 };
 
+function trackToModel(track) {
+    var trackModel = new Object();
+    trackModel.idPlot = track.idPlot;
+    trackModel.idTrack = track.idTrack;
+}
+
+function plotToTreeConfig(plot) {
+    var plotModel = new Object();
+    plotModel.name = 'logplot';
+    plotModel.type = 'logplot';
+    plotModel.properties = {
+        idWell: plot.idWell,
+        idPlot: plot.idPlot,
+        name: plot.name
+    };
+    plotModel.data = {
+        childExpanded: false,
+        icon: 'logplot-blank-16x16',
+        label: plot.name
+    }
+    plotModel.tracks = new Array();
+    if (!plot.tracks) return plotModel;
+
+    plot.tracks.forEach(function(track) {
+        plotModel.tracks.push(trackToModel(track));
+    });
+    return plotModel;
+}
+
+function curveToTreeConfig(curve) {
+    var curveModel = new Object();
+    curveModel.name = 'curve';
+    curveModel.type = 'curve';
+    curveModel.properties = {
+        idDataset: curve.idDataset,
+        idCurve: curve.idCurve,
+        idFamily: curve.idFamily,
+        name: curve.name,
+        unit: "US/F",
+        dataset: curve.dataset
+    };
+    curveModel.data = {
+        childExpanded: false,
+        icon: 'curve-16x16',
+        label: curve.name
+    };
+    curveModel.curveData = null;
+    return curveModel;
+}
+
+function datasetToTreeConfig(dataset) {
+    var datasetModel = new Object();
+    datasetModel.name = "dataset";
+    datasetModel.type = "dataset";
+    datasetModel.properties = {
+        idWell: dataset.idWell,
+        idDataset: dataset.idDataset,
+        name: dataset.name,
+        datasetKey: dataset.datasetKey,
+        datasetLabel: dataset.datasetLabel
+    };
+    datasetModel.data = {
+        childExpanded: false,
+        icon: "curve-data-16x16",
+        label: dataset.name
+    };
+    datasetModel.children = new Array();
+    if (!dataset.curves) return datasetModel;
+    
+    dataset.curves.forEach(function(curve) {
+        datasetModel.children.push(curveToTreeConfig(curve));
+    });
+
+    return datasetModel;
+}
+
+function createLogplotNode(well) {
+    let logplotModel = new Object();
+    logplotModel.name = 'logplots';
+    logplotModel.type = 'logplots';
+    logplotModel.data = {
+        childExpanded: false,
+        icon: 'logplot-blank-16x16',
+        label: "Logplot"
+    };
+    logplotModel.children = new Array();
+    if (!well.plots) return logplotModel;
+    well.plots.forEach(function(plot) {
+        logplotModel.children.push(plotToTreeConfig(plot));
+    });
+
+    return logplotModel;
+}
+function wellToTreeConfig(well) {
+    var wellModel = new Object();
+    wellModel.name = "well";
+    wellModel.type = "well";
+    wellModel.properties = {
+        idProject: well.idProject,
+        idWell: well.idWell,
+        name: well.name,
+        topDepth: well.topDepth,
+        bottomDepth: well.bottomDepth,
+        step: well.step
+    };
+    wellModel.data = {
+        childExpanded: false,
+        icon: "well-16x16",
+        label: well.name
+    };
+
+    wellModel.children = new Array();
+
+    if (well.datasets) {
+        well.datasets.forEach(function(dataset) {
+            wellModel.children.push(datasetToTreeConfig(dataset));
+        });
+    }
+    let logplotNode =
+    wellModel.children.push(createLogplotNode(well));
+    return wellModel;
+}
+
+exports.projectToTreeConfig = function(project) {
+    var projectModel = new Object();
+    projectModel.type = 'project';
+    projectModel.name = 'project';
+    projectModel.properties = {
+        idProject: project.idProject,
+        name: project.name,
+        department: project.department,
+        company: project.company,
+        description: project.description
+    };
+    projectModel.data = {
+        childExpanded: false,
+        icon: 'wells-16x16',
+        label: project.name
+    };
+    projectModel.children = new Array();
+
+    if (!project.wells) return projectModel;
+    
+    project.wells.forEach(function(well) {
+        projectModel.children.push(wellToTreeConfig(well));
+    });
+    return projectModel;
+}
+
 exports.pushProjectToExplorer = function (self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
-    console.log('project data: ', project);
     self.treeConfig = (new WiTreeConfig()).config;
-    console.log('self.treeConfig', self.treeConfig);
     $timeout(function () {
         let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
         wiRootTreeviewComponent.config[0].data.label = project.name;
