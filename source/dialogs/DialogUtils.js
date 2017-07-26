@@ -904,7 +904,122 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
     });
 }
 
+exports.symbolStyleDialog = function (ModalService, callback, options) {
+    function ModalController($scope, close) {
+        var self = this;
 
+        this.options = {
+            lines: {
+                color: '#ff0000',
+                style: {
+                    name: 'solid',
+                    param: [10, 0]
+                }
+                ,
+                width: {
+                    name: "1",
+                    param: 1
+                }
+            },
+            solidFill: '#000',
+            pattern: {
+                backGround: "#fff",
+                foreGround: "#000"
+            }
+        }
+        this.styles =[
+            {
+                name: 'solid',
+                param: [10, 0]
+            },
+            {
+                name : 'none',
+                param : [0, 10]
+            },
+            {
+                name : 'dotted',
+                param : [2, 2]
+            },
+            {
+                name : 'dashed',
+                param : [8, 2]
+            },
+            {
+                name : 'dashdot',
+                param : [10, 4, 2, 4]
+            },
+            {
+                name : 'dash2dot',
+                param : [10, 4, 2, 4, 2, 4]
+            }
+        ];
+        this.widthes = [
+            {
+                name : "1",
+                param : 1
+            },
+            {
+                name : "2",
+                param : 2
+            },
+            {
+                name : "3",
+                param : 3
+            },
+            {
+                name : "4",
+                param : 4
+            },
+            {
+                name : "5",
+                param : 5
+            },
+            {
+                name : "6",
+                param : 6
+            },
+            {
+                name : "7",
+                param : 7
+            },
+            {
+                name : "8",
+                param : 8
+            },
+            {
+                name : "9",
+                param : 9
+            },
+            {
+                name : "10",
+                param : 10
+            }
+        ];
+        this.onOkButtonClicked = function () {
+
+        };
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "symbol-style/symbol-style-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+
+            $('body').removeClass('modal-open');
+            console.log(ret);
+            callback(ret);
+        });
+    });
+}
 exports.curvePropertiesDialog = function (ModalService, wiComponentService, DialogUtils, currentCurve, callback) {
     let thisModalController = null;
     function ModalController($scope, close) {
@@ -1077,14 +1192,14 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
                 self.drawSample();
             }, self.lineOptions);
         };
-        // this.onEditSymbolStyleButtonClicked = function () {
-        //     DialogUtils.symbolStyleDialog(ModalService, function (options) {
-        //
-        //     });
-        // };
+        this.onEditSymbolStyleButtonClicked = function () {
+            DialogUtils.symbolStyleDialog(ModalService, function (options) {
+
+            });
+        };
         this.onApplyButtonClicked = function () {
             callback(self);
-            console.log(self);
+            console.log("$$",self);
         };
         this.onOkButtonClicked = function () {
             close(self, 100);
@@ -1260,11 +1375,37 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-exports.fillPatternSettingDialog = function (ModalService, callback) {
+exports.fillPatternSettingDialog = function (ModalService, callback, options) {
     function ModalController($scope, close) {
         let self = this;
         this.disabled = false;
         this.error = null;
+
+        this.options = {
+            fill: {
+                foreGround: "#000",
+                backGround: "#fff"
+            },
+            displayFill : false,
+            positiveNegative: {
+                positiveFill:{
+                    noPositiveFill: false,
+                    pattern: "dotted pattern",
+                    foreGround: '#000',
+                    backGround: '#fff'
+                },
+                negativeFill:{
+                    noNegativeFill: false,
+                    pattern: "dotted pattern",
+                    foreGround: '#000',
+                    backGround: '#fff'
+                }
+
+            }
+        };
+        this.enableFill = function (idEnable) {
+            $('#'+ idEnable).prop('disable', true);
+        }
 
         this.onOkButtonClicked = function () {
             self.error = '';

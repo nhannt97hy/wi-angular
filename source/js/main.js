@@ -151,13 +151,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
 
-    // mock logplot. remove when done
-    let mockPlot = {
-        idPlot: Date.now(),
-        name: 'mock plot',
-        option: 'blank-plot'
-    };
-    layoutManager.putWiLogPlotRight('myLogPlot' + mockPlot.idPlot, mockPlot);
 
     // Install TEST
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {

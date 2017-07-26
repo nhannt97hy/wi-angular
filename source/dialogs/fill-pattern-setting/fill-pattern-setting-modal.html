@@ -8,8 +8,150 @@
                 <h4 class="modal-title">Fill Pattern Setting</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" action="" name="modalOpenProject">
-                    
+                <form class="form-horizontal" action="" name="modalFillPatternSetting">
+                    <div class="row">
+                        <h5>Fill</h5>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Fill pattern</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="wiModal.options.fill.pattern"
+                                            class="form-control wi-form-control">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label col-sm-5 small-text" for="foreGround">Fore Ground</label>
+                                <div class="col-sm-7 text-left">
+                                    <input kendo-color-picker k-palette="'websafe'"
+                                           class="form-control wi-form-control"
+                                           ng-model="wiModal.options.fill.foreGround"/>
+                                    {{wiModal.options.fill.foreGround}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label col-sm-5 small-text" for="backGround">Back Ground</label>
+                                <div class="col-sm-7 text-left">
+                                    <input kendo-color-picker k-palette="'websafe'"
+                                           class="form-control wi-form-control"
+                                           ng-model="wiModal.options.fill.backGround"/>
+                                    {{wiModal.options.fill.backGround}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-sm-7">
+                                <label for="displayFill" class="normal-text">
+                                    <input type="checkbox" id="displayFill"
+                                           value="" name=""
+                                           ng-model="wiModal.displayFill">
+                                    Positive/Negative fill
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                    <div id="positiveNegative" class="row">
+                        <div class="container-fluid">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="noPositiveFill" class="normal-text">
+                                        <input type="checkbox" id="noPositiveFill"
+                                               value="" name=""
+                                               ng-model="wiModal.options.positiveNegative.noPositive.noPositiveFill">
+                                        No Positive fill
+                                    </label>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Positive pattern</label>
+                                            <div class="col-sm-8">
+                                                <select ng-model="wiModal.options.positiveNegative.positiveFill.pattern"
+                                                        class="form-control wi-form-control">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-5 small-text" >Positive Fore Ground</label>
+                                            <div class="col-sm-7 text-left">
+                                                <input kendo-color-picker k-palette="'websafe'"
+                                                       class="form-control wi-form-control"
+                                                       ng-model="wiModal.options.positiveNegative.positiveFill.foreGround"/>
+                                                {{wiModal.options.positiveNegative.positiveFill.foreGround}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-5 small-text">Positive Back Ground</label>
+                                            <div class="col-sm-7 text-left">
+                                                <input kendo-color-picker k-palette="'websafe'"
+                                                       class="form-control wi-form-control"
+                                                       ng-model="wiModal.options.positiveNegative.positiveFill.backGround"/>
+                                                {{wiModal.options.positiveNegative.positiveFill.backGround}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="noNegativeFill" class="normal-text">
+                                            <input type="checkbox" id="noNegativeFill"
+                                                   value="" name=""
+                                                   ng-model="wiModal.options.positiveNegative.negativeFill.noNegativeFill">
+                                            No Negative fill
+                                        </label>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-4">Negative pattern</label>
+                                                <div class="col-sm-8">
+                                                    <select ng-model="wiModal.options.positiveNegative.negativeFill.pattern"
+                                                            class="form-control wi-form-control">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 small-text" >Positive Fore Ground</label>
+                                                <div class="col-sm-7 text-left">
+                                                    <input kendo-color-picker k-palette="'websafe'"
+                                                           class="form-control wi-form-control"
+                                                           ng-model="wiModal.options.positiveNegative.negativeFill.foreGround"/>
+                                                    {{wiModal.options.positiveNegative.negativeFill.foreGround}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5 small-text">Positive Back Ground</label>
+                                                <div class="col-sm-7 text-left">
+                                                    <input kendo-color-picker k-palette="'websafe'"
+                                                           class="form-control wi-form-control"
+                                                           ng-model="wiModal.options.positiveNegative.negativeFill.backGround"/>
+                                                    {{wiModal.options.positiveNegative.negativeFill.backGround}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                 </form>
 
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>

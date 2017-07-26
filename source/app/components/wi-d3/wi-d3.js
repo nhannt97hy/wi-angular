@@ -401,6 +401,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
+                console.log("$$", currentCurve);
                 DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, DialogUtils, currentCurve, function(props) {
                     if (props) {
                         console.log(props);
