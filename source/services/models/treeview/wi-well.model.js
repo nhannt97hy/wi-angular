@@ -2,23 +2,75 @@ const wiServiceName = 'WiWell';
 const moduleName = 'wi-well-model';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
-    /**
-     * Sample item from server
-     bottomDepth:"50"
-     createdAt:"2017-07-05T10:26:47.000Z"
-     idProject:1
-     idWell:2
-     name:"Well22"
-     step:"30"
-     topDepth:"10"
-     updatedAt: "2017-07-05T10:26:47.000Z"
-     */
-
+app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset, WiLogplotsModel) {
     function WiWell(well) {
         let self = this;
         let defaultTreeItem = new WiTreeItem();
+        let defaultChildWell = [
+            {
+                name: 'rawdata',
+                type: 'rawdata',
+                data: {
+                    icon: 'project-new-16x16',
+                    label: 'Raw data',
+                    unit: '',
+                    childExpanded: false,
+                    properties: {}
+                },
+                children: []
+            },
+            {
+                name: 'intepretationmodel',
+                type: 'intepretationmodel',
+                data: {
+                    icon: 'project-new-16x16',
+                    label: 'Intepretation Model',
+                    unit: '',
+                    childExpanded: false,
+                    properties: {}
+                },
+                children: []
+            },
+            {
+                name: 'userdefined',
+                type: 'userdefined',
+                data: {
+                    icon: 'user-define-16x16',
+                    label: 'User Defined',
+                    unit: '',
+                    childExpanded: false,
+                    properties: {}
+                },
+                children: []
+            },
+            // {
+            //     name: 'logplots',
+            //     type: 'logplots',
+            //     data: {
+            //         icon: 'logplot-blank-16x16',
+            //         label: 'Logplot',
+            //         unit: '',
+            //         childExpanded: false,
+            //         properties: {}
+            //     },
+            //     children: []
+            // },
+            {
+                name: 'crossplot',
+                type: 'crossplot',
+                data: {
+                    icon: 'crossplot-blank-16x16',
+                    label: 'CrossPlot',
+                    unit: '',
+                    childExpanded: false,
+                    properties: {}
+                },
+                children: []
+            }
+        ];
+
         angular.copy(defaultTreeItem, self);
+        angular.copy(defaultChildWell, self.children);
 
         try {
             self.type = 'well';
@@ -34,9 +86,13 @@ app.factory(wiServiceName, function (WiTreeItem, WiProperty, WiDataset) {
                     let datasetTreeItem = new WiDataset(dataset, well['name']);
                     console.log('datasetTreeItem', datasetTreeItem);
 
-                    self.children.push(datasetTreeItem);
+                    self.children.unshift(datasetTreeItem);
                 }
             }
+
+            let logplots = new WiLogplotsModel(well);
+            self.children.push(logplots);
+
         } catch (err) {
             console.error('Parse well model has error', err);
         }

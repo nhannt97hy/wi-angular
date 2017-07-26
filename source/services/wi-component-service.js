@@ -56,20 +56,29 @@ app.factory(wiServiceName, function () {
         LOGPLOT_HANDLERS: 'LOGPLOT_HANDLERS',
         TREE_FUNCTIONS: 'tree-functions',
         GLOBAL_HANDLERS: 'GLOBAL_HANDLERS',
+        WI_EXPLORER_HANDLERS: 'wi-explorer-handlers',
         GRAPH: 'GRAPH',
         DRAG_MAN: 'DRAG_MAN',
         DIALOG_UTILS:'DIALOG_UTILS',
         LAYOUT_MANAGER: 'LAYOUT_MANAGER',
         UTILS: 'UTILS',
+        // MOMENT: 'moment',
+        PROJECT_LOADED: 'project-loaded',
+        ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',
 
         // event
         ADD_LOGPLOT_EVENT: 'add-logplot-event',
-        PROJECT_UNLOADED_EVENT: 'project-unloaded-event'
+        PROJECT_LOADED_EVENT: 'project-loaded-event',
+        PROJECT_UNLOADED_EVENT: 'project-unloaded-event',
+        PROJECT_REFRESH_EVENT: 'project-refresh-event',
+        UPDATE_WELL_EVENT: 'update-well-event',
+        UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
+        UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
+        UPDATE_TRACKS_EVENT: 'update-tracks-event',
     };
 });
 
 exports.name = moduleName;
-

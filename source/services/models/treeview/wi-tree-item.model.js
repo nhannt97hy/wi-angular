@@ -7,6 +7,7 @@ app.factory(wiServiceName, function () {
         name: '',
         type: '',
         data: {
+            payload: {},
             icon: 'project-new-16x16',
             label: '',
             unit: '',

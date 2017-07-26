@@ -2,11 +2,13 @@
     display: flex;
     flex-direction: column;
 }
-.track-header {
+.track-header-viewport {
+    position: relative;
     width: 100%;
     //height: 100px;
-    overflow-y: scroll;
+    overflow-y: hidden;
     flex: 1;
+
     label {
         //font-size: 6px;
         display: block;
@@ -18,9 +20,17 @@
         }
     }
     label.track-name {
+        position: relative;
         background-color: #88CC88;
+        z-index: 1;
     }
 }
+
+.track-header {
+    position: absolute;
+    width: 100%;
+}
+
 .plot-container {
     position: relative;
     height: 340px;
@@ -30,15 +40,17 @@
     //flex: 1;
 //    border: 1px dashed gray;
 }
-canvas, svg {
-    position:absolute;
-    top:0; left:0; bottom:0; right:0;
-    cursor: crosshair;
+.plot-container {
+    canvas, svg {
+        position:absolute;
+        top:0; left:0; bottom:0; right:0;
+        cursor: crosshair;
+    }
+    svg {
+        z-index: 1;
+    }
 }
 
-svg {
-    z-index: 1;
-}
 
 .grid .tick line {
     stroke: blue;

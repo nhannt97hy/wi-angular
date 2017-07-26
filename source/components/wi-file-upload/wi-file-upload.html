@@ -1,7 +1,9 @@
 <form name="uploadForm">
 
     <br>File:
-    <input type="file" ngf-select ng-model="wiFileUpload.picFile" name="file"
+    <input type="file" name="file"
+           ngf-select
+           ng-model="wiFileUpload.picFile"
            ngf-max-size="2MB" required
            ngf-model-invalid="errorFile">
 

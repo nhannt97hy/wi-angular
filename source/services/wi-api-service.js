@@ -2,8 +2,9 @@ const wiServiceName = 'wiApiService';
 const moduleName = 'wi-api-service';
 
 let app = angular.module(moduleName, []);
-app.factory(wiServiceName, function ($http) {
+app.factory(wiServiceName, function ($http, Upload) {
     const BASE_URL = 'http://54.169.109.34';
+    // const BASE_URL = 'http://localhost:3000';
 
     return {
         post: function (route, payload) {
@@ -12,7 +13,8 @@ app.factory(wiServiceName, function ($http) {
                     url: BASE_URL + route,
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Referrer-Policy': 'no-referrer'
                     },
                     data: payload
                 };
@@ -30,7 +32,93 @@ app.factory(wiServiceName, function ($http) {
                     reject
                 );
             });
-        }
+        },
+
+        postWithFile: function (route, dataPayload) {
+            return new Promise(function (resolve, reject) {
+                let configUpload = {
+                    url: BASE_URL + route,
+                    // url: 'http://localhost:3000' + route,
+                    headers: {
+                        'Referrer-Policy': 'no-referrer'
+                    },
+                    data: dataPayload
+                };
+
+                Upload.upload(configUpload).then(
+                    function (responseSuccess) {
+                        if (responseSuccess.data && responseSuccess.data.content){
+                            return resolve(responseSuccess.data.content);
+                        } else {
+                            return reject('Response is invalid!');
+                        }
+                    },
+                    function (responseError) {
+                        if (responseError.data && responseError.data.content){
+                            return reject(responseError.data.reason);
+                        } else {
+                            return reject(responseError);
+                        }
+                    },
+                    function (evt) {
+                        let progress = Math.round(100.0 * evt.loaded / evt.total);
+                        console.log('evt upload', progress);
+                    }
+                );
+            });
+        },
+
+        postMultiFiles: function (route, dataPayload) {
+            return new Promise(function (resolve, reject) {
+                let configUpload = {
+                    url: BASE_URL + route,
+                    // url: 'http://localhost:3000' + route,
+                    headers: {
+                        'Referrer-Policy': 'no-referrer'
+                    },
+                    data: dataPayload
+                };
+
+                Upload.upload(configUpload).then(
+                    function (responseSuccess) {
+                        console.log('response', responseSuccess);
+                        if (responseSuccess.data && responseSuccess.data.content){
+                            return resolve(responseSuccess.data.content);
+                        } else {
+                            return reject('Response is invalid!');
+                        }
+                    },
+                    function (responseError) {
+                        if (responseError.data && responseError.data.content){
+                            return reject(responseError.data.reason);
+                        } else {
+                            return reject(responseError);
+                        }
+                    },
+                    function (evt) {
+                        let progress = Math.round(100.0 * evt.loaded / evt.total);
+                        console.log('evt upload', progress);
+                    }
+                );
+            });
+        },
+
+        // route: GET, CREATE, UPDATE, DELETE
+        GET_PROJECT: '/project/fullinfo',
+        CURVE: '/project/well/dataset/curve/getData',
+
+        CREATE_PLOT: '/project/well/plot/new',
+        EDIT_PLOT: '/project/well/plot/edit',
+        DELETE_PLOT: '/project/well/plot/delete',
+        GET_PLOT: '/project/well/plot/info',
+
+        CREATE_LOG_TRACK: '/project/well/plot/track/new',
+        DELETE_LOG_TRACK: '/project/well/plot/track/delete',
+        GET_LOG_TRACK: '/project/well/plot/track/info',
+
+        CREATE_DEPTH_AXIS: '/project/well/plot/depth-axis/new',
+        DELETE_DEPTH_AXIS: '/project/well/plot/depth-axis/delete',
+        GET_DEPTH_AXIS: '/project/well/plot/depth-axis/info',
     };
 });
 

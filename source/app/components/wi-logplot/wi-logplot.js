@@ -5,12 +5,14 @@ function Controller($scope, wiComponentService, ModalService) {
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
-    // console.log(utils);
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
+        self.isFitWindow = false;
+        self.isReferenceLine = true;
+        self.isTooltip = true;
 
         // Setup handlers for logplot
         $scope.handlers = {};
@@ -21,6 +23,20 @@ function Controller($scope, wiComponentService, ModalService) {
             wiLogplot: self
         });
 
+        wiComponentService.on(wiComponentService.UPDATE_TRACKS_EVENT, function (logplotModel) {
+            let wiD3Controller = wiComponentService.getComponent(self.wiD3AreaName);
+            if (logplotModel.tracks && logplotModel.tracks.length) {
+                for (let track of logplotModel.tracks) {
+                    wiD3Controller.pushLogTrack();
+                }
+            }
+            //TODO: edit field name
+            if (logplotModel.depth_axes && logplotModel.depth_axes.length) {
+                for (let depthTrack of logplotModel.depth_axes) {
+                    wiD3Controller.pushDepthTrack();
+                }
+            }
+        });
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
@@ -33,8 +49,13 @@ function Controller($scope, wiComponentService, ModalService) {
             let low = max * previousSlidingBarState.top / 100;
             let high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
             wiD3Controller.setDepthRange([low, high]);
-            wiD3Controller.plotAll();
+            // wiD3Controller.plotAll();
         }
+    };
+
+    this.getLogplotModel = function () {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        return utils.findLogplotModelById(self.id);
     };
 
     this.getSlidingbarCtrl = function () {
@@ -53,7 +74,8 @@ app.component(componentName, {
     controllerAs: componentName,
     transclude: true,
     bindings: {
-        name: '@'
+        name: '@',
+        id: '@'
     }
 });
 

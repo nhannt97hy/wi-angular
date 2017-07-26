@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <title>Well Insight App</title>
 
@@ -7,8 +8,13 @@
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
 
+    <!-- color picker -->
+    <link rel="stylesheet" href="vendor/css/kendo.common-material.min.css"/>
+    <link rel="stylesheet" href="vendor/css/kendo.material.min.css"/>
+    <link rel="stylesheet" href="vendor/css/kendo.material.mobile.min.css"/>
+
     <link rel="stylesheet" type="text/css" href="css/dialogs.css">
-    
+
     <link rel="stylesheet" href="css/sprite_16.css">
     <link rel="stylesheet" href="css/sprite_32.css">
 
@@ -31,20 +37,41 @@
 
     <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
-
+    <!-- Insert this line above script imports  -->
+    <script>
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/angular.min.js"></script>
+    <!--<script src="vendor/js/moment.min.js"></script>-->
+    <script src="vendor/js/ng-file-upload.min.js"></script>
     <script src="vendor/js/angular-modal-service.min.js"></script>
     <script src="vendor/js/jquery-ui.js"></script>
+    <script src="vendor/js/jquery.mousewheel.min.js"></script>
     <script src='vendor/js/goldenlayout.min.js'></script>
     <script src='vendor/js/d3.min.js'></script>
     <script src='vendor/js/ResizeSensor.js'></script>
-
+    <!-- color picker -->
+    <script src="vendor/js/kendo.all.min.js"></script>
+    <!-- Insert this line after script imports -->
+    <script>
+        if (window.module) module = window.module;
+    </script>
     <script src="js/main.js.bundle.js"></script>
+
+    <!--select line style && line width-->
+    <script src="vendor/js/angular-sanitize.min.js"></script>
+
+    <link rel="stylesheet" href="vendor/css/select.css">
+    <script src="vendor/js/select.js"></script>
 </head>
+
 <body ng-app='wiapp'>
-    <div class='main' ng-controller="AppController as app">
+    <div class='main' id="main" ng-controller="AppController as app">
         <div class="ribbon-wrapper">
             @@include('./ribbon-block/index.html')
         </div>
@@ -65,4 +92,5 @@
         <h2>Vo va vo van</h2>
     </template>
 </body>
+
 </html>

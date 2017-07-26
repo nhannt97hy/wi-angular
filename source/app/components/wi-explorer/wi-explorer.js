@@ -1,20 +1,59 @@
 const componentName = 'wiExplorer';
 const moduleName = 'wi-explorer';
 
-function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
-        $scope.handlers = wiComponentService.getComponent('GLOBAL_HANDLERS');
-        let utils = wiComponentService.getComponent('UTILS');
-        wiComponentService.on('project-loaded-event', function (project) {
-            utils.pushProjectToExplorer(self, project, wiComponentService, WiTreeConfig, WiWell, $timeout);
+        $scope.handlers = wiComponentService.getComponent(wiComponentService.WI_EXPLORER_HANDLERS);
+        self.handlers = $scope.handlers;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
+            let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
-        wiComponentService.on('project-unloaded-event', function () {
+
+        wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
             self.treeConfig = {};
+            wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, '');
         });
+
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
+            let backupConfig = self.treeConfig;
+            let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
+            utils.pushProjectToExplorer(self, projectRefresh, wiComponentService, WiTreeConfig, WiWell, $timeout);
+
+            console.log('backupConfig', backupConfig);
+            console.log('config', self.treeConfig);
+            $timeout(function() {
+                self.backupConfig(backupConfig, self.treeConfig);
+            });
+        });
+
         if (self.name) wiComponentService.putComponent(self.name, self);
+    };
+
+    this.backupConfig = function(previousConfig, currConfig) {
+        for (let preItem of previousConfig) {
+            for (let item of currConfig) {
+                if (preItem.name === item.name) {
+                    self.backupItemState(preItem, item);
+
+                    if (Array.isArray(preItem.children) && Array.isArray(item.children)) {
+                        self.backupConfig(preItem.children, item.children);
+                    }
+                }
+            }
+        }
+    };
+
+    this.backupItemState = function(preItem, currItem) {
+        if (!preItem || !currItem) return;
+
+        currItem.data.childExpanded = preItem.data.childExpanded;
     };
 
     this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
@@ -38,84 +77,142 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                 label: "Expand All",
                 icon: "expand-all-16x16",
                 handler: function () {
-                    treeviewCtrl.expandAll();
+                    let rootConfig = wiComponentService.getComponent(self.treeviewName).config;
+                    treeviewCtrl.expandAll(rootConfig);
                 }
             }, {
                 name: "CollapseAll",
                 label: "Collapse All",
                 icon: "collapse-all-16x16",
                 handler: function () {
-                    treeviewCtrl.collapseAll();
+                    let rootConfig = wiComponentService.getComponent(self.treeviewName).config;
+                    treeviewCtrl.collapseAll(rootConfig);
                 }
             }
         ]
-    }
+    };
+
 
     this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
+        const defaultWellCtxMenu = [
+            {
+                name: "CreateNewWell",
+                label: "Create New Well",
+                icon: "well-new-16x16",
+                handler: function () {
+                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+                    DialogUtils.addNewDialog(ModalService, function (newWell) {
+                        if (newWell) utils.updateWellProject(wiComponentService, newWell);
+                    });
+                }
+            }, {
+                name: "ImportASCII",
+                label: "Import ASCII",
+                icon: "ascii-import-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportMultiASCII",
+                label: "Import Multi ASCII",
+                icon: "ascii-import-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportLAS",
+                label: "Import LAS",
+                icon: "las-import-16x16",
+                handler: function () {
+                    self.handlers.ImportLASButtonClicked();
+                }
+            }, {
+                name: "ImportMultiLAS",
+                label: "Import Multi LAS",
+                icon: "las-import-16x16",
+                handler: function () {
+                    self.handlers.ImportMultiLASButtonClicked();
+                }
+            }, {
+                name: "ImportDLIS",
+                label: "Import DLIS",
+                icon: "",
+                handler: function () {
+                }
+            }, {
+                name: "IntervalCoreLoader",
+                label: "Interval/Core Loader",
+                icon: "load-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "MultiwellCoreLoader",
+                label: "Multi-well Core Loader",
+                icon: "load-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportWellHeader",
+                label: "Import Well Header",
+                icon: "las-import-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "ImportWellTop",
+                label: "Import Well Top",
+                icon: "las-import-16x16",
+                handler: function () {
+                }
+            }
+        ]
         switch (configType) {
-            case 'well':
-                return [
+            case 'wells':
+                return defaultWellCtxMenu.concat([
                     {
-                        name: "CreateNewWell",
-                        label: "Create New Well",
-                        icon: "well-new-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportASCII",
-                        label: "Import ASCII",
-                        icon: "ascii-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportMultiASCII",
-                        label: "Import Multi ASCII",
-                        icon: "ascii-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportLAS",
-                        label: "Import LAS",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportMultiLAS",
-                        label: "Import Multi LAS",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportDLIS",
-                        label: "Import DLIS",
+                        name: "GroupManager",
+                        label: "Group Manager",
                         icon: "",
                         handler: function () {
                         }
                     }, {
-                        name: "IntervalCoreLoader",
-                        label: "Interval/Core Loader",
-                        icon: "load-16x16",
-                        handler: function () {
-                        }
+                        separator: '1'
                     }, {
-                        name: "MultiwellCoreLoader",
-                        label: "Multi-well Core Loader",
-                        icon: "load-16x16",
+                        name: "Sort",
+                        label: "Sort ...",
+                        icon: "",
                         handler: function () {
-                        }
+                        },
+                        childContextMenu: [
+                            {
+                                name: "SortNone",
+                                label: "None",
+                                icon: "",
+                                handler: function() {
+
+                                }
+                            }, {
+                                name: "SortAZ",
+                                label: "A-Z",
+                                icon: "arrow-down-16x16",
+                                handler: function() {
+
+                                }
+                            }, {
+                                name: "SortZA",
+                                label: "Z-A",
+                                icon: "arrow-up-16x16",
+                                handler: function() {
+
+                                }
+                            }
+                        ]
                     }, {
-                        name: "ImportWellHeader",
-                        label: "Import Well Header",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
-                        name: "ImportWellTop",
-                        label: "Import Well Top",
-                        icon: "las-import-16x16",
-                        handler: function () {
-                        }
-                    }, {
+                        separator: '1'
+                    }
+                ]);
+            case 'well':
+                return defaultWellCtxMenu.concat([
+                    {
                         name: "NewDataset",
                         label: "New Dataset",
                         icon: "dataset-new-16x16",
@@ -148,7 +245,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                     }, {
                         separator: '1'
                     }
-                ];
+                ]);
             case 'data':
                 return [
                     {
@@ -193,11 +290,11 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                         separator: '1'
                     }
                 ];
-            case 'logplot':
+            case 'logplots':
                 return [
                     {
                         name: "NewLogPlot",
-                        label: "New LogPlot",
+                        label: "New LogPlot ...",
                         icon: "logplot-new-16x16",
                         handler: function () {
                         },
@@ -207,6 +304,19 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
+                                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                                    DialogUtils.newBlankLogplotDialog(ModalService, function (data) {
+                                        // let utils = self.wiComponentService.getComponent('UTILS');
+                                        // utils.projectOpen(self.wiComponentService, data);
+                                    });
+
+                                    // let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                                    //
+                                    // // mock plot data
+                                    // let logplot = {
+                                    //     title: 'Mock Blank Plot'
+                                    // };
+                                    // utils.createNewBlankLogPlot(wiComponentService, wiApiService);
                                 }
                             }, {
                                 name: "3TracksBlank",
@@ -275,7 +385,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
             case 'crossplot':
                 return [
                     {
-                        name: "NewCrossPlot",
+                        name: "NewCrossPlot ...",
                         label: "New CrossPlot",
                         icon: "crossplot-new-16x16",
                         handler: function () {
@@ -284,7 +394,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                             {
                                 name: "BlankCrossPlot",
                                 label: "Blank Cross Plot",
-                                icon: "",
+                                icon: "crossplot-new-16x16",
                                 handler: function () {
                                 }
                             }, {
@@ -328,7 +438,7 @@ function Controller($scope, wiComponentService, WiWell, WiTreeConfig, $timeout) 
                             }, {
                                 name: "SonicRt",
                                 label: "Sonic Rt",
-                                icon: "",
+                                icon: "crossplot-new-16x16",
                                 handler: function () {
                                 }
                             }, {
@@ -380,4 +490,3 @@ app.component(componentName, {
 });
 
 exports.name = moduleName;
-

@@ -10,39 +10,83 @@ function Controller($scope, wiComponentService) {
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
-
+    var onDismiss = null;
     this.dismissAll = function () {
         self.shown = false;
         self.contextMenus = [];
+        if ( onDismiss ) onDismiss();
+        onDismiss = null;
     };
-    this.open = function (x, y, buttons) {
+    this.open = function (x, y, buttons, onDismissCallback) {
+        onDismiss = onDismissCallback;
         if (!buttons || buttons.length === 0) return;
         let contextMenu = {};
         if (buttons) contextMenu.buttons = buttons;
         contextMenu.top = y;
         contextMenu.left = x;
         self.contextMenus.push(contextMenu);
+        // console.log('contextmenus', self.contextMenus);
         self.shown = true;
     };
+    this.ngRepeatFinished = function () {
+        let contextMenuElements = $(".context-menu-wrapper");
+        let firstCxtMenuElement = contextMenuElements[0];
+        let contextMenuBackdrop = firstCxtMenuElement.offsetParent;
+        let backdropHeight = contextMenuBackdrop.offsetHeight;
+        let backdropWidth = contextMenuBackdrop.offsetWidth;
+        for (let i = 0; i < contextMenuElements.length; i++) {
+            let contextMenuElement = contextMenuElements[i];
+            let height = contextMenuElement.offsetHeight
+            let width = contextMenuElement.offsetWidth;
+            let top = contextMenuElement.offsetTop;
+            let left = contextMenuElement.offsetLeft;
+            if (top + height >= backdropHeight) {
+                top = backdropHeight - height - 5;
+                $($(".context-menu-wrapper").get(i)).css('top', top);
+            }
+            if (left + width >= backdropWidth) {
+                if (i === 0) {
+                    left = backdropWidth - width - 5;
+                    $(".context-menu-wrapper").css('left', left);
+                } else {
+                    parentMenuWidth = firstCxtMenuElement.offsetWidth;
+                    left = backdropWidth - width - parentMenuWidth - 5;
+                    $($(".context-menu-wrapper").get(i)).css('left', left);
+                }
+            }
+        }
+    }
 
-    this.showChildContextMenu = function (parent, $event, $index) {
-        let childContextMenu = parent.childContextMenu || [];
-        if (childContextMenu.length) {
+    var droppingMenu = [];
+    this.onMouseEnterButton = function (button, $event, $index) {
+        // console.log('droppingMenu', droppingMenu);
+        for (let menu of droppingMenu) {
+            if (button == menu) {
+                clearTimeout(self.dismissChildCtxMenuTimeout);
+                break;
+            }
+        }
+        if (button.childContextMenu && button.childContextMenu.length) {
+            let childContextMenu = button.childContextMenu;
             // let parentWidth = $event.currentTarget.firstChild.clientWidth;
-            let parentHeight = $event.currentTarget.firstChild.clientHeight;
+            let buttonHeight = $event.currentTarget.firstChild.clientHeight;
             let parentMenuX = $event.currentTarget.parentElement.offsetLeft;
             let parentMenuY = $event.currentTarget.parentElement.offsetTop;
             let parentMenuWidth = $event.currentTarget.parentElement.offsetWidth;
             // let menuHeight = $event.currentTarget.parentElement.offsetHeight;
             let x = parentMenuX + parentMenuWidth;
-            let y = parentMenuY + (parentHeight * $index);
+            let y = parentMenuY + (buttonHeight * $index);
             self.open(x, y, childContextMenu);
         }
     }
-    this.dismissChildContextMenu = function (parent) {
-        let childContextMenu = parent.childContextMenu || [];
-        if (childContextMenu.length) {
-            self.contextMenus.pop();
+    this.onMouseLeaveButton = function (button) {
+        if (button.childContextMenu && button.childContextMenu.length) {
+            droppingMenu = button.childContextMenu;
+            self.dismissChildCtxMenuTimeout = setTimeout(function () {
+                self.contextMenus.pop();
+            }, 200);
+        } else {
+            droppingMenu = [];
         }
     }
 }
