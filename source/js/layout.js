@@ -75,12 +75,12 @@ module.exports.putRight = function(templateId, title) {
     });
 }
 
-module.exports.putWiLogPlotRight = function(logPlotName, logplotModel) {
+module.exports.putWiLogPlotRight = function(logplotModel) {
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
         componentName: 'html-block',
         componentState: {
-            html: '<wi-logplot name="' + logPlotName + '"' + 'id="' + logplotModel.idPlot + '"></wi-logplot>'
+            html: '<wi-logplot name="' + logplotModel.name + '"' + 'id="' + logplotModel.idPlot + '"></wi-logplot>'
         },
         title: logplotModel.name
     });
