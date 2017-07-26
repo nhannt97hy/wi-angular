@@ -3,9 +3,12 @@
  * @module visualize
  */
 
-let DepthTrack = require('./visualize-depth-track.js');
-let LogTrack = require('./visualize-log-track.js');
-let Utils = require('./visualize-utils.js');
+let DepthTrack = require('./visualize-depth-track');
+let LogTrack = require('./visualize-log-track');
+let Curve = require('./visualize-curve');
+let Utils = require('./visualize-utils');
+let CanvasHelper = require('./visualize-canvas-helper');
+
 
 let registeredTracks = [];
 
@@ -45,6 +48,21 @@ exports.removeTrack = function(trackIdx, domElem) {
     Utils.removeTrack(trackIdx, domElem);
     registeredTracks.splice(trackIdx, 1);
 }
+
+/**
+ * Create a curve inside a specified DOM element
+ * @param {Object} config - Configurations of new Curve
+ * @param {Array} data - Curve data
+ * @param {Object} domElem - The DOM element containing the curve
+ * @returns {Object} The created curve
+ */
+exports.createCurve = function(config, data, domElem) {
+    let curve = new Curve(config);
+    curve.init(data, domElem);
+    return curve;
+}
+
+exports.CanvasHelper = CanvasHelper;
 
 setInterval(function() {
     registeredTracks.forEach(function(plot) {

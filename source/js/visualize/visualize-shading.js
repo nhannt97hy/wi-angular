@@ -99,6 +99,10 @@ Shading.prototype.nearPoint = function(x, y) {
     return Drawing.prototype.nearPoint.call(this, x, y, 1);
 }
 
+/**
+ * Get all colors used by the shading
+ * @returns {Array}
+ */
 Shading.prototype.getAllColors = function() {
     let colors = [];
     if (d3.color(this.fillStyle))

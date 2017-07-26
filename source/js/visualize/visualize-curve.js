@@ -1,5 +1,6 @@
 let Utils = require('./visualize-utils');
 let Drawing = require('./visualize-drawing');
+let CanvasHelper = require('./visualize-canvas-helper');
 
 module.exports = Curve;
 
@@ -13,7 +14,7 @@ Utils.extend(Drawing, Curve);
  * @param {String} [config.unit] - Unit of data
  * @param {Number} [config.minX] - Mininum x value to show
  * @param {Number} [config.maxX] - Maximum x value to show
- * @param {String} [config.scale] - Scale type (linear or log)
+ * @param {String} [config.scale] - Scale type (Linear or Logarithmic)
  * @param {String} [config.alias] - Text to show on header
  * @param {Boolean} [config.showHeader] - Flag to show or hide header
  * @param {Object} [config.line] - Configuration to draw line
@@ -21,8 +22,12 @@ Utils.extend(Drawing, Curve);
  * @param {Number} [config.line.width] - Line width
  * @param {Array} [config.line.dash] - Line dash style
  * @param {Object} [config.symbol] - Configuration to draw symbol
- * @param {String} [config.symbol.style] - Symbol style (circle, square, cross)
- * @param {String} [config.symbol.color] - Symbol color
+ * @param {String} [config.symbol.style] - Symbol style (circle, square, cross, diamond, plus, star)
+ * @param {String} [config.symbol.fillStyle] - Symbol fill style
+ * @param {String} [config.symbol.strokeStyle] - Symbol stroke style
+ * @param {Number} [config.symbol.lineWidth] - Symbol line width
+ * @param {Array} [config.symbol.lineDash] - Symbol line dash
+ * @param {Number} [config.symbol.size] - Symbol size
  */
 function Curve(config) {
     Drawing.call(this);
@@ -32,7 +37,7 @@ function Curve(config) {
     this.unit = config.unit || 'm3';
     this.minX = config.minX;
     this.maxX = config.maxX;
-    this.scale = config.scale || 'linear';
+    this.scale = config.scale || 'Linear';
     this.alias = config.alias || this.name;
     this.line = config.line;
     this.symbol = config.symbol;
@@ -75,8 +80,8 @@ Curve.prototype.getExtentY = function() {
  */
 Curve.prototype.getScaleFunc = function() {
     return {
-        'linear': d3.scaleLinear,
-        'log': d3.scaleLog
+        'Linear': d3.scaleLinear,
+        'Logarithmic': d3.scaleLog
     }[this.scale];
 }
 
@@ -123,12 +128,18 @@ Curve.prototype.nearPoint = function(x, y) {
     return Drawing.prototype.nearPoint.call(this, x, y, 4);
 }
 
+/**
+ * Get all colors used by the curve
+ * @returns {Array}
+ */
 Curve.prototype.getAllColors = function() {
     let colors = [];
     if (this.line && d3.color(this.line.color))
         colors.push(d3.color(this.line.color).toString());
-    if (this.symbol && d3.color(this.symbol.color))
-        colors.push(d3.color(this.symbol.color).toString());
+    if (this.symbol && d3.color(this.symbol.strokeStyle))
+        colors.push(d3.color(this.symbol.strokeStyle).toString());
+    if (this.symbol && d3.color(this.symbol.fillStyle))
+        colors.push(d3.color(this.symbol.fillStyle).toString());
     return colors;
 }
 
@@ -215,30 +226,19 @@ function plotSymbol(curve, data, highlight) {
     if (typeof curve.symbol != 'object') return;
     let ctx = curve.ctx;
     let symbol = curve.symbol;
-    let plotFunc = getPlotFunc(symbol.style || 'circle');
-    if (!plotFunc) return;
 
-    let size = symbol.size || '4';
+    let helper = new CanvasHelper(ctx, {
+        strokeStyle: highlight ? 'red' : symbol.strokeStyle,
+        fillStyle: highlight ? 'red' : symbol.fillStyle,
+        lineWidth: symbol.lineWidth,
+        lineDash: symbol.lineDash,
+        size: symbol.size
+    })
 
-    ctx.save();
-    ctx.strokeStyle = highlight ? 'red' : (symbol.color || 'blue');
-    ctx.fillStyle  = highlight ? 'red' : (symbol.color || 'blue');
+    let plotFunc = helper[symbol.style];
+    if (typeof plotFunc != 'function') return;
 
     data.forEach(function(d) {
-        plotFunc(ctx, size, x, y)
+        plotFunc.call(helper, d.x, d.y);
     });
-
-    ctx.restore();
-}
-
-function getPlotFunc(style) {
-    return {
-        'circle': plotCircle
-    }[style];
-}
-
-function plotCircle(ctx, size, x, y) {
-    let r = size / 2;
-    ctx.arc(x, y, r, 0, Math.PI * 2, true);
-    ctx.fill();
 }
