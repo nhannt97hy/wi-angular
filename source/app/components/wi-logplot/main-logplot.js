@@ -87,6 +87,16 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
                     background: 'blue',
                     name: 'basement'
                 }
+            },
+            positiveFill: {
+                color: 'red'
+            },
+            negativeFill: {
+                pattern: {
+                    foreground: 'black',
+                    background: 'white',
+                    name: 'chert'
+                }
             }
         });
     }

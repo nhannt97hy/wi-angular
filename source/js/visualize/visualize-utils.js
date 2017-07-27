@@ -8,8 +8,8 @@ exports.isWithinYRange = isWithinYRange;
 exports.trimData = trimData;
 exports.interpolateData = interpolateData;
 exports.parseData = parseData;
-exports.extend = extend
-exports.createFillStyle = createFillStyle
+exports.extend = extend;
+exports.createFillStyles = createFillStyles;
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
@@ -33,16 +33,39 @@ function isWithinYRange(item, extentY) {
     return (item.y >= extentY[0] && item.y <= extentY[1]);
 }
 
-function createFillStyle(ctx, fill) {
-    if (fill.color) return fill.color;
-    if (fill.pattern) {
-        let name = fill.pattern.name;
-        let fg = fill.pattern.foreground;
-        let bg = fill.pattern.background;
-        let pat = CanvasHelper.createPattern(ctx, name, fg, bg);
-        return pat;
-    }
-    return 'black';
+function createFillStyles(ctx, fills, callback) {
+    let patterns = [];
+
+    asyncLoop(
+        fills.length,
+        function(loop) {
+            let fill = fills[loop.iteration()];
+            if (!fill) {
+                patterns.push(null);
+                loop.next();
+            }
+            else if (fill.color) {
+                patterns.push(fill.color);
+                loop.next();
+            }
+            else if (fill.pattern) {
+                let name = fill.pattern.name;
+                let fg = fill.pattern.foreground;
+                let bg = fill.pattern.background;
+                CanvasHelper.createPattern(ctx, name, fg, bg, function(pattern) {
+                    patterns.push(pattern);
+                    loop.next();
+                });
+            }
+            else {
+                patterns.push(null);
+                loop.next();
+            }
+        },
+        function() {
+            callback(patterns);
+        }
+    );
 }
 
 function trimData(data) {
@@ -173,4 +196,31 @@ function removeTrack(idx, baseElement) {
             return i == idx;
         })
         .remove();
+}
+
+function asyncLoop(iterations, func, callback) {
+    let index = 0;
+    let done = false;
+    let loop = {
+        next: function() {
+            if (done) return;
+            if (index < iterations) {
+                index ++;
+                func(loop);
+            }
+            else {
+                done = true;
+                callback();
+            }
+        },
+        iteration: function() {
+            return index - 1;
+        },
+        break: function() {
+            done = true;
+            callback();
+        }
+    };
+    loop.next();
+    return loop;
 }

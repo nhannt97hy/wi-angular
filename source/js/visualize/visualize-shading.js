@@ -173,40 +173,41 @@ Shading.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
     if (plotSamples.length == 0) return;
 
     let ctx = this.ctx;
-    let fill = Utils.createFillStyle(this.ctx, this.fill);
-    let posFill, negFill;
+    let self = this;
 
-    if (this.isNegPosFilling) {
-        posFill = Utils.createFillStyle(this.ctx, this.positiveFill);
-        negFill = Utils.createFillStyle(this.ctx, this.negativeFill);
-    }
-    else {
-        posFill = negFill = fill;
-    }
+    Utils.createFillStyles(this.ctx, [this.fill, this.positiveFill, this.negativeFill], function(fillStyles) {
+        let fill = fillStyles[0];
+        let posFill = fillStyles[1];
+        let negFill = fillStyles[2];
 
-    ctx.clearRect(0, 0, this.clientRect.width, this.clientRect.height);
-    ctx.lineWidth = 0;
+        if (!self.isNegPosFilling) {
+            posFill = negFill = fill;
+        }
 
-    // Draw negative regions
-    ctx.save();
-    ctx.beginPath();
-    ctx.fillStyle = negFill;
-    drawCurveLine(ctx, plotSamples);
-    ctx.clip();
-    ctx.fillRect(rangeX[0], rangeY[0], vpRefX, rangeY[1] - rangeY[0]);
-    ctx.restore();
+        ctx.clearRect(0, 0, self.clientRect.width, self.clientRect.height);
+        ctx.lineWidth = 0;
 
-    // Draw postive regions
-    ctx.save();
-    ctx.beginPath();
-    ctx.fillStyle = posFill;
-    drawCurveLine(ctx, plotSamples);
-    ctx.clip();
-    ctx.fillRect(rangeX[0] + vpRefX, rangeY[0], rangeX[1] - vpRefX, rangeY[1] - rangeY[0]);
-    ctx.restore();
+        // Draw negative regions
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = negFill;
+        drawCurveLine(ctx, plotSamples);
+        ctx.clip();
+        ctx.fillRect(rangeX[0], rangeY[0], vpRefX, rangeY[1] - rangeY[0]);
+        ctx.restore();
 
-    drawHeader(this);
-    drawRefLine(this);
+        // Draw postive regions
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = posFill;
+        drawCurveLine(ctx, plotSamples);
+        ctx.clip();
+        ctx.fillRect(rangeX[0] + vpRefX, rangeY[0], rangeX[1] - vpRefX, rangeY[1] - rangeY[0]);
+        ctx.restore();
+
+        drawHeader(self);
+        drawRefLine(self);
+    });
     return this;
 }
 
@@ -297,16 +298,18 @@ function drawHeader(shading) {
         .attr('height', height)
 
     let hCtx = hCanvas.node().getContext('2d');
-    hCtx.save();
-    if (shading.isNegPosFilling) {
-        hCtx.fillStyle = Utils.createFillStyle(hCtx, shading.negativeFill);
-        hCtx.fillRect(0, 0, width / 2, height);
-        hCtx.fillStyle = Utils.createFillStyle(hCtx, shading.positiveFill);
-        hCtx.fillRect(width / 2, 0, width / 2, height);
-    }
-    else {
-        hCtx.fillStyle = Utils.createFillStyle(hCtx, shading.fill);
-        hCtx.fillRect(0, 0, width, height);
-    }
-    hCtx.restore();
+    Utils.createFillStyles(hCtx, [shading.fill, shading.positiveFill, shading.negativeFill], function(fillStyles) {
+        hCtx.save();
+        if (shading.isNegPosFilling) {
+            hCtx.fillStyle = fillStyles[2];
+            hCtx.fillRect(0, 0, width / 2, height);
+            hCtx.fillStyle = fillStyles[1];
+            hCtx.fillRect(width / 2, 0, width / 2, height);
+        }
+        else {
+            hCtx.fillStyle = fillStyles[0];
+            hCtx.fillRect(0, 0, width, height);
+        }
+        hCtx.restore();
+    })
 }

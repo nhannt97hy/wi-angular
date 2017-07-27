@@ -66,7 +66,7 @@ CanvasHelper.prototype.star = function(x, y) {
     draw(this);
 }
 
-CanvasHelper.createPattern = function(ctx, name, foreground, background) {
+CanvasHelper.createPattern = function(ctx, name, foreground, background, callback) {
     let src = CanvasHelper.RAW_PATTERNS[name];
     if (!src) return null;
     let image = new Image();
@@ -74,10 +74,11 @@ CanvasHelper.createPattern = function(ctx, name, foreground, background) {
         src = src.replace(/(stroke=")\w+(")/, '$1'+foreground+'$2');
     if (background)
         src = src.replace(/(fill=")\w+(")/, '$1'+background+'$2');
-
     image.src = src;
-
-    return ctx.createPattern(image, 'repeat');
+    image.onload = function() {
+        let pattern = ctx.createPattern(image, 'repeat');
+        callback(pattern);
+    }
 }
 
 CanvasHelper.createPattern2 = function(ctx, name, foreground, background, callback) {
