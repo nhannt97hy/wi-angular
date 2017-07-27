@@ -228,29 +228,31 @@ LogTrack.prototype.addCurve = function(data, config) {
  */
 LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     if (!leftCurve && !rightCurve) return;
-    let fillStyle = config.fillStyle || this.genColor();
 
     let leftName = leftCurve ? leftCurve.name : 'left';
     let rightName = rightCurve ? rightCurve.name : 'right';
-    let name = config.name || (leftName + ' - ' + rightName);
+    config.name = config.name || (leftName + ' - ' + rightName);
 
-    let shading = new Shading({
-        fillStyle:fillStyle,
-        name: name,
-        refX: refX
-    });
+    if (config.isNegPosFilling == null && !config.fill) {
+        config.fill = {
+            color: this.genColor()
+        }
+    }
+    config.refX = refX;
+    let shading = new Shading(config);
 
     let self = this;
     shading.init(this.plotContainer, leftCurve, rightCurve);
-    shading.header = this.addShadingHeader(shading, name, fillStyle);
+    shading.header = this.addShadingHeader(shading, config.name, 'red');
     shading.onRefLineDrag(function() {
         let rWidth = shading.refLineWidth;
-        let leftMost = rWidth / 2;
-        let rightMost = self.clientRect.width - rWidth / 2;
-        let refX = d3.event.x;
-        refX = refX > rightMost ? rightMost : refX;
-        refX = refX < leftMost ? leftMost : refX;
-        shading.refX = refX;
+        let rangeX = shading.rangeX;
+        let leftMost = rangeX[0] + rWidth / 2;
+        let rightMost = rangeX[1] - rWidth / 2;
+        let vpRefX = d3.event.x;
+        vpRefX = vpRefX > rightMost ? rightMost : vpRefX;
+        vpRefX = vpRefX < leftMost ? leftMost : vpRefX;
+        shading.refX = shading.getTransformX().invert(vpRefX - rangeX[0]);
         self.plotShading(shading);
     });
     this.drawings.push(shading);
