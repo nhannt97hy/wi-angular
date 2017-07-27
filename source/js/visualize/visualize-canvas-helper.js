@@ -66,6 +66,20 @@ CanvasHelper.prototype.star = function(x, y) {
     draw(this);
 }
 
+CanvasHelper.createPattern = function(ctx, name, foreground, background) {
+    let src = CanvasHelper.RAW_PATTERNS[name];
+    if (!src) return null;
+    let image = new Image();
+    if (foreground)
+        src = src.replace(/(stroke=")\w+(")/, '$1'+foreground+'$2');
+    if (background)
+        src = src.replace(/(fill=")\w+(")/, '$1'+background+'$2');
+
+    image.src = src;
+    console.log(src);
+    return ctx.createPattern(image, 'repeat');
+}
+
 CanvasHelper.RAW_PATTERNS = {
     basement: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M2,0L8,6M9,15L15,9" stroke="black" fill="none"/></g></svg>',
     chert: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M0,3L3,0L6,3M8,7L11,4L14,7M1,11L4,8L7,11M9,15L12,12L15,15" stroke="black" fill="none"/></g></svg>',
