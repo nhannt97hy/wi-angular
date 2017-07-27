@@ -1,3 +1,5 @@
+let CanvasHelper = require('./visualize-canvas-helper');
+
 exports.roundUp = roundUp;
 exports.roundDown = roundDown;
 exports.appendTrack = appendTrack;
@@ -7,6 +9,7 @@ exports.trimData = trimData;
 exports.interpolateData = interpolateData;
 exports.parseData = parseData;
 exports.extend = extend
+exports.createFillStyle = createFillStyle
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
@@ -28,6 +31,18 @@ function clip(val, extent) {
 
 function isWithinYRange(item, extentY) {
     return (item.y >= extentY[0] && item.y <= extentY[1]);
+}
+
+function createFillStyle(ctx, fill) {
+    if (fill.color) return fill.color;
+    if (fill.pattern) {
+        let name = fill.pattern.name;
+        let fg = fill.pattern.foreground;
+        let bg = fill.pattern.background;
+        let pat = CanvasHelper.createPattern(ctx, name, fg, bg);
+        return pat;
+    }
+    return 'black';
 }
 
 function trimData(data) {

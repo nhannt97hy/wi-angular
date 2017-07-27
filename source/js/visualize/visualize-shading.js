@@ -10,19 +10,53 @@ Utils.extend(Drawing, Shading);
  * @constructor
  * @param {Object} config - Configurations of new shading
  * @param {String} [config.name] - Name of new shading
- * @param {String} [config.fillStyle] - Canvas fill style
  * @param {Number} [config.refX] - x coordiate of reference line for custom shading
+ * @param {Number} [config.leftX] - Fix value of left curve
+ * @param {Number} [config.rightX] - Fix value of right curve
+ * @param {Object} [config.fill] - Configurations of fill style (contain only one key: color, pattern, or gradient)
+ * @param {String} [config.fill.color]
+ * @param {Object} [config.fill.pattern]
+ * @param {String} [config.fill.pattern.name]
+ * @param {String} [config.fill.pattern.foreground]
+ * @param {String} [config.fill.pattern.background]
+ * @param {Object} [config.fill.gradient]
+ * @param {Number} [config.fill.gradient.startX]
+ * @param {Number} [config.fill.gradient.endX]
+ * @param {String} [config.fill.gradient.startColor]
+ * @param {String} [config.fill.gradient.endColor]
+ * @param {Boolean} [config.isNegPosFilling] - Indicate whether to draw with negative and positive styles
+ * @param {Object} [config.negativeFill] - Configurations of fill style for negative values
+ * @param {Object} [config.positiveFill] - Configurations of fill style for positive values
+ * @param {Number} [config.refLineWidth] - Width in pixel of reference line
+ * @param {String} [config.refLineColor] - Color of reference line
  */
 function Shading(config) {
     Drawing.call(this);
     if (typeof config != 'object') config = {};
 
-    this.fillStyle = config.fillStyle || 'green';
+    this.fill = config.fill;
+    this.negativeFill = config.negativeFill;
+    this.positiveFill = config.positiveFill;
+    this.isNegPosFilling = config.isNegPosFilling;
+
     this.name = config.name || 'Noname';
     this.refX = config.refX;
+    this.leftX = config.leftX;
+    this.rightX = config.rightX;
 
-    this.refLineWidth = 2;
-    this.refLineColor = '#3e3e3e';
+    this.refLineWidth = config.refLineWidth || 2;
+    this.refLineColor = config.refLineColor || '#3e3e3e';
+    this.showRefLine = config.showRefLine;
+
+    if (this.showRefLine == null && this.refX != null) {
+        this.showRefLine = true;
+    }
+
+    this.vpX = {
+        left: null,
+        right: null,
+        ref: null
+    };
 }
 
 /**
@@ -43,8 +77,12 @@ Shading.prototype.getExtentY = function() {
  * @param {Object} rightCurve - Right curve, null if drawing right shading
  */
 Shading.prototype.init = function(plotContainer, leftCurve, rightCurve) {
+    let self = this;
+
     this.leftCurve = leftCurve;
     this.rightCurve = rightCurve;
+    this.selectedCurve = this.leftCurve || this.rightCurve;
+
     this.clientRect = plotContainer.node().getBoundingClientRect();
 
     this.canvas = plotContainer.append('canvas')
@@ -54,15 +92,14 @@ Shading.prototype.init = function(plotContainer, leftCurve, rightCurve) {
     this.ctx = this.canvas.node().getContext('2d');
     this.svg = plotContainer.select('svg');
 
-    if (this.refX != null) {
-        this.refLine = this.svg.append('line').attr('class', 'ref-line')
-            .attr('x1', this.refX)
-            .attr('x2', this.refX)
-            .attr('y1', 0)
-            .attr('y2', this.clientRect.height)
-            .attr('style', 'stroke:' + this.refLineColor +'; stroke-width:' + this.refLineWidth)
-            .raise();
-    }
+    this.refLine = this.svg
+        .append('line')
+        .attr('class', 'ref-line')
+        .attr('x1', 0)
+        .attr('x2', 0)
+        .attr('y1', 0)
+        .attr('y2', this.clientRect.height);
+
     return this;
 }
 
@@ -71,7 +108,7 @@ Shading.prototype.init = function(plotContainer, leftCurve, rightCurve) {
  */
 Shading.prototype.destroy = function() {
     Drawing.prototype.destroy.call(this);
-    if (this.refLine) this.refLine.remove();
+    this.refLine.remove();
 }
 
 /**
@@ -79,12 +116,10 @@ Shading.prototype.destroy = function() {
  * @param {Object} rect - The bounding rectangle
  */
 Shading.prototype.adjustSize = function(rect) {
-    if (this.refLine) {
-        this.refX = rect.width / this.clientRect.width * this.refX;
-        this.refLine
-            .attr('x1', this.refX)
-            .attr('x2', this.refX);
-    }
+    let vpRefX = this.getTransformX()(this.refX);
+    this.refLine
+        .attr('x1', this.rangeX[0] + vpRefX)
+        .attr('x2', this.rangeX[0] + vpRefX);
     Drawing.prototype.adjustSize.call(this, rect);
     return this;
 }
@@ -118,42 +153,60 @@ Shading.prototype.getAllColors = function() {
  * @param {Boolean} highlight
  */
 Shading.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
-    if (this.refX != null) drawRefLine(this);
+    if (!this.leftCurve && !this.rightCurve) return;
+    let leftData = this.prepareData(this.leftCurve, domainY, rangeX, rangeY);
+    let rightData = this.prepareData(this.rightCurve, domainY, rangeX, rangeY).reverse();
 
-    let leftData = prepareData(this.leftCurve, domainY, rangeX, rangeY);
-    let rightData = prepareData(this.rightCurve, domainY, rangeX, rangeY).reverse();
+    let vpRefX = this.vpX.ref;
+    let vpLeftX = this.vpX.left;
+    let vpRightX = this.vpX.right;
 
-    if (leftData.length == 0 && rightData.length == 0) return;
-
-    if (leftData.length == 0) {
-        let x = this.refX == null ? rangeX[0] : this.refX;
-        leftData = [
-            {x: x, y: rangeY[0]},
-            {x: x, y: rangeY[1]}
+    leftData = (vpLeftX == null && leftData.length > 0) ? leftData : [
+            {x: vpLeftX == null ? vpRefX : vpLeftX, y: rangeY[0]},
+            {x: vpLeftX == null ? vpRefX : vpLeftX, y: rangeY[1]}
         ];
-    }
-
-    if (rightData.length == 0) {
-        let x = this.refX == null ? rangeX[1] : this.refX;
-        rightData = [
-            {x: x, y: rangeY[1]},
-            {x: x, y: rangeY[0]}
+    rightData = (vpRightX == null && rightData.length > 0) ? rightData : [
+            {x: vpRightX == null ? vpRefX : vpRightX, y: rangeY[1]},
+            {x: vpRightX == null ? vpRefX : vpRightX, y: rangeY[0]}
         ];
-    }
-
     let plotSamples = leftData.concat(rightData);
+    if (plotSamples.length == 0) return;
+
     let ctx = this.ctx;
+    let fill = Utils.createFillStyle(this.ctx, this.fill);
+    let posFill, negFill;
+
+    if (this.isNegPosFilling) {
+        posFill = Utils.createFillStyle(this.ctx, this.positiveFill);
+        negFill = Utils.createFillStyle(this.ctx, this.negativeFill);
+    }
+    else {
+        posFill = negFill = fill;
+    }
 
     ctx.clearRect(0, 0, this.clientRect.width, this.clientRect.height);
-    ctx.fillStyle = this.fillStyle;
     ctx.lineWidth = 0;
 
+    // Draw negative regions
+    ctx.save();
     ctx.beginPath();
-    ctx.moveTo(plotSamples[0].x, plotSamples[0].y);
-    plotSamples.forEach(function(item) {
-        ctx.lineTo(item.x, item.y);
-    });
-    ctx.fill();
+    ctx.fillStyle = negFill;
+    drawCurveLine(ctx, plotSamples);
+    ctx.clip();
+    ctx.fillRect(rangeX[0], rangeY[0], vpRefX, rangeY[1] - rangeY[0]);
+    ctx.restore();
+
+    // Draw postive regions
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = posFill;
+    drawCurveLine(ctx, plotSamples);
+    ctx.clip();
+    ctx.fillRect(rangeX[0] + vpRefX, rangeY[0], rangeX[1] - vpRefX, rangeY[1] - rangeY[0]);
+    ctx.restore();
+
+    drawHeader(this);
+    drawRefLine(this);
     return this;
 }
 
@@ -162,18 +215,33 @@ Shading.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
  * @param {Function} cb - Callback function
  */
 Shading.prototype.onRefLineDrag = function(cb) {
-    if (this.refX != null)
-        this.refLine.call(d3.drag().on('drag', cb));
+    this.refLine.call(d3.drag().on('drag', cb));
     return this;
 }
 
-
-function prepareData(curve, domainY, rangeX, rangeY) {
+Shading.prototype.prepareData = function(curve, domainY, rangeX, rangeY) {
     if (!curve) return [];
+    this.rangeX = rangeX;
+    this.rangeY = rangeY;
 
     let scaleX = curve.getScaleFunc();
     let transformX = scaleX().domain(curve.getWindowX()).range(rangeX);
     let transformY = d3.scaleLinear().domain(domainY).range(rangeY);
+
+    if (curve == this.selectedCurve) {
+        this.vpX.ref = (this.refX == null) ?
+            (this.leftCurve && !this.rightCurve ? rangeX[1] : rangeX[0]) :
+            transformX(this.refX);
+        if (this.refX == null)
+            this.refX = this.getTransformX().invert(this.vpX.ref);
+    }
+
+    if (curve == this.leftCurve && this.leftX != null)
+        this.vpX.left = transformX(this.leftX);
+
+    if (curve == this.rightCurve && this.rightX != null)
+        this.vpX.right = transformX(this.rightX);
+
     let data = curve.data
         .filter(function(item) {
             return Utils.isWithinYRange(item, domainY);
@@ -187,11 +255,58 @@ function prepareData(curve, domainY, rangeX, rangeY) {
     return data.slice();
 }
 
+Shading.prototype.getTransformX = function(x) {
+    let curve = this.selectedCurve;
+    return curve.getScaleFunc()()
+        .domain(curve.getWindowX())
+        .range(this.rangeX);
+}
+
+function drawCurveLine(ctx, data) {
+    ctx.moveTo(data[0].x, data[0].y);
+    data.forEach(function(item) {
+        ctx.lineTo(item.x, item.y);
+    });
+}
+
 function drawRefLine(shading) {
-    shading.refLine.attr('x1', shading.refX)
-        .attr('x2', shading.refX)
+    shading.refLine
+        .attr('x1', shading.rangeX[0] + shading.vpX.ref)
+        .attr('x2', shading.rangeX[0] + shading.vpX.ref)
         .attr('y1', 0)
         .attr('y2', shading.clientRect.height)
         .attr('stroke', shading.refLineColor)
+        .attr('stroke-width', shading.refLineWidth)
+        .style('display', shading.showRefLine ? 'block' : 'none')
         .raise();
+}
+
+function drawHeader(shading) {
+    let header = shading.header;
+    if (!header) return;
+    header
+        .select('.shading-name-header')
+        .text(shading.name);
+
+    let rect = header.node().getBoundingClientRect();
+    let width = rect.width -2;
+    let height = rect.height -2;
+    let hCanvas = header
+        .select('canvas')
+        .attr('width', width)
+        .attr('height', height)
+
+    let hCtx = hCanvas.node().getContext('2d');
+    hCtx.save();
+    if (shading.isNegPosFilling) {
+        hCtx.fillStyle = Utils.createFillStyle(hCtx, shading.negativeFill);
+        hCtx.fillRect(0, 0, width / 2, height);
+        hCtx.fillStyle = Utils.createFillStyle(hCtx, shading.positiveFill);
+        hCtx.fillRect(width / 2, 0, width / 2, height);
+    }
+    else {
+        hCtx.fillStyle = Utils.createFillStyle(hCtx, shading.fill);
+        hCtx.fillRect(0, 0, width, height);
+    }
+    hCtx.restore();
 }
