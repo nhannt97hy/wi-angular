@@ -311,7 +311,10 @@
                                                     <select ng-model="shading.shadingStyle" name="shadingStyle" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.shadingStyle track by item"></select>
                                                 </td>
                                                 <td>
-                                                    <input type="button" ng-model="shading.fillPattern" class="form-control wi-form-control">
+                                                    <input type="button" value="Define" 
+                                                            ng-model="shading.fillPattern" 
+                                                            class="form-control wi-form-control"
+                                                            ng-click="wiModal.definePatternButtonClicked();">
                                                 </td>
                                                 <td>
                                                     <input type="button" ng-model="shading.variableShading" class="form-control wi-form-control">

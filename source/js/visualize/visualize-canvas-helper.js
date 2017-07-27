@@ -76,8 +76,23 @@ CanvasHelper.createPattern = function(ctx, name, foreground, background) {
         src = src.replace(/(fill=")\w+(")/, '$1'+background+'$2');
 
     image.src = src;
-    console.log(src);
+
     return ctx.createPattern(image, 'repeat');
+}
+
+CanvasHelper.createPattern2 = function(ctx, name, foreground, background, callback) {
+    let src = CanvasHelper.RAW_PATTERNS[name];
+    if (!src) return null;
+    let image = new Image();
+    if (foreground)
+        src = src.replace(/(stroke=")\w+(")/, '$1'+foreground+'$2');
+    if (background)
+        src = src.replace(/(fill=")\w+(")/, '$1'+background+'$2');
+
+    image.src = src;
+    image.onload = function() {
+        callback(image, 'repeat');
+    }
 }
 
 CanvasHelper.RAW_PATTERNS = {

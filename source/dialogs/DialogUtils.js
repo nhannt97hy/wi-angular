@@ -1379,42 +1379,25 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         this.error = null;
 
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-        console.log("GR: ", graph);
-        this.options = {
-            fill: {
-                foreground: "#000",
-                background: "#fff"
-            },
-            displayFill : false,
-            positiveNegative: {
-                positiveFill:{
-                    noPositiveFill: false,
-                    pattern: "dotted pattern",
-                    foreground: '#000',
-                    background: '#fff'
-                },
-                negativeFill:{
-                    noNegativeFill: false,
-                    pattern: "dotted pattern",
-                    foreground: '#000',
-                    background: '#fff'
-                }
-            }
-        };
-        this.enableFill = function (idEnable) {
-            $('#'+ idEnable).prop('disable', true);
+        // let CanvasHelper = graph.CanvasHelper;
+        // ctx.fillStyle = CanvasHelper.createPattern(ctx, 'chert', 'red', 'blue');
+        // ctx.fillRect()
+        console.log("$$", graph);
+        
+        this.options = options;
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.enableFill = function (idEnable, value) {
+            $('#'+ idEnable + " :input").attr("disabled", value);
         }
 
         this.onOkButtonClicked = function () {
             self.error = '';
-            self.disabled = true;
-
-
+            close(self.options, 200);
         };
 
         this.onCancelButtonClicked = function () {
             console.log('onCancelButtonClicked');
-            // close(null, 500);
+            close(null, 200);
         }
     }
 
@@ -1739,6 +1722,32 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
                 self.currentCurve.push({});
         };
 
+        
+        this.fillOptions = {
+            fill: {
+                foreground: "#0000ff",
+                background: "#ffff00",
+                pattern : null
+            },
+            positiveFill:{
+                pattern: null,
+                foreground: '#00ff00',
+                background: '#ffff00'
+            },
+            negativeFill:{
+                pattern: null,
+                foreground: '#ff0000',
+                background: '#ff0'
+            }
+        }
+        this.definePatternButtonClicked = function () {
+            console.log("define");
+            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+            DialogUtils.fillPatternSettingDialog(ModalService, function () {
+                console.log("fillPattern");
+
+            }, self.fillOptions);
+        }
         // Dialog buttons
         this.onApplyButtonClicked = function () {
             //close(props, 100);
