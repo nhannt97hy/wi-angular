@@ -148,6 +148,8 @@ app.factory(wiServiceName, function ($http, Upload) {
         CREATE_DEPTH_AXIS: '/project/well/plot/depth-axis/new',
         DELETE_DEPTH_AXIS: '/project/well/plot/depth-axis/delete',
         GET_DEPTH_AXIS: '/project/well/plot/depth-axis/info',
+
+        CREATE_LINE: '/project/well/plot/track/line/new',
     };
 });
 

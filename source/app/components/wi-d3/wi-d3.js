@@ -127,19 +127,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idPlot: self.logPlotCtrl.id
         };
         wiApiService.post(wiApiService.CREATE_LOG_TRACK, dataRequest)
-            .then(function (res) {
-                console.log("Success: ", res);
-                self.pushLogTrack();
+            .then(function (logTrack) {
+                console.log("Success: ", logTrack);
+                self.pushLogTrack(logTrack);
             })
-            .catch(function (res) {
-                wiComponentService.getComponent(wiComponentService.UTILS).error(res);
+            .catch(function (err) {
+                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                 return;
             });
     }
 
-    this.pushLogTrack = function () {
+    this.pushLogTrack = function (logTrack) {
         let graph = wiComponentService.getComponent('GRAPH');
         console.log(self.plotAreaId);
+        // track config
+        TRACK_CFG.id = logTrack.idTrack;
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
@@ -176,16 +178,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idPlot: self.logPlotCtrl.id
         };
         wiApiService.post(wiApiService.CREATE_DEPTH_AXIS, dataRequest)
-            .then(function (res) {
-                console.log("Success: ", res);
-                self.pushDepthTrack();
+            .then(function (depthTrack) {
+                console.log("Success: ", depthTrack);
+                self.pushDepthTrack(depthTrack);
             })
-            .catch(function (res) {
-                wiComponentService.getComponent(wiComponentService.UTILS).error(res);
+            .catch(function (err) {
+                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                 return;
             });
     }
-    this.pushDepthTrack = function () {
+    this.pushDepthTrack = function (depthTrack) {
         let graph = wiComponentService.getComponent('GRAPH');
         console.log(self.plotAreaId);
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));

@@ -50,6 +50,59 @@ exports.projectClose = function (wiComponentService) {
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
+function getCurveFromId(idCurve, wiComponentService) {
+    let rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNode) return;
+    let curve = null;
+    rootNode.forEach(function(node) {
+        visit(node, function (aNode) {
+            if (aNode.type == 'curve' && aNode.id == idCurve) {
+                curve = aNode;
+            }
+        });
+    }, this);
+    return curve;
+}
+
+function lineToTreeConfig(line, wiComponentService) {
+    let lineModel = new Object();
+    let curveModel = getCurveFromId(line.idCurve, wiComponentService);
+    console.log(curveModel);
+    lineModel.name = curveModel.properties.name;
+    lineModel.type = 'line';
+    lineModel.id = line.idLine;
+    lineModel.data = {
+        name: lineModel.name,
+        unit: curveModel.properties.unit,
+        minX: line.minValue,
+        maxX: line.maxValue,
+        scale: line.displayType,
+        alias: curveModel.properties.alias,
+        showHeader: line.showHeader,
+        line: null,
+        symbol: null
+    };
+    let temp = line.displayMode.toLowerCase().trim();
+    if ( temp == 'line' || temp == 'both') {
+        lineModel.data.line = {
+            dash: eval(line.lineStyle),
+            color: line.lineColor,
+            width: line.lineWidth
+        }
+    }
+    if ( temp == 'symbol' || temp == 'both') {
+        lineModel.data.symbol = {
+            // style: ,
+            // fillStyle: ,
+            lineWidth: line.lineWidth,
+            lineDash: eval(line.lineStyle),
+            // size: 
+        }
+    }
+    return lineModel;
+}
+exports.lineToTreeConfig = lineToTreeConfig;
+
 function trackToModel(track) {
     var trackModel = new Object();
     trackModel.idPlot = track.idPlot;
@@ -67,6 +120,7 @@ function logplotToTreeConfig(plot) {
     var plotModel = new Object();
     plotModel.name = 'logplot';
     plotModel.type = 'logplot';
+    plotModel.id = plot.idPlot;
     plotModel.properties = {
         idWell: plot.idWell,
         idPlot: plot.idPlot,
@@ -96,13 +150,15 @@ function curveToTreeConfig(curve) {
     var curveModel = new Object();
     curveModel.name = 'curve';
     curveModel.type = 'curve';
+    curveModel.id = curve.idCurve;
     curveModel.properties = {
         idDataset: curve.idDataset,
         idCurve: curve.idCurve,
         idFamily: curve.idFamily,
         name: curve.name,
         unit: "US/F",
-        dataset: curve.dataset
+        dataset: curve.dataset,
+        alias: curve.name // TODO
     };
     curveModel.data = {
         childExpanded: false,
@@ -118,6 +174,7 @@ function datasetToTreeConfig(dataset) {
     var datasetModel = new Object();
     datasetModel.name = "dataset";
     datasetModel.type = "dataset";
+    datasetModel.id = dataset.idDataset;
     datasetModel.properties = {
         idWell: dataset.idWell,
         idDataset: dataset.idDataset,
@@ -166,6 +223,7 @@ function wellToTreeConfig(well) {
     var wellModel = new Object();
     wellModel.name = "well";
     wellModel.type = "well";
+    wellModel.id = well.idWell;
     wellModel.properties = {
         idProject: well.idProject,
         idWell: well.idWell,
@@ -197,6 +255,7 @@ exports.projectToTreeConfig = function(project) {
     var projectModel = new Object();
     projectModel.type = 'project';
     projectModel.name = 'project';
+    projectModel.id = project.idProject;
     projectModel.properties = {
         idProject: project.idProject,
         name: project.name,
@@ -223,7 +282,7 @@ exports.projectToTreeConfig = function(project) {
 exports.visit = visit;
 
 function visit(node, callback) {
-    if(node.data.deleted) return;
+    if( node.data && node.data.deleted) return;
     callback(node);
     if (node.children) {
         node.children.forEach(function(child){
@@ -327,7 +386,7 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 function getCurveDataByName(apiService, idCurve, callback) {
     apiService.post(apiService.CURVE, { idCurve })
         .then(function (curve) {
-            console.log('curve data', curve);
+            // console.log('curve data', curve);
             callback(null, curve);
         })
         .catch(function (err) {
@@ -351,12 +410,19 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
             if (wiD3Ctrl && track) {
-                getCurveDataByName(apiService, ui.helper.attr('data'), function (err, data) {
-                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, {
-                        name: ui.helper.attr('data'),
-                        unit: 'm3'
+                let idCurve = ui.helper.attr('data');
+                apiService.post(apiService.CREATE_LINE, { idTrack: track.id, idCurve: idCurve })
+                    .then(function(line){
+                        console.log('line created', line);
+                        let lineModel = lineToTreeConfig(line, wiComponentService);
+                        getCurveDataByName(apiService, idCurve, function (err, data) {
+                            if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                        });
+                    })
+                    .catch(function(err){
+                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                        return;
                     });
-                });
             }
         },
         appendTo: 'body',

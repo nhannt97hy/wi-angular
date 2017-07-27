@@ -29,14 +29,14 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
                 logplotModel.tracks.forEach(function(track) {
                     if (track.type == 'log') {
                         $timeout(function(){
-                            // wiD3Controller.pushLogTrack(track);
-                            wiD3Controller.pushLogTrack();
+                            wiD3Controller.pushLogTrack(track);
+                            // wiD3Controller.pushLogTrack();
                         });
                     }
                     if (track.type == 'depth') {
                         $timeout(function(){
-                            // wiD3Controller.pushDepthTrack(track);
-                            wiD3Controller.pushDepthTrack();
+                            wiD3Controller.pushDepthTrack(track);
+                            // wiD3Controller.pushDepthTrack();
                         });
                     }
                 });
