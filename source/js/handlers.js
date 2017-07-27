@@ -90,7 +90,12 @@ exports.AddNewButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
 
     DialogUtils.addNewDialog(this.ModalService, function (newWell) {
-        if (newWell) utils.updateWellProject(wiComponentService, newWell);
+        if (newWell) {
+            let wellModel = utils.wellToTreeConfig(newWell);
+            let selectedNode = utils.getSelectedNode(wiComponentService);
+            selectedNode.children.push(wellModel);
+        }
+        //if (newWell) utils.updateWellProject(wiComponentService, newWell);
     });
 };
 
@@ -199,12 +204,29 @@ exports.ExportWellTopButtonClicked = function () {
 };
 
 exports.BlankLogplotButtonClicked = function () {
-    console.log('BlankLogplotButton is clicked');
-    var wiComponentService = this.wiComponentService;
-    var DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.blankLogplotDialog(this.ModalService, function (ret) {
-        console.log("User Choose: " + ret);
-    })
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function(logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode(wiComponentService);
+                $timeout(function(){
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel);
+                //wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logplotModel);
+            })
+            .catch(function(err) {
+                utils.error('newBlankLogplotDialog err ' + err);
+            });
+    });
 };
 
 exports.TrippleComboButtonClicked = function () {

@@ -12,7 +12,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-            utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
+            let projectModel = utils.projectToTreeConfig(projectLoaded);
+            self.treeConfig = [projectModel];
+            //utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -33,6 +35,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             });
         });
 
+        WICS = wiComponentService;
+        WIEXPLORER = self;
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
@@ -93,19 +97,24 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
     };
 
 
-    this.getItemTreeviewCtxMenu = function (configType, treeviewCtrl) {
+    this.getItemTreeviewCtxMenu = function (nodeType, treeviewCtrl) {
         const defaultWellCtxMenu = [
             {
                 name: "CreateNewWell",
                 label: "Create New Well",
                 icon: "well-new-16x16",
                 handler: function () {
+                    let handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+                    handlers.AddNewButtonClicked();
+                    /*
                     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                    
                     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
                     DialogUtils.addNewDialog(ModalService, function (newWell) {
+                        console.log(newWell);
                         if (newWell) utils.updateWellProject(wiComponentService, newWell);
-                    });
+                    });*/
                 }
             }, {
                 name: "ImportASCII",
@@ -165,7 +174,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 }
             }
         ]
-        switch (configType) {
+        switch (nodeType) {
+            case 'project':
             case 'wells':
                 return defaultWellCtxMenu.concat([
                     {
@@ -235,6 +245,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Delete",
                         icon: "delete-16x16",
                         handler: function () {
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         name: "Group",
@@ -247,6 +258,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }
                 ]);
             case 'data':
+            case 'dataset':
                 return [
                     {
                         name: "Rename",
@@ -304,12 +316,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
-                                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                                    DialogUtils.newBlankLogplotDialog(ModalService, function (data) {
-                                        // let utils = self.wiComponentService.getComponent('UTILS');
-                                        // utils.projectOpen(self.wiComponentService, data);
-                                    });
-
+                                    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+                                    globalHandlers.BlankLogplotButtonClicked();
                                     // let utils = wiComponentService.getComponent(wiComponentService.UTILS);
                                     //
                                     // // mock plot data
@@ -476,6 +484,31 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         }
     }
 
+    function toListConfig(currentNode) {
+        let config = {
+            name: currentNode.name,
+            heading: currentNode.name,
+            data: new Array()
+        }
+        for (var key in currentNode.properties) {
+            if (currentNode.properties.hasOwnProperty(key)) {
+                config.data.push({key:key, value:currentNode.properties[key]});
+            }
+        };
+        return [config];
+    }
+    // Select tree node and update wi-properties
+    this.selectHandler = function(currentNode) {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        self.treeConfig.forEach(function(item) {
+            utils.visit(item, function(node) {
+                if(node.data) node.data.selected = false;
+            });
+        });
+
+        if( currentNode.data ) currentNode.data.selected = true;
+        wiComponentService.emit('update-properties', toListConfig(currentNode));
+    }
 }
 
 let app = angular.module(moduleName, []);

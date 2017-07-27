@@ -27,6 +27,7 @@ function LogTrack(config) {
     this.drawings = [];
     this.windowX = [0, 1];
     this.windowY = [];
+    this.id = config.id;
 
     this.translateOpts = {};
     this.xAxisClass = 'grid';

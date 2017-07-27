@@ -1,7 +1,7 @@
 const componentName = 'wiLogplot';
 const moduleName = 'wi-logplot';
 
-function Controller($scope, wiComponentService, ModalService) {
+function Controller($scope, wiComponentService, ModalService, $timeout) {
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
@@ -24,17 +24,22 @@ function Controller($scope, wiComponentService, ModalService) {
         });
 
         wiComponentService.on(wiComponentService.UPDATE_TRACKS_EVENT, function (logplotModel) {
-            let wiD3Controller = wiComponentService.getComponent(self.wiD3AreaName);
+            let wiD3Controller = self.getwiD3Ctrl();
             if (logplotModel.tracks && logplotModel.tracks.length) {
-                for (let track of logplotModel.tracks) {
-                    wiD3Controller.pushLogTrack();
-                }
-            }
-            //TODO: edit field name
-            if (logplotModel.depth_axes && logplotModel.depth_axes.length) {
-                for (let depthTrack of logplotModel.depth_axes) {
-                    wiD3Controller.pushDepthTrack();
-                }
+                logplotModel.tracks.forEach(function(track) {
+                    if (track.type == 'log') {
+                        $timeout(function(){
+                            wiD3Controller.pushLogTrack(track);
+                            // wiD3Controller.pushLogTrack();
+                        });
+                    }
+                    if (track.type == 'depth') {
+                        $timeout(function(){
+                            wiD3Controller.pushDepthTrack(track);
+                            // wiD3Controller.pushDepthTrack();
+                        });
+                    }
+                });
             }
         });
         if (self.name) wiComponentService.putComponent(self.name, self);

@@ -52,7 +52,18 @@ span, h4, h5, p {
 }
 
 .lm_header .lm_tab.lm_active {
-    border-top: 2px solid blue;
+    background: rgba(247,247,248,1);
+    background: -moz-linear-gradient(top, rgba(247,247,248,1) 0%, rgba(225,225,225,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(247,247,248,1)), color-stop(100%, rgba(225,225,225,1)));
+    background: -webkit-linear-gradient(top, rgba(247,247,248,1) 0%, rgba(225,225,225,1) 100%);
+    background: -o-linear-gradient(top, rgba(247,247,248,1) 0%, rgba(225,225,225,1) 100%);
+    background: -ms-linear-gradient(top, rgba(247,247,248,1) 0%, rgba(225,225,225,1) 100%);
+    background: linear-gradient(to bottom, rgba(247,247,248,1) 0%, rgba(225,225,225,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f7f8', endColorstr='#e1e1e1', GradientType=0 );
+}
+
+.lm_header .lm_tab .lm_title{
+    font-weight: bold;
 }
 
 div.lm_content {

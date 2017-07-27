@@ -33,7 +33,8 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
     };
 
-    this.onClick = function ($index) {
+    this.onClick1 = function($index) {
+        console.log('onClick:', $index, self);
         wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
         wiComponentService.putComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD, self.config[$index].data.payload);
 
@@ -44,7 +45,21 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         }
     };
 
-    this.onDoubleClick = function ($index) {
+    this.onClick = function($index) {
+        console.log('onClick1:', $index, self);
+        if(self.container && self.container.selectHandler) {
+            self.container.selectHandler(self.config[$index]);
+        }
+    }
+
+    this.onDoubleClick = function($index) {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let logplotModel = utils.getSelectedNode(wiComponentService);
+        if( logplotModel.type != 'logplot') return;
+        utils.openLogplotTab(wiComponentService, logplotModel);
+    }
+
+    this.onDoubleClick1 = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
         } else if (self.config[$index].children && self.config[$index].children.length !== 0) {
@@ -221,10 +236,10 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         console.log('self.name', self.name);
         console.log('$index', $index);
         console.log('self.config', self.config);
-        let configType = self.config[$index].type;
+        let nodeType = self.config[$index].type;
         let contextMenuHolderCtrl = wiComponentService.getComponent(self.contextmenuholder);
         let defaultContextMenu = contextMenuHolderCtrl.getDefaultTreeviewCtxMenu($index, self);
-        let itemContextMenu = contextMenuHolderCtrl.getItemTreeviewCtxMenu(configType, self);
+        let itemContextMenu = contextMenuHolderCtrl.getItemTreeviewCtxMenu(nodeType, self);
         let contextMenu = itemContextMenu.concat(defaultContextMenu);
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
@@ -238,7 +253,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         config: '<',
-        contextmenuholder: '@'
+        contextmenuholder: '@',
+        container: '<'
     }
 });
 

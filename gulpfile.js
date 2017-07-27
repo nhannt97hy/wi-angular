@@ -13,6 +13,7 @@ const async = require('async');
 const fileInclude = require('gulp-file-include');
 const XLSX = require('xlsx');
 const workbook = XLSX.readFile('Wi-UI.Tung.xlsx');
+const rsync = require('gulp-rsync');
 const fs = require('fs');
 
 const BUILD_DIR = {
@@ -247,12 +248,12 @@ gulp.task('gen-template', ['gen-wi-logplot-template', 'gen-wi-explorer-template'
 
 gulp.task('gen-wi-logplot-template', function () {
     var configFile = 'config/wi-logplot.config.js';
-    var xlsxFile = './Wi-LogPlot.xlsx';
+    var xlsxFile = './Wi-LogPlot.Nam.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 gulp.task('gen-wi-explorer-template', function () {
     var configFile = 'config/wi-explorer.config.js';
-    var xlsxFile = './Wi-Explorer.xlsx';
+    var xlsxFile = './Wi-Explorer.Nam.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 
@@ -267,7 +268,7 @@ gulp.task('gen-functions', ['gen-wi-logplot-functions', 'gen-wi-explorer-functio
 
 gulp.task('gen-wi-logplot-functions', function () {
     var configFile = 'config/wi-logplot.config.js';
-    var xlsxFile = './Wi-LogPlot.xlsx';
+    var xlsxFile = './Wi-LogPlot.Nam.xlsx';
     var templateFile = 'source/js/wi-logplot-handlers.js.tmpl';
 
     var wiUI = require('./preprocess/excel-to-json.js');
@@ -276,7 +277,7 @@ gulp.task('gen-wi-logplot-functions', function () {
 
 gulp.task('gen-wi-explorer-functions', function () {
     var configFile = 'config/wi-explorer.config.js';
-    var xlsxFile = './Wi-Explorer.xlsx';
+    var xlsxFile = './Wi-Explorer.Nam.xlsx';
     var templateFile = 'source/js/wi-explorer-handlers.js.tmpl';
 
     var wiUI = require('./preprocess/excel-to-json.js');
@@ -313,7 +314,7 @@ gulp.task('default', ['watch']);
 /**
  * Push build to gh-pages
  */
-gulp.task('deploy', function () {
+gulp.task('github-page', function () {
     return gulp.src("./build/**/*")
         .pipe(deploy());
 });
@@ -324,4 +325,13 @@ gulp.task('build-visualize', mainTasks, function() {
         'build/js/main.js'
     ])
         .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
+});
+
+gulp.task('deploy', function() {
+    return gulp.src("./build/**/*")
+        .pipe(rsync({
+            root: "build/",
+            hostname: "centos@54.169.109.34",
+            destination:"/opt/wi-angular/build"
+        }));
 });

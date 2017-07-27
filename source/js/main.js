@@ -118,7 +118,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
         wiApiService,
         $timeout
     };
-
+    
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(globalHandlers, logplotHandlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
@@ -155,21 +155,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
         console.log(logplotModel);
         layoutManager.putWiLogPlotRight(logplotModel);
-        let dataRequest = {
-            idPlot: logplotModel.idPlot
-        }
-        wiApiService.post(wiApiService.GET_PLOT, dataRequest)
-            .then(function (res) {
-                console.log("Get plot info success: ", res);
-                wiComponentService.emit(wiComponentService.UPDATE_TRACKS_EVENT, logplotModel);
-            })
-            .catch(function (res) {
-                wiComponentService.getComponent(wiComponentService.UTILS).error(res);
-            });
+        // wiComponentService.emit(wiComponentService.UPDATE_TRACKS_EVENT, logplotModel);
     });
-    // wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
-    //     layoutManager.putWiLogPlotRight('myLogPlot' + logplotModel.idPlot, logplotModel);
-    // });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
