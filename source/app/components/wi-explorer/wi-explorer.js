@@ -35,6 +35,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             });
         });
 
+        WICS = wiComponentService;
         WIEXPLORER = self;
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
@@ -103,13 +104,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 label: "Create New Well",
                 icon: "well-new-16x16",
                 handler: function () {
+                    let handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+                    handlers.AddNewButtonClicked();
+                    /*
                     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+                    
                     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
                     DialogUtils.addNewDialog(ModalService, function (newWell) {
                         console.log(newWell);
                         if (newWell) utils.updateWellProject(wiComponentService, newWell);
-                    });
+                    });*/
                 }
             }, {
                 name: "ImportASCII",
@@ -240,6 +245,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Delete",
                         icon: "delete-16x16",
                         handler: function () {
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         name: "Group",
@@ -310,12 +316,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
-                                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                                    DialogUtils.newBlankLogplotDialog(ModalService, function (data) {
-                                        // let utils = self.wiComponentService.getComponent('UTILS');
-                                        // utils.projectOpen(self.wiComponentService, data);
-                                    });
-
+                                    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+                                    globalHandlers.BlankLogplotButtonClicked();
                                     // let utils = wiComponentService.getComponent(wiComponentService.UTILS);
                                     //
                                     // // mock plot data
@@ -497,12 +499,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
     }
     // Select tree node and update wi-properties
     this.selectHandler = function(currentNode) {
-        function visit(node, callback) {
-            callback(node);
-            if (node.children) node.children.forEach(function(child){visit(child, callback);});
-        }
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         self.treeConfig.forEach(function(item) {
-            visit(item, function(node) {
+            utils.visit(item, function(node) {
                 if(node.data) node.data.selected = false;
             });
         });

@@ -51,10 +51,10 @@ exports.ImportWellTopButtonClicked = function () {
 exports.ReloadProjectButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     utils.refreshProjectState(this.wiComponentService, this.wiApiService)
-        .then(function() {
+        .then(function () {
             console.log('reload project success');
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log('reload project err', err);
         })
 }
@@ -74,8 +74,32 @@ exports.CollapseProjectButtonClicked = function () {
     }
 }
 
-exports.DeleteProjectButtonClicked = function () {
-    console.log('DeleteProjectButton is clicked');
+exports.DeleteItemButtonClicked = function () {
+    console.log('DeleteItemButton is clicked');
+
+    const ModalService = this.ModalService;
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = utils.getSelectedNode(wiComponentService);
+
+    dialogUtils.confirmDialog(ModalService, "Delete confirm", "Are you sure to delete " + selectedNode.data.label, function (yes) {
+        if (yes) {
+            let dataRequest = {
+                idWell: selectedNode.properties.idWell
+            }
+            wiApiService.delete(wiApiService.DELETE_WELL, dataRequest)
+                .then(function (res) {
+                    $timeout(function () {
+                        selectedNode.data.deleted = true;
+                    });
+                }).catch(function (err) {
+                    utils.error(err);
+                })
+        }
+    });
 }
 
 exports.BrowseProjectButtonClicked = function () {

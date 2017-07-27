@@ -52,7 +52,14 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         }
     }
 
-    this.onDoubleClick = function ($index) {
+    this.onDoubleClick = function($index) {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let logplotModel = utils.getSelectedNode(wiComponentService);
+        if( logplotModel.type != 'logplot') return;
+        utils.openLogplotTab(wiComponentService, logplotModel);
+    }
+
+    this.onDoubleClick1 = function ($index) {
         if (self.config[$index].data.handler) {
             self.config[$index].data.handler();
         } else if (self.config[$index].children && self.config[$index].children.length !== 0) {

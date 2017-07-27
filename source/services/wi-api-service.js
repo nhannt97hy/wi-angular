@@ -34,6 +34,33 @@ app.factory(wiServiceName, function ($http, Upload) {
             });
         },
 
+        delete: function (route, payload) {
+            return new Promise(function (resolve, reject) {
+                let request = {
+                    url: BASE_URL + route,
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Referrer-Policy': 'no-referrer'
+                    },
+                    data: payload
+                };
+
+                $http(request).then(
+                    function (response) {
+                        if (response.data && response.data.code === 200) {
+                            return resolve(response.data.content);
+                        } else if (response.data) {
+                            return reject(response.data.reason);
+                        } else {
+                            return reject('Something went wrong!');
+                        }
+                    },
+                    reject
+                );
+            });
+        },
+
         postWithFile: function (route, dataPayload) {
             return new Promise(function (resolve, reject) {
                 let configUpload = {
@@ -106,6 +133,8 @@ app.factory(wiServiceName, function ($http, Upload) {
         // route: GET, CREATE, UPDATE, DELETE
         GET_PROJECT: '/project/fullinfo',
         CURVE: '/project/well/dataset/curve/getData',
+
+        DELETE_WELL: '/project/well/delete',
 
         CREATE_PLOT: '/project/well/plot/new',
         EDIT_PLOT: '/project/well/plot/edit',

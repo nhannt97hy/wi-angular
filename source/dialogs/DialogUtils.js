@@ -551,25 +551,7 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
         self.disabled = false;
 
         this.onOkButtonClicked = function () {
-            self.disabled = true;
-            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
-            let newLogplot = null;
-            utils.createNewBlankLogPlot(wiComponentService, wiApiService, self.name)
-                .then(function(logplot) {
-                    newLogplot = logplot;
-                    return utils.refreshProjectState(wiComponentService, wiApiService);
-                })
-                .then(function() {
-                    utils.openLogplotTab(wiComponentService, newLogplot);
-
-                    close(newLogplot);
-                })
-                .catch(function(err) {
-                    console.error('newBlankLogplotDialog err', err);
-
-                    self.disabled = false;
-                });
+            close(self.name);
         }
 
     }

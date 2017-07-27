@@ -139,6 +139,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.pushLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
+        console.log(self.plotAreaId);
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
@@ -186,6 +187,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.pushDepthTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
+        console.log(self.plotAreaId);
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);

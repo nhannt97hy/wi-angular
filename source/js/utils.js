@@ -47,16 +47,23 @@ exports.projectOpen = function (wiComponentService, projectData) {
 };
 
 exports.projectClose = function (wiComponentService) {
-    wiComponentService.emit('project-unloaded-event');
+    wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
 function trackToModel(track) {
     var trackModel = new Object();
     trackModel.idPlot = track.idPlot;
-    trackModel.idTrack = track.idTrack;
+    if (track.idTrack) {
+        trackModel.idTrack = track.idTrack;
+        trackModel.type = 'log';
+    } else if (track.idDepthAxis) {
+        trackModel.idDepthTrack = track.idDepthAxis;
+        trackModel.type = 'depth';
+    }
+    return trackModel;
 }
 
-function plotToTreeConfig(plot) {
+function logplotToTreeConfig(plot) {
     var plotModel = new Object();
     plotModel.name = 'logplot';
     plotModel.type = 'logplot';
@@ -76,8 +83,14 @@ function plotToTreeConfig(plot) {
     plot.tracks.forEach(function(track) {
         plotModel.tracks.push(trackToModel(track));
     });
+    //TODO: refactor
+    plot.depth_axes.forEach(function(depthTrack){
+        plotModel.tracks.push(trackToModel(depthTrack));
+    });
+    //plot.dep
     return plotModel;
 }
+exports.logplotToTreeConfig = logplotToTreeConfig;
 
 function curveToTreeConfig(curve) {
     var curveModel = new Object();
@@ -99,6 +112,7 @@ function curveToTreeConfig(curve) {
     curveModel.curveData = null;
     return curveModel;
 }
+exports.curveToTreeConfig = curveToTreeConfig;
 
 function datasetToTreeConfig(dataset) {
     var datasetModel = new Object();
@@ -125,6 +139,7 @@ function datasetToTreeConfig(dataset) {
 
     return datasetModel;
 }
+exports.datasetToTreeConfig = datasetToTreeConfig;
 
 function createLogplotNode(well) {
     let logplotModel = new Object();
@@ -135,14 +150,18 @@ function createLogplotNode(well) {
         icon: 'logplot-blank-16x16',
         label: "Logplot"
     };
+    logplotModel.properties = {
+        idWell: well.idWell
+    }
     logplotModel.children = new Array();
     if (!well.plots) return logplotModel;
     well.plots.forEach(function(plot) {
-        logplotModel.children.push(plotToTreeConfig(plot));
+        logplotModel.children.push(logplotToTreeConfig(plot));
     });
 
     return logplotModel;
 }
+
 function wellToTreeConfig(well) {
     var wellModel = new Object();
     wellModel.name = "well";
@@ -168,10 +187,11 @@ function wellToTreeConfig(well) {
             wellModel.children.push(datasetToTreeConfig(dataset));
         });
     }
-    let logplotNode =
-    wellModel.children.push(createLogplotNode(well));
+    let logplotNode = createLogplotNode(well);
+    wellModel.children.push(logplotNode);
     return wellModel;
 }
+exports.wellToTreeConfig = wellToTreeConfig;
 
 exports.projectToTreeConfig = function(project) {
     var projectModel = new Object();
@@ -187,7 +207,8 @@ exports.projectToTreeConfig = function(project) {
     projectModel.data = {
         childExpanded: false,
         icon: 'wells-16x16',
-        label: project.name
+        label: project.name,
+        selected: false
     };
     projectModel.children = new Array();
 
@@ -197,6 +218,33 @@ exports.projectToTreeConfig = function(project) {
         projectModel.children.push(wellToTreeConfig(well));
     });
     return projectModel;
+}
+
+exports.visit = visit;
+
+function visit(node, callback) {
+    if(node.data.deleted) return;
+    callback(node);
+    if (node.children) {
+        node.children.forEach(function(child){
+            visit(child, callback);
+        });
+    }
+}
+
+exports.getSelectedNode = getSelectedNode;
+function getSelectedNode(wiComponentService) {
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes) return;
+    let selectedNode = null;
+    rootNodes.forEach(function(node) {
+        visit(node, function(aNode) {
+            if(aNode.data && aNode.data.selected == true)
+                selectedNode = aNode;
+        });
+    });
+    console.log("selectedNode:", selectedNode);
+    return selectedNode;
 }
 
 exports.pushProjectToExplorer = function (self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
@@ -322,20 +370,20 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 };
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName) {
-    let well = wiComponentService.getComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD);
-    console.log('well payload', well);
-
+    let selectedLogplot = getSelectedNode(wiComponentService);
     let dataRequest = {
-        idWell: well.idWell,
+        idWell: selectedLogplot.properties.idWell,
         name: logplotName,
         option: 'blank-plot'
     };
     return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
 
-exports.openLogplotTab = function (wiComponentService, logplot) {
-    //TODO: check if logplot tab exists
-    wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logplot);
+exports.openLogplotTab = function (wiComponentService, logplotModel) {
+    console.log(logplotModel);
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putWiLogPlotRight(logplotModel);
+    wiComponentService.emit(wiComponentService.UPDATE_TRACKS_EVENT, logplotModel);
 };
 
 exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
