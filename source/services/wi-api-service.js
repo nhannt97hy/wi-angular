@@ -106,8 +106,19 @@ app.factory(wiServiceName, function ($http, Upload) {
         // route: GET, CREATE, UPDATE, DELETE
         GET_PROJECT: '/project/fullinfo',
         CURVE: '/project/well/dataset/curve/getData',
+
         CREATE_PLOT: '/project/well/plot/new',
+        EDIT_PLOT: '/project/well/plot/edit',
+        DELETE_PLOT: '/project/well/plot/delete',
+        GET_PLOT: '/project/well/plot/info',
+
+        CREATE_LOG_TRACK: '/project/well/plot/track/new',
+        DELETE_LOG_TRACK: '/project/well/plot/track/delete',
+        GET_LOG_TRACK: '/project/well/plot/track/info',
+
         CREATE_DEPTH_AXIS: '/project/well/plot/depth-axis/new',
+        DELETE_DEPTH_AXIS: '/project/well/plot/depth-axis/delete',
+        GET_DEPTH_AXIS: '/project/well/plot/depth-axis/info',
     };
 });
 

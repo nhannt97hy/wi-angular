@@ -20,6 +20,6 @@ exports.newitem = function () {
 
 exports.logplot = function (logplot) {
     // this.wiApiService.post(this.wiApiService.CREATE_PLOT, {});
-
-    this.wiComponentService.emit('add-logplot-event', logplot);
+    const wiComponentService = this.wiComponentService;
+    wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logplot);
 };

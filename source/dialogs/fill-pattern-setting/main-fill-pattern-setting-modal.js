@@ -1,5 +1,7 @@
 var DialogUtils = require('./DialogUtils');
-var app = angular.module('app', ['angularModalService', 'kendo.directives', 'ngSanitize', 'ui.select']);
+var wiComponentService = require('./wi-component-service');
+
+var app = angular.module('app', ['angularModalService', 'kendo.directives', 'ngSanitize', 'ui.select', wiComponentService.name]);
 
 app.controller('SampleController', function($scope, ModalService) {
     $scope.show = function() {

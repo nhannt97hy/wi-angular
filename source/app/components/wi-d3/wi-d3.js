@@ -121,7 +121,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks;
     };
 
-    this.addLogTrack = function () {
+    this.addLogTrack = function() {
+        //TODO: remember track position
+        let dataRequest = {
+            idPlot: self.logPlotCtrl.id
+        };
+        wiApiService.post(wiApiService.CREATE_LOG_TRACK, dataRequest)
+            .then(function (res) {
+                console.log("Success: ", res);
+                self.pushLogTrack();
+            })
+            .catch(function (res) {
+                wiComponentService.getComponent(wiComponentService.UTILS).error(res);
+                return;
+            });
+    }
+
+    this.pushLogTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
@@ -154,7 +170,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return track;
     };
 
-    this.addDepthTrack = function (callback) {
+    this.addDepthTrack = function() {
+        let dataRequest = {
+            idPlot: self.logPlotCtrl.id
+        };
+        wiApiService.post(wiApiService.CREATE_DEPTH_AXIS, dataRequest)
+            .then(function (res) {
+                console.log("Success: ", res);
+                self.pushDepthTrack();
+            })
+            .catch(function (res) {
+                wiComponentService.getComponent(wiComponentService.UTILS).error(res);
+                return;
+            });
+    }
+    this.pushDepthTrack = function () {
         let graph = wiComponentService.getComponent('GRAPH');
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
@@ -166,10 +196,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
-
-        // send http request
-        // wiApiService.post()
-
     };
 
     this.addCurveToTrack = function (track, data, config) {
@@ -184,7 +210,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 _curveOnRightClick();
             }
         });
-    }
+    };
 
     this.addLeftShadingToTrack = function (track, curve, config) {
         if (!track || !track.addShading) return;
@@ -476,11 +502,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, 1000);*/
     }
 
+    function getLogplotCtrl() {
+        let logPlotName = self.name.replace("D3Area", "");
+        return wiComponentService.getComponent(logPlotName);
+    }
     /* Private End */
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
-
+        self.logPlotCtrl = getLogplotCtrl();
+        //self.logplotModel = self.wiLogplotCtrl.getLogplotModel();
         console.log('wiLogplotCtrl of wi-d3', self.wiLogplotCtrl);
 
         if (self.name) {

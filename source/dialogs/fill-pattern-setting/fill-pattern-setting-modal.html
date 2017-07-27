@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal"
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" data-dismiss="modal"
                         aria-hidden="true">&times;
                 </button>
                 <h4 class="modal-title">Fill Pattern Setting</h4>
@@ -23,23 +23,23 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label class="control-label col-sm-5 small-text" for="foreGround">Fore Ground</label>
-                                <div class="col-sm-7 text-left">
+                                <label class="control-label col-sm-6 small-text">Foreground</label>
+                                <div class="col-sm-6 text-left">
                                     <input kendo-color-picker k-palette="'websafe'"
                                            class="form-control wi-form-control"
-                                           ng-model="wiModal.options.fill.foreGround"/>
-                                    {{wiModal.options.fill.foreGround}}
+                                           ng-model="wiModal.options.fill.foreground"/>
+                                    {{wiModal.options.fill.foreground}}
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label class="control-label col-sm-5 small-text" for="backGround">Back Ground</label>
-                                <div class="col-sm-7 text-left">
+                                <label class="control-label col-sm-6 small-text" for="background">Background</label>
+                                <div class="col-sm-6 text-left">
                                     <input kendo-color-picker k-palette="'websafe'"
                                            class="form-control wi-form-control"
-                                           ng-model="wiModal.options.fill.backGround"/>
-                                    {{wiModal.options.fill.backGround}}
+                                           ng-model="wiModal.options.fill.background"/>
+                                    {{wiModal.options.fill.background}}
                                 </div>
                             </div>
                         </div>
@@ -50,75 +50,31 @@
                                 <label for="displayFill" class="normal-text">
                                     <input type="checkbox" id="displayFill"
                                            value="" name=""
-                                           ng-model="wiModal.displayFill">
+                                           ng-model="wiModal.displayFill"
+                                           ng-change="wiModal.enableFill('positiveNegative');">
                                     Positive/Negative fill
                                 </label>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                    <div id="positiveNegative" class="row">
-                        <div class="container-fluid">
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <label for="noPositiveFill" class="normal-text">
-                                        <input type="checkbox" id="noPositiveFill"
-                                               value="" name=""
-                                               ng-model="wiModal.options.positiveNegative.noPositive.noPositiveFill">
-                                        No Positive fill
-                                    </label>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-4">Positive pattern</label>
-                                            <div class="col-sm-8">
-                                                <select ng-model="wiModal.options.positiveNegative.positiveFill.pattern"
-                                                        class="form-control wi-form-control">
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text" >Positive Fore Ground</label>
-                                            <div class="col-sm-7 text-left">
-                                                <input kendo-color-picker k-palette="'websafe'"
-                                                       class="form-control wi-form-control"
-                                                       ng-model="wiModal.options.positiveNegative.positiveFill.foreGround"/>
-                                                {{wiModal.options.positiveNegative.positiveFill.foreGround}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Positive Back Ground</label>
-                                            <div class="col-sm-7 text-left">
-                                                <input kendo-color-picker k-palette="'websafe'"
-                                                       class="form-control wi-form-control"
-                                                       ng-model="wiModal.options.positiveNegative.positiveFill.backGround"/>
-                                                {{wiModal.options.positiveNegative.positiveFill.backGround}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
+                        <div id="positiveNegative">
+                            <div class="container-fluid">
                                 <div class="col-sm-12">
                                     <div class="form-group">
-                                        <label for="noNegativeFill" class="normal-text">
-                                            <input type="checkbox" id="noNegativeFill"
+                                        <label for="noPositiveFill" class="normal-text">
+                                            <input type="checkbox" id="noPositiveFill"
                                                    value="" name=""
-                                                   ng-model="wiModal.options.positiveNegative.negativeFill.noNegativeFill">
-                                            No Negative fill
+                                                   ng-model="wiModal.options.positiveNegative.noPositive.noPositiveFill">
+                                            No Positive fill
                                         </label>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-12">
                                             <div class="form-group">
-                                                <label class="control-label col-sm-4">Negative pattern</label>
+                                                <label class="control-label col-sm-4">Positive pattern</label>
                                                 <div class="col-sm-8">
-                                                    <select ng-model="wiModal.options.positiveNegative.negativeFill.pattern"
+                                                    <select ng-model="wiModal.options.positiveNegative.positiveFill.pattern"
                                                             class="form-control wi-form-control">
                                                     </select>
                                                 </div>
@@ -126,23 +82,69 @@
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
-                                                <label class="control-label col-sm-5 small-text" >Positive Fore Ground</label>
-                                                <div class="col-sm-7 text-left">
+                                                <label class="control-label col-sm-6 small-text" >Positive Foreground</label>
+                                                <div class="col-sm-6 text-left">
                                                     <input kendo-color-picker k-palette="'websafe'"
                                                            class="form-control wi-form-control"
-                                                           ng-model="wiModal.options.positiveNegative.negativeFill.foreGround"/>
-                                                    {{wiModal.options.positiveNegative.negativeFill.foreGround}}
+                                                           ng-model="wiModal.options.positiveNegative.positiveFill.foreground"/>
+                                                    {{wiModal.options.positiveNegative.positiveFill.foreground}}
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
-                                                <label class="control-label col-sm-5 small-text">Positive Back Ground</label>
-                                                <div class="col-sm-7 text-left">
+                                                <label class="control-label col-sm-6 small-text">Positive Background</label>
+                                                <div class="col-sm-6 text-left">
                                                     <input kendo-color-picker k-palette="'websafe'"
                                                            class="form-control wi-form-control"
-                                                           ng-model="wiModal.options.positiveNegative.negativeFill.backGround"/>
-                                                    {{wiModal.options.positiveNegative.negativeFill.backGround}}
+                                                           ng-model="wiModal.options.positiveNegative.positiveFill.background"/>
+                                                    {{wiModal.options.positiveNegative.positiveFill.background}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="noNegativeFill" class="normal-text">
+                                                <input type="checkbox" id="noNegativeFill"
+                                                       value="" name=""
+                                                       ng-model="wiModal.options.positiveNegative.negativeFill.noNegativeFill">
+                                                No Negative fill
+                                            </label>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <div class="form-group">
+                                                    <label class="control-label col-sm-4">Negative pattern</label>
+                                                    <div class="col-sm-8">
+                                                        <select ng-model="wiModal.options.positiveNegative.negativeFill.pattern"
+                                                                class="form-control wi-form-control">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-sm-6 small-text" >Positive Foreground</label>
+                                                    <div class="col-sm-6 text-left">
+                                                        <input kendo-color-picker k-palette="'websafe'"
+                                                               class="form-control wi-form-control"
+                                                               ng-model="wiModal.options.positiveNegative.negativeFill.foreground"/>
+                                                        {{wiModal.options.positiveNegative.negativeFill.foreground}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label class="control-label col-sm-6 small-text">Positive Background</label>
+                                                    <div class="col-sm-6 text-left">
+                                                        <input kendo-color-picker k-palette="'websafe'"
+                                                               class="form-control wi-form-control"
+                                                               ng-model="wiModal.options.positiveNegative.negativeFill.background"/>
+                                                        {{wiModal.options.positiveNegative.negativeFill.background}}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -151,9 +153,7 @@
                             </div>
                         </div>
                     </div>
-                    </div>
                 </form>
-
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">

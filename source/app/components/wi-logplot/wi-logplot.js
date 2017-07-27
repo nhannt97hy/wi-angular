@@ -10,6 +10,9 @@ function Controller($scope, wiComponentService, ModalService) {
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
+        self.isFitWindow = false;
+        self.isReferenceLine = true;
+        self.isTooltip = true;
 
         // Setup handlers for logplot
         $scope.handlers = {};
@@ -20,6 +23,20 @@ function Controller($scope, wiComponentService, ModalService) {
             wiLogplot: self
         });
 
+        wiComponentService.on(wiComponentService.UPDATE_TRACKS_EVENT, function (logplotModel) {
+            let wiD3Controller = wiComponentService.getComponent(self.wiD3AreaName);
+            if (logplotModel.tracks && logplotModel.tracks.length) {
+                for (let track of logplotModel.tracks) {
+                    wiD3Controller.pushLogTrack();
+                }
+            }
+            //TODO: edit field name
+            if (logplotModel.depth_axes && logplotModel.depth_axes.length) {
+                for (let depthTrack of logplotModel.depth_axes) {
+                    wiD3Controller.pushDepthTrack();
+                }
+            }
+        });
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 

@@ -923,8 +923,8 @@ exports.symbolStyleDialog = function (ModalService, callback, options) {
             },
             solidFill: '#000',
             pattern: {
-                backGround: "#fff",
-                foreGround: "#000"
+                background: "#fff",
+                foreground: "#000"
             }
         }
         this.styles =[
@@ -1026,11 +1026,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
         let error = null;
         let self = this;
         thisModalController = this;
-        // let utils = wiComponentService.getComponent('UTILS');
-        // let projectData = utils.openProject;
-        // console.log("dataaa ",projectData);
-        let extentY = currentCurve.getExtentY();
 
+        let extentY = currentCurve.getExtentY();
         this.curveOptions = {
             name : currentCurve.name,
             alias: currentCurve.alias,
@@ -1376,31 +1373,32 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     });
 };
 exports.fillPatternSettingDialog = function (ModalService, callback, options) {
-    function ModalController($scope, close) {
+    function ModalController($scope, close, wiComponentService) {
         let self = this;
         this.disabled = false;
         this.error = null;
 
+        let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+        console.log("GR: ", graph);
         this.options = {
             fill: {
-                foreGround: "#000",
-                backGround: "#fff"
+                foreground: "#000",
+                background: "#fff"
             },
             displayFill : false,
             positiveNegative: {
                 positiveFill:{
                     noPositiveFill: false,
                     pattern: "dotted pattern",
-                    foreGround: '#000',
-                    backGround: '#fff'
+                    foreground: '#000',
+                    background: '#fff'
                 },
                 negativeFill:{
                     noNegativeFill: false,
                     pattern: "dotted pattern",
-                    foreGround: '#000',
-                    backGround: '#fff'
+                    foreground: '#000',
+                    background: '#fff'
                 }
-
             }
         };
         this.enableFill = function (idEnable) {
@@ -1896,3 +1894,37 @@ exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
         });
     });
 }
+
+exports.errorMessageDialog = function (ModalService, errorMessage) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.error = null;
+
+        this.error = errorMessage;
+
+        this.onOkButtonClicked = function () {
+            self.disabled = true;
+            close(errorMessage, 1000);
+        };
+
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'error-message/error-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(data);
+
+        })
+    });
+};

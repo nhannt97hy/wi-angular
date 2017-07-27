@@ -1,0 +1,18 @@
+<div class='modal fade'>
+    <div class='modal-dialog modal-sm'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Error</h4>
+            </div>
+            <div class="modal-body text-center padding-2em">
+                <span class="cancel-32x32-edit"></span>
+                <span class="margin-left-0_5em"><b><i>{{wiModal.error}}</i></b></span>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'>Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -34,6 +34,14 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
+exports.error = function (wiComponentService, ModalService, errorMessage) {
+    errorMessage = errorMessage || "Something's wrong!";
+    console.log("Error: ", errorMessage);
+    let wics = wiComponentService || this.wiComponentService;
+    let DialogUtils = wics.getComponent('DIALOG_UTILS');
+    DialogUtils.errorMessageDialog(ModalService, errorMessage );
+}
+
 exports.projectOpen = function (wiComponentService, projectData) {
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
@@ -180,6 +188,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
 };
 
 exports.openLogplotTab = function (wiComponentService, logplot) {
+    //TODO: check if logplot tab exists
     wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logplot);
 };
 
