@@ -447,7 +447,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                console.log("$$", currentCurve);
                 DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, DialogUtils, currentCurve, function(props) {
                     if (props) {
                         console.log(props);
@@ -548,6 +547,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
                 if (!_currentTrack) return;
+                console.log("$$", _currentTrack);
                 if (_currentTrack.isLogTrack()) {
                     DialogUtils.logTrackPropertiesDialog(ModalService, WiLogplotModel, _currentTrack, function (props) {
                         if (props) {

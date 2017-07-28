@@ -23,7 +23,6 @@
                                                             foreground="{{wiModal.options.fill.foreground}}" 
                                                             background='{{wiModal.options.fill.background}}'>
                                             </wi-canvas-rect>
-                                            <!-- {{wiModal.options.fill.pattern}} {{$select.selected}}" -->
                                         </ui-select-match>
                                         <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
                                             <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
@@ -90,9 +89,23 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-4">Positive pattern</label>
                                                     <div class="col-sm-8">
-                                                        <select ng-model="wiModal.options.positiveFill.pattern"
-                                                                class="form-control wi-form-control">
-                                                        </select>
+                                                        <ui-select theme="bootstrap" ng-model="wiModal.options.positiveFill.pattern" ng-disabled="wiModal.options.positiveFill.isFill || wiModal.options.fill.isFill">
+                                                            <ui-select-match>
+                                                                <wi-canvas-rect name="_selectedPatternCanvasPositive" 
+                                                                                pattern="{{wiModal.options.positiveFill.pattern}}" 
+                                                                                width="270" height="20" 
+                                                                                foreground="{{wiModal.options.positiveFill.foreground}}" 
+                                                                                background='{{wiModal.options.positiveFill.background}}'>
+                                                                </wi-canvas-rect>
+                                                            </ui-select-match>
+                                                            <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
+                                                                                width="270" height="20" 
+                                                                                foreground="{{wiModal.options.positiveFill.foreground}}" 
+                                                                                background='{{wiModal.options.positiveFill.background}}'>
+                                                                </wi-canvas-rect>
+                                                            </ui-select-choices>
+                                                        </ui-select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -135,9 +148,23 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-4">Negative pattern</label>
                                                     <div class="col-sm-8">
-                                                        <select ng-model="wiModal.options.negativeFill.pattern"
-                                                                class="form-control wi-form-control">
-                                                        </select>
+                                                        <ui-select theme="bootstrap" ng-model="wiModal.options.negativeFill.pattern" ng-disabled="wiModal.options.negativeFill.isFill || wiModal.options.fill.isFill">
+                                                            <ui-select-match>
+                                                                <wi-canvas-rect name="_selectedPatternCanvasNegative" 
+                                                                                pattern="{{wiModal.options.negativeFill.pattern}}" 
+                                                                                width="270" height="20" 
+                                                                                foreground="{{wiModal.options.negativeFill.foreground}}" 
+                                                                                background='{{wiModal.options.negativeFill.background}}'>
+                                                                </wi-canvas-rect>
+                                                            </ui-select-match>
+                                                            <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
+                                                                                width="270" height="20" 
+                                                                                foreground="{{wiModal.options.negativeFill.foreground}}" 
+                                                                                background='{{wiModal.options.negativeFill.background}}'>
+                                                                </wi-canvas-rect>
+                                                            </ui-select-choices>
+                                                        </ui-select>
                                                     </div>
                                                 </div>
                                             </div>

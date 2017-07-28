@@ -87,6 +87,9 @@ let app = angular.module('wiapp',
 
         wiApiService.name,
         wiComponentService.name,
+
+        wiCanvasRect.name, 
+        
         'angularModalService',
 
         // 3rd lib
