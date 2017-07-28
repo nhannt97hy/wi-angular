@@ -38,7 +38,8 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
-exports.error = function (wiComponentService, ModalService, errorMessage) {
+exports.error = error;
+function error(wiComponentService, ModalService, errorMessage) {
     errorMessage = errorMessage || "Something's wrong!";
     console.log("Error: ", errorMessage);
     let wics = wiComponentService || this.wiComponentService;
@@ -297,15 +298,14 @@ function visit(node, callback) {
 }
 
 exports.getSelectedNode = getSelectedNode;
-function getSelectedNode(wiComponentService) {
+function getSelectedNode() {
+    const wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes) return;
     let selectedNode = null;
-    rootNodes.forEach(function(node) {
-        visit(node, function(aNode) {
-            if(aNode.data && aNode.data.selected == true)
-                selectedNode = aNode;
-        });
+    visit(rootNodes[0], function (node) {
+        if (node.data && node.data.selected == true)
+            selectedNode = node;
     });
     console.log("selectedNode:", selectedNode);
     return selectedNode;
@@ -336,12 +336,10 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
     });
 };
 
-exports.updateWellProject = function (wiComponentService, well) {
-    // update well
+exports.updateWellProject = updateWellProject;
+function updateWellProject(wiComponentService, well) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
     if (!project) return;
-
     if (!Array.isArray(project.wells)) {
         project.wells = [];
         project.wells.push(well);
@@ -357,35 +355,17 @@ exports.updateWellProject = function (wiComponentService, well) {
             project.wells.push(well);
         }
     }
-
-    wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
+    //wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
+    wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
 };
 
-// todo: refactor
 exports.updateWellsProject = function (wiComponentService, wells) {
-    // update well
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     if (!project) return;
     for (let well of wells) {
-        if (!Array.isArray(project.wells)) {
-            project.wells = [];
-            project.wells.push(well);
-        } else {
-            let isNewWell = true;
-            for (let i = 0; i < project.wells.length; i++) {
-                if (project.wells[i].idWell == well.idWell) {
-                    project.wells[i] = well;
-                    isNewWell = false;
-                }
-            }
-            if (isNewWell) {
-                project.wells.push(well);
-            }
-        }
+        updateWellProject(wiComponentService, well);
     }
-    wiComponentService.emit(wiComponentService.UPDATE_MULTI_WELLS_EVENT, wells);
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
 };
 
 function getCurveDataByName(apiService, idCurve, callback) {
@@ -442,19 +422,41 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 };
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName) {
-    let selectedLogplot = getSelectedNode(wiComponentService);
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'logplots') return;
     let dataRequest = {
-        idWell: selectedLogplot.properties.idWell,
+        idWell: selectedNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot'
     };
     return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
 
+exports.deleteLogplot = function () {
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'logplot') return;
+    const wiComponentService = __GLOBAL.wiComponentService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function(yes){
+        if (!yes) return;
+        const wiApiService = __GLOBAL.wiApiService;
+        wiApiService.delete(wiApiService.DELETE_PLOT, { idPlot: selectedNode.properties.idPlot })
+            .then(function(res){
+                __GLOBAL.$timeout(function(){
+                    selectedNode.data.deleted = true;
+                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeWiLogPlot(selectedNode.id);                    
+                });
+            }).catch(function(err){
+                console.error('logplot delete error',err);
+            });
+    });
+};
+
 exports.openLogplotTab = function (wiComponentService, logplotModel) {
-    console.log(logplotModel);
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putWiLogPlotRight(logplotModel);
+    if (logplotModel.data.opened) return;
+    logplotModel.data.opened = true;    
     let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
@@ -526,22 +528,17 @@ function findWellProjectById(idWell, project) {
     return null;
 }
 
-exports.findLogplotModelById = function (logplotId, wiComponentService) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-    if (!project || !Array.isArray(project.wells)) return;
-
-    for (let well of project.wells) {
-        if (!Array.isArray(well.plots)) continue;
-
-        for (let plot of well.plots) {
-            if (plot.idPlot == logplotId) {
-                return plot;
-            }
+exports.findLogplotModelById = function (logplotId) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let plot = null;
+    visit(rootNodes[0], function(node) {
+        if (node.type == 'logplot' && node.id == logplotId) {
+            plot = node;
         }
-    }
-
-    return null;
+    });
+    return plot;
 }
 
 // exports.parseTime = function (wiComponentService, time) {

@@ -13,7 +13,7 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
         self.isFitWindow = false;
         self.isReferenceLine = true;
         self.isTooltip = true;
-
+        
         // Setup handlers for logplot
         $scope.handlers = {};
         utils.bindFunctions($scope.handlers, logplotHandlers, {

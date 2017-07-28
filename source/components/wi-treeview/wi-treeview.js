@@ -54,7 +54,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
 
     this.onDoubleClick = function($index) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let logplotModel = utils.getSelectedNode(wiComponentService);
+        let logplotModel = utils.getSelectedNode();
         if( logplotModel.type != 'logplot') return;
         utils.openLogplotTab(wiComponentService, logplotModel);
     }
