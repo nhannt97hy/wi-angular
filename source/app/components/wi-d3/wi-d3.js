@@ -122,21 +122,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks;
     };
 
-    this.updateTrack = function (track) {
-        if (track.type == 'log') {
-            $timeout(function () {
-                self.pushLogTrack(track);
-                // wiD3Controller.pushLogTrack();
-            });
-        }
-        if (track.type == 'depth') {
-            $timeout(function () {
-                self.pushDepthTrack(track);
-                // wiD3Controller.pushDepthTrack();
-            });
-        }
-    }
-
     this.addLogTrack = function() {
         //TODO: remember track position
         let dataRequest = {
@@ -448,7 +433,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                console.log("$$", currentCurve);
                 DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, DialogUtils, currentCurve, function(props) {
                     if (props) {
                         console.log(props);
@@ -549,6 +533,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
                 if (!_currentTrack) return;
+                console.log("$$", _currentTrack);
                 if (_currentTrack.isLogTrack()) {
                     DialogUtils.logTrackPropertiesDialog(ModalService, WiLogplotModel, _currentTrack, function (props) {
                         if (props) {

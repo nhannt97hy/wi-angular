@@ -87,6 +87,9 @@ let app = angular.module('wiapp',
 
         wiApiService.name,
         wiComponentService.name,
+
+        wiCanvasRect.name, 
+        
         'angularModalService',
 
         // 3rd lib
@@ -144,6 +147,9 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     wiComponentService.putComponent(wiComponentService.DRAG_MAN, dragMan);
     /* ======================================== */
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    let boundedLayoutManager = layoutManager;
+    layoutManager = {};
+    utils.bindFunctions(layoutManager, boundedLayoutManager, functionBindingProp);
     wiComponentService.putComponent(wiComponentService.LAYOUT_MANAGER, layoutManager);
 
     layoutManager.createLayout('myLayout', $scope, $compile);
@@ -155,10 +161,16 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
         console.log(logplotModel);
         layoutManager.putWiLogPlotRight(logplotModel);
     });
-
+    
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         console.log('project-unloaded-event');
         layoutManager.removeAllRightTabs();
+    });
+
+    wiComponentService.on('logplot-tab-closed', function(logplotId) {
+        let logplotModel = utils.findLogplotModelById(logplotId);
+        if (!logplotModel) return;
+        logplotModel.data.opened = false;
     });
 
     // update size when container is resized

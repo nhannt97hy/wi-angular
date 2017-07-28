@@ -4,11 +4,11 @@ const moduleName = 'wi-explorer';
 function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
 
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
         $scope.handlers = wiComponentService.getComponent(wiComponentService.WI_EXPLORER_HANDLERS);
         self.handlers = $scope.handlers;
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
@@ -23,6 +23,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         });
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
+            let backupConfig = self.treeConfig;
+            let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            self.treeConfig = [utils.projectToTreeConfig(projectRefresh)];
+            console.log('backupConfig', backupConfig);
+            console.log('config', self.treeConfig);
+            $timeout(function() {
+                self.backupConfig(backupConfig, self.treeConfig);
+            });
+        });
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT1, function () {
             let backupConfig = self.treeConfig;
             let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -40,10 +50,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    this.backupConfig = function(previousConfig, currConfig) {
+    this.backupConfig = function (previousConfig, currConfig) {
         for (let preItem of previousConfig) {
             for (let item of currConfig) {
-                if (preItem.name === item.name) {
+                if (preItem.type === item.type && preItem.id === item.id) {
                     self.backupItemState(preItem, item);
 
                     if (Array.isArray(preItem.children) && Array.isArray(item.children)) {
@@ -56,7 +66,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
     this.backupItemState = function(preItem, currItem) {
         if (!preItem || !currItem) return;
-
+        if (preItem.data.deleted) {
+            currItem.data.deleted = preItem.data.deleted;
+        }
         currItem.data.childExpanded = preItem.data.childExpanded;
     };
 
@@ -390,6 +402,33 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
+            case 'logplot':
+                return [
+                    {
+                        name: "Open",
+                        label: "Open",
+                        icon: "play-16x16",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16-edit",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            utils.deleteLogplot();
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ]
             case 'crossplot':
                 return [
                     {

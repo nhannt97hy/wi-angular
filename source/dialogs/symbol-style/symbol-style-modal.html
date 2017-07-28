@@ -81,10 +81,11 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-4 normal-text" for="color">Solid fill color</label>
                                         <div class="col-sm-8 text-left">
-                                            <input kendo-color-picker k-palette="'websafe'"
+                                            <!-- <input kendo-color-picker k-palette="'websafe'"
                                                    class="form-control wi-form-control"
-                                                   ng-model="wiModal.options.lines.color"/>
-                                            {{wiModal.options.solidFill.color}}
+                                                   ng-model="wiModal.options.lines.color"/> -->
+                                            <input type="color" name=""
+                                                    ng-model="wiModal.options.lines.color">
                                         </div>
                                     </div>
                                 </div>
@@ -95,25 +96,47 @@
                         <div class="container-fluid">
                             <form action="" class="form-horizontal">
                                 <div class="row">
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-12">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text" for="backGround">Back Ground</label>
-                                            <div class="col-sm-7 text-left">
-                                                <input kendo-color-picker k-palette="'websafe'"
-                                                       class="form-control wi-form-control"
-                                                       ng-model="wiModal.options.pattern.backGround"/>
-                                                {{wiModal.options.pattern.backGround}}
+                                            <label class="control-label col-sm-4">Pattern</label>
+                                            <div class="col-sm-8">
+                                                <ui-select theme="bootstrap" ng-model="wiModal.options.patternFill.pattern">
+                                                    <ui-select-match>
+                                                        <wi-canvas-rect name="_selectedPatternFill" 
+                                                                        pattern="{{wiModal.options.patternFill.pattern}}" 
+                                                                        width="270" height="20" 
+                                                                        foreground="{{wiModal.options.patternFill.foreground}}" 
+                                                                        background='{{wiModal.options.patternFill.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                                        <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
+                                                                        width="270" height="20" 
+                                                                        foreground="{{wiModal.options.patternFill.foreground}}" 
+                                                                        background='{{wiModal.options.patternFill.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </ui-select-choices>
+                                                </ui-select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text" for="foreGround">Fore Ground</label>
-                                            <div class="col-sm-7 text-left">
+                                            <label class="control-label col-sm-6 small-text">Foreground</label>
+                                            <div class="col-sm-6 text-left">
                                                 <input kendo-color-picker k-palette="'websafe'"
                                                        class="form-control wi-form-control"
-                                                       ng-model="wiModal.options.pattern.foreGround"/>
-                                                {{wiModal.options.pattern.foreGround}}
+                                                       ng-model="wiModal.options.patternFill.foreground"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-6 small-text">Background</label>
+                                            <div class="col-sm-6 text-left">
+                                                <input kendo-color-picker k-palette="'websafe'"
+                                                       class="form-control wi-form-control"
+                                                       ng-model="wiModal.options.patternFill.background"/>
                                             </div>
                                         </div>
                                     </div>
