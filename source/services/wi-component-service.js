@@ -78,7 +78,7 @@ app.factory(wiServiceName, function () {
         UPDATE_WELL_EVENT: 'update-well-event',
         UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
         UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
-        UPDATE_TRACKS_EVENT: 'update-tracks-event',
+        UPDATE_TRACK_EVENT: 'update-track-event',
     };
 });
 

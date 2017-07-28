@@ -23,25 +23,6 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
             wiLogplot: self
         });
 
-        wiComponentService.on(wiComponentService.UPDATE_TRACKS_EVENT, function (logplotModel) {
-            let wiD3Controller = self.getwiD3Ctrl();
-            if (logplotModel.tracks && logplotModel.tracks.length) {
-                logplotModel.tracks.forEach(function(track) {
-                    if (track.type == 'log') {
-                        $timeout(function(){
-                            wiD3Controller.pushLogTrack(track);
-                            // wiD3Controller.pushLogTrack();
-                        });
-                    }
-                    if (track.type == 'depth') {
-                        $timeout(function(){
-                            wiD3Controller.pushDepthTrack(track);
-                            // wiD3Controller.pushDepthTrack();
-                        });
-                    }
-                });
-            }
-        });
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 

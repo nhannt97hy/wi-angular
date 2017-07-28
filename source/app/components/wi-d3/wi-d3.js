@@ -121,6 +121,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks;
     };
 
+    this.updateTrack = function (track) {
+        if (track.type == 'log') {
+            $timeout(function () {
+                self.pushLogTrack(track);
+                // wiD3Controller.pushLogTrack();
+            });
+        }
+        if (track.type == 'depth') {
+            $timeout(function () {
+                self.pushDepthTrack(track);
+                // wiD3Controller.pushDepthTrack();
+            });
+        }
+    }
+
     this.addLogTrack = function() {
         //TODO: remember track position
         let dataRequest = {
@@ -203,6 +218,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addCurveToTrack = function (track, data, config) {
+        console.log("add curve to trackkkkkkk",track,data,config);
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
 

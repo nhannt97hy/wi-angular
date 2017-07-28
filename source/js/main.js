@@ -97,20 +97,10 @@ let app = angular.module('wiapp',
 app.controller('AppController', function ($scope, $rootScope, $timeout,
     $compile, wiComponentService,
     ModalService, wiApiService) {
-    // UTIL FUNCTIONS
-    wiComponentService.putComponent(wiComponentService.UTILS, utils);
-    // Logplot Handlers
-    wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
-
-    // dependency 3rd component
-    // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
-
-
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
     let wiExplorerHandlers = {};
-
     let functionBindingProp = {
         $scope,
         wiComponentService,
@@ -118,6 +108,14 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
         wiApiService,
         $timeout
     };
+    // UTIL FUNCTIONS
+    utils.setGlobalObj(functionBindingProp);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
+    // Logplot Handlers
+    wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
+
+    // dependency 3rd component
+    // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
     
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(globalHandlers, logplotHandlers, functionBindingProp);
@@ -155,7 +153,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
         console.log(logplotModel);
         layoutManager.putWiLogPlotRight(logplotModel);
-        // wiComponentService.emit(wiComponentService.UPDATE_TRACKS_EVENT, logplotModel);
     });
 
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
