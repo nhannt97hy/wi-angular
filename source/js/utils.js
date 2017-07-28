@@ -1,5 +1,9 @@
 'use strict';
 
+var __GLOBAL = null;
+exports.setGlobalObj = function(gObj) {
+    __GLOBAL = gObj;
+}
 exports.objcpy = function (destObj, sourceObj) {
     if (destObj) {
         for (let attr in sourceObj) {
@@ -51,23 +55,24 @@ exports.projectClose = function (wiComponentService) {
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
-function getCurveFromId(idCurve, wiComponentService) {
-    let rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
-    if (!rootNode) return;
+function getCurveFromId(idCurve) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes) return;
     let curve = null;
-    rootNode.forEach(function(node) {
+    rootNodes.forEach(function(node) {
         visit(node, function (aNode) {
             if (aNode.type == 'curve' && aNode.id == idCurve) {
                 curve = aNode;
             }
         });
-    }, this);
+    });
     return curve;
 }
-
-function lineToTreeConfig(line, wiComponentService) {
+exports.lineToTreeConfig = lineToTreeConfig;
+function lineToTreeConfig(line) {
     let lineModel = new Object();
-    let curveModel = getCurveFromId(line.idCurve, wiComponentService);
+    let curveModel = getCurveFromId(line.idCurve);
     console.log(curveModel);
     lineModel.name = curveModel.properties.name;
     lineModel.type = 'line';
@@ -102,7 +107,6 @@ function lineToTreeConfig(line, wiComponentService) {
     }
     return lineModel;
 }
-exports.lineToTreeConfig = lineToTreeConfig;
 
 function trackToModel(track) {
     var trackModel = new Object();
@@ -396,6 +400,7 @@ function getCurveDataByName(apiService, idCurve, callback) {
             callback(err);
         });
 }
+exports.getCurveDataByName = getCurveDataByName;
 
 exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
     let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
@@ -415,7 +420,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 apiService.post(apiService.CREATE_LINE, { idTrack: track.id, idCurve: idCurve })
                     .then(function(line){
                         console.log('line created', line);
-                        let lineModel = lineToTreeConfig(line, wiComponentService);
+                        let lineModel = lineToTreeConfig(line);
                         getCurveDataByName(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
@@ -450,7 +455,28 @@ exports.openLogplotTab = function (wiComponentService, logplotModel) {
     console.log(logplotModel);
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putWiLogPlotRight(logplotModel);
-    wiComponentService.emit(wiComponentService.UPDATE_TRACKS_EVENT, logplotModel);
+    let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
+        .then(function (plot) {
+            if (plot.depth_axes && plot.depth_axes.length) {
+                plot.depth_axes.forEach(function(depthTrack) {
+                    wiD3Ctrl.pushDepthTrack(depthTrack);
+                });
+            }
+            if (plot.tracks && plot.tracks.length) {
+                plot.tracks.forEach(function (track) {
+                    if (!track.lines || !track.lines.length) return;
+                    let trackObj = wiD3Ctrl.pushLogTrack(track);
+                    track.lines.forEach(function (line) {
+                        getCurveDataByName(wiApiService, line.idCurve, function (err, data) {
+                            let lineModel = lineToTreeConfig(line);
+                            if (!err) wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                        });
+                    });
+                });
+            }
+        });
 };
 
 exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
