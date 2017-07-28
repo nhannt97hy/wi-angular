@@ -92,7 +92,7 @@ exports.AddNewButtonClicked = function () {
     DialogUtils.addNewDialog(this.ModalService, function (newWell) {
         if (newWell) {
             let wellModel = utils.wellToTreeConfig(newWell);
-            let selectedNode = utils.getSelectedNode(wiComponentService);
+            let selectedNode = utils.getSelectedNode();
             selectedNode.children.push(wellModel);
         }
         //if (newWell) utils.updateWellProject(wiComponentService, newWell);
@@ -216,7 +216,7 @@ exports.BlankLogplotButtonClicked = function () {
             .then(function(logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
-                let selectedLogplot = utils.getSelectedNode(wiComponentService);
+                let selectedLogplot = utils.getSelectedNode();
                 $timeout(function(){
                     selectedLogplot.children.push(logplotModel);
                 });

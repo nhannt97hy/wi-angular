@@ -43,9 +43,14 @@ module.exports.createLayout = function(domId, $scope, $compile) {
         container.getElement().html(compileFunc(templateHtml)(scopeObj));
     });
 
+    let wiComponentService = this.wiComponentService;    
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
+        container.on('destroy', function() {
+            let plotId = container.tab.contentItem.config.id.replace('logplot','');
+            wiComponentService.emit('logplot-tab-closed', plotId);
+        })
     });
 
     layoutManager.init();
@@ -76,14 +81,28 @@ module.exports.putRight = function(templateId, title) {
 }
 
 module.exports.putWiLogPlotRight = function(logplotModel) {
-    layoutManager.root.getItemsById('right')[0].addChild({
+    let itemId = 'logplot' + logplotModel.id;
+    let rightContainer = layoutManager.root.getItemsById('right')[0];
+    let logplotItem = rightContainer.getItemsById(itemId)[0];
+    if (logplotItem) {
+        rightContainer.setActiveContentItem(logplotItem);
+        return;
+    }
+    rightContainer.addChild({
         type: 'component',
+        id: itemId,
         componentName: 'html-block',
         componentState: {
             html: '<wi-logplot name="' + logplotModel.properties.name + '"' + 'id="' + logplotModel.properties.idPlot + '"></wi-logplot>'
         },
         title: logplotModel.properties.name
     });
+}
+
+module.exports.removeWiLogPlot = function(logplotId) {
+    let item = layoutManager.root.getItemsById('logplot'+logplotId)[0];
+    if (!item) return;
+    layoutManager.root.getItemsById('right')[0].removeChild(item);
 }
 
 module.exports.removeAllRightTabs = function() {
@@ -98,8 +117,8 @@ function getChildContentItems(itemId) {
     return layoutManager.root.getItemsById(itemId)[0].contentItems;
 }
 
-module.exports.isComponentExist = function(templateId) {
-    return (layoutManager.root.getItemsById(templateId).length ? true : false);
+module.exports.isComponentExist = function(id) {
+    return (layoutManager.root.getItemsById(id).length ? true : false);
 }
 
 module.exports.updateSize = function() {
