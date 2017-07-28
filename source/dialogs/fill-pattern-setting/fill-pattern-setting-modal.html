@@ -15,17 +15,17 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Fill pattern</label>
                                 <div class="col-sm-8">
-                                    <ui-select theme="bootstrap" ng-model="wiModal.options.fillPattern">
+                                    <ui-select theme="bootstrap" ng-model="wiModal.options.fill.pattern">
                                         <ui-select-match>
                                             <wi-canvas-rect name="_selectedPatternCanvas" pattern="chert" 
-                                                            width="250" height="20" 
+                                                            width="300" height="20" 
                                                             foreground="{{wiModal.options.fill.foreground}}" 
                                                             background='{{wiModal.options.fill.background}}'>
                                             </wi-canvas-rect>
                                         </ui-select-match>
                                         <ui-select-choices repeat="pattern in wiModal.selectPatterns">
                                             <wi-canvas-rect name="{{pattern}}" pattern="{{pattern}}" 
-                                                            width="250" height="20" 
+                                                            width="300" height="20" 
                                                             foreground="{{wiModal.options.fill.foreground}}" 
                                                             background='{{wiModal.options.fill.background}}'>
                                             </wi-canvas-rect>
@@ -88,7 +88,7 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-4">Positive pattern</label>
                                                     <div class="col-sm-8">
-                                                        <select ng-model="wiModal.options.isFill.noPositive.pattern"
+                                                        <select ng-model="wiModal.options.positiveFill.pattern"
                                                                 class="form-control wi-form-control">
                                                         </select>
                                                     </div>
@@ -100,7 +100,7 @@
                                                     <div class="col-sm-6 text-left">
                                                         <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.isFill.positiveFill.foreground"/>
+                                                               ng-model="wiModal.options.positiveFill.foreground"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -110,7 +110,7 @@
                                                     <div class="col-sm-6 text-left">
                                                         <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.isFill.positiveFill.background"/>
+                                                               ng-model="wiModal.options.positiveFill.background"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -133,7 +133,7 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-4">Negative pattern</label>
                                                     <div class="col-sm-8">
-                                                        <select ng-model="wiModal.options.isFill.negativeFill.pattern"
+                                                        <select ng-model="wiModal.options.negativeFill.pattern"
                                                                 class="form-control wi-form-control">
                                                         </select>
                                                     </div>
@@ -145,7 +145,7 @@
                                                     <div class="col-sm-6 text-left">
                                                         <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.isFill.negativeFill.foreground"/>
+                                                               ng-model="wiModal.options.negativeFill.foreground"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -155,7 +155,7 @@
                                                     <div class="col-sm-6 text-left">
                                                         <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.isFill.negativeFill.background"/>
+                                                               ng-model="wiModal.options.negativeFill.background"/>
                                                     </div>
                                                 </div>
                                             </div>

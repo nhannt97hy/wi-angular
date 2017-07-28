@@ -26,7 +26,7 @@ function Controller(wiComponentService, $timeout) {
 			self.background,
 			function(img, option) {
 				context.fillStyle = context.createPattern(img, option);
-				context.rect(0, 0, 200, 20);
+				context.rect(0, 0, self.width, self.height);
 				context.fill();
 			}
 		);

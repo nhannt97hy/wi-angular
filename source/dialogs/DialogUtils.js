@@ -1361,12 +1361,33 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         this.error = null;
 
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-        // let CanvasHelper = graph.CanvasHelper;
-        // ctx.fillStyle = CanvasHelper.createPattern(ctx, 'chert', 'red', 'blue');
-        // ctx.fillRect()
         console.log("$$", graph);
         
-        this.options = options;
+        if (options) {
+            this.options = options;
+        }
+        else {
+            this.options = {
+                fill: {
+                    isFill: false,
+                    pattern: "chert",
+                    foreground: "#ff0",
+                    background: "#f0f"
+                },
+                positiveFill:{
+                    isFill: false,
+                    pattern: "chert",
+                    foreground: '#000',
+                    background: '#fff'
+                },
+                negativeFill:{
+                    isFill: false,
+                    pattern: "chert",
+                    foreground: '#000',
+                    background: '#fff'
+                }
+            };
+        }
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.enableFill = function (idEnable, value) {
             $('#'+ idEnable + " :input").attr("disabled", value);
