@@ -38,12 +38,11 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
-exports.error = function (wiComponentService, ModalService, errorMessage) {
+exports.error = function (errorMessage) {
     errorMessage = errorMessage || "Something's wrong!";
-    console.log("Error: ", errorMessage);
-    let wics = wiComponentService || this.wiComponentService;
+    let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
-    DialogUtils.errorMessageDialog(ModalService, errorMessage );
+    DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage );
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {

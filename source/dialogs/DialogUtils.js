@@ -1910,19 +1910,10 @@ exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
 exports.errorMessageDialog = function (ModalService, errorMessage) {
     function ModalController($scope, close) {
         let self = this;
-        this.error = null;
-
         this.error = errorMessage;
-
         this.onOkButtonClicked = function () {
-            self.disabled = true;
-            close(errorMessage, 1000);
-        };
-
-        this.onCancelButtonClicked = function () {
-            console.log('onCancelButtonClicked');
             close(null);
-        }
+        };
     }
 
     ModalService.showModal({

@@ -112,6 +112,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _selectedColor = '#ffffe0';
 
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
     this.getCurrentTrack = function () {
         return _currentTrack;
@@ -459,7 +460,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Edit Curve",
             icon: "edit-curve-text-16x16",
             handler: function () {
-
+                Utils.error("Feature is not implemented");
             }
         }, {
             name: "DepthShift",
