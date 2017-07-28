@@ -168,8 +168,9 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     });
 
     wiComponentService.on('logplot-tab-closed', function(logplotId) {
-        console.log(logplotId);
-        utils.findLogplotModelById(logplotId).data.opened = false;
+        let logplotModel = utils.findLogplotModelById(logplotId);
+        if (!logplotModel) return;
+        logplotModel.data.opened = false;
     });
 
     // update size when container is resized
