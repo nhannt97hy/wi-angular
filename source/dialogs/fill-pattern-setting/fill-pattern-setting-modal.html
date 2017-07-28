@@ -17,14 +17,16 @@
                                 <div class="col-sm-8">
                                     <ui-select theme="bootstrap" ng-model="wiModal.options.fill.pattern">
                                         <ui-select-match>
-                                            <wi-canvas-rect name="_selectedPatternCanvas" pattern="chert" 
+                                            <wi-canvas-rect name="_selectedPatternCanvas" 
+                                                            pattern="{{wiModal.options.fill.pattern}}" 
                                                             width="300" height="20" 
                                                             foreground="{{wiModal.options.fill.foreground}}" 
                                                             background='{{wiModal.options.fill.background}}'>
                                             </wi-canvas-rect>
+                                            <!-- {{wiModal.options.fill.pattern}} {{$select.selected}}" -->
                                         </ui-select-match>
-                                        <ui-select-choices repeat="pattern in wiModal.selectPatterns">
-                                            <wi-canvas-rect name="{{pattern}}" pattern="{{pattern}}" 
+                                        <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
                                                             width="300" height="20" 
                                                             foreground="{{wiModal.options.fill.foreground}}" 
                                                             background='{{wiModal.options.fill.background}}'>

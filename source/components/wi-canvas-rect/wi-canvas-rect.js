@@ -5,31 +5,38 @@ function Controller(wiComponentService, $timeout) {
     let self = this;
 
     this.$onInit = function () {
-    	console.log(self.name, self.pattern, self.width, self.height, self.foreground);
+    	wiComponentService.putComponent(self.name, self);
     }
     this.patternStyle = {
     	pattern: self.pattern,
     	foreground : self.foreground,
     	background : self.background
     }
-    this.onReady = function() {
-        console.log("onReady", self.name, self.pattern, self.width);
-    	let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-    	let canvasHelper = graph.CanvasHelper;
-
-		let context = $('#' + self.name)[0].getContext('2d');
-		context.beginPath();
-		canvasHelper.createPattern2(
-			context, 
-			self.pattern, 
-			self.foreground, 
-			self.background,
-			function(img, option) {
-				context.fillStyle = context.createPattern(img, option);
-				context.rect(0, 0, self.width, self.height);
-				context.fill();
-			}
-		);
+    this.paint = function() {
+        let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+        let canvasHelper = graph.CanvasHelper;
+        let canvas = $('#' + self.name)[0];
+        if(!canvas) return;
+        let context = canvas.getContext('2d');
+        if(!context) return;
+        context.clearRect(0,0, canvas.width, canvas.height);
+        context.beginPath();
+        canvasHelper.createPattern2(
+            context, 
+            self.pattern, 
+            self.foreground, 
+            self.background,
+            function(img, option) {
+                context.fillStyle = context.createPattern(img, option);
+                context.rect(0, 0, self.width, self.height);
+                context.fill();
+            }
+        );
+    }
+    this.$onChanges = function(changesObj) {
+        if(changesObj) {
+            self.paint();
+        }
     }
 }
 

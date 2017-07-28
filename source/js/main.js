@@ -7,6 +7,7 @@ let wiButton = require('./wi-button.js');
 let wiDropdown = require('./wi-dropdown.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiTabs = require('./wi-tabs.js');
+let wiCanvasRect = require('./wi-canvas-rect.js');
 
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');

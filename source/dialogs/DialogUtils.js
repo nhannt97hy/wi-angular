@@ -1355,7 +1355,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     });
 };
 exports.fillPatternSettingDialog = function (ModalService, callback, options) {
-    function ModalController($scope, close, wiComponentService) {
+    function ModalController($scope, close, wiComponentService, $timeout) {
         let self = this;
         this.disabled = false;
         this.error = null;
@@ -1749,7 +1749,7 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
             DialogUtils.fillPatternSettingDialog(ModalService, function () {
                 console.log("fillPattern");
 
-            }, self.fillOptions);
+            });
         }
         // Dialog buttons
         this.onApplyButtonClicked = function () {
