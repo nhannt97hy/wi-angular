@@ -1006,6 +1006,7 @@ exports.symbolStyleDialog = function (ModalService, callback, options) {
 }
 exports.curvePropertiesDialog = function (ModalService, wiComponentService, DialogUtils, currentCurve, callback) {
     let thisModalController = null;
+    console.log(currentCurve);
     function ModalController($scope, close) {
         let error = null;
         let self = this;
@@ -1034,12 +1035,24 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
                 param: currentCurve.line.width
             }
         };
-        this.symbolOptions = {
-            display: false,
-            symbolColor : '#00ffff',
-            symbolStyle: {
-                name: 'circle', // cross, diamond, star, triangle, dot, plus
-                size: 4
+        if (currentCurve.symbol) {
+            this.symbolOptions = {
+                display: true,
+                symbolColor : currentCurve.symbol.color,
+                symbolStyle: {
+                    name: currentCurve.symbol.style, // cross, diamond, star, triangle, dot, plus
+                    size: currentCurve.symbol.size
+                }
+            }
+        }
+        else {
+            this.symbolOptions = {
+                display: false,
+                symbolColor:'black',
+                symbolStyle: {
+                    name: 'circle',
+                    size: 4
+                }
             }
         }
         currentCurve.alias = this.curveOptions.alias;
@@ -1182,9 +1195,17 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
         this.onApplyButtonClicked = function () {
             callback(self);
             console.log("$$",self);
-            // logTrack.plotCurve(currentCurve);
         };
         this.onOkButtonClicked = function () {
+            currentCurve.line.color = self.lineOptions.lineColor;
+            currentCurve.line.width = self.lineOptions.lineWidth.param;
+            currentCurve.line.dash = self.lineOptions.lineStyle.param;
+            if (self.symbolOptions.display) {
+                currentCurve.symbol = currentCurve.symbol || new Object();
+                currentCurve.symbol.style = self.symbolOptions.symbolStyle.name;
+                currentCurve.symbol.color = self.symbolOptions.symbolColor;
+                currentCurve.symbol.size = self.symbolOptions.symbolStyle.size;
+            }
             close(self, 100);
         };
         this.onCancelButtonClicked = function () {
@@ -1330,8 +1351,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             wiApiService.postMultiFiles('/files', payloadParams)
                 .then(function (wells) {
                     console.log('wells response', wells);
-
-                    return close(wells, 500);
+                    return close(wells, 100);
                 })
                 .catch(function (err) {
                     console.log('err', err);

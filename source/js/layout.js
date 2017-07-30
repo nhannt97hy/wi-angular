@@ -82,6 +82,8 @@ module.exports.putRight = function(templateId, title) {
 
 module.exports.putWiLogPlotRight = function(logplotModel) {
     let itemId = 'logplot' + logplotModel.id;
+    console.log(itemId);
+    LAYOUT = layoutManager;
     let rightContainer = layoutManager.root.getItemsById('right')[0];
     let logplotItem = rightContainer.getItemsById(itemId)[0];
     if (logplotItem) {

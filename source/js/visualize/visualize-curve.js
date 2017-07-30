@@ -10,6 +10,7 @@ Utils.extend(Drawing, Curve);
  * Represents a Curve
  * @constructor
  * @param {Object} config - Configurations of new curve
+ * @param {Number} [config.id] - The id of this line(curve) in backend (idLine field)
  * @param {String} [config.name] - Name of new curve
  * @param {String} [config.unit] - Unit of data
  * @param {Number} [config.minX] - Mininum x value to show
@@ -32,6 +33,8 @@ Utils.extend(Drawing, Curve);
 function Curve(config) {
     Drawing.call(this);
     if (typeof config != 'object') config = {};
+
+    this.id = config.id;
 
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';

@@ -11,6 +11,9 @@ Utils.extend(Track, LogTrack);
  * Represents a log track
  * @constructor
  * @param {Object} config - Contain configurations.
+ * @param {Number} [config.id] - The id of this track in backend (idTrack field)
+ * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
+ * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
  * @param {String} [config.xAxisPosition] - Position of the x axis. Default: 'top'
  * @param {String} [config.yAxisPosition] - Position of the y axis. Default: 'left'
  * @param {Number} [config.xNTicks] - Number of ticks shown in x axis. Default: 4
@@ -23,6 +26,10 @@ Utils.extend(Track, LogTrack);
  */
 function LogTrack(config) {
     Track.call(this);
+
+    this.id = config.id;
+    this.type = config.type;
+    this.orderNum = config.orderNum;
 
     this.drawings = [];
     this.windowX = [0, 1];
@@ -190,6 +197,7 @@ LogTrack.prototype.doPlot = function() {
  * Add curve to track
  * @param {Object} data - Array of objects containing x, y coordinates
  * @param {Object} config - Configurations of new curve
+ * @param {Number} [config.id] - The id of this line in backend (idLine field)
  * @param {String} [config.name] - Name of new curve. Default: auto generate
  * @param {String} [config.unit] - Unit of data. Default: 'm3'
  * @param {Number} [config.minX] - Mininum x value to show. Default: auto detect

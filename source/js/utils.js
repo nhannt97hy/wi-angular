@@ -77,6 +77,7 @@ function lineToTreeConfig(line) {
     lineModel.type = 'line';
     lineModel.id = line.idLine;
     lineModel.data = {
+        id: line.idLine,
         name: lineModel.name,
         unit: curveModel.properties.unit,
         minX: line.minValue,
@@ -305,7 +306,6 @@ function getSelectedNode() {
         if (node.data && node.data.selected == true)
             selectedNode = node;
     });
-    console.log("selectedNode:", selectedNode);
     return selectedNode;
 }
 
@@ -366,19 +366,17 @@ exports.updateWellsProject = function (wiComponentService, wells) {
     }
 };
 
-function getCurveDataByName(apiService, idCurve, callback) {
+function getCurveData(apiService, idCurve, callback) {
     apiService.post(apiService.CURVE, { idCurve })
         .then(function (curve) {
-            // console.log('curve data', curve);
             callback(null, curve);
         })
         .catch(function (err) {
-            console.error('getCurveDataByName', err);
-
+            console.error('getCurveData', err);
             callback(err);
         });
 }
-exports.getCurveDataByName = getCurveDataByName;
+//exports.getCurveDataByName = getCurveDataByName;
 
 exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
     let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
@@ -399,7 +397,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     .then(function(line){
                         console.log('line created', line);
                         let lineModel = lineToTreeConfig(line);
-                        getCurveDataByName(apiService, idCurve, function (err, data) {
+                        getCurveData(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
                     })
@@ -454,27 +452,43 @@ exports.openLogplotTab = function (wiComponentService, logplotModel) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putWiLogPlotRight(logplotModel);
     if (logplotModel.data.opened) return;
-    logplotModel.data.opened = true;    
+    logplotModel.data.opened = true;
     let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
         .then(function (plot) {
+            let tracks = new Array();
+
             if (plot.depth_axes && plot.depth_axes.length) {
                 plot.depth_axes.forEach(function(depthTrack) {
-                    wiD3Ctrl.pushDepthTrack(depthTrack);
+                    tracks.push(depthTrack);
                 });
             }
             if (plot.tracks && plot.tracks.length) {
                 plot.tracks.forEach(function (track) {
-                    if (!track.lines || !track.lines.length) return;
-                    let trackObj = wiD3Ctrl.pushLogTrack(track);
-                    track.lines.forEach(function (line) {
-                        getCurveDataByName(wiApiService, line.idCurve, function (err, data) {
+                    tracks.push(track);
+                });
+            }
+
+            tracks.sort(function(track1, track2) { 
+                return track2.orderNum - track1.orderNum;
+            });
+            let aTrack = tracks.pop();
+            while( aTrack ) {
+                if (aTrack.idDepthAxis) {
+                    wiD3Ctrl.pushDepthTrack(aTrack);
+                }
+                else if (aTrack.idTrack) {
+                    let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+                    if ( !aTrack.lines ) return;
+                    aTrack.lines.forEach(function (line) {
+                        getCurveData(wiApiService, line.idCurve, function (err, data) {
                             let lineModel = lineToTreeConfig(line);
                             if (!err) wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
                         });
                     });
-                });
+                }
+                aTrack = tracks.pop();
             }
         });
 };

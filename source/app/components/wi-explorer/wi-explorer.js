@@ -14,7 +14,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             let projectModel = utils.projectToTreeConfig(projectLoaded);
             self.treeConfig = [projectModel];
-            //utils.pushProjectToExplorer(self, projectLoaded, wiComponentService, WiTreeConfig, WiWell, $timeout);
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -409,7 +408,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Open",
                         icon: "play-16x16",
                         handler: function() {
-
+                            let logplotModel = utils.getSelectedNode();
+                            utils.openLogplotTab(wiComponentService, logplotModel);
                         }
                     }, {
                         name: "Rename",

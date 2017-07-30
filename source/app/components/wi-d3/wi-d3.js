@@ -2,6 +2,7 @@ const componentName = 'wiD3';
 const moduleName = 'wi-d3';
 
 let TRACK_CFG = {
+    type: 'log-track',
     xNTicks: 4,
     yNTicks: 10,
     xAxisPosition: 'top',
@@ -13,6 +14,7 @@ let TRACK_CFG = {
 };
 
 let DTRACK_CFG = {
+    type: 'depth-track',
     xNTicks: 4,
     yNTicks: 10,
     xAxisPosition: 'top',
@@ -114,6 +116,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
+    this.getMaxOrderNum = function() {
+        return _tracks.reduce(function(max, item) {
+            return Math.max(max, item.orderNum);
+        }, 0);
+    }
+
     this.getCurrentTrack = function () {
         return _currentTrack;
     };
@@ -123,19 +131,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addLogTrack = function() {
-        //TODO: remember track position
-        let dataRequest = {
-            idPlot: self.logPlotCtrl.id
-        };
-        wiApiService.post(wiApiService.CREATE_LOG_TRACK, dataRequest)
-            .then(function (logTrack) {
-                console.log("Success: ", logTrack);
-                self.pushLogTrack(logTrack);
-            })
-            .catch(function (err) {
-                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                return;
-            });
+        var logTrackOrder = self.getMaxOrderNum() + 1;
+        console.log(logTrackOrder);
+        wiApiService.createLogTrack(self.logPlotCtrl.id, logTrackOrder, function(logTrack) {
+            self.pushLogTrack(logTrack);
+        });
     }
 
     this.pushLogTrack = function (logTrack) {
@@ -143,6 +143,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(self.plotAreaId);
         // track config
         TRACK_CFG.id = logTrack.idTrack;
+        TRACK_CFG.orderNum = logTrack.orderNum;
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
@@ -175,22 +176,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addDepthTrack = function() {
-        let dataRequest = {
-            idPlot: self.logPlotCtrl.id
-        };
-        wiApiService.post(wiApiService.CREATE_DEPTH_AXIS, dataRequest)
-            .then(function (depthTrack) {
-                console.log("Success: ", depthTrack);
-                self.pushDepthTrack(depthTrack);
-            })
-            .catch(function (err) {
-                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                return;
-            });
+        wiApiService.createDepthTrack(self.logPlotCtrl.id, self.getMaxOrderNum() + 1, function (depthTrack) {
+            console.log("Success: ", depthTrack);
+            self.pushDepthTrack(depthTrack);
+        });
     }
     this.pushDepthTrack = function (depthTrack) {
         let graph = wiComponentService.getComponent('GRAPH');
         console.log(self.plotAreaId);
+        DTRACK_CFG.id = depthTrack.idDepthAxis;
+        DTRACK_CFG.orderNum = depthTrack.orderNum;
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
@@ -204,7 +199,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addCurveToTrack = function (track, data, config) {
-        console.log("add curve to trackkkkkkk",track,data,config);
+        console.log("add curve to trackkkkkkk",track, data,config);
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
 
@@ -264,25 +259,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.removeTrack = function (track) {
-        DialogUtils.confirmDialog(ModalService, "Delete Track", "Are you sure to delete track: " + track.name + "?", function (yes) {
-            if (yes) {
-                let trackIdx = _tracks.indexOf(track);
-                if (trackIdx < 0) return;
+        let trackIdx = _tracks.indexOf(track);
+        if (trackIdx < 0) return;
 
-                if (track == _currentTrack) {
-                    _currentTrack = null;
-                }
-                _previousTrack = null;
-                if (track.removeAllDrawings) {
-                    track.removeAllDrawings();
-                }
+        if (track == _currentTrack) {
+            _currentTrack = null;
+        }
+        _previousTrack = null;
+        if (track.removeAllDrawings) {
+            track.removeAllDrawings();
+        }
 
-                let graph = wiComponentService.getComponent('GRAPH');
-                graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
+        let graph = wiComponentService.getComponent('GRAPH');
+        graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
 
-                _tracks.splice(trackIdx, 1);
-            }
-        })
+        _tracks.splice(trackIdx, 1);
     }
 
     this.plot = function (track) {
@@ -433,11 +424,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, DialogUtils, currentCurve, function(props) {
-                    if (props) {
-                        console.log(props);
+                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, DialogUtils, currentCurve, function(modalCtrl) {
+                    if (modalCtrl) {
+                        console.log(modalCtrl);
+                        currentCurve.line.color = modalCtrl.lineOptions.lineColor;
                     }
-                })
+                });
             }
         }, {
             name: "EditCurve",
@@ -458,7 +450,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Remove Curve",
             icon: "curve-hide-16x16",
             handler: function () {
-                self.removeCurrentCurve();
+                console.log( "currentCurve:", _currentTrack.getCurrentCurve() );
+                let idLine = _currentTrack.getCurrentCurve().id;
+                wiApiService.removeLine(idLine, self.removeCurrentCurve());
             }
         }, {
             name: "BaseLineShift",
@@ -495,16 +489,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }
         ]);
-        /*$timeout(function() {
-            console.log('++++++++++++', wiComponentService, wiComponentService.getComponent('ContextMenu'));
-            wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
-                name: "RemoveCurve",
-                label: "Remove Curve",
-                handler: function () {
-                    self.removeCurrentCurve();
-                }
-            }]);
-        }, 1000);*/
     }
 
     function getLogplotCtrl() {
@@ -641,7 +625,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Delete Track",
             icon: 'track-delete-16x16',
             handler: function () {
-                self.removeCurrentTrack();
+                DialogUtils.confirmDialog(ModalService, 
+                    "Delete Track", 
+                    "Are you sure to delete this track?", 
+                    function (yes) {
+                        if (yes) {
+                            if (_currentTrack.type == 'log-track') {
+                                wiApiService.removeLogTrack(_currentTrack.id, self.removeCurrentTrack);
+                            }
+                            else if (_currentTrack.type == 'depth-track') {
+                                wiApiService.removeDepthTrack(_currentTrack.id, self.removeCurrentTrack);
+                            }
+                        }
+                    }
+                );
             }
         },
     ];

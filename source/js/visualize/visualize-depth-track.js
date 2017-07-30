@@ -9,6 +9,9 @@ Utils.extend(Track, DepthTrack);
  * Represents a depth track
  * @constructor
  * @param {Object} config - Contain configurations.
+ * @param {Number} [config.id] - The id of this track in backend (idDepthAxis field)
+ * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
+ * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
  * @param {String} [config.unit] - Depth unit. Default: 'm'
  * @param {String} [config.xAxisPosition] - Position of the x axis. Default: 'top'
  * @param {String} [config.yAxisPosition] - Position of the y axis. Default: 'left'
@@ -22,6 +25,10 @@ Utils.extend(Track, DepthTrack);
  */
 function DepthTrack(config) {
     Track.call(this);
+
+    this.id = config.id;
+    this.type = config.type;
+    this.orderNum = config.orderNum;
 
     this.windowY = [];
     this.unit = config.unit || 'm';

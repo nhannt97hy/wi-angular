@@ -5,11 +5,10 @@
 
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"><span class="curve-properties-16x16"></span>&nbsp;Curve Properties</h4>
-                <h5 class="modal-infomation-title">&nbsp;Well Infomation</h5>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding-bottom:0;">
                 <div class="">
-                    <form class="form-horizontal" action="" name="modalAddNew">
+                    <form class="form-horizontal form-condensed" action="" name="modalAddNew">
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
@@ -60,18 +59,18 @@
                                                    ng-model="wiModal.curveOptions.maxValue">
                                         </div>
                                     </div>
-                                    <input type="checkbox" ng-model="wiModal.curveOptions.autoScale">&nbsp;Auto value scales <br><br>
-                                    <div class="minDepth">
-                                        <p class="col-sm-5">Min Depth: </p>
-                                        <p class="col-sm-7">
+                                    <input type="checkbox" ng-model="wiModal.curveOptions.autoScale">&nbsp;Auto value scales
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5">Min Depth: </label>
+                                        <div class="col-sm-7">
                                             {{wiModal.curveOptions.minDepth}}
-                                        </p>
+                                        </div>
                                     </div>
-                                    <div class="maxDepth">
-                                        <p class="col-sm-5">Max Depth: </p>
-                                        <p class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-5">Max Depth: </label>
+                                        <div class="col-sm-7">
                                             {{wiModal.curveOptions.maxDepth}}
-                                        </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

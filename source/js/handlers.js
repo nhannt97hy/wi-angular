@@ -48,7 +48,7 @@ exports.SaveProjectAsButtonClicked = function () {
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
     let wiComponentService = this.wiComponentService;
-    let layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
 
     if (!layoutManager.isComponentExist('explorer-block')) {
         layoutManager.putLeft('explorer-block', 'Project');
@@ -95,7 +95,6 @@ exports.AddNewButtonClicked = function () {
             let selectedNode = utils.getSelectedNode();
             selectedNode.children.push(wellModel);
         }
-        //if (newWell) utils.updateWellProject(wiComponentService, newWell);
     });
 };
 
@@ -135,22 +134,29 @@ exports.ImportMultiASCIIButtonClicked = function () {
 
 exports.ImportLASButtonClicked = function () {
     let self = this;
-    let utils = this.wiComponentService.getComponent(self.wiComponentService.UTILS);
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.importLASDialog(this.ModalService, function (well) {
         if (well) {
-            utils.updateWellProject(self.wiComponentService, well);
+            let wellModel = utils.wellToTreeConfig(well);
+            let selectedNode = utils.getSelectedNode();
+            selectedNode.children.push(wellModel);
+            //utils.updateWellProject(self.wiComponentService, well);
         }
     })
 };
 
 exports.ImportMultiLASButtonClicked = function () {
-    let self = this;
-    let utils = this.wiComponentService.getComponent(self.wiComponentService.UTILS);
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importMultiLASDialog(this.ModalService, function (wells) {
-        if (wells) {
-            utils.updateWellsProject(self.wiComponentService, wells);
+    DialogUtils.importMultiLASDialog(this.ModalService, function (wellResponses) {
+        if (wellResponses) {
+            for (let wellRes of wellResponses) {
+                let wellModel = utils.wellToTreeConfig(wellRes.content);
+                let selectedNode = utils.getSelectedNode();
+                selectedNode.children.push(wellModel);
+            }
+            //utils.updateWellsProject(self.wiComponentService, wells);
         }
     })
 };

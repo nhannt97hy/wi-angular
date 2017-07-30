@@ -7,23 +7,8 @@ function genSamples(nSamples) {
 }
 
 exports.EditFormatButtonClicked = function() {
-    let myPlot = this.wiComponentService.getD3Area(this.wiLogplot.name);
-    if (!myPlot) return;
-    let slidingBar = this.wiComponentService.getSlidingBar(this.wiLogplot.name);
-    if (!slidingBar) return;
-
-    myPlot.addDepthTrack();
-
-    let track = myPlot.addLogTrack();
-
-    myPlot.addCurveToTrack(track, genSamples(10000), 'Data', 'm3');
-
-    let maxDepth = myPlot.getMaxDepth();
-
-    let low = slidingBar.slidingBarState.top * maxDepth / 100;
-    let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
-    console.log(slidingBar.slidingBarState, low, high, maxDepth);
-    myPlot.setDepthRange([low, high]);
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    utils.error('This function is not implemented');
 };
 
 exports.SaveAsLogplotButtonClicked = function() {
