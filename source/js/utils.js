@@ -493,7 +493,7 @@ exports.openLogplotTab = function (wiComponentService, logplotModel) {
         });
 };
 
-exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
+/*exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
     let selectWellProject = findWellProjectById(idWell, project);
@@ -538,7 +538,7 @@ function findWellProjectById(idWell, project) {
     }
 
     return null;
-}
+}*/
 
 exports.findLogplotModelById = function (logplotId) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -551,6 +551,32 @@ exports.findLogplotModelById = function (logplotId) {
         }
     });
     return plot;
+}
+
+exports.findDatasetById = function (idDataset) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let dataset = null;
+    visit(rootNodes[0], function(node) {
+        if (node.type == 'dataset' && node.id == idDataset) {
+            dataset = node;
+        }
+    });
+    return dataset;
+}
+
+exports.findWellById = function (idWell) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let well = null;
+    visit(rootNodes[0], function(node) {
+        if (node.type == 'well' && node.id == idWell) {
+            well = node;
+        }
+    });
+    return well;
 }
 
 // exports.parseTime = function (wiComponentService, time) {
