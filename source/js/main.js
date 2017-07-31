@@ -161,11 +161,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
         console.log(logplotModel);
         layoutManager.putWiLogPlotRight(logplotModel);
     });
-    
-    wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
-        console.log('project-unloaded-event');
-        layoutManager.removeAllRightTabs();
-    });
 
     wiComponentService.on('logplot-tab-closed', function(logplotId) {
         let logplotModel = utils.findLogplotModelById(logplotId);
