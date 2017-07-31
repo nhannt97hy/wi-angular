@@ -354,8 +354,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 return [
                     {
                         name: "NewLogPlot",
-                        label: "New LogPlot ...",
+                        label: "New LogPlot",
                         icon: "logplot-new-16x16",
+                        class: 'has-more',
                         handler: function () {
                         },
                         childContextMenu: [

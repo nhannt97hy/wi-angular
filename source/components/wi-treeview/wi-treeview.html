@@ -1,39 +1,3 @@
-<!--<div class="wi-treeview-container"
-     ng-class='{"rootview": wiTreeview.name}'
-     ng-repeat="item in wiTreeview.config track by $index">
-    <div class="wi-parent-node" type="{{wiTreeview.config[$index].type}}"
-         ng-class='{"item-active": item.name == wiTreeview.getItemActiveName()}'
-         data="{{wiTreeview.config[$index].id}}"
-         wi-right-click="wiTreeview.onClick($index); wiTreeview.showContextMenu($event, $index)"
-         wi-element-ready="wiTreeview.onReady()">
-        <div class="wi-parent-content">
-            <div class="icon-expanded"
-                 ng-click="wiTreeview.onCollapse($index)">
-                <i aria-hidden="true" class="fa"
-                   ng-class="
-               {'fa-caret-down': item.data.childExpanded,
-               'fa-caret-right': !item.data.childExpanded,
-               'wi-hidden': item.children == null || item.children.length == 0}"></i>
-            </div>
-            <div ng-click="wiTreeview.onClick($index)"
-                 ng-dblclick="wiTreeview.onDoubleClick($index)">
-                <div class="display-inline-block margin-right-0_5em"><img class="{{item.data.icon}}" alt="img item treeview"></div>
-                <span>{{item.data.label}}</span>
-            </div>
-        </div>
-
-        <div class="wi-parent-unit text-right" ng-show="item.data.unit"
-             ng-click="wiTreeview.onClick($index)"
-             ng-dblclick="wiTreeview.onDoubleClick($index)">
-            {{item.data.unit}}
-        </div>
-    </div>
-
-    <div ng-show="item.data.childExpanded">
-        <wi-treeview contextmenuholder={{wiTreeview.contextmenuholder}} config="item.children"></wi-treeview>
-    </div>
-</div>
--->
 <div class="wi-treeview-container"
      ng-class='{"rootview": wiTreeview.name}'
      ng-repeat="item in wiTreeview.config track by $index"

@@ -6,6 +6,7 @@
         <wi-button ng-repeat='button in contextMenu.buttons track by $index'
                    name='{{contextMenu.name + "." + button.name}}'
                    icon='{{button.icon}}'
+                   class='{{button.class}}'
                    layout='icon-left'
                    label='{{button.label}}'
                    type='small'
