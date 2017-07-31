@@ -288,6 +288,40 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
+            case 'curve':
+                return [
+                    {
+                        name: "Copy",
+                        label: "Copy",
+                        icon: "copy-16x16",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Cut",
+                        label: "Cut",
+                        icon: "zone-split-16x16",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16-edit",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            self.handlers.DeleteItemButtonClicked();
+                        }
+                    }, {
+                        separator: "1"
+                    }
+                ];
             case 'intepretationmodel':
                 return [
                     {

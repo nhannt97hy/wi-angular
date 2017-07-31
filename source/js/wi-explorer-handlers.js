@@ -80,12 +80,18 @@ exports.DeleteItemButtonClicked = function () {
                     });
                     break;
                 case 'dataset':
-                    wiApiService.removeDataset(selectedNode.properties.idDataset, function() {
+                    wiApiService.removeDataset(selectedNode.properties.idDataset, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                         });
                     });
                     break;
+                case 'curve':
+                    wiApiService.removeCurve(selectedNode.properties.idCurve, function () {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                        });
+                    });
                 default: return;
             }
         }

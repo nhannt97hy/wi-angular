@@ -5,11 +5,13 @@ let app = angular.module(moduleName, []);
 
 // route: GET, CREATE, UPDATE, DELETE
 const GET_PROJECT = '/project/fullinfo';
-const CURVE = '/project/well/dataset/curve/getData';
 
 const DELETE_WELL = '/project/well/delete';
 
 const DELETE_DATASET = '/project/well/dataset/delete';
+
+const CURVE = '/project/well/dataset/curve/getData';
+const DELETE_CURVE = '/project/well/dataset/curve/delete';
 
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
@@ -203,6 +205,17 @@ Service.prototype.removeDataset = function(idDataset, callback) {
         idDataset: idDataset
     }
     this.delete(DELETE_DATASET, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.removeCurve = function(idCurve, callback) {
+    let dataRequest = {
+        idCurve: idCurve
+    }
+    this.delete(DELETE_CURVE, dataRequest)
         .then(callback)
         .catch(function (err) {
             self.getUtils().error(err);
