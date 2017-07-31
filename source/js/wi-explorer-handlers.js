@@ -63,41 +63,33 @@ exports.CollapseProjectButtonClicked = function () {
 }
 
 exports.DeleteItemButtonClicked = function () {
-    const ModalService = this.ModalService;
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = utils.getSelectedNode();
-    switch (selectedNode.type) {
-        case 'well':
-            dialogUtils.confirmDialog(ModalService, "Delete confirm", "Are you sure to delete " + selectedNode.data.label, function (yes) {
-                if (yes) {
+    dialogUtils.confirmDialog(this.ModalService, "Delete confirm", "Are you sure to delete " + selectedNode.data.label + "?", function (yes) {
+        if (yes) {
+            switch (selectedNode.type) {
+                case 'well':
                     wiApiService.removeWell(selectedNode.properties.idWell, function() {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                         });
                     });
-                    /*
-                    let dataRequest = {
-                        idWell: selectedNode.properties.idWell
-                    }
-                    wiApiService.delete(wiApiService.DELETE_WELL, dataRequest)
-                        .then(function (res) {
-                            $timeout(function () {
-                                selectedNode.data.deleted = true;
-                            });
-                        }).catch(function (err) {
-                            utils.error(err);
-                        })
-                    */
-                }
-            });
-            break;
-        default: return;
-    }
-    
+                    break;
+                case 'dataset':
+                    wiApiService.removeDataset(selectedNode.properties.idDataset, function() {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                        });
+                    });
+                    break;
+                default: return;
+            }
+        }
+    });
 }
 
 exports.BrowseProjectButtonClicked = function () {

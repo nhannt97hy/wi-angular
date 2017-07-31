@@ -9,6 +9,8 @@ const CURVE = '/project/well/dataset/curve/getData';
 
 const DELETE_WELL = '/project/well/delete';
 
+const DELETE_DATASET = '/project/well/dataset/delete';
+
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
 const DELETE_PLOT = '/project/well/plot/delete';
@@ -190,6 +192,17 @@ Service.prototype.removeWell = function(idWell, callback) {
         idWell: idWell
     }
     this.delete(DELETE_WELL, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.removeDataset = function(idDataset, callback) {
+    let dataRequest = {
+        idDataset: idDataset
+    }
+    this.delete(DELETE_DATASET, dataRequest)
         .then(callback)
         .catch(function (err) {
             self.getUtils().error(err);

@@ -280,7 +280,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         name: "Delete",
                         label: "Delete",
-                        icon: "delete-16x16"
+                        icon: "delete-16x16",
+                        handler: function () {
+                            self.handlers.DeleteItemButtonClicked();
+                        }
                     }, {
                         separator: '1'
                     }
