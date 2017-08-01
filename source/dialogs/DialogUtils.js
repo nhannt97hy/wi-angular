@@ -1064,7 +1064,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
             wrapMode: ["None", "Left", "Right", "Both"],
             symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
             blockPosition: ["None", "Start", "Middle", "End", "None"],
-            logLinear: ["Linear", "Log"],
+            logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
         this.defaultElement = {
@@ -1194,9 +1194,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
         };
         this.onApplyButtonClicked = function () {
             callback(self);
-            console.log("$$",self);
-        };
-        this.onOkButtonClicked = function () {
+            console.log(self);
             currentCurve.line.color = self.lineOptions.lineColor;
             currentCurve.line.width = self.lineOptions.lineWidth.param;
             currentCurve.line.dash = self.lineOptions.lineStyle.param;
@@ -1206,6 +1204,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
                 currentCurve.symbol.color = self.symbolOptions.symbolColor;
                 currentCurve.symbol.size = self.symbolOptions.symbolStyle.size;
             }
+        };
+        this.onOkButtonClicked = function () {
             close(self, 100);
         };
         this.onCancelButtonClicked = function () {
@@ -1453,10 +1453,16 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
         let self = this;
         this.disabled = false;
 
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let well = utils.findWellById(WiLogplotModel.properties.idWell);
+        let datasets = [];
+        well.children.forEach( function(child) {
+            if(child.type == 'dataset') datasets.push(child);
+        });
         const props = {
             general: {
                 isShowTitle: true,
-                title : "New Track",
+                title : "Track" + _currentTrack.id,
                 topJustification: "center",
                 bottomJustification: "center",
                 isShowLabels: false,
@@ -1469,12 +1475,11 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
                 width: 2.000,
                 trackColor: '#ffffff'
             },
-            curve: {
-
-            },
-            shading: {
-            }
+            curves: this.currentCurves,
+            shading: this.currentShadings
         }
+        this.curves = datasets.children;
+        
         console.log("Wi", WiLogplotModel);
         console.log("currentTrack", _currentTrack);
 
@@ -1545,124 +1550,36 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
             ];
 
         };
-        this.lineOptions = {
-            display: true,
-            lineColor: "#00ffff",
-            lineStyle: {
-                name: 'solid',
-                param: [10, 0]
+        this.lineOptions = {};
+         this.fillOptions = {
+            fill: {
+                foreground: "#0000ff",
+                background: "#ffff00",
+                pattern : "chert"
             },
-            lineWidth: {
-                name: '1',
-                param: 1
+            positiveFill:{
+                pattern: null,
+                foreground: '#00ff00',
+                background: '#ffff00'
+            },
+            negativeFill:{
+                pattern: null,
+                foreground: '#ff0000',
+                background: '#ff0'
             }
-        };
+        }
         this.selectedCurve = [];
-        this.currentCurve = getCurrentCurve();
+        this.currentCurves = getCurrentCurves();
+        this.currentShadings = getCurrentShadings();
+        console.log("currentCurves", this.currentCurves);
 
-        function getCurrentCurve () {
-            return [
-                {
-                    name : "dataset1",
-                    curves : [
-                        {
-                            name: "DTCO3",
-                            alias : "DTCO3",
-                            leftScale : 1000,
-                            rightScale : 10,
-                            logLinear : "Logarithmic",
-                            displayMode : "Line",
-                            lineStyle : self.lineOptions,
-                            displayAs : "Normal"
-                        },
-                        {
-                            name: "ECGR",
-                            alias : "ECGR",
-                            leftScale : 2000,
-                            rightScale : 20,
-                            logLinear : "Linear",
-                            displayMode : "Line",
-                            lineStyle : self.lineOptions,
-                            displayAs : "Normal"
-                        }
-                    ]
-                }
-            ]
-
+        function getCurrentCurves () {
+            return _currentTrack.getCurves();
+        };
+        function getCurrentShadings () {
+            return _currentTrack.getShadings();
         };
         function getFullData () {
-            // let WiLogplotModel = {
-            //     "idWell": 6,
-            //     "name": "W4",
-            //     "topDepth": "1119.8352",
-            //     "bottomDepth": "2184.8064",
-            //     "step": "0.1524",
-            //     "createdAt": "2017-07-24T10:54:55.000Z",
-            //     "updatedAt": "2017-07-24T10:54:55.000Z",
-            //     "idProject": 2,
-            //     "datasets": [
-            //         {
-            //             "idDataset": 6,
-            //             "name": "W4",
-            //             "datasetKey": "W4",
-            //             "datasetLabel": "W4",
-            //             "createdAt": "2017-07-24T10:54:55.000Z",
-            //             "updatedAt": "2017-07-24T10:54:55.000Z",
-            //             "idWell": 6,
-            //             "curves": [
-            //                 {
-            //                     "idCurve": 5,
-            //                     "name": "DEPTH",
-            //                     "dataset": "W4",
-            //                     "family": "VNU",
-            //                     "unit": "M",
-            //                     "initValue": "abc",
-            //                     "createdAt": "2017-07-24T10:54:55.000Z",
-            //                     "updatedAt": "2017-07-24T10:54:55.000Z",
-            //                     "idDataset": 6,
-            //                     "idFamily": null
-            //                 },
-            //                 {
-            //                     "idCurve": 6,
-            //                     "name": "DTCO3",
-            //                     "dataset": "W4",
-            //                     "family": "VNU",
-            //                     "unit": "US/F",
-            //                     "initValue": "abc",
-            //                     "createdAt": "2017-07-24T10:54:55.000Z",
-            //                     "updatedAt": "2017-07-24T10:54:55.000Z",
-            //                     "idDataset": 6,
-            //                     "idFamily": 127
-            //                 },
-            //                 {
-            //                     "idCurve": 7,
-            //                     "name": "ECGR",
-            //                     "dataset": "W4",
-            //                     "family": "VNU",
-            //                     "unit": "GAPI",
-            //                     "initValue": "abc",
-            //                     "createdAt": "2017-07-24T10:54:55.000Z",
-            //                     "updatedAt": "2017-07-24T10:54:55.000Z",
-            //                     "idDataset": 6,
-            //                     "idFamily": 2
-            //                 }
-            //             ]
-            //         }
-            //     ],
-            //     "plots": [
-            //         {
-            //             "idPlot": 1,
-            //             "name": "mock test",
-            //             "option": "blank-plot",
-            //             "createdAt": "2017-07-24T10:57:32.000Z",
-            //             "updatedAt": "2017-07-24T10:57:32.000Z",
-            //             "idWell": 6,
-            //             "tracks": [],
-            //             "depth_axes": []
-            //         }
-            //     ]
-            // };
-            return WiLogplotModel.datasets;
         }
 
         this.logLinear = ["Logarithmic", "Linear"];
@@ -1671,16 +1588,10 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
 
         this.shadingAttr = fillShadingAttrArray();
         this.fillDataset = getFullData();
-        this.lineStyleButtonClicked = function () {
-            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-            DialogUtils.lineStyleDialog(ModalService, function (options) {
-                lineOptions = options;
-            }, self.lineOptions);
-        };
-        this.setClickedRowCurve = function(index){
-            $scope.selectedRow = index;
-            self.selectedCurve = self.currentCurve[index];
-        };
+        // this.setClickedRowCurve = function(index){
+        //     $scope.selectedRow = index;
+        //     self.selectedCurve = self.currentCurve[index];
+        // };
         this.removeRow = function(){
             console.log("self.selectedCurve.content", self.selectedCurve.content);
 
@@ -1758,23 +1669,7 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
         };
 
         
-        this.fillOptions = {
-            fill: {
-                foreground: "#0000ff",
-                background: "#ffff00",
-                pattern : "chert"
-            },
-            positiveFill:{
-                pattern: null,
-                foreground: '#00ff00',
-                background: '#ffff00'
-            },
-            negativeFill:{
-                pattern: null,
-                foreground: '#ff0000',
-                background: '#ff0'
-            }
-        }
+        // Dialog buttons
         this.definePatternButtonClicked = function () {
             console.log("define");
             let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -1783,8 +1678,13 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
                 fillOptions = options;
 
             }, self.fillOptions);
-        }
-        // Dialog buttons
+        };
+        this.lineStyleButtonClicked = function () {
+            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+            DialogUtils.lineStyleDialog(ModalService, function (options) {
+                lineOptions = options;
+            }, self.lineOptions);
+        };
         this.onApplyButtonClicked = function () {
             //close(props, 100);
             callback(props);

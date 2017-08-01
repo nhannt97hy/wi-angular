@@ -35,7 +35,7 @@ function Curve(config) {
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
-
+    this.idDataset = config.idDataset;
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';
     this.minX = config.minX;

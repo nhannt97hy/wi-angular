@@ -164,10 +164,6 @@
                                                            class="form-control wi-form-control"
                                                         ng-model="wiModal.trackColor"/>
                                                 </div>
-                                                <div class="float-left">
-                                                    <input type="text" class="form-control wi-form-control"
-                                                    ng-model="wiModal.trackColor">
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -194,7 +190,57 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-model="curve"
+                                            <tr ng-model="currentCurve"
+                                                ng-repeat="currentCurve in wiModal.currentCurves"
+                                                ng-class="{selected:$index == selectedRow}"
+                                                ng-click="wiModal.setClickedRowCurve($index)">
+                                                <td>
+                                                    <select class="form-control wi-form-control"
+                                                            ng-model="dataset"
+                                                            ng-options="dataset.name for dataset in wiModal.fillDataset">
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select ng-model="currentCurve" name="curveName"
+                                                            value="" class="form-control wi-form-control"
+                                                            ng-options="selectCurve as selectCurve.name for selectCurve in wiModal.currentCurves">
+                                                    </select>
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" ng-model="currentCurve.alias"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="text" ng-model="currentCurve.minX"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="text" ng-model="currentCurve.maxX"
+                                                           class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <select ng-model="currentCurve.scale" name="log"
+                                                            value="" class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.logLinear track by item"></select>
+                                                </td>
+                                                <td>
+                                                    <select ng-model="currentCurve.displayMode" name="displayMode"
+                                                            value="" class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.displayMode track by item"></select>
+                                                </td>
+                                                <td>
+                                                    <input type="button" ng-model="currentCurve.line"
+                                                           value="Edit..." class="form-control wi-form-control"
+                                                            ng-click="wiModal.lineStyleButtonClicked()">
+                                                </td>
+                                                <td>
+                                                    <select ng-model="currentCurve.displayAs" name="displayAs"
+                                                            value="" class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.displayAs track by item"></select>
+                                                </td>       
+                                            </tr>
+                                            <!-- <tr ng-model="curve"
                                                 ng-repeat="curve in wiModal.fillDataset track by $index"
                                                 ng-class="{selected:$index == selectedRow}"
                                                 ng-click="wiModal.setClickedRowCurve($index)">
@@ -243,7 +289,7 @@
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayAs track by item"></select>
                                                 </td>
-                                            </tr>
+                                            </tr> -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -268,7 +314,7 @@
                         <div class="container-fluid">
                             <form action="" class="form-horizontal">
                                 <div class="col-sm-11">
-                                    <table class="table table-bordered shadingTable">
+                                    <table class="font-size-10px table table-bordered shadingTable">
                                         <thead>
                                             <tr>
                                                 <td colspan="2">Left Side of Shading</td>

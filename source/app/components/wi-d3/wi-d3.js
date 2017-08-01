@@ -24,77 +24,6 @@ let DTRACK_CFG = {
     yPadding: 5,
     width: 60
 };
-let WiLogplotModel = {
-    "idWell": 6,
-    "name": "W4",
-    "topDepth": "1119.8352",
-    "bottomDepth": "2184.8064",
-    "step": "0.1524",
-    "createdAt": "2017-07-24T10:54:55.000Z",
-    "updatedAt": "2017-07-24T10:54:55.000Z",
-    "idProject": 2,
-    "datasets": [
-        {
-            "idDataset": 6,
-            "name": "W4",
-            "datasetKey": "W4",
-            "datasetLabel": "W4",
-            "createdAt": "2017-07-24T10:54:55.000Z",
-            "updatedAt": "2017-07-24T10:54:55.000Z",
-            "idWell": 6,
-            "curves": [
-                {
-                    "idCurve": 5,
-                    "name": "DEPTH",
-                    "dataset": "W4",
-                    "family": "VNU",
-                    "unit": "M",
-                    "initValue": "abc",
-                    "createdAt": "2017-07-24T10:54:55.000Z",
-                    "updatedAt": "2017-07-24T10:54:55.000Z",
-                    "idDataset": 6,
-                    "idFamily": null
-                },
-                {
-                    "idCurve": 6,
-                    "name": "DTCO3",
-                    "dataset": "W4",
-                    "family": "VNU",
-                    "unit": "US/F",
-                    "initValue": "abc",
-                    "createdAt": "2017-07-24T10:54:55.000Z",
-                    "updatedAt": "2017-07-24T10:54:55.000Z",
-                    "idDataset": 6,
-                    "idFamily": 127
-                },
-                {
-                    "idCurve": 7,
-                    "name": "ECGR",
-                    "dataset": "W4",
-                    "family": "VNU",
-                    "unit": "GAPI",
-                    "initValue": "abc",
-                    "createdAt": "2017-07-24T10:54:55.000Z",
-                    "updatedAt": "2017-07-24T10:54:55.000Z",
-                    "idDataset": 6,
-                    "idFamily": 2
-                }
-            ]
-        }
-    ],
-    "plots": [
-        {
-            "idPlot": 1,
-            "name": "mock test",
-            "option": "blank-plot",
-            "createdAt": "2017-07-24T10:57:32.000Z",
-            "updatedAt": "2017-07-24T10:57:32.000Z",
-            "idWell": 6,
-            "tracks": [],
-            "depth_axes": []
-        }
-    ]
-};
 function getCurveFromName(name) {
     console.log("-", name);
     let nSamples = 1000;
@@ -110,6 +39,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
+    let WiLogplotModel = null;
     let _depthRange = [0, 100000];
     let _selectedColor = '#ffffe0';
 
@@ -500,7 +430,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
         self.logPlotCtrl = getLogplotCtrl();
-        //self.logplotModel = self.wiLogplotCtrl.getLogplotModel();
+        WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
         console.log('wiLogplotCtrl of wi-d3', self.wiLogplotCtrl);
 
         if (self.name) {
@@ -517,7 +447,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
                 if (!_currentTrack) return;
-                console.log("$$", _currentTrack);
+                console.log(_currentTrack);
                 if (_currentTrack.isLogTrack()) {
                     DialogUtils.logTrackPropertiesDialog(ModalService, WiLogplotModel, _currentTrack, function (props) {
                         if (props) {
