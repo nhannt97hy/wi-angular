@@ -76,6 +76,7 @@ function lineToTreeConfig(line) {
     lineModel.name = curveModel.properties.name;
     lineModel.type = 'line';
     lineModel.id = line.idLine;
+    lineModel.idDataset = curveModel.idDataset;
     lineModel.data = {
         id: line.idLine,
         name: lineModel.name,
