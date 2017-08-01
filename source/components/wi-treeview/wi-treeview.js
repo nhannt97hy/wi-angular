@@ -52,11 +52,17 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         }
     }
 
-    this.onDoubleClick = function($index) {
+    this.onDoubleClick = function ($index) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let logplotModel = utils.getSelectedNode();
-        if( logplotModel.type != 'logplot') return;
-        utils.openLogplotTab(wiComponentService, logplotModel);
+        let selectedNode = utils.getSelectedNode();
+        if (selectedNode.children && selectedNode.children.length) {
+            selectedNode.data.childExpanded = !selectedNode.data.childExpanded;
+            return;
+        }
+        if (selectedNode.type == 'logplot') {
+            utils.openLogplotTab(wiComponentService, selectedNode);
+            return;
+        }
     }
 
     this.onDoubleClick1 = function ($index) {
