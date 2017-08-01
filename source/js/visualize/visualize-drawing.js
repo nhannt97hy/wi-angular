@@ -57,7 +57,6 @@ Drawing.prototype.raise = function() {
  * @param {Object} rect - The bounding rectangle
  */
 Drawing.prototype.adjustSize = function(rect) {
-    this.clientRect = rect;
     this.canvas
         .attr('width', rect.width)
         .attr('height', rect.height);
@@ -67,6 +66,6 @@ Drawing.prototype.adjustSize = function(rect) {
  * Destroy DOM elements of the drawing
  */
 Drawing.prototype.destroy = function() {
-    this.canvas.remove();
+    if (this.canvas) this.canvas.remove();
     if (this.header) this.header.remove();
 }

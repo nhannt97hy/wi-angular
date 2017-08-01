@@ -44,8 +44,9 @@ exports.createDepthTrack = function(config, domElem) {
  * @param {Number} trackIdx - Index of the track in the element
  * @param {Object} domElem - The DOM element containing the track
  */
-exports.removeTrack = function(trackIdx, domElem) {
-    Utils.removeTrack(trackIdx, domElem);
+exports.removeTrack = function(track, domElem) {
+    track.destroy();
+    let trackIdx = registeredTracks.indexOf(track);
     registeredTracks.splice(trackIdx, 1);
 }
 
@@ -57,9 +58,39 @@ exports.removeTrack = function(trackIdx, domElem) {
  * @returns {Object} The created curve
  */
 exports.createCurve = function(config, data, domElem) {
+    config.data = data;
     let curve = new Curve(config);
-    curve.init(data, domElem);
+    curve.init(domElem);
     return curve;
+}
+
+/**
+ * Build a new visualize depth track object without creating DOM element
+ * @param {Object} config - Configurations of new Depth Track
+ * @returns {Object} The built track
+ */
+exports.buildDepthTrack = function(config) {
+    return new DepthTrack(config);
+}
+
+/**
+ * Build a new visualize log track object without creating DOM element
+ * @param {Object} config - Configurations of new Log Track
+ * @returns {Object} The built track
+ */
+exports.buildLogTrack = function(config) {
+    return new LogTrack(config);
+}
+
+/**
+ * Build a new visualize curve object without creating DOM element
+ * @param {Object} config - Configurations of new Curve
+ * @param {Array} data - Curve data
+ * @returns {Object} The built curve
+ */
+exports.buildCurve = function(config, data) {
+    config.data = data;
+    return new Curve(config);
 }
 
 exports.CanvasHelper = CanvasHelper;

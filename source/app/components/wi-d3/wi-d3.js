@@ -101,7 +101,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.onHeaderMouseDown(function () {
             _onHeaderMouseDownCallback(track);
         });
-
+        _registerTrackHorizontalResizerDragCallback();
         return track;
     };
 
@@ -126,6 +126,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.onMouseDown(function () {
             _setCurrentTrack(track);
         });
+        _registerTrackHorizontalResizerDragCallback();
     };
 
     this.addCurveToTrack = function (track, data, config) {
@@ -201,7 +202,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         let graph = wiComponentService.getComponent('GRAPH');
-        graph.removeTrack(trackIdx, document.getElementById(self.plotAreaId));
+        graph.removeTrack(track, document.getElementById(self.plotAreaId));
 
         _tracks.splice(trackIdx, 1);
     }
@@ -220,7 +221,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.setDepthRange = function(depthRange) {
         _depthRange = depthRange;
         _tracks.forEach(function(track) {
-            track.windowY = depthRange;
+            track.minY = depthRange[0];
+            track.maxY = depthRange[1];
         });
         self.plotAll();
     };
@@ -230,7 +232,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.setDepthRange(depthRange);
         }
         else {
-            track.windowY = depthRange;
+            track.minY = depthRange[0];
+            track.maxY = depthRange[1];
             self.plot(track);
             _depthRange = depthRange;
         }
@@ -300,6 +303,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
             }
+        });
+    }
+
+    function _registerTrackHorizontalResizerDragCallback(track) {
+        _tracks.forEach(function(track) {
+            track.onHorizontalResizerDrag(function() {
+                _tracks.forEach(function(t) {
+                    if (track == t) return;
+                    t.horizontalResizerDragCallback();
+                })
+            });
         })
     }
 
@@ -415,7 +429,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Create Shading",
             icon: "shading-add-16x16",
             handler: function () {
-
+                self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
             }
         }
         ]);
@@ -555,9 +569,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Delete Track",
             icon: 'track-delete-16x16',
             handler: function () {
-                DialogUtils.confirmDialog(ModalService, 
-                    "Delete Track", 
-                    "Are you sure to delete this track?", 
+                DialogUtils.confirmDialog(ModalService,
+                    "Delete Track",
+                    "Are you sure to delete this track?",
                     function (yes) {
                         if (yes) {
                             if (_currentTrack.type == 'log-track') {

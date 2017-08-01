@@ -10,6 +10,7 @@ exports.interpolateData = interpolateData;
 exports.parseData = parseData;
 exports.extend = extend;
 exports.createFillStyles = createFillStyles;
+exports.clip = clip;
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;

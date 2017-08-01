@@ -14,15 +14,15 @@ Utils.extend(Track, LogTrack);
  * @param {Number} [config.id] - The id of this track in backend (idTrack field)
  * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
  * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
- * @param {String} [config.xAxisPosition] - Position of the x axis. Default: 'top'
- * @param {String} [config.yAxisPosition] - Position of the y axis. Default: 'left'
+ * @param {String} [config.name] - Name of the track
  * @param {Number} [config.xNTicks] - Number of ticks shown in x axis. Default: 4
- * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 20
- * @param {String} [config.xFormatter] - d3 formatter for numbers in x axis. Default: 'g'
- * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: 'g'
- * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 0
- * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 0
- * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 200
+ * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 10
+ * @param {String} [config.xFormatter] - d3 formatter for numbers in x axis. Default: '.2f'
+ * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: '.2f'
+ * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
+ * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
+ * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 120
+ * @param {Number} [config.yStep] - Y gap between two consecutive points
  */
 function LogTrack(config) {
     Track.call(this);
@@ -31,35 +31,46 @@ function LogTrack(config) {
     this.type = config.type;
     this.orderNum = config.orderNum;
 
+    this.showTitle = (config.showTitle == null) ? true : config.showTitle;
+    this.name = config.name || 'Track';
+    this.width = config.width || 120;
+
     this.drawings = [];
-    this.windowX = [0, 1];
-    this.windowY = [];
-    this.id = config.id;
+    this.minX = config.minX;
+    this.maxX = config.maxX;
+    this.minY = config.minY;
+    this.maxY = config.maxY;
 
-    this.translateOpts = {};
-    this.xAxisClass = 'grid';
-    this.yAxisClass = 'grid';
-
-    this.xAxisPosition = config.xAxisPosition || 'top';
-    this.yAxisPosition = config.yAxisPosition || 'left';
     this.xNTicks = config.xNTicks || 4;
-    this.yNTicks = config.yNTicks || 20;
+    this.yNTicks = config.yNTicks || 10;
+    this.xPadding = config.xPadding || 1;
+    this.yPadding = config.yPadding || 5;
+    this.yStep = (config.yStep == null) ? 1 : config.yStep;
 
-    this.xPadding = config.xPadding || 0;
-    this.yPadding = config.yPadding || 0;
-    this.xFormatter = d3.format(config.xFormatter || 'g');
-    this.yFormatter = d3.format(config.yFormatter || 'g');
+    this.xFormatter = config.xFormatter || '.2f';
+    this.yFormatter = config.yFormatter || '.2f';
 
-    this.width = config.width || 200;
-    this.freshness = 0;
     this.curvesRemoved = 0;
+}
 
-    this.axisCfg = {
-        top:    function(transformX) { return d3.axisTop(transformX); },
-        bottom: function(transformX) { return d3.axisBottom(transformX); },
-        left:   function(transformY) { return d3.axisLeft(transformY); },
-        right:  function(transformY) { return d3.axisRight(transformY); }
-    }
+/**
+ * Get x window of track
+ * @returns {Array} Range of x values to show
+ */
+LogTrack.prototype.getWindowX = function() {
+    return (this.minX == null || this.maxX == null)
+        ? [0, 1]
+        : [this.minX, this.maxX];
+}
+
+/**
+ * Get x window of track
+ * @returns {Array} Range of x values to show
+ */
+LogTrack.prototype.getWindowY = function() {
+    return (this.minY == null || this.maxY == null)
+        ? [0, 20000]
+        : [this.minY, this.maxY];
 }
 
 /**
@@ -112,8 +123,8 @@ LogTrack.prototype.getExtentY = function() {
     this.drawings.forEach(function(d) {
         ys = ys.concat(d.getExtentY());
     })
-    let minY = Utils.roundDown(d3.min(ys), 100);
-    let maxY = Utils.roundUp(d3.max(ys), 100);
+    let minY = Utils.roundDown(d3.min(ys), 100 * this.yStep);
+    let maxY = Utils.roundUp(d3.max(ys), 100 * this.yStep);
     return [minY, maxY];
 }
 
@@ -128,68 +139,38 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
 }
 
 /**
- * Set background color for the track
- * @param {String} color - CSS color string
- */
-LogTrack.prototype.setBackgroundColor = function(color) {
-    this.trackContainer
-        .style('background-color', color)
-}
-
-/**
  * Initialize DOM elements for the track
  * param {Object} domElem - The DOM element to contain the track
  */
 LogTrack.prototype.init = function(baseElement) {
-    this.trackContainer = Utils.appendTrack(baseElement, 'Track', this.width);
-    this.plotContainer = this.trackContainer
-        .select('.plot-container')
-        .on('mousedown', this.onPlotMouseDownCallback);
+    Track.prototype.init.call(this, baseElement);
 
-    this.headerContainer = this.trackContainer.select('.track-header');
-
-    this.clientRect = this.plotContainer.node().getBoundingClientRect();
-    this.updateTranslateOpts(this.translateOpts, this.clientRect);
-
-    this.svg = this.plotContainer.append('svg')
-            .attr('width', this.clientRect.width)
-            .attr('height', this.clientRect.height);
-
-    // Axes
-    this.xAxisGroup = this.svg.append('g')
-        .attr('class', this.xAxisClass)
-        .attr('transform', this.translateOpts[this.xAxisPosition]);
-    this.yAxisGroup = this.svg.append('g')
-        .attr('class', this.yAxisClass)
-        .attr('transform', this.translateOpts[this.yAxisPosition]);
-
-    // Resizer
     let self = this;
-    new ResizeSensor(self.plotContainer.node(), function() {
-        self.clientRect = self.plotContainer.node().getBoundingClientRect();
-
-        self.updateTranslateOpts(self.translateOpts, self.clientRect);
-
-        self.svg
-            .attr('width', self.clientRect.width)
-            .attr('height', self.clientRect.height);
-
-        self.xAxisGroup.attr('transform', self.translateOpts[self.xAxisPosition]);
-        self.yAxisGroup.attr('transform', self.translateOpts[self.yAxisPosition]);
-
-        self.drawings.forEach(function(d) {
-            d.adjustSize(self.clientRect);
+    this.plotContainer
+        .on('mousedown', function(){
+            self.plotMouseDownCallback();
         });
-        self.doPlot();
-    });
+
+    this.svgContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing')
+        .style('position', 'absolute')
+        .style('overflow', 'visible');
+
+    this.xAxisGroup = this.svgContainer.append('g')
+        .attr('class', 'vi-track-axis');
+
+    this.yAxisGroup = this.svgContainer.append('g')
+        .attr('class', 'vi-track-axis');
 }
 
 /**
  * Draw axes, curves and shadings
  */
 LogTrack.prototype.doPlot = function() {
-    this.plotAxes();
+    this.updateHeader();
+    this.updateBody();
     this.plotAllDrawings();
+    this.plotAxes();
 }
 
 
@@ -214,10 +195,11 @@ LogTrack.prototype.addCurve = function(data, config) {
             dash: null
         };
     }
+    config.data = data;
     let curve = new Curve(config);
 
-    curve.init(this.plotContainer, data);
-    curve.header = this.addCurveHeader(curve, name, '', '', '');
+    curve.init(this.plotContainer);
+    curve.header = this.addCurveHeader(curve);
     this.drawings.push(curve);
 
     return curve;
@@ -247,22 +229,25 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
         }
     }
     config.refX = refX;
+    config.leftCurve = leftCurve;
+    config.rightCurve = rightCurve;
+
     let shading = new Shading(config);
+    shading.init(this.plotContainer);
+    shading.header = this.addShadingHeader(shading);
 
     let self = this;
-    shading.init(this.plotContainer, leftCurve, rightCurve);
-    shading.header = this.addShadingHeader(shading, config.name, 'red');
     shading.onRefLineDrag(function() {
         let rWidth = shading.refLineWidth;
-        let rangeX = shading.rangeX;
-        let leftMost = rangeX[0] + rWidth / 2;
-        let rightMost = rangeX[1] - rWidth / 2;
+        let leftMost = rWidth / 2;
+        let rightMost = self.plotContainer.node().clientWidth - rWidth / 2;
         let vpRefX = d3.event.x;
         vpRefX = vpRefX > rightMost ? rightMost : vpRefX;
         vpRefX = vpRefX < leftMost ? leftMost : vpRefX;
-        shading.refX = shading.getTransformX().invert(vpRefX - rangeX[0]);
+        shading.refX = shading.getTransformX(shading.selectedCurve).invert(vpRefX);
         self.plotShading(shading);
     });
+
     this.drawings.push(shading);
     return shading;
 }
@@ -337,9 +322,18 @@ LogTrack.prototype.removeAllDrawings = function() {
  * @param {Object} drawing - The drawing to plot
  */
 LogTrack.prototype.plotDrawing = function(drawing) {
-    if (!drawing) return;
-    if (drawing.isCurve()) this.plotCurve(drawing);
-    if (drawing.isShading()) this.plotShading(drawing);
+    if (!drawing || !drawing.doPlot) return;
+    let windowY = this.getWindowY();
+    drawing.minY = windowY[0];
+    drawing.maxY = windowY[1];
+    if (drawing == this.currentDrawing) {
+        drawing.doPlot(true);
+        drawing.raise();
+    }
+    else {
+        drawing.doPlot();
+    }
+    this.svgContainer.raise();
 }
 
 /**
@@ -347,15 +341,8 @@ LogTrack.prototype.plotDrawing = function(drawing) {
  * @param {Object} curve - The curve to plot
  */
 LogTrack.prototype.plotCurve = function(curve) {
-    if (!curve) return;
-    let self = this;
-    curve.doPlot(
-        self.windowY,
-        self.getAxisRange(self.yAxisPosition),
-        self.getAxisRange(self.xAxisPosition),
-        curve == self.currentDrawing
-    );
-    if (curve == this.currentDrawing) curve.raise();
+    if (!curve || !curve.isCurve || !curve.isCurve()) return;
+    this.plotDrawing(curve);
 }
 
 /**
@@ -363,15 +350,8 @@ LogTrack.prototype.plotCurve = function(curve) {
  * @param {Object} shading - The shading to plot
  */
 LogTrack.prototype.plotShading = function(shading) {
-    if (!shading) return;
-    let self = this;
-    shading.doPlot(
-        self.windowY,
-        self.getAxisRange(self.yAxisPosition),
-        self.getAxisRange(self.xAxisPosition),
-        shading == self.currentDrawing
-    );
-    if (shading == this.currentDrawing) shading.raise();
+    if (!shading || !shading.isShading || !shading.isShading()) return;
+    this.plotDrawing(shading);
 }
 
 /**
@@ -388,21 +368,24 @@ LogTrack.prototype.plotAllDrawings = function() {
  * Register event when mouse over the plot area
  */
 LogTrack.prototype.onPlotMouseOver = function(cb){
-    this.plotContainer.on('mouseover', cb);
+    this.plotContainer
+        .on('mouseover', cb);
 }
 
 /**
  * Register event when mouse leave the plot area
  */
 LogTrack.prototype.onPlotMouseLeave = function(cb) {
-    this.plotContainer.on('mouseleave', cb);
+    this.plotContainer
+        .on('mouseleave', cb);
 }
 
 /**
  * Register event when mouse wheel on the plot area
  */
 LogTrack.prototype.onPlotMouseWheel = function(cb) {
-    this.plotContainer.on('mousewheel', cb);
+    this.plotContainer
+        .on('mousewheel', cb);
 }
 
 /**
@@ -412,7 +395,7 @@ LogTrack.prototype.onPlotMouseDown = function(cb) {
     let self = this;
     this.plotContainer
         .on('mousedown', function() {
-            self.onPlotMouseDownCallback();
+            self.plotMouseDownCallback();
             cb();
         })
         .on('contextmenu', cb);
@@ -422,8 +405,7 @@ LogTrack.prototype.onPlotMouseDown = function(cb) {
  * Register event when mouse down the header area
  */
 LogTrack.prototype.onHeaderMouseDown = function(cb) {
-    this.trackContainer
-        .select('.track-header-viewport')
+    this.headerContainer
         .on('mousedown',cb);
 }
 
@@ -435,7 +417,7 @@ LogTrack.prototype.onShadingHeaderMouseDown = function(shading, cb) {
     let self = this;
     shading.header
         .on('mousedown', function() {
-            self.onDrawingHeaderMouseDownCallback(shading);
+            self.drawingHeaderMouseDownCallback(shading);
             cb();
         });
 }
@@ -448,45 +430,66 @@ LogTrack.prototype.onCurveHeaderMouseDown = function(curve, cb) {
     let self = this;
     curve.header
         .on('mousedown', function() {
-            self.onDrawingHeaderMouseDownCallback(curve);
+            self.drawingHeaderMouseDownCallback(curve);
             cb();
         });
 }
 
-LogTrack.prototype.updateTranslateOpts = function(translateOpts, clientRect) {
-    this.translateOpts.top = 'translate(0, ' + this.yPadding + ')';
-    this.translateOpts.bottom = 'translate(0, ' + (this.clientRect.height - this.yPadding) + ')';
-    this.translateOpts.left = 'translate(' + this.xPadding + ', 0)';
-    this.translateOpts.right = 'translate(' + (this.clientRect.width - this.xPadding) + ', 0)';
-}
-
-LogTrack.prototype.getAxisRange = function(axis) {
-    return {
-        top: [this.yPadding, this.clientRect.height - this.yPadding],
-        bottom: [this.yPadding, this.clientRect.height - this.yPadding].reverse(),
-        left: [this.xPadding, this.clientRect.width - this.xPadding],
-        right: [this.xPadding, this.clientRect.width - this.xPadding].reverse()
-    }[axis];
-}
-
 LogTrack.prototype.plotAxes = function() {
-    this.transformX = d3.scaleLinear().domain(this.windowX).range(this.getAxisRange(this.yAxisPosition));
-    this.transformY = d3.scaleLinear().domain(this.windowY).range(this.getAxisRange(this.xAxisPosition));
+    let rect = this.plotContainer.node().getBoundingClientRect();
+    let rangeX = [0, rect.width];
+    let rangeY = [0, rect.height];
+    let windowY = this.getWindowY();
+    let windowX = this.getWindowX();
 
-    let xAxis = this.axisCfg[this.xAxisPosition](this.transformX)
-        .tickValues(d3.range(this.windowX[0], this.windowX[1], (this.windowX[1] - this.windowX[0]) / this.xNTicks))
+    let transformX = d3.scaleLinear()
+        .domain(windowX)
+        .range(rangeX);
+
+    let transformY = d3.scaleLinear()
+        .domain(windowY)
+        .range(rangeY);
+
+    let xAxis = d3.axisTop(transformX)
+        .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / this.xNTicks))
         .tickFormat("")
-        .tickSize(-(this.clientRect.height - 2 * this.yPadding));
+        .tickSize(-rect.height);
 
-    let start = Utils.roundUp(this.windowY[0], 1);
-    let end = Utils.roundDown(this.windowY[1], 1);
-    let yAxis = this.axisCfg[this.yAxisPosition](this.transformY)
+    let start = Utils.roundUp(windowY[0], this.yStep);
+    let end = Utils.roundDown(windowY[1], this.yStep);
+
+    let yAxis = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end, (end - start) / this.yNTicks))
-        .tickFormat(this.yFormatter)
-        .tickSize(-(this.clientRect.width - 2 * this.xPadding));
+        .tickFormat("")
+        .tickSize(-rect.width);
 
     this.xAxisGroup.call(xAxis);
     this.yAxisGroup.call(yAxis);
+
+    this.bodyContainer.selectAll('.tick line')
+        .attr('stroke', 'blue')
+        .attr('stroke-dasharray', '20, 2')
+        .attr('stroke-width', 0.5);
+}
+
+LogTrack.prototype.updateHeader = function() {
+    this.headerNameBlock
+        .style('display', this.showTitle ? 'block': 'none')
+        .text(this.name);
+}
+
+LogTrack.prototype.updateBody = function() {
+    let rect = this.plotContainer
+        .style('top', this.yPadding + 'px')
+        .style('bottom', this.yPadding + 'px')
+        .style('left', this.xPadding + 'px')
+        .style('right', this.xPadding + 'px')
+        .node()
+        .getBoundingClientRect();
+
+    this.svgContainer
+        .attr('width', rect.width)
+        .attr('height', rect.height);
 }
 
 LogTrack.prototype.genColor = function() {
@@ -498,7 +501,8 @@ LogTrack.prototype.genColor = function() {
     let usedColors = [];
     this.drawings.forEach(function(d) {
         usedColors = usedColors.concat(d.getAllColors());
-    })
+    });
+
     let color;
     for (let i = 0; i <= this.drawings.length; i++)  {
         if (i >= DEFAULT_COLORS.length) {
@@ -507,78 +511,91 @@ LogTrack.prototype.genColor = function() {
             }
             while (usedColors.indexOf(color) >= 0);
         }
-        else {
-            color = d3.color(DEFAULT_COLORS[i]).toString();
-        }
+        else color = d3.color(DEFAULT_COLORS[i]).toString();
         if (usedColors.indexOf(color) < 0) break;
     }
     return color;
 }
 
-LogTrack.prototype.addCurveHeader = function(curve, name, unit, minVal, maxVal) {
+LogTrack.prototype.addCurveHeader = function(curve) {
     let self = this;
-    let unitHeaderData = [minVal, unit, maxVal];
-    let curveHeader = this.headerContainer.append('div')
-        .attr('class', 'curve-header')
-        .on('mousedown', function() {
-            self.onDrawingHeaderMouseDownCallback(curve);
-        });
+    let curveHeader = this.drawingHeaderContainer
+        .append('div')
+            .attr('class', 'vi-curve-header')
+            .on('mousedown', function() {
+                self.drawingHeaderMouseDownCallback(curve);
+            });
 
-    curveHeader.append('label')
-        .attr('class', 'data-header text-center')
+    curveHeader.append('div')
+        .attr('class', 'vi-curve-name')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .text(name);
 
-    curveHeader.append('label')
-        .attr('class', 'unit-header flex-row')
-        .selectAll('div').data(unitHeaderData).enter()
-            .append('div')
-                .attr('class', function(d, i) {
-                    switch(i) {
-                        case 0:
-                            return 'text-left';
-                        case 1:
-                            return 'flex-1 text-center';
-                        case 2:
-                            return 'text-right';
-                    }
-                    return '';
-                })
-                .text(function(d) { return d; });
+    curveHeader.append('div')
+        .attr('class', 'vi-curve-data')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        .style('position', 'relative')
+        .style('display', 'flex')
+        .style('flex-direction', 'row')
+        .selectAll('div')
+        .data(['min', 'unit', 'max'])
+        .enter()
+        .append('div')
+            .style('padding', '0 2px')
+            .style('text-align', function(d, i) {
+                switch(i) {
+                    case 0:
+                        return 'left';
+                    case 1:
+                        return 'center';
+                    case 2:
+                        return 'right';
+                }
+                return '';
+            })
+            .style('flex', function(d, i) {
+                return i == 1 ? 1 : 0;
+            })
+            .text(function(d) { return d; });
     return curveHeader;
 }
 
-LogTrack.prototype.addShadingHeader = function(shading, name, fillStyle) {
+LogTrack.prototype.addShadingHeader = function(shading) {
     let self = this;
-    let header = this.headerContainer.append('label')
-        .attr('class', 'shading-header')
+
+    let header = this.drawingHeaderContainer.append('div')
+        .attr('class', 'vi-shading-header')
         .style('position', 'relative')
         .style('padding', '2px 0 2px 0')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .on('mousedown', function() {
-            self.onDrawingHeaderMouseDownCallback(shading);
+            self.drawingHeaderMouseDownCallback(shading);
         });
 
-    header.append('span')
-        .attr('class', 'shading-name-header text-center')
+    let nameBlock = header.append('div')
+        .attr('class', 'vi-shading-name')
+        .style('display', 'inline-block')
+        .style('position', 'relative')
+        .style('text-align', 'center')
         .style('background-color', 'white')
         .style('border', '1px solid black')
-        .style('position', 'relative')
         .style('padding', '0 2px 0 2px')
-        .style('z-index', 1)
         .style('font-size', '10px')
+        .style('z-index', 1)
         .text(name);
 
     let rect = header.node().getBoundingClientRect();
     let headerCanvas = header.append('canvas')
-        .attr('width', rect.width -2)
-        .attr('height', rect.height -2)
+        .attr('class', 'vi-shading-header-canvas')
+        .attr('width', rect.width)
+        .attr('height', rect.height)
         .style('position', 'absolute')
-        .style('left', 0)
         .style('top', 0)
-        .style('cursor', 'default');
+        .style('left', 0);
 
-    let headerCtx = headerCanvas.node().getContext('2d');
-    headerCtx.fillStyle = fillStyle;
-    headerCtx.fillRect(0, 0, rect.width, rect.height);
     return header;
 }
 
@@ -588,11 +605,11 @@ LogTrack.prototype.highlightHeader = function() {
         let elem, bgColor;
         if (d.isCurve()) {
             elem = d.header;
-            bgColor = d == self.currentDrawing ? 'rgba(255,128,128,0.5)' : 'transparent';
+            bgColor = d == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'transparent';
         }
         else if (d.isShading()) {
-            elem = d.header.select('.shading-name-header');
-            bgColor = d == self.currentDrawing ? 'rgb(255,128, 128)' : 'white';
+            elem = d.header.select('.vi-shading-name');
+            bgColor = d == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'white';
         }
         else return;
         elem.style('background-color', bgColor);
@@ -600,11 +617,11 @@ LogTrack.prototype.highlightHeader = function() {
 }
 
 
-LogTrack.prototype.onDrawingHeaderMouseDownCallback = function(drawing) {
+LogTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
     this.setCurrentDrawing(drawing);
 }
 
-LogTrack.prototype.onPlotMouseDownCallback = function() {
+LogTrack.prototype.plotMouseDownCallback = function() {
     let current = null;
     let x = d3.event.offsetX;
     let y = d3.event.offsetY;

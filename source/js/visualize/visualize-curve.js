@@ -12,9 +12,12 @@ Utils.extend(Drawing, Curve);
  * @param {Object} config - Configurations of new curve
  * @param {Number} [config.id] - The id of this line(curve) in backend (idLine field)
  * @param {String} [config.name] - Name of new curve
+ * @param {Array} [config.data] - Data containing x, y coordinates or the curve
  * @param {String} [config.unit] - Unit of data
  * @param {Number} [config.minX] - Mininum x value to show
  * @param {Number} [config.maxX] - Maximum x value to show
+ * @param {Number} [config.minY] - Mininum y value to show
+ * @param {Number} [config.maxY] - Maximum y value to show
  * @param {String} [config.scale] - Scale type (Linear or Logarithmic)
  * @param {String} [config.alias] - Text to show on header
  * @param {Boolean} [config.showHeader] - Flag to show or hide header
@@ -38,13 +41,32 @@ function Curve(config) {
     this.idDataset = config.idDataset;
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';
+
     this.minX = config.minX;
     this.maxX = config.maxX;
+    this.minY = config.minY;
+    this.maxY = config.maxY;
+
     this.scale = config.scale || 'Linear';
     this.alias = config.alias || this.name;
     this.line = config.line;
     this.symbol = config.symbol;
-    this.showHeader = (config.showHeader == null) || true;
+    this.showHeader = (config.showHeader == null) ? true : config.showHeader;
+
+    this.data = config.data || [];
+
+    Utils.parseData(this.data);
+    this.data = Utils.trimData(this.data);
+    Utils.interpolateData(this.data);
+
+    if (this.minX == null || this.maxX == null)
+        this.autoScaleX();
+
+    if (this.minY == null || this.maxY == null) {
+        let extentY = this.getExtentY();
+        this.minY = extentY[0];
+        this.maxY = extentY[1];
+    }
 }
 
 /**
@@ -53,6 +75,14 @@ function Curve(config) {
  */
 Curve.prototype.getWindowX = function() {
     return [this.minX, this.maxX];
+}
+
+/**
+ * Get y window of curve
+ * @returns {Array} Range of y values to show
+ */
+Curve.prototype.getWindowY = function() {
+    return [this.minY, this.maxY];
 }
 
 /**
@@ -104,18 +134,17 @@ Curve.prototype.autoScaleX = function(granularity) {
  * @param {Object} plotContainer - The DOM element to contain the curve
  * @param {Array} data - Array of objects containing x, y coordinates
  */
-Curve.prototype.init = function(plotContainer, data) {
-    Utils.parseData(data);
-    this.data = Utils.trimData(data);
-    Utils.interpolateData(this.data);
-
-    if (this.minX == null || this.maxX == null) this.autoScaleX();
-
-    this.clientRect = plotContainer.node().getBoundingClientRect();
+Curve.prototype.init = function(plotContainer) {
+    this.root = plotContainer;
+    let rect = plotContainer
+        .node()
+        .getBoundingClientRect();
 
     this.canvas = plotContainer.append('canvas')
-        .attr('width', this.clientRect.width)
-        .attr('height', this.clientRect.height);
+        .attr('class', 'vi-track-drawing')
+        .style('position', 'absolute');
+
+    this.adjustSize(rect);
 
     this.ctx = this.canvas.node().getContext('2d');
     return this;
@@ -148,18 +177,27 @@ Curve.prototype.getAllColors = function() {
 
 /**
  * Actually draw the curve
- * @param {Array} domainY
- * @param {Array} rangeX
- * @param {Array} rangeY
  * @param {Boolean} highlight
  */
-Curve.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
+Curve.prototype.doPlot = function(highlight) {
+    let rect = this.root.node().getBoundingClientRect();
+    this.adjustSize(rect);
+    this.updateHeader();
+
+    let windowX = this.getWindowX();
+    let windowY = this.getWindowY();
+
     let scaleFunc = this.getScaleFunc();
-    let transformX = scaleFunc().domain([this.minX, this.maxX]).range(rangeX);
-    let transformY = d3.scaleLinear().domain(domainY).range(rangeY);
+    let transformX = scaleFunc()
+        .domain(windowX)
+        .range([0, rect.width]);
+
+    let transformY = d3.scaleLinear()
+        .domain(windowY)
+        .range([0, rect.height]);
 
     let plotSamples = this.data.filter(function(item) {
-        return Utils.isWithinYRange(item, domainY);
+        return Utils.isWithinYRange(item, windowY);
     });
     if (plotSamples.length == 0) return;
 
@@ -170,8 +208,7 @@ Curve.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
         }
     })
 
-    redrawHeader(this);
-    this.ctx.clearRect(0, 0, this.clientRect.width, this.clientRect.height);
+    this.ctx.clearRect(0, 0, rect.width, rect.height);
 
     if (this.line)
         plotLine(this, data, highlight);
@@ -181,28 +218,24 @@ Curve.prototype.doPlot = function(domainY, rangeX, rangeY, highlight) {
     return this;
 }
 
-function redrawHeader(curve) {
-    if (!curve.header) return;
-    if (curve.showHeader) {
-        let header = curve.header;
-        header
-            .style('display', 'block')
-            .select('.data-header')
-            .text(curve.alias);
-        header
-            .select('.unit-header')
-            .selectAll('div')
-            .each(function(d, i) {
-                let elem = d3.select(this);
-                if (i == 0) elem.text(curve.minX);
-                if (i == 1) elem.text(curve.unit);
-                if (i == 2) elem.text(curve.maxX);
-            })
-    }
-    else {
-        curve.header
-            .style('display', 'none');
-    }
+Curve.prototype.updateHeader = function() {
+    if (!this.header) return;
+
+    let self = this;
+    this.header
+        .style('display', this.showHeader ? 'block' : 'none')
+        .select('.vi-curve-name')
+        .text(this.alias);
+
+    this.header
+        .select('.vi-curve-data')
+        .selectAll('div')
+        .each(function(d, i) {
+            let elem = d3.select(this);
+            if (i == 0) elem.text(self.minX);
+            if (i == 1) elem.text(self.unit);
+            if (i == 2) elem.text(self.maxX);
+        })
 }
 
 function plotLine(curve, data, highlight) {

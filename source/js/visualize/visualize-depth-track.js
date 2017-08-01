@@ -12,16 +12,17 @@ Utils.extend(Track, DepthTrack);
  * @param {Number} [config.id] - The id of this track in backend (idDepthAxis field)
  * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
  * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
+ * @param {Boolean} [config.showTitle] - Flag to indicate whether to show title
+ * @param {String} [config.name] - Name of the track
+ * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 60
+ * @param {Number} [config.minY] - Min y value to show
+ * @param {Number} [config.maxY] - Max y value to show
  * @param {String} [config.unit] - Depth unit. Default: 'm'
- * @param {String} [config.xAxisPosition] - Position of the x axis. Default: 'top'
- * @param {String} [config.yAxisPosition] - Position of the y axis. Default: 'left'
- * @param {Number} [config.xNTicks] - Number of ticks shown in x axis. Default: 4
- * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 20
- * @param {String} [config.xFormatter] - d3 formatter for numbers in x axis. Default: 'g'
- * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: 'g'
- * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 0
- * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 0
- * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 200
+ * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 10
+ * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: '.2f'
+ * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
+ * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
+ * @param {Number} [config.yStep] - Y gap between two consecutive points
  */
 function DepthTrack(config) {
     Track.call(this);
@@ -30,22 +31,32 @@ function DepthTrack(config) {
     this.type = config.type;
     this.orderNum = config.orderNum;
 
-    this.windowY = [];
+    this.showTitle = (config.showTitle == null) ? true : config.showTitle;
+    this.name = config.name || 'Depth';
+    this.width = config.width || 60;
+
+    this.minY = config.minY;
+    this.maxY = config.maxY;
     this.unit = config.unit || 'm';
-    this.yAxisClass = 'depthtrack';
-    this.yNTicks = config.yNTicks || 20;
-    this.width = config.width || 200;
-    this.yFormatter = d3.format(config.yFormatter || 'g');
-    this.xPadding = config.xPadding || 0;
-    this.yPadding = config.yPadding || 0;
+
+    this.yNTicks = config.yNTicks || 10;
+    this.yFormatter = config.yFormatter || '.2f';
+
+    this.xPadding = config.xPadding || 1;
+    this.yPadding = config.yPadding || 5;
+    this.yStep = (config.yStep == null) ? 1 : config.yStep;
+
+    this.MIN_WIDTH = 60;
 }
+
 /**
- * Set background color for the track
- * @param {String} color - CSS color string
+ * Get y window of the track
+ * @returns {Array} Range of x values to show
  */
-DepthTrack.prototype.setBackgroundColor = function(color) {
-    this.trackContainer
-        .style('background-color', color)
+DepthTrack.prototype.getWindowY = function() {
+    return (this.minY != null && this.maxY != null)
+        ? [this.minY, this.maxY]
+        : [0, 10000];
 }
 
 /**
@@ -53,31 +64,22 @@ DepthTrack.prototype.setBackgroundColor = function(color) {
  * param {Object} domElem - The DOM element to contain the track
  */
 DepthTrack.prototype.init = function(baseElement) {
-    let self = this;
-    this.trackContainer = Utils.appendTrack(baseElement, 'Depth', this.width);
-    this.plotContainer = this.trackContainer.select('.plot-container');
-    appendDepthHeader(this.trackContainer, this.unit);
-    this.clientRect = this.plotContainer.node().getBoundingClientRect();
+    Track.prototype.init.call(this, baseElement);
 
-    this.svg = this.plotContainer.append('svg')
-            .attr('width', this.clientRect.width)
-            .attr('height', this.clientRect.height);
-    this.yAxisGroup = this.svg.append('g')
-        .attr('class', this.yAxisClass)
-        .attr('transform', 'translate(' + (this.clientRect.width - this.xPadding) + ', 0)');
-    this.yAxisGroup2 = this.svg.append('g')
-        .attr('class', this.yAxisClass);
-        //.attr('transform', 'translate(' + (clientRect.width - xPadding) + ', 0)');
+    this.svgContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing')
+        .style('position', 'absolute')
+        .style('overflow', 'visible');
 
-    new ResizeSensor(self.plotContainer.node(), function() {
-        self.clientRect = self.plotContainer.node().getBoundingClientRect();
+    this.yAxisGroupLeft = this.svgContainer.append('g')
+        .attr('class', 'vi-track-axis')
 
-        self.svg
-            .attr('width', self.clientRect.width)
-            .attr('height', self.clientRect.height);
-        self.yAxisGroup.attr('transform', 'translate(' + (self.clientRect.width - self.xPadding) + ', 0)');
-        if( self.windowY.length == 2 ) self.doPlot();
-    });
+    this.yAxisGroupRight = this.svgContainer.append('g')
+        .attr('class', 'vi-track-axis')
+
+    this.drawingHeaderContainer.append('div')
+        .attr('class', 'vi-track-unit')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black');
 }
 
 
@@ -85,21 +87,34 @@ DepthTrack.prototype.init = function(baseElement) {
  * Actually draw the track
  */
 DepthTrack.prototype.doPlot = function () {
-    let transformY = d3.scaleLinear().domain(this.windowY).range([this.yPadding, this.clientRect.height - this.yPadding]);
-    var start = Utils.roundUp(this.windowY[0], 1);
-    var end = Utils.roundDown(this.windowY[1], 1);
+    let self = this;
+    this.updateHeader();
+    this.updateBody();
+
+    let windowY = this.getWindowY();
+    let rect = this.plotContainer
+        .node()
+        .getBoundingClientRect();
+
+    let transformY = d3.scaleLinear()
+        .domain(windowY)
+        .range([0, rect.height]);
+
+    var start = Utils.roundUp(windowY[0], this.yStep);
+    var end = Utils.roundDown(windowY[1], this.yStep);
     var step = (end - start) / this.yNTicks;
-    var yAxis = d3.axisLeft(transformY)
+    var yAxisRight = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end + step, step))
-        .tickFormat(this.yFormatter)
+        .tickFormat(d3.format(self.yFormatter))
         .tickSize(5);
-    var yAxis1 = d3.axisRight(transformY)
+
+    var yAxisLeft = d3.axisRight(transformY)
         .tickValues(d3.range(start, end + step, step))
         .tickFormat('')
         .tickSize(5);
 
-    this.yAxisGroup.call(yAxis);
-    this.yAxisGroup2.call(yAxis1);
+    this.yAxisGroupRight.call(yAxisRight);
+    this.yAxisGroupLeft.call(yAxisLeft);
 }
 
 /**
@@ -112,9 +127,33 @@ DepthTrack.prototype.onMouseDown = function(mouseDownCallback) {
     });
 }
 
-function appendDepthHeader(base, unit) {
-    var trackHeader = base.selectAll('.track-header-viewport');
-    trackHeader.append('label')
-        .attr('class', 'data-header double-height text-center')
-        .text(unit);
+/**
+ * Update track header
+ */
+DepthTrack.prototype.updateHeader = function() {
+    this.headerNameBlock
+        .text(this.name);
+    this.drawingHeaderContainer.select('.vi-track-unit')
+        .text(this.unit);
+}
+
+/**
+ * Update body container
+ */
+DepthTrack.prototype.updateBody = function() {
+    let rect = this.plotContainer
+        .style('top', this.yPadding + 'px')
+        .style('bottom', this.yPadding + 'px')
+        .style('left', this.xPadding + 'px')
+        .style('right', this.xPadding + 'px')
+        .node()
+        .getBoundingClientRect();
+
+    this.plotContainer
+        .selectAll('.vi-track-drawing')
+        .attr('width', rect.width)
+        .attr('height', rect.height);
+
+    this.yAxisGroupRight
+        .style('transform', 'translateX(' + rect.width + 'px)');
 }

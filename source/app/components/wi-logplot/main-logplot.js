@@ -12,7 +12,7 @@ let wiElementReadyDirective = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
-let wiApiService = require('./wi-api-service')
+let wiApiService = require('./wi-api-service');
 
 let utils = require('./utils');
 
@@ -49,11 +49,11 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     });
 
     $scope.depthTrackButtonClick = function() {
-        wiD3Ctrl.pushDepthTrack();
+        wiD3Ctrl.pushDepthTrack({});
     }
 
     $scope.trackButtonClick = function() {
-        wiD3Ctrl.pushLogTrack();
+        wiD3Ctrl.pushLogTrack({});
     }
 
     $scope.addData1ButtonClick = function() {
