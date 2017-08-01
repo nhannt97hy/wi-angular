@@ -108,7 +108,8 @@ Track.prototype.createBodyContainer = function() {
 
     this.plotContainer = this.bodyContainer.append('div')
         .attr('class', 'vi-track-plot-container')
-        .style('position', 'absolute');
+        .style('position', 'absolute')
+        .style('z-index', 1);
 
     if (!existedPlot.empty()) {
         this.bodyContainer

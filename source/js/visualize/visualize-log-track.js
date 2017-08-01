@@ -153,6 +153,7 @@ LogTrack.prototype.init = function(baseElement) {
 
     this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing')
+        .style('cursor', 'crosshair')
         .style('position', 'absolute')
         .style('overflow', 'visible');
 
@@ -530,12 +531,14 @@ LogTrack.prototype.addCurveHeader = function(curve) {
         .attr('class', 'vi-curve-name')
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        .style('cursor', 'default')
         .text(name);
 
     curveHeader.append('div')
         .attr('class', 'vi-curve-data')
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        .style('cursor', 'default')
         .style('position', 'relative')
         .style('display', 'flex')
         .style('flex-direction', 'row')
@@ -585,6 +588,7 @@ LogTrack.prototype.addShadingHeader = function(shading) {
         .style('padding', '0 2px 0 2px')
         .style('font-size', '10px')
         .style('z-index', 1)
+        .style('cursor', 'default')
         .text(name);
 
     let rect = header.node().getBoundingClientRect();

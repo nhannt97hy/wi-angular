@@ -114,6 +114,7 @@ Shading.prototype.init = function(plotContainer) {
 
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing')
+        .style('cursor', 'crosshair')
         .style('position', 'absolute');
 
     this.ctx = this.canvas.node().getContext('2d');
