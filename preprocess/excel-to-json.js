@@ -144,6 +144,7 @@ function genFunctionsFromSheet(workbook, sheetName) {
 exports.genFunctionsFromXlsx = function (xlsxFile, outputFile, configFile) {
     let processTabInfos = require('./' + configFile).processTabInfos;
     let workbook = XLSX.readFile(xlsxFile);
+    fs.writeFileSync(outputFile, "");
     processTabInfos.forEach(function (item) {
         fs.appendFileSync(outputFile, genFunctionsFromSheet(workbook, item.tab).join('\n\n') + "\n\n");
         console.log("Tab " + item.tab + " was processed");

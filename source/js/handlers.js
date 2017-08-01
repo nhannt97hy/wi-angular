@@ -92,8 +92,8 @@ exports.AddNewButtonClicked = function () {
     DialogUtils.addNewDialog(this.ModalService, function (newWell) {
         if (newWell) {
             let wellModel = utils.wellToTreeConfig(newWell);
-            let selectedNode = utils.getSelectedNode();
-            selectedNode.children.push(wellModel);
+            let selectedProjectNode = utils.getSelectedProjectNode();
+            selectedProjectNode.children.push(wellModel);
         }
     });
 };
@@ -139,9 +139,18 @@ exports.ImportLASButtonClicked = function () {
     DialogUtils.importLASDialog(this.ModalService, function (well) {
         if (well) {
             let wellModel = utils.wellToTreeConfig(well);
-            let selectedNode = utils.getSelectedNode();
-            selectedNode.children.push(wellModel);
-            //utils.updateWellProject(self.wiComponentService, well);
+            let selectedProjectNode = utils.getSelectedProjectNode();
+            let found = false;
+            for (let i in selectedProjectNode.children) {
+                if (selectedProjectNode.children[i].id == wellModel.id) {
+                    selectedProjectNode.children[i] = wellModel;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                selectedProjectNode.children.push(wellModel);
+            }
         }
     })
 };
@@ -153,10 +162,19 @@ exports.ImportMultiLASButtonClicked = function () {
         if (wellResponses) {
             for (let wellRes of wellResponses) {
                 let wellModel = utils.wellToTreeConfig(wellRes.content);
-                let selectedNode = utils.getSelectedNode();
-                selectedNode.children.push(wellModel);
+                let selectedProjectNode = utils.getSelectedProjectNode();
+                let found = false;
+                for (let i in selectedProjectNode.children) {
+                    if (selectedProjectNode.children[i].id == wellModel.id) {
+                        selectedProjectNode.children[i] = wellModel;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    selectedProjectNode.children.push(wellModel);
+                }
             }
-            //utils.updateWellsProject(self.wiComponentService, wells);
         }
     })
 };

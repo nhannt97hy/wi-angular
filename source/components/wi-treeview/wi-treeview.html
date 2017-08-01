@@ -23,10 +23,10 @@
             </div>
         </div>
 
-        <div class="wi-parent-unit text-right" ng-show="item.data.unit"
+        <div class="wi-parent-unit" ng-show="item.data.unit"
             ng-click="wiTreeview.onClick($index)"
             ng-dblclick="wiTreeview.onDoubleClick($index)">
-            {{item.data.unit}}
+            <span class='display-inline-block' style='text-indent:10px;'>{{item.data.unit}}</span>
         </div>
     </div>
 

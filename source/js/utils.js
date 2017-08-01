@@ -161,14 +161,15 @@ function curveToTreeConfig(curve) {
         idCurve: curve.idCurve,
         idFamily: curve.idFamily,
         name: curve.name,
-        unit: "US/F",
+        unit: curve.unit || "NA",
         dataset: curve.dataset,
         alias: curve.name // TODO
     };
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
-        label: curve.name
+        label: curve.name,
+        unit: curveModel.properties.unit
     };
     curveModel.curveData = null;
     return curveModel;
@@ -286,27 +287,48 @@ exports.projectToTreeConfig = function(project) {
 
 exports.visit = visit;
 
-function visit(node, callback) {
+function visit(node, callback, options) {
+    if (options && options.found) return;
     if( node.data && node.data.deleted) return;
-    callback(node);
+    if (options && options.path && options.path.push) 
+        options.path.push(node);
+    if ( callback(node, options) ) {
+        if (options) options.found = true
+    }
     if (node.children) {
         node.children.forEach(function(child){
-            visit(child, callback);
+            visit(child, callback, options);
         });
     }
+    if (options && options.path && options.path.pop)
+        options.path.pop();
 }
-
 exports.getSelectedNode = getSelectedNode;
 function getSelectedNode() {
+    return getSelectedPath().pop();
+}
+
+exports.getSelectedProjectNode = getSelectedProjectNode;
+function getSelectedProjectNode() {
+    return getSelectedPath().shift();
+}
+
+exports.getSelectedPath = getSelectedPath;
+function getSelectedPath() {
     const wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes) return;
-    let selectedNode = null;
-    visit(rootNodes[0], function (node) {
-        if (node.data && node.data.selected == true)
-            selectedNode = node;
+    let selectedPath = new Array();
+    visit(rootNodes[0], function (node, options) {
+        if (node.data && node.data.selected == true) {
+            selectedPath = options.path.slice();
+            return true;
+        }
+        return false;
+    }, {
+        path: new Array()
     });
-    return selectedNode;
+    return selectedPath;
 }
 
 exports.pushProjectToExplorer = function (self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
