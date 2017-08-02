@@ -245,7 +245,11 @@ exports.BlankLogplotButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel);
-                //wiComponentService.emit(wiComponentService.ADD_LOGPLOT_EVENT, logplotModel);
+                let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+                wiD3Ctrl.addDepthTrack();
+                $timeout(function () {
+                    wiD3Ctrl.addLogTrack();
+                });
             })
             .catch(function(err) {
                 utils.error('newBlankLogplotDialog err ' + err);
@@ -266,7 +270,35 @@ exports.ResistivitySonicButtonClicked = function () {
 };
 
 exports.TriTracksBlankButtonClicked = function () {
-    console.log('3TracksBlankButton is clicked');
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel);
+                let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+                wiD3Ctrl.addDepthTrack();
+                $timeout(function () {
+                    for (var i = 0; i < 3; i++) {
+                        wiD3Ctrl.addLogTrack();
+                    }
+                });
+            })
+            .catch(function (err) {
+                utils.error('3TracksBlankDialog err ' + err);
+            });
+    });
 };
 
 exports.InputCurveButtonClicked = function () {

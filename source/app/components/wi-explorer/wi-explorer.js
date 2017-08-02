@@ -416,6 +416,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "3 Tracks Blank",
                                 icon: "",
                                 handler: function () {
+                                    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+                                    globalHandlers.TriTracksBlankButtonClicked();
                                 }
                             }, {
                                 name: "OpenTemplate",
