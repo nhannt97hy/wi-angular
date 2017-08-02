@@ -880,11 +880,13 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         let self = this;
         thisModalController = this;
 
+        let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         //TODO ?????? this.well = utils.findWellById(WiLogplotModel.properties.idWell);
         // this.well = utils.findWellByLogPlot(wiLogplotCtrl.id);
 
         let extentY = currentCurve.getExtentY();
+
         if (currentCurve.line) {
             this.lineOptions = {
             display: true,
@@ -940,8 +942,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.lineObjTemplate = {
             minDepth: extentY[0],
             maxDepth: extentY[1],
-            name : currentCurve.name,
-            
+            name : currentCurve.name    
         }
 
         this.curveOptions = {
