@@ -184,7 +184,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 handler: function () {
                 }
             }
-        ]
+        ];
+        let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
+        let cuttingCurve = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
         switch (nodeType) {
             case 'project':
             case 'wells':
@@ -270,7 +272,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 ]);
             case 'data':
             case 'dataset':
-                return [
+                let datasetCtx = [];
+                console.log(copyingCurve, cuttingCurve);
+                if (copyingCurve || cuttingCurve) {
+                    datasetCtx = [
+                        {
+                            name: "Paste",
+                            label: "Paste",
+                            icon: "apply-16x16",
+                            handler: function() {
+                                utils.pasteCurve();
+                            }
+                        }
+                    ];
+                }
+                return datasetCtx.concat([
                     {
                         name: "Rename",
                         label: "Rename",
@@ -287,29 +303,49 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         separator: '1'
                     }
-                ];
+                ]);
             case 'curve':
-                return [
+                let curveCtx = [];
+                if (copyingCurve || cuttingCurve) {
+                    curveCtx = [
+                        {
+                            name: "Paste",
+                            label: "Paste",
+                            icon: "apply-16x16",
+                            handler: function() {
+                                utils.pasteCurve();
+                            }
+                        }
+                    ];
+                }
+                return curveCtx.concat([
                     {
+                        name: "Export",
+                        label: "Export",
+                        icon: "save-16x16",
+                        handler: function() {
+                            utils.exportCurve();
+                        }
+                    }, {
                         name: "Copy",
                         label: "Copy",
                         icon: "copy-16x16",
                         handler: function() {
-
+                            utils.copyCurve();
                         }
                     }, {
                         name: "Cut",
                         label: "Cut",
                         icon: "zone-split-16x16",
                         handler: function() {
-
+                            utils.cutCurve();
                         }
                     }, {
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16-edit",
                         handler: function() {
-
+                            utils.renameCurve();
                         }
                     }, {
                         name: "Delete",
@@ -321,7 +357,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         separator: "1"
                     }
-                ];
+                ]);
             case 'intepretationmodel':
                 return [
                     {

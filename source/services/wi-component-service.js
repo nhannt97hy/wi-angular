@@ -63,6 +63,8 @@ app.factory(wiServiceName, function () {
         DIALOG_UTILS:'DIALOG_UTILS',
         LAYOUT_MANAGER: 'LAYOUT_MANAGER',
         UTILS: 'UTILS',
+        COPYING_CURVE: 'copying-curve',
+        CUTTING_CURVE: 'cutting-curve',
         // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
         ITEM_ACTIVE_PAYLOAD: 'item-active-payload',

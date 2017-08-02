@@ -576,7 +576,7 @@ exports.findLogplotModelById = function (logplotId) {
     return plot;
 }
 
-exports.findDatasetById = function (idDataset) {
+function findDatasetById(idDataset) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
@@ -588,8 +588,9 @@ exports.findDatasetById = function (idDataset) {
     });
     return dataset;
 }
+exports.findDatasetById = findDatasetById;
 
-exports.findWellById = function (idWell) {
+function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
@@ -601,6 +602,7 @@ exports.findWellById = function (idWell) {
     });
     return well;
 }
+exports.findWellById = findWellById;
 
 exports.findWellByLogplot = function(idLogplot) {
     
@@ -619,7 +621,9 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     });
 };
 
-exports.refreshProjectState = function(wiComponentService, wiApiService) {
+exports.refreshProjectState = refreshProjectState;
+function refreshProjectState() {
+    let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
     if (!project) return;
@@ -628,7 +632,7 @@ exports.refreshProjectState = function(wiComponentService, wiApiService) {
         let payload = {
             idProject: project.idProject
         };
-
+        let wiApiService = __GLOBAL.wiApiService;
         wiApiService.post(wiApiService.GET_PROJECT, payload)
             .then(function(projectRefresh) {
                 wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
@@ -643,3 +647,125 @@ exports.refreshProjectState = function(wiComponentService, wiApiService) {
             });
     });
 };
+
+function downloadFile(url) {
+    var filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+    xhr.onload = function () {
+        var a = document.createElement('a');
+        a.href = window.URL.createObjectURL(xhr.response); // xhr.response is a blob
+        a.download = filename; // Set the file name.
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.parentNode.removeChild(a);
+    };
+    xhr.open('GET', url);
+    xhr.send();
+}
+
+exports.exportCurve = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'curve') return;
+    let wiApiService = __GLOBAL.wiApiService;  
+    wiApiService.exportCurve(selectedNode.properties.idCurve, function (curveFileUrl) {
+        downloadFile(curveFileUrl);
+    });
+}
+
+exports.renameCurve = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'curve') return;
+    DialogUtils.promptDialog(__GLOBAL.ModalService, "Rename curve", selectedNode.data.label, function (ret) {
+        if (!ret) return;
+        let wiApiService = __GLOBAL.wiApiService;
+        let curveInfo = {
+            idCurve: selectedNode.properties.idCurve,
+            name: ret,
+            idDataset: selectedNode.properties.idDataset,
+            dataset: selectedNode.properties.dataset,
+            unit: selectedNode.properties.unit,
+            initValue: "-2810"
+        }
+        console.log(curveInfo);
+        wiApiService.editCurve(curveInfo, function () {
+            __GLOBAL.$timeout(function () {
+                selectedNode.data.label = ret;
+            })
+        });
+    });
+}
+
+exports.copyCurve = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'curve') return;
+    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, selectedNode);
+    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+}
+
+exports.cutCurve = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'curve') return;
+    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, selectedNode);
+    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+}
+
+exports.pasteCurve = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'curve' && selectedNode.type != 'dataset') return;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let wiApiService = __GLOBAL.wiApiService;  
+    // if copying  
+    let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
+    if (copyingCurve) {
+        console.log('copying curve');
+        if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+        let currentDatasetName = "";
+        if (selectedNode.type == 'curve') {
+            let currentDataset = findDatasetById(selectedNode.properties.idDataset);
+            currentDatasetName = currentDataset.properties.name;
+        } else {
+            currentDatasetName = selectedNode.properties.name;
+        }
+        let curveInfo = {
+            idDataset: selectedNode.properties.idDataset,
+            dataset: currentDatasetName,
+            name: copyingCurve.properties.name,
+            unit: copyingCurve.properties.unit,
+            initValue: "-2810"
+        }
+        wiApiService.createCurve(curveInfo, function (curve) {
+            refreshProjectState();
+        });
+        wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+        return;
+    }
+    // if cutting
+    let cuttingCurve = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
+    if (cuttingCurve) {
+        console.log('cutting curve');
+        if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+        let curveInfo = {
+            idCurve: cuttingCurve.properties.idCurve,
+            idDataset: selectedNode.properties.idDataset,
+            dataset: cuttingCurve.properties.dataset,
+            name: cuttingCurve.properties.name,
+            unit: cuttingCurve.properties.unit,
+            initValue: "-2810"
+        }
+        console.log(curveInfo);
+        wiApiService.editCurve(curveInfo, function () {
+            refreshProjectState();
+        });
+        wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+        return;
+    }
+}

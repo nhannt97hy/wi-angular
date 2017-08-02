@@ -155,6 +155,31 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
     });
 }
 
+exports.promptDialog = function (ModalService, titleMessage, input, callback) {
+    function ModalController($scope, close) {
+        this.error = null;
+        this.title = titleMessage;
+        this.input = input;
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "prompt/prompt-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
 exports.unitSettingDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         this.defaultData = {

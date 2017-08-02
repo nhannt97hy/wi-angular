@@ -11,6 +11,9 @@ const DELETE_WELL = '/project/well/delete';
 const DELETE_DATASET = '/project/well/dataset/delete';
 
 const CURVE = '/project/well/dataset/curve/getData';
+const EXPORT_CURVE = '/project/well/dataset/curve/export';
+const CREATE_CURVE = '/project/well/dataset/curve/new';
+const EDIT_CURVE = '/project/well/dataset/curve/edit';
 const DELETE_CURVE = '/project/well/dataset/curve/delete';
 
 const CREATE_PLOT = '/project/well/plot/new';
@@ -60,7 +63,7 @@ Service.prototype.DELETE_LINE = DELETE_LINE;
 Service.prototype.EDIT_LINE = EDIT_LINE;
 Service.prototype.getUtils = function() {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
-    console.log(utils);
+    // console.log(utils);
     return utils;
 }
 Service.prototype.post = function (route, payload) {
@@ -190,6 +193,7 @@ Service.prototype.postMultiFiles = function (route, dataPayload) {
 }
 
 Service.prototype.removeWell = function(idWell, callback) {
+    let self = this;    
     let dataRequest = {
         //idWell: selectedNode.properties.idWell
         idWell: idWell
@@ -202,6 +206,7 @@ Service.prototype.removeWell = function(idWell, callback) {
 }
 
 Service.prototype.removeDataset = function(idDataset, callback) {
+    let self = this;
     let dataRequest = {
         idDataset: idDataset
     }
@@ -212,7 +217,47 @@ Service.prototype.removeDataset = function(idDataset, callback) {
         });
 }
 
+Service.prototype.createCurve = function (curveInfo, callback) {
+    let self = this;
+    console.log(curveInfo);
+    this.post(CREATE_CURVE, curveInfo)
+        .then(function (curve) {
+            console.log("curve created", curve);
+            callback(curve);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
+}
+
+Service.prototype.editCurve = function (curveInfo, callback) {
+    if (!curveInfo.idCurve) return;
+    let self = this;
+    console.log(curveInfo);
+    this.post(EDIT_CURVE, curveInfo)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
+}
+
+Service.prototype.exportCurve = function (idCurve, callback) {
+    let self = this;
+    let dataRequest = {
+        idCurve: idCurve
+    }
+    callback('https://raw.githubusercontent.com/minhnt95/wi-angular/master/package.json');
+    // this.post(EXPORT_CURVE, dataRequest)
+    //     .then(function (curveFileUrl) {
+    //         callback(curveFileUrl);
+    //     })
+    //     .catch(function (err) {
+    //         self.getUtils().error(err);
+    //     })
+}
+
 Service.prototype.removeCurve = function(idCurve, callback) {
+    let self = this;
     let dataRequest = {
         idCurve: idCurve
     }
