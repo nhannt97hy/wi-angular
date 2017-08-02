@@ -23,9 +23,10 @@ Utils.extend(Track, DepthTrack);
  * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
  * @param {Number} [config.yStep] - Y gap between two consecutive points
+ * @param {String} [config.bgColor] - Background color for the track
  */
 function DepthTrack(config) {
-    Track.call(this);
+    Track.call(this, config);
 
     this.id = config.id;
     this.type = config.type;
@@ -85,8 +86,9 @@ DepthTrack.prototype.init = function(baseElement) {
 
 /**
  * Actually draw the track
+ * @param {Boolean} [highlight] - Indicate whether to call highlight callback
  */
-DepthTrack.prototype.doPlot = function () {
+DepthTrack.prototype.doPlot = function(highlight) {
     let self = this;
     this.updateHeader();
     this.updateBody();
@@ -115,6 +117,8 @@ DepthTrack.prototype.doPlot = function () {
 
     this.yAxisGroupRight.call(yAxisRight);
     this.yAxisGroupLeft.call(yAxisLeft);
+
+    Track.prototype.doPlot.call(this, highlight);
 }
 
 /**
