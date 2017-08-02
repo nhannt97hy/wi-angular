@@ -99,11 +99,12 @@ function lineToTreeConfig(line) {
     }
     if ( temp == 'symbol' || temp == 'both') {
         lineModel.data.symbol = {
-            // style: ,
-            // fillStyle: ,
-            lineWidth: line.lineWidth,
-            lineDash: eval(line.lineStyle),
-            // size: 
+            style: line.symbolName.toLowerCase(),
+            fillStyle: line.symbolFillStyle,
+            strokeStyle: line.symbolStrokeStyle,
+            lineWidth: line.symbolLineWidth,
+            lineDash: eval(line.symbolLineDash),
+            size: parseInt(line.symbolSize)
         }
     }
     return lineModel;

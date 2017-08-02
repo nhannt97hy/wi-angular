@@ -878,6 +878,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
     function ModalController($scope, close) {
         let error = null;
         let self = this;
+        console.log("currentCurve", currentCurve);
         thisModalController = this;
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -897,7 +898,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         }
         else {
             this.lineOptions = {
-            display: true,
+            display: false,
             lineStyle: {
                 lineColor : "black",
                 lineWidth : 1,
@@ -911,7 +912,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 symbolStyle: {
                     symbolName: currentCurve.symbol.style, // cross, diamond, star, triangle, dot, plus
                     symbolSize: currentCurve.symbol.size,
-                    symbolStrokeStyle: currrentCurve.symbol.strokeStyle,
+                    symbolStrokeStyle: currentCurve.symbol.strokeStyle,
                     symbolFillStyle: currentCurve.symbol.fillStyle,
                     symbolLineWidth : currentCurve.symbol.lineWidth,
                     symbolLineDash: currentCurve.symbol.lineDash
@@ -931,7 +932,6 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 }
             }
         }
-
 
         this.lineObjTemplate = {
             minDepth: extentY[0],
@@ -963,24 +963,15 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.selectData = {
             displayMode: ["Line", "Symbol", "Both", "None"],
             wrapMode: ["None", "Left", "Right", "Both"],
-            symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            symbolType: ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"],
             blockPosition: ["None", "Start", "Middle", "End", "None"],
             logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
-        this.defaultElement = {
-            displayMode: "Line",
-            wrapMode: "None",
-            symbolType: "Circle",
-            blockPosition: "None",
-            logLinear: "Linear",
-            displayAs: "Normal"
-        };
-
         function getDisplayMode(currentCurve) {
-            if(self.lineOptions.display && self.symbolOptions.display) return "Both";
-            if(self.lineOptions.display && !self.symbolOptions.display) return "Line";
-            if(!self.lineOptions.display && self.symbolOptions.display) return "Symbol";
+            if(currentCurve.line && currentCurve.symbol) return "Both";
+            if(currentCurve.line && !currentCurve.symbol) return "Line";
+            if(!currentCurve.line && currentCurve.symbol) return "Symbol";
             return "None";
         }
         function displayLine(lineOptions, symbolOptions) {

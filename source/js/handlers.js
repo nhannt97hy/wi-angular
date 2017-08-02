@@ -571,6 +571,12 @@ exports.HelpButtonClicked = function () {
 
 exports.AboutButtonClicked = function () {
     console.log('AboutButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.aboutDialog(this.ModalService, function (data) {
+        console.log("Well Insight");
+    });
 };
 
 exports.UnlockButtonClicked = function () {
