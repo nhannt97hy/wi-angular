@@ -43,7 +43,7 @@ module.exports.createLayout = function(domId, $scope, $compile) {
         container.getElement().html(compileFunc(templateHtml)(scopeObj));
     });
 
-    let wiComponentService = this.wiComponentService;    
+    let wiComponentService = this.wiComponentService;
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
@@ -90,14 +90,17 @@ module.exports.putWiLogPlotRight = function(logplotModel) {
         rightContainer.setActiveContentItem(logplotItem);
         return;
     }
+    let wiComponentService = this.wiComponentService;
+    let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(logplotModel.properties.idWell);
+    let tabTitle = '<img class="logplot-blank-16x16"> &nbsp;' + logplotModel.properties.name + ' - (' + well.properties.name + ')';
     rightContainer.addChild({
         type: 'component',
         id: itemId,
         componentName: 'html-block',
         componentState: {
-            html: '<wi-logplot name="' + logplotModel.properties.name + '"' + 'id="' + logplotModel.properties.idPlot + '"></wi-logplot>'
+            html: '<wi-logplot name="' + logplotModel.properties.name + '" id="' + logplotModel.properties.idPlot + '"></wi-logplot>'
         },
-        title: logplotModel.properties.name
+        title: tabTitle
     });
 }
 
