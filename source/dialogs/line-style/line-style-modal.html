@@ -12,19 +12,19 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-4 normal-text" for="style">Line Width</label>
                                 <div class="col-sm-8">
-                                    <ui-select theme="bootstrap" ng-model="wiModal.options.lineWidth">
+                                    <ui-select theme="bootstrap" ng-model="wiModal.options.lineStyle.lineWidth">
                                         <ui-select-match>
-                                            <div class="col-sm-2 text-left">{{$select.selected.name}}</div>
+                                            <div class="col-sm-2 text-left">{{$select.selected}}</div>
                                             <svg height="10" width="100%" class="col-sm-10">
                                                 <line x1="0" y1="5" x2="100%" y2="5"
-                                                      style="stroke: {{wiModal.options.lineColor}}; stroke-width: {{$select.selected.param}}"></line>
+                                                      style="stroke: {{wiModal.options.lineStyle.lineColor}}; stroke-width: {{$select.selected}}"></line>
                                             </svg>
                                         </ui-select-match>
                                         <ui-select-choices repeat="width in wiModal.widthes">
-                                            <div class="col-sm-2 text-left">{{width.name}}</div>
+                                            <div class="col-sm-2 text-left">{{width}}</div>
                                             <svg height="10" width="100%" class="col-sm-10">
                                                 <line x1="0" y1="5" x2="100%" y2="5"
-                                                      style="stroke: {{wiModal.options.lineColor}}; stroke-width: {{width.param}}"></line>
+                                                      style="stroke: {{wiModal.options.lineStyle.lineColor}}; stroke-width: {{width}}"></line>
                                             </svg>
                                         </ui-select-choices>
                                     </ui-select>
@@ -35,19 +35,19 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-4 normal-text" for="style">Line Style</label>
                                 <div class="col-sm-8">
-                                    <ui-select theme="bootstrap" ng-model="wiModal.options.lineStyle">
+                                    <ui-select theme="bootstrap" ng-model="wiModal.options.lineStyle.lineStyle">
                                         <ui-select-match>
                                             <svg height="10" width="100%" class="col-sm-12">
-                                                <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{$select.selected.param.join(',')}}"
-                                                      style="stroke: {{wiModal.options.lineColor}}; stroke-width: 1}"></line>
+                                                <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{$select.selected.join(',')}}"
+                                                      style="stroke: {{wiModal.options.lineStyle.lineColor}}; stroke-width: 1}"></line>
                                             </svg>
                                         </ui-select-match>
                                         <ui-select-choices repeat="style in wiModal.styles" class="text-left">
                                             <div class="container-fluid">
                                                 <!--<div class="col-sm-2 text-left"></div>-->
                                                 <svg height="10" width="100%" class="col-sm-12">
-                                                    <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{style.param.join(',')}}"
-                                                          style="stroke: {{wiModal.options.lineColor}}; stroke-width: 1"></line>
+                                                    <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{style.join(',')}}"
+                                                          style="stroke: {{wiModal.options.lineStyle.lineColor}}; stroke-width: 1"></line>
                                                 </svg>
                                             </div>
 
@@ -62,8 +62,8 @@
                                 <div class="col-sm-8 text-left">
                                     <input kendo-color-picker k-palette="'websafe'"
                                            class="form-control wi-form-control"
-                                           ng-model="wiModal.options.lineColor"/>
-                                    {{wiModal.options.lineColor}}
+                                           ng-model="wiModal.options.lineStyle.lineColor"/>
+                                    {{wiModal.options.lineStyle.lineColor}}
                                 </div>
                             </div>
                         </div>

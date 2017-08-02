@@ -897,19 +897,20 @@ exports.symbolStyleDialog = function (ModalService, callback, options) {
         });
     });
 }
-exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, wiLogplotCtrl, callback) {
+exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, currentTrack, wiLogplotCtrl, callback) {
     let thisModalController = null;
 
     function ModalController($scope, close) {
         let error = null;
         let self = this;
+        console.log("currentCurve", currentCurve);
         thisModalController = this;
-
+        let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        //TODO ?????? this.well = utils.findWellById(WiLogplotModel.properties.idWell);
-        // this.well = utils.findWellByLogPlot(wiLogplotCtrl.id);
-
+        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        
         let extentY = currentCurve.getExtentY();
+
         if (currentCurve.line) {
             this.lineOptions = {
             display: true,
@@ -922,7 +923,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         }
         else {
             this.lineOptions = {
-            display: true,
+            display: false,
             lineStyle: {
                 lineColor : "black",
                 lineWidth : 1,
@@ -936,7 +937,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 symbolStyle: {
                     symbolName: currentCurve.symbol.style, // cross, diamond, star, triangle, dot, plus
                     symbolSize: currentCurve.symbol.size,
-                    symbolStrokeStyle: currrentCurve.symbol.strokeStyle,
+                    symbolStrokeStyle: currentCurve.symbol.strokeStyle,
                     symbolFillStyle: currentCurve.symbol.fillStyle,
                     symbolLineWidth : currentCurve.symbol.lineWidth,
                     symbolLineDash: currentCurve.symbol.lineDash
@@ -956,22 +957,16 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 }
             }
         }
-         function getDisplayMode(currentCurve) {
-            if(self.lineOptions.display && self.symbolOptions.display) return "Both";
-            if(self.lineOptions.display && !self.symbolOptions.display) return "Line";
-            if(!self.lineOptions.display && self.symbolOptions.display) return "Symbol";
-            return "None";
-        }
+
         this.lineObjTemplate = {
             minDepth: extentY[0],
             maxDepth: extentY[1],
-            name : currentCurve.name,
-            
+            name : currentCurve.name    
         }
 
         this.curveOptions = {
             idLine : currentCurve.id,
-            // idTrack: ???,
+            idTrack: currentTrack.id,
             showHeader : currentCurve.showHeader, 
             showDataset : true, // add to currentCurve - Canh
             ignoreMissingValues: false,
@@ -986,37 +981,24 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             displayAs : "Normal" //default
         };
         
-        let lineObj = {};
-        angular.extend(lineObj, self.lineObjTemplate, self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
-        console.log("lineObj", lineObj);
-/* @param {Object} [config.symbol] - Configuration to draw symbol
- * @param {String} [config.symbol.style] - Symbol style (circle, square, cross, diamond, plus, star)
- * @param {String} [config.symbol.fillStyle] - Symbol fill style
- * @param {String} [config.symbol.strokeStyle] - Symbol stroke style
- * @param {Number} [config.symbol.lineWidth] - Symbol line width
- * @param {Array} [config.symbol.lineDash] - Symbol line dash
- * @param {Number} [config.symbol.size] - Symbol size*/
         
-       
         this.drawSample = function () {
             displayLine(self.lineOptions, self.symbolOptions);
         }
         this.selectData = {
             displayMode: ["Line", "Symbol", "Both", "None"],
             wrapMode: ["None", "Left", "Right", "Both"],
-            symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            symbolType: ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"],
             blockPosition: ["None", "Start", "Middle", "End", "None"],
             logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
-        this.defaultElement = {
-            displayMode: "Line",
-            wrapMode: "None",
-            symbolType: "Circle",
-            blockPosition: "None",
-            logLinear: "Linear",
-            displayAs: "Normal"
-        };
+        function getDisplayMode(currentCurve) {
+            if(currentCurve.line && currentCurve.symbol) return "Both";
+            if(currentCurve.line && !currentCurve.symbol) return "Line";
+            if(!currentCurve.line && currentCurve.symbol) return "Symbol";
+            return "None";
+        }
         function displayLine(lineOptions, symbolOptions) {
             let sample = $('#sample')[0];
             let context = sample.getContext('2d');
@@ -1036,13 +1018,13 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 context.stroke();
             }
             function drawSymbol(context, x, y, style) {
-                switch (style.symbolStyle.name) {
+                switch (style.symbolStyle.symbolName) {
                     case "circle":
                         context.beginPath();
-                        context.symbolStrokeStyle = style.symbolStyle.symbolStrokeStyle;
-                        context.symbolFillStyle = style.symbolStyle.symbolFillStyle;
-                        context.symbolLineWidth = style.symbolStyle.symbolLineWidth;
-                        context.symbolLineDash = style.symbolStyle.symbolLineDash;
+                        context.strokeStyle = style.symbolStyle.symbolStrokeStyle;
+                        context.fillStyle = style.symbolStyle.symbolFillStyle;
+                        context.lineWidth = style.symbolStyle.symbolLineWidth;
+                        context.setLineDash(style.symbolStyle.symbolLineDash);
                         context.arc(x, y, style.symbolStyle.symbolSize, 0, 2*Math.PI);
                         context.closePath();
                         context.stroke();
@@ -1063,24 +1045,27 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }
             for (let i = 0; i < x.length; i++) {
                 if( symbolOptions && symbolOptions.display ) {
+                    console.log(self.symbolOptions);
                     drawSymbol(context, x[i], y[i], self.symbolOptions);
                 }
             }
 
         }
 
-        // function updateLineProperties () = {
+        function changeLine() {
+            let lineObj = {};
+            angular.extend(lineObj, self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
+            lineObj.lineStyle = JSON.stringify(lineObj.lineStyle);
+            lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
 
-        //     wiApiService.editLine(lineObj, function () {
-        //         console.log("OK");
-        //     });
+            wiApiService.editLine(lineObj, function () {
+                console.log("OK");
+            });
+        };
 
-        // }
-        this.canvasClicked = function () {
-            console.log("Canvas");
-        }
         this.changeOther = function () {
-            switch (self.defaultElement.displayMode) {
+            console.log(self.curveOptions.displayMode);
+            switch (self.curveOptions.displayMode) {
                 case "Line":
                     $('#wrapMode').prop("disabled", false);
                     $('#symbolType').prop("disabled", true);
@@ -1137,22 +1122,23 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.onEditLineStyleButtonClicked = function () {
             DialogUtils.lineStyleDialog(ModalService, function (options) {
                 console.log("options", options);
-                lineOptions = options;
+                self.lineOptions = options;
                 self.drawSample();
             }, self.lineOptions);
         };
         this.onEditSymbolStyleButtonClicked = function () {
             DialogUtils.symbolStyleDialog(ModalService, function (options) {
-                symbolOptions = options;
+                self.symbolOptions = options;
+                console.log(self.symbolOptions);
                 self.drawSample();
             }, self.symbolOptions);
         };
         this.onApplyButtonClicked = function () {
-            updateLineProperties ();
+            changeLine();
 
         };
         this.onOkButtonClicked = function () {
-            updateLineProperties ();
+            changeLine();
             close(self, 100);
         };
         this.onCancelButtonClicked = function () {
@@ -1402,7 +1388,7 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
 
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         //TODO ????? this.well = utils.findWellById(WiLogplotModel.properties.idWell);
-        // this.well = utils.findWellByLogPlot(wiLogplotCtrl.id);
+        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
 
         this.datasets = [];
         this.selectedCurve = [];
