@@ -45,7 +45,6 @@ function DepthTrack(config) {
 
     this.xPadding = config.xPadding || 1;
     this.yPadding = config.yPadding || 5;
-    this.yStep = (config.yStep == null) ? 1 : config.yStep;
 
     this.MIN_WIDTH = 60;
 }
@@ -55,9 +54,13 @@ function DepthTrack(config) {
  * @returns {Array} Range of x values to show
  */
 DepthTrack.prototype.getWindowY = function() {
-    return (this.minY != null && this.maxY != null)
+    let windowY = (this.minY != null && this.maxY != null)
         ? [this.minY, this.maxY]
         : [0, 10000];
+
+    windowY[0] = this.offsetY + Utils.roundUp(windowY[0] - this.offsetY, this.yStep);
+    windowY[1] = this.offsetY + Utils.roundDown(windowY[1] - this.offsetY, this.yStep);
+    return windowY;
 }
 
 /**
@@ -101,16 +104,15 @@ DepthTrack.prototype.doPlot = function(highlight) {
     let transformY = d3.scaleLinear()
         .domain(windowY)
         .range([0, rect.height]);
-
-    var start = Utils.roundUp(windowY[0], this.yStep);
-    var end = Utils.roundDown(windowY[1], this.yStep);
-    var step = (end - start) / this.yNTicks;
-    var yAxisRight = d3.axisLeft(transformY)
+    let start = windowY[0];
+    let end = windowY[1];
+    let step = (end - start) / this.yNTicks;
+    let yAxisRight = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end + step, step))
         .tickFormat(d3.format(self.yFormatter))
         .tickSize(5);
 
-    var yAxisLeft = d3.axisRight(transformY)
+    let yAxisLeft = d3.axisRight(transformY)
         .tickValues(d3.range(start, end + step, step))
         .tickFormat('')
         .tickSize(5);

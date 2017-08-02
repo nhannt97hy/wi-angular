@@ -78,9 +78,11 @@ function trimData(data) {
 }
 
 function parseData(data) {
-    data.forEach(function(d) {
-        d.x = d.x == null ? null : parseFloat(d.x);
-        d.y = d.y == null ? null : parseFloat(d.y);
+    return data.map(function(d) {
+        return {
+            x: (d.x == null || d.x == NaN) ? null : parseFloat(d.x),
+            y: (d.y == null || d.y == NaN) ? null : parseFloat(d.y)
+        }
     });
 }
 

@@ -35,8 +35,8 @@ function Controller($scope, wiComponentService, $timeout) {
     }
 
     function updateState(top, height, parentHeight) {
-        self.slidingBarState.top = Math.round(top / parentHeight * 100);
-        self.slidingBarState.range = Math.round(height / parentHeight * 100);
+        self.slidingBarState.top = top / parentHeight * 100;
+        self.slidingBarState.range = height / parentHeight * 100;
 
         self.tinyWindow.height = height;
         self.tinyWindow.top = top;
@@ -54,8 +54,8 @@ function Controller($scope, wiComponentService, $timeout) {
         let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
 
         self.tinyWindow = {
-            top: (parentHeight - initialHeight * 4) * Math.random(),
-            height: initialHeight * 4
+            top: 0,
+            height: parentHeight
         };
 
         // init tiny window height
@@ -102,7 +102,9 @@ function Controller($scope, wiComponentService, $timeout) {
                 tempTopHandler = parentHeight - self.tinyWindow.height;
             }
 
-            updateSlidingHandler(tempTopHandler, self.tinyWindow.height, parentHeight);
+            let newTop = Math.round(tempTopHandler);
+            let newHeight = Math.ceil(self.tinyWindow.height);
+            updateSlidingHandler(newTop, newHeight);
         }
 
         function updateSlidingHandler(top, height) {
@@ -121,7 +123,7 @@ function Controller($scope, wiComponentService, $timeout) {
 
         this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
             let newTop = Math.round((topPercent * parentHeight) / 100);
-            let newHeight = Math.round((rangePercent * parentHeight) / 100);
+            let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
 
             if (newTop < 0) newTop = 0;
 
@@ -131,7 +133,6 @@ function Controller($scope, wiComponentService, $timeout) {
                 newTop = 0;
                 newHeight = parentHeight;
             }
-
             updateSlidingHandler(newTop, newHeight);
         };
 

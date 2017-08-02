@@ -6,9 +6,9 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
-    
+
     wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();        
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
@@ -19,7 +19,7 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
         self.isFitWindow = false;
         self.isReferenceLine = true;
         self.isTooltip = true;
-        
+
         // Setup handlers for logplot
         $scope.handlers = {};
         utils.bindFunctions($scope.handlers, logplotHandlers, {
@@ -38,8 +38,9 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
             utils.objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
             let wiD3Controller = self.getwiD3Ctrl();
             let max = wiD3Controller.getMaxDepth();
-            let low = max * previousSlidingBarState.top / 100;
-            let high = max * ( previousSlidingBarState.top + previousSlidingBarState.range ) / 100;
+            let min = wiD3Controller.getMinDepth();
+            let low = min + (max - min) * previousSlidingBarState.top / 100;
+            let high = low + (max - min) * previousSlidingBarState.range / 100;
             wiD3Controller.setDepthRange([low, high]);
             // wiD3Controller.plotAll();
         }

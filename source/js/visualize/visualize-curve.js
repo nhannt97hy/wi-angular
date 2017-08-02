@@ -34,7 +34,7 @@ Utils.extend(Drawing, Curve);
  * @param {Number} [config.symbol.size] - Symbol size
  */
 function Curve(config) {
-    Drawing.call(this);
+    Drawing.call(this, config);
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
@@ -53,11 +53,21 @@ function Curve(config) {
     this.symbol = config.symbol;
     this.showHeader = (config.showHeader == null) ? true : config.showHeader;
 
-    this.data = config.data || [];
+    this.yStep = config.yStep || 1;
+    this.offsetY = config.offsetY || 0;
 
-    Utils.parseData(this.data);
+    this.data = config.data || [];
+    this.data = Utils.parseData(this.data);
     this.data = Utils.trimData(this.data);
-    Utils.interpolateData(this.data);
+    this.data = Utils.interpolateData(this.data);
+
+    let self = this;
+    this.data = this.data.map(function(d) {
+        return {
+            x: d.x,
+            y: d.y * self.yStep + self.offsetY
+        };
+    })
 
     if (this.minX == null || this.maxX == null)
         this.autoScaleX();
@@ -123,7 +133,7 @@ Curve.prototype.getScaleFunc = function() {
  * @param {Number} granularity - level of detail to round
  */
 Curve.prototype.autoScaleX = function(granularity) {
-    if (!granularity) granularity = 1;
+    if (!granularity) granularity = this.yStep;
     let extentX = this.getExtentX();
     this.minX = Utils.roundDown(extentX[0], granularity);
     this.maxX = Utils.roundUp(extentX[1], granularity);

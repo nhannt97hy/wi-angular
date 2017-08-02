@@ -100,11 +100,11 @@ exports.ScaleFullButtonClicked = function() {
 };
 
 exports.ZoomInButtonClicked = function() {
-    this.wiLogplot.getSlidingbarCtrl().zoomIn();
+    this.wiLogplot.getwiD3Ctrl().zoom(false);
 };
 
 exports.ZoomOutButtonClicked = function() {
-    this.wiLogplot.getSlidingbarCtrl().zoomOut();
+    this.wiLogplot.getwiD3Ctrl().zoom(true);
 };
 
 exports.CropDisplayButtonClicked = function() {

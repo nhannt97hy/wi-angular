@@ -38,7 +38,7 @@ Utils.extend(Drawing, Shading);
  * @param {Boolean} [config.showRefLine] - Indicate whether to plot reference line
  */
 function Shading(config) {
-    Drawing.call(this);
+    Drawing.call(this, config);
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
