@@ -602,6 +602,9 @@ exports.findWellById = function (idWell) {
     return well;
 }
 
+exports.findWellByLogplot = function(idLogplot) {
+    
+};
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';

@@ -773,94 +773,14 @@ exports.addCurveDialog = function (ModalService, callback) {
 exports.lineStyleDialog = function (ModalService, callback, options) {
     function ModalController($scope, close) {
         var self = this;
-        console.log('hhhhhhhhh ',options);
+        console.log(options);
 
-        if (options) {
-            this.options = options;
-        }
-        else {
-            this.options = {
-                display: true,
-                lineColor: "#0000ff",
-                lineStyle: {
-                    name: 'solid',
-                    param: [10, 0]
-                },
-                lineWidth: {
-                    name: '1',
-                    param: 1
-                }
-            };
-        }
+        this.options = options;
+        
         console.log("Op", this.options);
-        this.styles =[
-            {
-                name: 'solid',
-                param: [10, 0]
-            },
-            {
-                name : 'none',
-                param : [0, 10]
-            },
-            {
-                name : 'dotted',
-                param : [2, 2]
-            },
-            {
-                name : 'dashed',
-                param : [8, 2]
-            },
-            {
-                name : 'dashdot',
-                param : [10, 4, 2, 4]
-            },
-            {
-                name : 'dash2dot',
-                param : [10, 4, 2, 4, 2, 4]
-            }
-        ];
-        this.widthes = [
-            {
-                name : "1",
-                param : 1
-            },
-            {
-                name : "2",
-                param : 2
-            },
-            {
-                name : "3",
-                param : 3
-            },
-            {
-                name : "4",
-                param : 4
-            },
-            {
-                name : "5",
-                param : 5
-            },
-            {
-                name : "6",
-                param : 6
-            },
-            {
-                name : "7",
-                param : 7
-            },
-            {
-                name : "8",
-                param : 8
-            },
-            {
-                name : "9",
-                param : 9
-            },
-            {
-                name : "10",
-                param : 10
-            }
-        ];
+        this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
+        this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        
         this.onOkButtonClicked = function () {
             console.log("optionsss: ", self.options);
             close(self.options);
@@ -890,98 +810,46 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
 exports.symbolStyleDialog = function (ModalService, callback, options) {
     function ModalController($scope, close) {
         var self = this;
-
-        this.options = {
-            lines: {
-                color: '#ff0000',
-                style: {
-                    name: 'solid',
-                    param: [10, 0]
+        console.log(options);
+        this.options = options;
+        console.log(this.options);
+        // this.options = {
+        //     lines: {
+        //         color: '#ff0000',
+        //         style: {
+        //             name: 'solid',
+        //             param: [10, 0]
+        //         }
+        //         ,
+        //         width: {
+        //             name: "1",
+        //             param: 1
+        //         }
+        //     },
+        //     solidFill: '#000',
+        //     patternFill: {
+        //         pattern: "chert",
+        //         background: "#fff",
+        //         foreground: "#000"
+        //     }
+        // };
+        /*this.symbolOptions = {
+                display: false,
+                symbolStyle: {
+                    name: "circle", // cross, diamond, star, triangle, dot, plus
+                    size: 4,
+                    strokeStyle: "black",
+                    fillStyle: "transparent",
+                    lineWidth : 1,
+                    lineDash: [10, 0]
                 }
-                ,
-                width: {
-                    name: "1",
-                    param: 1
-                }
-            },
-            solidFill: '#000',
-            patternFill: {
-                pattern: "chert",
-                background: "#fff",
-                foreground: "#000"
-            }
-        };
+            }*/
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
-        this.styles =[
-            {
-                name: 'solid',
-                param: [10, 0]
-            },
-            {
-                name : 'none',
-                param : [0, 10]
-            },
-            {
-                name : 'dotted',
-                param : [2, 2]
-            },
-            {
-                name : 'dashed',
-                param : [8, 2]
-            },
-            {
-                name : 'dashdot',
-                param : [10, 4, 2, 4]
-            },
-            {
-                name : 'dash2dot',
-                param : [10, 4, 2, 4, 2, 4]
-            }
-        ];
-        this.widthes = [
-            {
-                name : "1",
-                param : 1
-            },
-            {
-                name : "2",
-                param : 2
-            },
-            {
-                name : "3",
-                param : 3
-            },
-            {
-                name : "4",
-                param : 4
-            },
-            {
-                name : "5",
-                param : 5
-            },
-            {
-                name : "6",
-                param : 6
-            },
-            {
-                name : "7",
-                param : 7
-            },
-            {
-                name : "8",
-                param : 8
-            },
-            {
-                name : "9",
-                param : 9
-            },
-            {
-                name : "10",
-                param : 10
-            }
-        ];
-        this.onOkButtonClicked = function () {
+        this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
+        this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+        this.onOkButtonClicked = function () {
+            close(self.options);
         };
 
         this.onCancelButtonClicked = function () {
@@ -1004,58 +872,107 @@ exports.symbolStyleDialog = function (ModalService, callback, options) {
         });
     });
 }
-exports.curvePropertiesDialog = function (ModalService, wiComponentService, DialogUtils, currentCurve, callback) {
+exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, wiLogplotCtrl, callback) {
     let thisModalController = null;
-    console.log(currentCurve);
+
     function ModalController($scope, close) {
         let error = null;
         let self = this;
         thisModalController = this;
 
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        //TODO ?????? this.well = utils.findWellById(WiLogplotModel.properties.idWell);
+        // this.well = utils.findWellByLogPlot(wiLogplotCtrl.id);
+
         let extentY = currentCurve.getExtentY();
-        this.curveOptions = {
-            name : currentCurve.name,
-            alias: currentCurve.alias,
-            minValue: currentCurve.minX,
-            maxValue: currentCurve.maxX,
-            autoScale: false,
-            logLinear: currentCurve.scale,
-            minDepth: extentY[0],
-            maxDepth: extentY[1]
-        };
-        this.lineOptions = {
+        if (currentCurve.line) {
+            this.lineOptions = {
             display: true,
-            lineColor: currentCurve.line.color,
             lineStyle: {
-                name: 'solid',
-                param: currentCurve.line.dash
-            },
-            lineWidth: {
-                name: '1',
-                param: currentCurve.line.width
+                lineColor : currentCurve.line.color,
+                lineWidth : currentCurve.line.width,
+                lineStyle : currentCurve.line.dash
+                }
             }
-        };
+        }
+        else {
+            this.lineOptions = {
+            display: true,
+            lineStyle: {
+                lineColor : "black",
+                lineWidth : 1,
+                lineStyle : [0]
+                }
+            }
+        }
         if (currentCurve.symbol) {
             this.symbolOptions = {
                 display: true,
-                symbolColor : currentCurve.symbol.color,
                 symbolStyle: {
-                    name: currentCurve.symbol.style, // cross, diamond, star, triangle, dot, plus
-                    size: currentCurve.symbol.size
+                    symbolName: currentCurve.symbol.style, // cross, diamond, star, triangle, dot, plus
+                    symbolSize: currentCurve.symbol.size,
+                    symbolStrokeStyle: currrentCurve.symbol.strokeStyle,
+                    symbolFillStyle: currentCurve.symbol.fillStyle,
+                    symbolLineWidth : currentCurve.symbol.lineWidth,
+                    symbolLineDash: currentCurve.symbol.lineDash
                 }
             }
         }
         else {
             this.symbolOptions = {
                 display: false,
-                symbolColor:'black',
                 symbolStyle: {
-                    name: 'circle',
-                    size: 4
+                    symbolName: "circle", // cross, diamond, star, triangle, dot, plus
+                    symbolSize: 4,
+                    symbolStrokeStyle: "black",
+                    symbolFillStyle: "transparent",
+                    symbolLineWidth : 1,
+                    symbolLineDash: [10, 0]
                 }
             }
         }
-        currentCurve.alias = this.curveOptions.alias;
+         function getDisplayMode(currentCurve) {
+            if(self.lineOptions.display && self.symbolOptions.display) return "Both";
+            if(self.lineOptions.display && !self.symbolOptions.display) return "Line";
+            if(!self.lineOptions.display && self.symbolOptions.display) return "Symbol";
+            return "None";
+        }
+        this.lineObjTemplate = {
+            minDepth: extentY[0],
+            maxDepth: extentY[1],
+            name : currentCurve.name,
+            
+        }
+
+        this.curveOptions = {
+            idLine : currentCurve.id,
+            // idTrack: ???,
+            showHeader : currentCurve.showHeader, 
+            showDataset : true, // add to currentCurve - Canh
+            ignoreMissingValues: false,
+            alias: currentCurve.alias,
+            minValue: currentCurve.minX,
+            maxValue: currentCurve.maxX,
+            autoValueScale: false,
+            displayType : currentCurve.scale,
+            displayMode : getDisplayMode(currentCurve),
+            wrapMode : "None", //default
+            blockPosition : "None", //default
+            displayAs : "Normal" //default
+        };
+        
+        let lineObj = {};
+        angular.extend(lineObj, self.lineObjTemplate, self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
+        console.log("lineObj", lineObj);
+/* @param {Object} [config.symbol] - Configuration to draw symbol
+ * @param {String} [config.symbol.style] - Symbol style (circle, square, cross, diamond, plus, star)
+ * @param {String} [config.symbol.fillStyle] - Symbol fill style
+ * @param {String} [config.symbol.strokeStyle] - Symbol stroke style
+ * @param {Number} [config.symbol.lineWidth] - Symbol line width
+ * @param {Array} [config.symbol.lineDash] - Symbol line dash
+ * @param {Number} [config.symbol.size] - Symbol size*/
+        
+       
         this.drawSample = function () {
             displayLine(self.lineOptions, self.symbolOptions);
         }
@@ -1082,9 +999,9 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
             var x = [5, 50, 100, 150, 195];
             var y = [180, 40, 20, 40, 180];
             function drawSegment (context, x1, y1, x2, y2) {
-                let lineColor = lineOptions.lineColor;
-                let lineWidth = lineOptions.lineWidth.param;
-                let lineStyle = lineOptions.lineStyle.param;
+                let lineColor = lineOptions.lineStyle.lineColor;
+                let lineWidth = lineOptions.lineStyle.lineWidth;
+                let lineStyle = lineOptions.lineStyle.lineStyle;
                 context.beginPath();
                 context.strokeStyle = lineColor;
                 context.lineWidth = lineWidth;
@@ -1097,10 +1014,14 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
                 switch (style.symbolStyle.name) {
                     case "circle":
                         context.beginPath();
-                        context.strokeStyle = style.symbolColor;
-                        context.arc(x, y, style.symbolStyle.size, 0, 2*Math.PI);
+                        context.symbolStrokeStyle = style.symbolStyle.symbolStrokeStyle;
+                        context.symbolFillStyle = style.symbolStyle.symbolFillStyle;
+                        context.symbolLineWidth = style.symbolStyle.symbolLineWidth;
+                        context.symbolLineDash = style.symbolStyle.symbolLineDash;
+                        context.arc(x, y, style.symbolStyle.symbolSize, 0, 2*Math.PI);
                         context.closePath();
                         context.stroke();
+                        context.fill();
                         break;
                     case "dot":
                         // context.strokeStyle = style.symbolColor;
@@ -1122,6 +1043,14 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
             }
 
         }
+
+        // function updateLineProperties () = {
+
+        //     wiApiService.editLine(lineObj, function () {
+        //         console.log("OK");
+        //     });
+
+        // }
         this.canvasClicked = function () {
             console.log("Canvas");
         }
@@ -1189,23 +1118,16 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, Dial
         };
         this.onEditSymbolStyleButtonClicked = function () {
             DialogUtils.symbolStyleDialog(ModalService, function (options) {
-
-            });
+                symbolOptions = options;
+                self.drawSample();
+            }, self.symbolOptions);
         };
         this.onApplyButtonClicked = function () {
-            callback(self);
-            console.log(self);
-            currentCurve.line.color = self.lineOptions.lineColor;
-            currentCurve.line.width = self.lineOptions.lineWidth.param;
-            currentCurve.line.dash = self.lineOptions.lineStyle.param;
-            if (self.symbolOptions.display) {
-                currentCurve.symbol = currentCurve.symbol || new Object();
-                currentCurve.symbol.style = self.symbolOptions.symbolStyle.name;
-                currentCurve.symbol.color = self.symbolOptions.symbolColor;
-                currentCurve.symbol.size = self.symbolOptions.symbolStyle.size;
-            }
+            updateLineProperties ();
+
         };
         this.onOkButtonClicked = function () {
+            updateLineProperties ();
             close(self, 100);
         };
         this.onCancelButtonClicked = function () {
@@ -1447,17 +1369,24 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         });
     });
 };
-exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _currentTrack, callback) {
+exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogplotCtrl, callback) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
         this.disabled = false;
 
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let well = utils.findWellById(WiLogplotModel.properties.idWell);
-        let datasets = [];
-        well.children.forEach( function(child) {
-            if(child.type == 'dataset') datasets.push(child);
+        //TODO ????? this.well = utils.findWellById(WiLogplotModel.properties.idWell);
+        // this.well = utils.findWellByLogPlot(wiLogplotCtrl.id);
+
+        this.datasets = [];
+        this.selectedCurve = [];
+        this.currentCurves = getCurrentCurves();
+        this.currentShadings = getCurrentShadings();
+        this.curves = this.datasets.children;
+
+        this.well.children.forEach( function(child) {
+            if(child.type == 'dataset') self.datasets.push(child);
         });
         const props = {
             general: {
@@ -1478,10 +1407,10 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
             curves: this.currentCurves,
             shading: this.currentShadings
         }
-        this.curves = datasets.children;
         
-        console.log("Wi", WiLogplotModel);
         console.log("currentTrack", _currentTrack);
+        console.log("currentCurves", this.currentCurves);
+        console.log("datasets", this.datasets);
 
         // Tab General
         this.isShowTitle = props.general.isShowTitle;
@@ -1568,10 +1497,6 @@ exports.logTrackPropertiesDialog = function (ModalService, WiLogplotModel, _curr
                 background: '#ff0'
             }
         }
-        this.selectedCurve = [];
-        this.currentCurves = getCurrentCurves();
-        this.currentShadings = getCurrentShadings();
-        console.log("currentCurves", this.currentCurves);
 
         function getCurrentCurves () {
             return _currentTrack.getCurves();
@@ -1864,3 +1789,34 @@ exports.errorMessageDialog = function (ModalService, errorMessage) {
         })
     });
 };
+exports.aboutDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.aboutApp = {
+            version : "1.0x",
+            build : "2017-08-01"
+        }
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'about/about-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (data) {
+                callback(data);
+            }
+        })
+    });
+};
+

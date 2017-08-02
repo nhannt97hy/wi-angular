@@ -39,7 +39,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
-    let WiLogplotModel = null;
+    //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
     let _selectedColor = '#ffffe0';
 
@@ -368,7 +368,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, DialogUtils, currentCurve, function(modalCtrl) {
+                console.log("abc",currentCurve);
+                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, self.wiLogplotCtrl, function(modalCtrl) {
                     if (modalCtrl) {
                         console.log(modalCtrl);
                         currentCurve.line.color = modalCtrl.lineOptions.lineColor;
@@ -444,8 +445,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
         self.logPlotCtrl = getLogplotCtrl();
-        WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
-        console.log('wiLogplotCtrl of wi-d3', self.wiLogplotCtrl);
+        //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
+        
+
 
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
@@ -463,7 +465,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (!_currentTrack) return;
                 console.log(_currentTrack);
                 if (_currentTrack.isLogTrack()) {
-                    DialogUtils.logTrackPropertiesDialog(ModalService, WiLogplotModel, _currentTrack, function (props) {
+                    DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, function (props) {
                         if (props) {
                             console.log('logTrackPropertiesData', props);
                         }
