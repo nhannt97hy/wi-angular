@@ -315,15 +315,23 @@ function getSelectedProjectNode() {
 }
 
 exports.getSelectedPath = getSelectedPath;
-function getSelectedPath() {
+function getSelectedPath(foundCB) {
     const wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes) return;
     let selectedPath = new Array();
     visit(rootNodes[0], function (node, options) {
-        if (node.data && node.data.selected == true) {
-            selectedPath = options.path.slice();
-            return true;
+        if (node.data) {
+            if (foundCB) {
+                if (foundCB(node)) {
+                    selectedPath = options.path.slice();
+                    return true;
+                }
+            }
+            else if (node.data.selected == true) {
+                selectedPath = options.path.slice();
+                return true;
+            }
         }
         return false;
     }, {
@@ -603,8 +611,13 @@ exports.findWellById = function (idWell) {
 }
 
 exports.findWellByLogplot = function(idLogplot) {
-    
+    var path = getSelectedPath(function(node) {
+        return node.type == "logplot" && node.id == idLogplot
+    });
+    console.log(path);
+    return path[1];
 };
+
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';

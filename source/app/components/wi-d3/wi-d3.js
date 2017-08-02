@@ -368,8 +368,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                console.log("abc",currentCurve);
-                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, self.wiLogplotCtrl, function(modalCtrl) {
+                console.log("__", _currentTrack);
+                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, _currentTrack, self.wiLogplotCtrl, function(modalCtrl) {
                     if (modalCtrl) {
                         console.log(modalCtrl);
                         currentCurve.line.color = modalCtrl.lineOptions.lineColor;
