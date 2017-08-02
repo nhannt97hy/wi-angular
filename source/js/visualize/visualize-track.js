@@ -6,13 +6,17 @@ module.exports = Track;
  * Represent a general track
  * @constructor
  */
-function Track() {
+function Track(config) {
     this.HEADER_NAME_COLOR = '#88CC88';
     this.HEADER_ITEM_BORDER_WIDTH = 1;
     this.HEADER_ITEM_MARGIN_BOTTOM = 1;
     this.HEADER_HIGHLIGHT_COLOR = 'rgb(255,128,128)';
     this.BODY_CONTAINER_HEIGHT = 340;
+    this.BODY_HIGHLIGHT_COLOR = '#ffffe0';
+    this.BODY_DEFAULT_COLOR = 'transparent';
     this.MIN_WIDTH = 120;
+
+    this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;
 }
 
 /**
@@ -40,6 +44,10 @@ Track.prototype.setBackgroundColor = function(color) {
         .style('background-color', color)
 }
 
+/**
+ * Initialize DOM elements
+ * @param {Object} domElem - The DOM elements to contain the track
+ */
 Track.prototype.init = function(domElem) {
     this.root = d3.select(domElem);
     this.createContainer();
@@ -49,6 +57,9 @@ Track.prototype.init = function(domElem) {
     this.createBodyContainer();
 }
 
+/**
+ * Create outer-most DOM element containing the track
+ */
 Track.prototype.createContainer = function() {
     this.trackContainer = this.root.append('div')
         .attr('class', 'vi-track-container')
@@ -57,6 +68,9 @@ Track.prototype.createContainer = function() {
         .style('flex-direction', 'column');
 }
 
+/**
+ * Create DOM element containing header
+ */
 Track.prototype.createHeaderContainer = function() {
     let self = this;
 
@@ -97,6 +111,9 @@ Track.prototype.createHeaderContainer = function() {
         }));
 }
 
+/**
+ * Create DOM element containing body
+ */
 Track.prototype.createBodyContainer = function() {
     let existedPlot = this.root
         .select('.vi-track-body-container');
@@ -117,6 +134,9 @@ Track.prototype.createBodyContainer = function() {
     }
 }
 
+/**
+ * Create vertical resizer to resize track width
+ */
 Track.prototype.createVerticalResizer = function() {
     let minWidth = this.MIN_WIDTH;
     let compensator;
@@ -142,6 +162,9 @@ Track.prototype.createVerticalResizer = function() {
         );
 }
 
+/**
+ * Create horizontal resiser to resize track height
+ */
 Track.prototype.createHorizontalResizer = function() {
     let self = this;
     this.horizontalVertical = this.trackContainer.append('div')
@@ -158,6 +181,9 @@ Track.prototype.createHorizontalResizer = function() {
         );
 }
 
+/**
+ * Function to call when the horizontal resizer is dragged
+ */
 Track.prototype.horizontalResizerDragCallback = function() {
     let plotHeight = this.bodyContainer
         .node()
@@ -170,6 +196,9 @@ Track.prototype.horizontalResizerDragCallback = function() {
     this.doPlot();
 }
 
+/**
+ * Function to call when header is scrolled
+ */
 Track.prototype.headerScrollCallback = function() {
     let rowHeight = this.headerNameBlock.node().clientHeight;
     let extraHeight = this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM;
@@ -184,6 +213,9 @@ Track.prototype.headerScrollCallback = function() {
         .style('top', top + 'px');
 }
 
+/**
+ * Register event when dragging horizontal resizer
+ */
 Track.prototype.onHorizontalResizerDrag = function(cb) {
     let self = this;
     this.horizontalVertical.call(d3.drag().on('drag', function(){
@@ -192,7 +224,26 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
     }))
 }
 
+/**
+ * Destroy all DOM elements of the track
+ */
 Track.prototype.destroy = function() {
     this.trackContainer.remove();
     this.verticalResizer.remove();
+}
+
+/**
+ * Function to call if the track is highlighted
+ */
+Track.prototype.highlightCallback = function() {
+    this.setBackgroundColor(this.BODY_HIGHLIGHT_COLOR);
+}
+
+/**
+ * Plot the track and children elements
+ */
+Track.prototype.doPlot = function(highlight) {
+    this.setBackgroundColor(this.BODY_DEFAULT_COLOR);
+    if (highlight && (typeof this.highlightCallback == 'function'))
+        this.highlightCallback();
 }

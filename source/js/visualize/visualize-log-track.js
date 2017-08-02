@@ -23,9 +23,10 @@ Utils.extend(Track, LogTrack);
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
  * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 120
  * @param {Number} [config.yStep] - Y gap between two consecutive points
+ * @param {String} [config.bgColor] - Background color for the track
  */
 function LogTrack(config) {
-    Track.call(this);
+    Track.call(this, config);
 
     this.id = config.id;
     this.type = config.type;
@@ -166,12 +167,14 @@ LogTrack.prototype.init = function(baseElement) {
 
 /**
  * Draw axes, curves and shadings
+ * @param {Boolean} [highlight] - Indicate whether to call highlight callback
  */
-LogTrack.prototype.doPlot = function() {
+LogTrack.prototype.doPlot = function(highlight) {
     this.updateHeader();
     this.updateBody();
     this.plotAllDrawings();
     this.plotAxes();
+    Track.prototype.doPlot.call(this, highlight);
 }
 
 
@@ -642,6 +645,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     });
     this.setCurrentDrawing(current);
 }
+
 
 // function mousemoveHandler() {
 //     freshness = Date.now();

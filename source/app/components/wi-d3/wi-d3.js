@@ -41,7 +41,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _previousTrack = null;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
-    let _selectedColor = '#ffffe0';
 
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -208,12 +207,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.plot = function (track) {
-        if (track && track.doPlot) track.doPlot();
+        if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };
 
     this.plotAll = function () {
         _tracks.forEach(function (track) {
-            track.doPlot();
+            track.doPlot(track == _currentTrack);
         });
     };
 
@@ -270,7 +269,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _setCurrentTrack(track) {
         _previousTrack = _currentTrack;
         _currentTrack = track;
-        _currentTrack.setBackgroundColor(_selectedColor);
+        _currentTrack.highlightCallback();
         _clearPreviousHighlight();
     }
 
@@ -279,7 +278,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (_previousTrack != _currentTrack) {
             if (_previousTrack.setCurrentDrawing)
                 _previousTrack.setCurrentDrawing(null);
-            _previousTrack.setBackgroundColor('transparent');
+            _previousTrack.doPlot(false);
         }
 
     }
@@ -445,7 +444,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.plotAreaId = self.name + 'PlotArea';
         self.logPlotCtrl = getLogplotCtrl();
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
-        
+
 
 
         if (self.name) {
