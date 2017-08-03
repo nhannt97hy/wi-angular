@@ -1,5 +1,7 @@
 module.exports = exports = CanvasHelper;
 
+let usedPatterns = {};
+
 function CanvasHelper(ctx, config) {
     this.ctx = ctx;
     this.fillStyle = config.fillStyle || 'transparent';
@@ -67,8 +69,15 @@ CanvasHelper.prototype.star = function(x, y) {
 }
 
 CanvasHelper.createPattern = function(ctx, name, foreground, background, callback) {
+    let key = name + foreground + background;
+    if (usedPatterns[key]) {
+        callback(usedPatterns[key]);
+        return;
+    }
+
     let src = CanvasHelper.RAW_PATTERNS[name];
     if (!src) return null;
+
     let image = new Image();
     if (foreground)
         src = src.replace(/(stroke=")\w+(")/, '$1'+foreground+'$2');
@@ -77,6 +86,8 @@ CanvasHelper.createPattern = function(ctx, name, foreground, background, callbac
     image.src = src;
     image.onload = function() {
         let pattern = ctx.createPattern(image, 'repeat');
+        if (Object.keys(usedPatterns).length > 50) usedPatterns = {};
+        usedPatterns[key] = pattern;
         callback(pattern);
     }
 }

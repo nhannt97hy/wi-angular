@@ -442,7 +442,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _getWellProps() {
-        let well = Utils.findWellByLogplot(self.logPlotCtrl.id);
+        let well = Utils.findWellByLogplot(self.logPlotCtrl.id) || {};
         return well.properties || {};
     }
 

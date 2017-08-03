@@ -7,12 +7,24 @@ let wiDropdown = require('./wi-dropdown');
 let graph = require('./visualize/visualize.js');
 let wiD3 = require('./wi-d3.js');
 let wiLogplot = require('./wi-logplot.js');
+let wiExplorer = require('./wi-explorer');
+let wiProperties = require('./wi-properties');
 let wiElementReadyDirective = require('./wi-element-ready');
 
 let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
 let wiApiService = require('./wi-api-service');
+let wiTreeConfig = require('./wi-tree-config.model');
+let wiTreeItem = require('./wi-tree-item.model');
+let wiWell = require('./wi-well.model');
+let wiProperty = require('./wi-property.model');
+let wiListview = require('./wi-listview.model');
+let wiDataset = require('./wi-dataset.model');
+let wiDepth = require('./wi-depth.model');
+let wiCurve = require('./wi-curve.model');
+let wiLogplotsModel = require('./wi-logplots.model');
+let wiLogplotModel = require('./wi-logplot.model');
 
 let utils = require('./utils');
 
@@ -35,13 +47,30 @@ let app = angular.module('helloapp', [
     'angularModalService',
     'ngFileUpload',
     wiDropdown.name,
-    wiApiService.name
+    wiApiService.name,
+    wiExplorer.name,
+    wiProperties.name,
+    wiWell.name,
+    wiTreeItem.name,
+    wiTreeConfig.name,
+    wiProperty.name,
+    wiListview.name,
+    wiDataset.name,
+    wiCurve.name,
+    wiDepth.name,
+    wiLogplotModel.name,
+    wiLogplotsModel.name
 ]);
 
 app.controller('WiDummy', function ($scope, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);
     wiComponentService.putComponent("UTILS", utils);
     wiComponentService.putComponent('DRAG_MAN', dragMan);
+
+    let functionBindingProp = {
+        wiComponentService
+    };
+    utils.setGlobalObj(functionBindingProp);
 
     var wiD3Ctrl = null;
     wiComponentService.on('myPlotD3Area', function(param) {
@@ -58,12 +87,31 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
 
     $scope.addData1ButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCurveToTrack(track, genSamples([0,1], [0,1000]), {});
+        let data = genSamples([0,1], [0,1000]).map(function(d) {
+            return {
+                x: (d.y > 100 && d.y < 200) ? null : d.x,
+                y: d.y
+            }
+        })
+        wiD3Ctrl.addCurveToTrack(track, data, {
+            symbol: {
+                style: 'circle'
+            },
+            line: {
+                color: 'red'
+            }
+        });
     }
 
     $scope.addData2ButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCurveToTrack(track, genSamples([1,2], [0,1100]), {});
+        let data = genSamples([1,2], [0,1100]).map(function(d) {
+            return {
+                x: (d.y > 150 && d.y < 250) ? null : d.x,
+                y: d.y
+            }
+        })
+        wiD3Ctrl.addCurveToTrack(track, data, {});
     }
 
     $scope.changeColor = function() {

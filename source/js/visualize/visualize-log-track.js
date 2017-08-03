@@ -28,6 +28,10 @@ Utils.extend(Track, LogTrack);
  * @param {Number} [config.offsetY] - Offset to increase all y coordinates
  * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
+ * @param {Number} [config.xDecimal] - Precision of float number in x axis. Default: 2
+ * @param {Number} [config.yDecimal] - Precision of float number in y axis. Default: 2
+ * @param {Boolean} [config.showLabels] - Indicate whether to show labels
+ * @param {Boolean} [config.showEndLabels] - Indicate whether to show labels at two ends
  */
 function LogTrack(config) {
     Track.call(this, config);
@@ -52,9 +56,11 @@ function LogTrack(config) {
 
     this.xPadding = config.xPadding || 1;
     this.yPadding = config.yPadding || 5;
+    this.xDecimal = (config.xDecimal == null) ? 2 : config.xDecimal;
+    this.yDecimal = (config.yDecimal == null) ? 2 : config.yDecimal;
 
-    this.xFormatter = config.xFormatter || '.2f';
-    this.yFormatter = config.yFormatter || '.2f';
+    this.showLabels = config.showLabels;
+    this.showEndLabels = config.showEndLabels;
 
     this.curvesRemoved = 0;
 }
@@ -469,16 +475,17 @@ LogTrack.prototype.plotAxes = function() {
         .range(rangeY);
 
     let xAxis = d3.axisTop(transformX)
-        .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / (this.xMajorTicks * this.xMinorTicks)))
-        .tickFormat("")
+        .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / (this.xMajorTicks * this.xMinorTicks || 1)))
+        .tickFormat('')
         .tickSize(-rect.height);
 
     let start = windowY[0];
     let end = windowY[1];
+    let step = (end - start) / this.yTicks;
 
     let yAxis = d3.axisLeft(transformY)
-        .tickValues(d3.range(start, end, (end - start) / this.yTicks))
-        .tickFormat("")
+        .tickValues(d3.range(start, end + step, step))
+        .tickFormat(self.showLabels ? self.getDecimalFormatter(self.yDecimal) : '')
         .tickSize(-rect.width);
 
     this.xAxisGroup.call(xAxis);
@@ -486,16 +493,28 @@ LogTrack.prototype.plotAxes = function() {
 
     this.xAxisGroup
         .style('display', this.showXGrids ? 'block' : 'none');
+
     this.yAxisGroup
-        .style('display', this.showYGrids ? 'block' : 'none');
+        .style('display', this.showYGrids ? 'block' : 'none')
+        .selectAll('.tick text')
+            .attr('x', function(d, i) {
+                let parentWidth = self.plotContainer.node().clientWidth;
+                let textWidth = this.clientWidth;
+                let x = (parentWidth + textWidth) / 2;
+                return x;
+            })
+            .style('display', function(d, i) {
+                return ((i == 0 || i == self.yTicks) && !self.showEndLabels) ? 'none' : 'block';
+            });
 
     this.bodyContainer.selectAll('.tick line')
         .attr('stroke', 'blue')
         .attr('stroke-dasharray', '20, 2')
         .attr('stroke-width', 0.4);
+
     this.xAxisGroup.selectAll('.tick line')
         .attr('stroke-width', function(d, i) {
-            return i % self.xMinorTicks == 0 ? 0.4 : 0.2;
+            return (!self.xMinorTicks || i % self.xMinorTicks == 0) ? 0.4 : 0.1;
         });
 }
 
