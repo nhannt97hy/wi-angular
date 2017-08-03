@@ -11,6 +11,13 @@ exports.parseData = parseData;
 exports.extend = extend;
 exports.createFillStyles = createFillStyles;
 exports.clip = clip;
+exports.pascalCaseToLowerDash = pascalCaseToLowerDash;
+
+function pascalCaseToLowerDash(str) {
+    return str.replace(/\.?[A-Z]/g, function(c) {
+        return '-' + c.toLowerCase()
+    }).replace(/^-/, '');
+}
 
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
