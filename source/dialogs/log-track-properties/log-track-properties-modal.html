@@ -18,7 +18,7 @@
                                                 <label for="isShowTitle" class="normal-text">
                                                     <input type="checkbox" id="isShowTitle"
                                                            value="" name=""
-                                                           ng-model="wiModal.isShowTitle">
+                                                           ng-model="wiModal.props.general.isShowTitle">
                                                     Show title
                                                 </label>
                                             </div>
@@ -28,8 +28,8 @@
                                             <div class="col-sm-7">
                                                 <input type="text" class="form-control wi-form-control"
                                                        value="" name="title" id="title"
-                                                        ng-model="wiModal.title"
-                                                       ng-disabled="!wiModal.isShowTitle">
+                                                        ng-model="wiModal.props.general.title"
+                                                       ng-disabled="!wiModal.props.general.isShowTitle">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -37,13 +37,15 @@
                                                 Top Justification
                                             </label>
                                             <div class="col-sm-7">
-                                                <select ng-model="wiModal.topJustification"
+                                            {{wiModal.props.general.topJustification}}
+                                                <select ng-model="wiModal.props.general.topJustification"
                                                         name="topJust" value="" id="topJust"
                                                         class="form-control wi-form-control"
-                                                        ng-disabled="!wiModal.isShowTitle">
-                                                    <option value="left">Left</option>
-                                                    <option value="center">Center</option>
-                                                    <option value="right">Right</option>
+                                                        ng-change="wiModal.test();"
+                                                        ng-disabled="!wiModal.props.general.isShowTitle">
+                                                    <option value="Left">Left</option>
+                                                    <option value="Center">Center</option>
+                                                    <option value="Right">Right</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -52,13 +54,13 @@
                                                 Bottom Justification
                                             </label>
                                             <div class="col-sm-7">
-                                                <select ng-model="wiModal.bottomJustification"
+                                                <select ng-model="wiModal.props.general.bottomJustification"
                                                         name="bottomJust" value=""
                                                         class="form-control wi-form-control" id="bottomJust"
-                                                        ng-disabled="!wiModal.isShowTitle">
-                                                    <option value="left">Left</option>
-                                                    <option value="center">Center</option>
-                                                    <option value="right">Right</option>
+                                                        ng-disabled="!wiModal.props.general.isShowTitle">
+                                                    <option value="Left">Left</option>
+                                                    <option value="Center">Center</option>
+                                                    <option value="Right">Right</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -71,15 +73,15 @@
                                             <div class="col-sm-5">
                                                 <label for="isShowLabels" class="normal-text">
                                                     <input type="checkbox" id="isShowLabels" value=""
-                                                           ng-model="wiModal.isShowLabels">
+                                                           ng-model="wiModal.props.general.isShowLabels">
                                                     Show labels
                                                 </label>
                                             </div>
                                             <div class="col-sm-7">
                                                 <label for="isShowEndLabels" class="normal-text">
                                                     <input type="checkbox" id="isShowEndLabels" value=""
-                                                           ng-model="wiModal.isShowEndLabels"
-                                                            ng-disabled="!wiModal.isShowLabels">
+                                                           ng-model="wiModal.props.general.isShowEndLabels"
+                                                            ng-disabled="!wiModal.props.general.isShowLabels">
                                                     Show end labels
                                                 </label>
                                             </div>
@@ -91,7 +93,7 @@
                                             <div class="col-sm-7">
                                                 <input type="text" class="form-control wi-form-control"
                                                        value="" name="format" id="format"
-                                                        ng-model="wiModal.format" ng-disabled="!wiModal.isShowLabels">
+                                                        ng-model="wiModal.props.general.format" ng-disabled="!wiModal.props.general.isShowLabels">
                                             </div>
                                         </div>
                                     </div>
@@ -103,7 +105,7 @@
                                             <div class="col-sm-7">
                                                 <label for="isShowValueGrid" class="normal-text">
                                                     <input type="checkbox" id="isShowValueGrid" value=""
-                                                           ng-model="wiModal.isShowValueGrid">
+                                                           ng-model="wiModal.props.general.isShowValueGrid">
                                                     Show Value Grid
                                             </label>
                                             </div>
@@ -113,7 +115,7 @@
                                             <div class="col-sm-7">
                                                 <input type="number" class="form-control wi-form-control"
                                                        value="" name="majorTicks" id="majorTicks"
-                                                        ng-model="wiModal.majorTicks" ng-disabled="!wiModal.isShowValueGrid">
+                                                        ng-model="wiModal.props.general.majorTicks" ng-disabled="!wiModal.props.general.isShowValueGrid">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -121,15 +123,15 @@
                                             <div class="col-sm-7">
                                                 <input type="number" class="form-control wi-form-control"
                                                        value="" name="minorTicks" id="minorTicks"
-                                                        ng-model="wiModal.minorTicks"
-                                                       ng-disabled="!wiModal.isShowValueGrid">
+                                                        ng-model="wiModal.props.general.minorTicks"
+                                                       ng-disabled="!wiModal.props.general.isShowValueGrid">
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <div class="col-sm-7">
                                                 <label for="isShowDepthGrid" class="normal-text">
                                                     <input type="checkbox" id="isShowDepthGrid" value=""
-                                                           ng-model="wiModal.isShowDepthGrid">
+                                                           ng-model="wiModal.props.general.isShowDepthGrid">
                                                     Show Depth Grid
                                                 </label>
                                             </div>
@@ -146,7 +148,7 @@
                                             <div class="col-sm-7">
                                                 <input type="number" step="0.001" min="1"
                                                        class="form-control wi-form-control" name="width"
-                                                        ng-model="wiModal.width">
+                                                        ng-model="wiModal.props.general.width">
                                             </div>
                                         </div>
                                     </div>
@@ -162,7 +164,7 @@
                                                 <div class="float-left">
                                                     <input kendo-color-picker k-palette="'websafe'"
                                                            class="form-control wi-form-control"
-                                                        ng-model="wiModal.trackColor"/>
+                                                        ng-model="wiModal.props.general.trackColor"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -190,52 +192,54 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-model="currentCurve"
-                                                ng-repeat="currentCurve in wiModal.currentCurves"
+                                            <tr ng-repeat="curve in wiModal.curves"
                                                 ng-class="{selected:$index == selectedRow}"
                                                 ng-click="wiModal.setClickedRowCurve($index)">
                                                 <td>
                                                     <select class="form-control wi-form-control"
-                                                            ng-model="dataset"
+                                                            ng-model="wiModal.dataset"
                                                             ng-options="dataset.name for dataset in wiModal.datasets">
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <select ng-model="currentCurve" name="curveName"
+                                                    <select ng-model="curve.alias" name="curveName"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="selectCurve as selectCurve.name for selectCurve in wiModal.currentCurves">
                                                     </select>
                                                 </td>
 
                                                 <td>
-                                                    <input type="text" ng-model="currentCurve.alias"
+                                                    <input type="text" ng-model="curve.alias"
                                                            class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="currentCurve.minX"
+                                                    <input type="text" ng-model="curve.minValue"
                                                            class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="currentCurve.maxX"
+                                                    <input type="text" ng-model="curve.maxValue"
                                                            class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <select ng-model="currentCurve.scale" name="log"
+                                                    <select ng-model="curve.displayType" name="log"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.logLinear track by item"></select>
                                                 </td>
                                                 <td>
-                                                    <select ng-model="currentCurve.displayMode" name="displayMode"
+                                                    <select ng-model="curve.displayMode" name="displayMode"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayMode track by item"></select>
                                                 </td>
                                                 <td>
-                                                    <input type="button" value="Edit..." 
+                                                    <input type="button" value="Line..." 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.editStyleButtonClicked(currentCurve.lineOptions, currentCurve.symbolOptions)">
+                                                            ng-click="wiModal.lineStyleButtonClicked()">
+                                                    <input type="button" value="Symbol..." 
+                                                            class="form-control wi-form-control"
+                                                            ng-click="wiModal.symbolStyleButtonClicked()">
                                                 </td>
                                                 <td>
-                                                    <select ng-model="currentCurve.displayAs" name="displayAs"
+                                                    <select ng-model="curve.displayAs" name="displayAs"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayAs track by item"></select>
                                                 </td>       
