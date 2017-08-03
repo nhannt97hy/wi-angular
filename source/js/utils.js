@@ -312,7 +312,11 @@ function getSelectedNode() {
 
 exports.getSelectedProjectNode = getSelectedProjectNode;
 function getSelectedProjectNode() {
-    return getSelectedPath().shift();
+    const wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || rootNodes.length <= 0) return;
+    return rootNodes[0];
+    //return getSelectedPath().shift();
 }
 
 exports.getSelectedPath = getSelectedPath;
@@ -615,9 +619,8 @@ exports.findWellById = findWellById;
 
 exports.findWellByLogplot = function(idLogplot) {
     var path = getSelectedPath(function(node) {
-        return node.type == "logplot" && node.id == idLogplot
+        return node.type == "logplot" && node.id == idLogplot;
     });
-    console.log(path);
     return path[1];
 };
 
