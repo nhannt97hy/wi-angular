@@ -4,73 +4,177 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
                 <h4>Load LAS file</h4>
-                <h5>Select File</h5>
             </div>
             <div class="modal-body">
                 <form class="form-horizontal" action="" name="modalImportLAS">
                     <div class="row">
+                        <h5>Select File</h5>
                         <div class="form-group">
                             <div class="col-sm-7">
                                 <input type="text" class="form-control" value="{{wiModal.lasFile.name}}" disabled>
                             </div>
                             <div class="col-sm-5">
-                                <label for="selected" class="btn btn-default">Select</label>
                                 <input id="selected" class="display-none" type="file"
                                        ngf-select
                                        ng-model="wiModal.lasFile"
                                        ngf-max-size="10MB" required/>
+                                <label for="selected" class="btn btn-default">Select</label>
+                                <button type="button" class="btn btn-default" ng-disabled="!wiModal.lasFile"
+                                        ng-click="wiModal.onUploadButtonClicked()">
+                                        Upload
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
-                        <h5>Well info</h5>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4 normal-text" for="selectWell">Select Well</label>
-                            <div class="col-sm-8">
-                                <select name="selectWell" class="form-control wi-form-control"
-                                        ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
-                                        ng-model="wiModal.selectedWell">
-                                    <option value=""></option>
-                                </select>
+                        <div class="col-sm-7">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label>
+                                        <input type="checkbox" ng-model="wiModal.isLoadAll" ng-change="wiModal.checkAllButtonClicked()">
+                                        All
+                                    </label>
+                                    <button type="button" class="btn btn-default" ng-click="wiModal.invertCheckButtonClicked()">Invert</button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label>
+                                        <input type="checkbox">
+                                        Use UWI as well name
+                                    </label>
+                                </div>
                             </div>
+                            
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>LAS Name</th>
+                                        <th>Input Name</th>
+                                        <th>Unit</th>
+                                        <th>Load</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="curve in wiModal.curves">
+                                        <td>
+                                            <input type="text" ng-value="::curve.lasName" class="form-control wi-form-control" disabled>
+                                        </td>
+                                        <td>
+                                            <input type="text" ng-model="curve.inputName" class="form-control wi-form-control">
+                                        </td>
+                                        <td>
+                                            <input type="text" ng-model="curve.unit" class="form-control wi-form-control">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" ng-model="curve.isLoad" class="form-control wi-form-control">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
                         </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4 normal-text" for="topDepth">Top Depth</label>
-                            <div class="col-sm-8">
-                                <input type="number" id="topDepth" name="topDepth"
-                                       value="{{wiModal.selectedWell.topDepth}}" class="form-control wi-form-control" disabled>
+                        <div class="col-sm-5">
+                            <div class="row">
+                                <h5>
+                                    <span class="well-16x16"></span>
+                                    Well info
+                                </h5>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text" for="selectWell">Select Well</label>
+                                    <div class="col-sm-8">
+                                        <select name="selectWell" class="form-control wi-form-control"
+                                                ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
+                                                ng-model="wiModal.selectedWell">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text" for="topDepth">Top Depth</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" id="topDepth" name="topDepth"
+                                               ng-value="wiModal.selectedWell.topDepth" class="form-control wi-form-control" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text" for="bottomDepth">Bottom Depth</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" id="bottomDepth" name="bottomDepth"
+                                               ng-value="wiModal.selectedWell.bottomDepth" class="form-control wi-form-control" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text" for="depthUnit">Depth Unit</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" id="depthUnit" name="depthUnit"
+                                               ng-model="depthUnit" class="form-control wi-form-control" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text" for="wellStep">Well step</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" id="wellStep" name="wellStep"
+                                               ng-value="wiModal.selectedWell.step" class="form-control wi-form-control" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text" for="datasetName">Dataset Name</label>
+                                    <div class="col-sm-8">
+                                        <select name="datasetName" class="form-control wi-form-control"
+                                                ng-options="datasetOption.name for datasetOption in wiModal.selectedWell.datasets"
+                                                ng-model="wiModal.selectedDataset">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4 normal-text" for="bottomDepth">Bottom Depth</label>
-                            <div class="col-sm-8">
-                                <input type="number" id="bottomDepth" name="bottomDepth"
-                                       ng-value="wiModal.selectedWell.bottomDepth" class="form-control wi-form-control" disabled>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4 normal-text" for="depthUnit">Depth Unit</label>
-                            <div class="col-sm-8">
-                                <input type="text" id="depthUnit" name="depthUnit"
-                                       ng-model="depthUnit" class="form-control wi-form-control" disabled>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4 normal-text" for="wellStep">Well step</label>
-                            <div class="col-sm-8">
-                                <input type="number" id="wellStep" name="wellStep"
-                                       value="{{wiModal.selectedWell.step}}" class="form-control wi-form-control" disabled>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4 normal-text" for="datasetName">Dataset Name</label>
-                            <div class="col-sm-8">
-                                <select name="datasetName" class="form-control wi-form-control"
-                                        ng-options="datasetOption.name for datasetOption in wiModal.selectedWell.datasets"
-                                        ng-model="wiModal.selectedDataset">
-                                    <option value=""></option>
-                                </select>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-8 normal-text">
+                                        <span class="las-import-16x16"></span>
+                                        LAS File
+                                    </label>
+                                    <label class="control-label col-sm-4 normal-text">
+                                        <span class="las-import-16x16"></span>
+                                        LAS Input
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text">Step</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" disabled ng-value="::wiModal.lasInfo.step">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" ng-value="::wiModal.lasInput.step" disabled>                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text">Top Depth</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" disabled ng-value="::wiModal.lasInfo.topDepth">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" ng-value="::wiModal.lasInput.topDepth">                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text">Bottom Depth</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" disabled ng-value="::wiModal.lasInfo.bottomDepth">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" ng-value="::wiModal.lasInput.bottomDepth">                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4 normal-text">Depth Unit</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" disabled ng-value="::wiModal.lasInfo.depthUnit">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" ng-value="::wiModal.lasInput.depthUnit">                                        
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

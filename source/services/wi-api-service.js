@@ -4,6 +4,9 @@ const moduleName = 'wi-api-service';
 let app = angular.module(moduleName, []);
 
 // route: GET, CREATE, UPDATE, DELETE
+const UPLOAD_FILE = '/file-1';
+const IMPORT_FILE = '/file-2';
+
 const GET_PROJECT = '/project/fullinfo';
 
 const EDIT_WELL = '/project/well/edit';
@@ -192,6 +195,33 @@ Service.prototype.postMultiFiles = function (route, dataPayload) {
             }
         );
     });
+}
+
+Service.prototype.uploadFile = function (data, callback) {
+    let self = this;
+    let returnData = {
+        step: 0.1524,
+        topDepth: 1119.8325,
+        bottomDepth: 2184.8064,
+        depthUnit: 'M',
+        curves: [
+            {
+                lasName: 'DTCO3',
+                unit: 'US/F'
+            }, {
+                lasName: 'ECGR',
+                unit: 'GAPI'
+            }
+        ]
+    };
+    callback(returnData);
+    /*this.postWithFile(UPLOAD_FILE, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);            
+        });*/
 }
 
 Service.prototype.editWell = function(infoWell, callback) {

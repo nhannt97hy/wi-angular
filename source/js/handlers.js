@@ -138,6 +138,17 @@ exports.ImportLASButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.importLASDialog(this.ModalService, function (well) {
         if (well) {
+            utils.refreshProjectState();
+        }
+    })
+};
+
+exports.ImportLASButtonClicked1 = function () {
+    let self = this;
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importLASDialog(this.ModalService, function (well) {
+        if (well) {
             let wellModel = utils.wellToTreeConfig(well);
             let selectedProjectNode = utils.getSelectedProjectNode();
             let found = false;
@@ -287,8 +298,7 @@ exports.TriTracksBlankButtonClicked = function () {
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel);
                 let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
-                wiD3Ctrl.addDepthTrack();
-                $timeout(function () {
+                wiD3Ctrl.addDepthTrack(function () {
                     for (var i = 0; i < 3; i++) {
                         wiD3Ctrl.addLogTrack();
                     }
