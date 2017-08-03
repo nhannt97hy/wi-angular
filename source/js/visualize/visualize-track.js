@@ -17,6 +17,8 @@ function Track(config) {
     this.MIN_WIDTH = 120;
 
     this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;
+    this.yStep = config.yStep || 1;
+    this.offsetY = config.offsetY || 0;
 }
 
 /**

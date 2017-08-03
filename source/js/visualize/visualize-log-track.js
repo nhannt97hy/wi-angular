@@ -23,6 +23,7 @@ Utils.extend(Track, LogTrack);
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
  * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 120
  * @param {Number} [config.yStep] - Y gap between two consecutive points
+ * @param {Number} [config.offsetY] - Offset to increase all y coordinates
  * @param {String} [config.bgColor] - Background color for the track
  */
 function LogTrack(config) {
@@ -46,7 +47,6 @@ function LogTrack(config) {
     this.yNTicks = config.yNTicks || 10;
     this.xPadding = config.xPadding || 1;
     this.yPadding = config.yPadding || 5;
-    this.yStep = (config.yStep == null) ? 1 : config.yStep;
 
     this.xFormatter = config.xFormatter || '.2f';
     this.yFormatter = config.yFormatter || '.2f';
@@ -69,9 +69,13 @@ LogTrack.prototype.getWindowX = function() {
  * @returns {Array} Range of x values to show
  */
 LogTrack.prototype.getWindowY = function() {
-    return (this.minY == null || this.maxY == null)
-        ? [0, 20000]
-        : [this.minY, this.maxY];
+    let windowY = (this.minY != null && this.maxY != null)
+        ? [this.minY, this.maxY]
+        : [0, 10000];
+
+    windowY[0] = this.offsetY + Utils.roundUp(windowY[0] - this.offsetY, this.yStep);
+    windowY[1] = this.offsetY + Utils.roundDown(windowY[1] - this.offsetY, this.yStep);
+    return windowY;
 }
 
 /**
@@ -200,6 +204,9 @@ LogTrack.prototype.addCurve = function(data, config) {
         };
     }
     config.data = data;
+    config.yStep = config.yStep || this.yStep;
+    config.offsetY = config.offsetY || this.offsetY;
+
     let curve = new Curve(config);
 
     curve.init(this.plotContainer);
@@ -459,8 +466,8 @@ LogTrack.prototype.plotAxes = function() {
         .tickFormat("")
         .tickSize(-rect.height);
 
-    let start = Utils.roundUp(windowY[0], this.yStep);
-    let end = Utils.roundDown(windowY[1], this.yStep);
+    let start = windowY[0];
+    let end = windowY[1];
 
     let yAxis = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end, (end - start) / this.yNTicks))

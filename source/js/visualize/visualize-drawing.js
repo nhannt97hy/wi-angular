@@ -4,7 +4,7 @@ module.exports = Drawing;
  * Represent a general drawing
  * @constructor
  */
-function Drawing() {}
+function Drawing(config) {}
 
 /**
  * Check if class of this instance is Curve

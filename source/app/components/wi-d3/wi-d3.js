@@ -73,6 +73,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // track config
         TRACK_CFG.id = logTrack.idTrack;
         TRACK_CFG.orderNum = logTrack.orderNum;
+        TRACK_CFG.yStep = parseFloat(_getWellProps().step);
+        TRACK_CFG.offsetY = parseFloat(_getWellProps().topDepth);
         let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
@@ -92,7 +94,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             dragMan.track = null;
         });
         track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback(track);
+            _onPlotMouseWheelCallback();
         });
         track.onPlotMouseDown(function () {
             _onPlotMouseDownCallback(track);
@@ -115,6 +117,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(self.plotAreaId);
         DTRACK_CFG.id = depthTrack.idDepthAxis;
         DTRACK_CFG.orderNum = depthTrack.orderNum;
+        DTRACK_CFG.yStep = parseFloat(_getWellProps().step);
+        DTRACK_CFG.offsetY = parseFloat(_getWellProps().topDepth);
         let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
@@ -135,6 +139,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
+        track.plotCurve(curve);
         track.onCurveHeaderMouseDown(curve, function() {
             _setCurrentTrack(track);
             if (d3.event.button == 2) {
@@ -241,22 +246,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getDepthRangeFromSlidingBar = function() {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
+        let minDepth = self.getMinDepth();
 
-        let low = slidingBar.slidingBarState.top * maxDepth / 100;
-        let high = (slidingBar.slidingBarState.top + slidingBar.slidingBarState.range) * maxDepth / 100;
+        let low = minDepth + slidingBar.slidingBarState.top * (maxDepth - minDepth) / 100;
+        let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
     }
 
     this.adjustSlidingBarFromDepthRange = function(vY) {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
+        let minDepth = self.getMinDepth();
 
-        let top = Math.round(vY[0] * 100 / maxDepth);
-        let range = Math.round(vY[1] * 100 / maxDepth) - top;
-        slidingBar.updateSlidingHandlerByPercent(top, range || 1);
+        let top = (vY[0] - minDepth) * 100 / (maxDepth - minDepth);
+        let range = (vY[1] - minDepth) * 100 / (maxDepth - minDepth) - top;
+        slidingBar.updateSlidingHandlerByPercent(top, range);
     }
 
-    this.getMaxDepth = function () {
+    this.getMaxDepth = function() {
+        let wellProps = _getWellProps();
+        if (wellProps.bottomDepth)
+            return parseFloat(wellProps.bottomDepth) + parseFloat(wellProps.step);
+
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getExtentY) return track.getExtentY()[1];
             return -1;
@@ -264,6 +275,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
         return _maxDepth;
     };
+
+    this.getMinDepth = function() {
+        let wellProps = _getWellProps();
+        return parseFloat(wellProps.topDepth) || 0;
+    }
+
+    this.zoom = function(zoomOut) {
+        let range = _depthRange[1] - _depthRange[0];
+        let low, high;
+        let maxDepth = self.getMaxDepth();
+        let minDepth = self.getMinDepth();
+        let yStep = parseFloat(_getWellProps().step) || 1;
+        if (zoomOut) {
+            low = _depthRange[0] - range * 0.2;
+            high = _depthRange[1] + range * 0.2;
+        }
+        else {
+            low = _depthRange[0] + range * 0.2;
+            high = _depthRange[1] - range * 0.2;
+        }
+        if (low + 2*yStep >= high) return;
+        low = low < minDepth ? minDepth : low;
+        high = high > maxDepth ? maxDepth : high;
+        self.setDepthRange([low, high]);
+        self.adjustSlidingBarFromDepthRange([low, high]);
+    }
 
     /* Private Begin */
     function _setCurrentTrack(track) {
@@ -317,20 +354,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _onPlotMouseWheelCallback(track) {
-        let range = _depthRange[1] - _depthRange[0];
-        let low, high, maxDepth = self.getMaxDepth();
-        if (d3.event.deltaY < 0) {
-            low = _depthRange[0] - range * 0.2;
-            high = _depthRange[1] + range * 0.2;
-        }
-        else {
-            low = _depthRange[0] + range * 0.2;
-            high = _depthRange[1] - range * 0.2;
-        }
-        low = low < 0 ? 0 : Math.floor(low);
-        high = high > maxDepth ? maxDepth : Math.ceil(high);
-        self.setDepthRange([low, high]);
-        self.adjustSlidingBarFromDepthRange([low, high]);
+        self.zoom(d3.event.deltaY < 0)
     }
 
     function _onHeaderMouseDownCallback(track) {
@@ -432,6 +456,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }
         ]);
+    }
+
+    function _getWellProps() {
+        let well = Utils.findWellByLogplot(self.logPlotCtrl.id);
+        return well.properties || {};
     }
 
     function getLogplotCtrl() {
