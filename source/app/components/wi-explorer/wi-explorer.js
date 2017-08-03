@@ -65,9 +65,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
     this.backupItemState = function(preItem, currItem) {
         if (!preItem || !currItem) return;
-        if (preItem.data.deleted) {
-            currItem.data.deleted = preItem.data.deleted;
-        }
+        if (preItem.data.deleted) currItem.data.deleted = preItem.data.deleted;
+        if (preItem.data.selected) currItem.data.selected = preItem.data.selected;
         currItem.data.childExpanded = preItem.data.childExpanded;
     };
 
@@ -599,19 +598,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         }
     }
 
-    function toListConfig(currentNode) {
-        let config = {
-            name: currentNode.name,
-            heading: currentNode.name,
-            data: new Array()
-        }
-        for (var key in currentNode.properties) {
-            if (currentNode.properties.hasOwnProperty(key)) {
-                config.data.push({key:key, value:currentNode.properties[key]});
-            }
-        };
-        return [config];
-    }
     // Select tree node and update wi-properties
     this.selectHandler = function(currentNode) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -620,9 +606,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 if(node.data) node.data.selected = false;
             });
         });
-
         if( currentNode.data ) currentNode.data.selected = true;
-        wiComponentService.emit('update-properties', toListConfig(currentNode));
+        wiComponentService.emit('update-properties', currentNode);
     }
 }
 

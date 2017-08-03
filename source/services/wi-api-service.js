@@ -6,8 +6,10 @@ let app = angular.module(moduleName, []);
 // route: GET, CREATE, UPDATE, DELETE
 const GET_PROJECT = '/project/fullinfo';
 
+const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
 
+const EDIT_DATASET = '/project/well/dataset/edit';
 const DELETE_DATASET = '/project/well/dataset/delete';
 
 const CURVE = '/project/well/dataset/curve/getData';
@@ -192,13 +194,31 @@ Service.prototype.postMultiFiles = function (route, dataPayload) {
     });
 }
 
+Service.prototype.editWell = function(infoWell, callback) {
+    let self = this;
+    console.log('infoWell', infoWell);
+    this.post(EDIT_WELL, infoWell)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
 Service.prototype.removeWell = function(idWell, callback) {
     let self = this;    
     let dataRequest = {
-        //idWell: selectedNode.properties.idWell
         idWell: idWell
     }
     this.delete(DELETE_WELL, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.editDataset = function (infoDataset, callback) {
+    let self = this;
+    this.post(EDIT_DATASET, infoDataset)
         .then(callback)
         .catch(function (err) {
             self.getUtils().error(err);
@@ -231,7 +251,7 @@ Service.prototype.createCurve = function (curveInfo, callback) {
 }
 
 Service.prototype.editCurve = function (curveInfo, callback) {
-    if (!curveInfo.idCurve) return;
+    if (!curveInfo.initValue) curveInfo.initValue = '-2810';
     let self = this;
     console.log(curveInfo);
     this.post(EDIT_CURVE, curveInfo)
@@ -262,6 +282,16 @@ Service.prototype.removeCurve = function(idCurve, callback) {
         idCurve: idCurve
     }
     this.delete(DELETE_CURVE, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.editLogplot = function (infoLogplot, callback) {
+    if (!infoLogplot.option) infoLogplot.option = '';
+    let self = this;
+    this.post(EDIT_PLOT, infoLogplot)
         .then(callback)
         .catch(function (err) {
             self.getUtils().error(err);

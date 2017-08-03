@@ -288,7 +288,6 @@ exports.projectToTreeConfig = function(project) {
 }
 
 exports.visit = visit;
-
 function visit(node, callback, options) {
     if (options && options.found) return;
     if( node.data && node.data.deleted) return;
@@ -703,8 +702,7 @@ exports.renameCurve = function () {
             name: ret,
             idDataset: selectedNode.properties.idDataset,
             dataset: selectedNode.properties.dataset,
-            unit: selectedNode.properties.unit,
-            initValue: "-2810"
+            unit: selectedNode.properties.unit
         }
         console.log(curveInfo);
         wiApiService.editCurve(curveInfo, function () {
@@ -753,8 +751,7 @@ exports.pasteCurve = function () {
             idDataset: selectedNode.properties.idDataset,
             dataset: currentDatasetName,
             name: copyingCurve.properties.name,
-            unit: copyingCurve.properties.unit,
-            initValue: "-2810"
+            unit: copyingCurve.properties.unit
         }
         wiApiService.createCurve(curveInfo, function (curve) {
             refreshProjectState();
@@ -772,8 +769,7 @@ exports.pasteCurve = function () {
             idDataset: selectedNode.properties.idDataset,
             dataset: cuttingCurve.properties.dataset,
             name: cuttingCurve.properties.name,
-            unit: cuttingCurve.properties.unit,
-            initValue: "-2810"
+            unit: cuttingCurve.properties.unit
         }
         console.log(curveInfo);
         wiApiService.editCurve(curveInfo, function () {
@@ -783,3 +779,50 @@ exports.pasteCurve = function () {
         return;
     }
 }
+
+function editProperty(item) {
+    let selectedNode = getSelectedNode();
+    let properties = selectedNode.properties;
+    let wiApiService = __GLOBAL.wiApiService;
+    switch (selectedNode.type) {
+        case 'well':
+            let infoWell = angular.copy(properties);
+            infoWell[item.key] = item.value;
+            if (JSON.stringify(infoWell) === JSON.stringify(properties)) return;
+            console.log(infoWell);
+            wiApiService.editWell(infoWell, function () {
+                refreshProjectState();
+            });
+            break;
+        case 'dataset':
+            let infoDataset = angular.copy(properties);
+            infoDataset[item.key] = item.value;
+            if (JSON.stringify(infoDataset) === JSON.stringify(properties)) return;
+            console.log(infoDataset);
+            wiApiService.editDataset(infoDataset, function () {
+                refreshProjectState();
+            });
+            break;
+        case 'curve':
+            let infoCurve = angular.copy(properties);
+            infoCurve[item.key] = item.value;
+            if (JSON.stringify(infoCurve) === JSON.stringify(properties)) return;
+            console.log(infoCurve);
+            wiApiService.editCurve(infoCurve, function () {
+                refreshProjectState();
+            });
+            break;
+        case 'logplot':
+            let infoLogplot = angular.copy(properties);
+            infoLogplot[item.key] = item.value;
+            if (JSON.stringify(infoLogplot) === JSON.stringify(properties)) return;
+            console.log(infoLogplot);
+            wiApiService.editLogplot(infoLogplot, function () {
+                refreshProjectState();
+            });
+            break;
+        default:
+            return;
+    }
+}
+exports.editProperty = editProperty;
