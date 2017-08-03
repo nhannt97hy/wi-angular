@@ -1,29 +1,6 @@
 const componentName = 'wiD3';
 const moduleName = 'wi-d3';
 
-let TRACK_CFG = {
-    type: 'log-track',
-    xNTicks: 4,
-    yNTicks: 10,
-    xAxisPosition: 'top',
-    xFormatter: '.2f',
-    yFormatter: '.2f',
-    xPadding: 1,
-    yPadding: 5,
-    width: 120
-};
-
-let DTRACK_CFG = {
-    type: 'depth-track',
-    xNTicks: 4,
-    yNTicks: 10,
-    xAxisPosition: 'top',
-    xFormatter: '.2f',
-    yFormatter: '.2f',
-    xPadding: 1,
-    yPadding: 5,
-    width: 60
-};
 function getCurveFromName(name) {
     console.log("-", name);
     let nSamples = 1000;
@@ -71,11 +48,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let graph = wiComponentService.getComponent('GRAPH');
         console.log(self.plotAreaId);
         // track config
-        TRACK_CFG.id = logTrack.idTrack;
-        TRACK_CFG.orderNum = logTrack.orderNum;
-        TRACK_CFG.yStep = parseFloat(_getWellProps().step);
-        TRACK_CFG.offsetY = parseFloat(_getWellProps().topDepth);
-        let track = graph.createLogTrack(TRACK_CFG, document.getElementById(self.plotAreaId));
+        let config = {
+            id: logTrack.idTrack,
+            orderNum: logTrack.orderNum,
+            yStep: parseFloat(_getWellProps().step),
+            offsetY: parseFloat(_getWellProps().topDepth)
+        };
+        let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
 
@@ -106,20 +85,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return track;
     };
 
-    this.addDepthTrack = function() {
+    this.addDepthTrack = function(callback) {
         wiApiService.createDepthTrack(self.logPlotCtrl.id, self.getMaxOrderNum() + 1, function (depthTrack) {
             console.log("Success: ", depthTrack);
             self.pushDepthTrack(depthTrack);
+            if (callback) callback();
         });
     }
     this.pushDepthTrack = function (depthTrack) {
         let graph = wiComponentService.getComponent('GRAPH');
         console.log(self.plotAreaId);
-        DTRACK_CFG.id = depthTrack.idDepthAxis;
-        DTRACK_CFG.orderNum = depthTrack.orderNum;
-        DTRACK_CFG.yStep = parseFloat(_getWellProps().step);
-        DTRACK_CFG.offsetY = parseFloat(_getWellProps().topDepth);
-        let track = graph.createDepthTrack(DTRACK_CFG, document.getElementById(self.plotAreaId));
+        let config = {
+            id: depthTrack.idDepthAxis,
+            orderNum: depthTrack.orderNum,
+            yStep: parseFloat(_getWellProps().step),
+            offsetY: parseFloat(_getWellProps().topDepth)
+        };
+
+        let track = graph.createDepthTrack(config, document.getElementById(self.plotAreaId));
         _tracks.push(track);
         _setCurrentTrack(track);
 

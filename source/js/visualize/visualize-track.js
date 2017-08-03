@@ -19,6 +19,9 @@ function Track(config) {
     this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
+    this.type = config.type || Utils.pascalCaseToLowerDash(this.constructor.name);
+    this.justification = config.justification || 'center';
+    this.showTitle = (config.showTitle == null) ? true : config.showTitle;
 }
 
 /**
@@ -88,6 +91,7 @@ Track.prototype.createHeaderContainer = function() {
     this.headerNameBlock = this.headerContainer.append('div')
         .attr('class', 'vi-track-header-name')
         .style('display', this.showTitle ? 'block' : 'none')
+        .style('text-align', this.justification)
         .style('position', 'relative')
         .style('background-color', this.HEADER_NAME_COLOR)
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
@@ -248,4 +252,12 @@ Track.prototype.doPlot = function(highlight) {
     this.setBackgroundColor(this.BODY_DEFAULT_COLOR);
     if (highlight && (typeof this.highlightCallback == 'function'))
         this.highlightCallback();
+}
+
+/**
+ *
+ */
+Track.prototype.getDecimalFormatter = function(decimal) {
+    decimal = decimal < 0 ? 0 : decimal;
+    return d3.format('.' + decimal + 'f');
 }

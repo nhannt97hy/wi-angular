@@ -13,26 +13,25 @@ Utils.extend(Track, DepthTrack);
  * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
  * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
  * @param {Boolean} [config.showTitle] - Flag to indicate whether to show title
+ * @param {Boolean} [config.justification] - Alignment of the title (left, center, right)
  * @param {String} [config.name] - Name of the track
  * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 60
  * @param {Number} [config.minY] - Min y value to show
  * @param {Number} [config.maxY] - Max y value to show
  * @param {String} [config.unit] - Depth unit. Default: 'm'
- * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 10
- * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: '.2f'
+ * @param {Number} [config.yTicks] - Number of ticks shown in y axis. Default: 10
  * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
  * @param {Number} [config.yStep] - Y gap between two consecutive points
  * @param {String} [config.bgColor] - Background color for the track
+ * @param {Number} [config.yDecimal] - Precision of float number. Default: 2
  */
 function DepthTrack(config) {
     Track.call(this, config);
 
     this.id = config.id;
-    this.type = config.type;
     this.orderNum = config.orderNum;
 
-    this.showTitle = (config.showTitle == null) ? true : config.showTitle;
     this.name = config.name || 'Depth';
     this.width = config.width || 60;
 
@@ -40,8 +39,8 @@ function DepthTrack(config) {
     this.maxY = config.maxY;
     this.unit = config.unit || 'm';
 
-    this.yNTicks = config.yNTicks || 10;
-    this.yFormatter = config.yFormatter || '.2f';
+    this.yTicks = config.yTicks || 10;
+    this.yDecimal = (config.decimal == null) ? 2 : config.decimal;
 
     this.xPadding = config.xPadding || 1;
     this.yPadding = config.yPadding || 5;
@@ -106,10 +105,10 @@ DepthTrack.prototype.doPlot = function(highlight) {
         .range([0, rect.height]);
     let start = windowY[0];
     let end = windowY[1];
-    let step = (end - start) / this.yNTicks;
+    let step = (end - start) / this.yTicks;
     let yAxisRight = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end + step, step))
-        .tickFormat(d3.format(self.yFormatter))
+        .tickFormat(self.getDecimalFormatter(self.yDecimal))
         .tickSize(5);
 
     let yAxisLeft = d3.axisRight(transformY)

@@ -246,8 +246,7 @@ exports.BlankLogplotButtonClicked = function () {
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel);
                 let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
-                wiD3Ctrl.addDepthTrack();
-                $timeout(function () {
+                wiD3Ctrl.addDepthTrack(function() {
                     wiD3Ctrl.addLogTrack();
                 });
             })
