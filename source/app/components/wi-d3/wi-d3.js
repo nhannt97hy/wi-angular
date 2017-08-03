@@ -492,7 +492,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (!_currentTrack) return;
                 console.log(_currentTrack);
                 if (_currentTrack.isLogTrack()) {
-                    DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, function (props) {
+                    DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
                         if (props) {
                             console.log('logTrackPropertiesData', props);
                         }

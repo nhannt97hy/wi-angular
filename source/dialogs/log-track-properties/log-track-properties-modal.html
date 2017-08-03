@@ -1,5 +1,5 @@
 <div class="modal fade" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -9,7 +9,7 @@
                 <wi-tabset>
                     <wi-tab heading="General">
                         <div class="container-fluid">
-                            <form action="" class="form-horizontal">
+                            <form action="" class="form-horizontal form-condensed">
                                 <div id="header">
                                     <h5>Header</h5>
                                     <div class="padding-left-20-percent">
@@ -197,7 +197,7 @@
                                                 <td>
                                                     <select class="form-control wi-form-control"
                                                             ng-model="dataset"
-                                                            ng-options="dataset.name for dataset in wiModal.fillDataset">
+                                                            ng-options="dataset.name for dataset in wiModal.datasets">
                                                     </select>
                                                 </td>
                                                 <td>
@@ -230,9 +230,9 @@
                                                             ng-options="item for item in wiModal.displayMode track by item"></select>
                                                 </td>
                                                 <td>
-                                                    <input type="button" ng-model="currentCurve.line"
-                                                           value="Edit..." class="form-control wi-form-control"
-                                                            ng-click="wiModal.lineStyleButtonClicked()">
+                                                    <input type="button" value="Edit..." 
+                                                            class="form-control wi-form-control"
+                                                            ng-click="wiModal.editStyleButtonClicked(currentCurve.lineOptions, currentCurve.symbolOptions)">
                                                 </td>
                                                 <td>
                                                     <select ng-model="currentCurve.displayAs" name="displayAs"
@@ -336,7 +336,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-model="wiModal.selectedShading" ng-repeat="shading in wiModal.shadingAttr" ng-class="{'selected':$index == wiModal.selectedRowShading}"
+                                            <tr ng-model="wiModal.selectedShading" ng-repeat="shading in wiModal.currentShadings" ng-class="{'selected':$index == wiModal.selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
                                                 <td>
                                                     <select ng-model="shading.left.curveName" name="curveName" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.curveName track by item"></select>
@@ -380,9 +380,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default" data-dismiss="modal"><span class="apply-16x16"></span>&nbsp;Apply</button>
-                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default" data-dismiss="modal"><span class="ok-16x16"></span>&nbsp;OK</button>
-                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default" data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
+                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>
     </div>

@@ -964,22 +964,23 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             name : currentCurve.name    
         }
 
-        this.curveOptions = {
-            idLine : currentCurve.id,
-            idTrack: currentTrack.id,
-            showHeader : currentCurve.showHeader, 
-            showDataset : true, // add to currentCurve - Canh
-            ignoreMissingValues: false,
-            alias: currentCurve.alias,
-            minValue: currentCurve.minX,
-            maxValue: currentCurve.maxX,
-            autoValueScale: false,
-            displayType : currentCurve.scale,
-            displayMode : getDisplayMode(currentCurve),
-            wrapMode : "None", //default
-            blockPosition : "None", //default
-            displayAs : "Normal" //default
-        };
+        // this.curveOptions = {
+        //     idLine : currentCurve.id,
+        //     idTrack: currentTrack.id,
+        //     showHeader : currentCurve.showHeader, 
+        //     showDataset : true, // add to currentCurve - Canh
+        //     ignoreMissingValues: false,
+        //     alias: currentCurve.alias,
+        //     minValue: currentCurve.minX,
+        //     maxValue: currentCurve.maxX,
+        //     autoValueScale: false,
+        //     displayType : currentCurve.scale,
+        //     displayMode : getDisplayMode(currentCurve),
+        //     wrapMode : "None", //default
+        //     blockPosition : "None", //default
+        //     displayAs : "Normal" //default
+        // };
+        this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
         
         
         this.drawSample = function () {
@@ -993,12 +994,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
-        function getDisplayMode(currentCurve) {
-            if(currentCurve.line && currentCurve.symbol) return "Both";
-            if(currentCurve.line && !currentCurve.symbol) return "Line";
-            if(!currentCurve.line && currentCurve.symbol) return "Symbol";
-            return "None";
-        }
+
         function displayLine(lineOptions, symbolOptions) {
             let sample = $('#sample')[0];
             let context = sample.getContext('2d');
@@ -1052,17 +1048,16 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
 
         }
 
-        function changeLine() {
-            let lineObj = {};
-            angular.extend(lineObj, self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
-            lineObj.lineStyle = JSON.stringify(lineObj.lineStyle);
-            lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
+        // function changeLine() {
+        //     let lineObj = {};
+        //     angular.extend(lineObj, self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
+        //     lineObj.lineStyle = JSON.stringify(lineObj.lineStyle);
+        //     lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
 
-            wiApiService.editLine(lineObj, function () {
-                console.log("OK");
-            });
-        };
-
+        //     wiApiService.editLine(lineObj, function () {
+        //         console.log("OK");
+        //     });
+        // };
         this.changeOther = function () {
             console.log(self.curveOptions.displayMode);
             switch (self.curveOptions.displayMode) {
@@ -1134,11 +1129,11 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }, self.symbolOptions);
         };
         this.onApplyButtonClicked = function () {
-            changeLine();
+            utils.changeLine(utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle), wiApiService);
 
         };
         this.onOkButtonClicked = function () {
-            changeLine();
+            utils.changeLine(utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle), wiApiService);
             close(self, 100);
         };
         this.onCancelButtonClicked = function () {
@@ -1380,20 +1375,23 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         });
     });
 };
-exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogplotCtrl, callback) {
+exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
+        let index = null;
         this.disabled = false;
-
+        this.displayAsArr = new Array();
+        this.lineOptions = {};
+        this.symbolOptions = {};
+        this.curveOptionsToChange = [];
+        let curveOptionsArr = new Array();
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        //TODO ????? this.well = utils.findWellById(WiLogplotModel.properties.idWell);
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
 
         this.datasets = [];
         this.selectedCurve = [];
-        this.currentCurves = getCurrentCurves();
-        this.currentShadings = getCurrentShadings();
         this.curves = this.datasets.children;
 
         this.well.children.forEach( function(child) {
@@ -1401,8 +1399,8 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
         });
         const props = {
             general: {
-                isShowTitle: true,
-                title : "Track" + _currentTrack.id,
+                isShowTitle: currentTrack.showTitle,
+                title : "Track" + currentTrack.id,
                 topJustification: "center",
                 bottomJustification: "center",
                 isShowLabels: false,
@@ -1412,16 +1410,18 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
                 majorTicks: 1,
                 minorTicks: 5,
                 isShowDepthGrid: true,
-                width: 2.000,
-                trackColor: '#ffffff'
+                width: currentTrack.MIN_WIDTH,
+                trackColor: currentTrack.bgColor
             },
-            curves: this.currentCurves,
-            shading: this.currentShadings
+            currentCurves: currentTrack.getCurves(),
+            currentShadings: currentTrack.getShadings()
         }
-        
-        console.log("currentTrack", _currentTrack);
-        console.log("currentCurves", this.currentCurves);
-        console.log("datasets", this.datasets);
+        function getDisplayMode(currentCurve) {
+            if(currentCurve.line && currentCurve.symbol) return "Both";
+            if(currentCurve.line && !currentCurve.symbol) return "Line";
+            if(!currentCurve.line && currentCurve.symbol) return "Symbol";
+            return "None";
+        }
 
         // Tab General
         this.isShowTitle = props.general.isShowTitle;
@@ -1441,8 +1441,44 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
         this.width = props.general.width;
         this.trackColor = props.general.trackColor;
 
+        this.currentCurves = props.currentCurves;
+        this.currentShadings = props.currentShadings;
 
         // Tab Curve
+        this.currentCurves.forEach( function(currentCurve) {
+            currentCurve.displayMode = getDisplayMode(currentCurve);
+
+            if (currentCurve.line) {
+                self.lineOptions = {
+                display: true,
+                lineStyle: {
+                    lineColor : currentCurve.line.color,
+                    lineWidth : currentCurve.line.width,
+                    lineStyle : currentCurve.line.dash
+                    }
+                }
+                currentCurve.lineOptions = self.lineOptions;
+            }
+            if (currentCurve.symbol) {
+                self.symbolOptions = {
+                display: true,
+                symbolStyle: {
+                    symbolName: currentCurve.symbol.style,
+                    symbolSize: currentCurve.symbol.size,
+                    symbolStrokeStyle: currentCurve.symbol.strokeStyle,
+                    symbolFillStyle: currentCurve.symbol.fillStyle,
+                    symbolLineWidth : currentCurve.symbol.lineWidth,
+                    symbolLineDash: currentCurve.symbol.lineDash
+                    }
+                }
+                currentCurve.symbolOptions = self.symbolOptions;
+            }
+
+            this.curveOptions = utils.curveOptions(currentTrack, currentCurve); 
+            curveOptionsArr.push(utils.mergeLineObj(curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle));
+        });
+            console.log("BB", curveOptionsArr);
+
         function fillShadingAttrArray() {
             return [
                 {
@@ -1490,7 +1526,7 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
             ];
 
         };
-        this.lineOptions = {};
+
          this.fillOptions = {
             fill: {
                 foreground: "#0000ff",
@@ -1509,25 +1545,19 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
             }
         }
 
-        function getCurrentCurves () {
-            return _currentTrack.getCurves();
-        };
-        function getCurrentShadings () {
-            return _currentTrack.getShadings();
-        };
-        function getFullData () {
-        }
 
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
-        this.shadingAttr = fillShadingAttrArray();
-        this.fillDataset = getFullData();
-        // this.setClickedRowCurve = function(index){
-        //     $scope.selectedRow = index;
-        //     self.selectedCurve = self.currentCurve[index];
-        // };
+        console.log("currentTrack", currentTrack);
+        console.log("currentCurves", this.currentCurves);
+        console.log("datasets", this.datasets);
+        this.setClickedRowCurve = function(index){
+            $scope.selectedRow = index;
+            self.selectedCurve = self.currentCurves[index];
+            console.log("selectCurve", self.selectedCurve);
+        };
         this.removeRow = function(){
             console.log("self.selectedCurve.content", self.selectedCurve.content);
 
@@ -1604,28 +1634,48 @@ exports.logTrackPropertiesDialog = function (ModalService, _currentTrack, wiLogp
                 self.currentCurve.push({});
         };
 
-        
         // Dialog buttons
         this.definePatternButtonClicked = function () {
             console.log("define");
-            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
             DialogUtils.fillPatternSettingDialog(ModalService, function (options) {
                 console.log("fillPattern");
                 fillOptions = options;
 
             }, self.fillOptions);
         };
-        this.lineStyleButtonClicked = function () {
-            let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.editStyleButtonClicked = function (lineOptions, symbolOptions) {
+            console.log("chooses style");
+            if (symbolOptions) {
+                symbolStyleButtonClicked (symbolOptions);
+            }
+            else {
+                lineStyleButtonClicked (lineOptions);
+            }
+        };
+        function lineStyleButtonClicked(lineOptions) {
+            console.log("line style");
+
             DialogUtils.lineStyleDialog(ModalService, function (options) {
                 lineOptions = options;
-            }, self.lineOptions);
+            }, lineOptions);
+        };
+        function symbolStyleButtonClicked(symbolOptions) {
+            console.log("symbol style");
+
+            DialogUtils.symbolStyleDialog(ModalService, function (options) {
+                symbolOptions = options;
+            }, symbolOptions);
         };
         this.onApplyButtonClicked = function () {
-            //close(props, 100);
-            callback(props);
+            curveOptionsArr.forEach(function(curveOptions) {
+                utils.changeLine(curveOptions, wiApiService);
+            });
+
         };
         this.onOkButtonClicked = function () {
+            curveOptionsArr.forEach(function(curveOptions) {
+                utils.changeLine(curveOptions, wiApiService);
+            });
             close(props, 100);
         };
         this.onCancelButtonClicked = function () {

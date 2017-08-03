@@ -783,3 +783,41 @@ exports.pasteCurve = function () {
         return;
     }
 }
+function getDisplayMode(currentCurve) {
+    if(currentCurve.line && currentCurve.symbol) return "Both";
+    if(currentCurve.line && !currentCurve.symbol) return "Line";
+    if(!currentCurve.line && currentCurve.symbol) return "Symbol";
+    return "None";
+}
+exports.curveOptions = function (currentTrack, currentCurve) {
+    let options = {
+        idLine : currentCurve.id,
+        idTrack: currentTrack.id,
+        showHeader : currentCurve.showHeader, 
+        showDataset : true, // add to currentCurve - Canh
+        ignoreMissingValues: false,
+        alias: currentCurve.alias,
+        minValue: currentCurve.minX,
+        maxValue: currentCurve.maxX,
+        autoValueScale: false,
+        displayType : currentCurve.scale,
+        displayMode : getDisplayMode(currentCurve),
+        wrapMode : "None", //default
+        blockPosition : "None", //default
+        displayAs : "Normal" //default
+    }
+    return options;
+}
+exports.mergeLineObj = function(curveOptions, lineStyle, symbolStyle) {
+    let lineObj = {};
+    angular.extend(lineObj, curveOptions, lineStyle, symbolStyle);
+    lineObj.lineStyle = JSON.stringify(lineObj.lineStyle);
+    lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
+    return lineObj;
+};
+exports.changeLine = function(lineObj, wiApiService) {
+    console.log("testttttt");
+    wiApiService.editLine(lineObj, function () {
+        console.log("OK");
+    });
+} 
