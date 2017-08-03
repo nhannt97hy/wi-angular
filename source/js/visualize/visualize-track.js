@@ -11,7 +11,8 @@ function Track(config) {
     this.HEADER_ITEM_BORDER_WIDTH = 1;
     this.HEADER_ITEM_MARGIN_BOTTOM = 1;
     this.HEADER_HIGHLIGHT_COLOR = 'rgb(255,128,128)';
-    this.BODY_CONTAINER_HEIGHT = 340;
+    //this.BODY_CONTAINER_HEIGHT = 340;
+    this.BODY_CONTAINER_HEIGHT = 70;
     this.BODY_HIGHLIGHT_COLOR = '#ffffe0';
     this.BODY_DEFAULT_COLOR = 'transparent';
     this.MIN_WIDTH = 120;
@@ -127,7 +128,7 @@ Track.prototype.createBodyContainer = function() {
     this.bodyContainer = this.trackContainer.append('div')
         .attr('class', 'vi-track-body-container')
         .style('position', 'relative')
-        .style('height', this.BODY_CONTAINER_HEIGHT + 'px');
+        .style('height', this.BODY_CONTAINER_HEIGHT + '%');
 
     this.plotContainer = this.bodyContainer.append('div')
         .attr('class', 'vi-track-plot-container')
