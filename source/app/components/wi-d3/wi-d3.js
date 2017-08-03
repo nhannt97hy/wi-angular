@@ -106,10 +106,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return track;
     };
 
-    this.addDepthTrack = function() {
+    this.addDepthTrack = function(callback) {
         wiApiService.createDepthTrack(self.logPlotCtrl.id, self.getMaxOrderNum() + 1, function (depthTrack) {
             console.log("Success: ", depthTrack);
             self.pushDepthTrack(depthTrack);
+            if (callback) callback();
         });
     }
     this.pushDepthTrack = function (depthTrack) {
