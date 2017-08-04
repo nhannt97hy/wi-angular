@@ -136,7 +136,7 @@ exports.ImportLASButtonClicked = function () {
     let self = this;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importLASDialog(this.ModalService, function (well) {
+    DialogUtils.importLASDialog1(this.ModalService, function (well) {
         if (well) {
             utils.refreshProjectState();
         }

@@ -1095,6 +1095,15 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }
             self.drawSample();
         };
+        function updateLine(callback) {
+            let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
+            console.log("LINE", lineObj);
+            utils.changeLine(lineObj, wiApiService, function () { 
+                currentCurve.setProperties(lineObj);
+                currentTrack.plotCurve(currentCurve);
+                callback();
+            });
+        }
         this.onEditLineStyleButtonClicked = function () {
             DialogUtils.lineStyleDialog(ModalService, function (options) {
                 console.log("options", options);
@@ -1110,12 +1119,12 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }, self.symbolOptions);
         };
         this.onApplyButtonClicked = function () {
-            utils.changeLine(utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle), wiApiService);
-
+            updateLine();
         };
         this.onOkButtonClicked = function () {
-            utils.changeLine(utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle), wiApiService);
-            close(self, 100);
+            updateLine(function(){
+                close(self, 100);
+            });
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -1278,7 +1287,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: "import-LAS/import-LAS-modal.html",
+        templateUrl: "import-LAS/import-LAS-modal.1.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
@@ -1444,12 +1453,10 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
     });
 };
 exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback) {
-    let thisModalController = null;
 
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
-        thisModalController = this;
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -1466,6 +1473,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         let curveList = currentTrack.getCurves();
         console.log(curveList);
+        let shadingList = currentTrack.getShadings();
+        console.log("shading", shadingList);
         curveList.forEach(function (curve, index) {
             curve.change = false;
             let curveOptions = {};
@@ -1655,7 +1664,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.setClickedRowShading(idx+1);
         };
         this.addRow = function () {
-                self.currentCurve.push({});
+            self.curves.push({});
+            console.log(self.curves);
         };
 
         // Dialog buttons
@@ -1689,6 +1699,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
             console.log("LINE", lineObj);
             utils.changeLine(lineObj, wiApiService);
+            curveList[index].setProperties(lineObj);
+            currentTrack.plotCurve(curveList[index]);
         }
 
         function updateGeneralTab() {
