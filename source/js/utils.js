@@ -664,6 +664,24 @@ function refreshProjectState() {
     });
 };
 
+exports.renameDataset = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'dataset') return;
+    DialogUtils.promptDialog(__GLOBAL.ModalService, "New dataset name", selectedNode.properties.name, function (ret) {
+        if (!ret) return;
+        let wiApiService = __GLOBAL.wiApiService;
+        let datasetInfo = selectedNode.properties;
+        datasetInfo.name = ret;
+        wiApiService.editDataset(datasetInfo, function () {
+            __GLOBAL.$timeout(function () {
+                selectedNode.data.label = ret;
+            })
+        });
+    });
+}
+
 function downloadFile(url) {
     var filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
     var xhr = new XMLHttpRequest();
@@ -697,7 +715,7 @@ exports.renameCurve = function () {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
-    DialogUtils.promptDialog(__GLOBAL.ModalService, "Rename curve", selectedNode.data.label, function (ret) {
+    DialogUtils.promptDialog(__GLOBAL.ModalService, "New curve name", selectedNode.data.label, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let curveInfo = {

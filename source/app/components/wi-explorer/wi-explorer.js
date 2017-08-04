@@ -291,6 +291,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Rename",
                         icon: "annotation-16x16",
                         handler: function () {
+                            utils.renameDataset();
                         }
                     }, {
                         name: "Delete",
