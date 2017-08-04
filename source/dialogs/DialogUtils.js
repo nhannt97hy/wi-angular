@@ -964,22 +964,6 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             name : currentCurve.name    
         }
 
-        // this.curveOptions = {
-        //     idLine : currentCurve.id,
-        //     idTrack: currentTrack.id,
-        //     showHeader : currentCurve.showHeader, 
-        //     showDataset : true, // add to currentCurve - Canh
-        //     ignoreMissingValues: false,
-        //     alias: currentCurve.alias,
-        //     minValue: currentCurve.minX,
-        //     maxValue: currentCurve.maxX,
-        //     autoValueScale: false,
-        //     displayType : currentCurve.scale,
-        //     displayMode : getDisplayMode(currentCurve),
-        //     wrapMode : "None", //default
-        //     blockPosition : "None", //default
-        //     displayAs : "Normal" //default
-        // };
         this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
         
         
@@ -1047,56 +1031,63 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }
 
         }
-
+        this.disabledByLine = function() {
+            $('#wrapMode').prop("disabled", false);
+            $('#symbolType').prop("disabled", true);
+            $("#blockPosition").prop("disabled", false);
+            $('#ignore').prop("disabled", false);
+            $('#symbolSize').prop("disabled", true);
+            $('#editSymbolStyle').prop("disabled", true);
+            $('#editLineStyle').prop("disabled", false);
+            self.lineOptions.display = true;
+            self.symbolOptions.display = false;
+        }
+        this.disabledBySymbol =  function() {
+            $('#wrapMode').prop("disabled", false);
+            $('#symbolType').prop("disabled", false);
+            $('#blockPosition').prop("disabled", true);
+            $('#ignore').prop("disabled", false);
+            $('#symbolSize').prop("disabled", false);
+            $('#editSymbolStyle').prop("disabled", false);
+            $('#editLineStyle').prop("disabled", true);
+            self.lineOptions.display = false;
+            self.symbolOptions.display = true;
+        }
+        this.disabledByBoth = function() {
+            $('#wrapMode').prop("disabled", false);
+            $('#symbolType').prop("disabled", false);
+            $('#blockPosition').prop("disabled", true);
+            $('#ignore').prop("disabled", false);
+            $('#symbolSize').prop("disabled", false);
+            $('#editSymbolStyle').prop("disabled", false);
+            $('#editLineStyle').prop("disabled", false);
+            self.lineOptions.display = true;
+            self.symbolOptions.display = true;
+        }
+        this.disabledByNone =  function() {
+            $('#wrapMode').prop("disabled", true);
+            $('#symbolType').prop("disabled", true);
+            $('#blockPosition').prop("disabled", true);
+            $('#ignore').prop("disabled", true);
+            $('#symbolSize').prop("disabled", true);
+            $('#editSymbolStyle').prop("disabled", true);
+            $('#editLineStyle').prop("disabled", true);
+            self.lineOptions.display = false;
+            self.symbolOptions.display = false;
+        }
         this.changeOther = function () {
-            console.log(self.curveOptions.displayMode);
             switch (self.curveOptions.displayMode) {
                 case "Line":
-                    $('#wrapMode').prop("disabled", false);
-                    $('#symbolType').prop("disabled", true);
-                    $("#blockPosition").prop("disabled", false);
-                    $('#ignore').prop("disabled", false);
-                    $('#symbolSize').prop("disabled", true);
-                    $('#editSymbolStyle').prop("disabled", true);
-                    $('#editLineStyle').prop("disabled", false);
-                    self.lineOptions.display = true;
-                    self.symbolOptions.display = false;
+                    self.disabledByLine();
                     break;
                 case "Symbol":
-                    $('#wrapMode').prop("disabled", false);
-                    $('#symbolType').prop("disabled", false);
-                    $('#blockPosition').prop("disabled", true);
-                    $('#ignore').prop("disabled", false);
-                    $('#symbolSize').prop("disabled", false);
-                    $('#editSymbolStyle').prop("disabled", false);
-                    $('#editLineStyle').prop("disabled", true);
-                    $('#sample').text('Symbol Style ');
-                    self.lineOptions.display = false;
-                    self.symbolOptions.display = true;
+                    self.disabledBySymbol();
                     break;
                 case "Both":
-                    $('#wrapMode').prop("disabled", false);
-                    $('#symbolType').prop("disabled", false);
-                    $('#blockPosition').prop("disabled", true);
-                    $('#ignore').prop("disabled", false);
-                    $('#symbolSize').prop("disabled", false);
-                    $('#editSymbolStyle').prop("disabled", false);
-                    $('#editLineStyle').prop("disabled", false);
-                    $('#sample').text('Both Style ');
-                    self.lineOptions.display = true;
-                    self.symbolOptions.display = true;
+                    self.disabledByBoth();
                     break;
                 case "None":
-                    $('#wrapMode').prop("disabled", true);
-                    $('#symbolType').prop("disabled", true);
-                    $('#blockPosition').prop("disabled", true);
-                    $('#ignore').prop("disabled", true);
-                    $('#symbolSize').prop("disabled", true);
-                    $('#editSymbolStyle').prop("disabled", true);
-                    $('#editLineStyle').prop("disabled", true);
-                    $('#sample').text(' ');
-                    self.lineOptions.display = false;
-                    self.symbolOptions.display = false;
+                    self.disabledByNone();
                     break;
                 default:
                     console.log("Error: NULL");
@@ -1139,6 +1130,23 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         modal.element.modal();
         modal.element.draggable();
         thisModalController.drawSample();
+        switch (thisModalController.curveOptions.displayMode) {
+                case "Line":
+                    thisModalController.disabledByLine();
+                    break;
+                case "Symbol":
+                    thisModalController.disabledBySymbol();
+                    break;
+                case "Both":
+                    thisModalController.disabledByBoth();
+                    break;
+                case "None":
+                    thisModalController.disabledByNone();
+                    break;
+                default:
+                    console.log("Error: NULL");
+                    break;
+            }
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -1436,9 +1444,13 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
     });
 };
 exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback) {
+    let thisModalController = null;
+
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
+        thisModalController = this;
+
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
@@ -1453,6 +1465,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
 
         let curveList = currentTrack.getCurves();
+        console.log(curveList);
         curveList.forEach(function (curve, index) {
             curve.change = false;
             let curveOptions = {};
@@ -1682,10 +1695,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             console.log(self.props);
         }
         function updateCurvesTab() {
+            console.log("Update");
             self.curvesChanged.forEach(function(item, index) {
-                if(item) {
-                    updateLine(index);
-                }
+                // if(item) {
+                //     updateLine(index);
+                // }
+                updateLine(index);
             });
         }
 

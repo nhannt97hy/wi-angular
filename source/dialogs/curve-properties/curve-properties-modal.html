@@ -101,7 +101,7 @@
                                             <select ng-model="wiModal.curveOptions.wrapMode"
                                                     name="wrapMode" id="wrapMode" value=""
                                                     class="form-control wi-form-control"
-                                                    ng-options="item for item in wiModal.selectData.wrapMode track by item"></select>
+                                                    ng-options="item for item in wiModal.selectData.wrapMode track by item" disabled></select>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -110,7 +110,7 @@
                                             <select ng-model="wiModal.symbolOptions.symbolStyle.symbolName"
                                                     name="symbolType" id="symbolType" value=""
                                                     class="form-control wi-form-control"
-                                                    ng-options="item for item in wiModal.selectData.symbolType track by item" disabled="true">
+                                                    ng-options="item for item in wiModal.selectData.symbolType track by item" disabled>
                                             </select>
                                         </div>
                                     </div>
@@ -122,11 +122,11 @@
                                             <select ng-model="wiModal.curveOptions.blockPosition"
                                                     name="blockPosition" value="" id="blockPosition"
                                                     class="form-control wi-form-control"
-                                                    ng-options="item for item in wiModal.selectData.blockPosition track by item">
+                                                    ng-options="item for item in wiModal.selectData.blockPosition track by item" disabled>
                                             </select>
                                         </div>
                                     </div>
-                                    <input type="checkbox" ng-model="wiModal.curveOptions.ignoreMissingValue" id="ignore">Ignore Missing Values
+                                    <input type="checkbox" ng-model="wiModal.curveOptions.ignoreMissingValue" id="ignore" disabled>Ignore Missing Values
                                     <br>
                                     <div class="form-group">
                                         <label class="control-label col-sm-5 normal-text">Symbol Size</label>
@@ -135,8 +135,8 @@
                                                    min="1" max="50"
                                                    class="form-control wi-form-control"
                                                    ng-model="wiModal.symbolOptions.symbolStyle.symbolSize"
-                                                   ng-change="wiModal.changeOther();"
-                                                   disabled="false">
+                                                   ng-change="wiModal.changeOther();" disabled 
+                                                   >
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -144,7 +144,7 @@
                                         <div class="col-sm-5">
                                             <button type="button" ng-click="wiModal.onEditSymbolStyleButtonClicked();"
                                                     id="editSymbolStyle"
-                                                    class="btn btn-default" disabled="true">&nbsp;Edit</button>
+                                                    class="btn btn-default" disabled>&nbsp;Edit</button>
                                         </div>
                                     </div>
                                 </div>
@@ -166,7 +166,7 @@
                                         <div class="col-sm-5">
                                             <button type="button" id="editLineStyle"
                                                     ng-click="wiModal.onEditLineStyleButtonClicked();"
-                                                    class="btn btn-default">&nbsp;Edit</button>
+                                                    class="btn btn-default" disabled>&nbsp;Edit</button>
                                         </div>
                                     </div>
                                 </div>
