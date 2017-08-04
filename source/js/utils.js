@@ -197,7 +197,7 @@ function datasetToTreeConfig(dataset) {
     };
     datasetModel.children = new Array();
     if (!dataset.curves) return datasetModel;
-    
+
     dataset.curves.forEach(function(curve) {
         datasetModel.children.push(curveToTreeConfig(curve));
     });
@@ -280,7 +280,7 @@ exports.projectToTreeConfig = function(project) {
     projectModel.children = new Array();
 
     if (!project.wells) return projectModel;
-    
+
     project.wells.forEach(function(well) {
         projectModel.children.push(wellToTreeConfig(well));
     });
@@ -291,7 +291,7 @@ exports.visit = visit;
 function visit(node, callback, options) {
     if (options && options.found) return;
     if( node.data && node.data.deleted) return;
-    if (options && options.path && options.path.push) 
+    if (options && options.path && options.path.push)
         options.path.push(node);
     if ( callback(node, options) ) {
         if (options) options.found = true
@@ -475,7 +475,7 @@ exports.deleteLogplot = function () {
             .then(function(res){
                 __GLOBAL.$timeout(function(){
                     selectedNode.data.deleted = true;
-                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeWiLogPlot(selectedNode.id);                    
+                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeWiLogPlot(selectedNode.id);
                 });
             }).catch(function(err){
                 console.error('logplot delete error',err);
@@ -505,7 +505,7 @@ exports.openLogplotTab = function (wiComponentService, logplotModel) {
                 });
             }
 
-            tracks.sort(function(track1, track2) { 
+            tracks.sort(function(track1, track2) {
                 return track2.orderNum - track1.orderNum;
             });
             let aTrack = tracks.pop();
@@ -619,7 +619,7 @@ exports.findWellById = findWellById;
 exports.findWellByLogplot = function(idLogplot) {
     var path = getSelectedPath(function(node) {
         return node.type == "logplot" && node.id == idLogplot;
-    });
+    }) || [];
     return path[1];
 };
 
@@ -686,7 +686,7 @@ exports.exportCurve = function () {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
-    let wiApiService = __GLOBAL.wiApiService;  
+    let wiApiService = __GLOBAL.wiApiService;
     wiApiService.exportCurve(selectedNode.properties.idCurve, function (curveFileUrl) {
         downloadFile(curveFileUrl);
     });
@@ -737,8 +737,8 @@ exports.pasteCurve = function () {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve' && selectedNode.type != 'dataset') return;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let wiApiService = __GLOBAL.wiApiService;  
-    // if copying  
+    let wiApiService = __GLOBAL.wiApiService;
+    // if copying
     let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
     if (copyingCurve) {
         console.log('copying curve');

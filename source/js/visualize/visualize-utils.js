@@ -12,6 +12,57 @@ exports.extend = extend;
 exports.createFillStyles = createFillStyles;
 exports.clip = clip;
 exports.pascalCaseToLowerDash = pascalCaseToLowerDash;
+exports.clusterData = clusterData;
+exports.clusterPairData = clusterPairData;
+
+
+/**
+ * Cluster continuous data into groups
+ */
+function clusterData(data) {
+    let ret = [];
+    let tmp = [];
+    let testData = data.concat([{y:-1, x: null}]);
+    testData.forEach(function(d) {
+        if (d.x == null) {
+            if (tmp.length) ret.push(tmp);
+            tmp = [];
+        }
+        else {
+            tmp.push(d);
+        }
+    });
+    return ret;
+}
+
+function clusterPairData(data1, data2) {
+    let first = (data1.length > data2.length) ? data1 : data2;
+    let second = (data1.length > data2.length) ? data2 : data1;
+    let map = {},
+        ret = [],
+        tmp1 = [],
+        tmp2 = [];
+    second.forEach(function(d) {
+        map[d.y] = d.x;
+    });
+    let testData = first.concat([{y:-1, x: null}]);
+    testData.forEach(function(d) {
+        if (d.x == null || map[d.y] === null) {
+            if (tmp1.length && tmp2.length)
+                ret.push(tmp1.concat(tmp2.reverse()));
+            tmp1 = [];
+            tmp2 = [];
+        }
+        else {
+            tmp1.push(d);
+            tmp2.push({
+                y: d.y,
+                x: (map[d.y] === undefined) ? second[0].x : map[d.y]
+            })
+        }
+    });
+    return ret;
+}
 
 function pascalCaseToLowerDash(str) {
     return str.replace(/\.?[A-Z]/g, function(c) {

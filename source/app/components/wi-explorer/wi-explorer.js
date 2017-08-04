@@ -118,7 +118,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     handlers.AddNewButtonClicked();
                     /*
                     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-                    
+
                     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
                     DialogUtils.addNewDialog(ModalService, function (newWell) {

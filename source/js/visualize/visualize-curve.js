@@ -59,7 +59,7 @@ function Curve(config) {
     this.data = config.data || [];
     this.data = Utils.parseData(this.data);
     this.data = Utils.trimData(this.data);
-    this.data = Utils.interpolateData(this.data);
+    // this.data = Utils.interpolateData(this.data);
 
     let self = this;
     this.data = this.data.map(function(d) {
@@ -191,6 +191,7 @@ Curve.prototype.getAllColors = function() {
  * @param {Boolean} highlight
  */
 Curve.prototype.doPlot = function(highlight) {
+    let self = this;
     let rect = this.root.node().getBoundingClientRect();
     this.adjustSize(rect);
     this.updateHeader();
@@ -211,20 +212,21 @@ Curve.prototype.doPlot = function(highlight) {
         return Utils.isWithinYRange(item, windowY);
     });
     if (plotSamples.length == 0) return;
-
-    let data = plotSamples.map(function(s) {
-        return {
-            x: transformX(s.x),
-            y: transformY(s.y)
-        }
-    })
-
     this.ctx.clearRect(0, 0, rect.width, rect.height);
 
-    if (this.line)
-        plotLine(this, data, highlight);
-    if (this.symbol)
-        plotSymbol(this, data, highlight);
+    Utils.clusterData(plotSamples).forEach(function(clustered) {
+        let data = clustered.map(function(s) {
+            return {
+                x: transformX(s.x),
+                y: transformY(s.y)
+            }
+        });
+
+        if (self.line)
+            plotLine(self, data, highlight);
+        if (self.symbol)
+            plotSymbol(self, data, highlight);
+    });
 
     return this;
 }
@@ -276,7 +278,7 @@ function plotSymbol(curve, data, highlight) {
 
     let helper = new CanvasHelper(ctx, {
         strokeStyle: highlight ? 'red' : symbol.strokeStyle,
-        fillStyle: highlight ? 'red' : symbol.fillStyle,
+        fillStyle: symbol.fillStyle,
         lineWidth: symbol.lineWidth,
         lineDash: symbol.lineDash,
         size: symbol.size

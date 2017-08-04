@@ -187,7 +187,7 @@ Shading.prototype.doPlot = function(highlight) {
     this.adjustSize(rect);
 
     let leftData = this.prepareData(this.leftCurve);
-    let rightData = this.prepareData(this.rightCurve).reverse();
+    let rightData = this.prepareData(this.rightCurve);
     let vpRefX = this.vpX.ref = this.getTransformX(this.selectedCurve)(this.refX);
     let vpLeftX = this.vpX.left;
     let vpRightX = this.vpX.right;
@@ -197,14 +197,13 @@ Shading.prototype.doPlot = function(highlight) {
             {x: vpLeftX == null ? vpRefX : vpLeftX, y: rect.height}
         ];
     rightData = (vpRightX == null && rightData.length > 0) ? rightData : [
-            {x: vpRightX == null ? vpRefX : vpRightX, y: rect.height},
-            {x: vpRightX == null ? vpRefX : vpRightX, y: 0}
+            {x: vpRightX == null ? vpRefX : vpRightX, y: 0},
+            {x: vpRightX == null ? vpRefX : vpRightX, y: rect.height}
         ];
-    let plotSamples = leftData.concat(rightData);
-    if (plotSamples.length == 0) return;
 
     let ctx = this.ctx;
     let self = this;
+    let plotSamples = Utils.clusterPairData(leftData, rightData);
 
     Utils.createFillStyles(this.ctx, [this.fill, this.positiveFill, this.negativeFill], function(fillStyles) {
         let fill = fillStyles[0];
@@ -217,23 +216,26 @@ Shading.prototype.doPlot = function(highlight) {
 
         ctx.clearRect(0, 0, rect.width, rect.height);
         ctx.lineWidth = 0;
-        // Draw negative regions
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = negFill;
-        drawCurveLine(ctx, plotSamples);
-        ctx.clip();
-        ctx.fillRect(0, 0, vpRefX, rect.height);
-        ctx.restore();
+        plotSamples.forEach(function(clustered) {
 
-        // Draw postive regions
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = posFill;
-        drawCurveLine(ctx, plotSamples);
-        ctx.clip();
-        ctx.fillRect(vpRefX, 0, rect.width - vpRefX, rect.height);
-        ctx.restore();
+            // Draw negative regions
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = negFill;
+            drawCurveLine(ctx, clustered);
+            ctx.clip();
+            ctx.fillRect(0, 0, vpRefX, rect.height);
+            ctx.restore();
+
+            // Draw postive regions
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = posFill;
+            drawCurveLine(ctx, clustered);
+            ctx.clip();
+            ctx.fillRect(vpRefX, 0, rect.width - vpRefX, rect.height);
+            ctx.restore();
+        })
 
         drawHeader(self);
         drawRefLine(self);
@@ -279,7 +281,7 @@ Shading.prototype.prepareData = function(curve) {
         })
         .map(function(item) {
             return {
-                x: transformX(item.x),
+                x: item.x == null ? null : transformX(item.x),
                 y: transformY(item.y)
             }
         });
