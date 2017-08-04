@@ -403,6 +403,7 @@ exports.updateWellsProject = function (wiComponentService, wells) {
     }
 };
 
+exports.getCurveData = getCurveData;
 function getCurveData(apiService, idCurve, callback) {
     apiService.post(apiService.CURVE, { idCurve })
         .then(function (curve) {

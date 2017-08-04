@@ -3,7 +3,7 @@ const moduleName = 'wi-slidingbar';
 
 const MIN_RANGE = 1;
 
-function Controller($scope, wiComponentService, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
 
     let parentHeight = 0;
@@ -16,6 +16,30 @@ function Controller($scope, wiComponentService, $timeout) {
         top: 0,
         range: MIN_RANGE
     };
+
+    function createPreview() {
+        let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+        let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+        let logPlotName = self.name.replace('Slidingbar', '');
+        let logPlotCtrl = wiComponentService.getComponent(logPlotName);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let logplotId = logPlotCtrl.id;
+        let well = utils.findWellByLogplot(logplotId);
+        let firstCurve = well.children[0].children[0];
+        utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
+            let config = {
+                minY: parseFloat(well.properties.topDepth),
+                maxY: parseFloat(well.properties.bottomDepth),
+                yStep: parseFloat(well.properties.step),
+                offsetY: parseFloat(well.properties.topDepth),
+                line: {
+                    color: 'blue'
+                }
+            }
+            let viCurve = graph.createCurve(config, data, d3.select(self.contentId));
+            viCurve.doPlot();
+        });
+    }
 
     function update(ui) {
         parentHeight = parseInt($(self.contentId).height());
@@ -83,6 +107,8 @@ function Controller($scope, wiComponentService, $timeout) {
             event.stopPropagation();
             update(ui);
         });
+
+        createPreview();
 
         new ResizeSensor($(self.contentId), function() {
             let currentParentHeight = parseInt($(self.contentId).height());
