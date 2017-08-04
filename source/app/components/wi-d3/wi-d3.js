@@ -81,6 +81,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.onHeaderMouseDown(function () {
             _onHeaderMouseDownCallback(track);
         });
+        track.on('focus', function() {
+            _setCurrentTrack(track);
+        });
+        track.on('keypress', function() {
+            _onTrackKeyPressCallback(track);
+        });
         _registerTrackHorizontalResizerDragCallback();
         return track;
     };
@@ -109,7 +115,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
-        track.onMouseDown(function () {
+        track.on('focus', function () {
             _setCurrentTrack(track);
         });
         _registerTrackHorizontalResizerDragCallback();
@@ -124,16 +130,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.setDepthRangeForTrack(track, depthRange);
         track.plotCurve(curve);
         track.onCurveHeaderMouseDown(curve, function() {
-            _setCurrentTrack(track);
             if (d3.event.button == 2) {
                 _curveOnRightClick();
             }
         });
+        console.log('Curve props', curve.getProperties())
     };
 
     this.addLeftShadingToTrack = function (track, curve, config) {
         if (!track || !track.addShading) return;
-        let shading =track.addShading(null, curve, null, config);
+        let shading = track.addShading(null, curve, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
@@ -151,6 +157,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
     };
+
+    this.addPairShadingToTrack = function(track, lCurve, rCurve, config) {
+        if (!track || !track.addShading) return;
+        let shading = track.addShading(lCurve, rCurve, null, config);
+        track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
+    }
 
     this.removeCurrentCurve = function() {
         if (!_currentTrack.getCurrentCurve) return;
@@ -230,7 +243,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();
         let minDepth = self.getMinDepth();
-
         let low = minDepth + slidingBar.slidingBarState.top * (maxDepth - minDepth) / 100;
         let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
@@ -304,7 +316,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _onPlotMouseDownCallback(track) {
-        _setCurrentTrack(track);
         if (d3.event.currentDrawing && d3.event.button == 2) {
             if (d3.event.currentDrawing.isCurve()) {
                 _curveOnRightClick();
@@ -318,7 +329,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function() {
-            _setCurrentTrack(track);
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
             }
@@ -341,8 +351,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _onHeaderMouseDownCallback(track) {
-        _setCurrentTrack(track);
-        _currentTrack.setCurrentDrawing(null);
+        track.setCurrentDrawing(null);
+    }
+
+    function _onTrackKeyPressCallback(track) {
+        if (!d3.event) return;
+        switch (d3.event.key) {
+            case 'Delete':
+                if (track.removeCurrentDrawing) track.removeCurrentDrawing();
+                return;
+        }
     }
 
     function _shadingOnRightClick() {

@@ -79,6 +79,75 @@ function Curve(config) {
     }
 }
 
+Curve.prototype.getProperties = function() {
+    let self = this;
+    function getDisplayMode() {
+        if (self.line && self.symbol) return 'Both';
+        if (self.line && !self.symbol) return 'Line';
+        if (!self.line && self.symbol) return 'Symbol';
+        return 'None';
+    }
+
+    let line = this.line || {};
+    let symbol = this.symbol || {};
+    return {
+        alias: this.alias,
+        name: this.name,
+        showHeader: this.showHeader,
+        showDataset: false,
+        minValue: this.minX,
+        maxValue: this.maxX,
+        autoValueScale: false,
+        diplayMode: getDisplayMode(),
+        wrapMode: 'None',
+        blockPosition: 'None',
+        ignoreMissingValues: false,
+        displayType: Utils.capitalize(this.scale),
+        displayAs: 'Normal',
+        lineStyle: line.dash,
+        lineWidth: line.width,
+        lineColor: line.color,
+        symbolName: Utils.capitalize(symbol.style),
+        symbolSize: symbol.size,
+        symbolStrokeStyle: symbol.strokeStyle,
+        symbolFillStyle: symbol.fillStyle,
+        symbolLineWidth: symbol.lineWidth,
+        symbolLineDash: symbol.lineDash
+    }
+}
+
+Curve.prototype.setProperties = function(props) {
+    let self = this;
+
+    this.alias = props.alias;
+    this.name = props.name;
+    this.showHeader = props.showHeader;
+    this.minX = props.minValue;
+    this.maxX = props.maxValue;
+    this.scale = Utils.capitalize(props.displayType);
+
+    if (props.displayMode == 'Both' || props.displayMode == 'Line') {
+        this.line = {
+            dash: eval(props.lineStyle),
+            width: parseInt(props.lineWidth),
+            color: Utils.convertColorToRGB(props.lineColor)
+        }
+        if (props.displayMode == 'Line') this.symbol = null;
+    }
+
+    if (props.displayMode == 'Both' || props.displayMode == 'Symbol') {
+        this.symbol = {
+            style: Utils.lowercase(props.symbolName),
+            size: parseInt(props.symbolSize),
+            strokeStyle: Utils.convertColorToRGB(props.strokeStyle),
+            fillStyle: Utils.convertColorToRGB(props.fillStyle),
+            lineWidth: parseInt(props.symbolLineWidth),
+            lineDash: eval(props.symbolLineDash)
+        }
+        if (props.displayMode == 'Symbol') this.line = null;
+    }
+}
+
 /**
  * Get x window of curve
  * @returns {Array} Range of x values to show
@@ -284,7 +353,7 @@ function plotSymbol(curve, data, highlight) {
         size: symbol.size
     })
 
-    let plotFunc = helper[symbol.style];
+    let plotFunc = helper[symbol.style.toLowerCase()];
     if (typeof plotFunc != 'function') return;
 
     data.forEach(function(d) {

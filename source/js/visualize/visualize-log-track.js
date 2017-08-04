@@ -484,7 +484,7 @@ LogTrack.prototype.plotAxes = function() {
     let step = (end - start) / this.yTicks;
 
     let yAxis = d3.axisLeft(transformY)
-        .tickValues(d3.range(start, end + step, step))
+        .tickValues(d3.range(start, end + step / 2, step))
         .tickFormat(self.showLabels ? self.getDecimalFormatter(self.yDecimal) : '')
         .tickSize(-rect.width);
 
