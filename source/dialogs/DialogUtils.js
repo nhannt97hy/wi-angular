@@ -801,11 +801,11 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
         console.log(options);
 
         this.options = options;
-        
+
         console.log("Op", this.options);
         this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        
+
         this.onOkButtonClicked = function () {
             console.log("optionsss: ", self.options);
             close(self.options);
@@ -908,7 +908,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
-        
+
         let extentY = currentCurve.getExtentY();
 
         if (currentCurve.line) {
@@ -961,12 +961,12 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.lineObjTemplate = {
             minDepth: extentY[0],
             maxDepth: extentY[1],
-            name : currentCurve.name    
+            name : currentCurve.name
         }
 
         this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
-        
-        
+
+
         this.drawSample = function () {
             displayLine(self.lineOptions, self.symbolOptions);
         }
@@ -1097,11 +1097,11 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         };
         function updateLine(callback) {
             let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
-            console.log("LINE", lineObj);
-            utils.changeLine(lineObj, wiApiService, function () { 
+            utils.changeLine(lineObj, wiApiService, function () {
                 currentCurve.setProperties(lineObj);
                 currentTrack.plotCurve(currentCurve);
-                callback();
+
+                if (callback) callback();
             });
         }
         this.onEditLineStyleButtonClicked = function () {
@@ -1122,8 +1122,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             updateLine();
         };
         this.onOkButtonClicked = function () {
-            updateLine(function(){
-                close(self, 100);
+            updateLine(function() {
+              close(null, 100);
             });
         };
         this.onCancelButtonClicked = function () {
@@ -1159,7 +1159,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            if (callback) callback(ret);
         });
     });
 };
@@ -1172,7 +1173,7 @@ exports.importLASDialog = function (ModalService, callback) {
         this.selectedWell = null;
         this.selectedDataset = null;
         this.isDisabled = true;
-        
+
         this.lasFile = null;
         this.transactionId = Date.now();
         this.onUploadButtonClicked = function () {
@@ -1212,7 +1213,7 @@ exports.importLASDialog = function (ModalService, callback) {
         }
 
         this.onLoadButtonClicked = function () {
-            
+
         }
 
         this.onCancelButtonClicked = function () {
@@ -1391,7 +1392,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
 
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         console.log("$$", graph);
-        
+
         if (options) {
             this.options = options;
         }
@@ -1491,7 +1492,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         lineStyle : curve.line.dash
                     }
                 }
-                
+
             } else {
                 lineOptions = {
                     display : true,
@@ -1501,7 +1502,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         lineStyle : [10, 0]
                     }
                 }
-                
+
             }
             self.curvesLineOptions.push(lineOptions);
 
@@ -1543,7 +1544,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             general: {
                 isShowTitle: currentTrack.showTitle,
                 title : "Track" + currentTrack.id,
-                topJustification: "Center", 
+                topJustification: "Center",
                 bottomJustification: "Center",
                 isShowLabels: false,
                 isShowEndLabels: true,
@@ -1629,8 +1630,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
-        
-        
+
+
         //tab Shading
         this.setClickedRowShading = function(index){
             self.selectedRowShading = index;
@@ -1930,4 +1931,3 @@ exports.aboutDialog = function (ModalService, callback) {
         })
     });
 };
-

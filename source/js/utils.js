@@ -810,7 +810,7 @@ exports.curveOptions = function (currentTrack, currentCurve) {
     let options = {
         idLine : currentCurve.id,
         idTrack: currentTrack.id,
-        showHeader : currentCurve.showHeader, 
+        showHeader : currentCurve.showHeader,
         showDataset : true, // add to currentCurve - Canh
         ignoreMissingValues: false,
         alias: currentCurve.alias,
@@ -833,12 +833,10 @@ exports.mergeLineObj = function(curveOptions, lineStyle, symbolStyle) {
     return lineObj;
 };
 exports.changeLine = function(lineObj, wiApiService, callback) {
-    console.log("testttttt");
     wiApiService.editLine(lineObj, function (result) {
-        console.log("OK", result);
         if( callback ) callback(result);
     });
-} 
+}
 
 function editProperty(item) {
     let selectedNode = getSelectedNode();
