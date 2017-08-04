@@ -65,6 +65,37 @@ function LogTrack(config) {
     this.curvesRemoved = 0;
 }
 
+LogTrack.prototype.getProperties = function() {
+    return {
+        showTitle: this.showTitle,
+        title: this.name,
+        topJustification: Utils.capitalize(this.justification),
+        bottomJustification: 'Center',
+        showLabels: this.showLabels,
+        showValueGrid: this.showXGrids,
+        showDepthGrid: this.showYGrids,
+        majorTicks: this.xMajorTicks,
+        minorTicks: this.xMinorTicks,
+        width: this.width,
+        color: this.bgColor,
+        showEndLabels: this.showEndLabels
+    }
+}
+
+LogTrack.prototype.setProperties = function(props) {
+    this.showTitle = props.showTitle;
+    this.name = props.title;
+    this.justification = Utils.lowercase(props.topJustification);
+    this.showLabels = props.showLabels;
+    this.showEndLabels = props.showEndLabels;
+    this.showXGrids = props.showValueGrid;
+    this.showYGrids = props.showDepthGrid;
+    this.xMajorTicks = parseInt(props.majorTicks);
+    this.xMinorTicks = parseInt(props.minorTicks);
+    this.width = parseInt(props.width);
+    this.bgColor = Utils.convertColorToRGB(props.color);
+}
+
 /**
  * Get x window of track
  * @returns {Array} Range of x values to show

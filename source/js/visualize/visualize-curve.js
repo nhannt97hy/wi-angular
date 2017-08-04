@@ -139,8 +139,8 @@ Curve.prototype.setProperties = function(props) {
         this.symbol = {
             style: Utils.lowercase(props.symbolName),
             size: parseInt(props.symbolSize),
-            strokeStyle: Utils.convertColorToRGB(props.strokeStyle),
-            fillStyle: Utils.convertColorToRGB(props.fillStyle),
+            strokeStyle: Utils.convertColorToRGB(props.symbolStrokeStyle),
+            fillStyle: Utils.convertColorToRGB(props.symbolFillStyle),
             lineWidth: parseInt(props.symbolLineWidth),
             lineDash: eval(props.symbolLineDash)
         }
