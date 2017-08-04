@@ -50,6 +50,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // track config
         let config = {
             id: logTrack.idTrack,
+            idPlot: logTrack.idPlot,
             orderNum: logTrack.orderNum,
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth)
@@ -103,6 +104,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(self.plotAreaId);
         let config = {
             id: depthTrack.idDepthAxis,
+            idPlot: depthTrack.idPlot,
             orderNum: depthTrack.orderNum,
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth)

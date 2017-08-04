@@ -957,7 +957,6 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 }
             }
         }
-
         this.lineObjTemplate = {
             minDepth: extentY[0],
             maxDepth: extentY[1],
@@ -1540,24 +1539,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.well.children.forEach( function(child) {
             if(child.type == 'dataset') self.datasets.push(child);
         });
+        console.log("Current Track", currentTrack);
         this.props = {
-            general: {
-                isShowTitle: currentTrack.showTitle,
-                title : "Track" + currentTrack.id,
-                topJustification: "Center",
-                bottomJustification: "Center",
-                isShowLabels: false,
-                isShowEndLabels: true,
-                format: '',
-                isShowValueGrid: true,
-                majorTicks: 1,
-                minorTicks: 5,
-                isShowDepthGrid: true,
-                width: currentTrack.MIN_WIDTH,
-                trackColor: currentTrack.bgColor
-            }
+            general: currentTrack.getProperties()
         }
-
+        console.log("props", this.props.general);
 
         function fillShadingAttrArray() {
             return [
@@ -1705,7 +1691,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
 
         function updateGeneralTab() {
-            console.log(self.props);
+            console.log("props---", self.props.general);
+            utils.changeTrack(self.props.general, wiApiService)
+            currentTrack.setProperties(self.props.general);
         }
         function updateCurvesTab() {
             console.log("Update");

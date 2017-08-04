@@ -37,6 +37,7 @@ function LogTrack(config) {
     Track.call(this, config);
 
     this.id = config.id;
+    this.idPlot = config.idPlot;
     this.orderNum = config.orderNum;
 
     this.showYGrids = (config.showYGrids == null) ? true : config.showYGrids;
@@ -59,14 +60,17 @@ function LogTrack(config) {
     this.xDecimal = (config.xDecimal == null) ? 2 : config.xDecimal;
     this.yDecimal = (config.yDecimal == null) ? 2 : config.yDecimal;
 
-    this.showLabels = config.showLabels;
-    this.showEndLabels = config.showEndLabels;
+    this.showLabels = config.showLabels == null ? false : config.showLabels;
+    this.showEndLabels = config.showEndLabels == null ? true : config.showEndLabels;
 
     this.curvesRemoved = 0;
 }
 
 LogTrack.prototype.getProperties = function() {
     return {
+        idTrack: this.id,
+        idPlot: this.idPlot,
+        orderNum: this.orderNum,
         showTitle: this.showTitle,
         title: this.name,
         topJustification: Utils.capitalize(this.justification),
@@ -83,6 +87,9 @@ LogTrack.prototype.getProperties = function() {
 }
 
 LogTrack.prototype.setProperties = function(props) {
+    this.id = props.idTrack;
+    this.idPlot = props.idPlot;
+    this.orderNum = parseInt(props.orderNum);
     this.showTitle = props.showTitle;
     this.name = props.title;
     this.justification = Utils.lowercase(props.topJustification);

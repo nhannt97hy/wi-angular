@@ -115,9 +115,11 @@ function trackToModel(track) {
     trackModel.idPlot = track.idPlot;
     if (track.idTrack) {
         trackModel.idTrack = track.idTrack;
+        trackModel.idPlot = track.idPlot;
         trackModel.type = 'log';
     } else if (track.idDepthAxis) {
         trackModel.idDepthTrack = track.idDepthAxis;
+        trackModel.idPlot = track.idPlot;
         trackModel.type = 'depth';
     }
     return trackModel;
@@ -837,7 +839,11 @@ exports.changeLine = function(lineObj, wiApiService, callback) {
         if( callback ) callback(result);
     });
 }
-
+exports.changeTrack = function(trackObj, wiApiService, callback) {
+    wiApiService.editTrack(trackObj, function (result) {
+        if(callback) callback(result);
+    });
+}
 function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
@@ -882,5 +888,8 @@ function editProperty(item) {
         default:
             return;
     }
+}
+exports.upperCaseFirstLetter = function(string){
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 exports.editProperty = editProperty;
