@@ -15,25 +15,32 @@ Utils.extend(Track, LogTrack);
  * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
  * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
  * @param {String} [config.name] - Name of the track
- * @param {Number} [config.xNTicks] - Number of ticks shown in x axis. Default: 4
- * @param {Number} [config.yNTicks] - Number of ticks shown in y axis. Default: 10
- * @param {String} [config.xFormatter] - d3 formatter for numbers in x axis. Default: '.2f'
- * @param {String} [config.yFormatter] - d3 formatter for numbers in y axis. Default: '.2f'
- * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
- * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
+ * @param {Boolean} [config.showTitle] - Indicate whether to show title
+ * @param {Boolean} [config.showXGrids] - Indicate whether to show value grids
+ * @param {Boolean} [config.showYGrids] - Indicate whether to show depth grids
+ * @param {Boolean} [config.justification] - Alignment of the title (left, center, right)
+ * @param {Number} [config.xMajorTicks] - Number of major ticks shown in x axis. Default: 4
+ * @param {Number} [config.xMinorTicks] - Number of minor ticks shown in x axis. Default: 2
+ * @param {Number} [config.yTicks] - Number of ticks shown in y axis. Default: 10
  * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 120
+ * @param {String} [config.bgColor] - Background color for the track
  * @param {Number} [config.yStep] - Y gap between two consecutive points
  * @param {Number} [config.offsetY] - Offset to increase all y coordinates
- * @param {String} [config.bgColor] - Background color for the track
+ * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
+ * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
  */
 function LogTrack(config) {
     Track.call(this, config);
 
     this.id = config.id;
-    this.type = config.type;
     this.orderNum = config.orderNum;
 
-    this.showTitle = (config.showTitle == null) ? true : config.showTitle;
+    this.showYGrids = (config.showYGrids == null) ? true : config.showYGrids;
+    this.showXGrids = (config.showXGrids == null) ? true : config.showXGrids;
+    this.xMajorTicks = config.xMajorTicks || 4;
+    this.xMinorTicks = config.xMinorTicks || 2;
+    this.yTicks = config.yTicks || 10;
+
     this.name = config.name || 'Track';
     this.width = config.width || 120;
 
@@ -43,8 +50,6 @@ function LogTrack(config) {
     this.minY = config.minY;
     this.maxY = config.maxY;
 
-    this.xNTicks = config.xNTicks || 4;
-    this.yNTicks = config.yNTicks || 10;
     this.xPadding = config.xPadding || 1;
     this.yPadding = config.yPadding || 5;
 
@@ -447,6 +452,8 @@ LogTrack.prototype.onCurveHeaderMouseDown = function(curve, cb) {
 }
 
 LogTrack.prototype.plotAxes = function() {
+    let self = this;
+
     let rect = this.plotContainer.node().getBoundingClientRect();
     let rangeX = [0, rect.width];
     let rangeY = [0, rect.height];
@@ -462,7 +469,7 @@ LogTrack.prototype.plotAxes = function() {
         .range(rangeY);
 
     let xAxis = d3.axisTop(transformX)
-        .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / this.xNTicks))
+        .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / (this.xMajorTicks * this.xMinorTicks)))
         .tickFormat("")
         .tickSize(-rect.height);
 
@@ -470,17 +477,26 @@ LogTrack.prototype.plotAxes = function() {
     let end = windowY[1];
 
     let yAxis = d3.axisLeft(transformY)
-        .tickValues(d3.range(start, end, (end - start) / this.yNTicks))
+        .tickValues(d3.range(start, end, (end - start) / this.yTicks))
         .tickFormat("")
         .tickSize(-rect.width);
 
     this.xAxisGroup.call(xAxis);
     this.yAxisGroup.call(yAxis);
 
+    this.xAxisGroup
+        .style('display', this.showXGrids ? 'block' : 'none');
+    this.yAxisGroup
+        .style('display', this.showYGrids ? 'block' : 'none');
+
     this.bodyContainer.selectAll('.tick line')
         .attr('stroke', 'blue')
         .attr('stroke-dasharray', '20, 2')
-        .attr('stroke-width', 0.5);
+        .attr('stroke-width', 0.4);
+    this.xAxisGroup.selectAll('.tick line')
+        .attr('stroke-width', function(d, i) {
+            return i % self.xMinorTicks == 0 ? 0.4 : 0.2;
+        });
 }
 
 LogTrack.prototype.updateHeader = function() {

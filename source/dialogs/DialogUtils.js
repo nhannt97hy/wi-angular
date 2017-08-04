@@ -1373,74 +1373,74 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
 
-        this.datasets = [];
-/*
-@param {Number} [config.id] - The id of this line(curve) in backend (idLine field)
- * @param {String} [config.name] - Name of new curve
- * @param {Array} [config.data] - Data containing x, y coordinates or the curve
- * @param {String} [config.unit] - Unit of data
- * @param {Number} [config.minX] - Mininum x value to show
- * @param {Number} [config.maxX] - Maximum x value to show
- * @param {Number} [config.minY] - Mininum y value to show
- * @param {Number} [config.maxY] - Maximum y value to show
- * @param {String} [config.scale] - Scale type (Linear or Logarithmic)
- * @param {String} [config.alias] - Text to show on header
- * @param {Boolean} [config.showHeader] - Flag to show or hide header
- * @param {Object} [config.line] - Configuration to draw line
- * @param {String} [config.line.color] - Line color
- * @param {Number} [config.line.width] - Line width
- * @param {Array} [config.line.dash] - Line dash style
- * @param {Object} [config.symbol] - Configuration to draw symbol
- * @param {String} [config.symbol.style] - Symbol style (circle, square, cross, diamond, plus, star)
- * @param {String} [config.symbol.fillStyle] - Symbol fill style
- * @param {String} [config.symbol.strokeStyle] - Symbol stroke style
- * @param {Number} [config.symbol.lineWidth] - Symbol line width
- * @param {Array} [config.symbol.lineDash] - Symbol line dash
- * @param {Number} [config.symbol.size] - Symbol size */
-        this.curves = [
-            {
-                idLine : 1,
-                idTrack: 1,
-                showHeader : true, 
-                showDataset : true, // add to currentCurve - Canh
-                ignoreMissingValues: false,
-                alias: "AA",
-                minValue: 0,
-                maxValue: 200,
-                autoValueScale: false,
-                displayType : "Linear",
-                displayMode : "Symbol",
-                wrapMode : "None", //default
-                blockPosition : "None", //default
-                displayAs : "Normal" //default
-            }
-        ];
-        this.curvesLineOptions = [
-            {
-                display : true,
-                lineStyle :{
-                    lineColor : "#0ff",
-                    lineWidth : 1,
-                    lineDash : [0]
-                }
-            }
-            
-        ];
-        this.curvesSymbolOptions = [
-            {
-                display : true,
-                symbolStyle:{
-                    symbolName: "circle",
-                    symbolSize: 1,
-                    symbolStrokeStyle: "black",
-                    symbolFillStyle: "transparent",
-                    symbolLineWidth : 1,
-                    symbolLineDash: [0] 
-                }
-            }
-            
-        ];
+        this.datasets = new Array();
 
+        this.curves = new Array();
+        this.curvesLineOptions = new Array();
+        this.curvesSymbolOptions = new Array();
+        this.curvesChanged = new Array();
+
+
+        let curveList = currentTrack.getCurves();
+        curveList.forEach(function (curve, index) {
+            curve.change = false;
+            let curveOptions = {};
+            let lineOptions = {};
+            let symbolOptions = {};
+            curveOptions = utils.curveOptions(currentTrack, curve);
+            self.curves.push(curveOptions);
+            if (curve.line) {
+                lineOptions = {
+                    display : true,
+                    lineStyle : {
+                        lineColor : curve.line.color,
+                        lineWidth : curve.line.width,
+                        lineStyle : curve.line.dash
+                    }
+                }
+                
+            } else {
+                lineOptions = {
+                    display : true,
+                    lineStyle :{
+                        lineColor : "#0ff",
+                        lineWidth : 1,
+                        lineStyle : [10, 0]
+                    }
+                }
+                
+            }
+            self.curvesLineOptions.push(lineOptions);
+
+            if (curve.symbol) {
+                symbolOptions = {
+                    display: true,
+                    symbolStyle: {
+                        symbolName: curve.symbol.style, // cross, diamond, star, triangle, dot, plus
+                        symbolSize: curve.symbol.size,
+                        symbolStrokeStyle: curve.symbol.strokeStyle,
+                        symbolFillStyle: curve.symbol.fillStyle,
+                        symbolLineWidth : curve.symbol.lineWidth,
+                        symbolLineDash: curve.symbol.lineDash
+                    }
+                }
+            }
+            else {
+                symbolOptions = {
+                    display: false,
+                    symbolStyle: {
+                        symbolName: "circle", // cross, diamond, star, triangle, dot, plus
+                        symbolSize: 4,
+                        symbolStrokeStyle: "black",
+                        symbolFillStyle: "transparent",
+                        symbolLineWidth : 1,
+                        symbolLineDash: [10, 0]
+                    }
+                }
+            }
+            self.curvesSymbolOptions.push(symbolOptions);
+            self.curvesChanged.push(false);
+        });
 
 
         this.well.children.forEach( function(child) {
@@ -1464,15 +1464,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
         }
 
-
-        function getDisplayMode(currentCurve) {
-            if(currentCurve.line && currentCurve.symbol) return "Both";
-            if(currentCurve.line && !currentCurve.symbol) return "Line";
-            if(!currentCurve.line && currentCurve.symbol) return "Symbol";
-            return "None";
-        }
-
-        // Tab Curve
 
         function fillShadingAttrArray() {
             return [
@@ -1592,20 +1583,53 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             }, self.fillOptions);
         };
-        this.editStyleButtonClicked = function (lineOptions, symbolOptions) {
-            
+
+        this.lineStyleButtonClicked = function (index) {
+            console.log(index);
+            DialogUtils.lineStyleDialog(ModalService, function (options) {
+                console.log("lineStyle");
+            }, self.curvesLineOptions[index]);
         };
-        function lineStyleButtonClicked(lineOptions) {
-            
+        this.symbolStyleButtonClicked = function (index) {
+            console.log(index);
+            DialogUtils.symbolStyleDialog(ModalService, function (options) {
+                console.log("symbolStyle");
+
+            }, self.curvesSymbolOptions[index]);
         };
-        function symbolStyleButtonClicked(symbolOptions) {
-            
-        };
+
+        function updateLine(index) {
+            let curveOptions = self.curves[index];
+            let lineOptions = self.curvesLineOptions[index].lineStyle;
+            let symbolOptions = self.curvesSymbolOptions[index].symbolStyle;
+            let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
+            console.log("LINE", lineObj);
+            utils.changeLine(lineObj, wiApiService);
+        }
+
+        function updateGeneralTab() {
+            console.log(self.props);
+        }
+        function updateCurvesTab() {
+            self.curvesChanged.forEach(function(item, index) {
+                if(item) {
+                    updateLine(index);
+                }
+            });
+        }
+
+        function updateShadingsTab() {
+
+        }
         this.onApplyButtonClicked = function () {
-            
+            updateGeneralTab();
+            updateCurvesTab();
+            updateShadingsTab();
         };
         this.onOkButtonClicked = function () {
-            console.log(self.props);
+            updateGeneralTab();
+            updateCurvesTab();
+            updateShadingsTab();
             close(self.props);
         };
         this.onCancelButtonClicked = function () {
