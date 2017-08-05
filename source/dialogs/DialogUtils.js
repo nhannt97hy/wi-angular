@@ -1169,10 +1169,7 @@ exports.importLASDialog = function (ModalService, callback) {
         let self = this;
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.isDisabled = true;
-<<<<<<< HEAD
-=======
 
->>>>>>> ccad250c4b28ffda8c74e89d0365ae94a549c84c
         this.lasFile = null;
         this.transactionId = Date.now();
         this.onUploadButtonClicked = function () {
