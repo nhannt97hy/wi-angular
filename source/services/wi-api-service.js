@@ -224,6 +224,48 @@ Service.prototype.uploadFile = function (data, callback) {
         });*/
 }
 
+Service.prototype.uploadMultiFiles = function (data, callback) {
+    let self = this;
+    let returnData = [
+        {
+            well: 'W4',
+            step: 0.1524,
+            topDepth: 1119.8325,
+            bottomDepth: 2184.8064,
+            depthUnit: 'M',
+            curves: [
+                {
+                    lasName: 'DTCO3',
+                    unit: 'US/F'
+                }, {
+                    lasName: 'ECGR',
+                    unit: 'GAPI'
+                }
+            ]
+        }, {
+            well: 'W3',
+            step: 0.1524,
+            topDepth: 1146.048,
+            bottomDepth: 2108.3016,
+            depthUnit: 'M',
+            curves: [
+                {
+                    lasName: 'ECGR',
+                    unit: 'GAPI'
+                }
+            ]
+        }
+    ];
+    callback(returnData);
+    /*this.postWithFile(UPLOAD_MULTI_FILES, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);            
+        });*/
+}
+
 Service.prototype.editWell = function(infoWell, callback) {
     let self = this;
     console.log('infoWell', infoWell);

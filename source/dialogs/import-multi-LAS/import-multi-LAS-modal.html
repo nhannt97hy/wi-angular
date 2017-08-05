@@ -1,93 +1,186 @@
 <div class='modal fade' data-backdrop="static" data-keyboard="false">
-    <div class='modal-dialog modal-lg'>
+    <div class='modal-dialog modal-1000'>
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
                 <h4>Load multi LAS files</h4>
-                <h5>Select files</h5>
             </div>
-            <div class="modal-body">
-                <form class="form-horizontal" action="" name="modalImportLAS">
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-sm-12">
-                                <label for="selected" class="btn btn-default">Select files</label>
-                                <input id="selected" class="display-none" type="file" ngf-select multiple ng-model="wiModal.lasFiles" ngf-max-size="1000MB"
-                                    required/>
-                                <button type="button" class="btn btn-default" ng-click="wiModal.onRemoveFileClick()">
-                                    <span class="delete-16x16"></span>&nbsp;Remove
-                                </button>
-                                <button type="button" class="btn btn-default" ng-click="wiModal.onRemoveAllFilesClick()">
-                                    <span class="clear-16x16"></span>&nbsp;Clear
-                                </button>
+            <div class="modal-body padding-0">
+                <wi-tabset>
+                    <wi-tab heading="Settings">
+                        <div class="container-fluid">
+                            <div>&nbsp;</div>
+                            <div class="row">
+                                <form class="form-horizontal form-condensed col-sm-6">
+                                    <label for="isOverwriteWellHeader" class="col-sm-12">
+                                        <input type="checkbox" id="isOverwriteWellHeader" ng-model="wiModal.settings.isOverwriteWellHeader">
+                                        Overwrite well header
+                                    </label>
+                                    <label for="isCreateNewWellIfDupe" class="col-sm-12">
+                                        <input type="checkbox" id="isCreateNewWellIfDupe" ng-model="wiModal.settings.isCreateNewWellIfDupe">
+                                        Create new well if duplicated
+                                    </label>
+                                    <label for="isCreateNewDatasetIfDupe" class="col-sm-12">
+                                        <input type="checkbox" id="isCreateNewDatasetIfDupe" ng-model="wiModal.settings.isCreateNewDatasetIfDupe">
+                                        Create new dataset if duplicated
+                                    </label>
+                                    <label for="isUseUwiAsWellName" class="col-sm-12">
+                                        <input type="checkbox" id="isUseUwiAsWellName" ng-model="wiModal.settings.isUseUwiAsWellName">
+                                        Use UWI as well name
+                                    </label>
+                                </form>
+                                <form class="form-horizontal form-condensed col-sm-6">
+                                    <div class="col-sm-6">
+                                        <label for="isLoadAllCurves">
+                                            <input type="radio" id="isLoadAllCurves" ng-model="wiModal.settings.isLoadAllCurves" ng-value="true">
+                                            Load All Curves
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="isChooseFamilies">
+                                            <input type="radio" id="isChooseFamilies" ng-model="wiModal.settings.isLoadAllCurves" ng-value="false">
+                                            Choose Families
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <div ng-repeat="family in wiModal.families">
+                                            <label for="{{family}}">
+                                                <input type="checkbox" id="{{family}}" ng-model="wiModal.selectedFamilies[family]" ng-disabled="wiModal.settings.isLoadAllCurves">
+                                                {{family}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <h5>Selected files</h5>
-                            <button type="button" class="btn button-normal btn-block btn-default" ng-repeat="lasFile in wiModal.lasFiles track by $index"
-                                ng-click="wiModal.onFileClick($index)" ng-class="{active: fileIndex==$index}">
-                                {{lasFile.name}}
-                            </button>
+                    </wi-tab>
+                    <wi-tab heading="Input Files">
+                        <div class="container-fluid">
+                            <div>&nbsp;</div>
+                            <form class="form-horizontal" name="modalImportLAS">
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <label for="selected" class="btn btn-default">Select files</label>
+                                        <input id="selected" class="display-none" type="file" ngf-select multiple ng-model="wiModal.lasFiles" ngf-max-size="1000MB"
+                                            required/>
+                                        <button type="button" class="btn btn-default" ng-click="wiModal.onRemoveFileClick()" ng-disabled="!wiModal.lasInfos.length">
+                                            <span class="delete-16x16"></span>&nbsp;Remove
+                                        </button>
+                                        <button type="button" class="btn btn-default" ng-click="wiModal.onRemoveAllFilesClick()" ng-disabled="!wiModal.lasInfos.length">
+                                            <span class="clear-16x16"></span>&nbsp;Clear
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <button type="button" class="btn btn-default" ng-disabled="!wiModal.lasFiles.length"
+                                                ng-click="wiModal.onUploadButtonClicked()">
+                                                Upload
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <!-- <button type="button" class="btn button-normal btn-block btn-default" ng-repeat="lasFile in wiModal.lasFiles track by $index"
+                                            ng-click="wiModal.onFileClick($index)" ng-class="{active: fileIndex==$index}">
+                                            {{lasFile.name}}
+                                        </button> -->
+                                        <h5>
+                                            <span class="las-import-16x16"></span>
+                                            LAS Files
+                                        </h5>
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Load</th>
+                                                    <th>LAS Name</th>
+                                                    <th>Well Name</th>
+                                                    <th>Dataset</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="lasInfo in wiModal.lasInfos track by $index" ng-click="wiModal.onLasClick($index)"
+                                                    ng-class="{active: fileIndex==$index}">
+                                                    <td>
+                                                        <input type="checkbox" ng-model="lasInfo.isLoad" class="form-control wi-form-control">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" ng-value="lasInfo.well" class="form-control wi-form-control" disabled>
+                                                    </td>
+                                                    <td>
+                                                        <select name="selectWell" class="form-control wi-form-control"
+                                                            ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
+                                                            ng-model="lasInfo.selectedWell">
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="datasetName" class="form-control wi-form-control"
+                                                            ng-options="datasetOption.name for datasetOption in lasInfo.selectedWell.datasets"
+                                                            ng-model="lasInfo.selectedDataset">
+                                                        </select>
+                                                        <!-- <input list=datasets name="datasetName" class="form-control wi-form-control" ng-model="wiModal.selectedDatasets[fileIndex]">
+                                                        <datalist id=datasets>
+                                                            <option ng-repeat="datasetOption in wiModal.selectedWells[fileIndex].datasets" ng-value="datasetOption">{{datasetOption.name}}</option>
+                                                        </datalist> -->
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h5>
+                                            <span class="info-frp-16x16"></span>
+                                            Preview
+                                        </h5>
+                                        <div class="col-sm-8">
+                                            <table class="table table-bordered table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Curve Name</th>
+                                                        <th>Unit</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="curve in wiModal.curves">
+                                                        <td>
+                                                            <input type="text" ng-value="curve.lasName" class="form-control wi-form-control" disabled>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" ng-model="curve.unit" class="form-control wi-form-control">
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label normal-text" for="wellStep">Step</label>
+                                                <input type="number" id="wellStep" name="wellStep" ng-value="wiModal.lasInfos[fileIndex].step" class="form-control wi-form-control"
+                                                    disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label normal-text" for="topDepth">Top Depth</label>
+                                                <input type="number" id="topDepth" name="topDepth" ng-value="wiModal.lasInfos[fileIndex].topDepth" class="form-control wi-form-control"
+                                                    disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label normal-text" for="bottomDepth">Bottom Depth</label>
+                                                <input type="number" id="bottomDepth" name="bottomDepth" ng-value="wiModal.lasInfos[fileIndex].bottomDepth" class="form-control wi-form-control"
+                                                    disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label normal-text" for="depthUnit">Depth Unit</label>
+                                                <input type="text" id="depthUnit" name="depthUnit" ng-value="wiModal.lasInfos[fileIndex].depthUnit" class="form-control wi-form-control"
+                                                    disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                        <div class="col-sm-9">
-                            <h5>Well info</h5>
-                            <div class="form-group">
-                                <label class="control-label col-sm-3 normal-text" for="selectWell">Select Well</label>
-                                <div class="col-sm-9">
-                                    <select name="selectWell" class="form-control wi-form-control" ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
-                                        ng-model="wiModal.selectedWells[fileIndex]">
-                                  </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-3 normal-text" for="topDepth">Top Depth</label>
-                                <div class="col-sm-9">
-                                    <input type="number" id="topDepth" name="topDepth" ng-value="wiModal.selectedWells[fileIndex].topDepth" class="form-control wi-form-control"
-                                        disabled>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-3 normal-text" for="bottomDepth">Bottom Depth</label>
-                                <div class="col-sm-9">
-                                    <input type="number" id="bottomDepth" name="bottomDepth" ng-value="wiModal.selectedWells[fileIndex].bottomDepth" class="form-control wi-form-control"
-                                        disabled>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-3 normal-text" for="depthUnit">Depth Unit</label>
-                                <div class="col-sm-9">
-                                    <input type="text" id="depthUnit" name="depthUnit" ng-value="wiModal.selectedWells[fileIndex].depthUnit" class="form-control wi-form-control"
-                                        disabled>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-3 normal-text" for="wellStep">Well step</label>
-                                <div class="col-sm-9">
-                                    <input type="number" id="wellStep" name="wellStep" ng-value="wiModal.selectedWells[fileIndex].step" class="form-control wi-form-control"
-                                        disabled>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-3 normal-text" for="datasetName">Dataset Name</label>
-                                <div class="col-sm-9">
-                                    <select name="datasetName" class="form-control wi-form-control" ng-options="datasetOption.name for datasetOption in wiModal.selectedWells[fileIndex].datasets"
-                                        ng-model="wiModal.selectedDatasets[fileIndex]">
-                                  </select>
-                                    <!-- <input list=datasets name="datasetName" class="form-control wi-form-control" ng-model="wiModal.selectedDatasets[fileIndex]">
-                                    <datalist id=datasets>
-                                        <option ng-repeat="datasetOption in wiModal.selectedWells[fileIndex].datasets" ng-value="datasetOption">{{datasetOption.name}}</option>
-                                    </datalist> -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </form>
+                    </wi-tab>
+                </wi-tabset>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
+                <button class='btn btn-default' ng-click='wiModal.onLoadButtonClicked()' ng-disabled="wiModal.isDisabled"><span class="ok-16x16"></span>&nbsp;Load</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

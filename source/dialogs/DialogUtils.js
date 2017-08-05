@@ -1159,11 +1159,7 @@ exports.importLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-        this.selectedWell = null;
-        this.selectedDataset = null;
         this.isDisabled = true;
-        
         this.lasFile = null;
         this.transactionId = Date.now();
         this.onUploadButtonClicked = function () {
@@ -1203,7 +1199,7 @@ exports.importLASDialog = function (ModalService, callback) {
         }
 
         this.onLoadButtonClicked = function () {
-            
+            console.log(self.lasInfo);
         }
 
         this.onCancelButtonClicked = function () {
@@ -1295,32 +1291,75 @@ exports.importLASDialog1 = function (ModalService, callback) {
 exports.importMultiLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
-        this.disabled = false;
-        this.error = null;
-
+        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+        this.isDisabled = true;
         this.lasFiles = [];
         this.selectedWells = [];
         this.selectedDatasets = [];
+        this.transactionId = Date.now();
+        
+        this.settings = {
+            isOverwriteWellHeader: false,
+            isCreateNewWellIfDupe: false,
+            isCreateNewDatasetIfDupe: false,
+            isUseUwiAsWellName: false,
+            isLoadAllCurves: true
+        };
+        this.families = [
+            'Gamma Ray',
+            'Porosity',
+            'Density',
+            'Acoustic',
+            'Resistivity',
+            'Permeability',
+            'Saturation',
+            'Volume'
+        ];
+        this.selectedFamilies = {};
+        this.families.forEach(function(family) {
+            self.selectedFamilies[family] = true;
+        });
 
-        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-        console.log('projectLoaded', self.projectLoaded);
+        this.onUploadButtonClicked = function () {
+            let dataRequest = {
+                files: self.lasFiles,
+                transactionId: self.transactionId
+            }
+            wiApiService.uploadMultiFiles(dataRequest, function (lasInfos) {
+                self.lasInfos = lasInfos;
+                self.curves = lasInfos[0].curves;
+                // self.lasInputs = angular.copy(lasInfos);
+                self.lasInfos.forEach(function (lasInfo) {
+                    lasInfo.isLoad = true;
+                    lasInfo.wellName = lasInfo.lasName;
+                    lasInfo.dataset = "Data_Input";
+                    lasInfo.selectedWell = null;
+                    lasInfo.selectedDataset = null;
+                //     lasInfo.curves.forEach(function(curve) {
+                //         curve.inputName = curve.lasName;
+                //         curve.isLoad = true;
+                //     });
+                });
+                self.isDisabled = false;
+            });
+        }
 
         $scope.fileIndex = 0;
-        this.onFileClick = function($index) {
+        this.onLasClick = function($index) {
             $scope.fileIndex = $index;
+            self.curves = self.lasInfos[$index].curves;
         }
 
         this.onRemoveFileClick = function() {
-            self.lasFiles.splice($scope.fileIndex,1);
-            self.selectedWells.splice($scope.fileIndex,1);
-            self.selectedDatasets.splice($scope.fileIndex,1);
+            self.lasInfos.splice($scope.fileIndex,1);
+            if (!self.lasInfos.length) {
+                self.isDisabled = true;
+            }
         }
 
         this.onRemoveAllFilesClick = function() {
-            this.lasFiles = [];
-            this.selectedWells = [];
-            this.selectedDatasets = [];
+            self.lasInfos = [];
+            self.isDisabled = true;
         }
 
         this.onLoadButtonClicked = function () {
