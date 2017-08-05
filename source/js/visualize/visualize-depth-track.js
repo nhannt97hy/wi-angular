@@ -107,7 +107,7 @@ DepthTrack.prototype.doPlot = function(highlight) {
     let end = windowY[1];
     let step = (end - start) / this.yTicks;
     let yAxisRight = d3.axisLeft(transformY)
-        .tickValues(d3.range(start, end + step, step))
+        .tickValues(d3.range(start, end + step / 2, step))
         .tickFormat(self.getDecimalFormatter(self.yDecimal))
         .tickSize(5);
 

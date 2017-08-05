@@ -69,9 +69,11 @@ Track.prototype.init = function(domElem) {
 Track.prototype.createContainer = function() {
     this.trackContainer = this.root.append('div')
         .attr('class', 'vi-track-container')
+        .attr('tabindex', this.orderNum == null ? -1 : this.orderNum)
         .style('width', this.width + 'px')
         .style('display', 'flex')
-        .style('flex-direction', 'column');
+        .style('flex-direction', 'column')
+        .style('outline', 'none');
 }
 
 /**
@@ -112,6 +114,7 @@ Track.prototype.createHeaderContainer = function() {
         .on('mousedown', function() {
             d3.event.preventDefault();
             d3.event.stopPropagation();
+            self.trackContainer.node().focus();
         })
         .call(d3.drag().on('drag', function() {
             self.headerScrollCallback();
@@ -256,9 +259,17 @@ Track.prototype.doPlot = function(highlight) {
 }
 
 /**
- *
+ * Get d3 decimal formatter function
  */
 Track.prototype.getDecimalFormatter = function(decimal) {
     decimal = decimal < 0 ? 0 : decimal;
     return d3.format('.' + decimal + 'f');
 }
+
+/**
+ * Register event for track container
+ */
+Track.prototype.on = function(type, cb) {
+    this.trackContainer.on(type, cb);
+}
+

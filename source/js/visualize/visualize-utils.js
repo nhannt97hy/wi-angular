@@ -2,8 +2,6 @@ let CanvasHelper = require('./visualize-canvas-helper');
 
 exports.roundUp = roundUp;
 exports.roundDown = roundDown;
-exports.appendTrack = appendTrack;
-exports.removeTrack = removeTrack;
 exports.isWithinYRange = isWithinYRange;
 exports.trimData = trimData;
 exports.interpolateData = interpolateData;
@@ -14,7 +12,16 @@ exports.clip = clip;
 exports.pascalCaseToLowerDash = pascalCaseToLowerDash;
 exports.clusterData = clusterData;
 exports.clusterPairData = clusterPairData;
+exports.capitalize = capitalize;
+exports.lowercase = lowercase;
+exports.uppercase = uppercase;
+exports.convertColorToRGB = convertColorToRGB;
 
+function convertColorToRGB (color) {
+    let d3Color = d3.color(color);
+    if (!d3Color) return null;
+    return d3Color.toString();
+}
 
 /**
  * Cluster continuous data into groups
@@ -62,6 +69,21 @@ function clusterPairData(data1, data2) {
         }
     });
     return ret;
+}
+
+function uppercase(str) {
+    if (typeof str != 'string') return null;
+    return str.toUpperCase();
+}
+
+function lowercase(str) {
+    if (typeof str != 'string') return null;
+    return str.toLowerCase();
+}
+
+function capitalize(str) {
+    if (typeof str != 'string') return null;
+    return str.replace(str[0], str[0].toUpperCase());
 }
 
 function pascalCaseToLowerDash(str) {
@@ -155,108 +177,6 @@ function interpolateData(data) {
         prev = i;
     }
     return data;
-}
-
-function appendTrackHeader(plotArea, container, trackName) {
-    let headerViewport = container.append('div')
-        .attr('class', 'track-header-viewport text-center')
-
-    let nameLabel = headerViewport.append('label')
-        .attr('class', 'track-name text-center')
-        .style('z-index', 2)
-        .text(trackName);
-
-    let header = headerViewport.append('div')
-        .attr('class', 'track-header')
-        .style('top', nameLabel.node().clientHeight + 3 + 'px')
-
-    function _headerScrollCallback(header) {
-        let rowHeight = nameLabel.node().clientHeight;
-        let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -rowHeight*2 -6: rowHeight*2 + 6);
-        let top = parseInt(header.style('top').replace('px', '')) + dy;
-        let maxTop = rowHeight + 3;
-        let minTop = headerViewport.node().clientHeight - header.node().clientHeight + 2;
-
-
-        top = minTop < maxTop ? clip(top, [minTop, maxTop]) : maxTop;
-        header.style('top', top + 'px');
-    }
-
-    header
-        .on('mousewheel', function() {
-            _headerScrollCallback(d3.select(this));
-        })
-        .on('mousedown', function() {
-            d3.event.preventDefault();
-            d3.event.stopPropagation();
-        })
-        .call(d3.drag().on('drag', function() {
-            _headerScrollCallback(d3.select(this))
-        }));
-
-    container.append('div')
-        .attr('class', 'vresizer')
-        .call(d3.drag()
-            .on('drag', function() {
-                let plotHeight = container.select('.plot-container').node().clientHeight;
-                d3.select(plotArea).selectAll('.plot-container')
-                    .style('height', (plotHeight - d3.event.dy) + 'px');
-
-                d3.select(plotArea).selectAll('.track-header').each(function(h) {
-                    _headerScrollCallback(d3.select(this));
-                })
-            })
-        );
-}
-
-function appendTrack(baseElement, trackName, plotWidth) {
-    let compensator;
-    let minPlotWidth = plotWidth;
-    let root = d3.select(baseElement);
-    let trackContainer = root.append('div')
-        .attr('class', 'track-container')
-        .style('width', plotWidth + 'px')
-
-    appendTrackHeader(baseElement, trackContainer, trackName);
-    let resizer = root.append('div')
-        .attr('class', 'resizer track-resizer')
-        .call(d3.drag()
-            .on('start', function() {
-                compensator = 0;
-            })
-            .on('drag', function() {
-                compensator += d3.event.dx;
-                if (( plotWidth + compensator ) > minPlotWidth) {
-                    plotWidth += compensator;
-                    compensator = 0;
-                    trackContainer.style('width', plotWidth + 'px');
-                }
-            })
-        );
-    let existedPlot = d3.select('.plot-container')
-    let plotContainer = trackContainer.append('div')
-        .attr('class', 'plot-container')
-
-    if (!existedPlot.empty()) {
-        plotContainer.style('height', existedPlot.style('height'));
-    }
-
-    return trackContainer;
-}
-
-function removeTrack(idx, baseElement) {
-    let base = d3.select(baseElement);
-    base.selectAll('.track-container')
-        .filter(function (d, i) {
-            return i == idx;
-        })
-        .remove();
-
-    base.selectAll('.track-resizer')
-        .filter(function (d, i) {
-            return i == idx;
-        })
-        .remove();
 }
 
 function asyncLoop(iterations, func, callback) {

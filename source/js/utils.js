@@ -115,9 +115,11 @@ function trackToModel(track) {
     trackModel.idPlot = track.idPlot;
     if (track.idTrack) {
         trackModel.idTrack = track.idTrack;
+        trackModel.idPlot = track.idPlot;
         trackModel.type = 'log';
     } else if (track.idDepthAxis) {
         trackModel.idDepthTrack = track.idDepthAxis;
+        trackModel.idPlot = track.idPlot;
         trackModel.type = 'depth';
     }
     return trackModel;
@@ -401,6 +403,7 @@ exports.updateWellsProject = function (wiComponentService, wells) {
     }
 };
 
+exports.getCurveData = getCurveData;
 function getCurveData(apiService, idCurve, callback) {
     apiService.post(apiService.CURVE, { idCurve })
         .then(function (curve) {
@@ -810,7 +813,7 @@ exports.curveOptions = function (currentTrack, currentCurve) {
     let options = {
         idLine : currentCurve.id,
         idTrack: currentTrack.id,
-        showHeader : currentCurve.showHeader, 
+        showHeader : currentCurve.showHeader,
         showDataset : true, // add to currentCurve - Canh
         ignoreMissingValues: false,
         alias: currentCurve.alias,
@@ -833,13 +836,15 @@ exports.mergeLineObj = function(curveOptions, lineStyle, symbolStyle) {
     return lineObj;
 };
 exports.changeLine = function(lineObj, wiApiService, callback) {
-    console.log("testttttt");
     wiApiService.editLine(lineObj, function (result) {
-        console.log("OK", result);
         if( callback ) callback(result);
     });
-} 
-
+}
+exports.changeTrack = function(trackObj, wiApiService, callback) {
+    wiApiService.editTrack(trackObj, function (result) {
+        if(callback) callback(result);
+    });
+}
 function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
@@ -884,5 +889,8 @@ function editProperty(item) {
         default:
             return;
     }
+}
+exports.upperCaseFirstLetter = function(string){
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 exports.editProperty = editProperty;

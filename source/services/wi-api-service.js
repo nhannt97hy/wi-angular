@@ -37,6 +37,8 @@ const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
 const CREATE_LINE = '/project/well/plot/track/line/new';
 const DELETE_LINE = '/project/well/plot/track/line/delete';
 const EDIT_LINE = '/project/well/plot/track/line/edit';
+const EDIT_TRACK = '/project/well/plot/track/edit';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -64,7 +66,7 @@ Service.prototype.GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
 
 Service.prototype.CREATE_LINE = '/project/well/plot/track/line/new';
 Service.prototype.DELETE_LINE = DELETE_LINE;
-
+Service.prototype.EDIT_TRACK = EDIT_TRACK;
 Service.prototype.EDIT_LINE = EDIT_LINE;
 Service.prototype.getUtils = function() {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
@@ -429,6 +431,14 @@ Service.prototype.removeLine = function(idLine, callback) {
         idLine: idLine
     };
     this.delete(DELETE_LINE, dataRequest)
+        .then(callback)
+        .catch(function(err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editTrack = function(trackObj, callback) {
+    var self = this;
+    this.post(EDIT_TRACK, trackObj)
         .then(callback)
         .catch(function(err) {
             self.getUtils().error(err);

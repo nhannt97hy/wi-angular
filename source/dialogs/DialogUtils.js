@@ -801,11 +801,11 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
         console.log(options);
 
         this.options = options;
-        
+
         console.log("Op", this.options);
         this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        
+
         this.onOkButtonClicked = function () {
             console.log("optionsss: ", self.options);
             close(self.options);
@@ -908,7 +908,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
-        
+
         let extentY = currentCurve.getExtentY();
 
         if (currentCurve.line) {
@@ -957,16 +957,15 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 }
             }
         }
-
         this.lineObjTemplate = {
             minDepth: extentY[0],
             maxDepth: extentY[1],
-            name : currentCurve.name    
+            name : currentCurve.name
         }
 
         this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
-        
-        
+
+
         this.drawSample = function () {
             displayLine(self.lineOptions, self.symbolOptions);
         }
@@ -1095,6 +1094,15 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }
             self.drawSample();
         };
+        function updateLine(callback) {
+            let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
+            utils.changeLine(lineObj, wiApiService, function () {
+                currentCurve.setProperties(lineObj);
+                currentTrack.plotCurve(currentCurve);
+
+                if (callback) callback();
+            });
+        }
         this.onEditLineStyleButtonClicked = function () {
             DialogUtils.lineStyleDialog(ModalService, function (options) {
                 console.log("options", options);
@@ -1110,12 +1118,12 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }, self.symbolOptions);
         };
         this.onApplyButtonClicked = function () {
-            utils.changeLine(utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle), wiApiService);
-
+            updateLine();
         };
         this.onOkButtonClicked = function () {
-            utils.changeLine(utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle), wiApiService);
-            close(self, 100);
+            updateLine(function() {
+              close(null, 100);
+            });
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -1150,7 +1158,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            callback(ret);
+
+            if (callback) callback(ret);
         });
     });
 };
@@ -1160,6 +1169,10 @@ exports.importLASDialog = function (ModalService, callback) {
         let self = this;
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.isDisabled = true;
+<<<<<<< HEAD
+=======
+
+>>>>>>> ccad250c4b28ffda8c74e89d0365ae94a549c84c
         this.lasFile = null;
         this.transactionId = Date.now();
         this.onUploadButtonClicked = function () {
@@ -1274,7 +1287,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: "import-LAS/import-LAS-modal.html",
+        templateUrl: "import-LAS/import-LAS-modal.1.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
@@ -1421,7 +1434,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
 
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         console.log("$$", graph);
-        
+
         if (options) {
             this.options = options;
         }
@@ -1483,12 +1496,10 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
     });
 };
 exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback) {
-    let thisModalController = null;
 
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
-        thisModalController = this;
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -1505,6 +1516,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         let curveList = currentTrack.getCurves();
         console.log(curveList);
+        let shadingList = currentTrack.getShadings();
+        console.log("shading", shadingList);
         curveList.forEach(function (curve, index) {
             curve.change = false;
             let curveOptions = {};
@@ -1521,7 +1534,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         lineStyle : curve.line.dash
                     }
                 }
-                
+
             } else {
                 lineOptions = {
                     display : true,
@@ -1531,7 +1544,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         lineStyle : [10, 0]
                     }
                 }
-                
+
             }
             self.curvesLineOptions.push(lineOptions);
 
@@ -1569,24 +1582,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.well.children.forEach( function(child) {
             if(child.type == 'dataset') self.datasets.push(child);
         });
+        console.log("Current Track", currentTrack);
         this.props = {
-            general: {
-                isShowTitle: currentTrack.showTitle,
-                title : "Track" + currentTrack.id,
-                topJustification: "Center", 
-                bottomJustification: "Center",
-                isShowLabels: false,
-                isShowEndLabels: true,
-                format: '',
-                isShowValueGrid: true,
-                majorTicks: 1,
-                minorTicks: 5,
-                isShowDepthGrid: true,
-                width: currentTrack.MIN_WIDTH,
-                trackColor: currentTrack.bgColor
-            }
+            general: currentTrack.getProperties()
         }
-
+        console.log("props", this.props.general);
 
         function fillShadingAttrArray() {
             return [
@@ -1659,8 +1659,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
-        
-        
+
+
         //tab Shading
         this.setClickedRowShading = function(index){
             self.selectedRowShading = index;
@@ -1694,7 +1694,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.setClickedRowShading(idx+1);
         };
         this.addRow = function () {
-                self.currentCurve.push({});
+            self.curves.push({});
+            console.log(self.curves);
         };
 
         // Dialog buttons
@@ -1728,10 +1729,14 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
             console.log("LINE", lineObj);
             utils.changeLine(lineObj, wiApiService);
+            curveList[index].setProperties(lineObj);
+            currentTrack.plotCurve(curveList[index]);
         }
 
         function updateGeneralTab() {
-            console.log(self.props);
+            console.log("props---", self.props.general);
+            utils.changeTrack(self.props.general, wiApiService)
+            currentTrack.setProperties(self.props.general);
         }
         function updateCurvesTab() {
             console.log("Update");
@@ -1957,4 +1962,3 @@ exports.aboutDialog = function (ModalService, callback) {
         })
     });
 };
-
