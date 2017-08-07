@@ -438,7 +438,8 @@ Service.prototype.removeLine = function(idLine, callback) {
 }
 Service.prototype.editTrack = function(trackObj, callback) {
     var self = this;
-    this.post(EDIT_TRACK, trackObj)
+    let dataRequest = trackObj;
+    this.post(EDIT_TRACK, dataRequest)
         .then(callback)
         .catch(function(err) {
             self.getUtils().error(err);
@@ -446,7 +447,8 @@ Service.prototype.editTrack = function(trackObj, callback) {
 }
 Service.prototype.editLine = function (lineObj, callback) {
     var self = this;
-    this.post(EDIT_LINE, lineObj)
+    let dataRequest = lineObj;
+    this.post(EDIT_LINE, dataRequest)
         .then(callback)
         .catch(function (err) {
             self.getUtils().error(err);

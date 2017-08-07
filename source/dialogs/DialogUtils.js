@@ -1656,40 +1656,25 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
-
-
-        //tab Shading
-        this.setClickedRowShading = function(index){
-            self.selectedRowShading = index;
-            self.selectedShading = self.shadingAttr[index];
+        let idx = null;
+        let idLineToRemove = [];
+        this.setClickedRow = function(index){
+            $scope.selectedRow = index;
+            idx = index;
+            console.log(index);
         };
-        this.arrowUpShading = function () {
-            let prevIdx = -1;
-            let idx = self.shadingAttr.indexOf(self.selectedShading);
-            console.log(idx);
-            if (idx-1 == prevIdx) {
-                prevIdx = idx
-            } else if (idx > 0) {
-                let moveShading = self.shadingAttr.splice(idx, 1)
-                console.log(moveShading[0])
-                self.shadingAttr.splice(idx-1, 0, moveShading[0]);
-            }
-            self.setClickedRowShading(idx-1);
-
-        };
-        this.arrowDownShading = function () {
-            let prevIdx = self.shadingAttr.length;
-            let idx = self.shadingAttr.indexOf(self.selectedShading);
-            console.log(idx);
-            if (idx+1 == prevIdx) {
-                prevIdx = idx
-            } else if (idx < self.shadingAttr.length-1) {
-                let moveShading = self.shadingAttr.splice(idx, 1)
-                console.log(moveShading[0])
-                self.shadingAttr.splice(idx+1, 0, moveShading[0]);
-            }
-            self.setClickedRowShading(idx+1);
-        };
+        this.removeRowCurve = function() {
+            let idLine = self.curves[idx].idLine;
+            idLineToRemove.push(idLine);
+            self.curves.splice(idx, 1);
+            self.curvesLineOptions.splice(idx, 1);
+            self.curvesSymbolOptions.splice(idx, 1);
+        }
+        function removeCurve(idLine) {
+            wiApiService.removeLine(idLine, function() {
+                if(callback) callback();
+            });
+        }
         this.addRow = function () {
             self.curves.push({});
             console.log(self.curves);
@@ -1697,7 +1682,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         // Dialog buttons
         this.definePatternButtonClicked = function () {
-            console.log("define");
             DialogUtils.fillPatternSettingDialog(ModalService, function (options) {
                 console.log("fillPattern");
                 fillOptions = options;
@@ -1725,24 +1709,33 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let symbolOptions = self.curvesSymbolOptions[index].symbolStyle;
             let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
             console.log("LINE", lineObj);
-            utils.changeLine(lineObj, wiApiService);
-            curveList[index].setProperties(lineObj);
-            currentTrack.plotCurve(curveList[index]);
+            utils.changeLine(lineObj, wiApiService, function() {
+                curveList[index].setProperties(lineObj);
+                currentTrack.plotCurve(curveList[index]);
+
+                if(callback) callback();
+            });
         }
 
         function updateGeneralTab() {
-            console.log("props---", self.props.general);
             utils.changeTrack(self.props.general, wiApiService)
             currentTrack.setProperties(self.props.general);
+            if(idLineToRemove) {
+                idLineToRemove.forEach(function(idLine) {
+                    removeCurve(idLine, function() {
+                        if(callback) callback;
+                    })
+                })
+            };
         }
         function updateCurvesTab() {
             console.log("Update");
             self.curvesChanged.forEach(function(item, index) {
-                // if(item) {
-                //     updateLine(index);
-                // }
-                updateLine(index);
+                if(item) {
+                    updateLine(index);
+                }
             });
+            
         }
 
         function updateShadingsTab() {
