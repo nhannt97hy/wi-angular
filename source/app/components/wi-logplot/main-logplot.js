@@ -78,11 +78,15 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     });
 
     $scope.depthTrackButtonClick = function() {
-        wiD3Ctrl.pushDepthTrack({});
+        wiD3Ctrl.pushDepthTrack({
+            orderNum: '0'
+        });
     }
 
     $scope.trackButtonClick = function() {
-        wiD3Ctrl.pushLogTrack({});
+        wiD3Ctrl.pushLogTrack({
+            orderNum: '1'
+        });
     }
 
     $scope.addData1ButtonClick = function() {
@@ -94,6 +98,7 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
             }
         })
         wiD3Ctrl.addCurveToTrack(track, data, {
+            blockPosition: 'middle',
             symbol: {
                 style: 'circle'
             },
@@ -129,6 +134,7 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.addLeftShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
         wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {
+            leftX: 0.4,
             fill: {
                 pattern: {
                     foreground: 'red',
@@ -157,6 +163,21 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.addCustomShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
         wiD3Ctrl.addCustomShadingToTrack(track, track.getCurrentCurve(), 0.5, {});
+    }
+
+    $scope.addPairShadingButtonClick = function() {
+        let track = wiD3Ctrl.getCurrentTrack();
+        let curves = track.getCurves();
+        if (curves.length < 2) return;
+        wiD3Ctrl.addPairShadingToTrack(track, curves[0], curves[1], {
+            fill: {
+                pattern: {
+                    foreground: 'red',
+                    background: 'blue',
+                    name: 'basement'
+                }
+            }
+        });
     }
 
     $scope.removeShadingButtonClick = function() {

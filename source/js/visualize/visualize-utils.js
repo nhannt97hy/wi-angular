@@ -43,32 +43,25 @@ function clusterData(data) {
 }
 
 function clusterPairData(data1, data2) {
-    let first = (data1.length > data2.length) ? data1 : data2;
-    let second = (data1.length > data2.length) ? data2 : data1;
-    let map = {},
-        ret = [],
+    if (!data1.length || !data2.length) return [[], []];
+
+    let ret = [],
         tmp1 = [],
         tmp2 = [];
-    second.forEach(function(d) {
-        map[d.y] = d.x;
-    });
-    let testData = first.concat([{y:-1, x: null}]);
-    testData.forEach(function(d) {
-        if (d.x == null || map[d.y] === null) {
+
+    for (let i = 0; i <= data1.length; i ++) {
+        if (i == data1.length || data1[i].x == null || data2[i].x == null) {
             if (tmp1.length && tmp2.length)
-                ret.push(tmp1.concat(tmp2.reverse()));
+                ret.push([tmp1, tmp2]);
             tmp1 = [];
             tmp2 = [];
         }
         else {
-            tmp1.push(d);
-            tmp2.push({
-                y: d.y,
-                x: (map[d.y] === undefined) ? second[0].x : map[d.y]
-            })
+            tmp1.push(data1[i]);
+            tmp2.push(data2[i]);
         }
-    });
-    return ret;
+    };
+    return ret
 }
 
 function uppercase(str) {

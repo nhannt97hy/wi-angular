@@ -25,6 +25,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let logplotId = logPlotCtrl.id;
         let well = utils.findWellByLogplot(logplotId);
+        if (!well) return;
         let firstCurve = well.children[0].children[0];
         utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
             let config = {
@@ -80,7 +81,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         self.tinyWindow = {
             top: 0,
-            height: parentHeight
+            height: parseInt(parentHeight / 20) || 1
         };
 
         // init tiny window height
