@@ -11,6 +11,8 @@ Utils.extend(Drawing, Curve);
  * @constructor
  * @param {Object} config - Configurations of new curve
  * @param {Number} [config.id] - The id of this line(curve) in backend (idLine field)
+ * @param {Number} [config.idCurve] - The id of this line(curve) in backend (idCurve field)
+ * @param {Number} [config.idDataset] - The id of the dataset in backend (idDataset field)
  * @param {String} [config.name] - Name of new curve
  * @param {Array} [config.data] - Data containing x, y coordinates or the curve
  * @param {String} [config.unit] - Unit of data
@@ -21,6 +23,7 @@ Utils.extend(Drawing, Curve);
  * @param {String} [config.scale] - Scale type (Linear or Logarithmic)
  * @param {String} [config.alias] - Text to show on header
  * @param {Boolean} [config.showHeader] - Flag to show or hide header
+ * @param {String} [config.blockPosition] - Display curve as blocks with the data point at specified position (start, middle, end, none)
  * @param {Object} [config.line] - Configuration to draw line
  * @param {String} [config.line.color] - Line color
  * @param {Number} [config.line.width] - Line width
@@ -38,6 +41,7 @@ function Curve(config) {
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
+    this.idCurve = config.idCurve;
     this.idDataset = config.idDataset;
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';
@@ -53,11 +57,13 @@ function Curve(config) {
     this.symbol = config.symbol;
     this.showHeader = (config.showHeader == null) ? true : config.showHeader;
 
+    this.blockPosition = config.blockPosition || 'none';
+
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
 
-    this.data = config.data || [];
-    this.data = Utils.parseData(this.data);
+    this.raw_data = config.data || [];
+    this.data = Utils.parseData(this.raw_data);
     this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
 
@@ -67,7 +73,7 @@ function Curve(config) {
             x: d.x,
             y: d.y * self.yStep + self.offsetY
         };
-    })
+    });
 
     if (this.minX == null || this.maxX == null)
         this.autoScaleX();
@@ -79,6 +85,9 @@ function Curve(config) {
     }
 }
 
+/**
+ * @returns {Object} Properties of the curve
+ */
 Curve.prototype.getProperties = function() {
     let self = this;
     function getDisplayMode() {
@@ -91,6 +100,9 @@ Curve.prototype.getProperties = function() {
     let line = this.line || {};
     let symbol = this.symbol || {};
     return {
+        idLine: this.id,
+        idCurve: this.idCurve,
+        idDataset: this.idDataset,
         alias: this.alias,
         name: this.name,
         showHeader: this.showHeader,
@@ -100,7 +112,7 @@ Curve.prototype.getProperties = function() {
         autoValueScale: false,
         diplayMode: getDisplayMode(),
         wrapMode: 'None',
-        blockPosition: 'None',
+        blockPosition: Utils.capitalize(this.blockPosition),
         ignoreMissingValues: false,
         displayType: Utils.capitalize(this.scale),
         displayAs: 'Normal',
@@ -116,15 +128,22 @@ Curve.prototype.getProperties = function() {
     }
 }
 
+/**
+ * @param {Object} props - New properties for the curve
+ */
 Curve.prototype.setProperties = function(props) {
     let self = this;
 
+    this.id = props.idLine;
+    this.idCurve = props.idCurve;
+    this.idDataset = props.idDataset;
     this.alias = props.alias;
     this.name = props.name;
     this.showHeader = props.showHeader;
     this.minX = props.minValue;
     this.maxX = props.maxValue;
     this.scale = Utils.capitalize(props.displayType);
+    this.blockPosition = Utils.lowercase(props.blockPosition);
 
     if (props.displayMode == 'Both' || props.displayMode == 'Line') {
         this.line = {
@@ -320,6 +339,43 @@ Curve.prototype.updateHeader = function() {
         })
 }
 
+Curve.prototype.calculateDataForBlockPosition = function(originData) {
+    let self = this;
+    let data = [];
+    originData.forEach(function(d, i) {
+        data.push(d);
+        if (i == originData.length - 1) return;
+        if (d.x == null || originData[i+1].x == null) return;
+
+        switch (Utils.lowercase(self.blockPosition)) {
+            case 'start':
+                data.push({
+                    x: d.x,
+                    y: originData[i+1].y
+                })
+                return;
+            case 'middle':
+                data.push({
+                    x: d.x,
+                    y: (d.y + originData[i+1].y) / 2
+                });
+                data.push({
+                    x: originData[i+1].x,
+                    y: (d.y + originData[i+1].y) / 2
+                })
+                return;
+            case 'end':
+                data.push({
+                    x: originData[i+1].x,
+                    y: d.y
+                });
+                return;
+        }
+    });
+
+    return data;
+}
+
 function plotLine(curve, data, highlight) {
     if (typeof curve.line != 'object') return;
     let ctx = curve.ctx;
@@ -330,9 +386,10 @@ function plotLine(curve, data, highlight) {
     ctx.lineWidth = line.width || '1';
     if (line.dash) ctx.setLineDash(line.dash);
 
+    let samples = curve.calculateDataForBlockPosition(data);
     ctx.beginPath();
-    ctx.moveTo(data[0].x, data[0].y);
-    data.forEach(function(d) {
+    ctx.moveTo(samples[0].x, samples[0].y);
+    samples.forEach(function(d) {
         ctx.lineTo(d.x, d.y);
     });
     ctx.stroke();

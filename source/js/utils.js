@@ -76,9 +76,11 @@ function lineToTreeConfig(line) {
     lineModel.name = curveModel.properties.name;
     lineModel.type = 'line';
     lineModel.id = line.idLine;
+    lineModel.idCurve = line.idCurve;
     lineModel.idDataset = curveModel.idDataset;
     lineModel.data = {
         id: line.idLine,
+        idCurve: line.idCurve,
         name: lineModel.name,
         unit: curveModel.properties.unit,
         minX: line.minValue,
@@ -491,7 +493,8 @@ exports.openLogplotTab = function (wiComponentService, logplotModel, callback) {
     layoutManager.putWiLogPlotRight(logplotModel);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
-    let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+    let logplotName = 'plot' + logplotModel.properties.idPlot;
+    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
         .then(function (plot) {

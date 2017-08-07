@@ -93,12 +93,13 @@ module.exports.putWiLogPlotRight = function(logplotModel) {
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(logplotModel.properties.idWell);
     let tabTitle = '<img class="logplot-blank-16x16"> &nbsp;' + logplotModel.properties.name + ' - (' + well.properties.name + ')';
+    let logplotName = 'plot' + logplotModel.properties.idPlot;
     rightContainer.addChild({
         type: 'component',
         id: itemId,
         componentName: 'html-block',
         componentState: {
-            html: '<wi-logplot name="' + logplotModel.properties.name + '" id="' + logplotModel.properties.idPlot + '"></wi-logplot>'
+            html: '<wi-logplot name="' + logplotName + '" id="' + logplotModel.properties.idPlot + '"></wi-logplot>'
         },
         title: tabTitle
     });

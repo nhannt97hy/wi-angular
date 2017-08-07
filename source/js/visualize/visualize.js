@@ -95,8 +95,9 @@ exports.buildCurve = function(config, data) {
 /**
  * Rearange tracks in wi-d3 area
  */
-exports.rearangeTracks = function() {
-    d3.selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
+exports.rearangeTracks = function(wiD3Ctrl) {
+    let wiD3Name = wiD3Ctrl.name;
+    d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
 }
 
 exports.sheetDraggable = function(domElem) {

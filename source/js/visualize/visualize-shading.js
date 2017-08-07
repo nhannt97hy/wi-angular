@@ -182,6 +182,15 @@ Shading.prototype.getAllColors = function() {
  * @param {Boolean} highlight
  */
 Shading.prototype.doPlot = function(highlight) {
+    function cloneCurveData(data, newX) {
+        return data.map(function(d) {
+            return {
+                x: newX,
+                y: d.y
+            }
+        })
+    }
+
     if (!this.leftCurve && !this.rightCurve) return;
     let rect = this.root.node().getBoundingClientRect();
     this.adjustSize(rect);
@@ -192,14 +201,19 @@ Shading.prototype.doPlot = function(highlight) {
     let vpLeftX = this.vpX.left;
     let vpRightX = this.vpX.right;
 
-    leftData = (vpLeftX == null && leftData.length > 0) ? leftData : [
-            {x: vpLeftX == null ? vpRefX : vpLeftX, y: 0},
-            {x: vpLeftX == null ? vpRefX : vpLeftX, y: rect.height}
-        ];
-    rightData = (vpRightX == null && rightData.length > 0) ? rightData : [
-            {x: vpRightX == null ? vpRefX : vpRightX, y: 0},
-            {x: vpRightX == null ? vpRefX : vpRightX, y: rect.height}
-        ];
+    leftData = (vpLeftX != null)
+        ? cloneCurveData(leftData, vpLeftX)
+        : (this.leftCurve
+            ? leftData
+            : cloneCurveData(rightData, vpRefX)
+        );
+
+    rightData = (vpRightX != null)
+        ? cloneCurveData(rightData, vpRightX)
+        : (this.rightCurve
+            ? rightData
+            : cloneCurveData(leftData, vpRefX)
+        );
 
     let ctx = this.ctx;
     let self = this;
@@ -209,7 +223,6 @@ Shading.prototype.doPlot = function(highlight) {
         let fill = fillStyles[0];
         let posFill = fillStyles[1];
         let negFill = fillStyles[2];
-
         if (!self.isNegPosFilling) {
             posFill = negFill = fill;
         }
@@ -218,11 +231,15 @@ Shading.prototype.doPlot = function(highlight) {
         ctx.lineWidth = 0;
         plotSamples.forEach(function(clustered) {
 
+            let leftSide = self.leftCurve ? self.leftCurve.calculateDataForBlockPosition(clustered[0]) : clustered[0];
+            let rightSide = self.rightCurve ? self.rightCurve.calculateDataForBlockPosition(clustered[1]) : clustered[1];
+            let data = leftSide.concat(rightSide.reverse());
+
             // Draw negative regions
             ctx.save();
             ctx.beginPath();
             ctx.fillStyle = negFill;
-            drawCurveLine(ctx, clustered);
+            drawCurveLine(ctx, data);
             ctx.clip();
             ctx.fillRect(0, 0, vpRefX, rect.height);
             ctx.restore();
@@ -231,7 +248,7 @@ Shading.prototype.doPlot = function(highlight) {
             ctx.save();
             ctx.beginPath();
             ctx.fillStyle = posFill;
-            drawCurveLine(ctx, clustered);
+            drawCurveLine(ctx, data);
             ctx.clip();
             ctx.fillRect(vpRefX, 0, rect.width - vpRefX, rect.height);
             ctx.restore();
@@ -239,6 +256,7 @@ Shading.prototype.doPlot = function(highlight) {
 
         drawHeader(self);
         drawRefLine(self);
+        self.canvas.lower();
     });
     return this;
 }
@@ -285,7 +303,7 @@ Shading.prototype.prepareData = function(curve) {
                 y: transformY(item.y)
             }
         });
-    return data.slice();
+    return data;
 }
 
 Shading.prototype.getTransformX = function(curve) {

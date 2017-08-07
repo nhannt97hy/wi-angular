@@ -289,7 +289,6 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     config.refX = refX;
     config.leftCurve = leftCurve;
     config.rightCurve = rightCurve;
-
     let shading = new Shading(config);
     shading.init(this.plotContainer);
     shading.header = this.addShadingHeader(shading);
