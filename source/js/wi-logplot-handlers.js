@@ -27,16 +27,32 @@ exports.PrintToImageButtonClicked = function() {
     console.log('PrintToImageButton is clicked');
 };
 
+function getDpi() {
+    let inch = document.createElement('inch');
+    inch.style = 'height: 1in; width: 1in; left: -100%; position: absolute; top: -100%;';
+    document.body.appendChild(inch);
+    let devicePixelRatio = window.devicePixelRatio || 1;
+    let dpi = inch.clientWidth * devicePixelRatio;
+    return dpi;
+}
+
 function scaleTo(rangeUnit, wiLogplot) {
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
+    let wiSlidingbarCtrl = wiLogplot.getSlidingbarCtrl();
     let maxDepth = wiD3Ctrl.getMaxDepth();
-    let rangeHandlerByPercent = (rangeUnit / maxDepth) * 100;
-
+    let minDepth = wiD3Ctrl.getMinDepth();
+    let realLengthCm = (maxDepth - minDepth) * 100;
+    let dpCm = getDpi()/2.54;
+    let trackHeight = d3.select('.track-area .vi-track-plot-container').node().clientHeight;
+    let trackHeightCm = trackHeight/dpCm;
+    let trackRealLengthCm = trackHeightCm*rangeUnit;
+    let rangeHandlerByPercent = (trackRealLengthCm/realLengthCm) * 100;
+    console.log('scale handler', rangeHandlerByPercent, trackRealLengthCm, realLengthCm);
     if (rangeHandlerByPercent > 100) {
         rangeHandlerByPercent = 100;
     }
 
-    wiLogplot.getSlidingbarCtrl().updateRangeSlidingHandler(rangeHandlerByPercent);
+    wiSlidingbarCtrl.updateRangeSlidingHandler(rangeHandlerByPercent);
 }
 
 exports.Scale20ButtonClicked = function() {
@@ -95,7 +111,7 @@ exports.Scale5000ButtonClicked = function() {
 };
 
 exports.ScaleFullButtonClicked = function() {
-    let rangeUnit = this.wiLogplot.getwiD3Ctrl().getMaxDepth();
+    let rangeUnit = this.wiLogplot.getwiD3Ctrl().getMaxDepth()*100;
     scaleTo(rangeUnit, this.wiLogplot);
 };
 
