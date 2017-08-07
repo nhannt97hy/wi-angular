@@ -256,7 +256,8 @@ exports.BlankLogplotButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function() {
                         console.log("Hic hic");
                         wiD3Ctrl.addLogTrack();
@@ -299,7 +300,8 @@ exports.TriTracksBlankButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel);
-                let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+                let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                 wiD3Ctrl.addDepthTrack(function () {
                     for (var i = 0; i < 3; i++) {
                         wiD3Ctrl.addLogTrack();

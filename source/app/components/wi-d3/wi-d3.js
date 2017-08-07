@@ -81,7 +81,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             offsetY: parseFloat(_getWellProps().topDepth)
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
-        graph.rearangeTracks();
+        graph.rearangeTracks(self);
 
         _tracks.push(track);
         _tracks.sort(function(track1, track2) {
@@ -148,7 +148,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
 
         let track = graph.createDepthTrack(config, document.getElementById(self.plotAreaId));
-        graph.rearangeTracks();
+        graph.rearangeTracks(self);
 
         _tracks.push(track);
         _tracks.sort(function(track1, track2) {
