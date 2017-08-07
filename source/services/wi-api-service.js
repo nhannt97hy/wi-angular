@@ -453,8 +453,8 @@ Service.prototype.editLine = function (lineObj, callback) {
 }
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
-    //const BASE_URL = 'http://54.169.109.34';
-    const BASE_URL = 'http://localhost:3000';
+    const BASE_URL = 'http://54.169.109.34';
+    //const BASE_URL = 'http://localhost:3000';
     return new Service(BASE_URL, $http, wiComponentService, Upload);
 });
 
