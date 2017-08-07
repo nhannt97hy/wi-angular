@@ -13,7 +13,6 @@ Utils.extend(Track, LogTrack);
  * @param {Object} config - Contain configurations.
  * @param {Number} [config.id] - The id of this track in backend (idTrack field)
  * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
- * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
  * @param {String} [config.name] - Name of the track
  * @param {Boolean} [config.showTitle] - Indicate whether to show title
  * @param {Boolean} [config.showXGrids] - Indicate whether to show value grids
@@ -38,7 +37,6 @@ function LogTrack(config) {
 
     this.id = config.id;
     this.idPlot = config.idPlot;
-    this.orderNum = config.orderNum;
 
     this.showYGrids = (config.showYGrids == null) ? true : config.showYGrids;
     this.showXGrids = (config.showXGrids == null) ? true : config.showXGrids;

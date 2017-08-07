@@ -17,6 +17,7 @@ function Track(config) {
     this.BODY_DEFAULT_COLOR = 'transparent';
     this.MIN_WIDTH = 120;
 
+    this.orderNum = config.orderNum;
     this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
@@ -68,8 +69,10 @@ Track.prototype.init = function(domElem) {
  */
 Track.prototype.createContainer = function() {
     this.trackContainer = this.root.append('div')
+        .datum(this.orderNum)
         .attr('class', 'vi-track-container')
-        .attr('tabindex', this.orderNum == null ? -1 : this.orderNum)
+        .attr('tabindex', isNaN(this.orderNum) ? -1 : this.orderNum)
+        .attr('data-order-num', function(d) { return d; })
         .style('width', this.width + 'px')
         .style('display', 'flex')
         .style('flex-direction', 'column')
@@ -109,16 +112,24 @@ Track.prototype.createHeaderContainer = function() {
         .style('width', '100%')
         .lower()
         .on('mousewheel', function() {
-            self.headerScrollCallback();
+            if (d3.event.shiftKey) {
+                self.headerScrollCallback();
+            }
         })
         .on('mousedown', function() {
             d3.event.preventDefault();
             d3.event.stopPropagation();
             self.trackContainer.node().focus();
         })
-        .call(d3.drag().on('drag', function() {
-            self.headerScrollCallback();
-        }));
+        .on('keydown', function() {
+            console.log('shiftKey:', d3.event.keyCode);
+        })
+        .call(d3.drag()
+            .on('drag', function() {
+                self.headerScrollCallback();
+            })
+        );
+
 }
 
 /**
@@ -153,8 +164,10 @@ Track.prototype.createVerticalResizer = function() {
     let self = this;
 
     this.verticalResizer = this.root.append('div')
+        .datum(this.orderNum + "*")
         .attr('class', 'vi-track-vertical-resizer')
-        .style('width', '2px')
+        .attr('data-order-num', function(d) {return d;})
+        .style('width', '5px')
         .style('cursor', 'col-resize')
         .call(d3.drag()
             .on('start', function() {
@@ -213,7 +226,9 @@ Track.prototype.headerScrollCallback = function() {
     let rowHeight = this.headerNameBlock.node().clientHeight;
     let extraHeight = this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM;
 
-    let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
+    //let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
+    let step = this.headerContainer.node().clientHeight/40.;
+    let dy = d3.event.dy/4. || (Math.sign(d3.event.deltaY) > 0 ? (0 - step) : step);
     let top = parseInt(this.drawingHeaderContainer.style('top').replace('px', '')) + dy;
     let maxTop = rowHeight + extraHeight;
     let minTop = this.headerContainer.node().clientHeight - this.drawingHeaderContainer.node().clientHeight + extraHeight;

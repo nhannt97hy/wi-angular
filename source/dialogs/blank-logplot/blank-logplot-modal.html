@@ -23,7 +23,7 @@
             <div class="modal-footer">
                 <button
                     class='btn btn-default'
-                    ng-disabled="wiModal.disabled || !modalBlankPlot.$dirty || (modalBlankPlot.$dirty && modalBlankPlot.$invalid)"
+                    ng-disabled="wiModal.disabled || !(wiModal.name.length)"
                     ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()' data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>

@@ -13,6 +13,7 @@ function getCurveFromName(name) {
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
@@ -22,6 +23,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
+    function error(message) {
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        DialogUtils.errorMessageDialog(ModalService, message );
+    }
+    function getOrderKey() {
+        if (_tracks.length <= 0) {
+            return 'a';
+        }
+        var currentIdx = _tracks.indexOf(_currentTrack);
+        if(currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
+            currentIdx = _tracks.length - 1;
+            let currentOrderKey = _tracks[currentIdx].orderNum;
+            if ( currentOrderKey < 'z' ) {
+                var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+                console.log(key);
+                return key;
+            }
+            return null; // ERROR
+        }
+        return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
+    }
     this.getMaxOrderNum = function() {
         return _tracks.reduce(function(max, item) {
             return Math.max(max, item.orderNum);
@@ -37,16 +59,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addLogTrack = function() {
-        var logTrackOrder = self.getMaxOrderNum() + 1;
-        console.log(logTrackOrder);
-        wiApiService.createLogTrack(self.logPlotCtrl.id, logTrackOrder, function(logTrack) {
-            self.pushLogTrack(logTrack);
-        });
+        var trackOrder = getOrderKey();
+        if (trackOrder) {
+            wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(logTrack) {
+                self.pushLogTrack(logTrack);
+            });
+        }
+        else {
+            error('Cannot add Log track');
+        }
     }
 
     this.pushLogTrack = function (logTrack) {
-        let graph = wiComponentService.getComponent('GRAPH');
-        console.log(self.plotAreaId);
+        console.log('pushLogTrack:', logTrack);
         // track config
         let config = {
             id: logTrack.idTrack,
@@ -56,7 +81,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             offsetY: parseFloat(_getWellProps().topDepth)
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
+        graph.rearangeTracks();
+
         _tracks.push(track);
+        _tracks.sort(function(track1, track2) {
+            return track1.orderNum.localeCompare(track2.orderNum);
+        });
         _setCurrentTrack(track);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
@@ -93,15 +123,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addDepthTrack = function(callback) {
-        wiApiService.createDepthTrack(self.logPlotCtrl.id, self.getMaxOrderNum() + 1, function (depthTrack) {
-            console.log("Success: ", depthTrack);
-            self.pushDepthTrack(depthTrack);
-            if (callback) callback();
-        });
+        var trackOrder = getOrderKey();
+        console.log(trackOrder);
+        if (trackOrder) {
+            wiApiService.createDepthTrack(self.logPlotCtrl.id, trackOrder, function (depthTrack) {
+                console.log("Success: ", depthTrack);
+                self.pushDepthTrack(depthTrack);
+                if (callback) callback();
+            });
+        }
+        else {
+            error("Cannot create depth track");
+        }
     }
     this.pushDepthTrack = function (depthTrack) {
-        let graph = wiComponentService.getComponent('GRAPH');
-        console.log(self.plotAreaId);
+        //let graph = wiComponentService.getComponent('GRAPH');
+        console.log('pushDepthTrack:', depthTrack);
         let config = {
             id: depthTrack.idDepthAxis,
             idPlot: depthTrack.idPlot,
@@ -111,7 +148,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
 
         let track = graph.createDepthTrack(config, document.getElementById(self.plotAreaId));
+        graph.rearangeTracks();
+
         _tracks.push(track);
+        _tracks.sort(function(track1, track2) {
+            return track1.orderNum.localeCompare(track2.orderNum);
+        });
+
         _setCurrentTrack(track);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
@@ -124,7 +167,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.addCurveToTrack = function (track, data, config) {
-        console.log("add curve to trackkkkkkk",track, data,config);
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
 
@@ -203,7 +245,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             track.removeAllDrawings();
         }
 
-        let graph = wiComponentService.getComponent('GRAPH');
+        //let graph = wiComponentService.getComponent('GRAPH');
         graph.removeTrack(track, document.getElementById(self.plotAreaId));
 
         _tracks.splice(trackIdx, 1);
@@ -415,7 +457,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Remove Curve",
             icon: "curve-hide-16x16",
             handler: function () {
-                console.log( "currentCurve:", _currentTrack.getCurrentCurve() );
                 let idLine = _currentTrack.getCurrentCurve().id;
                 wiApiService.removeLine(idLine, self.removeCurrentCurve());
             }
@@ -478,6 +519,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+
+        $timeout(function() {
+            graph.sheetDraggable(document.getElementById(self.plotAreaId));
+        }, 1000)
     };
 
     var commonCtxMenu = [
@@ -488,7 +533,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
                 if (!_currentTrack) return;
-                console.log(_currentTrack);
                 if (_currentTrack.isLogTrack()) {
                     DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
                         if (props) {

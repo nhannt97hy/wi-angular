@@ -255,10 +255,12 @@ exports.BlankLogplotButtonClicked = function () {
                 $timeout(function(){
                     selectedLogplot.children.push(logplotModel);
                 });
-                utils.openLogplotTab(wiComponentService, logplotModel);
-                let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
-                wiD3Ctrl.addDepthTrack(function() {
-                    wiD3Ctrl.addLogTrack();
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotModel.properties.name).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function() {
+                        console.log("Hic hic");
+                        wiD3Ctrl.addLogTrack();
+                    });
                 });
             })
             .catch(function(err) {
