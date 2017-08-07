@@ -11,6 +11,8 @@ Utils.extend(Drawing, Curve);
  * @constructor
  * @param {Object} config - Configurations of new curve
  * @param {Number} [config.id] - The id of this line(curve) in backend (idLine field)
+ * @param {Number} [config.idCurve] - The id of this line(curve) in backend (idCurve field)
+ * @param {Number} [config.idDataset] - The id of the dataset in backend (idDataset field)
  * @param {String} [config.name] - Name of new curve
  * @param {Array} [config.data] - Data containing x, y coordinates or the curve
  * @param {String} [config.unit] - Unit of data
@@ -39,6 +41,7 @@ function Curve(config) {
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
+    this.idCurve = config.idCurve;
     this.idDataset = config.idDataset;
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';
@@ -97,6 +100,9 @@ Curve.prototype.getProperties = function() {
     let line = this.line || {};
     let symbol = this.symbol || {};
     return {
+        idLine: this.id,
+        idCurve: this.idCurve,
+        idDataset: this.idDataset,
         alias: this.alias,
         name: this.name,
         showHeader: this.showHeader,
@@ -128,6 +134,9 @@ Curve.prototype.getProperties = function() {
 Curve.prototype.setProperties = function(props) {
     let self = this;
 
+    this.id = props.idLine;
+    this.idCurve = props.idCurve;
+    this.idDataset = props.idDataset;
     this.alias = props.alias;
     this.name = props.name;
     this.showHeader = props.showHeader;
