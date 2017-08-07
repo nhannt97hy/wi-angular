@@ -677,6 +677,8 @@ exports.renameDataset = function () {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'dataset') return;
+    console.log("test", selectedNode.properties);
+
     DialogUtils.promptDialog(__GLOBAL.ModalService, "New dataset name", selectedNode.properties.name, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
@@ -689,7 +691,28 @@ exports.renameDataset = function () {
         });
     });
 }
-
+exports.createDataset = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'well') return;
+    console.log("test", selectedNode.properties);
+    DialogUtils.promptDialog(__GLOBAL.ModalService, "New dataset", selectedNode.properties.name, function (ret) {
+        if (!ret) return;
+        let wiApiService = __GLOBAL.wiApiService;
+        let datasetInfo = {
+            name: ret,
+            idWell : selectedNode.properties.idWell,
+            datasetKey : selectedNode.properties.name,
+            datasetLabel : selectedNode.properties.name
+        }
+        wiApiService.createDataset(datasetInfo, function () {
+            __GLOBAL.$timeout(function () {
+                refreshProjectState();
+            })
+        });
+    });
+}
 function downloadFile(url) {
     var filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
     var xhr = new XMLHttpRequest();
