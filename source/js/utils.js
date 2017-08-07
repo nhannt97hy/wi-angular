@@ -486,7 +486,7 @@ exports.deleteLogplot = function () {
     });
 };
 
-exports.openLogplotTab = function (wiComponentService, logplotModel) {
+exports.openLogplotTab = function (wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putWiLogPlotRight(logplotModel);
     if (logplotModel.data.opened) return;
@@ -507,11 +507,12 @@ exports.openLogplotTab = function (wiComponentService, logplotModel) {
                     tracks.push(track);
                 });
             }
-
+            /*
             tracks.sort(function(track1, track2) {
-                return track2.orderNum - track1.orderNum;
+                return track1.orderNum.localeCompare(track2.orderNum);
             });
-            let aTrack = tracks.pop();
+            */
+            let aTrack = tracks.shift();
             while( aTrack ) {
                 if (aTrack.idDepthAxis) {
                     wiD3Ctrl.pushDepthTrack(aTrack);
@@ -526,8 +527,9 @@ exports.openLogplotTab = function (wiComponentService, logplotModel) {
                         });
                     });
                 }
-                aTrack = tracks.pop();
+                aTrack = tracks.shift();
             }
+            if (callback) callback();
         });
 };
 

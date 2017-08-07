@@ -571,7 +571,7 @@ exports.familyEditDialog = function (ModalService, callback) {
 exports.newBlankLogplotDialog = function (ModalService, callback) {
     function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
         let self = this;
-        // self.name = "BlankLogPlot";
+        self.name = "BlankLogPlot";
         self.error = null;
         self.disabled = false;
 

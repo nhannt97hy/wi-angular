@@ -11,7 +11,6 @@ Utils.extend(Track, DepthTrack);
  * @param {Object} config - Contain configurations.
  * @param {Number} [config.id] - The id of this track in backend (idDepthAxis field)
  * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
- * @param {Number} [config.orderNum] - The order of this track in the plot (orderNum field)
  * @param {Boolean} [config.showTitle] - Flag to indicate whether to show title
  * @param {Boolean} [config.justification] - Alignment of the title (left, center, right)
  * @param {String} [config.name] - Name of the track
@@ -30,7 +29,6 @@ function DepthTrack(config) {
     Track.call(this, config);
 
     this.id = config.id;
-    this.orderNum = config.orderNum;
 
     this.name = config.name || 'Depth';
     this.width = config.width || 60;
