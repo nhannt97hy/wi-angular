@@ -76,6 +76,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.onReady = function () {
         parentHeight = parseInt($(self.contentId).height());
+        self.parentHeight = parentHeight;
         let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
 
         self.tinyWindow = {
@@ -121,7 +122,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).on("mousewheel", onMouseWheel);
 
         function onMouseWheel(event) {
-            let tempTopHandler = self.tinyWindow.top + event.deltaY;
+            let tempTopHandler = self.tinyWindow.top - event.deltaY;
 
             if (tempTopHandler < 0) {
                 tempTopHandler = 0;
@@ -145,6 +146,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         this.refreshHandler = function() {
             parentHeight = parseInt($(self.contentId).height());
+            self.parentHeight = parentHeight;
             self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
         }
 
