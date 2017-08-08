@@ -12,6 +12,7 @@ const GET_PROJECT = '/project/fullinfo';
 const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
 
+const CREATE_DATASET = '/project/well/dataset/new';
 const EDIT_DATASET = '/project/well/dataset/edit';
 const DELETE_DATASET = '/project/well/dataset/delete';
 
@@ -288,7 +289,15 @@ Service.prototype.removeWell = function(idWell, callback) {
             self.getUtils().error(err);
         });
 }
-
+Service.prototype.createDataset = function (infoDataset, callback) {
+    let self = this;
+    let dataRequest = infoDataset;
+    this.post(CREATE_DATASET, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 Service.prototype.editDataset = function (infoDataset, callback) {
     let self = this;
     this.post(EDIT_DATASET, infoDataset)
@@ -313,6 +322,7 @@ Service.prototype.removeDataset = function(idDataset, callback) {
 Service.prototype.createCurve = function (curveInfo, callback) {
     let self = this;
     console.log(curveInfo);
+    if (!curveInfo.initValue) curveInfo.initValue = '-2810';
     this.post(CREATE_CURVE, curveInfo)
         .then(function (curve) {
             console.log("curve created", curve);
@@ -437,15 +447,26 @@ Service.prototype.removeLine = function(idLine, callback) {
 }
 Service.prototype.editTrack = function(trackObj, callback) {
     var self = this;
-    this.post(EDIT_TRACK, trackObj)
+    let dataRequest = trackObj;
+    this.post(EDIT_TRACK, dataRequest)
         .then(callback)
         .catch(function(err) {
             self.getUtils().error(err);
         });
 }
+Service.prototype.createLine = function (lineObj, callback) {
+    var self = this;
+    let dataRequest = lineObj;
+    this.post(CREATE_LINE, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 Service.prototype.editLine = function (lineObj, callback) {
     var self = this;
-    this.post(EDIT_LINE, lineObj)
+    let dataRequest = lineObj;
+    this.post(EDIT_LINE, dataRequest)
         .then(callback)
         .catch(function (err) {
             self.getUtils().error(err);

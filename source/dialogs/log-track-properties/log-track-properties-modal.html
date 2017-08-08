@@ -192,60 +192,70 @@
                                         <tbody>
                                             <tr ng-repeat="curve in wiModal.curves"
                                                 ng-class="{selected:$index == selectedRow}"
-                                                ng-click="wiModal.setClickedRowCurve($index)">
+                                                ng-click="wiModal.setClickedRow($index)">
                                                 <td>
-                                                    <input type="text" ng-model="curve.alias" name="curveName"
+                                                    <!-- <input type="text" ng-model="curve.alias" name="curveName"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.curvesChanged[$index] = true;">
-                                                    </input>
+                                                            ng-change="wiModal.onChange($index);">
+                                                    </input> -->
+                                                    <!-- <select ng-model="wiModal.selectCurveArr[$index].properties.datasetName + '.' + wiModal.selectCurveArr[$index].properties.name;"
+                                                            name="curveName"
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item.properties.datasetName + '.' + item.properties.name for item in wiModal.curvesArr track by item.id"
+                                                            ng-change="wiModal.onChange($index);"></select> -->
+                                                    <select ng-model="wiModal.selectCurveArr[$index]"
+                                                            name="curveName"
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item for item in wiModal.selectCurveArr"
+                                                            ng-change="wiModal.onChange($index);"></select>
                                                 </td>
 
                                                 <td>
                                                     <input type="text" ng-model="curve.alias"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.curvesChanged[$index] = true;">
+                                                           ng-change="wiModal.onChange($index);">
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="curve.minValue"
+                                                    <input type="number" ng-model="curve.minValue"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.curvesChanged[$index] = true;">
+                                                           ng-change="wiModal.onChange($index);">
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="curve.maxValue"
+                                                    <input type="number" ng-model="curve.maxValue"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.curvesChanged[$index] = true;">
+                                                           ng-change="wiModal.onChange($index);">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayType" name="log"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.logLinear track by item"
-                                                            ng-change="wiModal.curvesChanged[$index] = true;"></select>
+                                                            ng-change="wiModal.onChange($index);"></select>
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayMode" name="displayMode"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayMode track by item"
-                                                            ng-change="wiModal.curvesChanged[$index] = true;"></select>
+                                                            ng-change="wiModal.onChange($index);"></select>
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.lineOptions"
                                                             type="button" value="Edit..." id="editLine" 
                                                             class="form-control wi-form-control"
                                                             ng-click="wiModal.lineStyleButtonClicked($index)"
-                                                            ng-change="wiModal.curvesChanged[$index] = true;">
+                                                            ng-change="wiModal.onChange($index);">
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.symbolOptions"
                                                             type="button" value="Edit..." id="editSymbol" 
                                                             class="form-control wi-form-control"
                                                             ng-click="wiModal.symbolStyleButtonClicked($index)"
-                                                            ng-change="wiModal.curvesChanged[$index] = true;">
+                                                            ng-change="wiModal.onChange($index);">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayAs" name="displayAs"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayAs track by item"
-                                                            ng-change="wiModal.curvesChanged[$index] = true;"></select>
+                                                            ng-change="wiModal.onChange($index);"></select>
                                                 </td>       
                                             </tr>
                                             <!-- <tr ng-model="curve"
@@ -302,7 +312,7 @@
                                     </table>
                                 </div>
                                 <div class="width-5-percent float-left padding-left-5px">
-                                    <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                                    <button class="btn btn-default" ng-click="wiModal.removeRowCurve();">
                                             <span class="delete-16x16"></span>
                                         </button>
                                     <button class="btn btn-default" ng-click="wiModal.addRow();">

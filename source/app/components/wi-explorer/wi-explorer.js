@@ -239,6 +239,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "New Dataset",
                         icon: "dataset-new-16x16",
                         handler: function () {
+                            utils.createDataset();
                         }
                     }, {
                         name: "ZoneManager",
