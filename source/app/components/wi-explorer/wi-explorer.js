@@ -506,7 +506,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ]
-            case 'crossplot':
+            case 'crossplots':
                 return [
                     {
                         name: "NewCrossPlot ...",
@@ -520,6 +520,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Blank Cross Plot",
                                 icon: "crossplot-new-16x16",
                                 handler: function () {
+                                    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+                                    globalHandlers.BlankCrossplotButtonClicked();
                                 }
                             }, {
                                 separator: '1'
@@ -591,6 +593,34 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 }
                             }
                         ]
+                    }, {
+                        separator: '1'
+                    }
+                ];
+            case 'crossplot':
+                return [
+                    {
+                        name: "Open",
+                        label: "Open",
+                        icon: "play-16x16",
+                        handler: function() {
+                            let crossplotModel = utils.getSelectedNode();
+                            utils.openCrossplotTab(wiComponentService, crossplotModel);
+                        }
+                    }, {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16-edit",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                           
+                        }
                     }, {
                         separator: '1'
                     }

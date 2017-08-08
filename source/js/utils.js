@@ -157,6 +157,47 @@ function logplotToTreeConfig(plot) {
 }
 exports.logplotToTreeConfig = logplotToTreeConfig;
 
+
+function crossplotToTreeConfig(plot) {
+    var plotModel = new Object();
+    plotModel.name = 'logplot';
+    plotModel.type = 'logplot';
+    plotModel.id = plot.idPlot;
+    plotModel.properties = {
+        idWell: plot.idWell,
+        idPlot: plot.idPlot,
+        name: plot.name
+    };
+    plotModel.data = {
+        childExpanded: false,
+        icon: 'crossplot-blank-16x16',
+        label: plot.name
+    }
+    
+    return plotModel;
+}
+exports.crossplotToTreeConfig = crossplotToTreeConfig;
+
+function histogramToTreeConfig(plot) {
+    var plotModel = new Object();
+    plotModel.name = 'logplot';
+    plotModel.type = 'logplot';
+    plotModel.id = plot.idPlot;
+    plotModel.properties = {
+        idWell: plot.idWell,
+        idPlot: plot.idPlot,
+        name: plot.name
+    };
+    plotModel.data = {
+        childExpanded: false,
+        icon: 'histogram-blank-16x16',
+        label: plot.name
+    }
+    
+    return plotModel;
+}
+exports.histogramToTreeConfig = histogramToTreeConfig;
+
 function curveToTreeConfig(curve) {
     var curveModel = new Object();
     curveModel.name = 'curve';
@@ -230,7 +271,40 @@ function createLogplotNode(well) {
 
     return logplotModel;
 }
+function createCrossplotNode(well) {
+    let crossplotModel = new Object();
+    crossplotModel.name = 'crossplot';
+    crossplotModel.type = 'crossplot';
+    crossplotModel.data = {
+        childExpanded: false,
+        icon: 'crossplot-blank-16x16',
+        label: 'Crossplot'
+    };
+    crossplotModel.properties = {
+        idWell: well.idWell
+    };
+    // crossplotModel.children = new Array();
+    // if(!well.plots) return crossplotModel;
+    // well.plots.forEach(function(plot) {
+    //     crossplotModel.children.push(crossplotToTreeConfig(plot));
+    // });
 
+    return crossplotModel;
+}
+function createHistogramNode(well) {
+    let histogramModel = new Object();
+    histogramModel.name = 'histogram';
+    histogramModel.type = 'histogram';
+    histogramModel.data = {
+        childExpanded: false,
+        icon: 'histogram-blank-16x16',
+        label: 'Histogram'
+    };
+    histogramModel.properties = {
+        idWell: well.idWell
+    };
+    return histogramModel;
+}
 function wellToTreeConfig(well) {
     var wellModel = new Object();
     wellModel.name = "well";
@@ -258,7 +332,10 @@ function wellToTreeConfig(well) {
         });
     }
     let logplotNode = createLogplotNode(well);
+    let crossplotNode = createCrossplotNode(well);
     wellModel.children.push(logplotNode);
+    wellModel.children.push(crossplotNode);
+
     return wellModel;
 }
 exports.wellToTreeConfig = wellToTreeConfig;
@@ -467,7 +544,26 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     };
     return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
-
+exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'crossplots') return;
+    let dataRequest = {
+        idWell: selectedNode.properties.idWell,
+        name: crossplotName,
+        option: 'blank-plot'
+    };
+    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
+};
+exports.createNewBlankHistogram = function (wiComponentService, wiApiService, histogramName) {
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'histograms') return;
+    let dataRequest = {
+        idWell: selectedNode.properties.idWell,
+        name: histogramName,
+        option: 'blank-plot'
+    };
+    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
+};
 exports.deleteLogplot = function () {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'logplot') return;

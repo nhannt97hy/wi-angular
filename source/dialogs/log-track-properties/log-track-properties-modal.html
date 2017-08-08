@@ -203,7 +203,7 @@
                                                             class="form-control wi-form-control"
                                                             ng-options="item.properties.datasetName + '.' + item.properties.name for item in wiModal.curvesArr track by item.id"
                                                             ng-change="wiModal.onChange($index);"></select> -->
-                                                    <select ng-model="wiModal.selectCurveArr[$index]"
+                                                    <select ng-model="wiModal.lineCurve[$index].datasetCurve"
                                                             name="curveName"
                                                             class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.selectCurveArr"

@@ -126,18 +126,24 @@ exports.ZoomOutButtonClicked = function() {
 exports.CropDisplayButtonClicked = function() {
     console.log('CropDisplayButton is clicked');
 };
+exports.RangeSpecificButtonClicked = function() {
+    let self = this;
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    DialogUtils.rangeSpecificDialog(this.ModalService, this.wiLogplot, function () {
+       console.log("RangeFrom");
+    });
+}
+// exports.RangeFromButtonClicked = function() {
+//     console.log('RangeFromButton is clicked');
+// };
 
-exports.RangeFromButtonClicked = function() {
-    console.log('RangeFromButton is clicked');
-};
+// exports.RangeToButtonClicked = function() {
+//     console.log('RangeToButton is clicked');
+// };
 
-exports.RangeToButtonClicked = function() {
-    console.log('RangeToButton is clicked');
-};
-
-exports.RangeOkButtonClicked = function() {
-    console.log('RangeOkButton is clicked');
-};
+// exports.RangeOkButtonClicked = function() {
+//     console.log('RangeOkButton is clicked');
+// };
 
 exports.ViewWholeWellButtonClicked = function() {
     console.log('ViewWholeWellButton is clicked');

@@ -44,6 +44,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
+
+    this.getDepthRange = function() {
+        return _depthRange;
+    }
+
     this.getMaxOrderNum = function() {
         return _tracks.reduce(function(max, item) {
             return Math.max(max, item.orderNum);

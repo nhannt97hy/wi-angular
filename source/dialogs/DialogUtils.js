@@ -869,6 +869,12 @@ exports.symbolStyleDialog = function (ModalService, callback, options) {
                     lineDash: [10, 0]
                 }
             }*/
+        $(function() {
+            $('#testColor').colorpicker({
+                format: "rgba",
+                horizontal: true
+            });
+        });
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -1528,7 +1534,17 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         })
         let curveList = currentTrack.getCurves();
         console.log("curveList", curveList);
-        this.selectCurveArr = [];
+        this.selectCurveArr = []; // select Curve in all dataset
+
+        this.arr = []; //curvesArr + dataset.curve
+        this.lineCurve = [];
+
+        this.curvesArr.forEach(function(item) {
+            let selectedCurve = item.properties.datasetName + '.' + item.properties.name;
+            self.selectCurveArr.push(selectedCurve);
+            item.datasetCurve = selectedCurve;
+            self.arr.push(item);
+        })
         // this.selectCurveLine = function(index){
         //     let selectedCurve;
         //     self.curvesArr.forEach(function(item) {
@@ -1549,12 +1565,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let symbolOptions = {};
             curveOptions = utils.curveOptions(currentTrack, curve);
 
-            let selectedCurve;
-            self.curvesArr.forEach(function(item) {
+            self.arr.forEach(function(item) {
                 if(curve.idCurve == item.id) {
-                    console.log("222");
-                    selectedCurve = item.properties.datasetName + '.' + item.properties.name;
-                    self.selectCurveArr.push(selectedCurve);
+                    self.lineCurve.push(item); 
                 }
             })
 
@@ -1612,7 +1625,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curvesChanged.push('0');
         });
 
-        console.log("RRRR", this.selectCurveArr, this.curvesArr);
+        console.log("RRRR", this.selectCurveArr, this.arr);
 
         this.well.children.forEach( function(child) {
             if(child.type == 'dataset') self.datasets.push(child);
@@ -1714,6 +1727,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         this.onChange = function (index) {
             if(self.curvesChanged[index] == '0') self.curvesChanged[index] = '1';
+            // if(self.curvesChanged[index] == '2')
         }
         this.addRow = function () {
 
@@ -1779,7 +1793,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     updateLine(index);
                 }
                 if(item == '2') {
-                    console.log("createLine");
+                    console.log("createLine", index);
                     // let lineObj = {
                     //     idCurve : curveList[index].idCurve,
                     //     idTrack : currentTrack.id
@@ -2006,3 +2020,65 @@ exports.aboutDialog = function (ModalService, callback) {
         })
     });
 };
+exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        let wiD3Ctr = wiLogplot.getwiD3Ctrl();
+        this.depthRange = wiD3Ctr.getDepthRange();
+        
+        this.onOkButtonClicked = function() {
+            wiD3Ctr.setDepthRange(self.depthRange);
+            close(self);
+        }
+        this.onCancelButtonClicked = function () {
+            console.log('onCancelButtonClicked');
+            wiD3Ctr.setDepthRange(self.depthRange);
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'range-specific/range-specific-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (data) {
+                callback(data);
+            }
+        })
+    });
+};
+exports.newBlankCrossplotDialog = function (ModalService, callback) {
+    function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
+        let self = this;
+        self.name = "BlankCrossPlot";
+        self.error = null;
+        self.disabled = false;
+
+        this.onOkButtonClicked = function () {
+            close(self.name);
+        }
+
+    }
+
+    ModalService.showModal({
+        templateUrl: "blank-crossplot/blank-crossplot-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        modal.close.then(function (newPlot) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (callback) callback(newPlot);
+        });
+    });
+}
