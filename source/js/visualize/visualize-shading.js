@@ -230,29 +230,8 @@ Shading.prototype.doPlot = function(highlight) {
         ctx.clearRect(0, 0, rect.width, rect.height);
         ctx.lineWidth = 0;
         plotSamples.forEach(function(clustered) {
-
-            let leftSide = self.leftCurve ? self.leftCurve.calculateDataForBlockPosition(clustered[0]) : clustered[0];
-            let rightSide = self.rightCurve ? self.rightCurve.calculateDataForBlockPosition(clustered[1]) : clustered[1];
-            let data = leftSide.concat(rightSide.reverse());
-
-            // Draw negative regions
-            ctx.save();
-            ctx.beginPath();
-            ctx.fillStyle = negFill;
-            drawCurveLine(ctx, data);
-            ctx.clip();
-            ctx.fillRect(0, 0, vpRefX, rect.height);
-            ctx.restore();
-
-            // Draw postive regions
-            ctx.save();
-            ctx.beginPath();
-            ctx.fillStyle = posFill;
-            drawCurveLine(ctx, data);
-            ctx.clip();
-            ctx.fillRect(vpRefX, 0, rect.width - vpRefX, rect.height);
-            ctx.restore();
-        })
+            drawCluster(self, clustered, negFill, posFill);
+        });
 
         drawHeader(self);
         drawRefLine(self);
@@ -310,6 +289,55 @@ Shading.prototype.getTransformX = function(curve) {
     return curve.getScaleFunc()()
         .domain(curve.getWindowX())
         .range([0, this.root.node().clientWidth]);
+}
+
+function drawCluster(shading, clustered, negFill, posFill) {
+    let leftSide = clustered[0],
+        rightSide = clustered[1],
+        leftTranslateX = [],
+        rightTranslateX = [];
+
+    if (shading.leftCurve) {
+        leftSide = shading.leftCurve.calculateDataForBlockPosition(leftSide);
+        leftTranslateX = shading.leftCurve.getCanvasTranslateXForWrapMode();
+    }
+    if (shading.rightCurve) {
+        rightSide = shading.rightCurve.calculateDataForBlockPosition(rightSide);
+        rightTranslateX = shading.rightCurve.getCanvasTranslateXForWrapMode();
+    }
+    let data = leftSide.concat(rightSide.reverse());
+    let translateX = Utils.uniq(leftTranslateX.concat(rightTranslateX));
+    let ctx = shading.ctx;
+    translateX.forEach(function(trX) {
+        ctx.save();
+        ctx.translate(trX, 0);
+        drawNegAndPosRegions(shading, data, negFill, posFill, trX);
+        ctx.restore();
+    });
+}
+
+function drawNegAndPosRegions(shading, data, negFill, posFill, trX) {
+    let ctx = shading.ctx;
+    let rect = shading.root.node().getBoundingClientRect();
+    let vpRefX = shading.vpX.ref;
+
+    // Draw negative regions
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = negFill;
+    drawCurveLine(ctx, data);
+    ctx.clip();
+    ctx.fillRect(-trX, 0, vpRefX, rect.height);
+    ctx.restore();
+
+    // Draw postive regions
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = posFill;
+    drawCurveLine(ctx, data);
+    ctx.clip();
+    ctx.fillRect(vpRefX - trX, 0, rect.width - vpRefX, rect.height);
+    ctx.restore();
 }
 
 function drawCurveLine(ctx, data) {

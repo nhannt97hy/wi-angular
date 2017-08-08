@@ -120,7 +120,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('focus', function() {
             _setCurrentTrack(track);
         });
-        track.on('keypress', function() {
+        track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
         });
         _registerTrackHorizontalResizerDragCallback();
@@ -406,6 +406,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _onTrackKeyPressCallback(track) {
         if (!d3.event) return;
         switch (d3.event.key) {
+            case 'Backspace':
             case 'Delete':
                 if (track.removeCurrentDrawing) track.removeCurrentDrawing();
                 return;

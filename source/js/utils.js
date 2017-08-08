@@ -506,10 +506,11 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.dragging = false;
             let wiD3Ctrl = dragMan.wiD3Ctrl;
             let track = dragMan.track;
+            let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
+            let idCurve = ui.helper.attr('data');
             if (wiD3Ctrl && track) {
-                let idCurve = ui.helper.attr('data');
                 apiService.post(apiService.CREATE_LINE, { idTrack: track.id, idCurve: idCurve })
                     .then(function(line){
                         console.log('line created', line);
@@ -522,6 +523,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                         wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                         return;
                     });
+                return;
+            }
+            if (wiSlidingBarCtrl) {
+                wiSlidingBarCtrl.createPreview1(idCurve);
             }
         },
         appendTo: 'body',

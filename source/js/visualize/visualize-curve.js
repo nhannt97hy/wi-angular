@@ -24,6 +24,7 @@ Utils.extend(Drawing, Curve);
  * @param {String} [config.alias] - Text to show on header
  * @param {Boolean} [config.showHeader] - Flag to show or hide header
  * @param {String} [config.blockPosition] - Display curve as blocks with the data point at specified position (start, middle, end, none)
+ * @param {String} [config.wrapMode] - Wrap outliers to specified side of the plot (left, right, both, none)
  * @param {Object} [config.line] - Configuration to draw line
  * @param {String} [config.line.color] - Line color
  * @param {Number} [config.line.width] - Line width
@@ -58,6 +59,7 @@ function Curve(config) {
     this.showHeader = (config.showHeader == null) ? true : config.showHeader;
 
     this.blockPosition = config.blockPosition || 'none';
+    this.wrapMode = config.wrapMode || 'none';
 
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
@@ -111,7 +113,7 @@ Curve.prototype.getProperties = function() {
         maxValue: this.maxX,
         autoValueScale: false,
         diplayMode: getDisplayMode(),
-        wrapMode: 'None',
+        wrapMode: Utils.capitalize(this.wrapMode),
         blockPosition: Utils.capitalize(this.blockPosition),
         ignoreMissingValues: false,
         displayType: Utils.capitalize(this.scale),
@@ -144,6 +146,7 @@ Curve.prototype.setProperties = function(props) {
     this.maxX = props.maxValue;
     this.scale = Utils.capitalize(props.displayType);
     this.blockPosition = Utils.lowercase(props.blockPosition);
+    this.wrapMode = Utils.lowercase(props.wrapMode);
 
     if (props.displayMode == 'Both' || props.displayMode == 'Line') {
         this.line = {
@@ -300,7 +303,8 @@ Curve.prototype.doPlot = function(highlight) {
         return Utils.isWithinYRange(item, windowY);
     });
     if (plotSamples.length == 0) return;
-    this.ctx.clearRect(0, 0, rect.width, rect.height);
+    let ctx = this.ctx;
+    ctx.clearRect(0, 0, rect.width, rect.height);
 
     Utils.clusterData(plotSamples).forEach(function(clustered) {
         let data = clustered.map(function(s) {
@@ -310,10 +314,15 @@ Curve.prototype.doPlot = function(highlight) {
             }
         });
 
-        if (self.line)
-            plotLine(self, data, highlight);
-        if (self.symbol)
-            plotSymbol(self, data, highlight);
+        self.getCanvasTranslateXForWrapMode().forEach(function(translateX) {
+            ctx.save();
+            ctx.translate(translateX, 0);
+            if (self.line)
+                plotLine(self, data, highlight);
+            if (self.symbol)
+                plotSymbol(self, data, highlight);
+            ctx.restore();
+        });
     });
 
     return this;
@@ -337,6 +346,20 @@ Curve.prototype.updateHeader = function() {
             if (i == 1) elem.text(self.unit);
             if (i == 2) elem.text(self.maxX);
         })
+}
+
+Curve.prototype.getCanvasTranslateXForWrapMode = function() {
+    let width = this.root.node().clientWidth;
+    let wrapMode = Utils.lowercase(this.wrapMode);
+    let ret = [];
+
+    ret.push(0);
+    if (wrapMode == 'left' || wrapMode == 'both')
+        ret.push(-width);
+    if (wrapMode == 'right' || wrapMode == 'both')
+        ret.push(width);
+
+    return ret;
 }
 
 Curve.prototype.calculateDataForBlockPosition = function(originData) {
