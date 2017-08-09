@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.close('Cancel')" data-dismiss="modal"
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()"
                         aria-hidden="true">&times;
                 </button>
                 <h4 class="modal-title"><span class="project-new-16x16"></span>&nbsp;New Project</h4>
@@ -53,8 +53,8 @@
                         ng-click="wiModal.onOkButtonClicked()">
                     <span class="ok-16x16"></span>&nbsp;OK
                 </button>
-                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default"
-                        data-dismiss="modal"><span class="close-16x16"></span>&nbsp;Cancel
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default">
+                    <span class="close-16x16"></span>&nbsp;Cancel
                 </button>
             </div>
         </div>
