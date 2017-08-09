@@ -116,7 +116,11 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
                 y: d.y
             }
         })
-        wiD3Ctrl.addCurveToTrack(track, data, {});
+        wiD3Ctrl.addCurveToTrack(track, data, {
+            wrapMode: 'Both',
+            minX: 1.2,
+            maxX: 1.8
+        });
     }
 
     $scope.changeColor = function() {
@@ -134,7 +138,6 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     $scope.addLeftShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
         wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {
-            leftX: 0.4,
             fill: {
                 pattern: {
                     foreground: 'red',

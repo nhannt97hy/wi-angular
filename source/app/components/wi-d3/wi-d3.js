@@ -44,6 +44,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
+
+    this.getDepthRange = function() {
+        return _depthRange;
+    }
+
     this.getMaxOrderNum = function() {
         return _tracks.reduce(function(max, item) {
             return Math.max(max, item.orderNum);
@@ -122,7 +127,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('focus', function() {
             _setCurrentTrack(track);
         });
-        track.on('keypress', function() {
+        track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
         });
         _registerTrackHorizontalResizerDragCallback();
@@ -409,6 +414,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _onTrackKeyPressCallback(track) {
         if (!d3.event) return;
         switch (d3.event.key) {
+            case 'Backspace':
             case 'Delete':
                 if (track.removeCurrentDrawing) track.removeCurrentDrawing();
                 return;

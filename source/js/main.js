@@ -33,7 +33,8 @@ let graph = require('./visualize/visualize');
 let dragMan = {
     dragging: false,
     wiD3Ctrl: null,
-    track: null
+    track: null,
+    wiSlidingBarCtrl: null
 };
 
 let wiElementReady = require('./wi-element-ready');

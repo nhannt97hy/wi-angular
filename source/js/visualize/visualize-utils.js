@@ -16,8 +16,15 @@ exports.capitalize = capitalize;
 exports.lowercase = lowercase;
 exports.uppercase = uppercase;
 exports.convertColorToRGB = convertColorToRGB;
+exports.uniq = uniq;
 
-function convertColorToRGB (color) {
+function uniq(array) {
+    return array.filter(function(item, i) {
+        return array.indexOf(item) == i;
+    })
+}
+
+function convertColorToRGB(color) {
     let d3Color = d3.color(color);
     if (!d3Color) return null;
     return d3Color.toString();

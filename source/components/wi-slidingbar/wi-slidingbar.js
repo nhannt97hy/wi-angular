@@ -5,7 +5,7 @@ const MIN_RANGE = 1;
 
 function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
-
+    let _viCurve = null;
     let parentHeight = 0;
     this.tinyWindow = {
         top: 0,
@@ -17,9 +17,35 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         range: MIN_RANGE
     };
 
-    function createPreview() {
-        let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    function createPreview1(idCurve) {
+        let logPlotName = self.name.replace('Slidingbar', '');
+        let logPlotCtrl = wiComponentService.getComponent(logPlotName);
+        let logplotId = logPlotCtrl.id;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        let well = utils.findWellByLogplot(logplotId);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+        let minY = parseFloat(well.properties.topDepth);
+        let maxY = parseFloat(well.properties.bottomDepth);
+        let stepY = parseFloat(well.properties.step);
+        console.log('%%%%%%%%%%%%%%%');
+        utils.getCurveData(wiApiService, idCurve, function(err, data) {
+            let config = {
+                minY: minY,
+                maxY: maxY,
+                yStep: stepY,
+                offsetY: minY,
+                line: {
+                    color: 'blue'
+                }
+            }
+            if (_viCurve) _viCurve.destroy();
+            _viCurve = graph.createCurve(config, data, d3.select(self.contentId));
+            _viCurve.doPlot();
+        });
+    }
+    this.createPreview1 = createPreview1;
+    function createPreview() {
         let logPlotName = self.name.replace('Slidingbar', '');
         let logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -27,7 +53,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let well = utils.findWellByLogplot(logplotId);
         if (!well) return;
         let firstCurve = well.children[0].children[0];
-        utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
+
+        createPreview1(firstCurve.properties.idCurve);
+
+        /*utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
             let config = {
                 minY: parseFloat(well.properties.topDepth),
                 maxY: parseFloat(well.properties.bottomDepth),
@@ -39,7 +68,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             }
             let viCurve = graph.createCurve(config, data, d3.select(self.contentId));
             viCurve.doPlot();
-        });
+        });*/
     }
 
     function update(ui) {
@@ -121,6 +150,19 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.contentId).on("mousewheel", onMouseWheel);
         $(self.handleId).on("mousewheel", onMouseWheel);
 
+        console.log('**********:',$(self.contentId));
+
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        $(self.contentId).on('mouseover', function() {
+            console.log('mouseover');
+            dragMan.wiSlidingBarCtrl = self;
+        });
+
+        $(self.contentId).on('mouseleave', function() {
+            console.log('mouseleave');
+            dragMan.wiSlidingBarCtrl = null;
+        });
+
         function onMouseWheel(event) {
             let tempTopHandler = self.tinyWindow.top - event.deltaY;
 
@@ -185,6 +227,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             let newTop = self.slidingBarState.top - deltaRange;
             self.updateSlidingHandlerByPercent(newTop, newRange);
         };
+
     };
 }
 
