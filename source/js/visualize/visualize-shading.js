@@ -290,14 +290,8 @@ Shading.prototype.prepareData = function(curve) {
         .getBoundingClientRect();
 
     let windowY = this.getWindowY();
-    let scaleX = curve.getScaleFunc();
-    let transformX = scaleX()
-        .domain(curve.getWindowX())
-        .range([0, rect.width]);
-
-    let transformY = d3.scaleLinear()
-        .domain(windowY)
-        .range([0, rect.height]);
+    let transformX = this.getTransformX(curve);
+    let transformY = this.getTransformY();
 
     if (curve == this.leftCurve && this.leftX != null)
         this.vpX.left = transformX(this.leftX);
@@ -320,9 +314,7 @@ Shading.prototype.prepareData = function(curve) {
 }
 
 Shading.prototype.getTransformX = function(curve) {
-    return curve.getScaleFunc()()
-        .domain(curve.getWindowX())
-        .range([0, this.root.node().clientWidth]);
+    return curve.getTransformX();
 }
 
 Shading.prototype.getTransformY = function() {

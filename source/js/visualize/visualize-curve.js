@@ -210,17 +210,6 @@ Curve.prototype.getExtentY = function() {
 }
 
 /**
- * Get scale function of curve
- * @returns {Function} d3 scale function
- */
-Curve.prototype.getScaleFunc = function() {
-    return {
-        'Linear': d3.scaleLinear,
-        'Logarithmic': d3.scaleLog
-    }[this.scale];
-}
-
-/**
  * Auto set x window by x extent
  * @param {Number} granularity - level of detail to round
  */
@@ -279,6 +268,52 @@ Curve.prototype.getAllColors = function() {
 }
 
 /**
+ * Get transform function for x coordinate
+ */
+Curve.prototype.getTransformX = function() {
+    let rect = this.root.node().getBoundingClientRect();
+    let windowX = this.getWindowX();
+    let self = this;
+
+    switch(Utils.lowercase(this.scale)) {
+        case 'linear':
+            return d3.scaleLinear()
+                .domain(windowX)
+                .range([0, rect.width]);
+        case 'logarithmic':
+            let minX = d3.min(self.getExtentX().concat(self.getWindowX()));
+            function toPositive(val) {
+                return val - minX + 0.01;
+            }
+            function fromPositive(val) {
+                return val + minX - 0.01;
+            }
+            let d3LogFunc = d3.scaleLog()
+                .domain([toPositive(windowX[0]), toPositive(windowX[1])])
+                .range([0, rect.width]);
+
+            function logFunc(x) {
+                return d3LogFunc(toPositive(x));
+            }
+            logFunc.prototype.invert = function(x) {
+                return d3LogFunc.invert(fromPositive(x));
+            }
+            return logFunc;
+    }
+}
+
+/**
+ * Get transform function for y coordinate
+ */
+Curve.prototype.getTransformY = function() {
+    let rect = this.root.node().getBoundingClientRect();
+    let windowY = this.getWindowY();
+    return d3.scaleLinear()
+        .domain(windowY)
+        .range([0, rect.height]);
+}
+
+/**
  * Actually draw the curve
  * @param {Boolean} highlight
  */
@@ -288,17 +323,9 @@ Curve.prototype.doPlot = function(highlight) {
     this.adjustSize(rect);
     this.updateHeader();
 
-    let windowX = this.getWindowX();
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
     let windowY = this.getWindowY();
-
-    let scaleFunc = this.getScaleFunc();
-    let transformX = scaleFunc()
-        .domain(windowX)
-        .range([0, rect.width]);
-
-    let transformY = d3.scaleLinear()
-        .domain(windowY)
-        .range([0, rect.height]);
 
     let plotSamples = this.data.filter(function(item) {
         return Utils.isWithinYRange(item, windowY);
@@ -314,7 +341,6 @@ Curve.prototype.doPlot = function(highlight) {
                 y: transformY(s.y)
             }
         });
-
         self.getCanvasTranslateXForWrapMode().forEach(function(translateX) {
             ctx.save();
             ctx.translate(translateX, 0);
