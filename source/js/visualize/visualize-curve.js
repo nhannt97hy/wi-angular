@@ -400,14 +400,24 @@ Curve.prototype.calculateDataForBlockPosition = function(originData) {
     return data;
 }
 
+Curve.prototype.addHighlightEffect = function() {
+    let ctx = this.ctx;
+    ctx.shadowColor = Utils.convertColorToRGB(ctx.strokeStyle) || 'black';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.shadowBlur = 2;
+}
+
+
 function plotLine(curve, data, highlight) {
     if (typeof curve.line != 'object') return;
     let ctx = curve.ctx;
     let line = curve.line;
     ctx.save();
 
-    ctx.strokeStyle = highlight ? 'red' : (line.color || 'blue');
+    ctx.strokeStyle = line.color || 'blue';
     ctx.lineWidth = line.width || '1';
+    if (highlight) curve.addHighlightEffect();
     if (line.dash) ctx.setLineDash(line.dash);
 
     let samples = curve.calculateDataForBlockPosition(data);
@@ -427,12 +437,13 @@ function plotSymbol(curve, data, highlight) {
     let symbol = curve.symbol;
 
     let helper = new CanvasHelper(ctx, {
-        strokeStyle: highlight ? 'red' : symbol.strokeStyle,
+        strokeStyle: symbol.strokeStyle,
         fillStyle: symbol.fillStyle,
         lineWidth: symbol.lineWidth,
         lineDash: symbol.lineDash,
         size: symbol.size
-    })
+    });
+    if (highlight) curve.addHighlightEffect();
 
     let plotFunc = helper[symbol.style.toLowerCase()];
     if (typeof plotFunc != 'function') return;

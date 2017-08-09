@@ -229,11 +229,11 @@ Shading.prototype.doPlot = function(highlight) {
         }
 
         ctx.clearRect(0, 0, rect.width, rect.height);
-        ctx.lineWidth = 0;
+        ctx.save();
         plotSamples.forEach(function(clustered) {
-            drawCluster(self, clustered, negFill, posFill);
+            drawCluster(self, clustered, negFill, posFill, highlight);
         });
-
+        ctx.restore();
         drawHeader(self);
         drawRefLine(self);
         self.canvas.lower();
@@ -331,7 +331,7 @@ Shading.prototype.getTransformY = function() {
         .range([0, this.root.node().clientHeight]);
 }
 
-function drawCluster(shading, clustered, negFill, posFill) {
+function drawCluster(shading, clustered, negFill, posFill, highlight) {
     let leftSide = clustered[0],
         rightSide = clustered[1],
         leftTranslateX = [],
@@ -351,12 +351,12 @@ function drawCluster(shading, clustered, negFill, posFill) {
     translateX.forEach(function(trX) {
         ctx.save();
         ctx.translate(trX, 0);
-        drawNegAndPosRegions(shading, data, negFill, posFill, trX);
+        drawNegAndPosRegions(shading, data, negFill, posFill, trX, highlight);
         ctx.restore();
     });
 }
 
-function drawNegAndPosRegions(shading, data, negFill, posFill, trX) {
+function drawNegAndPosRegions(shading, data, negFill, posFill, trX, highlight) {
     let ctx = shading.ctx;
     let rect = shading.root.node().getBoundingClientRect();
     let vpRefX = shading.vpX.ref;
@@ -365,7 +365,7 @@ function drawNegAndPosRegions(shading, data, negFill, posFill, trX) {
     ctx.save();
     ctx.beginPath();
     ctx.fillStyle = negFill;
-    drawCurveLine(ctx, data);
+    drawCurveLine(ctx, data, highlight);
     ctx.clip();
     ctx.fillRect(-trX, 0, vpRefX, rect.height);
     ctx.restore();
@@ -374,17 +374,25 @@ function drawNegAndPosRegions(shading, data, negFill, posFill, trX) {
     ctx.save();
     ctx.beginPath();
     ctx.fillStyle = posFill;
-    drawCurveLine(ctx, data);
+    drawCurveLine(ctx, data, highlight);
     ctx.clip();
     ctx.fillRect(vpRefX - trX, 0, rect.width - vpRefX, rect.height);
     ctx.restore();
 }
 
-function drawCurveLine(ctx, data) {
+function drawCurveLine(ctx, data, highlight) {
     ctx.moveTo(data[0].x, data[0].y);
     data.forEach(function(item) {
         ctx.lineTo(item.x, item.y);
     });
+    if (highlight) {
+        ctx.shadowColor = 'black';
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.shadowBlur = 2;
+        ctx.lineWidth = 0;
+        ctx.stroke();
+    }
 }
 
 function drawRefLine(shading) {

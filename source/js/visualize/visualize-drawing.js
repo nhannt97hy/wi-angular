@@ -1,3 +1,5 @@
+let Utils = require('./visualize-utils');
+
 module.exports = Drawing;
 
 /**
