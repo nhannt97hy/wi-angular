@@ -219,7 +219,8 @@ Shading.prototype.doPlot = function(highlight) {
     let self = this;
     let plotSamples = Utils.clusterPairData(leftData, rightData);
 
-    Utils.createFillStyles(this.ctx, [this.fill, this.positiveFill, this.negativeFill], function(fillStyles) {
+    let fills = this.prepareFillStyles();
+    Utils.createFillStyles(this.ctx, fills, function(fillStyles) {
         let fill = fillStyles[0];
         let posFill = fillStyles[1];
         let negFill = fillStyles[2];
@@ -238,6 +239,39 @@ Shading.prototype.doPlot = function(highlight) {
         self.canvas.lower();
     });
     return this;
+}
+
+Shading.prototype.prepareFillStyles = function(forHeader) {
+    let self = this;
+    let fills = [this.fill, this.positiveFill, this.negativeFill];
+    let ret = [];
+    fills.forEach(function(fill) {
+        if (!fill || !fill.gradient) {
+            ret.push(fill);
+            return;
+        }
+        let gradient = Utils.clone(fill.gradient);
+
+        if (forHeader) {
+            let rect = self.header.node().getBoundingClientRect();
+            gradient.startX = 0;
+            gradient.endX = rect.width;
+            gradient.data = Utils.range(0, 1, 0.1).map(function(d) {
+                return {
+                    x: d * rect.width,
+                    y: d * rect.height
+                }
+            })
+        }
+        else {
+            let transformX = self.getTransformX(self.selectedCurve);
+            gradient.data = self.prepareData(self.selectedCurve);
+            gradient.startX = transformX(gradient.startX);
+            gradient.endX = transformX(gradient.endX);
+        }
+        ret.push({ gradient: gradient });
+    });
+    return ret;
 }
 
 /**
@@ -289,6 +323,12 @@ Shading.prototype.getTransformX = function(curve) {
     return curve.getScaleFunc()()
         .domain(curve.getWindowX())
         .range([0, this.root.node().clientWidth]);
+}
+
+Shading.prototype.getTransformY = function() {
+    return d3.scaleLinear()
+        .domain(this.getWindowY())
+        .range([0, this.root.node().clientHeight]);
 }
 
 function drawCluster(shading, clustered, negFill, posFill) {
@@ -378,7 +418,8 @@ function drawHeader(shading) {
         .attr('height', height)
 
     let hCtx = hCanvas.node().getContext('2d');
-    Utils.createFillStyles(hCtx, [shading.fill, shading.positiveFill, shading.negativeFill], function(fillStyles) {
+    let fills = shading.prepareFillStyles(true);
+    Utils.createFillStyles(hCtx, fills, function(fillStyles) {
         hCtx.save();
         if (shading.isNegPosFilling) {
             hCtx.fillStyle = fillStyles[2];

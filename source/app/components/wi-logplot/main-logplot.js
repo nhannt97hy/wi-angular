@@ -98,12 +98,12 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
             }
         })
         wiD3Ctrl.addCurveToTrack(track, data, {
-            blockPosition: 'middle',
+            blockPosition: 'start',
             symbol: {
                 style: 'circle'
             },
             line: {
-                color: 'red'
+                color: 'green'
             }
         });
     }
@@ -117,7 +117,7 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
             }
         })
         wiD3Ctrl.addCurveToTrack(track, data, {
-            wrapMode: 'Both',
+            wrapMode: 'both',
             minX: 1.2,
             maxX: 1.8
         });
@@ -139,10 +139,11 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         let track = wiD3Ctrl.getCurrentTrack();
         wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {
             fill: {
-                pattern: {
-                    foreground: 'red',
-                    background: 'blue',
-                    name: 'basement'
+                gradient: {
+                    startColor: 'red',
+                    endColor: 'blue',
+                    startX: 1,
+                    endX: 2
                 }
             },
             positiveFill: {

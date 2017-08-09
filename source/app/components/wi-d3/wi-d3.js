@@ -318,7 +318,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getMaxDepth = function() {
         let wellProps = _getWellProps();
         if (wellProps.bottomDepth)
-            return parseFloat(wellProps.bottomDepth) + parseFloat(wellProps.step);
+            return parseFloat(wellProps.bottomDepth);
 
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getExtentY) return track.getExtentY()[1];
