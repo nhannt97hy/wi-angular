@@ -17,13 +17,42 @@ exports.lowercase = lowercase;
 exports.uppercase = uppercase;
 exports.convertColorToRGB = convertColorToRGB;
 exports.uniq = uniq;
+exports.clone = clone;
+exports.range = range;
 
+
+/**
+ * Create an array with each element is an integer from 'start' up to 'end'
+ */
+function range(start, end, step) {
+    if (!step) step = 1;
+    return Array.apply(null, {length: (end-start+step) / step}).map(function(d, i) {
+        return i*step + start;
+    });
+}
+
+/**
+ * Deep copy an object
+ */
+function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Remove duplications from array
+ * @param {Array} Original array containing duplications
+ * @returns {Array} Array with no duplicated items
+ */
 function uniq(array) {
     return array.filter(function(item, i) {
         return array.indexOf(item) == i;
-    })
+    });
 }
 
+/**
+ * @param {String} color - CSS color
+ * @returns {String} String representation of color in rgb format, null if the input string cannot be converted
+ */
 function convertColorToRGB(color) {
     let d3Color = d3.color(color);
     if (!d3Color) return null;
@@ -31,7 +60,10 @@ function convertColorToRGB(color) {
 }
 
 /**
- * Cluster continuous data into groups
+ * Cluster original array of data into sub-arrays separated by null values
+ * Each sub-array contains no null data
+ * @param {Array} data - Array of x,y coordinates
+ * @returns {Array} Array of sub-arrays
  */
 function clusterData(data) {
     let ret = [];
@@ -49,6 +81,14 @@ function clusterData(data) {
     return ret;
 }
 
+/**
+ * Cluster original pair of same-length data arrays into arrays of pairs of arrays
+ * Original data are divided into sub-groups when there is null value in either of the two input arrays
+ * Each sub-group is an array of a pair of array from two original data arrays containing no null values
+ * @param {Array} data1 - First set of data containing x,y coordinates
+ * @param {Array} data2 - Second set of data containing x,y coordinates
+ * @returns {Array} Array of sub-arrays
+ */
 function clusterPairData(data1, data2) {
     if (!data1.length || !data2.length) return [[], []];
 
@@ -71,49 +111,105 @@ function clusterPairData(data1, data2) {
     return ret
 }
 
+/**
+ * @param {String} str
+ * @returns {String} New string with all characters to the uppercase
+ */
 function uppercase(str) {
     if (typeof str != 'string') return null;
     return str.toUpperCase();
 }
 
+/**
+ * @param {String} str
+ * @returns {String} New string with all characters to the lowercase
+ */
 function lowercase(str) {
     if (typeof str != 'string') return null;
     return str.toLowerCase();
 }
 
+/**
+ * @param {String} str
+ * @returns {String} New string with the first character to the uppercase
+ */
 function capitalize(str) {
     if (typeof str != 'string') return null;
     return str.replace(str[0], str[0].toUpperCase());
 }
 
+/**
+ * @param {String} str - String in pascal case
+ * @returns {String} New string with all lowercase characters, words are separated by dash "-"
+ */
 function pascalCaseToLowerDash(str) {
     return str.replace(/\.?[A-Z]/g, function(c) {
         return '-' + c.toLowerCase()
     }).replace(/^-/, '');
 }
 
+/**
+ * @param {Number} value - Number to round up
+ * @param {Number} granularity - The rounded number is the multiplier of this value
+ * @returns {Number}
+ */
 function roundUp(value, granularity) {
     return Math.ceil(value / granularity) * granularity;
 }
+
+/**
+ * @param {Number} value - Number to round down
+ * @param {Number} granularity - The rounded number is the multiplier of this value
+ * @returns {Number}
+ */
 function roundDown(value, granularity) {
     return Math.floor(value / granularity) * granularity;
 }
 
+/**
+ * Copy prototype of a function into another function
+ * @param {Function} base - Base function which has already defined prototypes
+ * @param {Function} sub - Function to inherit prototypes
+ */
 function extend(base, sub) {
     sub.prototype = Object.create(base.prototype);
     sub.prototype.constructor = sub;
 }
 
+/**
+ * Limit a value against an extent
+ * @param {Number} val - The value to limit
+ * @param {Array} extent - The range to limit the value
+ * @returns {Number}
+ */
 function clip(val, extent) {
     if (val > extent[1]) return extent[1];
     if (val < extent[0]) return extent[0];
     return val;
 }
 
+/**
+ * Check if data point has y coordinate within a specified range
+ * @param {Object} item - Data item containing x, y coordinates
+ * @param {Array} extentY - Range of y coordinate
+ * @returns {Boolean}
+ */
 function isWithinYRange(item, extentY) {
     return (item.y >= extentY[0] && item.y <= extentY[1]);
 }
 
+/**
+ * Create canvas fillstyle from objects defining style
+ * @async
+ * @param {Object} ctx - The canvas context to create fillstyle
+ * @param {Object[]} fills - Array of object defining fillstyle. Each fill style has only one key: color, pattern or gradient
+ * @param {String} [fills[].color] - CSS color
+ * @param {Object} [fills[].pattern] - Object defining pattern
+ * @param {String} [fills[].pattern.name] - Pattern name
+ * @param {String} [fills[].pattern.foreground] - Pattern foreground
+ * @param {String} [fills[].pattern.background] - Pattern background
+ * @param {Function} callback - The function to call back after creating fillstyles
+ */
 function createFillStyles(ctx, fills, callback) {
     let patterns = [];
 
@@ -137,6 +233,28 @@ function createFillStyles(ctx, fills, callback) {
                     patterns.push(pattern);
                     loop.next();
                 });
+            }
+            else if (fill.gradient) {
+                let startX = fill.gradient.startX;
+                let endX = fill.gradient.endX;
+                let startColor = fill.gradient.startColor;
+                let endColor = fill.gradient.endColor;
+                let data = fill.gradient.data;
+                let minY = data[0].y;
+                let maxY = data[data.length-1].y;
+                let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
+                let transform = d3.scaleLinear()
+                    .domain([startX, endX])
+                    .range([startColor, endColor]);
+
+                for (let i = 0; i < data.length - 1; i ++) {
+                    let x = data[i].x;
+                    let color = x < startX ? startColor : (x > endX ? endColor : transform(x));
+                    gradient.addColorStop((data[i].y - minY) / (maxY-minY), color);
+                    gradient.addColorStop((data[i+1].y - minY) / (maxY-minY), color);
+                }
+                patterns.push(gradient);
+                loop.next();
             }
             else {
                 patterns.push(null);
