@@ -259,8 +259,7 @@ exports.BlankLogplotButtonClicked = function () {
                     let logplotName = 'plot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function() {
-                        console.log("Hic hic");
-                        wiD3Ctrl.addLogTrack();
+                        wiD3Ctrl.addLogTrack('Track 1');
                     });
                 });
             })
@@ -271,25 +270,18 @@ exports.BlankLogplotButtonClicked = function () {
 };
 
 exports.TrippleComboButtonClicked = function () {
-    console.log('TrippleComboButton is clicked');
-};
-
-exports.DensityNeutronButtonClicked = function () {
-    console.log('DensityNeutronButton is clicked');
-};
-
-exports.ResistivitySonicButtonClicked = function () {
-    console.log('ResistivitySonicButton is clicked');
-};
-
-exports.TriTracksBlankButtonClicked = function () {
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'TripleCombo'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
             .then(function (logplot) {
@@ -299,13 +291,134 @@ exports.TriTracksBlankButtonClicked = function () {
                 $timeout(function () {
                     selectedLogplot.children.push(logplotModel);
                 });
-                utils.openLogplotTab(wiComponentService, logplotModel);
-                let logplotName = 'plot' + logplotModel.properties.idPlot;    
-                let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
-                wiD3Ctrl.addDepthTrack(function () {
-                    for (var i = 0; i < 3; i++) {
-                        wiD3Ctrl.addLogTrack();
-                    }
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Gamma Ray', function() {
+                            wiD3Ctrl.addLogTrack('Resistivity', function() {
+                                wiD3Ctrl.addLogTrack('Log Porosity');
+                            });
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('DensityNeutronDialog err ' + err);
+            });
+    });
+};
+
+exports.DensityNeutronButtonClicked = function () {
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'DensityNeutron'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Gammaray', function() {
+                            wiD3Ctrl.addLogTrack('Neutron - Density');
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('DensityNeutronDialog err ' + err);
+            });
+    });
+};
+
+exports.ResistivitySonicButtonClicked = function () {
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'ResistivitySonic'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Gamma Ray', function() {
+                            wiD3Ctrl.addLogTrack('Resistivity', function() {
+                                wiD3Ctrl.addLogTrack('Sonic');
+                            });
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('DensityNeutronDialog err ' + err);
+            });
+    });
+};
+
+exports.TriTracksBlankButtonClicked = function () {
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: '3TrackBlank'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Track 1', function() {
+                            wiD3Ctrl.addLogTrack('Track 2', function() {
+                                wiD3Ctrl.addLogTrack('Track 3');
+                            });
+                        });
+                    });
                 });
             })
             .catch(function (err) {
@@ -315,19 +428,187 @@ exports.TriTracksBlankButtonClicked = function () {
 };
 
 exports.InputCurveButtonClicked = function () {
-    console.log('InputCurveButton is clicked');
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'InputCurves'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Grammaray', function() {
+                            wiD3Ctrl.addLogTrack('Density', function() {
+                                wiD3Ctrl.addLogTrack('Neutron', function() {
+                                    wiD3Ctrl.addLogTrack('Sonic');
+                                });
+                            });
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('3TracksBlankDialog err ' + err);
+            });
+    });
 };
 
 exports.LithoPlusSyn_CurveButtonClicked = function () {
-    console.log('Litho+Syn.CurveButton is clicked');
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'Lithosyn'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Lithology', function() {
+                            wiD3Ctrl.addLogTrack('Gramma Ray', function() {
+                                wiD3Ctrl.addLogTrack('Density', function() {
+                                    wiD3Ctrl.addLogTrack('Neutron', function() {
+                                        wiD3Ctrl.addLogTrack('Sonic', function() {
+                                            wiD3Ctrl.addLogTrack('Resistivity', function() {
+                                                wiD3Ctrl.addLogTrack('PHI_TOTAL');
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('3TracksBlankDialog err ' + err);
+            });
+    });
 };
 
 exports.Syn_CurveButtonClicked = function () {
-    console.log('Syn.CurveButton is clicked');
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'SynCurves'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Lithology', function() {
+                            wiD3Ctrl.addLogTrack('Gramma Ray', function() {
+                                wiD3Ctrl.addLogTrack('Density', function() {
+                                    wiD3Ctrl.addLogTrack('Neutron', function() {
+                                        wiD3Ctrl.addLogTrack('Sonic');
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('3TracksBlankDialog err ' + err);
+            });
+    });
 };
 
 exports.ResultButtonClicked = function () {
-    console.log('ResultButton is clicked');
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Create New Log Plot',
+        inputName: 'Name',
+        input: 'Result'
+    };
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        console.log(logplotName);
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+            .then(function (logplot) {
+                console.log("Created new log plot", logplot);
+                let logplotModel = utils.logplotToTreeConfig(logplot);
+                let selectedLogplot = utils.getSelectedNode();
+                $timeout(function () {
+                    selectedLogplot.children.push(logplotModel);
+                });
+                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+                    wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Lithology', function() {
+                            wiD3Ctrl.addLogTrack('GR-DT-RHOB-NPHI', function() {
+                                wiD3Ctrl.addLogTrack('Resistivity', function() {
+                                    wiD3Ctrl.addDepthTrack(function () {
+                                        wiD3Ctrl.addLogTrack('Total Porosity', function() {
+                                            wiD3Ctrl.addLogTrack('Fracture Porosity', function() {
+                                                wiD3Ctrl.addLogTrack('Water Saturation', function() {
+                                                    wiD3Ctrl.addLogTrack('Permeability');
+                                                })
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            })
+            .catch(function (err) {
+                utils.error('3TracksBlankDialog err ' + err);
+            });
+    });
 };
 
 exports.BlankCrossPlotButtonClicked = function () {

@@ -152,11 +152,56 @@ exports.NewTrackButtonClicked = function() {
 };
 
 exports.DuplicateTrackButtonClicked = function() {
-    console.log('DuplicateTrackButton is clicked');
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)    
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
+    let currentTrack = wiD3Ctrl.getCurrentTrack();
+    let curves = currentTrack.getCurves();
+    let wiApiService = this.wiApiService;
+    let props = currentTrack.getProperties();
+    wiD3Ctrl.addLogTrack(props.title, function(track) {
+        props.orderNum = track.orderNum;
+        props.idTrack = track.id;
+        wiApiService.editTrack(props, function(ret) {
+            track.setProperties(props);
+        });
+        if (!curves.length) return;
+        curves.forEach(function(curve) {
+            wiApiService.post(wiApiService.CREATE_LINE, { idTrack: track.id, idCurve: curve.idCurve })
+                .then(function(line) {
+                    let newCurve = wiD3Ctrl.addCurveToTrack(track, curve.rawData, {});
+                    let newCurveProps = curve.getProperties();
+                    newCurveProps.idLine = line.idLine;
+                    newCurveProps.idTrack = track.id;
+                    console.log('newCurveProps', newCurveProps);
+                    newCurveProps.lineStyle = JSON.stringify(newCurveProps.lineStyle);
+                    wiApiService.editLine(newCurveProps, function() {
+                        newCurve.setProperties(newCurveProps);
+                        track.plotCurve(newCurve);
+                    });
+                })
+                .catch(function(err){
+                    console.log(err);
+                    utils.error(err);
+                    return;
+                });
+        });
+    })
 };
 
 exports.DeleteTrackButtonClicked = function() {
-    this.wiLogplot.getwiD3Ctrl().removeCurrentTrack();
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();    
+    let currentTrack = wiD3Ctrl.getCurrentTrack();
+    let wiApiService = this.wiApiService;
+    const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete this track?", function (yes) {
+            if (!yes) return;
+            if (currentTrack.type == 'log-track') {
+                wiApiService.removeLogTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+            } else if (currentTrack.type == 'depth-track') {
+                wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+            }
+        }
+    );
 };
 
 exports.AddMarkerButtonClicked = function() {

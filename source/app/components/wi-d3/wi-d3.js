@@ -58,11 +58,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks;
     };
 
-    this.addLogTrack = function() {
+    this.addLogTrack = function(trackTitle, callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
-            wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(logTrack) {
-                self.pushLogTrack(logTrack);
+            wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(ret) {
+                wiApiService.infoTrack(ret.idTrack, function(logTrack) {
+                    logTrack.title = trackTitle;
+                    let viTrack = self.pushLogTrack(logTrack);
+                    wiApiService.editTrack(logTrack);
+                    if (!callback) return;
+                    callback(viTrack);
+                });
             });
         }
         else {
@@ -77,6 +83,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             id: logTrack.idTrack,
             idPlot: logTrack.idPlot,
             orderNum: logTrack.orderNum,
+            name: logTrack.title,
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth)
         };
@@ -178,7 +185,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 _curveOnRightClick();
             }
         });
-        console.log('Curve props', curve.getProperties())
+        console.log('Curve props', curve.getProperties());
+        return curve;
     };
 
     this.addLeftShadingToTrack = function (track, curve, config) {
@@ -508,12 +516,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     /* Private End */
 
+    let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
         self.logPlotCtrl = getLogplotCtrl();
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
-
-
+        let handlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');    
+        Utils.bindFunctions(logplotHandlers, handlers, {
+            $scope: $scope,
+            wiComponentService: wiComponentService,
+            wiApiService: wiApiService,
+            ModalService: ModalService,
+            wiLogplot: self.logPlotCtrl
+        });
 
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
@@ -632,7 +647,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Duplicate Track",
             icon: 'track-duplicate-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                logplotHandlers.DuplicateTrackButtonClicked();
             }
         },
         {
@@ -640,20 +655,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Delete Track",
             icon: 'track-delete-16x16',
             handler: function () {
-                DialogUtils.confirmDialog(ModalService,
-                    "Delete Track",
-                    "Are you sure to delete this track?",
-                    function (yes) {
-                        if (yes) {
-                            if (_currentTrack.type == 'log-track') {
-                                wiApiService.removeLogTrack(_currentTrack.id, self.removeCurrentTrack);
-                            }
-                            else if (_currentTrack.type == 'depth-track') {
-                                wiApiService.removeDepthTrack(_currentTrack.id, self.removeCurrentTrack);
-                            }
-                        }
-                    }
-                );
+                logplotHandlers.DeleteTrackButtonClicked();
             }
         },
     ];

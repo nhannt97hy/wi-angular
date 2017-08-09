@@ -677,9 +677,12 @@ exports.renameDataset = function () {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'dataset') return;
-    console.log("test", selectedNode.properties);
-
-    DialogUtils.promptDialog(__GLOBAL.ModalService, "New dataset name", selectedNode.properties.name, function (ret) {
+    let promptConfig = {
+        title: '<span class="curve-data-16x16"></span> Rename Dataset',
+        inputName: 'Name',
+        input: selectedNode.properties.name
+    }
+    DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let datasetInfo = selectedNode.properties;
@@ -697,7 +700,12 @@ exports.createDataset = function () {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'well') return;
     console.log("test", selectedNode.properties);
-    DialogUtils.promptDialog(__GLOBAL.ModalService, "New dataset", selectedNode.properties.name, function (ret) {
+    let promptConfig = {
+        title: '<span class="dataset-new-16x16"></span> Create New Dataset',
+        inputName: 'Name',
+        input: 'NewDataset'
+    }
+    DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let datasetInfo = {
@@ -736,8 +744,9 @@ exports.exportCurve = function () {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.exportCurve(selectedNode.properties.idCurve, function (curveFileUrl) {
-        downloadFile(curveFileUrl);
+    wiApiService.exportCurve(selectedNode.properties.idCurve, function (res) {
+        console.log(res);
+        // downloadFile(curveFileUrl);
     });
 }
 
@@ -746,7 +755,12 @@ exports.renameCurve = function () {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
-    DialogUtils.promptDialog(__GLOBAL.ModalService, "New curve name", selectedNode.data.label, function (ret) {
+    let promptConfig = {
+        title: '<span class="curve-edit-16x16"></span> Rename Curve',
+        inputName: 'Name',
+        input: selectedNode.properties.name
+    }
+    DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let curveInfo = {

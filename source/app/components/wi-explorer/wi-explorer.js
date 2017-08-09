@@ -5,6 +5,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
     let self = this;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);        
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
         $scope.handlers = wiComponentService.getComponent(wiComponentService.WI_EXPLORER_HANDLERS);
@@ -402,22 +403,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Blank Log Plot",
                                 icon: "",
                                 handler: function () {
-                                    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
                                     globalHandlers.BlankLogplotButtonClicked();
-                                    // let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-                                    //
-                                    // // mock plot data
-                                    // let logplot = {
-                                    //     title: 'Mock Blank Plot'
-                                    // };
-                                    // utils.createNewBlankLogPlot(wiComponentService, wiApiService);
                                 }
                             }, {
                                 name: "3TracksBlank",
                                 label: "3 Tracks Blank",
                                 icon: "",
                                 handler: function () {
-                                    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
                                     globalHandlers.TriTracksBlankButtonClicked();
                                 }
                             }, {
@@ -433,36 +425,42 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Density Neutron",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.DensityNeutronButtonClicked();                                    
                                 }
                             }, {
                                 name: "ResistivitySonic",
                                 label: "Resistivity Sonic",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.ResistivitySonicButtonClicked();
                                 }
                             }, {
                                 name: "TripleCombo",
                                 label: "Triple Combo",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.TrippleComboButtonClicked();
                                 }
                             }, {
                                 name: "InputCurves",
                                 label: "Input Curves",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.InputCurveButtonClicked();
                                 }
                             }, {
                                 name: "SynCurves",
                                 label: "Syn. Curves",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.Syn_CurveButtonClicked();
                                 }
                             }, {
                                 name: "LithoSynCurves",
                                 label: "Litho + Syn. Curves",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.LithoPlusSyn_CurveButtonClicked();
                                 }
                             }, {
                                 separator: '1'
@@ -471,6 +469,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Result",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.ResultButtonClicked();
                                 }
                             }
                         ]

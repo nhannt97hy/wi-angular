@@ -349,14 +349,14 @@ Service.prototype.exportCurve = function (idCurve, callback) {
     let dataRequest = {
         idCurve: idCurve
     }
-    callback('https://raw.githubusercontent.com/minhnt95/wi-angular/master/package.json');
-    // this.post(EXPORT_CURVE, dataRequest)
-    //     .then(function (curveFileUrl) {
-    //         callback(curveFileUrl);
-    //     })
-    //     .catch(function (err) {
-    //         self.getUtils().error(err);
-    //     })
+    // callback('https://raw.githubusercontent.com/minhnt95/wi-angular/master/package.json');
+    this.post(EXPORT_CURVE, dataRequest)
+        .then(function (res) {
+            callback(res);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
 }
 
 Service.prototype.removeCurve = function(idCurve, callback) {
@@ -409,6 +409,34 @@ Service.prototype.removeLogTrack = function(idTrack, callback) {
         });
 }
 
+Service.prototype.infoTrack = function(idTrack, callback) {
+    let self = this;
+    let dataRequest = {
+        idTrack: idTrack
+    };
+    this.post(GET_LOG_TRACK, dataRequest)
+        .then(function (infoTrack) {
+            if (!callback) return;
+            callback(infoTrack);
+        })
+        .catch(function(err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.editTrack = function(trackObj, callback) {
+    var self = this;
+    let dataRequest = trackObj;
+    this.post(EDIT_TRACK, dataRequest)
+        .then(function(track) {
+            if (!callback) return;            
+            callback(track);
+        })
+        .catch(function(err) {
+            self.getUtils().error(err);
+        });
+}
+
 Service.prototype.createDepthTrack = function(idPlot, orderNum, callback) {
     var self = this;
     console.log("createDepthTrack", self);
@@ -445,15 +473,7 @@ Service.prototype.removeLine = function(idLine, callback) {
             self.getUtils().error(err);
         });
 }
-Service.prototype.editTrack = function(trackObj, callback) {
-    var self = this;
-    let dataRequest = trackObj;
-    this.post(EDIT_TRACK, dataRequest)
-        .then(callback)
-        .catch(function(err) {
-            self.getUtils().error(err);
-        });
-}
+
 Service.prototype.createLine = function (lineObj, callback) {
     var self = this;
     let dataRequest = lineObj;
@@ -463,6 +483,7 @@ Service.prototype.createLine = function (lineObj, callback) {
             self.getUtils().error(err);
         });
 }
+
 Service.prototype.editLine = function (lineObj, callback) {
     var self = this;
     let dataRequest = lineObj;

@@ -155,7 +155,7 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
     });
 }
 
-exports.promptDialog = function (ModalService, titleMessage, input, callback) {
+exports.promptDialog1 = function (ModalService, titleMessage, input, callback) {
     function ModalController($scope, close) {
         this.error = null;
         this.title = titleMessage;
@@ -175,6 +175,33 @@ exports.promptDialog = function (ModalService, titleMessage, input, callback) {
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.promptDialog = function (ModalService, promptConfig, callback) {
+    function ModalController($scope, close) {
+        this.error = null;
+        this.title = promptConfig.title;
+        this.inputName = promptConfig.inputName;
+        this.input = promptConfig.input;
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "prompt/prompt-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element[0].children[0].draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
             callback(ret);
         });
     });

@@ -62,8 +62,8 @@ function Curve(config) {
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
 
-    this.raw_data = config.data || [];
-    this.data = Utils.parseData(this.raw_data);
+    this.rawData = config.data || [];
+    this.data = Utils.parseData(this.rawData);
     this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
 
@@ -105,12 +105,13 @@ Curve.prototype.getProperties = function() {
         idDataset: this.idDataset,
         alias: this.alias,
         name: this.name,
+        unit: this.unit,
         showHeader: this.showHeader,
         showDataset: false,
         minValue: this.minX,
         maxValue: this.maxX,
         autoValueScale: false,
-        diplayMode: getDisplayMode(),
+        displayMode: getDisplayMode(),
         wrapMode: 'None',
         blockPosition: Utils.capitalize(this.blockPosition),
         ignoreMissingValues: false,
@@ -139,12 +140,13 @@ Curve.prototype.setProperties = function(props) {
     this.idDataset = props.idDataset;
     this.alias = props.alias;
     this.name = props.name;
+    this.unit = props.unit;
     this.showHeader = props.showHeader;
     this.minX = props.minValue;
     this.maxX = props.maxValue;
     this.scale = Utils.capitalize(props.displayType);
     this.blockPosition = Utils.lowercase(props.blockPosition);
-
+    
     if (props.displayMode == 'Both' || props.displayMode == 'Line') {
         this.line = {
             dash: eval(props.lineStyle),

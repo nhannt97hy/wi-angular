@@ -1,15 +1,14 @@
 <div class='modal fade'>
-	<div class='modal-dialog'>
+	<div class='modal-dialog modal-sm'>
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" ng-click="wiModal.close(null)" aria-hidden="true">&times;</button>
-				<h4 ng-bind-html="wiModal.title"></h4>
+				<h4>{{wiModal.title}}</h4>
 			</div>
 			<div class="modal-body text-center">
 				<form class="form-horizontal" action="" name="modalBlankPlot">
 					<div class="form-group">
-						<label class="control-label col-sm-3" for="name">{{wiModal.inputName}}:</label>							
-						<div class="col-sm-9">
+						<div class="col-sm-12">
 							<input type="text" class="form-control"
 								ng-model="wiModal.input" ng-click="wiModal.error = null"
 								wi-enter="wiModal.close(wiModal.input)" required>

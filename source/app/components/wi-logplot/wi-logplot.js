@@ -1,7 +1,7 @@
 const componentName = 'wiLogplot';
 const moduleName = 'wi-logplot';
 
-function Controller($scope, wiComponentService, ModalService, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent('UTILS');
@@ -25,6 +25,7 @@ function Controller($scope, wiComponentService, ModalService, $timeout) {
         utils.bindFunctions($scope.handlers, logplotHandlers, {
             $scope: $scope,
             wiComponentService: wiComponentService,
+            wiApiService: wiApiService,
             ModalService: ModalService,
             wiLogplot: self
         });
