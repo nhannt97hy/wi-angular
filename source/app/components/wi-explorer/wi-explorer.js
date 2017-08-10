@@ -511,6 +511,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         name: "NewCrossPlot ...",
                         label: "New CrossPlot",
                         icon: "crossplot-new-16x16",
+                        class: 'has-more',
                         handler: function () {
                         },
                         childContextMenu: [

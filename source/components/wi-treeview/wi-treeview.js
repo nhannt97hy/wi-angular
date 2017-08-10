@@ -46,7 +46,6 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     };
 
     this.onClick = function($index) {
-        console.log('onClick1:', $index, self);
         if(self.container && self.container.selectHandler) {
             self.container.selectHandler(self.config[$index]);
         }
@@ -59,9 +58,8 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             selectedNode.data.childExpanded = !selectedNode.data.childExpanded;
             return;
         }
-        if (selectedNode.type == 'logplot') {
-            utils.openLogplotTab(wiComponentService, selectedNode);
-            return;
+        if (selectedNode.handler) {
+            selectedNode.handler();
         }
     }
 

@@ -8,7 +8,7 @@ function Controller(wiComponentService) {
         label: '',
         type: 'normal',
         layout: 'icon-top',
-        icon: 'project-new-32x32',
+        // icon: 'project-new-32x32',
         disabled: false,
         initialState: {}
     };

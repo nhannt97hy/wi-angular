@@ -256,7 +256,7 @@ exports.BlankLogplotButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function() {
                         wiD3Ctrl.addLogTrack('Track 1');
@@ -292,7 +292,7 @@ exports.TrippleComboButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Gamma Ray', function() {
@@ -332,7 +332,7 @@ exports.DensityNeutronButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Gammaray', function() {
@@ -370,7 +370,7 @@ exports.ResistivitySonicButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Gamma Ray', function() {
@@ -410,7 +410,7 @@ exports.TriTracksBlankButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Track 1', function() {
@@ -450,7 +450,7 @@ exports.InputCurveButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Grammaray', function() {
@@ -492,7 +492,7 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -540,7 +540,7 @@ exports.Syn_CurveButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -584,7 +584,7 @@ exports.ResultButtonClicked = function () {
                     selectedLogplot.children.push(logplotModel);
                 });
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'plot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {

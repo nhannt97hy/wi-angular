@@ -18,6 +18,7 @@ let wiList = require('./wi-list');
 let wiContextMenu = require('./wi-context-menu');
 
 let wiD3 = require('./wi-d3');
+let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
@@ -68,6 +69,7 @@ let app = angular.module('wiapp',
         wiList.name,
         wiContextMenu.name,
         wiD3.name,
+        wiCrossplot.name,
         wiLogplot.name,
         wiExplorer.name,
         wiProperties.name,
@@ -159,16 +161,15 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
 
-    // Install TEST
+    wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
+    });
+    wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
+    });
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
         console.log(logplotModel);
-        layoutManager.putWiLogPlotRight(logplotModel);
-    });
-
-    wiComponentService.on('logplot-tab-closed', function(logplotId) {
-        let logplotModel = utils.findLogplotModelById(logplotId);
-        if (!logplotModel) return;
-        logplotModel.data.opened = false;
+        layoutManager.putTabRightWithModel(logplotModel);
     });
 
     // update size when container is resized

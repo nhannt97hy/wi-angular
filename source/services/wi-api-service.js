@@ -349,14 +349,20 @@ Service.prototype.exportCurve = function (idCurve, callback) {
     let dataRequest = {
         idCurve: idCurve
     }
-    // callback('https://raw.githubusercontent.com/minhnt95/wi-angular/master/package.json');
-    this.post(EXPORT_CURVE, dataRequest)
-        .then(function (res) {
-            callback(res);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        })
+    self.$http({
+        url: self.baseUrl + EXPORT_CURVE,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer'
+        },
+        responseType: "arraybuffer",
+        data: dataRequest
+    }).then(function (res) {
+        callback(res.data, res.headers('Content-Type'));
+    }, function (err) {
+        self.getUtils().error("File not found!");
+    });
 }
 
 Service.prototype.removeCurve = function(idCurve, callback) {

@@ -7,12 +7,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let utils = wiComponentService.getComponent('UTILS');
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
-    wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
-    });
-    wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
-    });
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';

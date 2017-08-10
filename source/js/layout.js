@@ -44,12 +44,14 @@ module.exports.createLayout = function(domId, $scope, $compile) {
     });
 
     let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
+        let modelRef = componentState.model;
         container.on('destroy', function() {
-            let plotId = container.tab.contentItem.config.id.replace('logplot','');
-            wiComponentService.emit('logplot-tab-closed', plotId);
+            let model = utils.getModel(modelRef.type, modelRef.id);
+            model.data.opened = false;
         })
     });
 
@@ -80,33 +82,57 @@ module.exports.putRight = function(templateId, title) {
     });
 }
 
-module.exports.putWiLogPlotRight = function(logplotModel) {
-    let itemId = 'logplot' + logplotModel.id;
-    console.log(itemId);
+module.exports.putTabRightWithModel = function(model) {
     LAYOUT = layoutManager;
+    let wiComponentService = this.wiComponentService;
+    let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
+    var itemId, tabTitle, name, htmlTemplate;
+    console.log(model);
+    switch (model.type) {
+        case 'logplot':
+            itemId = 'logplot' + model.id;
+            tabTitle = '<img class="logplot-blank-16x16"> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            name = 'logplot' + model.properties.idPlot;
+            htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
+            break;
+        case 'crossplot':
+            itemId = 'crossplot' + model.id;
+            tabTitle = '<img class="crossplot-blank-16x16"> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            name = 'crossplot' + model.properties.idPlot;
+            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-crossplot>'
+            break;
+        default:
+            console.log('model type is not valid');
+            return;
+    }
+
     let rightContainer = layoutManager.root.getItemsById('right')[0];
-    let logplotItem = rightContainer.getItemsById(itemId)[0];
-    if (logplotItem) {
-        rightContainer.setActiveContentItem(logplotItem);
+    let tabItem = rightContainer.getItemsById(itemId)[0];
+    if (tabItem) {
+        rightContainer.setActiveContentItem(tabItem);
         return;
     }
-    let wiComponentService = this.wiComponentService;
-    let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(logplotModel.properties.idWell);
-    let tabTitle = '<img class="logplot-blank-16x16"> &nbsp;' + logplotModel.properties.name + ' - (' + well.properties.name + ')';
-    let logplotName = 'plot' + logplotModel.properties.idPlot;
     rightContainer.addChild({
         type: 'component',
         id: itemId,
         componentName: 'html-block',
         componentState: {
-            html: '<wi-logplot name="' + logplotName + '" id="' + logplotModel.properties.idPlot + '"></wi-logplot>'
+            html: htmlTemplate,
+            model: model
         },
         title: tabTitle
     });
 }
 
-module.exports.removeWiLogPlot = function(logplotId) {
-    let item = layoutManager.root.getItemsById('logplot'+logplotId)[0];
+module.exports.removeTabWithModel = function(model) {
+    switch (model.type) {
+        case 'logplot':
+            var item = layoutManager.root.getItemsById('logplot'+logplotId)[0];    
+            break;
+        default:
+            console.log('model type is not valid');        
+            return;
+    }
     if (!item) return;
     layoutManager.root.getItemsById('right')[0].removeChild(item);
 }
