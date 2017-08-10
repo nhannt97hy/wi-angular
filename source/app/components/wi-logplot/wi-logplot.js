@@ -4,7 +4,7 @@ const moduleName = 'wi-logplot';
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     let previousSlidingBarState = {};
-    let utils = wiComponentService.getComponent('UTILS');
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
 
     this.$onInit = function () {
@@ -13,6 +13,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isFitWindow = false;
         self.isReferenceLine = true;
         self.isTooltip = true;
+        self.logplotModel = self.getLogplotModel();
+        self.wellName = utils.getModel('well', self.logplotModel.properties.idWell).properties.name;
 
         // Setup handlers for logplot
         $scope.handlers = {};
@@ -42,7 +44,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     };
 
     this.getLogplotModel = function () {
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         return utils.findLogplotModelById(self.id);
     };
 
