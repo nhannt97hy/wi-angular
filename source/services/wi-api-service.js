@@ -16,7 +16,8 @@ const CREATE_DATASET = '/project/well/dataset/new';
 const EDIT_DATASET = '/project/well/dataset/edit';
 const DELETE_DATASET = '/project/well/dataset/delete';
 
-const CURVE = '/project/well/dataset/curve/getData';
+const INFO_CURVE = '/project/well/dataset/curve/info';
+const DATA_CURVE = '/project/well/dataset/curve/getData';
 const EXPORT_CURVE = '/project/well/dataset/curve/export';
 const CREATE_CURVE = '/project/well/dataset/curve/new';
 const EDIT_CURVE = '/project/well/dataset/curve/edit';
@@ -48,7 +49,7 @@ function Service(baseUrl, $http, wiComponentService, Upload) {
 }
 
 Service.prototype.GET_PROJECT = '/project/fullinfo';
-Service.prototype.CURVE = '/project/well/dataset/curve/getData';
+Service.prototype.DATA_CURVE = '/project/well/dataset/curve/getData';
 
 Service.prototype.DELETE_WELL = '/project/well/delete';
 
@@ -339,6 +340,17 @@ Service.prototype.editCurve = function (curveInfo, callback) {
     console.log(curveInfo);
     this.post(EDIT_CURVE, curveInfo)
         .then(callback)
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
+}
+
+Service.prototype.infoCurve = function (idCurve, callback) {
+    let self = this;
+    this.post(INFO_CURVE, { idCurve: idCurve })
+        .then(function (res) {
+            callback(res)
+        })
         .catch(function (err) {
             self.getUtils().error(err);
         })

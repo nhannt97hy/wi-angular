@@ -17,7 +17,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         range: MIN_RANGE
     };
 
-    function createPreview1(idCurve) {
+    function createPreview(idCurve) {
         let logPlotName = self.name.replace('Slidingbar', '');
         let logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let logplotId = logPlotCtrl.id;
@@ -28,24 +28,31 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let minY = parseFloat(well.properties.topDepth);
         let maxY = parseFloat(well.properties.bottomDepth);
         let stepY = parseFloat(well.properties.step);
-        console.log('%%%%%%%%%%%%%%%');
-        utils.getCurveData(wiApiService, idCurve, function(err, data) {
+        wiApiService.infoCurve(idCurve, function (infoCurve) {
             let config = {
+                minX: infoCurve.LineProperty.minScale,
+                maxX: infoCurve.LineProperty.maxScale,
                 minY: minY,
                 maxY: maxY,
                 yStep: stepY,
                 offsetY: minY,
                 line: {
-                    color: 'blue'
+                    color: infoCurve.LineProperty.lineColor
                 }
-            }
-            if (_viCurve) _viCurve.destroy();
-            _viCurve = graph.createCurve(config, data, d3.select(self.contentId));
-            _viCurve.doPlot();
-        });
+            };
+            utils.getCurveData(wiApiService, idCurve, function(err, dataCurve) {
+                if (err) {
+                    utils.error(err);
+                    return;
+                }
+                if (_viCurve) _viCurve.destroy();
+                _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
+                _viCurve.doPlot();
+            });
+        })
     }
-    this.createPreview1 = createPreview1;
-    function createPreview() {
+    this.createPreview = createPreview;
+    /*function createPreview() {
         let logPlotName = self.name.replace('Slidingbar', '');
         let logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -56,7 +63,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         createPreview1(firstCurve.properties.idCurve);
 
-        /*utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
+        utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
             let config = {
                 minY: parseFloat(well.properties.topDepth),
                 maxY: parseFloat(well.properties.bottomDepth),
@@ -68,8 +75,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             }
             let viCurve = graph.createCurve(config, data, d3.select(self.contentId));
             viCurve.doPlot();
-        });*/
-    }
+        });
+    }*/
 
     function update(ui) {
         parentHeight = parseInt($(self.contentId).height());
@@ -138,8 +145,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             event.stopPropagation();
             update(ui);
         });
-
-        createPreview();
 
         new ResizeSensor($(self.contentId), function() {
             let currentParentHeight = parseInt($(self.contentId).height());

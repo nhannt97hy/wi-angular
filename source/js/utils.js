@@ -135,7 +135,8 @@ function logplotToTreeConfig(plot) {
     plotModel.properties = {
         idWell: plot.idWell,
         idPlot: plot.idPlot,
-        name: plot.name
+        name: plot.name,
+        referenceCurve: plot.referenceCurve
     };
     plotModel.data = {
         childExpanded: false,
@@ -509,7 +510,7 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 
 exports.getCurveData = getCurveData;
 function getCurveData(apiService, idCurve, callback) {
-    apiService.post(apiService.CURVE, { idCurve })
+    apiService.post(apiService.DATA_CURVE, { idCurve })
         .then(function (curve) {
             callback(null, curve);
         })
@@ -551,7 +552,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 return;
             }
             if (wiSlidingBarCtrl) {
-                wiSlidingBarCtrl.createPreview1(idCurve);
+                wiSlidingBarCtrl.createPreview(idCurve);
             }
         },
         appendTo: 'body',
@@ -567,33 +568,17 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName) {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'logplots') return;
+    let well = getModel('well', selectedNode.properties.idWell);
+    let firstCurve = well.children[0].children[0];
     let dataRequest = {
         idWell: selectedNode.properties.idWell,
         name: logplotName,
-        option: 'blank-plot'
+        option: 'blank-plot',
+        referenceCurve: firstCurve.properties.idCurve
     };
     return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
-exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'crossplots') return;
-    let dataRequest = {
-        idWell: selectedNode.properties.idWell,
-        name: crossplotName,
-        option: 'blank-plot'
-    };
-    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
-};
-exports.createNewBlankHistogram = function (wiComponentService, wiApiService, histogramName) {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'histograms') return;
-    let dataRequest = {
-        idWell: selectedNode.properties.idWell,
-        name: histogramName,
-        option: 'blank-plot'
-    };
-    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
-};
+
 exports.deleteLogplot = function () {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'logplot') return;
@@ -620,10 +605,15 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
     let logplotName = 'logplot' + logplotModel.properties.idPlot;
-    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
+    let logplotCtrl = wiComponentService.getComponent(logplotName);
+    let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
+    let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
         .then(function (plot) {
+            if (logplotModel.properties.referenceCurve) {
+                slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
+            }
             let tracks = new Array();
 
             if (plot.depth_axes && plot.depth_axes.length) {
@@ -1070,6 +1060,17 @@ exports.upperCaseFirstLetter = function(string){
 }
 exports.editProperty = editProperty;
 
+exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'crossplots') return;
+    let dataRequest = {
+        idWell: selectedNode.properties.idWell,
+        name: crossplotName,
+        option: 'blank-plot'
+    };
+    return wiApiService.post(route, dataRequest);
+};
+
 function openCrossplotTab(wiComponentService, crossplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(crossplotModel);
@@ -1077,3 +1078,14 @@ function openCrossplotTab(wiComponentService, crossplotModel, callback) {
     crossplotModel.data.opened = true;
 };
 exports.openCrossplotTab = openCrossplotTab;
+
+exports.createNewBlankHistogram = function (wiComponentService, wiApiService, histogramName) {
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'histograms') return;
+    let dataRequest = {
+        idWell: selectedNode.properties.idWell,
+        name: histogramName,
+        option: 'blank-plot'
+    };
+    return wiApiService.post(route, dataRequest);
+};
