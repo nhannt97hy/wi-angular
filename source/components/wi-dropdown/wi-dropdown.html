@@ -3,7 +3,7 @@
             type="button" data-toggle="dropdown"
             ng-click="wiDropdown.onClick()"
             ng-disabled='wiDropdown.isDisabled()'>
-        <img ng-if="wiDropdown.icon" class="{{wiDropdown.icon || wiDropdown.config.icon || wiDropdown.default.icon}}" alt="icon wi-dropdown">
+        <span ng-if="wiDropdown.icon" class="{{wiDropdown.icon || wiDropdown.config.icon || wiDropdown.default.icon}}"></span>
         <div class="label-wrapper {{wiDropdown.layout || wiDropdown.config.layout || wiDropdown.default.layout}}">
             <span class="{{wiDropdown.layout || wiDropdown.config.layout || wiDropdown.default.layout}}"
                   ng-show="wiDropdown.label || wiDropdown.config.label">

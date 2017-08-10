@@ -91,13 +91,13 @@ module.exports.putTabRightWithModel = function(model) {
     switch (model.type) {
         case 'logplot':
             itemId = 'logplot' + model.id;
-            tabTitle = '<img class="logplot-blank-16x16"> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            tabTitle = '<span class="logplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
             name = 'logplot' + model.properties.idPlot;
             htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
             break;
         case 'crossplot':
             itemId = 'crossplot' + model.id;
-            tabTitle = '<img class="crossplot-blank-16x16"> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
             name = 'crossplot' + model.properties.idPlot;
             htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-crossplot>'
             break;
