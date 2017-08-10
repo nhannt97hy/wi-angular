@@ -252,9 +252,7 @@ exports.BlankLogplotButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function(){
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -288,9 +286,7 @@ exports.TrippleComboButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -328,9 +324,7 @@ exports.DensityNeutronButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -366,9 +360,7 @@ exports.ResistivitySonicButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -406,9 +398,7 @@ exports.TriTracksBlankButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -446,9 +436,7 @@ exports.InputCurveButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -488,9 +476,7 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -536,9 +522,7 @@ exports.Syn_CurveButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
@@ -580,9 +564,7 @@ exports.ResultButtonClicked = function () {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
-                $timeout(function () {
-                    selectedLogplot.children.push(logplotModel);
-                });
+                selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;    
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
