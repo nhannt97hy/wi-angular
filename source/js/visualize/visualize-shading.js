@@ -410,8 +410,9 @@ function drawHeader(shading) {
         .text(shading.name);
 
     let rect = header.node().getBoundingClientRect();
-    let width = rect.width -2;
-    let height = rect.height -2;
+    let headerBorderWidth = parseInt(header.style('border-width'));
+    let width = rect.width - headerBorderWidth;
+    let height = rect.height - headerBorderWidth;
     let hCanvas = header
         .select('canvas')
         .attr('width', width)
