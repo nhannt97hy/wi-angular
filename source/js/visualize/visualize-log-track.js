@@ -213,10 +213,16 @@ LogTrack.prototype.init = function(baseElement) {
         .style('position', 'absolute')
         .style('overflow', 'visible');
 
-    this.xAxisGroup = this.svgContainer.append('g')
+    this.axisContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing')
+        .style('cursor', 'crosshair')
+        .style('position', 'absolute')
+        .style('overflow', 'visible');
+
+    this.xAxisGroup = this.axisContainer.append('g')
         .attr('class', 'vi-track-axis');
 
-    this.yAxisGroup = this.svgContainer.append('g')
+    this.yAxisGroup = this.axisContainer.append('g')
         .attr('class', 'vi-track-axis');
 }
 
@@ -344,6 +350,36 @@ LogTrack.prototype.removeCurve = function(curve) {
 LogTrack.prototype.removeShading = function(shading) {
     if (shading && shading.isShading())
         this.removeDrawing(shading);
+}
+
+/**
+ * Remove drawing by its id
+ */
+LogTrack.prototype.removeDrawingById = function(id) {
+    let drawings = this.drawings.filter(function(d) {
+        return d.id == id;
+    });
+    this.removeDrawing(drawings[0]);
+}
+
+/**
+ * Remove curve by its id
+ */
+LogTrack.prototype.removeCurveById = function(id) {
+    let curves = this.getCurves().filter(function(c) {
+        return c.id == id;
+    });
+    this.removeCurve(curves[0]);
+}
+
+/**
+ * Remove shading by its id
+ */
+LogTrack.prototype.removeShadingById = function(id) {
+    let shadings = this.getShadings().filter(function(sh) {
+        return sh.id == id;
+    });
+    this.removeShading(shadings[0]);
 }
 
 /**

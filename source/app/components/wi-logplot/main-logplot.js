@@ -128,7 +128,8 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     }
 
     $scope.removeCurveButtonClick = function() {
-        wiD3Ctrl.removeCurrentCurve();
+        let track = wiD3Ctrl.getCurrentTrack();
+        track.removeCurrentCurve();
     }
 
     $scope.removeTrackButtonClick = function() {
