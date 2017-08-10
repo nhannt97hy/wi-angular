@@ -106,11 +106,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         track.onPlotMouseOver(function () {
+            console.log('mouseover');
             if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = self;
             dragMan.track = track;
         });
         track.onPlotMouseLeave(function () {
+            console.log('mouseleave');
             if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
@@ -541,9 +543,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
 
-        /*$timeout(function() {
+        $timeout(function() {
             graph.sheetDraggable(document.getElementById(self.plotAreaId));
-        }, 1000)*/
+        }, 1000)
     };
 
     var commonCtxMenu = [

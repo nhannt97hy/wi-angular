@@ -113,7 +113,7 @@ exports.sheetDraggable = function(domElem) {
                 d3.event.sourceEvent.preventDefault();
                 d3.event.sourceEvent.stopPropagation();
                 d.baseX += d3.event.dx;
-                d3.select(this).style('transform', 'translateX(' + d.baseX + "px)");
+                d3.select(this).style('left', d.baseX + "px");
             })
             .on("end", function(d) {
                 if (d.baseX > 0) {
@@ -122,10 +122,10 @@ exports.sheetDraggable = function(domElem) {
                 else {
                     let logplotWidth = d3.select('.logplot-main-content').node().clientWidth;
                     let slidingBarWidth = d3.select('.slidingbar').node().clientWidth;
-                    let offsetMax = this.clientWidth - (logplotWidth - slidingBarWidth - 4);
+                    let offsetMax = this.clientWidth - (logplotWidth - slidingBarWidth - 16);
                     if (-d.baseX > offsetMax) d.baseX = -offsetMax;
                 }
-                d3.select(this).style('transform', 'translateX(' + d.baseX + "px)");
+                d3.select(this).style('left', d.baseX + "px");
                 d3.select(this).classed('moving', false);
             })
         );
