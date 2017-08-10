@@ -19,7 +19,19 @@ exports.convertColorToRGB = convertColorToRGB;
 exports.uniq = uniq;
 exports.clone = clone;
 exports.range = range;
+exports.getScaleFunc = getScaleFunc;
+exports.setIfNotNull = setIfNotNull;
 
+function setIfNotNull(obj, attr, newProp) {
+    obj[attr] = newProp == null ? obj[attr] : newProp;
+}
+
+function getScaleFunc(scale) {
+    return {
+        'linear': d3.scaleLinear(),
+        'logarithmic': d3.scaleLog()
+    }[lowercase(scale)];
+}
 
 /**
  * Create an array with each element is an integer from 'start' up to 'end'

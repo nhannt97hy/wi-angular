@@ -137,18 +137,19 @@ Curve.prototype.getProperties = function() {
 Curve.prototype.setProperties = function(props) {
     let self = this;
 
-    this.id = props.idLine;
-    this.idCurve = props.idCurve;
-    this.idDataset = props.idDataset;
-    this.alias = props.alias;
-    this.name = props.name;
-    this.unit = props.unit;
-    this.showHeader = props.showHeader;
-    this.minX = props.minValue;
-    this.maxX = props.maxValue;
-    this.scale = Utils.capitalize(props.displayType);
-    this.blockPosition = Utils.lowercase(props.blockPosition);
-    this.wrapMode = Utils.lowercase(props.wrapMode);
+    Utils.setIfNotNull(this, 'id', props.idLine);
+    Utils.setIfNotNull(this, 'idCurve', props.idCurve);
+    Utils.setIfNotNull(this, 'idDataset', props.idDataset);
+    Utils.setIfNotNull(this, 'alias', props.alias);
+    Utils.setIfNotNull(this, 'name', props.name);
+    Utils.setIfNotNull(this, 'unit', props.unit);
+    Utils.setIfNotNull(this, 'showHeader', props.showHeader);
+    Utils.setIfNotNull(this, 'minX', props.minValue);
+    Utils.setIfNotNull(this, 'maxX', props.maxValue);
+    Utils.setIfNotNull(this, 'scale', Utils.capitalize(props.displayType));
+    Utils.setIfNotNull(this, 'blockPosition', Utils.lowercase(props.blockPosition));
+    Utils.setIfNotNull(this, 'wrapMode', Utils.lowercase(props.wrapMode));
+
     if (props.displayMode == 'Both' || props.displayMode == 'Line') {
         this.line = {
             dash: eval(props.lineStyle),
@@ -281,7 +282,7 @@ Curve.prototype.getTransformX = function() {
                 .domain(windowX)
                 .range([0, rect.width]);
         case 'logarithmic':
-            let minX = d3.min(self.getExtentX().concat(self.getWindowX()));
+            let minX = d3.min(self.getWindowX());
             function toPositive(val) {
                 return val - minX + 0.01;
             }
@@ -290,13 +291,14 @@ Curve.prototype.getTransformX = function() {
             }
             let d3LogFunc = d3.scaleLog()
                 .domain([toPositive(windowX[0]), toPositive(windowX[1])])
-                .range([0, rect.width]);
+                .range([0, rect.width])
+                .clamp(true);
 
             function logFunc(x) {
                 return d3LogFunc(toPositive(x));
             }
-            logFunc.prototype.invert = function(x) {
-                return d3LogFunc.invert(fromPositive(x));
+            logFunc.invert = function(x) {
+                return fromPositive(d3LogFunc.invert(x));
             }
             return logFunc;
     }

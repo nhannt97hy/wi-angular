@@ -41,7 +41,7 @@ function LogTrack(config) {
     this.showYGrids = (config.showYGrids == null) ? true : config.showYGrids;
     this.showXGrids = (config.showXGrids == null) ? true : config.showXGrids;
     this.xMajorTicks = config.xMajorTicks || 4;
-    this.xMinorTicks = config.xMinorTicks || 2;
+    this.xMinorTicks = config.xMinorTicks || 4;
     this.yTicks = config.yTicks || 10;
 
     this.name = config.name || 'Track';
@@ -57,9 +57,11 @@ function LogTrack(config) {
     this.yPadding = config.yPadding || 5;
     this.xDecimal = (config.xDecimal == null) ? 2 : config.xDecimal;
     this.yDecimal = (config.yDecimal == null) ? 2 : config.yDecimal;
+    this.scale = config.scale || 'linear';
 
     this.showLabels = config.showLabels == null ? false : config.showLabels;
     this.showEndLabels = config.showEndLabels == null ? true : config.showEndLabels;
+    this.gridColor = 'gray';
 
     this.curvesRemoved = 0;
 }
@@ -80,25 +82,27 @@ LogTrack.prototype.getProperties = function() {
         minorTicks: this.xMinorTicks,
         width: this.width,
         color: this.bgColor,
-        showEndLabels: this.showEndLabels
+        showEndLabels: this.showEndLabels,
+        displayType: Utils.capitalize(this.scale)
     }
 }
 
 LogTrack.prototype.setProperties = function(props) {
-    this.id = props.idTrack;
-    this.idPlot = props.idPlot;
-    this.orderNum = props.orderNum;
-    this.showTitle = props.showTitle;
-    this.name = props.title;
-    this.justification = Utils.lowercase(props.topJustification);
-    this.showLabels = props.showLabels;
-    this.showEndLabels = props.showEndLabels;
-    this.showXGrids = props.showValueGrid;
-    this.showYGrids = props.showDepthGrid;
-    this.xMajorTicks = parseInt(props.majorTicks);
-    this.xMinorTicks = parseInt(props.minorTicks);
-    this.width = parseInt(props.width);
-    this.bgColor = Utils.convertColorToRGB(props.color);
+    Utils.setIfNotNull(this, 'id', props.idTrack);
+    Utils.setIfNotNull(this, 'idPlot', props.idPlot);
+    Utils.setIfNotNull(this, 'orderNum', props.orderNum);
+    Utils.setIfNotNull(this, 'showTitle', props.showTitle);
+    Utils.setIfNotNull(this, 'name', props.title);
+    Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
+    Utils.setIfNotNull(this, 'showLabels', props.showLabels);
+    Utils.setIfNotNull(this, 'showEndLabels', props.showEndLabels);
+    Utils.setIfNotNull(this, 'showXGrids', props.showValueGrid);
+    Utils.setIfNotNull(this, 'showYGrids', props.showDepthGrid);
+    Utils.setIfNotNull(this, 'xMajorTicks', parseInt(props.majorTicks));
+    Utils.setIfNotNull(this, 'xMinorTicks', parseInt(props.minorTicks));
+    Utils.setIfNotNull(this, 'width', parseInt(props.width));
+    Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.color));
+    Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
 }
 
 /**
@@ -107,7 +111,7 @@ LogTrack.prototype.setProperties = function(props) {
  */
 LogTrack.prototype.getWindowX = function() {
     return (this.minX == null || this.maxX == null)
-        ? [0, 1]
+        ? [1, 2]
         : [this.minX, this.maxX];
 }
 
@@ -501,9 +505,25 @@ LogTrack.prototype.plotAxes = function() {
     let windowY = this.getWindowY();
     let windowX = this.getWindowX();
 
-    let transformX = d3.scaleLinear()
-        .domain(windowX)
-        .range(rangeX);
+    function transformX(x) {
+        let majorStep = (windowX[1] - windowX[0]) / (self.xMajorTicks || 1);
+        let majorTransformX = d3.scaleLinear()
+            .domain(windowX)
+            .range(rangeX);
+        if ((x - windowX[0]) % majorStep < 0.0001) {
+            return majorTransformX(x);
+        }
+        else {
+            let leftSide = windowX[0] + Utils.roundDown(x - windowX[0], majorStep);
+            let minorTransformX = Utils.getScaleFunc(self.scale)
+                .domain([0.01, majorStep + 0.01])
+                .range([0, majorTransformX(windowX[0] + majorStep) - rangeX[0]]);
+            return majorTransformX(leftSide) + minorTransformX(x - leftSide + 0.01);
+        }
+    }
+    transformX.range = function() { return rangeX };
+    transformX.domain = function() { return windowX };
+    transformX.copy = function() { return transformX };
 
     let transformY = d3.scaleLinear()
         .domain(windowY)
@@ -543,13 +563,14 @@ LogTrack.prototype.plotAxes = function() {
             });
 
     this.bodyContainer.selectAll('.tick line')
-        .attr('stroke', 'blue')
+        .attr('stroke', this.gridColor)
         .attr('stroke-dasharray', '20, 2')
-        .attr('stroke-width', 0.4);
+        .attr('stroke-opacity', 0.8)
+        .attr('stroke-width', 1);
 
     this.xAxisGroup.selectAll('.tick line')
-        .attr('stroke-width', function(d, i) {
-            return (!self.xMinorTicks || i % self.xMinorTicks == 0) ? 0.4 : 0.1;
+        .attr('stroke-opacity', function(d, i) {
+            return (!self.xMinorTicks || i % self.xMinorTicks == 0) ? 0.8 : 0.3;
         });
 }
 
