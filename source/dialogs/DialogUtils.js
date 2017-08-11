@@ -819,9 +819,10 @@ exports.addCurveDialog = function (ModalService, callback) {
     });
 }
 
-exports.lineStyleDialog = function (ModalService, callback, options) {
+exports.lineStyleDialog = function (ModalService, wiComponentService, callback, options) {
     function ModalController($scope, close) {
         var self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         console.log(options);
 
         this.options = options;
@@ -830,14 +831,16 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
         this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+        this.lineColor = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.lineStyle.lineColor, function (colorStr) {
+                console.log(colorStr);
+                self.options.lineStyle.lineColor = colorStr;
+            });
+        }
         this.onOkButtonClicked = function () {
             console.log("optionsss: ", self.options);
             close(self.options);
         };
-
-        // this.onCancelButtonClicked = function () {
-        //     close(null);
-        // };
     }
 
     ModalService.showModal({
@@ -856,53 +859,30 @@ exports.lineStyleDialog = function (ModalService, callback, options) {
     });
 }
 
-exports.symbolStyleDialog = function (ModalService, callback, options) {
+exports.symbolStyleDialog = function (ModalService, wiComponentService, callback, options) {
     function ModalController($scope, close) {
         var self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         console.log(options);
         this.options = options;
         console.log(this.options);
-        // this.options = {
-        //     lines: {
-        //         color: '#ff0000',
-        //         style: {
-        //             name: 'solid',
-        //             param: [10, 0]
-        //         }
-        //         ,
-        //         width: {
-        //             name: "1",
-        //             param: 1
-        //         }
-        //     },
-        //     solidFill: '#000',
-        //     patternFill: {
-        //         pattern: "chert",
-        //         background: "#fff",
-        //         foreground: "#000"
-        //     }
-        // };
-        /*this.symbolOptions = {
-                display: false,
-                symbolStyle: {
-                    name: "circle", // cross, diamond, star, triangle, dot, plus
-                    size: 4,
-                    strokeStyle: "black",
-                    fillStyle: "transparent",
-                    lineWidth : 1,
-                    lineDash: [10, 0]
-                }
-            }*/
-        $(function() {
-            $('#testColor').colorpicker({
-                format: "rgba",
-                horizontal: true
-            });
-        });
+        
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+        this.lineColor = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolStrokeStyle, function (colorStr) {
+                console.log(colorStr);
+                self.options.symbolStyle.symbolStrokeStyle = colorStr;
+            });
+        };
+        this.solidFillColor = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolFillStyle, function (colorStr) {
+                console.log(colorStr);
+                self.options.symbolStyle.symbolFillStyle = colorStr;
+            });
+        }
         this.onOkButtonClicked = function () {
             close(self.options);
         };
@@ -1134,14 +1114,14 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             });
         }
         this.onEditLineStyleButtonClicked = function () {
-            DialogUtils.lineStyleDialog(ModalService, function (options) {
+            DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {
                 console.log("options", options);
                 self.lineOptions = options;
                 self.drawSample();
             }, self.lineOptions);
         };
         this.onEditSymbolStyleButtonClicked = function () {
-            DialogUtils.symbolStyleDialog(ModalService, function (options) {
+            DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {
                 self.symbolOptions = options;
                 console.log(self.symbolOptions);
                 self.drawSample();
@@ -1489,7 +1469,43 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         this.enableFill = function (idEnable, value) {
             $('#'+ idEnable + " :input").attr("disabled", value);
         }
-
+        //button
+        this.foreground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.fill.foreground, function (colorStr) {
+                console.log(colorStr);
+                self.options.fill.foreground = colorStr;
+            });
+        }
+        this.background = function(){
+            DialogUtils.colorPickerDialog(ModalService, self.options.fill.background, function (colorStr) {
+                console.log(colorStr);
+                self.options.fill.background = colorStr;
+            });
+        }
+        this.posPositiveForeground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.foreground, function (colorStr) {
+                console.log(colorStr);
+                self.options.positiveFill.foreground = colorStr;
+            });
+        }
+        this.posPositiveBackground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.background, function (colorStr) {
+                console.log(colorStr);
+                self.options.positiveFill.background = colorStr;
+            });
+        }
+        this.negPositiveForeground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.foreground, function (colorStr) {
+                console.log(colorStr);
+                self.options.negativeFill.foreground = colorStr;
+            });
+        }
+        this.negPositiveBackground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.background, function (colorStr) {
+                console.log(colorStr);
+                self.options.negativeFill.background = colorStr;
+            });
+        }
         this.onOkButtonClicked = function () {
             self.error = '';
             close(self.options, 200);0
@@ -1730,6 +1746,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curves.splice(idx, 1);
             self.curvesLineOptions.splice(idx, 1);
             self.curvesSymbolOptions.splice(idx, 1);
+            console.log("options", self.curves, idx);
         }
         function removeCurve(idLine) {
             wiApiService.removeLine(idLine, function() {
@@ -1803,20 +1820,20 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         this.lineStyleButtonClicked = function (index) {
             console.log(index);
-            DialogUtils.lineStyleDialog(ModalService, function (options) {
+            DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {
                 console.log("lineStyle");
             }, self.curvesLineOptions[index]);
         };
         this.symbolStyleButtonClicked = function (index) {
             console.log(index);
-            DialogUtils.symbolStyleDialog(ModalService, function (options) {
+            DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {
                 console.log("symbolStyle");
-
             }, self.curvesSymbolOptions[index]);
         };
         this.colorTrack = function () {
-            DialogUtils.colorPickerDialog(ModalService, function (colorStr) {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
                 console.log(colorStr);
+                self.props.general.color = colorStr;
             });
         };
         function updateLine(index) {
@@ -1943,6 +1960,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 exports.depthTrackPropertiesDialog = function(ModalService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let props = {
             isShowTitle: true,
             title : "Depth",
@@ -1964,6 +1982,12 @@ exports.depthTrackPropertiesDialog = function(ModalService, callback) {
         this.unitType = props.unitType;
         this.decimals = props.decimals;
         // Dialog buttons
+        this.trackBackground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
+                console.log(colorStr);
+                self.trackColor = colorStr;
+            });
+        }
         this.onApplyButtonClicked = function () {
             bindProps();
             callback(props);
@@ -2007,6 +2031,7 @@ exports.depthTrackPropertiesDialog = function(ModalService, callback) {
 exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let props = {
             isShowTitle: true,
             title : "New Zone",
@@ -2028,6 +2053,12 @@ exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
         this.zoneSets = props.zoneSets;
         this.zoneSet = props.zoneSet;
         // Dialog buttons
+        this.trackBackground = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
+                console.log(colorStr);
+                self.trackColor = colorStr;
+            });
+        }
         this.onApplyButtonClicked = function () {
             bindProps();
             callback(props);
@@ -2182,7 +2213,7 @@ exports.newBlankCrossplotDialog = function (ModalService, callback) {
         });
     });
 }
-exports.colorPickerDialog = function(ModalService, callback) {
+exports.colorPickerDialog = function(ModalService, currentColor, callback) {
     let wiModal = null;
     let thisTimeout = null;
     function ModalController($scope, close, $timeout, wiComponentService, wiApiService, $compile) {
@@ -2190,10 +2221,6 @@ exports.colorPickerDialog = function(ModalService, callback) {
         wiModal = this;
         thisScope = $scope;
         thisTimeout = $timeout;
-        // $('#cp').colorpicker({
-        //     format: 'rgba',
-        //     inline: true
-        // });
         function colorToString(colorObj) {
             var colorStr = 'rgba(' + colorObj.r + ',' + colorObj.g + ',' + colorObj.b + ',' + colorObj.a + ')';
             return colorStr;
@@ -2255,7 +2282,7 @@ exports.colorPickerDialog = function(ModalService, callback) {
             console.log("color", temp);
             thisTimeout(function() {wiModal.color = temp;});
         });
-        $('#cp').colorpicker('setValue', "#ccc");
+        $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
