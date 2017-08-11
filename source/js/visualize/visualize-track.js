@@ -89,6 +89,7 @@ Track.prototype.createHeaderContainer = function() {
         .attr('class', 'vi-track-header-container')
         .style('background-color', 'white')
         .style('position', 'relative')
+        .style('z-index', 11)
         .style('width', '100%')
         .style('flex', 1)
         .style('overflow', 'hidden')
@@ -102,7 +103,7 @@ Track.prototype.createHeaderContainer = function() {
         .style('background-color', this.HEADER_NAME_COLOR)
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
-        .style('z-index', 2)
+        .style('z-index', 1)
         .text(this.name);
 
     this.drawingHeaderContainer = this.headerContainer.append('div')

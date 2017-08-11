@@ -1,0 +1,69 @@
+<div class="histogram-toolbar-wrapper">
+    
+    <wi-toolbar name="CrossPlotToolbar1">
+    		<wi-button name="SaveFormatButton" icon="save-16x16" type="small" tooltip="Edit Format" handler="handlers.SaveFormatButtonClicked">
+
+    		</wi-button>
+    		<wi-button name="PrintButton" icon="print-16x16" type="small" tooltip="Print" handler="handlers.PrintButtonClicked">
+
+    		</wi-button>
+    		<wi-button name="EditFormatButton" icon="properties-16x16" type="small" tooltip="Edit Format" handler="handlers.EditFormatButtonClicked">
+
+    		</wi-button>
+    		<wi-button name="ActiveZoneButton" icon="zone-edit-16x16" type="small" tooltip="Active Zone" handler="handlers.ActiveZoneButtonClicked">
+
+    		</wi-button>
+    		<wi-button name="FrequencyInfoButton" label="Frequency Info" type="small" handler="handlers.FrequencyInfoButtonClicked">
+
+    		</wi-button>
+
+    </wi-toolbar>
+    <wi-toolbar name="CrossPlotToolbar2">
+    			<name/>
+    			<attrs>
+    				<name/>
+    				<type>small</type>
+    </attrs>
+    			<children>
+    </children>
+
+    			<name/>
+    			<attrs>
+    				<name/>
+    				<type>small</type>
+    </attrs>
+    			<children>
+    </children>
+
+
+    </wi-toolbar>
+    <wi-toolbar name="CrossPlotToolbar3">
+    		<wi-dropdown name="PlotTypeDropdown" label="Plot Type" type="small">
+    				<wi-button name="FrequencyButton" label="Frequency" type="small" class="height-auto" handler="handlers.FrequencyButtonClicked">
+
+    				</wi-button>
+    				<wi-button name="PercentButton" label="Percent" type="small" class="height-auto" handler="handlers.PercentButtonClicked">
+
+    				</wi-button>
+
+    		</wi-dropdown>
+    		<wi-dropdown name="ColorDropdown" label="Color" type="small">
+    				<wi-button name="ColorByZoneButton" label="Color by Zone" type="small" class="height-auto" handler="handlers.ColorByZoneButtonClicked">
+
+    				</wi-button>
+    				<wi-button name="ColorByInputCurveButton" label="Color by Inpur Curve" type="small" class="height-auto" handler="handlers.ColorByInputCurveButtonClicked">
+
+    				</wi-button>
+
+    		</wi-dropdown>
+
+    </wi-toolbar>
+
+</div>
+<div class="histogram-main-content" style="flex: 1; display: flex; flex-direction: row;">
+    <wi-d3-histogram style="width: 100%; flex: 1; display: flex;"
+    name='{{wiCrossplot.wiD3AreaName}}'
+    wi-logplot-ctrl='wiCrossplot'></wi-d3-histogram>
+    <div class="reference-curve">
+    </div>
+</div>

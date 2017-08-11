@@ -77,6 +77,12 @@ function Curve(config) {
         };
     });
 
+    let dataMap = {};
+    this.data.forEach(function(d) {
+        dataMap[d.y] = d.x;
+    });
+    this.dataMap = dataMap;
+
     if (this.minX == null || this.maxX == null)
         this.autoScaleX();
 

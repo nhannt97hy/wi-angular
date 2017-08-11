@@ -100,6 +100,35 @@ exports.rearangeTracks = function(wiD3Ctrl) {
     d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
 }
 
+exports.createTooltipLines = function(domSvg) {
+    let svg = d3.select(domSvg);
+    let mousePosition = d3.mouse(domSvg);
+    let x = mousePosition[0];
+    let y = mousePosition[1];
+    let lineData = [
+        {x1: x, y1: 0, x2: x, y2: domSvg.clientHeight},
+        {x1: 0, y1: y, x2: domSvg.clientWidth, y2: y}
+    ];
+    let lines = svg.selectAll('line.tooltip-line')
+        .data(lineData);
+
+    lines.enter().append('line')
+        .attr('class', 'tooltip-line');
+
+    lines
+        .attr('x1', function(d) { return d.x1; })
+        .attr('x2', function(d) { return d.x2; })
+        .attr('y1', function(d) { return d.y1; })
+        .attr('y2', function(d) { return d.y2; })
+        .style('stroke', 'black')
+        .style('stroke-dasharray', '2, 1')
+        .style('stroke-width', '1px');
+}
+
+exports.removeTooltipLines = function(domSvg) {
+    d3.select(domSvg).selectAll('line.tooltip-line').remove();
+}
+
 exports.sheetDraggable = function(domElem) {
     d3.select(domElem)
         .datum({baseX:0})

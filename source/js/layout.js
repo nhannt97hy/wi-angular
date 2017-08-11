@@ -86,7 +86,7 @@ module.exports.putTabRightWithModel = function(model) {
     LAYOUT = layoutManager;
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
-    var itemId, tabTitle, name, htmlTemplate;
+    var itemType, itemId, tabTitle, name, htmlTemplate;
     console.log(model);
     switch (model.type) {
         case 'logplot':
@@ -98,8 +98,15 @@ module.exports.putTabRightWithModel = function(model) {
         case 'crossplot':
             itemId = 'crossplot' + model.id;
             tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
-            name = 'crossplot' + model.properties.idPlot;
-            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-crossplot>'
+            name = 'crossplot' + model.properties.idCrossplot;
+            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossplot + '"></wi-crossplot>'
+            break;
+        case 'histogram':      
+            itemId = 'histogram' + model.id;
+            tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            name = 'histogram' + model.properties.idHistogram;
+            htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
+            
             break;
         default:
             console.log('model type is not valid');
@@ -122,6 +129,17 @@ module.exports.putTabRightWithModel = function(model) {
         },
         title: tabTitle
     });
+    let tabContainer = rightContainer.getItemsById(itemId)[0];
+    switch (model.type) {
+        case 'crossplot':
+            console.log(tabContainer);
+            break;
+        case 'histogram':
+            console.log(tabContainer);        
+            break;
+        default:
+            return;
+    }
 }
 
 module.exports.removeTabWithModel = function(model) {

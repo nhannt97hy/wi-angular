@@ -1,5 +1,6 @@
 let CanvasHelper = require('./visualize-canvas-helper');
 
+exports.round = round;
 exports.roundUp = roundUp;
 exports.roundDown = roundDown;
 exports.isWithinYRange = isWithinYRange;
@@ -158,6 +159,15 @@ function pascalCaseToLowerDash(str) {
     return str.replace(/\.?[A-Z]/g, function(c) {
         return '-' + c.toLowerCase()
     }).replace(/^-/, '');
+}
+
+/**
+ * @param {Number} value - Number to round
+ * @param {Number} granularity - The rounded number is the multiplier of this value
+ * @returns {Number}
+ */
+function round(value, granularity) {
+    return Math.round(value / granularity) * granularity;
 }
 
 /**

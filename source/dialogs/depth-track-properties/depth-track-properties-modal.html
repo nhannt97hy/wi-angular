@@ -51,7 +51,12 @@
                                 <label class="control-label col-sm-5 normal-text" for="track-background">Track background</label>
                                 <div class="col-sm-7">
                                     <div class="float-left">
-                                        <input kendo-color-picker k-palette="'websafe'" class="form-control wi-form-control" ng-model="wiModal.trackColor" />
+                                        <!-- <input kendo-color-picker k-palette="'websafe'" class="form-control wi-form-control" ng-model="wiModal.trackColor" /> -->
+                                        <div class="addon valign-middle" ng-style="{'background-color':wiModal.trackColor}"><img/></div>
+                                        <button ng-click="wiModal.trackBackground();"
+                                                class="form-control wi-form-control width-80px">
+                                                    Change
+                                        </button>
                                     </div>
                                     <div class="float-left">
                                         <input type="text" class="form-control wi-form-control" id="track-background" ng-model="wiModal.trackColor">

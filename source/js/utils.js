@@ -194,10 +194,10 @@ function histogramToTreeConfig(histogram) {
     let histogramModel = new Object();
     histogramModel.name = 'histogram';
     histogramModel.type = 'histogram';
-    histogramModel.id = histogram.idPlot;
+    histogramModel.id = histogram.idHistogram;
     histogramModel.properties = {
         idWell: histogram.idWell,
-        idPlot: histogram.idPlot,
+        idHistogram: histogram.idHistogram,
         name: histogram.name
     };
     histogramModel.data = {
@@ -328,6 +328,18 @@ function createHistogramNode(well) {
     histogramModel.properties = {
         idWell: well.idWell
     };
+    // mock
+    well.histograms = [{
+        idHistogram: 2810,
+        idWell: well.idWell,
+        name: 'MockHistogram'
+    }];
+
+    if(!well.histograms) return histogramModel;
+    histogramModel.children = new Array();
+    well.histograms.forEach(function(histogram) {
+        histogramModel.children.push(histogramToTreeConfig(histogram));
+    });
     return histogramModel;
 }
 function wellToTreeConfig(well) {
@@ -1089,3 +1101,11 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
     };
     return wiApiService.post(route, dataRequest);
 };
+
+function openHistogramTab(wiComponentService, histogramModel, callback) {
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRightWithModel(histogramModel);
+    if (histogramModel.data.opened) return;
+    histogramModel.data.opened = true;
+};
+exports.openHistogramTab = openHistogramTab;

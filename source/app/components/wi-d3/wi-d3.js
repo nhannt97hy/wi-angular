@@ -17,6 +17,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
+    let _tooltip = true;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
 
@@ -43,6 +44,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return null; // ERROR
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
+    }
+
+    this.tooltip = function(on) {
+        if (on === undefined) return _tooltip;
+        _tooltip = on;
     }
 
     this.getDepthRange = function() {
@@ -112,7 +118,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             dragMan.track = track;
         });
         track.onPlotMouseLeave(function () {
-            console.log('mouseleave');
+            _removeTooltip(track);
             if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
@@ -125,6 +131,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         track.onHeaderMouseDown(function () {
             _onHeaderMouseDownCallback(track);
+        });
+        track.plotContainer.on('mousemove', function() {
+            _drawTooltip(track);
         });
         track.on('focus', function() {
             _setCurrentTrack(track);
@@ -357,6 +366,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     /* Private Begin */
+    function _drawTooltip(track) {
+        if (!_tooltip) return;
+        let svg = document.getElementById(self.svgId);
+        track.drawTooltipText(svg);
+        graph.createTooltipLines(svg);
+    }
+
+    function _removeTooltip(track) {
+        if (!_tooltip) return;
+        let svg = document.getElementById(self.svgId);
+        track.removeTooltipText(svg);
+        graph.removeTooltipLines(svg);
+    }
+
     function _setCurrentTrack(track) {
         _previousTrack = _currentTrack;
         _currentTrack = track;
@@ -430,7 +453,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
 
-                
+
                 return;
         }
     }
@@ -539,9 +562,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
+        self.svgId = self.plotAreaId + 'SVG';
+
         self.logPlotCtrl = getLogplotCtrl();
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
-        let handlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');    
+        let handlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
         Utils.bindFunctions(logplotHandlers, handlers, {
             $scope: $scope,
             wiComponentService: wiComponentService,
