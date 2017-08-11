@@ -51,6 +51,7 @@ module.exports.createLayout = function(domId, $scope, $compile) {
         let modelRef = componentState.model;
         container.on('destroy', function() {
             let model = utils.getModel(modelRef.type, modelRef.id);
+            if (!model) return;
             model.data.opened = false;
         })
     });
@@ -145,7 +146,7 @@ module.exports.putTabRightWithModel = function(model) {
 module.exports.removeTabWithModel = function(model) {
     switch (model.type) {
         case 'logplot':
-            var item = layoutManager.root.getItemsById('logplot'+logplotId)[0];    
+            var item = layoutManager.root.getItemsById('logplot'+model.id)[0];    
             break;
         default:
             console.log('model type is not valid');        
