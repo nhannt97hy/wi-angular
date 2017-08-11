@@ -673,4 +673,6 @@ Color.prototype = {
     return false;
   }
 };
+/* test-code */
+module.exports = Color;
 /* end-test-code */

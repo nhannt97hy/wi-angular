@@ -515,8 +515,8 @@ function getCurveData(apiService, idCurve, callback) {
             callback(null, curve);
         })
         .catch(function (err) {
-            console.error('getCurveData', err);
-            callback(err);
+            console.log('getCurveData', err);
+            callback(err, null);
         });
 }
 //exports.getCurveDataByName = getCurveDataByName;

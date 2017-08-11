@@ -1522,7 +1522,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
 };
 exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback) {
 
-    function ModalController($scope, wiComponentService, close) {
+    function ModalController($scope, wiComponentService, $timeout, close, $compile) {
         let error = null;
         let self = this;
 
@@ -1539,7 +1539,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.curvesChanged = new Array(); // 1: change line, 2: add line
 
         this.curvesArr = [];
-
+        let idCurveNew = null;
         this.well.children.forEach( function(child) {
             if(child.type == 'dataset') self.datasets.push(child);
         });
@@ -1557,31 +1557,20 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let curveList = currentTrack.getCurves();
         console.log("curveList", curveList);
         this.selectCurveArr = []; // select Curve in all dataset
-
+        this.selectCurveIdArr = [];
         this.arr = []; //curvesArr + dataset.curve
         this.lineCurve = [];
 
         this.curvesArr.forEach(function(item) {
             let selectedCurve = item.properties.datasetName + '.' + item.properties.name;
             self.selectCurveArr.push(selectedCurve);
+            self.selectCurveIdArr.push(item.properties.idCurve);
             item.datasetCurve = selectedCurve;
             self.arr.push(item);
         })
-        // this.selectCurveLine = function(index){
-        //     let selectedCurve;
-        //     self.curvesArr.forEach(function(item) {
-        //         if(curveList[index].idCurve == item.id) {
-        //             console.log("222");
-        //             selectedCurve = item.properties.datasetName + '.' + item.properties.name;
-        //             // self.arr.push(selectedCurve);
-        //         }
-        //     })
-        //     return selectedCurve;
-        // }
         let shadingList = currentTrack.getShadings();
         console.log("shading", shadingList);
         curveList.forEach(function (curve, index) {
-            // curve.change = 0;
             let curveOptions = {};
             let lineOptions = {};
             let symbolOptions = {};
@@ -1646,7 +1635,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curvesSymbolOptions.push(symbolOptions);
             self.curvesChanged.push('0');
         });
-
+        console.log("LINECURVE", this.lineCurve);
         console.log("RRRR", this.selectCurveArr, this.arr);
 
         this.well.children.forEach( function(child) {
@@ -1744,15 +1733,60 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         function removeCurve(idLine) {
             wiApiService.removeLine(idLine, function() {
-                if(callback) callback();
+                currentTrack.removeCurveById(idLine);
             });
+        }
+        this.onSelectCurve = function(index){
+            if(self.curvesChanged[index] == '2') {
+                idCurveNew = self.selectCurveIdArr[index];
+                console.log("idCurveNew", idCurveNew, self.selectCurveIdArr, self.selectCurveArr[index], index);
+                wiApiService.infoCurve(idCurveNew, function(curveInfo){
+                    console.log(curveInfo, self.curves, self.curvesLineOptions, self.curvesSymbolOptions);
+                    $timeout(function(){
+                        self.curves[index] = {
+                            alias: curveInfo.name,
+                            autoValueScale: false,
+                            blockPosition: curveInfo.LineProperty.blockPosition,
+                            displayAs: "Normal",
+                            displayMode: curveInfo.LineProperty.displayMode,
+                            displayType: curveInfo.LineProperty.displayType,
+                            idLine: null,
+                            idTrack: currentTrack.id,
+                            ignoreMissingValues: true,
+                            maxValue: curveInfo.LineProperty.minScale,
+                            minValue: curveInfo.LineProperty.maxScale,
+                            showDataset: true,
+                            showHeader: true,
+                            wrapMode: 'None'
+                        };
+                        self.curvesLineOptions[index] = {
+                            display: true,
+                            lineStyle: {
+                                lineColor: curveInfo.LineProperty.lineColor,
+                                lineStyle: eval(curveInfo.LineProperty.lineStyle),
+                                lineWidth: curveInfo.LineProperty.lineWidth
+                            }
+                        };
+                        self.curvesSymbolOptions[index] = {
+                            display: false,
+                            symbolStyle: {
+                                symbolFillStyle: "transparent",
+                                symbolLineDash: [10, 0],
+                                symbolLineWidth: 1,
+                                symbolName: "circle",
+                                symbolSize: 4,
+                                symbolStrokeStyle: "black"
+                            }
+                        }
+                    });
+                });
+            }
         }
         this.onChange = function (index) {
             if(self.curvesChanged[index] == '0') self.curvesChanged[index] = '1';
-            // if(self.curvesChanged[index] == '2')
+            
         }
         this.addRow = function () {
-
             self.curves.push({});
             console.log(self.curves);
             self.curvesChanged.push('2'); 
@@ -1780,13 +1814,17 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             }, self.curvesSymbolOptions[index]);
         };
-
+        this.colorTrack = function () {
+            DialogUtils.colorPickerDialog(ModalService, function (colorStr) {
+                console.log(colorStr);
+            });
+        };
         function updateLine(index) {
             let curveOptions = self.curves[index];
             let lineOptions = self.curvesLineOptions[index].lineStyle;
             let symbolOptions = self.curvesSymbolOptions[index].symbolStyle;
             let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
-            console.log("LINE", lineObj);
+            console.log("LINE", lineObj, curveOptions, lineOptions, symbolOptions);
             utils.changeLine(lineObj, wiApiService, function() {
                 curveList[index].setProperties(lineObj);
                 currentTrack.plotCurve(curveList[index]);
@@ -1802,30 +1840,70 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             if(idLineToRemove) {
                 idLineToRemove.forEach(function(idLine) {
                     removeCurve(idLine, function() {
-                        if(callback) callback;
+                        console.log("updateGeneralTab");
                     })
                 })
             };
 
         }
         function updateCurvesTab() {
-            console.log("Update");
-            self.curvesChanged.forEach(function(item, index) {
-                if(item == '1') {
-                    updateLine(index);
-                }
-                if(item == '2') {
-                    console.log("createLine", index);
-                    // let lineObj = {
-                    //     idCurve : curveList[index].idCurve,
-                    //     idTrack : currentTrack.id
-                    // }
-                    // wiApiService.createLine(lineObj, function(ret) {
-                    //     console.log("OK", ret);
-                    // })
-                }
-            });
-            
+            var eventEmitter = new EventEmitter();
+            var numberOfNewLines = self.curvesChanged.reduce(function(total, item){
+                if (item == '2') return total + 1;
+                return total;
+            }, 0);
+            console.log(numberOfNewLines);
+            if (numberOfNewLines  == 0) {
+                roundTwo();
+            }
+            else {
+                let lineCreatedCount = 0;
+                eventEmitter.on('line-created', function() {
+                    lineCreatedCount = lineCreatedCount + 1;
+                    if (lineCreatedCount == numberOfNewLines) {
+                        curveList = currentTrack.getCurves();
+                        roundTwo();
+                    }
+                });
+                roundOne();
+            }
+            function roundTwo() {
+                self.curvesChanged.forEach(function(item, index) {
+                    console.log("indexRoundTwo", index, item);
+                    if(item == '1') {
+                        updateLine(index);
+                    }
+                });
+            }
+            function roundOne() {
+                self.curvesChanged.forEach(function(item, index) {
+                    if(item == '2') {
+                        let lineObj = {
+                            idCurve : idCurveNew,
+                            idTrack : currentTrack.id
+                        }
+                        wiApiService.createLine(lineObj, function(line){
+                            console.log("CREATE:", line);
+                            let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                            utils.getCurveData(wiApiService, line.idCurve, function(err, data){
+                                let lineModel = utils.lineToTreeConfig(line);
+                                if (!err) {
+                                    wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
+                                    self.curves[index].idLine = line.idLine;
+                                    self.curvesChanged[index] = '1';
+                                    console.log(eventEmitter);
+                                    eventEmitter.emitEvent("line-created");
+                                    console.log("99999999)))))",eventEmitter);
+                                }
+                                else {
+                                    console.log(err);
+                                }
+                            });
+                        });
+                    }
+                });
+
+            }
         }
 
         function updateShadingsTab() {
@@ -1994,7 +2072,7 @@ exports.errorMessageDialog = function (ModalService, errorMessage) {
     function ModalController($scope, close) {
         let self = this;
         this.error = errorMessage;
-        this.onOkButtonClicked = function () {
+        this.onCloseButtonClicked = function () {
             close(null);
         };
     }
@@ -2101,6 +2179,88 @@ exports.newBlankCrossplotDialog = function (ModalService, callback) {
             $('body').removeClass('modal-open');
 
             if (callback && newPlot) callback(newPlot);
+        });
+    });
+}
+exports.colorPickerDialog = function(ModalService, callback) {
+    let wiModal = null;
+    let thisTimeout = null;
+    function ModalController($scope, close, $timeout, wiComponentService, wiApiService, $compile) {
+        let self = this;
+        wiModal = this;
+        thisScope = $scope;
+        thisTimeout = $timeout;
+        // $('#cp').colorpicker({
+        //     format: 'rgba',
+        //     inline: true
+        // });
+        function colorToString(colorObj) {
+            var colorStr = 'rgba(' + colorObj.r + ',' + colorObj.g + ',' + colorObj.b + ',' + colorObj.a + ')';
+            return colorStr;
+        }
+        this.updateColor = function(){
+            var colorStr = colorToString(self.color);
+            $('#cp').colorpicker('setValue', colorStr);
+        }
+        this.color = null;
+        this.onOkButtonClicked = function() {
+            close(colorToString(self.color));
+        }
+        this.onCancelButtonClicked = function() {
+            close();
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "color-picker/color-picker-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.element.draggable();
+        // thisScope.color = "#ccc";
+        $('#cp').colorpicker({
+            format: 'rgba',
+            inline: true,
+            container: '#demo',
+            customClass : 'wiColorpicker',
+            sliders : {
+                saturation : {
+                    maxTop : 170,
+                    maxLeft: 170
+                },
+                hue: {
+                    maxTop : 170
+                },
+                alpha: {
+                    maxTop : 170
+                }
+            },
+            colorSelectors: {
+                'black': '#000000',
+                'white': '#ffffff',
+                'red': '#FF0000',
+                'default': '#777777',
+                'primary': '#337ab7',
+                'success': '#5cb85c',
+                'info': '#5bc0de',
+                'warning': '#f0ad4e',
+                'danger': '#d9534f',
+                'aliceBlue':'#f0f8ff',
+                'antiqueWhite': '#faebd7',
+                'aqua': '#00ffff',
+                'aquamarine': '7fffd4'
+            }
+        }).on('changeColor', function(evt) {
+            var temp = evt.color.toRGB();
+            console.log("color", temp);
+            thisTimeout(function() {wiModal.color = temp;});
+        });
+        $('#cp').colorpicker('setValue', "#ccc");
+        modal.close.then(function (colorStr) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (callback) if(colorStr) callback(colorStr);
         });
     });
 }

@@ -86,9 +86,9 @@
                                                    ng-model="wiModal.options.lines.color"/> -->
                                             <!-- <input type="color" name="" data-alphacontrol="alpha-range"
                                                     ng-model="wiModal.options.symbolStyle.symbolFillStyle"> -->
-                                            <input type="text" name="" id="testColor"
-                                                    class="form-control wi-form-control" 
-                                                    ng-model="wiModal.options.symbolStyle.symbolFillStyle">
+                                            <input color-picker 
+                                                    color-picker-model="wiModal.options.symbolStyle.symbolFillStyle"
+                                                    ng-style="{background:wiModal.options.symbolStyle.symbolFillStyle}">
                                             
                                         </div>
                                     </div>
