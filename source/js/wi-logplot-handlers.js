@@ -154,7 +154,7 @@ exports.AddDepthAxisButtonClicked = function() {
 };
 
 exports.NewTrackButtonClicked = function() {
-    this.wiLogplot.getwiD3Ctrl().addLogTrack();
+    this.wiLogplot.getwiD3Ctrl().addLogTrack('New Track');
 };
 
 exports.DuplicateTrackButtonClicked = function() {

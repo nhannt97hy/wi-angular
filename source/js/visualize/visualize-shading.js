@@ -118,7 +118,7 @@ Shading.prototype.init = function(plotContainer) {
         .style('position', 'absolute');
 
     this.ctx = this.canvas.node().getContext('2d');
-    this.svg = plotContainer.select('svg');
+    this.svg = plotContainer.select('.vi-track-svg-container');
 
     this.refLine = this.svg.append('line')
         .attr('x1', 0)
