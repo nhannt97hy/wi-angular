@@ -17,7 +17,10 @@ let wiList = require('./wi-list');
 
 let wiContextMenu = require('./wi-context-menu');
 
+let wiD3Histogram = require('./wi-d3-crossplot');
+let wiD3Crossplot = require('./wi-d3-crossplot');
 let wiD3 = require('./wi-d3');
+let wiHistogram = require('./wi-histogram');
 let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
@@ -68,7 +71,10 @@ let app = angular.module('wiapp',
         wiSlidingbar.name,
         wiList.name,
         wiContextMenu.name,
+        wiD3Crossplot.name,
+        wiD3Histogram.name,
         wiD3.name,
+        wiHistogram.name,
         wiCrossplot.name,
         wiLogplot.name,
         wiExplorer.name,
