@@ -68,6 +68,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         if (!preItem || !currItem) return;
         if (preItem.data.deleted) currItem.data.deleted = preItem.data.deleted;
         if (preItem.data.selected) currItem.data.selected = preItem.data.selected;
+        if (preItem.data.opened) currItem.data.opened = preItem.data.opened;
         currItem.data.childExpanded = preItem.data.childExpanded;
     };
 

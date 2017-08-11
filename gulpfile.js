@@ -195,6 +195,19 @@ gulp.task('include', function () {
         .pipe(gulp.dest('./build'));
 });
 
+gulp.task('wi-histogram-include', function () {
+    var templateFile = './source/app/components/wi-histogram/template/wi-histogram.html';
+    var outputDir = './source/app/components/wi-histogram';
+
+    return gulp.src([templateFile])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest(outputDir));
+});
+
 gulp.task('wi-crossplot-include', function () {
     var templateFile = './source/app/components/wi-crossplot/template/wi-crossplot.html';
     var outputDir = './source/app/components/wi-crossplot';
@@ -253,9 +266,15 @@ function xlsxToHTML(xlsxFile, configFile) {
     jsonXML.jsonToXML(configFile);
 }
 
-gulp.task('gen-template', ['gen-wi-crossplot-template', 'gen-wi-logplot-template', 'gen-wi-explorer-template'], function () {
+gulp.task('gen-template', ['gen-wi-histogram-template', 'gen-wi-crossplot-template', 'gen-wi-logplot-template', 'gen-wi-explorer-template'], function () {
     var configFile = 'config/ribbon-config.js';
     var xlsxFile = './Wi-UI.Tung.xlsx';
+    xlsxToHTML(xlsxFile, configFile);
+});
+
+gulp.task('gen-wi-histogram-template', function () {
+    var configFile = 'config/wi-histogram.config.js';
+    var xlsxFile = './Wi-Histogram.xlsx';
     xlsxToHTML(xlsxFile, configFile);
 });
 
@@ -276,11 +295,20 @@ gulp.task('gen-wi-explorer-template', function () {
     xlsxToHTML(xlsxFile, configFile);
 });
 
-gulp.task('gen-functions', ['gen-wi-crossplot-functions', 'gen-wi-logplot-functions', 'gen-wi-explorer-functions'], function () {
+gulp.task('gen-functions', ['gen-wi-histogram-functions', 'gen-wi-crossplot-functions', 'gen-wi-logplot-functions', 'gen-wi-explorer-functions'], function () {
     var configFile = 'config/ribbon-config.js';
     var xlsxFile = './Wi-UI.Tung.xlsx';
     var templateFile = 'source/js/handlers.js.tmpl';
 
+    var wiUI = require('./preprocess/excel-to-json.js');
+    wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
+});
+
+gulp.task('gen-wi-histogram-functions', function () {
+    var configFile = 'config/wi-histogram.config.js';
+    var xlsxFile = './Wi-Histogram.xlsx';
+    var templateFile = 'source/js/wi-histogram-handlers.js.tmpl';
+    
     var wiUI = require('./preprocess/excel-to-json.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
@@ -326,7 +354,7 @@ gulp.task('pre', ['gen-template', 'gen-functions'], function () {
 });
 
 const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor',
-                    'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include'];
+                    'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include'];
 gulp.task('build', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
