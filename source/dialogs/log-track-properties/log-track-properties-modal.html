@@ -160,9 +160,11 @@
                                             </label>
                                             <div class="col-sm-7">
                                                 <div class="float-left">
-                                                    <input kendo-color-picker k-palette="'websafe'"
+                                                    <!-- <input kendo-color-picker k-palette="'websafe'"
                                                            class="form-control wi-form-control"
-                                                        ng-model="wiModal.props.general.color"/>
+                                                        ng-model="wiModal.props.general.color"/> -->
+                                                    <button ng-click="wiModal.colorTrack();"
+                                                            class="form-control wi-form-control">Color Track</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -207,7 +209,7 @@
                                                             name="curveName"
                                                             class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.selectCurveArr"
-                                                            ng-change="wiModal.onChange($index);"></select>
+                                                            ng-change="wiModal.onSelectCurve($index);" ng-disabled="wiModal.curvesChanged[$index] != '2'"></select>
                                                 </td>
 
                                                 <td>
@@ -258,56 +260,6 @@
                                                             ng-change="wiModal.onChange($index);"></select>
                                                 </td>       
                                             </tr>
-                                            <!-- <tr ng-model="curve"
-                                                ng-repeat="curve in wiModal.fillDataset track by $index"
-                                                ng-class="{selected:$index == selectedRow}"
-                                                ng-click="wiModal.setClickedRowCurve($index)">
-                                                <td>
-                                                    <select class="form-control wi-form-control"
-                                                            ng-model="dataset"
-                                                            ng-options="dataset.name for dataset in wiModal.fillDataset">
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select ng-model="selectCurve" name="curveName"
-                                                            value="" class="form-control wi-form-control"
-                                                            ng-options="selectCurve as selectCurve.name for selectCurve in dataset.curves">
-                                                    </select>
-                                                </td>
-
-                                                <td>
-                                                    <input type="text" ng-model="selectCurve.alias"
-                                                           class="form-control wi-form-control">
-                                                </td>
-                                                <td>
-                                                    <input type="text" ng-model="selectCurve.leftScale"
-                                                           class="form-control wi-form-control">
-                                                </td>
-                                                <td>
-                                                    <input type="text" ng-model="selectCurve.rightScale"
-                                                           class="form-control wi-form-control">
-                                                </td>
-                                                <td>
-                                                    <select ng-model="selectCurve.logLinear" name="log"
-                                                            value="" class="form-control wi-form-control"
-                                                            ng-options="item for item in wiModal.logLinear track by item"></select>
-                                                </td>
-                                                <td>
-                                                    <select ng-model="selectCurve.displayMode" name="displayMode"
-                                                            value="" class="form-control wi-form-control"
-                                                            ng-options="item for item in wiModal.displayMode track by item"></select>
-                                                </td>
-                                                <td>
-                                                    <input type="button" ng-model="selectCurve.lineStyle"
-                                                           value="Edit..." class="form-control wi-form-control"
-                                                            ng-click="wiModal.lineStyleButtonClicked()">
-                                                </td>
-                                                <td>
-                                                    <select ng-model="selectCurve.displayAs" name="displayAs"
-                                                            value="" class="form-control wi-form-control"
-                                                            ng-options="item for item in wiModal.displayAs track by item"></select>
-                                                </td>
-                                            </tr> -->
                                         </tbody>
                                     </table>
                                 </div>

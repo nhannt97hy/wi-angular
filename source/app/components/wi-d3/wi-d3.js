@@ -418,7 +418,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         switch (d3.event.key) {
             case 'Backspace':
             case 'Delete':
-                if (track.removeCurrentDrawing) track.removeCurrentDrawing();
+                let curve = track.getCurrentCurve();
+                console.log(curve);
+
+                if(curve) {
+                    let props = curve.getProperties();
+                    console.log(props);
+                    let idLine = props.idLine;
+                    wiApiService.removeLine(idLine, function() {
+                       track.removeCurve(curve);
+                    });
+                }
+
+                
                 return;
         }
     }
