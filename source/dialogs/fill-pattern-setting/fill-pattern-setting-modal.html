@@ -39,9 +39,13 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-6 small-text">Foreground</label>
                                 <div class="col-sm-6 text-left">
-                                    <input kendo-color-picker k-palette="'websafe'"
+                                    <!-- <input kendo-color-picker k-palette="'websafe'"
                                            class="form-control wi-form-control"
-                                           ng-model="wiModal.options.fill.foreground"/>
+                                           ng-model="wiModal.options.fill.foreground"/> -->
+                                    <div class="addon valign-middle" 
+                                        ng-style="{'background-color':wiModal.options.fill.foreground}"><img/></div>
+                                    <button ng-click="wiModal.foreground()"
+                                            class="form-control wi-form-control width-80px">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -49,9 +53,12 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-6 small-text" for="background">Background</label>
                                 <div class="col-sm-6 text-left">
-                                    <input kendo-color-picker k-palette="'websafe'"
+                                    <!-- <input kendo-color-picker k-palette="'websafe'"
                                            class="form-control wi-form-control"
-                                           ng-model="wiModal.options.fill.background"/>
+                                           ng-model="wiModal.options.fill.background"/> -->
+                                    <div class="addon valign-middle" ng-style="{'background-color':wiModal.options.fill.background}"><img/></div>
+                                    <button ng-click="wiModal.background()"
+                                            class="form-control wi-form-control width-80px">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -113,9 +120,13 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-6 small-text" >Positive Foreground</label>
                                                     <div class="col-sm-6 text-left">
-                                                        <input kendo-color-picker k-palette="'websafe'"
+                                                        <!-- <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.positiveFill.foreground"/>
+                                                               ng-model="wiModal.options.positiveFill.foreground"/> -->
+                                                        <div class="addon valign-middle" 
+                                                            ng-style="{'background-color':wiModal.options.positiveFill.foreground}"><img/></div>
+                                                        <button ng-click="wiModal.posPositiveForeground()"
+                                                                class="form-control wi-form-control width-80px">Change</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -123,9 +134,13 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-6 small-text">Positive Background</label>
                                                     <div class="col-sm-6 text-left">
-                                                        <input kendo-color-picker k-palette="'websafe'"
+                                                        <!-- <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.positiveFill.background"/>
+                                                               ng-model="wiModal.options.positiveFill.background"/> -->
+                                                        <div class="addon valign-middle" 
+                                                            ng-style="{'background-color':wiModal.options.positiveFill.background}"><img/></div>
+                                                        <button ng-click="wiModal.posPositiveBackground()"
+                                                                class="form-control wi-form-control width-80px">Change</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -172,9 +187,15 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-6 small-text" >Positive Foreground</label>
                                                     <div class="col-sm-6 text-left">
-                                                        <input kendo-color-picker k-palette="'websafe'"
+                                                        <!-- <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.negativeFill.foreground"/>
+                                                               ng-model="wiModal.options.negativeFill.foreground"/> -->
+                                                        <div class="addon valign-middle" 
+                                                            ng-style="{'background-color':wiModal.options.negativeFill.foreground}"><img/></div>
+                                                        <button ng-click="wiModal.negPositiveForeground()"
+                                                                class="form-control wi-form-control width-80px">
+                                                                Change
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -182,9 +203,15 @@
                                                 <div class="form-group">
                                                     <label class="control-label col-sm-6 small-text">Positive Background</label>
                                                     <div class="col-sm-6 text-left">
-                                                        <input kendo-color-picker k-palette="'websafe'"
+                                                        <!-- <input kendo-color-picker k-palette="'websafe'"
                                                                class="form-control wi-form-control"
-                                                               ng-model="wiModal.options.negativeFill.background"/>
+                                                               ng-model="wiModal.options.negativeFill.background"/> -->
+                                                        <div class="addon valign-middle" 
+                                                            ng-style="{'background-color':wiModal.options.negativeFill.background}"><img/></div>
+                                                        <button ng-click="wiModal.negPositiveBackground()"
+                                                                class="form-control wi-form-control width-80px">
+                                                                Change
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>

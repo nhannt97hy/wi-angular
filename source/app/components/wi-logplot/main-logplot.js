@@ -98,7 +98,6 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
             }
         })
         wiD3Ctrl.addCurveToTrack(track, data, {
-            scale: 'logarithmic',
             symbol: {
                 style: 'circle'
             },
