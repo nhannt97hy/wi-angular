@@ -69,6 +69,8 @@ CanvasHelper.prototype.star = function(x, y) {
 }
 
 CanvasHelper.createPattern = function(ctx, name, foreground, background, callback) {
+    if (name == 'none') return background;
+
     let key = name + foreground + background;
     if (usedPatterns[key]) {
         callback(usedPatterns[key]);

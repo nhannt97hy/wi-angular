@@ -205,6 +205,7 @@ LogTrack.prototype.getExtentY = function() {
  * @param {Object} drawing - The drawing to be current
  */
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
+    if (drawing) console.log('Drawing props', drawing.getProperties());
     this.currentDrawing = drawing;
     this.plotAllDrawings();
     this.highlightHeader();
@@ -369,16 +370,6 @@ LogTrack.prototype.removeShading = function(shading) {
 }
 
 /**
- * Remove drawing by its id
- */
-LogTrack.prototype.removeDrawingById = function(id) {
-    let drawings = this.drawings.filter(function(d) {
-        return d.id == id;
-    });
-    this.removeDrawing(drawings[0]);
-}
-
-/**
  * Remove curve by its id
  */
 LogTrack.prototype.removeCurveById = function(id) {
@@ -396,6 +387,40 @@ LogTrack.prototype.removeShadingById = function(id) {
         return sh.id == id;
     });
     this.removeShading(shadings[0]);
+}
+
+LogTrack.prototype.findCurveById = function(id) {
+    return this.getCurves().filter(function(c) {
+        return c.id == id;
+    })[0];
+}
+
+LogTrack.prototype.findShadingById = function(id) {
+    return this.getShadings().filter(function(sh) {
+        return sh.id == id;
+    })[0];
+}
+
+LogTrack.prototype.findCurves = function(props) {
+    return this.getCurves().filter(function(c) {
+        let cProps = c.getProperties();
+        let match = true;
+        Object.keys(props).forEach(function(k) {
+            match = match && (cProps[k] == props[k]);
+        });
+        return match;
+    });
+}
+
+LogTrack.prototype.findShadings = function(props) {
+    return this.getShadings().filter(function(sh) {
+        let shProps = sh.getProperties();
+        let match = true;
+        Object.keys(props).forEach(function(k) {
+            match = match && (shProps[k] == props[k]);
+        });
+        return match;
+    });
 }
 
 /**

@@ -22,9 +22,25 @@ exports.clone = clone;
 exports.range = range;
 exports.getScaleFunc = getScaleFunc;
 exports.setIfNotNull = setIfNotNull;
+exports.setIfNotUndefined = setIfNotUndefined;
+exports.isJson = isJson;
+
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    }
+    catch (e) {
+        return false;
+    }
+    return true;
+}
 
 function setIfNotNull(obj, attr, newProp) {
     obj[attr] = newProp == null ? obj[attr] : newProp;
+}
+
+function setIfNotUndefined(obj, attr, newProp) {
+    obj[attr] = newProp === undefined ? obj[attr] : newProp;
 }
 
 function getScaleFunc(scale) {
