@@ -205,11 +205,12 @@
                                                             class="form-control wi-form-control"
                                                             ng-change="wiModal.onChange($index);">
                                                     </input> -->
-                                                    <select ng-model="wiModal.lineCurve[$index].datasetCurve"
+                                                    <select ng-model="wiModal.lineCurve[$index].id"
                                                             name="curveName"
                                                             class="form-control wi-form-control"
-                                                            ng-options="item for item in wiModal.selectCurveArr"
-                                                            ng-change="wiModal.onSelectCurve($index);" ng-disabled="wiModal.curvesChanged[$index] != '2'"></select>
+                                                            ng-options="item.id as item.datasetCurve for item in wiModal.arr"
+                                                            ng-change="wiModal.onSelectCurve($index);" 
+                                                            ng-disabled="wiModal.curvesChanged[$index] != '2'"></select>
                                                 </td>
 
                                                 <td>

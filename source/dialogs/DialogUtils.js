@@ -1748,6 +1748,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curvesSymbolOptions.splice(idx, 1);
             self.curvesChanged.splice(idx, 1);
             self.lineCurve.splice(idx, 1);
+
             // curveList.splice(idx, 1);
             console.log("curveList", curveList);
             console.log("options", self.curves, idx);
@@ -1759,8 +1760,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         this.onSelectCurve = function(index){
             if(self.curvesChanged[index] == '2') {
-                idCurveNew = self.selectCurveIdArr[index];
-                console.log("idCurveNew", idCurveNew, self.selectCurveIdArr, self.selectCurveArr[index], index);
+                idCurveNew = self.lineCurve[index].id;
+                console.log("idCurveNew", idCurveNew, self.selectCurveArr[index], index);
                 wiApiService.infoCurve(idCurveNew, function(curveInfo){
                     console.log(curveInfo, self.curves, self.curvesLineOptions, self.curvesSymbolOptions);
                     $timeout(function(){
@@ -1774,8 +1775,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             idLine: null,
                             idTrack: currentTrack.id,
                             ignoreMissingValues: true,
-                            maxValue: curveInfo.LineProperty.minScale,
-                            minValue: curveInfo.LineProperty.maxScale,
+                            maxValue: curveInfo.LineProperty.maxScale,
+                            minValue: curveInfo.LineProperty.minScale,
                             showDataset: true,
                             showHeader: true,
                             wrapMode: 'None'
@@ -1858,6 +1859,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             utils.changeTrack(self.props.general, wiApiService)
             currentTrack.setProperties(self.props.general);
             currentTrack.doPlot(true);
+            
+        }
+        function updateCurvesTab() {
             if(idLineToRemove) {
                 idLineToRemove.forEach(function(idLine) {
                     removeCurve(idLine, function() {
@@ -1866,8 +1870,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 })
             };
 
-        }
-        function updateCurvesTab() {
             var eventEmitter = new EventEmitter();
             var numberOfNewLines = self.curvesChanged.reduce(function(total, item){
                 if (item == '2') return total + 1;
