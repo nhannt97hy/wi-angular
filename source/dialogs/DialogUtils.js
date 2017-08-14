@@ -1746,6 +1746,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curves.splice(idx, 1);
             self.curvesLineOptions.splice(idx, 1);
             self.curvesSymbolOptions.splice(idx, 1);
+            self.curvesChanged.splice(idx, 1);
+            self.lineCurve.splice(idx, 1);
+            // curveList.splice(idx, 1);
+            console.log("curveList", curveList);
             console.log("options", self.curves, idx);
         }
         function removeCurve(idLine) {
@@ -1801,13 +1805,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         this.onChange = function (index) {
             if(self.curvesChanged[index] == '0') self.curvesChanged[index] = '1';
-            
+            console.log(self.curvesChanged[index]);
         }
         this.addRow = function () {
             self.curves.push({});
             console.log(self.curves);
             self.curvesChanged.push('2'); 
-            console.log(self.curvesChanged);
+            console.log("***", self.curvesChanged, self.lineCurve);
         };
         // Dialog buttons
         this.definePatternButtonClicked = function () {
@@ -2244,7 +2248,6 @@ exports.colorPickerDialog = function(ModalService, currentColor, callback) {
     }).then(function (modal) {
         modal.element.modal();
         modal.element.draggable();
-        // thisScope.color = "#ccc";
         $('#cp').colorpicker({
             format: 'rgba',
             inline: true,
