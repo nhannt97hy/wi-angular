@@ -17,7 +17,7 @@ let wiList = require('./wi-list');
 
 let wiContextMenu = require('./wi-context-menu');
 
-let wiD3Histogram = require('./wi-d3-crossplot');
+let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
 let wiD3 = require('./wi-d3');
 let wiHistogram = require('./wi-histogram');

@@ -16,11 +16,60 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.contextMenu = [
         {
-            name: "",
-            label: "",
+            name: "Refresh",
+            label: "Refresh",
+            icon: "reload-16x16",
+            handler: function () {
+                
+            }
+        }, {
+            name: "Properties",
+            label: "Properties",
+            icon: "properties2-16x16",
+            handler: function () {
+                
+            }
+        }, {
+            name: "ShowOverlay",
+            label: "Show Overlay",
             icon: "",
             handler: function () {
-
+                
+            }
+        }, {
+            name: "ShowReferenceZone",
+            label: "Show Reference Zone",
+            icon: "",
+            handler: function () {
+                
+            }
+        }, {
+            name: "ShowReferenceWindow",
+            label: "Show Reference Window",
+            icon: "logplot-blank-16x16",
+            handler: function () {
+                
+            }
+        }, {
+            name: "ShowTooltip",
+            label: "Show Tooltip",
+            icon: "",
+            handler: function () {
+                
+            }
+        }, {
+            name: "ShowHistogram",
+            label: "Show Histogram",
+            icon: "",
+            handler: function () {
+                
+            }
+        }, {
+            name: "Function",
+            label: "Function",
+            icon: "",
+            handler: function () {
+                
             }
         }
     ];
