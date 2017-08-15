@@ -111,36 +111,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
-        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        track.onPlotMouseOver(function () {
-            if (!dragMan.dragging) return;
-            dragMan.wiD3Ctrl = self;
-            dragMan.track = track;
-        });
-        track.onPlotMouseLeave(function () {
-            _removeTooltip(track);
-            if (!dragMan.dragging) return;
-            dragMan.wiD3Ctrl = null;
-            dragMan.track = null;
-        });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
-        track.onPlotMouseDown(function () {
-            _onPlotMouseDownCallback(track);
-        });
-        track.onHeaderMouseDown(function () {
-            _onHeaderMouseDownCallback(track);
-        });
-        track.plotContainer.on('mousemove', function() {
-            _drawTooltip(track);
-        });
-        track.on('focus', function() {
-            _setCurrentTrack(track);
-        });
-        track.on('keydown', function() {
-            _onTrackKeyPressCallback(track);
-        });
+        _registerLogTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
         return track;
     };
@@ -186,6 +157,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('focus', function () {
             _setCurrentTrack(track);
         });
+        track.on('dblclick', function() {
+            openTrackPropertiesDialog();
+        });
         _registerTrackHorizontalResizerDragCallback();
     };
 
@@ -201,7 +175,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 _curveOnRightClick();
             }
         });
-        console.log('Curve props', curve.getProperties());
+        curve.header.on('dblclick', function() {
+            // Mousedown already set the curve to be current curve
+            _curveOnDoubleClick();
+        });
         return curve;
     };
 
@@ -408,12 +385,66 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    function _onPlotDoubleClickCallback(track) {
+        if (d3.event.currentDrawing) {
+            if (d3.event.currentDrawing.isCurve()) {
+                _curveOnDoubleClick();
+            }
+            else if (d3.event.currentDrawing.isShading()) {
+                _shadingOnDoubleClick();
+            }
+        }
+    }
+
+    function _registerLogTrackCallback(track) {
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        track.onPlotMouseOver(function () {
+            if (!dragMan.dragging) return;
+            dragMan.wiD3Ctrl = self;
+            dragMan.track = track;
+        });
+        track.onPlotMouseLeave(function () {
+            _removeTooltip(track);
+            if (!dragMan.dragging) return;
+            dragMan.wiD3Ctrl = null;
+            dragMan.track = null;
+        });
+        track.onPlotMouseWheel(function () {
+            _onPlotMouseWheelCallback();
+        });
+        track.onPlotMouseDown(function () {
+            _onPlotMouseDownCallback(track);
+        });
+        track.onHeaderMouseDown(function () {
+            _onHeaderMouseDownCallback(track);
+        });
+        track.onPlotDoubleClick(function() {
+            _onPlotDoubleClickCallback(track);
+        });
+        track.plotContainer.on('mousemove', function() {
+            _drawTooltip(track);
+        });
+        track.on('focus', function() {
+            _setCurrentTrack(track);
+        });
+        track.on('keydown', function() {
+            _onTrackKeyPressCallback(track);
+        });
+        track.on('dblclick', function() {
+            openTrackPropertiesDialog();
+        });
+    }
+
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function() {
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
             }
+        });
+        shading.header.on('dblclick', function() {
+            // Mousedown already set the shading to be current shading
+            _shadingOnDoubleClick();
         });
     }
 
@@ -456,6 +487,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                 return;
         }
+    }
+
+    function _shadingOnDoubleClick() {
+        console.log('Shading double clicked');
+
+        // Prevent track properties dialog from opening
+        d3.event.stopPropagation();
+    }
+
+    function _curveOnDoubleClick() {
+        let currentCurve = _currentTrack.getCurrentCurve();
+        DialogUtils.curvePropertiesDialog(
+            ModalService,
+            wiComponentService,
+            wiApiService,
+            DialogUtils,
+            currentCurve,
+            _currentTrack,
+            self.wiLogplotCtrl
+        );
+
+        // Prevent track properties dialog from opening
+        d3.event.stopPropagation();
     }
 
     function _shadingOnRightClick() {
@@ -559,6 +613,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     /* Private End */
 
+    function openTrackPropertiesDialog() {
+        if (!_currentTrack) return;
+        if (_currentTrack.isLogTrack()) {
+            DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                if (props) {
+                    console.log('logTrackPropertiesData', props);
+                }
+            });
+        } else if (_currentTrack.isDepthTrack()) {
+            DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
+                if (props) {
+                    console.log('depthTrackPropertiesData', props);
+                }
+            });
+        } else { //TODO: zoneTrack condition
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
+                if (props) {
+                    console.log('zoneTrackPropertiesData', props);
+                }
+            });
+        }
+    }
+
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -590,29 +667,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "TrackProperties",
             label: "Track Properties",
             icon: 'track-properties-16x16',
-            handler: function () {
-                let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-                if (!_currentTrack) return;
-                if (_currentTrack.isLogTrack()) {
-                    DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-                        if (props) {
-                            console.log('logTrackPropertiesData', props);
-                        }
-                    });
-                } else if (_currentTrack.isDepthTrack()) {
-                    DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
-                        if (props) {
-                            console.log('depthTrackPropertiesData', props);
-                        }
-                    });
-                } else { //TODO: zoneTrack condition
-                    DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
-                        if (props) {
-                            console.log('zoneTrackPropertiesData', props);
-                        }
-                    });
-                }
-            }
+            handler: openTrackPropertiesDialog
         },
         {
             name: "SwitchToLogarithmic",

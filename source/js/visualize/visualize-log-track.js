@@ -540,6 +540,18 @@ LogTrack.prototype.onPlotMouseDown = function(cb) {
 }
 
 /**
+ * Register event when double click the plot area
+ */
+LogTrack.prototype.onPlotDoubleClick = function(cb) {
+    let self = this;
+    this.plotContainer
+        .on('dblclick', function() {
+            self.plotMouseDownCallback();
+            cb();
+        });
+}
+
+/**
  * Register event when mouse down the header area
  */
 LogTrack.prototype.onHeaderMouseDown = function(cb) {
@@ -825,7 +837,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
 
     if (this.currentDrawing && this.currentDrawing.nearPoint(x, y)) {
         d3.event.currentDrawing = this.currentDrawing;
-        return
+        return;
     }
     this.getShadings().concat(this.getCurves()).forEach(function(d) {
         if (!current && d.nearPoint(x, y)) {
@@ -833,6 +845,10 @@ LogTrack.prototype.plotMouseDownCallback = function() {
             d3.event.currentDrawing = current;
         }
     });
+
+    // Current drawing is already set when mouse down
+    if (d3.event.type == 'dblclick') return;
+
     this.setCurrentDrawing(current);
 }
 
