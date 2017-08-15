@@ -46,6 +46,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
 
+    /**
+     * If param is absent, return a boolean indicating whether tooltip is on or off
+     * If param is present, set tooltip on/off
+     */
     this.tooltip = function(on) {
         if (on === undefined) return _tooltip;
         _tooltip = on;
@@ -582,7 +586,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Cross plot",
             icon: "crossplot-blank-16x16",
             handler: function () {
-
+                let curve1 = _currentTrack.getCurrentCurve();
+                let curve2 = _currentTrack.getTmpCurve();
+                if (!curve1 || !curve2) {
+                    console.log('Two curves are needed');
+                }
+                else {
+                    console.log('Create crossplot', curve1, curve2);
+                }
             }
         }, {
             name: "Histogram",
@@ -596,7 +607,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Create Shading",
             icon: "shading-add-16x16",
             handler: function () {
-                self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
+                let curve1 = _currentTrack.getCurrentCurve();
+                let curve2 = _currentTrack.getTmpCurve();
+
+                if (!curve1) return;
+                if (!curve2) {
+                    // This should open dialog
+                    self.addLeftShadingToTrack(_currentTrack, curve1, {});
+                }
+                else {
+                    self.addPairShadingToTrack(_currentTrack, curve1, curve2, {});
+                }
             }
         }
         ]);
