@@ -209,6 +209,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let shading = track.addShading(null, curve, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
+        return shading;
     };
 
     this.addRightShadingToTrack = function (track, curve, config) {
@@ -216,6 +217,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let shading = track.addShading(curve, null, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
+        return shading;
     };
 
     this.addCustomShadingToTrack = function (track, curve, value, config) {
@@ -223,6 +225,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let shading = track.addShading(curve, null, value, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
+        return shading;
     };
 
     this.addPairShadingToTrack = function(track, lCurve, rCurve, config) {
@@ -230,6 +233,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let shading = track.addShading(lCurve, rCurve, null, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
+        return shading;
     }
 
     this.removeCurrentCurve = function() {
@@ -463,7 +467,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "RemoveShading",
             label: "Remove Shading",
             handler: function () {
-                self.removeCurrentShading();
+                // self.removeCurrentShading();
+                self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
+
             }
         }]);
         /*$timeout(function() {
@@ -541,7 +547,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Create Shading",
             icon: "shading-add-16x16",
             handler: function () {
-                self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
+                // self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
+                let currentCurve = _currentTrack.getCurrentCurve();
+                let currentShading = null;
+                DialogUtils.shadingPropertiesDialog(ModalService, _currentTrack, currentCurve, currentShading, function(ret){
+                    console.log("ret");
+                });
             }
         }
         ]);

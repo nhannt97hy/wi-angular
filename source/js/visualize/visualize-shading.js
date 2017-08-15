@@ -42,6 +42,7 @@ function Shading(config) {
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
+    this.idTrack = config.idTrack;
     this.name = config.name || 'Noname';
 
     this.fill = config.fill;
@@ -98,15 +99,16 @@ Shading.prototype.getProperties = function() {
     let e = 0.000001;
     let type;
 
-    if (this.refX == this.selectedCurve.maxX)
+    if (Math.abs(this.refX - this.selectedCurve.maxX) < e)
         type = 'right';
-    else if (this.refX == this.selectedCurve.minX)
+    else if (Math.abs(this.refX - this.selectedCurve.minX) < e)
         type = 'left';
     else
         type = 'custom';
 
     return {
         idShading: this.id,
+        idTrack: this.idTrack,
         name: this.name,
         negativeFill: this.isNegPosFilling ? this.negativeFill : null,
         positiveFill: this.isNegPosFilling ? this.positiveFill : this.fill,
@@ -121,6 +123,7 @@ Shading.prototype.getProperties = function() {
 }
 
 Shading.prototype.setProperties = function(props) {
+    Utils.setIfNotNull(this,'idTrack', props.idTrack);
     Utils.setIfNotNull(this, 'id', props.idShading);
     Utils.setIfNotNull(this, 'name', props.name);
     Utils.setIfNotNull(this, 'isNegPosFilling', props.isNegPosFilling);

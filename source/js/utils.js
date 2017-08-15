@@ -988,6 +988,7 @@ function getDisplayMode(currentCurve) {
 }
 exports.curveOptions = function (currentTrack, currentCurve) {
     let options = {
+        // Locally use properties
         idLine : currentCurve.id,
         idTrack: currentTrack.id,
         showHeader : currentCurve.showHeader,

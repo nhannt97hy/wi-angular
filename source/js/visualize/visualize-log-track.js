@@ -310,12 +310,17 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
 
     if (config.isNegPosFilling == null && !config.fill) {
         config.fill = {
-            color: this.genColor()
+            pattern: {
+                name: 'none',
+                background: this.genColor(),
+                foreground: 'black'
+            }
         }
     }
     config.refX = refX;
     config.leftCurve = leftCurve;
     config.rightCurve = rightCurve;
+    config.idTrack = this.id;
     let shading = new Shading(config);
     shading.init(this.plotContainer);
     shading.header = this.addShadingHeader(shading);

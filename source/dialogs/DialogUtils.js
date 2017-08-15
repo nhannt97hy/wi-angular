@@ -1472,37 +1472,31 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         //button
         this.foreground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.fill.foreground, function (colorStr) {
-                console.log(colorStr);
                 self.options.fill.foreground = colorStr;
             });
         }
         this.background = function(){
             DialogUtils.colorPickerDialog(ModalService, self.options.fill.background, function (colorStr) {
-                console.log(colorStr);
                 self.options.fill.background = colorStr;
             });
         }
         this.posPositiveForeground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.foreground, function (colorStr) {
-                console.log(colorStr);
                 self.options.positiveFill.foreground = colorStr;
             });
         }
         this.posPositiveBackground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.background, function (colorStr) {
-                console.log(colorStr);
                 self.options.positiveFill.background = colorStr;
             });
         }
         this.negPositiveForeground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.foreground, function (colorStr) {
-                console.log(colorStr);
                 self.options.negativeFill.foreground = colorStr;
             });
         }
         this.negPositiveBackground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.background, function (colorStr) {
-                console.log(colorStr);
                 self.options.negativeFill.background = colorStr;
             });
         }
@@ -1742,16 +1736,14 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.removeRowCurve = function() {
             let idLine = self.curves[idx].idLine;
-            idLineToRemove.push(idLine);
-            self.curves.splice(idx, 1);
-            self.curvesLineOptions.splice(idx, 1);
-            self.curvesSymbolOptions.splice(idx, 1);
-            self.curvesChanged.splice(idx, 1);
-            self.lineCurve.splice(idx, 1);
-
-            // curveList.splice(idx, 1);
-            console.log("curveList", curveList);
-            console.log("options", self.curves, idx);
+            if(self.curvesChanged[idx] != '2'){
+                idLineToRemove.push(idLine);
+            }
+                self.curves.splice(idx, 1);
+                self.curvesLineOptions.splice(idx, 1);
+                self.curvesSymbolOptions.splice(idx, 1);
+                self.curvesChanged.splice(idx, 1);
+                self.lineCurve.splice(idx, 1);
         }
         function removeCurve(idLine) {
             wiApiService.removeLine(idLine, function() {
@@ -1913,7 +1905,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 if (!err) {
                                     wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curves[index].idLine = line.idLine;
-                                    self.curvesChanged[index] = '1';
+                                    self.curvesChanged[index] = '0';
                                     console.log(eventEmitter);
                                     eventEmitter.emitEvent("line-created");
                                     console.log("99999999)))))",eventEmitter);
@@ -1925,8 +1917,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         });
                     }
                 });
-
             }
+            idLineToRemove = [];
+            self.curvesChanged.forEach(function(item, index) {
+                item = '0';
+            })
+            console.log("000", self.curvesChanged, idLineToRemove);
         }
 
         function updateShadingsTab() {
@@ -2293,6 +2289,126 @@ exports.colorPickerDialog = function(ModalService, currentColor, callback) {
             $('body').removeClass('modal-open');
 
             if (callback) if(colorStr) callback(colorStr);
+        });
+    });
+}
+exports.variableShadingDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        let error = null;
+        let self = this;
+        this.onOkButtonClicked = function () {
+            console.log(self);
+        }
+        this.onCancelButtonClicked = function(){
+            console.log(null);
+        }
+        this.close = function (ret) {
+            close(ret);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "variable-shading/variable-shading-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentCurve, currentShading, callback) {
+    let thisModal = null;
+    function ModalController($scope, wiComponentService, close) {
+        let error = null;
+        let self = this;
+        thisModal = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        console.log("Current", currentTrack, currentCurve, currentShading);
+        if (currentShading) {
+            this.props = currentShading.getProperties();
+        }
+        if (currentCurve) {
+            let fill = {
+                color: "black",
+                pattern: {
+                    name: "none",
+                    foreground: "",
+                    background: "",
+                },
+                gradient: {
+                    startX: 0,
+                    endX: null,
+                    startColor: "",
+                    endColor: ""
+                }
+            }
+            this.props = {
+                idTrack: currentTrack.id,
+                name: currentCurve.name,
+                isNegPosFilling: false,
+                negativeFill: null,
+                positiveFill: fill.pattern,
+                idLeftLine: null,
+                idRightLine: null,
+                leftFixedValue: null,
+                rightFixedValue: null,
+                idControlCurve: currentCurve.id,
+                type: "left"
+            }
+        }
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.foreground = function(){
+            DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.foreground, function (colorStr) {
+                console.log(colorStr);
+                self.props.positiveFill.foreground = colorStr;
+            });
+        }
+        this.background = function(){
+            DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.background, function (colorStr) {
+                console.log(colorStr);
+                self.props.positiveFill.background = colorStr;
+            });
+        }
+        this.positiveColor = function(){
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                console.log(colorStr);
+                self.props.general.color = colorStr;
+            });
+        }
+        this.negativeColor = function(){
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                console.log(colorStr);
+                self.props.general.color = colorStr;
+            });
+        }
+        this.enableFill = function (idEnable, value) {
+            $('#'+ idEnable + " :input").prop("disabled", !value);
+        }
+        this.onOkButtonClicked = function () {
+            console.log(self);
+            close(self);
+        }
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "shading-properties/shading-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        thisModal.enableFill("positiveNegative", false);
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
         });
     });
 }
