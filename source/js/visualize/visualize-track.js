@@ -122,9 +122,6 @@ Track.prototype.createHeaderContainer = function() {
             d3.event.stopPropagation();
             self.trackContainer.node().focus();
         })
-        .on('keydown', function() {
-            console.log('shiftKey:', d3.event.keyCode);
-        })
         .call(d3.drag()
             .on('drag', function() {
                 self.headerScrollCallback();
@@ -269,7 +266,9 @@ Track.prototype.highlightCallback = function() {
  * Plot the track and children elements
  */
 Track.prototype.doPlot = function(highlight) {
-    this.setBackgroundColor(this.BODY_DEFAULT_COLOR);
+    this.trackContainer.style('width', this.width + 'px');
+
+    this.setBackgroundColor(this.bgColor);
     if (highlight && (typeof this.highlightCallback == 'function'))
         this.highlightCallback();
 }

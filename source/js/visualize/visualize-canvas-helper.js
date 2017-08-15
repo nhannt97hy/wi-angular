@@ -130,7 +130,7 @@ function prepare(canvas) {
 
 function draw(canvas) {
     let ctx = canvas.ctx;
-    ctx.stroke();
-    ctx.fill();
+    if (canvas.strokeStyle != 'none') ctx.stroke();
+    if (canvas.fillStyle != 'none') ctx.fill();
     ctx.restore();
 }

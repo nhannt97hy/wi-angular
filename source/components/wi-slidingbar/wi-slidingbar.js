@@ -155,16 +155,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.contentId).on("mousewheel", onMouseWheel);
         $(self.handleId).on("mousewheel", onMouseWheel);
 
-        console.log('**********:',$(self.contentId));
-
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         $(self.contentId).on('mouseover', function() {
-            console.log('mouseover');
             dragMan.wiSlidingBarCtrl = self;
         });
 
         $(self.contentId).on('mouseleave', function() {
-            console.log('mouseleave');
             dragMan.wiSlidingBarCtrl = null;
         });
 

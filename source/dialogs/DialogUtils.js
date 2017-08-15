@@ -1655,6 +1655,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.props = {
             general: currentTrack.getProperties()
         }
+        this.props.general.width = utils.pixelToInch(this.props.general.width);
         console.log("props", this.props.general);
 
         function fillShadingAttrArray() {
@@ -1848,20 +1849,21 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
 
         function updateGeneralTab() {
-            utils.changeTrack(self.props.general, wiApiService)
-            currentTrack.setProperties(self.props.general);
-            currentTrack.doPlot(true);
-            
+            let newProps = angular.copy(self.props);
+            utils.changeTrack(newProps.general, wiApiService, function () {
+                newProps.general.width = utils.inchToPixel(self.props.general.width);
+                currentTrack.setProperties(newProps.general);
+                currentTrack.doPlot(true);
+                if(idLineToRemove) {
+                    idLineToRemove.forEach(function(idLine) {
+                        removeCurve(idLine, function() {
+                            console.log("updateGeneralTab");
+                        })
+                    })
+                };
+            });
         }
         function updateCurvesTab() {
-            if(idLineToRemove) {
-                idLineToRemove.forEach(function(idLine) {
-                    removeCurve(idLine, function() {
-                        console.log("updateGeneralTab");
-                    })
-                })
-            };
-
             var eventEmitter = new EventEmitter();
             var numberOfNewLines = self.curvesChanged.reduce(function(total, item){
                 if (item == '2') return total + 1;
