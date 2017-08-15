@@ -266,7 +266,9 @@ Track.prototype.highlightCallback = function() {
  * Plot the track and children elements
  */
 Track.prototype.doPlot = function(highlight) {
-    this.setBackgroundColor(this.BODY_DEFAULT_COLOR);
+    this.trackContainer.style('width', this.width + 'px');
+
+    this.setBackgroundColor(this.bgColor);
     if (highlight && (typeof this.highlightCallback == 'function'))
         this.highlightCallback();
 }

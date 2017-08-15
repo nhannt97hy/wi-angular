@@ -96,7 +96,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             orderNum: logTrack.orderNum,
             name: logTrack.title,
             yStep: parseFloat(_getWellProps().step),
-            offsetY: parseFloat(_getWellProps().topDepth)
+            offsetY: parseFloat(_getWellProps().topDepth),
+            width: Utils.inchToPixel(logTrack.width)
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
         graph.rearangeTracks(self);

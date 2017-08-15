@@ -248,11 +248,11 @@ LogTrack.prototype.init = function(baseElement) {
  * @param {Boolean} [highlight] - Indicate whether to call highlight callback
  */
 LogTrack.prototype.doPlot = function(highlight) {
+    Track.prototype.doPlot.call(this, highlight);
     this.updateHeader();
     this.updateBody();
     this.plotAllDrawings();
     this.updateAxis();
-    Track.prototype.doPlot.call(this, highlight);
 }
 
 

@@ -1109,3 +1109,38 @@ function openHistogramTab(wiComponentService, histogramModel, callback) {
     histogramModel.data.opened = true;
 };
 exports.openHistogramTab = openHistogramTab;
+
+
+function getDpi() {
+    let inch = document.createElement('inch');
+    inch.style = 'height: 1in; width: 1in; left: -100%; position: absolute; top: -100%;';
+    document.body.appendChild(inch);
+    let devicePixelRatio = window.devicePixelRatio || 1;
+    let dpi = inch.clientWidth * devicePixelRatio;
+    return dpi;
+}
+exports.getDpi = getDpi;
+function inchToPixel(inch) {
+    return getDpi()*inch;
+}
+exports.inchToPixel = inchToPixel;
+function pixelToInch(px) {
+    let inch = Math.round(px/getDpi() * 1000) / 1000;
+    return inch
+}
+exports.pixelToInch = pixelToInch;
+function getDpcm() {
+    return getDpi() * 2.54;
+}
+exports.getDpcm = getDpcm;
+function cmToPixel(cm) {
+    let dpCm = getDpi()/2.54;
+    return dpCm*cm;
+}
+exports.cmToPixel = cmToPixel;
+function pixelToCm(px) {
+    let dpCm = getDpi()/2.54;
+    let cm = Math.round(px/dpCm * 1000) / 1000;
+    return cm
+}
+exports.pixelToCm = pixelToCm;
