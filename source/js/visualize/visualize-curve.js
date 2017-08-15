@@ -233,7 +233,7 @@ Curve.prototype.autoScaleX = function(granularity) {
  * @param {Array} data - Array of objects containing x, y coordinates
  */
 Curve.prototype.init = function(plotContainer) {
-    this.root = plotContainer;
+    this.root = (typeof plotContainer.node == 'function') ? plotContainer : d3.select(plotContainer);
     let rect = plotContainer
         .node()
         .getBoundingClientRect();

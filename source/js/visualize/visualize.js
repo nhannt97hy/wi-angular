@@ -5,12 +5,11 @@
 
 let DepthTrack = require('./visualize-depth-track');
 let LogTrack = require('./visualize-log-track');
+let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
-let Utils = require('./visualize-utils');
 let CanvasHelper = require('./visualize-canvas-helper');
 
-
-let registeredTracks = [];
+exports.CanvasHelper = CanvasHelper;
 
 /**
  * Create and draw a new Log Track inside a specified DOM element
@@ -21,7 +20,6 @@ let registeredTracks = [];
 exports.createLogTrack = function(config, domElem) {
     let logTrack = new LogTrack(config);
     logTrack.init(domElem);
-    registeredTracks.push(logTrack);
     return logTrack;
 }
 
@@ -34,20 +32,16 @@ exports.createLogTrack = function(config, domElem) {
 exports.createDepthTrack = function(config, domElem) {
     let depthTrack = new DepthTrack(config);
     depthTrack.init(domElem);
-    registeredTracks.push(depthTrack);
     return depthTrack;
 }
 
 
 /**
- * Remove a track inside a specified DOM element
- * @param {Number} trackIdx - Index of the track in the element
- * @param {Object} domElem - The DOM element containing the track
+ * Remove a track
+ * @param {Object} - The track object to remove
  */
 exports.removeTrack = function(track, domElem) {
     track.destroy();
-    let trackIdx = registeredTracks.indexOf(track);
-    registeredTracks.splice(trackIdx, 1);
 }
 
 /**
@@ -100,6 +94,9 @@ exports.rearangeTracks = function(wiD3Ctrl) {
     d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
 }
 
+/**
+ * Create tooltip lines on a DOM SVG at mouse position
+ */
 exports.createTooltipLines = function(domSvg) {
     let svg = d3.select(domSvg);
     let mousePosition = d3.mouse(domSvg);
@@ -125,6 +122,9 @@ exports.createTooltipLines = function(domSvg) {
         .style('stroke-width', '1px');
 }
 
+/**
+ * Remove tooltip lines from a DOM SVG
+ */
 exports.removeTooltipLines = function(domSvg) {
     d3.select(domSvg).selectAll('line.tooltip-line').remove();
 }
@@ -160,10 +160,19 @@ exports.sheetDraggable = function(domElem) {
         );
 }
 
-exports.CanvasHelper = CanvasHelper;
+/**
+ * Create and draw a new Crossplot inside a specified DOM element
+ * @param {Object} xCurve - The curve in x axis
+ * @param {Object} yCurve - The curve in y axis
+ * @param {Object} config - Configurations of new Crossplot
+ * @param {Object} domElem - The DOM element to contain the crossplot
+ * @returns {Object} The created crossplot
+ */
+exports.createCrossplot = function(xCurve, yCurve, config, domElem) {
+    config.xCurve = xCurve;
+    config.yCurve = yCurve;
+    let crossplot = new Crossplot(config);
+    crossplot.init(domElem);
+    return crossplot;
+}
 
-setInterval(function() {
-    registeredTracks.forEach(function(plot) {
-        if(plot.periodicTask) plot.periodicTask();
-    });
-}, 2000);

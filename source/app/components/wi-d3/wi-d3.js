@@ -269,7 +269,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         //let graph = wiComponentService.getComponent('GRAPH');
-        graph.removeTrack(track, document.getElementById(self.plotAreaId));
+        graph.removeTrack(track);
 
         _tracks.splice(trackIdx, 1);
     }

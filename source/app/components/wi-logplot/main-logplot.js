@@ -6,6 +6,8 @@ let wiDropdown = require('./wi-dropdown');
 
 let graph = require('./visualize/visualize.js');
 let wiD3 = require('./wi-d3.js');
+let wiD3Crossplot = require('./wi-d3-crossplot');
+let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot.js');
 let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
@@ -37,11 +39,13 @@ let dragMan = {
 
 let app = angular.module('helloapp', [
     wiLogplot.name,
+    wiCrossplot.name,
     wiButton.name,
     wiToolbar.name,
     wiSlidingbar.name,
     wiContextMenu.name,
     wiD3.name,
+    wiD3Crossplot.name,
     wiComponentService.name,
     wiElementReadyDirective.name,
     'angularModalService',

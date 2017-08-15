@@ -10,7 +10,8 @@
     <link href='css/wi-toolbar.css' rel='stylesheet'>
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
     <link href='css/wi-context-menu.css' rel='stylesheet'>
-    <link href='css/wi-logplot.css' rel='stylesheet'>
+    <link href='css/wi-crossplot.css' rel='stylesheet'>
+    <link href='css/wi-d3-crossplot.css' rel='stylesheet'>
     <link href='css/wi-context-menu.css' rel='stylesheet'>
     <link rel="stylesheet" href="css/wi-d3.css">
     <link rel="stylesheet" href="css/graph.css">
@@ -29,7 +30,7 @@
     <script src="vendor/js/ng-file-upload.min.js"></script>
     <script src="vendor/js/kendo.all.min.js"></script>
 
-    <script src="js/main-logplot.js.bundle.js"></script>
+    <script src="js/main-crossplot.js.bundle.js"></script>
 
     <title>Test</title>
 </head>
@@ -39,26 +40,6 @@
 <div ng-controller="WiDummy">
     <wi-explorer name="WiExplorer" tree-config="myTreeviewConfig" style="display: none"></wi-explorer>
     <wi-properties name="WiProperties" list-config="myPropertiesConfig" style="display: none"></wi-properties>
-    <div style="width: 1000px; height: 500px; border: 1px solid green; display: flex">
-        <wi-logplot name="myPlot" style="flex: 1"></wi-logplot>
-    </div>
-    <button ng-click='depthTrackButtonClick()'>depth</button>
-    <button ng-click='trackButtonClick()'>log</button>
-    <button ng-click='addData1ButtonClick()'>data 1</button>
-    <button ng-click='addData2ButtonClick()'>data 2</button>
-    <div class='form-group'>
-        <label> Color: </label>
-        <input type='text' ng-model='color'>
-        <button ng-click='changeColor()'>change color</button>
-    </div>
-    <button ng-click='removeCurveButtonClick()'>remove curve</button>
-    <button ng-click='removeTrackButtonClick()'>remove track</button>
-    <button ng-click='addLeftShadingButtonClick()'>add left shading</button>
-    <button ng-click='addRightShadingButtonClick()'>add right shading</button>
-    <button ng-click='addCustomShadingButtonClick()'>add custom shading</button>
-    <button ng-click='addPairShadingButtonClick()'>add pair shading</button>
-    <button ng-click='removeShadingButtonClick()'>remove-shading</button>
-
     <div style="width: 1000px; height: 500px; border: 1px solid green; display: flex">
         <wi-crossplot name="myCrossPlot" style="flex: 1"></wi-crossplot>
     </div>
