@@ -197,7 +197,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-repeat="curve in wiModal.curves"
+                                            <tr ng-repeat="curve in wiModal.getCurves()"
                                                 ng-class="{selected:$index == selectedRow}"
                                                 ng-click="wiModal.setClickedRow($index)">
                                                 <td style="width: 12%">
@@ -210,53 +210,53 @@
                                                             class="form-control wi-form-control"
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.arr"
                                                             ng-change="wiModal.onSelectCurve($index);" 
-                                                            ng-disabled="wiModal.curvesChanged[$index] != '2'"></select>
+                                                            ng-disabled="wiModal.curvesChanged[wiModal.__idx].change != '2'"></select>
                                                 </td>
 
                                                 <td>
                                                     <input type="text" ng-model="curve.alias"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChange($index);">
+                                                           ng-change="wiModal.onChange();">
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="curve.minValue"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChange($index);">
+                                                           ng-change="wiModal.onChange();">
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="curve.maxValue"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChange($index);">
+                                                           ng-change="wiModal.onChange();">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayType" name="log"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.logLinear track by item"
-                                                            ng-change="wiModal.onChange($index);"></select>
+                                                            ng-change="wiModal.onChange();"></select>
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayMode" name="displayMode"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayMode track by item"
-                                                            ng-change="wiModal.onChange($index);"></select>
+                                                            ng-change="wiModal.onChange();"></select>
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.lineOptions"
                                                             type="button" value="Edit..." id="editLine" 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.lineStyleButtonClicked($index); wiModal.onChange($index);">
+                                                            ng-click="wiModal.lineStyleButtonClicked($index, $event); wiModal.onChange();">
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.symbolOptions"
                                                             type="button" value="Edit..." id="editSymbol" 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.symbolStyleButtonClicked($index); wiModal.onChange($index);">
+                                                            ng-click="wiModal.symbolStyleButtonClicked($index, $event); wiModal.onChange();">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayAs" name="displayAs"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayAs track by item"
-                                                            ng-change="wiModal.onChange($index);"></select>
+                                                            ng-change="wiModal.onChange();"></select>
                                                 </td>       
                                             </tr>
                                         </tbody>

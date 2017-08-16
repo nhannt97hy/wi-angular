@@ -1567,14 +1567,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let curveList = currentTrack.getCurves();
         console.log("curveList", curveList);
         this.selectCurveArr = []; // select Curve in all dataset
-        this.selectCurveIdArr = [];
         this.arr = []; //curvesArr + dataset.curve
         this.lineCurve = [];
 
         this.curvesArr.forEach(function(item) {
             let selectedCurve = item.properties.datasetName + '.' + item.properties.name;
             self.selectCurveArr.push(selectedCurve);
-            self.selectCurveIdArr.push(item.properties.idCurve);
             item.datasetCurve = selectedCurve;
             self.arr.push(item);
         })
@@ -1584,7 +1582,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let curveOptions = {};
             let lineOptions = {};
             let symbolOptions = {};
-            curveOptions = utils.curveOptions(currentTrack, curve);
+            curveOptions = utils.curveOptions(currentTrack, curve, index);
 
             self.arr.forEach(function(item) {
                 if(curve.idCurve == item.id) {
@@ -1595,6 +1593,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curves.push(curveOptions);
             if (curve.line) {
                 lineOptions = {
+                    _index: index,
                     display : true,
                     lineStyle : {
                         lineColor : curve.line.color,
@@ -1605,6 +1604,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             } else {
                 lineOptions = {
+                    _index: index,
                     display : false,
                     lineStyle :{
                         lineColor : "#0ff",
@@ -1618,6 +1618,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             if (curve.symbol) {
                 symbolOptions = {
+                    _index: index,
                     display: true,
                     symbolStyle: {
                         symbolName: curve.symbol.style, // cross, diamond, star, triangle, dot, plus
@@ -1631,6 +1632,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             else {
                 symbolOptions = {
+                    _index: index,
                     display: false,
                     symbolStyle: {
                         symbolName: "circle", // cross, diamond, star, triangle, dot, plus
@@ -1643,7 +1645,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             }
             self.curvesSymbolOptions.push(symbolOptions);
-            self.curvesChanged.push('0');
+            self.curvesChanged.push({
+                _index: index,
+                change : '0'
+            });
         });
         console.log("LINECURVE", this.lineCurve);
         console.log("RRRR", this.selectCurveArr, this.arr);
@@ -1655,7 +1660,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.props = {
             general: currentTrack.getProperties()
         }
-        this.props.general.width = utils.pixelToInch(this.props.general.width);
         console.log("props", this.props.general);
 
         function fillShadingAttrArray() {
@@ -1729,36 +1733,30 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.displayMode = ["Line", "Symbol", "Both", "None"];
         this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
 
-        let idx = null;
-        let idLineToRemove = [];
+        this.__idx = null;
         this.setClickedRow = function(index){
             $scope.selectedRow = index;
-            idx = index;
+            self.__idx = self.getCurves()[index]._index;
+            
         };
         this.removeRowCurve = function() {
-            let idLine = self.curves[idx].idLine;
-            if(self.curvesChanged[idx] != '2'){
-                idLineToRemove.push(idLine);
-            }
-                self.curves.splice(idx, 1);
-                self.curvesLineOptions.splice(idx, 1);
-                self.curvesSymbolOptions.splice(idx, 1);
-                self.curvesChanged.splice(idx, 1);
-                self.lineCurve.splice(idx, 1);
+            self.curvesChanged[self.__idx].change = '3';
+            console.log("curvesChanged", self.curvesChanged);
         }
         function removeCurve(idLine) {
             wiApiService.removeLine(idLine, function() {
                 currentTrack.removeCurveById(idLine);
             });
         }
-        this.onSelectCurve = function(index){
-            if(self.curvesChanged[index] == '2') {
-                idCurveNew = self.lineCurve[index].id;
-                console.log("idCurveNew", idCurveNew, self.selectCurveArr[index], index);
+        this.onSelectCurve = function(){
+            if(self.curvesChanged[self.__idx].change == '2') {
+                idCurveNew = self.lineCurve[self.__idx].id;
+                console.log("idCurveNew", idCurveNew, self.__idx, self.curvesChanged, self.lineCurve[self.__idx]);
                 wiApiService.infoCurve(idCurveNew, function(curveInfo){
                     console.log(curveInfo, self.curves, self.curvesLineOptions, self.curvesSymbolOptions);
                     $timeout(function(){
-                        self.curves[index] = {
+                        self.curves[self.__idx] = {
+                            _index: self.__idx,
                             alias: curveInfo.name,
                             autoValueScale: false,
                             blockPosition: curveInfo.LineProperty.blockPosition,
@@ -1774,7 +1772,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             showHeader: true,
                             wrapMode: 'None'
                         };
-                        self.curvesLineOptions[index] = {
+                        self.curvesLineOptions[self.__idx] = {
+                            _index: self.__idx,
                             display: true,
                             lineStyle: {
                                 lineColor: curveInfo.LineProperty.lineColor,
@@ -1782,7 +1781,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 lineWidth: curveInfo.LineProperty.lineWidth
                             }
                         };
-                        self.curvesSymbolOptions[index] = {
+                        self.curvesSymbolOptions[self.__idx] = {
+                            _index: self.__idx,
                             display: false,
                             symbolStyle: {
                                 symbolFillStyle: "transparent",
@@ -1797,15 +1797,23 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 });
             }
         }
-        this.onChange = function (index) {
-            if(self.curvesChanged[index] == '0') self.curvesChanged[index] = '1';
-            console.log(self.curvesChanged[index]);
+        this.getCurves = function() {
+            return self.curves.filter(function(c, index){
+                return self.curvesChanged[index].change != '3';
+            });
+        }
+        this.onChange = function () {
+            if(self.curvesChanged[self.__idx].change == '0') self.curvesChanged[self.__idx].change = '1';
+            console.log(self.curvesChanged[self.__idx]);
         }
         this.addRow = function () {
-            self.curves.push({});
+            self.curves.push({_index: self.curves.length}); 
             console.log(self.curves);
-            self.curvesChanged.push('2'); 
-            console.log("***", self.curvesChanged, self.lineCurve);
+            self.curvesChanged.push({
+                _index: self.curvesChanged.length,
+                change: '2'
+            });
+            console.log("curvesChanged", self.curvesChanged, self.curves, self.lineCurve, self.__idx);
         };
         // Dialog buttons
         this.definePatternButtonClicked = function () {
@@ -1816,17 +1824,19 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }, self.fillOptions);
         };
 
-        this.lineStyleButtonClicked = function (index) {
-            console.log(index);
+        this.lineStyleButtonClicked = function (index, $event) {
+            self.setClickedRow(index);
             DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {
                 console.log("lineStyle");
-            }, self.curvesLineOptions[index]);
+            }, self.curvesLineOptions[self.__idx]);
+            $event.stopPropagation();
         };
-        this.symbolStyleButtonClicked = function (index) {
-            console.log(index);
+        this.symbolStyleButtonClicked = function (index, $event) {
+            self.setClickedRow(index);
             DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {
                 console.log("symbolStyle");
-            }, self.curvesSymbolOptions[index]);
+            }, self.curvesSymbolOptions[self.__idx]);
+            $event.stopPropagation();
         };
         this.colorTrack = function () {
             DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
@@ -1849,52 +1859,62 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
 
         function updateGeneralTab() {
-            let newProps = angular.copy(self.props);
-            utils.changeTrack(newProps.general, wiApiService, function () {
-                newProps.general.width = utils.inchToPixel(self.props.general.width);
-                currentTrack.setProperties(newProps.general);
-                currentTrack.doPlot(true);
-                if(idLineToRemove) {
-                    idLineToRemove.forEach(function(idLine) {
-                        removeCurve(idLine, function() {
-                            console.log("updateGeneralTab");
-                        })
-                    })
-                };
-            });
+            utils.changeTrack(self.props.general, wiApiService)
+            currentTrack.setProperties(self.props.general);
+            currentTrack.doPlot(true);
+            
         }
         function updateCurvesTab() {
             var eventEmitter = new EventEmitter();
-            var numberOfNewLines = self.curvesChanged.reduce(function(total, item){
-                if (item == '2') return total + 1;
+            var numberberOfNewLines = self.curvesChanged.reduce(function(total, item){
+                if (item.change == '2') return total + 1;
                 return total;
             }, 0);
-            console.log(numberOfNewLines);
-            if (numberOfNewLines  == 0) {
+            console.log(numberberOfNewLines);
+            if (numberberOfNewLines  == 0) {
                 roundTwo();
             }
             else {
                 let lineCreatedCount = 0;
                 eventEmitter.on('line-created', function() {
                     lineCreatedCount = lineCreatedCount + 1;
-                    if (lineCreatedCount == numberOfNewLines) {
+                    if (lineCreatedCount == numberberOfNewLines) {
                         curveList = currentTrack.getCurves();
                         roundTwo();
                     }
                 });
                 roundOne();
             }
+
             function roundTwo() {
                 self.curvesChanged.forEach(function(item, index) {
                     console.log("indexRoundTwo", index, item);
-                    if(item == '1') {
+                    if(item.change == '1') {
                         updateLine(index);
+                        item.change = '0';
+                    }
+                    if (item.change == '3') {
+                        removeCurve(self.curves[index].idLine);
                     }
                 });
+                // remove all deleted curve from self.curves and self.curvesChanged. IMPORTANT!
+                for (let idx = self.curvesChanged.length - 1; idx > -1; idx--) {
+                    if (self.curvesChanged[idx].change == "3") {
+                        console.log("splice");
+                        self.curvesChanged.splice(idx,1);
+                        self.curves.splice(idx, 1);
+                        self.curvesSymbolOptions.splice(idx, 1);
+                        self.curvesLineOptions.splice(idx, 1);
+                        self.lineCurve.splice(idx, 1);
+                        self.arr.splice(idx, 1);
+                    }
+                }
+                console.log(self.curves, self.curvesChanged, self.curvesLineOptions, self.curvesSymbolOptions);
             }
             function roundOne() {
+                console.log('roundOne:', self.curves);
                 self.curvesChanged.forEach(function(item, index) {
-                    if(item == '2') {
+                    if(item.change == '2') {
                         let lineObj = {
                             idCurve : idCurveNew,
                             idTrack : currentTrack.id
@@ -1907,7 +1927,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 if (!err) {
                                     wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curves[index].idLine = line.idLine;
-                                    self.curvesChanged[index] = '0';
+                                    self.curvesChanged[index].change = '1';
                                     console.log(eventEmitter);
                                     eventEmitter.emitEvent("line-created");
                                     console.log("99999999)))))",eventEmitter);
@@ -1919,12 +1939,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         });
                     }
                 });
+
             }
-            idLineToRemove = [];
-            self.curvesChanged.forEach(function(item, index) {
-                item = '0';
-            })
-            console.log("000", self.curvesChanged, idLineToRemove);
         }
 
         function updateShadingsTab() {

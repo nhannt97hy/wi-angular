@@ -986,9 +986,10 @@ function getDisplayMode(currentCurve) {
     if(!currentCurve.line && currentCurve.symbol) return "Symbol";
     return "None";
 }
-exports.curveOptions = function (currentTrack, currentCurve) {
+exports.curveOptions = function (currentTrack, currentCurve, index) {
     let options = {
         // Locally use properties
+        _index : index,
         idLine : currentCurve.id,
         idTrack: currentTrack.id,
         showHeader : currentCurve.showHeader,

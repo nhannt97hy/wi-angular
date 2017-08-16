@@ -1,0 +1,98 @@
+<div class='modal fade'>
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Define Variable Shading</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal form-condensed">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <p class="normal-text">Shading controlled by curve:</p>
+                        </div>
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3">
+                            <select class="form-control wi-form-control"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                        </div>
+                        <div class="col-sm-3">
+                            <p>Start:</p>
+                        </div>
+                        <div class="col-sm-3">
+                            <p>End:</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                        </div>
+                        <div class="col-sm-2">
+                            <p class="small-text">Curve Value:</p>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="number" name=""
+                                class="form-control wi-form-control">
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="number" name=""
+                                class="form-control wi-form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>
+                                <input type="radio" name="">
+                                Use Gradient
+                            </label>
+                        </div>
+                        <div class="col-sm-2">
+                            <p class="small-text">Color:</p>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="button" name=""
+                                class="form-control wi-form-control">
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="button" name=""
+                                class="form-control wi-form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>
+                                <input type="radio" name="">
+                                Use Palette
+                            </label>
+                        </div>
+                        <div class="col-sm-2">
+                            <p class="small-text">Palette Name:</p>
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="form-control wi-form-control"></select>
+                        </div>
+                        <div class="col-sm-3">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>
+                                <input type="radio" name="">
+                                Use Values
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        
+                    </div>
+                </form>                   
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
