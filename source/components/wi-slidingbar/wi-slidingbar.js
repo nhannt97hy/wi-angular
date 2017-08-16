@@ -18,6 +18,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     function createPreview(idCurve) {
+        console.log(idCurve);
+        if ( !idCurve ) {
+            createPreviewWithDefault();
+            return;
+        }
         let logPlotName = self.name.replace('Slidingbar', '');
         let logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let logplotId = logPlotCtrl.id;
@@ -52,7 +57,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         })
     }
     this.createPreview = createPreview;
-    /*function createPreview() {
+    function createPreviewWithDefault() {
         let logPlotName = self.name.replace('Slidingbar', '');
         let logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -76,7 +81,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             let viCurve = graph.createCurve(config, data, d3.select(self.contentId));
             viCurve.doPlot();
         });
-    }*/
+    }
 
     function update(ui) {
         parentHeight = parseInt($(self.contentId).height());

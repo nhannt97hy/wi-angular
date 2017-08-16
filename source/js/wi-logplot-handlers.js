@@ -8,6 +8,7 @@ function genSamples(nSamples) {
 
 exports.EditFormatButtonClicked = function() {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    console.error('This function is not implemented');
     utils.error('This function is not implemented');
 };
 
@@ -178,7 +179,7 @@ exports.DuplicateTrackButtonClicked = function() {
                     });
                 })
                 .catch(function(err){
-                    console.log(err);
+                    console.error(err);
                     utils.error(err);
                     return;
                 });

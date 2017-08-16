@@ -684,9 +684,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
 
-        /*$timeout(function() {
+        $timeout(function() {
             graph.sheetDraggable(document.getElementById(self.plotAreaId));
-        }, 1000)*/
+        }, 1000)
     };
 
     var commonCtxMenu = [
