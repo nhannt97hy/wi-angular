@@ -28,22 +28,14 @@ exports.PrintToImageButtonClicked = function() {
     console.log('PrintToImageButton is clicked');
 };
 
-function getDpi() {
-    let inch = document.createElement('inch');
-    inch.style = 'height: 1in; width: 1in; left: -100%; position: absolute; top: -100%;';
-    document.body.appendChild(inch);
-    let devicePixelRatio = window.devicePixelRatio || 1;
-    let dpi = inch.clientWidth * devicePixelRatio;
-    return dpi;
-}
-
 function scaleTo(rangeUnit, wiLogplot) {
+    let utils = this.wiComponentService.getComponent(wiComponentService.UTILS);
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     let wiSlidingbarCtrl = wiLogplot.getSlidingbarCtrl();
     let maxDepth = wiD3Ctrl.getMaxDepth();
     let minDepth = wiD3Ctrl.getMinDepth();
     let realLengthCm = (maxDepth - minDepth) * 100;
-    let dpCm = getDpi()/2.54;
+    let dpCm = utils.getDpcm();
     let trackHeight = d3.select('.track-area .vi-track-plot-container').node().clientHeight;
     let trackHeightCm = trackHeight/dpCm;
     let trackRealLengthCm = trackHeightCm*rangeUnit;

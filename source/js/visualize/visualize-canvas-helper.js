@@ -69,6 +69,10 @@ CanvasHelper.prototype.star = function(x, y) {
 }
 
 CanvasHelper.createPattern = function(ctx, name, foreground, background, callback) {
+    if (name == 'none') {
+        return callback(background);
+    }
+
     let key = name + foreground + background;
     if (usedPatterns[key]) {
         callback(usedPatterns[key]);
@@ -128,7 +132,7 @@ function prepare(canvas) {
 
 function draw(canvas) {
     let ctx = canvas.ctx;
-    ctx.stroke();
-    ctx.fill();
+    if (canvas.strokeStyle != 'none') ctx.stroke();
+    if (canvas.fillStyle != 'none') ctx.fill();
     ctx.restore();
 }

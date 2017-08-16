@@ -42,6 +42,7 @@ function Shading(config) {
     if (typeof config != 'object') config = {};
 
     this.id = config.id;
+    this.idTrack = config.idTrack;
     this.name = config.name || 'Noname';
 
     this.fill = config.fill;
@@ -60,7 +61,7 @@ function Shading(config) {
 
     this.refLineWidth = config.refLineWidth || 2;
     this.refLineColor = config.refLineColor || '#3e3e3e';
-    this.showRefLine = config.showRefLine;
+    this.showRefLine = config.showRefLine == null ? true : config.showRefLine;
 
     this.vpX = {
         left: null,
@@ -72,15 +73,84 @@ function Shading(config) {
     this.rightCurve = config.rightCurve;
     this.selectedCurve = config.selectedCurve || this.leftCurve || this.rightCurve;
 
-    if (this.showRefLine == null && this.refX != null) {
-        this.showRefLine = true;
-    }
-
     if (this.refX == null){
         this.refX = (this.leftCurve && !this.rightCurve)
             ? this.selectedCurve.maxX
             : this.selectedCurve.minX;
     }
+}
+
+Shading.prototype.getProperties = function() {
+    let leftCurve = this.leftCurve;
+    let rightCurve = this.rightCurve
+    let leftX = this.leftX;
+    let rightX = this.rightX;
+    // Server does not allow right curve to be null
+    if (!rightCurve && leftCurve) {
+        rightCurve = leftCurve;
+        rightX = leftX;
+        leftCurve = this.rightCurve;
+        leftX = this.rightX;
+    }
+    if (!leftCurve && rightCurve) {
+        leftX = leftX == null ? this.refX : leftX;
+    }
+
+    let e = 0.000001;
+    let type;
+
+    if (Math.abs(this.refX - this.selectedCurve.maxX) < e)
+        type = 'right';
+    else if (Math.abs(this.refX - this.selectedCurve.minX) < e)
+        type = 'left';
+    else
+        type = 'custom';
+
+    return {
+        idShading: this.id,
+        idTrack: this.idTrack,
+        name: this.name,
+        negativeFill: this.isNegPosFilling ? this.negativeFill : null,
+        positiveFill: this.isNegPosFilling ? this.positiveFill : this.fill,
+        isNegPosFilling: this.isNegPosFilling,
+        idLeftLine: (leftCurve || {}).id,
+        idRightLine: (rightCurve || {}).id,
+        leftFixedValue: leftX,
+        rightFixedValue: rightX,
+        idControlCurve: (this.selectedCurve || {}).idCurve,
+        type: type
+    }
+}
+
+Shading.prototype.setProperties = function(props) {
+    Utils.setIfNotNull(this,'idTrack', props.idTrack);
+    Utils.setIfNotNull(this, 'id', props.idShading);
+    Utils.setIfNotNull(this, 'name', props.name);
+    Utils.setIfNotNull(this, 'isNegPosFilling', props.isNegPosFilling);
+    if (props.isNegPosFilling) {
+        Utils.setIfNotNull(this, 'positiveFill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
+        Utils.setIfNotNull(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
+    }
+    else {
+        Utils.setIfNotNull(this, 'fill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
+    }
+
+    if (!this.rightCurve && this.leftCurve) {
+        Utils.setIfNotUndefined(this, 'rightCurve', props.leftCurve);
+        Utils.setIfNotNull(this, 'refX', props.leftFixedValue);
+        Utils.setIfNotNull(this, 'rightX', props.leftFixedValue);
+        Utils.setIfNotUndefined(this, 'leftCurve', props.rightCurve);
+        Utils.setIfNotNull(this, 'leftX', props.rightFixedValue);
+    }
+    else {
+        Utils.setIfNotUndefined(this, 'leftCurve', props.leftCurve);
+        Utils.setIfNotNull(this, 'refX', props.leftFixedValue);
+        Utils.setIfNotNull(this, 'leftX', props.leftFixedValue);
+        Utils.setIfNotUndefined(this, 'rightCurve', props.rightCurve);
+        Utils.setIfNotNull(this, 'rightX', props.rightFixedValue);
+    }
+
+    Utils.setIfNotUndefined(this, 'selectedCurve', props.controlCurve);
 }
 
 /**

@@ -308,7 +308,7 @@ gulp.task('gen-wi-histogram-functions', function () {
     var configFile = 'config/wi-histogram.config.js';
     var xlsxFile = './Wi-Histogram.xlsx';
     var templateFile = 'source/js/wi-histogram-handlers.js.tmpl';
-    
+
     var wiUI = require('./preprocess/excel-to-json.js');
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
@@ -379,6 +379,7 @@ gulp.task('github-page', function () {
 gulp.task('build-visualize', mainTasks, function() {
     gulp.src([
         'build/js/main-logplot.js',
+        'build/js/main-crossplot.js',
         'build/js/main.js'
     ])
         .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));

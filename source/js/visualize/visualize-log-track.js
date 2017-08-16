@@ -186,6 +186,13 @@ LogTrack.prototype.getShadings = function() {
 }
 
 /**
+ * Get temporary curve to create pair shading
+ */
+LogTrack.prototype.getTmpCurve = function() {
+    return this.tmpCurve;
+}
+
+/**
  * Get extent of y value among all drawings, [-1, -1] if there is no drawing
  * @return {Array}
  */
@@ -201,11 +208,25 @@ LogTrack.prototype.getExtentY = function() {
 }
 
 /**
+ * Set temporary curve to create pair shading
+ * @param {Object} curve - The temporary curve
+ */
+LogTrack.prototype.setTmpCurve = function(curve) {
+    let currentCurve = this.getCurrentCurve();
+    this.tmpCurve = (currentCurve && curve && curve.isCurve && curve.isCurve()) ? curve : null;
+    if (this.tmpCurve) {
+        this.plotAllDrawings();
+        this.highlightHeader();
+    }
+}
+
+/**
  * Set current drawing and re-draw to highlight
  * @param {Object} drawing - The drawing to be current
  */
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
     this.currentDrawing = drawing;
+    this.tmpCurve = null;
     this.plotAllDrawings();
     this.highlightHeader();
 }
@@ -247,11 +268,11 @@ LogTrack.prototype.init = function(baseElement) {
  * @param {Boolean} [highlight] - Indicate whether to call highlight callback
  */
 LogTrack.prototype.doPlot = function(highlight) {
+    Track.prototype.doPlot.call(this, highlight);
     this.updateHeader();
     this.updateBody();
     this.plotAllDrawings();
     this.updateAxis();
-    Track.prototype.doPlot.call(this, highlight);
 }
 
 
@@ -309,12 +330,17 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
 
     if (config.isNegPosFilling == null && !config.fill) {
         config.fill = {
-            color: this.genColor()
+            pattern: {
+                name: 'none',
+                background: this.genColor(),
+                foreground: 'black'
+            }
         }
     }
     config.refX = refX;
     config.leftCurve = leftCurve;
     config.rightCurve = rightCurve;
+    config.idTrack = this.id;
     let shading = new Shading(config);
     shading.init(this.plotContainer);
     shading.header = this.addShadingHeader(shading);
@@ -369,16 +395,6 @@ LogTrack.prototype.removeShading = function(shading) {
 }
 
 /**
- * Remove drawing by its id
- */
-LogTrack.prototype.removeDrawingById = function(id) {
-    let drawings = this.drawings.filter(function(d) {
-        return d.id == id;
-    });
-    this.removeDrawing(drawings[0]);
-}
-
-/**
  * Remove curve by its id
  */
 LogTrack.prototype.removeCurveById = function(id) {
@@ -396,6 +412,40 @@ LogTrack.prototype.removeShadingById = function(id) {
         return sh.id == id;
     });
     this.removeShading(shadings[0]);
+}
+
+LogTrack.prototype.findCurveById = function(id) {
+    return this.getCurves().filter(function(c) {
+        return c.id == id;
+    })[0];
+}
+
+LogTrack.prototype.findShadingById = function(id) {
+    return this.getShadings().filter(function(sh) {
+        return sh.id == id;
+    })[0];
+}
+
+LogTrack.prototype.findCurves = function(props) {
+    return this.getCurves().filter(function(c) {
+        let cProps = c.getProperties();
+        let match = true;
+        Object.keys(props).forEach(function(k) {
+            match = match && (cProps[k] == props[k]);
+        });
+        return match;
+    });
+}
+
+LogTrack.prototype.findShadings = function(props) {
+    return this.getShadings().filter(function(sh) {
+        let shProps = sh.getProperties();
+        let match = true;
+        Object.keys(props).forEach(function(k) {
+            match = match && (shProps[k] == props[k]);
+        });
+        return match;
+    });
 }
 
 /**
@@ -439,7 +489,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     let windowY = this.getWindowY();
     drawing.minY = windowY[0];
     drawing.maxY = windowY[1];
-    if (drawing == this.currentDrawing) {
+    if (drawing == this.currentDrawing || drawing == this.tmpCurve) {
         drawing.doPlot(true);
         drawing.raise();
     }
@@ -512,6 +562,18 @@ LogTrack.prototype.onPlotMouseDown = function(cb) {
             cb();
         })
         .on('contextmenu', cb);
+}
+
+/**
+ * Register event when double click the plot area
+ */
+LogTrack.prototype.onPlotDoubleClick = function(cb) {
+    let self = this;
+    this.plotContainer
+        .on('dblclick', function() {
+            self.plotMouseDownCallback();
+            cb();
+        });
 }
 
 /**
@@ -777,7 +839,7 @@ LogTrack.prototype.highlightHeader = function() {
         let elem, bgColor;
         if (d.isCurve()) {
             elem = d.header;
-            bgColor = d == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'transparent';
+            bgColor = (d == self.currentDrawing || d == self.tmpCurve) ? self.HEADER_HIGHLIGHT_COLOR : 'transparent';
         }
         else if (d.isShading()) {
             elem = d.header.select('.vi-shading-name');
@@ -790,7 +852,12 @@ LogTrack.prototype.highlightHeader = function() {
 
 
 LogTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
-    this.setCurrentDrawing(drawing);
+    if (d3.event.ctrlKey) {
+        this.setTmpCurve(drawing);
+    }
+    else {
+        this.setCurrentDrawing(drawing);
+    }
 }
 
 LogTrack.prototype.plotMouseDownCallback = function() {
@@ -800,7 +867,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
 
     if (this.currentDrawing && this.currentDrawing.nearPoint(x, y)) {
         d3.event.currentDrawing = this.currentDrawing;
-        return
+        return;
     }
     this.getShadings().concat(this.getCurves()).forEach(function(d) {
         if (!current && d.nearPoint(x, y)) {
@@ -808,7 +875,16 @@ LogTrack.prototype.plotMouseDownCallback = function() {
             d3.event.currentDrawing = current;
         }
     });
-    this.setCurrentDrawing(current);
+
+    // Current drawing is already set when mouse down
+    if (d3.event.type == 'dblclick') return;
+
+    if (d3.event.ctrlKey) {
+        this.setTmpCurve(current);
+    }
+    else {
+        this.setCurrentDrawing(current);
+    }
 }
 
 LogTrack.prototype.drawTooltipText = function(svgDom) {
