@@ -526,8 +526,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "RemoveShading",
             label: "Remove Shading",
             handler: function () {
-                // self.removeCurrentShading();
-                self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
+                self.removeCurrentShading();
+                // self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
 
             }
         }]);
