@@ -275,6 +275,7 @@ Service.prototype.editWell = function(infoWell, callback) {
     this.post(EDIT_WELL, infoWell)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -287,6 +288,7 @@ Service.prototype.removeWell = function(idWell, callback) {
     this.delete(DELETE_WELL, dataRequest)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -296,6 +298,7 @@ Service.prototype.createDataset = function (infoDataset, callback) {
     this.post(CREATE_DATASET, dataRequest)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -304,6 +307,7 @@ Service.prototype.editDataset = function (infoDataset, callback) {
     this.post(EDIT_DATASET, infoDataset)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -316,6 +320,7 @@ Service.prototype.removeDataset = function(idDataset, callback) {
     this.delete(DELETE_DATASET, dataRequest)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -330,6 +335,7 @@ Service.prototype.createCurve = function (curveInfo, callback) {
             callback(curve);
         })
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         })
 }
@@ -341,6 +347,7 @@ Service.prototype.editCurve = function (curveInfo, callback) {
     this.post(EDIT_CURVE, curveInfo)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         })
 }
@@ -352,6 +359,7 @@ Service.prototype.infoCurve = function (idCurve, callback) {
             callback(res)
         })
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         })
 }
@@ -373,6 +381,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
     }).then(function (res) {
         callback(res.data, res.headers('Content-Type'));
     }, function (err) {
+        console.error(err);
         self.getUtils().error("File not found!");
     });
 }
@@ -385,6 +394,7 @@ Service.prototype.removeCurve = function(idCurve, callback) {
     this.delete(DELETE_CURVE, dataRequest)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -395,6 +405,7 @@ Service.prototype.editLogplot = function (infoLogplot, callback) {
     this.post(EDIT_PLOT, infoLogplot)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -411,6 +422,7 @@ Service.prototype.createLogTrack = function(idPlot, orderNum, callback) {
             callback(logTrack);
         })
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -423,6 +435,7 @@ Service.prototype.removeLogTrack = function(idTrack, callback) {
     this.delete(DELETE_LOG_TRACK, dataRequest)
         .then(callback)
         .catch(function(err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -438,6 +451,7 @@ Service.prototype.infoTrack = function(idTrack, callback) {
             callback(infoTrack);
         })
         .catch(function(err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -451,6 +465,7 @@ Service.prototype.editTrack = function(trackObj, callback) {
             callback(track);
         })
         .catch(function(err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -465,6 +480,7 @@ Service.prototype.createDepthTrack = function(idPlot, orderNum, callback) {
     this.post(CREATE_DEPTH_AXIS, dataRequest)
         .then(callback)
         .catch(function(err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -476,6 +492,7 @@ Service.prototype.removeDepthTrack = function(idDepthAxis, callback) {
     this.delete(DELETE_DEPTH_AXIS, dataRequest)
         .then(callback)
         .catch(function(err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -488,6 +505,7 @@ Service.prototype.removeLine = function(idLine, callback) {
     this.delete(DELETE_LINE, dataRequest)
         .then(callback)
         .catch(function(err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -498,6 +516,7 @@ Service.prototype.createLine = function (lineObj, callback) {
     this.post(CREATE_LINE, dataRequest)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }
@@ -508,6 +527,7 @@ Service.prototype.editLine = function (lineObj, callback) {
     this.post(EDIT_LINE, dataRequest)
         .then(callback)
         .catch(function (err) {
+            console.error(err);
             self.getUtils().error(err);
         });
 }

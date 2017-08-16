@@ -112,7 +112,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         track.onPlotMouseOver(function () {
-            console.log('mouseover');
             if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = self;
             dragMan.track = track;
