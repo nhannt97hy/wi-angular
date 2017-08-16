@@ -77,10 +77,10 @@ function lineToTreeConfig(line) {
     lineModel.type = 'line';
     lineModel.id = line.idLine;
     lineModel.idCurve = line.idCurve;
-    lineModel.idDataset = curveModel.idDataset;
     lineModel.data = {
         id: line.idLine,
         idCurve: line.idCurve,
+        idDataset: curveModel.properties.idDataset,
         name: lineModel.name,
         unit: curveModel.properties.unit,
         minX: line.minValue,
@@ -993,7 +993,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         idLine : currentCurve.id,
         idTrack: currentTrack.id,
         showHeader : currentCurve.showHeader,
-        showDataset : true, // add to currentCurve - Canh
+        showDataset : false, // add to currentCurve - Canh
         ignoreMissingValues: false,
         alias: currentCurve.alias,
         minValue: currentCurve.minX,

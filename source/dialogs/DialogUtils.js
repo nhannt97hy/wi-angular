@@ -907,6 +907,54 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         });
     });
 }
+
+exports.curveAttributeDialog = function (ModalService, wiComponentService, lineOptions, symbolOptions, callback) {
+    function ModalController($scope, close) {
+        var self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        console.log("options", lineOptions, symbolOptions);
+
+        this.lineOptions = lineOptions;
+        this.symbolOptions = symbolOptions;
+        
+        this.lineStyles = [[8, 2, 2, 2, 2, 2], [8, 2, 2, 2], [2, 2], [8, 2], [1, 0], [0, 1]];
+        this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.symbolStyles = ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"];
+        this.symbolWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+        this.lineColor = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
+                console.log(colorStr);
+                self.lineOptions.lineStyle.lineColor = colorStr;
+            });
+        }
+        this.onOkButtonClicked = function () {
+            close(self.lineOptions, self.symbolOptions);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-attribute/curve-attribute-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (lineOptions, symbolOptions) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (lineOptions || symbolOptions) {
+                console.log(lineOptions, symbolOptions);
+                callback(lineOptions, symbolOptions);
+            }
+        });
+    });
+}
+
 exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, currentTrack, wiLogplotCtrl, callback) {
     let thisModalController = null;
 
@@ -918,6 +966,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        let dataset = utils.getModel('dataset', currentCurve.idDataset);
 
         let extentY = currentCurve.getExtentY();
 
@@ -970,11 +1019,14 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.lineObjTemplate = {
             minDepth: extentY[0],
             maxDepth: extentY[1],
-            name : currentCurve.name
+            name : dataset.properties.name + "." + currentCurve.name
         }
 
         this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
-
+        
+        this.onToggleShowDataset = function () {
+            self.curveOptions.alias = self.curveOptions.showDataset? self.lineObjTemplate.name : currentCurve.name;
+        }
 
         this.drawSample = function () {
             displayLine(self.lineOptions, self.symbolOptions);
@@ -1126,6 +1178,29 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 console.log(self.symbolOptions);
                 self.drawSample();
             }, self.symbolOptions);
+        };
+        this.onEditAttributeButtonClicked = function () {
+            let lineOptions = null;
+            let symbolOptions = null;
+            switch (self.curveOptions.displayMode) {
+                case "Line":
+                    lineOptions = self.lineOptions;
+                    break;
+                case "Symbol":
+                    symbolOptions = self.symbolOptions;
+                    break;
+                case "Both":
+                    lineOptions = self.lineOptions;
+                    symbolOptions = self.symbolOptions;
+                    break;
+                default:
+                    break;
+            }
+            DialogUtils.curveAttributeDialog(ModalService, wiComponentService, lineOptions, symbolOptions, function (lineOptions, symbolOptions) {
+                if (lineOptions) self.lineOptions = lineOptions;
+                if (symbolOptions) self.symbolOptions = symbolOptions;
+                self.drawSample();
+            });
         };
         this.onApplyButtonClicked = function () {
             updateLine();
@@ -1660,6 +1735,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.props = {
             general: currentTrack.getProperties()
         }
+        this.props.general.width = utils.pixelToInch(this.props.general.width);        
         console.log("props", this.props.general);
 
         function fillShadingAttrArray() {
@@ -1859,10 +1935,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
 
         function updateGeneralTab() {
-            utils.changeTrack(self.props.general, wiApiService)
-            currentTrack.setProperties(self.props.general);
+            utils.changeTrack(self.props.general, wiApiService);
+            let newProps = angular.copy(self.props);            
+            newProps.general.width = utils.inchToPixel(self.props.general.width);
+            currentTrack.setProperties(newProps.general);
             currentTrack.doPlot(true);
-            
         }
         function updateCurvesTab() {
             var eventEmitter = new EventEmitter();
