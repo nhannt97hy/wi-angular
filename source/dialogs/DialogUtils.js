@@ -1432,8 +1432,10 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     });
 };
 exports.fillPatternSettingDialog = function (ModalService, callback, options) {
+    let thisModal = null;
     function ModalController($scope, close, wiComponentService, $timeout) {
         let self = this;
+        thisModal = this;
         this.disabled = false;
         this.error = null;
 
@@ -1467,7 +1469,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         }
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.enableFill = function (idEnable, value) {
-            $('#'+ idEnable + " :input").attr("disabled", value);
+            $('#'+ idEnable + " :input").attr("disabled", !value);
         }
         //button
         this.foreground = function() {
@@ -1518,7 +1520,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-
+        thisModal.enableFill("positiveNegative", false);
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
@@ -1549,6 +1551,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.curvesChanged = new Array(); // 1: change line, 2: add line
 
         this.curvesArr = [];
+        this.shadingArr = new Array();
+        // let shadingList =  new Array();
+        let logTrack = {};
+
         let idCurveNew = null;
         this.well.children.forEach( function(child) {
             if(child.type == 'dataset') self.datasets.push(child);
@@ -1577,7 +1583,16 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.arr.push(item);
         })
         let shadingList = currentTrack.getShadings();
-        console.log("shading", shadingList);
+        console.log("shading", this.shadingArr);
+        shadingList.forEach(function(shading, index){
+            self.shadingArr.push(shading.getProperties());
+        });
+        function getLineById(idLine) {
+            wiApiService.infoLine(idLine, function(line){
+                if(callback) callback();
+            })
+        }
+        
         curveList.forEach(function (curve, index) {
             let curveOptions = {};
             let lineOptions = {};
@@ -1727,6 +1742,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 background: '#ff0'
             }
         }
+        // wiApiService.infoTrack(currentTrack.id, function(infoTrack) {
+        //     logTrack = infoTrack;
+        //     console.log("LOGTRACK", logTrack);
+        // });
+
+        // shadingList = logTrack.shadings;
 
 
         this.logLinear = ["Logarithmic", "Linear"];
@@ -1741,7 +1762,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.removeRowCurve = function() {
             self.curvesChanged[self.__idx].change = '3';
-            console.log("curvesChanged", self.curvesChanged);
+            console.log("curvesChanged", self.curvesChanged, self.__idx);
         }
         function removeCurve(idLine) {
             wiApiService.removeLine(idLine, function() {

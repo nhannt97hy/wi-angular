@@ -299,25 +299,36 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-model="wiModal.selectedShading" ng-repeat="shading in wiModal.currentShadings" ng-class="{'selected':$index == wiModal.selectedRowShading}"
+                                            <tr ng-repeat="shading in wiModal.shadingArr" 
+                                                ng-class="{'selected':$index == selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
                                                 <td>
-                                                    <select ng-model="shading.left.curveName" name="curveName" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.curveName track by item"></select>
+                                                    <select ng-model="shading.leftCurve.id" name="curveName"
+                                                            class="form-control wi-form-control" 
+                                                            ng-options="item.id as item.name for item in wiModal.lineCurve track by item"></select>
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="shading.left.fixedValue" class="form-control wi-form-control">
+                                                    <input type="text" ng-model="shading.leftFixedValue" 
+                                                            class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <select ng-model="shading.right.curveName" name="curveName" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.curveName track by item"></select>
+                                                    <select ng-model="shading.rightCurve" name="curveName"
+                                                    class="form-control wi-form-control" 
+                                                    ng-options="item for item in wiModal.lineCurve track by item"></select>
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="shading.right.fixedValue" class="form-control wi-form-control">
+                                                    <input type="text" ng-model="shading.rightFixedValue" class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <input type="text" ng-model="shading.shadingName" class="form-control wi-form-control">
+                                                    <input type="text" ng-model="shading.name" 
+                                                    class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <select ng-model="shading.shadingStyle" name="shadingStyle" value="" class="form-control wi-form-control" ng-options="item for item in wiModal.shadingStyle track by item"></select>
+                                                    <select ng-model="shading.shadingStyle" 
+                                                            class="form-control wi-form-control">
+                                                        <option value="fillPattern">Fill Pattern</option>
+                                                        <option value="Variable Shading">Variable Shading</option>
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     <input type="button" value="Define" 
@@ -326,15 +337,17 @@
                                                             ng-click="wiModal.definePatternButtonClicked();">
                                                 </td>
                                                 <td>
-                                                    <input type="button" ng-model="shading.variableShading" class="form-control wi-form-control">
+                                                    <input type="button" value="Define" 
+                                                            ng-model="shading.variableShading" 
+                                                            class="form-control wi-form-control">
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="col-sm-1">
-                                    <button type="button" class="btn btn-default" ng-click="wiModal.arrowUpShading()"><span class="arrow-up-16x16"></span></button>
-                                    <button type="button" class="btn btn-default" ng-click="wiModal.arrowDownShading()"><span class="arrow-down-16x16"></span></button>
+                                    <button type="button" class="btn btn-default" ng-click="wiModal.removeRowShading()"><span class="delete-16x16"></span></button>
+                                    <button type="button" class="btn btn-default" ng-click="wiModal.addRowShading()"><span class="ok-16x16"></span></button>
                                 </div>
                             </form>
                         </div>
