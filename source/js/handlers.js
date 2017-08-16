@@ -262,6 +262,7 @@ exports.BlankLogplotButtonClicked = function () {
                 });
             })
             .catch(function(err) {
+                console.error('newBlankLogplotDialog err ' + err);
                 utils.error('newBlankLogplotDialog err ' + err);
             });
     });
@@ -300,6 +301,7 @@ exports.TrippleComboButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('DensityNeutronDialog err ' + err);
                 utils.error('DensityNeutronDialog err ' + err);
             });
     });
@@ -336,6 +338,7 @@ exports.DensityNeutronButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('DensityNeutronDialog err ' + err);
                 utils.error('DensityNeutronDialog err ' + err);
             });
     });
@@ -374,6 +377,7 @@ exports.ResistivitySonicButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('DensityNeutronDialog err ' + err);
                 utils.error('DensityNeutronDialog err ' + err);
             });
     });
@@ -412,6 +416,7 @@ exports.TriTracksBlankButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('3TracksBlankDialog err ' + err);
                 utils.error('3TracksBlankDialog err ' + err);
             });
     });
@@ -452,6 +457,7 @@ exports.InputCurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('3TracksBlankDialog err ' + err);
                 utils.error('3TracksBlankDialog err ' + err);
             });
     });
@@ -498,6 +504,7 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('3TracksBlankDialog err ' + err);
                 utils.error('3TracksBlankDialog err ' + err);
             });
     });
@@ -540,6 +547,7 @@ exports.Syn_CurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('3TracksBlankDialog err ' + err);
                 utils.error('3TracksBlankDialog err ' + err);
             });
     });
@@ -588,6 +596,7 @@ exports.ResultButtonClicked = function () {
                 });
             })
             .catch(function (err) {
+                console.error('3TracksBlankDialog err ' + err);
                 utils.error('3TracksBlankDialog err ' + err);
             });
     });

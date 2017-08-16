@@ -527,7 +527,6 @@ function getCurveData(apiService, idCurve, callback) {
             callback(null, curve);
         })
         .catch(function (err) {
-            console.log('getCurveData', err);
             callback(err, null);
         });
 }
@@ -558,6 +557,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                         });
                     })
                     .catch(function(err){
+                        console.error(err);
                         wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                         return;
                     });
@@ -624,6 +624,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
         .then(function (plot) {
             if (logplotModel.properties.referenceCurve) {
+                console.log(logplotModel.properties.referenceCurve);
                 slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
             }
             let tracks = new Array();
@@ -650,17 +651,30 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                 }
                 else if (aTrack.idTrack) {
                     let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-                    if ( !aTrack.lines ) return;
+                    if ( !aTrack.lines || aTrack.lines.length == 0 ) {
+                        aTrack = tracks.shift();
+                        continue;
+                    }
                     aTrack.lines.forEach(function (line) {
                         getCurveData(wiApiService, line.idCurve, function (err, data) {
                             let lineModel = lineToTreeConfig(line);
-                            if (!err) wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                            if (!err) {
+                                wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                            }
+                            else {
+                                console.error(err);
+                                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                            }
                         });
                     });
                 }
                 aTrack = tracks.shift();
             }
             if (callback) callback();
+        })
+        .catch(function(err) {
+            console.error(err);
+            wiComponentService.getComponent(wiComponentService.UTILS).error(err);
         });
 };
 exports.openLogplotTab = openLogplotTab;
