@@ -39,6 +39,8 @@ const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
 const CREATE_LINE = '/project/well/plot/track/line/new';
 const DELETE_LINE = '/project/well/plot/track/line/delete';
 const EDIT_LINE = '/project/well/plot/track/line/edit';
+const GET_LINE = '/project/well/plot/track/line/info';
+
 const EDIT_TRACK = '/project/well/plot/track/edit';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
@@ -68,8 +70,11 @@ Service.prototype.GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
 
 Service.prototype.CREATE_LINE = '/project/well/plot/track/line/new';
 Service.prototype.DELETE_LINE = DELETE_LINE;
-Service.prototype.EDIT_TRACK = EDIT_TRACK;
 Service.prototype.EDIT_LINE = EDIT_LINE;
+Service.prototype.GET_LINE = GET_LINE;
+
+Service.prototype.EDIT_TRACK = EDIT_TRACK;
+
 Service.prototype.getUtils = function() {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     // console.log(utils);
@@ -531,7 +536,20 @@ Service.prototype.editLine = function (lineObj, callback) {
             self.getUtils().error(err);
         });
 }
-
+Service.prototype.infoLine = function(idLine, callback) {
+    let self = this;
+    let dataRequest = {
+        idLine: idLine
+    };
+    this.post(GET_LINE, dataRequest)
+        .then(function (infoLine) {
+            if (!callback) return;
+            callback(infoLine);
+        })
+        .catch(function(err) {
+            self.getUtils().error(err);
+        });
+}
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     const BASE_URL = 'http://54.169.109.34';
     //const BASE_URL = 'http://localhost:3000';

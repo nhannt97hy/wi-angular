@@ -615,7 +615,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let curve1 = _currentTrack.getCurrentCurve();
                 let curve2 = _currentTrack.getTmpCurve();
-
+                console.log("create shading!!");
                 if (!curve1) return;
                 if (!curve2) {
                     // This should open dialog
