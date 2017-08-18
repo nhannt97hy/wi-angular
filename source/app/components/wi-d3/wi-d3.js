@@ -619,7 +619,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (!curve1) return;
                 if (!curve2) {
                     // This should open dialog
-                    self.addLeftShadingToTrack(_currentTrack, curve1, {});
+                    
+                    var config = {
+                        isNegPosFilling : true,
+                        positiveFill: {
+                            gradient: {
+                                startX:0,
+                                endX: 200,
+                                startColor: 'yellow',
+                                endColor: 'blue'
+                            }
+                        },
+                        negativeFill: {
+                            gradient: {
+                                startX:0,
+                                endX: 200,
+                                startColor: 'red',
+                                endColor: 'cyan'
+                            }
+                        },
+                        showRefLine: true
+                    }
+                    self.addLeftShadingToTrack(_currentTrack, curve1, config);
                 }
                 else {
                     self.addPairShadingToTrack(_currentTrack, curve1, curve2, {});

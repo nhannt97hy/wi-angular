@@ -13,7 +13,8 @@
                         </div>
                         <div class="col-sm-2"></div>
                         <div class="col-sm-3">
-                            <select class="form-control wi-form-control"></select>
+                            <select class="form-control wi-form-control"
+                                    ng-model="wiModal.options.curveControl"></select>
                         </div>
                     </div>
                     <div class="row">
@@ -34,17 +35,19 @@
                         </div>
                         <div class="col-sm-3">
                             <input type="number" name=""
-                                class="form-control wi-form-control">
+                                class="form-control wi-form-control"
+                                ng-model="wiModal.options.startX">
                         </div>
                         <div class="col-sm-3">
                             <input type="number" name=""
-                                class="form-control wi-form-control">
+                                class="form-control wi-form-control"
+                                ng-model="wiModal.options.endX">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
                             <label class="small-text">
-                                <input type="radio" name="">
+                                <input type="radio" ng-value="gradient">
                                 Use Gradient
                             </label>
                         </div>
@@ -52,18 +55,22 @@
                             <p class="small-text margin-top-0_5em">Color:</p>
                         </div>
                         <div class="col-sm-3">
-                            <input type="button" name=""
-                                class="form-control wi-form-control">
+                            <div class="addon valign-middle" 
+                                ng-style="{'background-color':wiModal.options.startColor}"><img/></div>
+                                    <button ng-click="wiModal.startColor()"
+                                            class="form-control wi-form-control width-80px">Change</button>
                         </div>
                         <div class="col-sm-3">
-                            <input type="button" name=""
-                                class="form-control wi-form-control">
+                            <div class="addon valign-middle" 
+                                ng-style="{'background-color':wiModal.options.endColor}"><img/></div>
+                                    <button ng-click="wiModal.endColor()"
+                                            class="form-control wi-form-control width-80px">Change</button>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
                             <label class="small-text">
-                                <input type="radio" name="">
+                                <input type="radio" ng-value="palette">
                                 Use Palette
                             </label>
                         </div>
@@ -79,7 +86,7 @@
                     <div class="row">
                         <div class="col-sm-4">
                             <label class="small-text">
-                                <input type="radio" name="">
+                                <input type="radio" ng-value="values">
                                 Use Values
                             </label>
                         </div>
@@ -90,8 +97,7 @@
                 </form>                   
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
-                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Close</button>
             </div>
         </div>
     </div>

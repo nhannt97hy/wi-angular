@@ -198,12 +198,12 @@
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="curve in wiModal.getCurves()"
-                                                ng-class="{selected:$index == selectedRow}"
-                                                ng-click="wiModal.setClickedRow($index)">
+                                                ng-class="{selected:$index == selectedRowCurve}"
+                                                ng-click="wiModal.setClickedRowCurve($index)">
                                                 <td style="width: 12%">
                                                     <!-- <input type="text" ng-model="curve.alias" name="curveName"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChange($index);">
+                                                            ng-change="wiModal.onChangeCurve($index);">
                                                     </input> -->
                                                     <select ng-model="wiModal.lineCurve[$index].id"
                                                             name="curveName"
@@ -216,47 +216,47 @@
                                                 <td>
                                                     <input type="text" ng-model="curve.alias"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChange();">
+                                                           ng-change="wiModal.onChangeCurve();">
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="curve.minValue"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChange();">
+                                                           ng-change="wiModal.onChangeCurve();">
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="curve.maxValue"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChange();">
+                                                           ng-change="wiModal.onChangeCurve();">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayType" name="log"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.logLinear track by item"
-                                                            ng-change="wiModal.onChange();"></select>
+                                                            ng-change="wiModal.onChangeCurve();"></select>
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayMode" name="displayMode"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayMode track by item"
-                                                            ng-change="wiModal.onChange();"></select>
+                                                            ng-change="wiModal.onChangeCurve();"></select>
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.lineOptions"
                                                             type="button" value="Edit..." id="editLine" 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.lineStyleButtonClicked($index, $event); wiModal.onChange();">
+                                                            ng-click="wiModal.lineStyleButtonClicked($index, $event); wiModal.onChangeCurve();">
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.symbolOptions"
                                                             type="button" value="Edit..." id="editSymbol" 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.symbolStyleButtonClicked($index, $event); wiModal.onChange();">
+                                                            ng-click="wiModal.symbolStyleButtonClicked($index, $event); wiModal.onChangeCurve();">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayAs" name="displayAs"
                                                             value="" class="form-control wi-form-control"
                                                             ng-options="item for item in wiModal.displayAs track by item"
-                                                            ng-change="wiModal.onChange();"></select>
+                                                            ng-change="wiModal.onChangeCurve();"></select>
                                                 </td>       
                                             </tr>
                                         </tbody>
@@ -274,76 +274,75 @@
                         </div>
                     </wi-tab>
                     <wi-tab heading="Shading">
-                        <div class="container-fluid">
+                        <div class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="col-sm-11">
-                                    <table class="font-size-10px table table-bordered shadingTable">
+                                    <table style="border-collapse: collapse;" class="font-size-10px shadingTable col-sm-12">
                                         <thead>
                                             <tr>
-                                                <td colspan="2">Left Side of Shading</td>
-                                                <td colspan="2">Right Side of Shading</td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Curve Name</td>
-                                                <td>Fixed Name</td>
-                                                <td>Curve Name</td>
-                                                <td>Fixed Name</td>
-                                                <td>Shading Name</td>
-                                                <td>Shading Style</td>
-                                                <td>Fill Pattern</td>
-                                                <td>Variable Shading</td>
+                                                <td colspan="2" class="text-center border border-style1-left border-style1-top border-style1-right"><strong>Left Side</strong></td>
+                                                <td colspan="2" class="text-center border border-style1-top border-style1-right"><strong>Right Side</strong></td>
+                                                <td colspan="3" class="text-center border border-style1-top border-style1-right"><strong>Parameters</strong></td>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <tr>
+                                                <td class="text-center border border-style1-left"><strong>Curve</strong></td>
+                                                <td class="text-center border border-style1-right"><strong>Fixed Value</strong></td>
+                                                <td class="text-center border"><strong>Curve</strong></td>
+                                                <td class="text-center border border-style1-right"><strong>Fixed Value</strong></td>
+                                                <td class="text-center border"><strong>Shading Name</strong></td>
+                                                <td class="text-center border"><strong>Shading Style</strong></td>
+                                                <td class="text-center border border-style1-right"><strong>Shading Options</strong></td>
+                                            </tr>
                                             <tr ng-repeat="shading in wiModal.shadingArr" 
                                                 ng-class="{'selected':$index == selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
-                                                <td>
-                                                    <select ng-model="shading.leftCurve.id" name="curveName"
+                                                <td class="border border-style1-left">
+                                                    <select ng-model="shading.idLeftLine" name="curveName"
                                                             class="form-control wi-form-control" 
-                                                            ng-options="item.id as item.name for item in wiModal.lineCurve track by item"></select>
+                                                            ng-options="item.id as item.name for item in wiModal.curveList"></select>
                                                 </td>
-                                                <td>
+                                                <td class="border border-style1-right">
                                                     <input type="text" ng-model="shading.leftFixedValue" 
-                                                            class="form-control wi-form-control">
+                                                            class="form-control wi-form-control"
+                                                            size="6">
                                                 </td>
-                                                <td>
-                                                    <select ng-model="shading.rightCurve" name="curveName"
-                                                    class="form-control wi-form-control" 
-                                                    ng-options="item for item in wiModal.lineCurve track by item"></select>
+                                                <td class="border">
+                                                    <select ng-model="shading.idRightLine" name="curveName"
+                                                            class="form-control wi-form-control" 
+                                                            ng-options="item.id as item.name for item in wiModal.curveList"></select>
                                                 </td>
-                                                <td>
-                                                    <input type="text" ng-model="shading.rightFixedValue" class="form-control wi-form-control">
+                                                <td class="border border-style1-right">
+                                                    <input type="text" ng-model="shading.rightFixedValue" class="form-control wi-form-control" size="6">
                                                 </td>
-                                                <td>
+                                                <td class="border">
                                                     <input type="text" ng-model="shading.name" 
                                                     class="form-control wi-form-control">
                                                 </td>
-                                                <td>
+                                                <td class="border">
                                                     <select ng-model="shading.shadingStyle" 
                                                             class="form-control wi-form-control">
                                                         <option value="fillPattern">Fill Pattern</option>
-                                                        <option value="Variable Shading">Variable Shading</option>
+                                                        <option value="variableShading">Variable Shading</option>
                                                     </select>
                                                 </td>
-                                                <td>
+                                                <td class="border border-style1-right">
                                                     <input type="button" value="Define" 
                                                             ng-model="shading.fillPattern" 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.definePatternButtonClicked();">
+                                                            ng-click="wiModal.defineButtonClicked($index);">
                                                 </td>
-                                                <td>
+                                                <!-- <td>
                                                     <input type="button" value="Define" 
                                                             ng-model="shading.variableShading" 
-                                                            class="form-control wi-form-control">
-                                                </td>
+                                                            class="form-control wi-form-control"
+                                                            ng-click="wiModal.defineVariableButtonClicked($index)">
+                                                </td> -->
                                             </tr>
                                         </tbody>
                                     </table>
+                                    <p></p>
                                 </div>
                                 <div class="col-sm-1">
                                     <button type="button" class="btn btn-default" ng-click="wiModal.removeRowShading()"><span class="delete-16x16"></span></button>
@@ -353,7 +352,6 @@
                         </div>
                     </wi-tab>
                 </wi-tabset>
-                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>

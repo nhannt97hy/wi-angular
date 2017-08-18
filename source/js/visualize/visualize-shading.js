@@ -48,7 +48,7 @@ function Shading(config) {
     this.fill = config.fill;
     this.negativeFill = config.negativeFill;
     this.positiveFill = config.positiveFill;
-    this.isNegPosFilling = config.isNegPosFilling;
+    this.isNegPosFilling = config.isNegPosFilling == null ? false : config.isNegPosFilling;
 
     this.leftCurve = config.leftCurve;
     this.rightCurve = config.rightCurve;

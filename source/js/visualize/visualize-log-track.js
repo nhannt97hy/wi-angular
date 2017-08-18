@@ -20,7 +20,7 @@ Utils.extend(Track, LogTrack);
  * @param {Boolean} [config.justification] - Alignment of the title (left, center, right)
  * @param {Number} [config.xMajorTicks] - Number of major ticks shown in x axis. Default: 4
  * @param {Number} [config.xMinorTicks] - Number of minor ticks shown in x axis. Default: 2
- * @param {Number} [config.yTicks] - Number of ticks shown in y axis. Default: 10
+ * @param {Number} [config.yTicks] - addaddNumber of ticks shown in y axis. Default: 10
  * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 120
  * @param {String} [config.bgColor] - Background color for the track
  * @param {Number} [config.yStep] - Y gap between two consecutive points

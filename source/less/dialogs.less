@@ -285,3 +285,28 @@ div.addon {
 	display: inline-block;
 	font-size: 11px;
 }
+
+table.shadingTable td {
+	&.border.border-style1-left {
+		border-left: 1px solid blue;
+	}
+	&.border.border-style1-right {
+		border-right: 1px solid blue;
+	}
+	&.border.border-style1-top {
+		border-top: 1px solid blue;
+	}
+
+	&.border {
+		border: 1px solid lightgray;
+	}
+}
+table.shadingTable tr:last-child {
+	td.border {
+		border-bottom: 1px solid blue;	
+	}
+}
+table.shadingTable td {
+	padding-top: 1em;
+	padding-bottom: 1em;
+}
