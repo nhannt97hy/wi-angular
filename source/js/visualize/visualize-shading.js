@@ -110,6 +110,7 @@ Shading.prototype.getProperties = function() {
         idShading: this.id,
         idTrack: this.idTrack,
         name: this.name,
+        fill: this.isNegPosFilling ? null: this.fill,
         negativeFill: this.isNegPosFilling ? this.negativeFill : null,
         positiveFill: this.isNegPosFilling ? this.positiveFill : this.fill,
         isNegPosFilling: this.isNegPosFilling,
@@ -132,7 +133,9 @@ Shading.prototype.setProperties = function(props) {
         Utils.setIfNotNull(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
     }
     else {
-        Utils.setIfNotNull(this, 'fill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
+        if (props.fill) 
+            Utils.setIfNotNull(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
+        else Utils.setIfNotNull(this, 'fill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
     }
 
     if (!this.rightCurve && this.leftCurve) {

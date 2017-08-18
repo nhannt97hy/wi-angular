@@ -1028,6 +1028,28 @@ exports.mergeLineObj = function(curveOptions, lineStyle, symbolStyle) {
     lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
     return lineObj;
 };
+exports.mergeShadingObj = function(shadingOptions, fillPatternStyles, variableShadingStyle) {
+
+    console.log("CHECK----:", shadingOptions, fillPatternStyles, variableShadingStyle);
+
+    let shadingObj = new Object();
+    angular.extend(shadingObj, shadingOptions);
+    if (shadingObj.shadingStyle == 'fillPattern') {
+        if (!shadingObj.isNegPosFilling) {
+            shadingObj.fill = fillPatternStyles.fill;
+        }
+        else {
+            shadingObj.positiveFill = fillPatternStyles.positiveFill;
+            shadingObj.negativeFill = fillPatternStyles.negativeFill;    
+        }
+    }
+    else {
+        shadingObj.fill = variableShadingStyle;
+    }
+    console.log("CHECK:", shadingObj);
+    return shadingObj;
+}
+
 exports.changeLine = function(lineObj, wiApiService, callback) {
     wiApiService.editLine(lineObj, function (result) {
         if( callback ) callback(result);
@@ -1160,3 +1182,34 @@ function pixelToCm(px) {
     return cm
 }
 exports.pixelToCm = pixelToCm;
+
+function hexToRgbA(hex){
+    var c;
+    var hexStr = hex;
+    console.log("hex", hex);
+    if (!hex || hex.length == 0) {
+        hexStr = '#FFFFFE';
+    }
+    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hexStr)) {
+        c = hexStr.substring(1).split('');
+        if ( c.length == 3 ) {
+            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+        c = '0x' + c.join('');
+        
+        return {
+            r: (c>>16)&255, 
+            g: (c>>8)&255, 
+            b: c&255 , 
+            a: 1
+        };
+    }
+
+    throw new Error('Bad Hex');
+}
+
+exports.hexToRgbA = hexToRgbA;
+
+exports.rgbaObjToString = function(rgbaObj){
+    return 'rgba('+rgbaObj.r+','+rgbaObj.g+','+rgbaObj.b+','+rgbaObj.a+')';
+}

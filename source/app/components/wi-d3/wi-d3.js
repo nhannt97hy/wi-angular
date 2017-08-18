@@ -639,7 +639,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             }
                         },
                         showRefLine: true
-                    }
+                    };
+                    // var config = {
+                    //     type: 'custom',
+                    //     isNegPosFilling : true,
+                    //     positiveFill: {
+                    //         gradient: {
+                    //             startX:0,
+                    //             endX: 200,
+                    //             startColor: 'yellow',
+                    //             endColor: 'blue'
+                    //         }
+                    //     },
+                    //     negativeFill: {
+                    //         gradient: {
+                    //             startX:0,
+                    //             endX: 200,
+                    //             startColor: 'blue',
+                    //             endColor: 'yellow'
+                    //         }
+                    //     },
+                    //     showRefLine: true
+                    // };
                     self.addLeftShadingToTrack(_currentTrack, curve1, config);
                 }
                 else {

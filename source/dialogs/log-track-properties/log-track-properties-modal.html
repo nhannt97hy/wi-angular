@@ -301,28 +301,35 @@
                                                 <td class="border border-style1-left">
                                                     <select ng-model="shading.idLeftLine" name="curveName"
                                                             class="form-control wi-form-control" 
-                                                            ng-options="item.id as item.name for item in wiModal.curveList"></select>
+                                                            ng-options="item.id as item.name for item in wiModal.curveList"
+                                                            ng-change="wiModal.onChangeShading($index)"></select>
                                                 </td>
                                                 <td class="border border-style1-right">
                                                     <input type="text" ng-model="shading.leftFixedValue" 
                                                             class="form-control wi-form-control"
+                                                            ng-change="wiModal.onChangeShading($index)"
                                                             size="6">
                                                 </td>
                                                 <td class="border">
                                                     <select ng-model="shading.idRightLine" name="curveName"
                                                             class="form-control wi-form-control" 
-                                                            ng-options="item.id as item.name for item in wiModal.curveList"></select>
+                                                            ng-options="item.id as item.name for item in wiModal.curveList"
+                                                            ng-change="wiModal.onChangeShading($index)"></select>
                                                 </td>
                                                 <td class="border border-style1-right">
-                                                    <input type="text" ng-model="shading.rightFixedValue" class="form-control wi-form-control" size="6">
+                                                    <input type="text" ng-model="shading.rightFixedValue" 
+                                                            class="form-control wi-form-control"
+                                                            ng-change="wiModal.onChangeShading($index)" size="6">
                                                 </td>
                                                 <td class="border">
                                                     <input type="text" ng-model="shading.name" 
-                                                    class="form-control wi-form-control">
+                                                    class="form-control wi-form-control"
+                                                    ng-change="wiModal.onChangeShading($index)">
                                                 </td>
                                                 <td class="border">
                                                     <select ng-model="shading.shadingStyle" 
-                                                            class="form-control wi-form-control">
+                                                            class="form-control wi-form-control"
+                                                            ng-change="wiModal.onChangeShading($index)">
                                                         <option value="fillPattern">Fill Pattern</option>
                                                         <option value="variableShading">Variable Shading</option>
                                                     </select>
@@ -331,7 +338,7 @@
                                                     <input type="button" value="Define" 
                                                             ng-model="shading.fillPattern" 
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.defineButtonClicked($index);">
+                                                            ng-click="wiModal.defineButtonClicked($index); wiModal.onChangeShading($index);">
                                                 </td>
                                                 <!-- <td>
                                                     <input type="button" value="Define" 

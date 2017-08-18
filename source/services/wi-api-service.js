@@ -41,6 +41,12 @@ const DELETE_LINE = '/project/well/plot/track/line/delete';
 const EDIT_LINE = '/project/well/plot/track/line/edit';
 const GET_LINE = '/project/well/plot/track/line/info';
 
+const CREATE_SHADING = '/project/well/plot/track/shading/new';
+const DELETE_SHADING = '/project/well/plot/track/shading/delete';
+const EDIT_SHADING = '/project/well/plot/track/shading/edit';
+const GET_SHADING = '/project/well/plot/track/shading/info';
+
+
 const EDIT_TRACK = '/project/well/plot/track/edit';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
@@ -50,28 +56,33 @@ function Service(baseUrl, $http, wiComponentService, Upload) {
     this.wiComponentService = wiComponentService;
 }
 
-Service.prototype.GET_PROJECT = '/project/fullinfo';
-Service.prototype.DATA_CURVE = '/project/well/dataset/curve/getData';
+Service.prototype.GET_PROJECT = GET_PROJECT; //'/project/fullinfo';
+Service.prototype.DATA_CURVE = DATA_CURVE; //'/project/well/dataset/curve/getData';
 
-Service.prototype.DELETE_WELL = '/project/well/delete';
+Service.prototype.DELETE_WELL = DELETE_WELL; //'/project/well/delete';
 
-Service.prototype.CREATE_PLOT = '/project/well/plot/new';
-Service.prototype.EDIT_PLOT = '/project/well/plot/edit';
-Service.prototype.DELETE_PLOT = '/project/well/plot/delete';
-Service.prototype.GET_PLOT = '/project/well/plot/info';
+Service.prototype.CREATE_PLOT = CREATE_PLOT; //'/project/well/plot/new';
+Service.prototype.EDIT_PLOT = EDIT_PLOT; //'/project/well/plot/edit';
+Service.prototype.DELETE_PLOT = DELETE_PLOT; //'/project/well/plot/delete';
+Service.prototype.GET_PLOT = GET_PLOT; //'/project/well/plot/info';
 
-Service.prototype.CREATE_LOG_TRACK = '/project/well/plot/track/new';
+Service.prototype.CREATE_LOG_TRACK = CREATE_LOG_TRACK;
 Service.prototype.DELETE_LOG_TRACK = DELETE_LOG_TRACK;
-Service.prototype.GET_LOG_TRACK = '/project/well/plot/track/info';
+Service.prototype.GET_LOG_TRACK = GET_LOG_TRACK; //'/project/well/plot/track/info';
 
-Service.prototype.CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
-Service.prototype.DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
-Service.prototype.GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
+Service.prototype.CREATE_DEPTH_AXIS = CREATE_DEPTH_AXIS; //'/project/well/plot/depth-axis/new';
+Service.prototype.DELETE_DEPTH_AXIS = DELETE_DEPTH_AXIS;//'/project/well/plot/depth-axis/delete';
+Service.prototype.GET_DEPTH_AXIS = GET_DEPTH_AXIS; //'/project/well/plot/depth-axis/info';
 
-Service.prototype.CREATE_LINE = '/project/well/plot/track/line/new';
+Service.prototype.CREATE_LINE = CREATE_LINE; //'/project/well/plot/track/line/new';
 Service.prototype.DELETE_LINE = DELETE_LINE;
 Service.prototype.EDIT_LINE = EDIT_LINE;
 Service.prototype.GET_LINE = GET_LINE;
+
+Service.prototype.CREATE_SHADING = CREATE_SHADING;
+Service.prototype.DELETE_SHADING = DELETE_SHADING;
+Service.prototype.EDIT_SHADING = EDIT_SHADING;
+Service.prototype.GET_SHADING = GET_SHADING;
 
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
@@ -545,6 +556,53 @@ Service.prototype.infoLine = function(idLine, callback) {
         .then(function (infoLine) {
             if (!callback) return;
             callback(infoLine);
+        })
+        .catch(function(err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.createShading = function(shadingObj, callback) {
+    var self = this;
+    let dataRequest = shadingObj;
+    this.post(CREATE_SHADING, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editShading = function(shadingObj, callback) {
+    let self = this;
+    let dataRequest = shadingObj;
+
+    this.post(EDIT_SHADING, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeShading = function(idShading, callback) {
+    var self = this;
+    let dataRequest = {
+        idShading: idShading
+    };
+    this.delete(DELETE_SHADING, dataRequest)
+        .then(callback)
+        .catch(function(err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.infoShading = function(idShading, callback) {
+    let self = this;
+    let dataRequest = {
+        idShading: idShading
+    };
+    this.post(GET_SHADING, dataRequest)
+        .then(function (infoShading) {
+            if (!callback) return;
+            callback(infoShading);
         })
         .catch(function(err) {
             self.getUtils().error(err);

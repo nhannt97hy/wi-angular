@@ -833,7 +833,6 @@ exports.lineStyleDialog = function (ModalService, wiComponentService, callback, 
 
         this.lineColor = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.lineStyle.lineColor, function (colorStr) {
-                console.log(colorStr);
                 self.options.lineStyle.lineColor = colorStr;
             });
         }
@@ -873,13 +872,11 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
 
         this.lineColor = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolStrokeStyle, function (colorStr) {
-                console.log(colorStr);
                 self.options.symbolStyle.symbolStrokeStyle = colorStr;
             });
         };
         this.solidFillColor = function() {
             DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolFillStyle, function (colorStr) {
-                console.log(colorStr);
                 self.options.symbolStyle.symbolFillStyle = colorStr;
             });
         }
@@ -925,7 +922,6 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
 
         this.lineColor = function() {
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
-                console.log(colorStr);
                 self.lineOptions.lineStyle.lineColor = colorStr;
             });
         }
@@ -1506,7 +1502,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-exports.fillPatternSettingDialog = function (ModalService, callback, options) {
+exports.fillPatternSettingDialog = function (ModalService, callback, options, options1) {
     let thisModal = null;
     function ModalController($scope, close, wiComponentService, $timeout) {
         let self = this;
@@ -1516,8 +1512,10 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
 
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        console.log("$$", graph);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        console.log("$$", options);
 
+        this.options1 = options1;
         if (options) {
             this.options = options;
         }
@@ -1525,21 +1523,27 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
             this.options = {
                 fill: {
                     display: false,
-                    pattern: "chert",
-                    foreground: "#ff0",
-                    background: "#f0f"
+                    pattern: {
+                        name:"chert",
+                        foreground: "#fff",
+                        background: "#000"
+                    }
                 },
                 positiveFill:{
                     display: false,
-                    pattern: "chert",
-                    foreground: '#000',
-                    background: '#fff'
+                    pattern: {
+                        name:"chert",
+                        foreground: "#fff",
+                        background: "#000"
+                    }
                 },
                 negativeFill:{
                     display: false,
-                    pattern: "chert",
-                    foreground: '#000',
-                    background: '#fff'
+                    pattern: {
+                        name:"chert",
+                        foreground: "#fff",
+                        background: "#000"
+                    }
                 }
             };
         }
@@ -1549,45 +1553,47 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options) {
         }
         //button
         this.foreground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.options.fill.foreground, function (colorStr) {
-                self.options.fill.foreground = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.fill.pattern.foreground, function (colorStr) {
+                self.options.fill.pattern.foreground = colorStr;
             });
         }
         this.background = function(){
-            DialogUtils.colorPickerDialog(ModalService, self.options.fill.background, function (colorStr) {
-                self.options.fill.background = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.fill.pattern.background, function (colorStr) {
+                self.options.fill.pattern.background = colorStr;
             });
         }
         this.posPositiveForeground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.foreground, function (colorStr) {
-                self.options.positiveFill.foreground = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.pattern.foreground, function (colorStr) {
+                self.options.positiveFill.pattern.foreground = colorStr;
             });
         }
         this.posPositiveBackground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.background, function (colorStr) {
-                self.options.positiveFill.background = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.positiveFill.pattern.background, function (colorStr) {
+                self.options.positiveFill.pattern.background = colorStr;
             });
         }
         this.negPositiveForeground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.foreground, function (colorStr) {
-                self.options.negativeFill.foreground = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.pattern.foreground, function (colorStr) {
+                self.options.negativeFill.pattern.foreground = colorStr;
             });
         }
         this.negPositiveBackground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.background, function (colorStr) {
-                self.options.negativeFill.background = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.negativeFill.pattern.background, function (colorStr) {
+                self.options.negativeFill.pattern.background = colorStr;
             });
         }
+        this.correctFillingStyle = function() {
+            self.options1.isNegPosFilling = !self.options.fill.display;
+            self.options.positiveFill.display = !self.options.fill.display;
+            self.options.negativeFill.display = self.options.positiveFill.display;
+        }
+
         this.onOkButtonClicked = function () {
             self.error = '';
+            console.log(self.options);
             close(self.options, 200);
 
         };
-
-        // this.onCancelButtonClicked = function () {
-        //     console.log('onCancelButtonClicked');
-        //     close(null, 200);
-        // }
     }
 
     ModalService.showModal({
@@ -1625,6 +1631,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.curvesLineOptions = new Array();
         this.curvesSymbolOptions = new Array();
         this.curvesChanged = new Array(); // 1: change line, 2: add line
+        this.shadingChanged = new Array();
 
         this.curvesArr = [];
         this.shadingArr = new Array();
@@ -1680,51 +1687,67 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var shadingProp = shading.getProperties();
             var fillPatternItem = new Object();
             var variableShadingItem = new Object();
+            var shadingChangedItem = new Object();
 
             console.log(shadingProp);
+            shadingItem.idTrack = shadingProp.idTrack;
+            shadingItem.idShading = shadingProp.idShading;
             shadingItem.idLeftLine = shadingProp.idLeftLine;
             shadingItem.leftFixedValue = shadingProp.leftFixedValue;
             shadingItem.idRightLine = shadingProp.idRightLine;
             shadingItem.rightFixedValue = shadingProp.rightFixedValue;
             shadingItem.name = shadingProp.name;
-            shadingItem.shadingStyle = getShadingStyle(shading.positiveFill);
+            shadingItem.shadingStyle = getShadingStyle(shadingProp.isNegPosFilling?shading.positiveFill:shading.fill);
+            shadingItem.idControlCurve = shadingProp.idControlCurve;
+            shadingItem.isNegPosFilling = shadingProp.isNegPosFilling;
+            shadingItem.type = shadingProp.type;
 
-
-            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingProp.isNegPosFilling);
-            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingProp.isNegPosFilling);
-            var condition3 = (shadingItem.shadingStyle == "variableShading");
+            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFilling);
+            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFilling);
+            var condition3 = (shadingItem.shadingStyle == "variableShading" && !shadingItem.isNegPosFilling);
+            // var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFilling); // Not use right now
 
             fillPatternItem.fill = {
-                display: condition1,
-                pattern: {   
-                    pattern: (condition1?shadingProp.positiveFill.pattern.name:null),
-                    foreground: (condition1?shadingProp.positiveFill.pattern.foreground:null),
-                    background: (condition1?shadingProp.positiveFill.pattern.background:null)
+                display: condition1,  
+                pattern: {
+                    name:(condition1?shadingProp.fill.pattern.name:"none"),
+                    foreground: (condition1?shadingProp.fill.pattern.foreground:null),
+                    background: (condition1?shadingProp.fill.pattern.background:null)
                 }
             };
             fillPatternItem.positiveFill = {
-                display: condition2,
-                pattern: condition2?shadingProp.positiveFill.pattern.name:null,
-                foreground: condition2?shadingProp.positiveFill.pattern.foreground:null,
-                background: condition2?shadingProp.positiveFill.pattern.background:null
+                display: condition2,  
+                pattern: {
+                    name:(condition2?shadingProp.positiveFill.pattern.name:"none"),
+                    foreground: (condition2?shadingProp.positiveFill.pattern.foreground:null),
+                    background: (condition2?shadingProp.positiveFill.pattern.background:null)
+                }
             };
 
             fillPatternItem.negativeFill = {
                 display: condition2,
-                pattern: condition2?shadingProp.positiveFill.pattern.name:null,
-                foreground: condition2?shadingProp.positiveFill.pattern.foreground:null,
-                background: condition2?shadingProp.positiveFill.pattern.background:null
+                pattern: {
+                    name:(condition2?shadingProp.positiveFill.pattern.name:"none"),
+                    foreground: (condition2?shadingProp.positiveFill.pattern.foreground:null),
+                    background: (condition2?shadingProp.positiveFill.pattern.background:null)
+                }
             }
             variableShadingItem.gradient = {
                 display: condition3,
-                startX: condition3?shadingProp.positiveFill.gradient.startX:null,
-                endX: condition3?shadingProp.positiveFill.gradient.endX:null,
-                startColor: condition3?shadingProp.positiveFill.gradient.startColor:null,
-                endColor: condition3?shadingProp.positiveFill.gradient.endColor:null
+                startX: condition3?shadingProp.fill.gradient.startX:null,
+                endX: condition3?shadingProp.fill.gradient.endX:null,
+                startColor: condition3?shadingProp.fill.gradient.startColor:null,
+                endColor: condition3?shadingProp.fill.gradient.endColor:null
+            }
+
+            shadingChangedItem = {
+                change: "0",
+                index: null,
             }
             self.shadingArr.push(shadingItem);
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
+            self.shadingChanged.push(shadingChangedItem);
         });
         
         this.curveList.forEach(function (curve, index) {
@@ -1902,6 +1925,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.setClickedRowShading = function(index) {
             $scope.selectedRowShading = index;
         }
+        this.onChangeShading = function(index){
+            if(self.shadingChanged[index].change == '0') self.shadingChanged[index].change = '1';
+            console.log("shadingChanged", self.shadingChanged[index]);
+        }
         this.removeRowShading = function() {//TODO
             console.log("removeRowShading");
         }
@@ -1909,16 +1936,89 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         }
         this.addRowShading = function() {
-            self.shadingArr.push({});
+            var shadingItem = {
+                name: 'noname',
+                shadingStyle: "fillPattern",
+                isNegPosFilling: false,
+                type: 'left'
+            };
+            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFilling);
+            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFilling);
+            var condition3 = (shadingItem.shadingStyle == "variableShading");
+
+            var fillPatternItem = {
+                fill : {
+                    display: condition1,
+                    pattern: "none",
+                    foreground: "#fff",
+                    background: "#000"
+                },
+                positiveFill: {
+                    display: condition2,
+                    parttern: "none",
+                    foreground: "#fff",
+                    background: "000"
+                },
+                negativeFill: {
+                    display: condition2,
+                    pattern: "none",
+                    foreground: "#fff",
+                    background: "#000"
+                }
+            };
+            var variableShadingItem = {
+                gradient: {
+                    display: condition3, 
+                    startX : null,
+                    endX: null,
+                    startColor: "#fff",
+                    endColor: "#000"
+                }
+            };
+
+            var shadingChangedItem = {
+                change: '2',
+                index: null
+            }
+            
+            self.shadingArr.push(shadingItem);
+            self.fillPatternOptions.push(fillPatternItem);
+            self.variableShadingOptions.push(variableShadingItem);
+
             console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions);
+        }
+        
+        function updateShadings(){//TODO
+            self.shadingChanged.forEach(function(item, index){
+                if(item.change == "1") {
+                    console.log("change", item.change);
+                    let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
+                                                     self.fillPatternOptions[index], 
+                                                     self.variableShadingOptions[index]);
+                    console.log(shadingObj);
+                    shadingList[index].setProperties(shadingObj);
+                    console.log('visualize-+-shading', shadingList[index]);
+
+                    // wiApiService.editShading(shadingObj, function(result) {
+                    //     console.log(result);
+                    //     // TODO
+                    // });
+                }
+            });
+        }
+        function createNewShadings() {//TODO
+            // shadingChanged.forEach(function(item, idex){})
+        }
+        function removeShadings(){//TODO
+
         }
         // Dialog buttons
         this.defineButtonClicked = function(index){
-            self.shadingArr.forEach(function(shading) {
+                var shading = self.shadingArr[index];
                 if(shading.shadingStyle == "fillPattern") {
                     DialogUtils.fillPatternSettingDialog(ModalService, function (options) {
-                        console.log("fillPattern", self.fillPatternOptions[index].pattern);
-                    }, self.fillPatternOptions[index].pattern);
+                        //console.log("fillPattern", self.fillPatternOptions[index]);
+                    }, self.fillPatternOptions[index], self.shadingArr[index] );
                     return;
                 }
                 if(shading.shadingStyle == "variableShading") {
@@ -1927,7 +2027,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     }, self.variableShadingOptions[index].gradient);
                     return;
                 }
-            });
+                else return;
         }
         this.lineStyleButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
@@ -1945,7 +2045,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.colorTrack = function () {
             DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                console.log(colorStr);
                 self.props.general.color = colorStr;
             });
         };
@@ -2056,7 +2155,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
 
         function updateShadingsTab() {
-
+            updateShadings();
+            createNewShadings();
+            removeShadings();
         }
         this.onApplyButtonClicked = function () {
             updateGeneralTab();
@@ -2116,7 +2217,6 @@ exports.depthTrackPropertiesDialog = function(ModalService, callback) {
         // Dialog buttons
         this.trackBackground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
-                console.log(colorStr);
                 self.trackColor = colorStr;
             });
         }
@@ -2187,7 +2287,6 @@ exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
         // Dialog buttons
         this.trackBackground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
-                console.log(colorStr);
                 self.trackColor = colorStr;
             });
         }
@@ -2424,9 +2523,11 @@ exports.colorPickerDialog1 = function(ModalService, currentColor, callback) {
 }
 
 exports.colorPickerDialog = function (ModalService, currentColor, callback) {
+    if(!currentColor) currentColor = "#fff";
+    console.log("Color:",currentColor);
     function colorToString(color) {
 		var retArray = [color.r, color.g, color.b, color.a];
-		return 'rgba(' + retArray.join(',') + ")";
+		return 'rgba(' + retArray.join(',') + ')';
     }
     
     const ColorTemps = [
@@ -2604,6 +2705,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             console.log(modalCtrl.currentColor);
             timeoutFunc(function() {modalCtrl.currentColor = event.color.toRGB();});
         });
+        $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -2612,8 +2714,8 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
     })
 }
 
-exports.variableShadingDialog = function (ModalService, callback) {
-    function ModalController($scope, close) {
+exports.variableShadingDialog = function (ModalService, callback, options) {
+    function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
         console.log(options);
@@ -2631,13 +2733,11 @@ exports.variableShadingDialog = function (ModalService, callback) {
         }
         this.startColor = function(){
             DialogUtils.colorPickerDialog(ModalService, self.options.startColor, function (colorStr) {
-                console.log(colorStr);
                 self.options.startColor = colorStr;
             });
         }
         this.endColor = function(){
             DialogUtils.colorPickerDialog(ModalService, self.options.endColor, function (colorStr) {
-                console.log(colorStr);
                 self.options.endColor = colorStr;
             });
         }
@@ -2662,6 +2762,7 @@ exports.variableShadingDialog = function (ModalService, callback) {
         });
     });
 }
+/*
 exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentCurve, currentShading, callback) {
     let thisModal = null;
     function ModalController($scope, wiComponentService, close) {
@@ -2705,25 +2806,21 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.foreground = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.foreground, function (colorStr) {
-                console.log(colorStr);
                 self.props.positiveFill.foreground = colorStr;
             });
         }
         this.background = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.background, function (colorStr) {
-                console.log(colorStr);
                 self.props.positiveFill.background = colorStr;
             });
         }
         this.positiveColor = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                console.log(colorStr);
                 self.props.general.color = colorStr;
             });
         }
         this.negativeColor = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                console.log(colorStr);
                 self.props.general.color = colorStr;
             });
         }
@@ -2754,3 +2851,4 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
         });
     });
 }
+*/
