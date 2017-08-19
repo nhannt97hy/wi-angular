@@ -56,9 +56,6 @@ function Shading(config) {
     this.leftX = config.leftX;
     this.rightX = config.rightX;
 
-    this.minY = config.minY;
-    this.maxY = config.maxY;
-
     this.refLineWidth = config.refLineWidth || 2;
     this.refLineColor = config.refLineColor || '#3e3e3e';
     this.showRefLine = config.showRefLine == null ? true : config.showRefLine;
@@ -157,14 +154,6 @@ Shading.prototype.setProperties = function(props) {
 }
 
 /**
- * Get y window of shading
- * @returns {Array} Range of y values to show
- */
-Shading.prototype.getWindowY = function() {
-    return [this.minY, this.maxY];
-}
-
-/**
  * Get y extent of shading
  * @returns {Array}
  */
@@ -178,17 +167,14 @@ Shading.prototype.getExtentY = function() {
 /**
  * Initialize DOM elements
  * @param {Object} plotContainer - The DOM element to contain the shading
- * @param {Object} leftCurve - Left curve, null if drawing left shading
- * @param {Object} rightCurve - Right curve, null if drawing right shading
  */
 Shading.prototype.init = function(plotContainer) {
-    let self = this;
-    this.root = plotContainer;
+    Drawing.prototype.init.call(this, plotContainer);
 
+    let self = this;
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing')
-        .style('cursor', 'crosshair')
-        .style('position', 'absolute');
+        .style('cursor', 'crosshair');
 
     this.ctx = this.canvas.node().getContext('2d');
     this.svg = plotContainer.select('.vi-track-svg-container');
@@ -388,12 +374,6 @@ Shading.prototype.prepareData = function(curve) {
 
 Shading.prototype.getTransformX = function(curve) {
     return curve.getTransformX();
-}
-
-Shading.prototype.getTransformY = function() {
-    return d3.scaleLinear()
-        .domain(this.getWindowY())
-        .range([0, this.root.node().clientHeight]);
 }
 
 function drawCluster(shading, clustered, negFill, posFill, highlight) {

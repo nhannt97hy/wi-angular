@@ -1,85 +1,26 @@
-// .track-container {
-//     display: flex;
-//     flex-direction: column;
-// }
-// .track-header-viewport {
-//     position: relative;
-//     width: 100%;
-//     //height: 100px;
-//     overflow-y: hidden;
-//     flex: 1;
+.vi-track-drawing {
+    position: absolute;
+}
 
-//     label {
-//         //font-size: 6px;
-//         display: block;
-//         border: 1px solid black;
-//         margin-bottom: 1px;
-//         & > div {
-//             width: auto;
-//             display: inline-block;
-//         }
-//     }
-//     label.track-name {
-//         position: relative;
-//         background-color: #88CC88;
-//         z-index: 1;
-//     }
-// }
+.vi-zone-track-container {
+    .vi-track-plot-container {
+        border: 1px solid black;
+    }
+}
 
-// .track-header {
-//     position: absolute;
-//     width: 100%;
-// }
+.vi-zone-header {
+    position: relative;
+    padding: 2px 0 2px 0;
 
-// .plot-container {
-//     position: relative;
-//     height: 340px;
-//     //display: flex;
-//     //width: 250px;
-//     width: 100%;
-//     //flex: 1;
-// //    border: 1px dashed gray;
-// }
-// .plot-container {
-//     canvas, svg {
-//         position:absolute;
-//         top:0; left:0; bottom:0; right:0;
-//         cursor: crosshair;
-//     }
-//     svg {
-//         z-index: 1;
-//     }
-// }
-
-
-// .grid .tick line {
-//     stroke: blue;
-//     stroke-dasharray: 20, 2;
-//     stroke-width: 0.5;
-// }
-// .depthtrack .tick line {
-//     stroke: black;
-//     stroke-width: 1;
-// }
-// .wi-tooltip {
-//     font-size: 10px;
-//     background-color: yellow;
-// }
-// .tooltipBg {
-//     fill: rgba(255,255,0, 1);
-// }
-// .resizer {
-//     width: 2px;
-//     cursor: col-resize;
-// }
-// .vresizer {
-//     height: 5px;
-//     background-color: lightgray;
-//     border-radius: 3px;
-//     width: 100%;
-//     cursor: row-resize;
-// }
-// .ref-line {
-//     cursor: col-resize;
-// }
-
+    .vi-zone-header-name {
+        display: inline-block;
+        position: relative;
+        text-align: center;
+        background-color: white;
+        border: 1px solid black;
+        padding: 0 2px 0 2px;
+        font-size: 10px;
+        z-index: 1;
+        cursor: default;
+    }
+}

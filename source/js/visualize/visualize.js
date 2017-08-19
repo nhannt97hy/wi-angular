@@ -5,6 +5,7 @@
 
 let DepthTrack = require('./visualize-depth-track');
 let LogTrack = require('./visualize-log-track');
+let ZoneTrack = require('./visualize-zone-track');
 let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
@@ -35,6 +36,17 @@ exports.createDepthTrack = function(config, domElem) {
     return depthTrack;
 }
 
+/**
+ * Create and draw a new Zone Track inside a specified DOM element
+ * @param {Object} config - Configurations of new Zone Track
+ * @param {Object} domElem - The DOM element to contain the track
+ * @returns {Object} The created track
+ */
+exports.createZoneTrack = function(config, domElem) {
+    let zoneTrack = new ZoneTrack(config);
+    zoneTrack.init(domElem);
+    return zoneTrack;
+}
 
 /**
  * Remove a track

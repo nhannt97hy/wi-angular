@@ -151,7 +151,7 @@ exports.NewTrackButtonClicked = function() {
 };
 
 exports.DuplicateTrackButtonClicked = function() {
-    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)    
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let curves = currentTrack.getCurves();
@@ -188,7 +188,7 @@ exports.DuplicateTrackButtonClicked = function() {
 };
 
 exports.DeleteTrackButtonClicked = function() {
-    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();    
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let wiApiService = this.wiApiService;
     const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
@@ -198,6 +198,10 @@ exports.DeleteTrackButtonClicked = function() {
                 wiApiService.removeLogTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
             } else if (currentTrack.type == 'depth-track') {
                 wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+            } else if (currentTrack.type == 'zone-track') {
+                // TO DO
+                // Send api to remove zone track
+                wiD3Ctrl.removeCurrentTrack();
             }
         }
     );

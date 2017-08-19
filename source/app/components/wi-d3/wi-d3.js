@@ -167,6 +167,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackHorizontalResizerDragCallback();
     };
 
+    this.addZoneTrack = function(callback) {
+        let trackOrder = getOrderKey();
+        if (trackOrder) {
+            // TO DO
+            // Send api to create zone track
+            self.pushZoneTrack({ orderNum: trackOrder });
+        }
+        else {
+            error('Cannot create zone track');
+        }
+    }
+
+    this.pushZoneTrack = function(zoneTrack) {
+        let config = {
+            id: zoneTrack.idZoneTrack,
+            idPlot: zoneTrack.idPlot,
+            orderNum: zoneTrack.orderNum,
+            yStep: parseFloat(_getWellProps().step),
+            offsetY: parseFloat(_getWellProps().topDepth)
+        }
+
+        let track = graph.createZoneTrack(config, document.getElementById(self.plotAreaId));
+        graph.rearangeTracks(self);
+        _tracks.push(track);
+        _tracks.sort(function(track1, track2) {
+            return track1.orderNum.localeCompare(track2.orderNum);
+        });
+        _setCurrentTrack(track);
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
+
+        _registerZoneTrackCallback(track);
+        _registerTrackHorizontalResizerDragCallback();
+    }
+
     this.addCurveToTrack = function (track, data, config) {
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
@@ -185,6 +221,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         return curve;
     };
+
+    this.addZoneToTrack = function (track, config) {
+        if (!track || !track.addZone) return;
+        let zone = track.addZone(config);
+        track.plotZone(zone);
+        track.onZoneHeaderMouseDown(zone, function() {
+            if (d3.event.button == 2) {
+                _zoneOnRightClick();
+            }
+        });
+        zone.header.on('dblclick', _zoneOnDoubleClick);
+        return zone;
+    }
 
     this.addLeftShadingToTrack = function (track, curve, config) {
         if (!track || !track.addShading) return;
@@ -443,6 +492,43 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
 
+    function _registerZoneTrackCallback(track) {
+        track.plotContainer.call(d3.drag()
+            .on('start', function() {
+                track.setCurrentZone(null);
+                track.startY = d3.mouse(track.plotContainer.node())[1];
+            })
+            .on('drag', function() {
+                let y1 = d3.mouse(track.plotContainer.node())[1];
+                let y2 = track.startY;
+                let minY = d3.min([y1, y2]);
+                let maxY = d3.max([y1, y2]);
+
+                if (!track.getCurrentZone()) {
+                    track.setCurrentZone(self.addZoneToTrack(track, {
+                        minY: track.minY,
+                        maxY: track.maxY
+                    }));
+                }
+
+                let zone = track.getCurrentZone();
+                let transformY = zone.getTransformY();
+                zone.setProperties({
+                    startDepth: transformY.invert(minY),
+                    endDepth: transformY.invert(maxY)
+                });
+
+                track.plotZone(zone);
+            })
+        );
+        track.on('focus', function() {
+            _setCurrentTrack(track);
+        });
+        track.on('dblclick', function() {
+            openTrackPropertiesDialog();
+        });
+    }
+
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function() {
@@ -497,8 +583,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    function _zoneOnDoubleClick() {
+        console.log('Zone double clicked');
+        // TODO
+
+        // Prevent track properties dialog from opening
+        d3.event.stopPropagation();
+    }
+
     function _shadingOnDoubleClick() {
         console.log('Shading double clicked');
+        // TODO
 
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
@@ -518,6 +613,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
+    }
+
+    function _zoneOnRightClick() {
+        let zone = _currentTrack.getCurrentZone();
+
+        self.setContextMenu([{
+            name: "RemoveZone",
+            label: "Remove Zone",
+            handler: function() {
+                _currentTrack.removeZone(zone);
+            }
+        }]);
     }
 
     function _shadingOnRightClick() {
@@ -619,7 +726,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (!curve1) return;
                 if (!curve2) {
                     // This should open dialog
-                    
+
                     var config = {
                         isNegPosFilling : true,
                         positiveFill: {
@@ -696,7 +803,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     console.log('depthTrackPropertiesData', props);
                 }
             });
-        } else { //TODO: zoneTrack condition
+        } else if (_currentTrack.isZoneTrack()) {
             DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
                 if (props) {
                     console.log('zoneTrackPropertiesData', props);
@@ -770,7 +877,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Zonation Track",
             icon: 'zonation-track-add-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                self.addZoneTrack();
             }
         },
         {

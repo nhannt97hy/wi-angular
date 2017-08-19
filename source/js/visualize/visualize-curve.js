@@ -49,8 +49,6 @@ function Curve(config) {
 
     this.minX = config.minX;
     this.maxX = config.maxX;
-    this.minY = config.minY;
-    this.maxY = config.maxY;
 
     this.scale = config.scale || 'Linear';
     this.alias = config.alias || this.name;
@@ -187,14 +185,6 @@ Curve.prototype.getWindowX = function() {
 }
 
 /**
- * Get y window of curve
- * @returns {Array} Range of y values to show
- */
-Curve.prototype.getWindowY = function() {
-    return [this.minY, this.maxY];
-}
-
-/**
  * Get x extent of curve
  * @returns {Array} Extent of y values
  */
@@ -228,20 +218,19 @@ Curve.prototype.autoScaleX = function(granularity) {
 }
 
 /**
- * Initialize DOM elements and bind data for the curve
+ * Initialize DOM elements
  * @param {Object} plotContainer - The DOM element to contain the curve
- * @param {Array} data - Array of objects containing x, y coordinates
  */
 Curve.prototype.init = function(plotContainer) {
-    this.root = (typeof plotContainer.node == 'function') ? plotContainer : d3.select(plotContainer);
+    Drawing.prototype.init.call(this, plotContainer);
+
     let rect = plotContainer
         .node()
         .getBoundingClientRect();
 
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing')
-        .style('cursor', 'crosshair')
-        .style('position', 'absolute');
+        .style('cursor', 'crosshair');
 
     this.adjustSize(rect);
 
@@ -308,17 +297,6 @@ Curve.prototype.getTransformX = function() {
             }
             return logFunc;
     }
-}
-
-/**
- * Get transform function for y coordinate
- */
-Curve.prototype.getTransformY = function() {
-    let rect = this.root.node().getBoundingClientRect();
-    let windowY = this.getWindowY();
-    return d3.scaleLinear()
-        .domain(windowY)
-        .range([0, rect.height]);
 }
 
 /**

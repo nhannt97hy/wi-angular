@@ -53,8 +53,6 @@ function LogTrack(config) {
     this.minY = config.minY;
     this.maxY = config.maxY;
 
-    this.xPadding = config.xPadding || 1;
-    this.yPadding = config.yPadding || 5;
     this.xDecimal = (config.xDecimal == null) ? 2 : config.xDecimal;
     this.yDecimal = (config.yDecimal == null) ? 2 : config.yDecimal;
     this.scale = config.scale || 'linear';
@@ -113,36 +111,6 @@ LogTrack.prototype.getWindowX = function() {
     return (this.minX == null || this.maxX == null)
         ? [1, 2]
         : [this.minX, this.maxX];
-}
-
-/**
- * Get y window of track
- * @returns {Array} Range of actual y values to show
- */
-LogTrack.prototype.getWindowY = function() {
-    let windowY = (this.minY != null && this.maxY != null)
-        ? [this.minY, this.maxY]
-        : [0, 10000];
-
-    windowY[0] = this.offsetY + Utils.roundUp(windowY[0] - this.offsetY, this.yStep);
-    windowY[1] = this.offsetY + Utils.roundDown(windowY[1] - this.offsetY, this.yStep);
-    return windowY;
-}
-
-/**
- * Get x viewport of track
- * @returns {Array} Range of transformed x values to show
- */
-LogTrack.prototype.getViewportX = function() {
-    return [0, this.plotContainer.node().clientWidth];
-}
-
-/**
- * Get y viewport of track
- * @returns {Array} Range of transformed y values to show
- */
-LogTrack.prototype.getViewportY = function() {
-    return [0, this.plotContainer.node().clientHeight]
 }
 
 /**
@@ -247,13 +215,11 @@ LogTrack.prototype.init = function(baseElement) {
     this.axisContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing')
         .style('cursor', 'crosshair')
-        .style('position', 'absolute')
         .style('overflow', 'visible');
 
     this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing vi-track-svg-container')
         .style('cursor', 'crosshair')
-        .style('position', 'absolute')
         .style('overflow', 'visible');
 
     this.xAxisGroup = this.axisContainer.append('g')
@@ -269,8 +235,6 @@ LogTrack.prototype.init = function(baseElement) {
  */
 LogTrack.prototype.doPlot = function(highlight) {
     Track.prototype.doPlot.call(this, highlight);
-    this.updateHeader();
-    this.updateBody();
     this.plotAllDrawings();
     this.updateAxis();
 }
@@ -639,12 +603,6 @@ LogTrack.prototype.getTransformX = function() {
     return transformX;
 }
 
-LogTrack.prototype.getTransformY = function() {
-    return d3.scaleLinear()
-        .domain(this.getWindowY())
-        .range(this.getViewportY());
-}
-
 /**
  * Update axis or create new if not exist
  */
@@ -700,9 +658,7 @@ LogTrack.prototype.updateAxis = function() {
 }
 
 LogTrack.prototype.updateHeader = function() {
-    this.headerNameBlock
-        .style('display', this.showTitle ? 'block': 'none')
-        .text(this.name);
+    Track.prototype.updateHeader.call(this);
 }
 
 LogTrack.prototype.updateBody = function() {

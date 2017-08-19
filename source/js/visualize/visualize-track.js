@@ -24,6 +24,9 @@ function Track(config) {
     this.type = config.type || Utils.pascalCaseToLowerDash(this.constructor.name);
     this.justification = config.justification || 'center';
     this.showTitle = (config.showTitle == null) ? true : config.showTitle;
+
+    this.xPadding = config.xPadding || 1;
+    this.yPadding = config.yPadding || 5;
 }
 
 /**
@@ -39,7 +42,15 @@ Track.prototype.isLogTrack = function() {
  * @returns {Boolean}
  */
 Track.prototype.isDepthTrack = function() {
-    return this.constructor.name = 'DepthTrack';
+    return this.constructor.name == 'DepthTrack';
+}
+
+/**
+ * Check if class of this instance is ZoneTrack
+ * @returns {Boolean}
+ */
+Track.prototype.isZoneTrack = function() {
+    return this.constructor.name == 'ZoneTrack';
 }
 
 /**
@@ -271,6 +282,9 @@ Track.prototype.doPlot = function(highlight) {
     this.setBackgroundColor(this.bgColor);
     if (highlight && (typeof this.highlightCallback == 'function'))
         this.highlightCallback();
+
+    this.updateHeader();
+    this.updateBody();
 }
 
 /**
@@ -288,3 +302,69 @@ Track.prototype.on = function(type, cb) {
     this.trackContainer.on(type, cb);
 }
 
+/**
+ * Update header container
+ */
+Track.prototype.updateHeader = function() {
+    this.headerNameBlock
+        .style('display', this.showTitle ? 'block': 'none')
+        .style('text-align', this.justification)
+        .text(this.name);
+}
+
+/**
+ * Update body container
+ */
+Track.prototype.updateBody = function() {
+    let rect = this.plotContainer
+        .style('top', this.yPadding + 'px')
+        .style('bottom', this.yPadding + 'px')
+        .style('left', this.xPadding + 'px')
+        .style('right', this.xPadding + 'px')
+        .node()
+        .getBoundingClientRect();
+
+    this.plotContainer.selectAll('.vi-track-drawing')
+        .attr('width', rect.width)
+        .attr('height', rect.height);
+}
+
+/**
+ * Get y window of the track
+ * @returns {Array} Range of x values to show
+ */
+Track.prototype.getWindowY = function() {
+    let windowY = (this.minY != null && this.maxY != null)
+        ? [this.minY, this.maxY]
+        : [0, 10000];
+
+    windowY[0] = this.offsetY + Utils.roundUp(windowY[0] - this.offsetY, this.yStep);
+    windowY[1] = this.offsetY + Utils.roundDown(windowY[1] - this.offsetY, this.yStep);
+    return windowY;
+}
+
+
+/**
+ * Get y viewport of the track
+ * @returns {Array} Range of transformed y values to show
+ */
+Track.prototype.getViewportY = function() {
+    return [0, this.plotContainer.node().clientHeight];
+}
+
+/**
+ * Get x viewport of the track
+ * @returns {Array} Range of transformed x values to show
+ */
+Track.prototype.getViewportX = function() {
+    return [0, this.plotContainer.node().clientWidth];
+}
+
+/**
+ * Get transform function for y coordinate
+ */
+Track.prototype.getTransformY = function() {
+    return d3.scaleLinear()
+        .domain(this.getWindowY())
+        .range(this.getViewportY());
+}

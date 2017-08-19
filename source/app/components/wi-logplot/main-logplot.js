@@ -93,6 +93,12 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         });
     }
 
+    $scope.zoneTrackButtonClick = function() {
+        wiD3Ctrl.pushZoneTrack({
+            orderNum: '2'
+        });
+    }
+
     $scope.addData1ButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
         let data = genSamples([0,1], [0,1000]).map(function(d) {
