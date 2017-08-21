@@ -679,31 +679,6 @@ LogTrack.prototype.updateBody = function() {
         .attr('height', rect.height);
 }
 
-LogTrack.prototype.genColor = function() {
-    function rand(x) {
-        return Math.floor(Math.random() * x);
-    }
-
-    const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
-    let usedColors = [];
-    this.drawings.forEach(function(d) {
-        usedColors = usedColors.concat(d.getAllColors());
-    });
-
-    let color;
-    for (let i = 0; i <= this.drawings.length; i++)  {
-        if (i >= DEFAULT_COLORS.length) {
-            do {
-                color = d3.rgb(rand(255), rand(255), rand(255)).toString();
-            }
-            while (usedColors.indexOf(color) >= 0);
-        }
-        else color = d3.color(DEFAULT_COLORS[i]).toString();
-        if (usedColors.indexOf(color) < 0) break;
-    }
-    return color;
-}
-
 LogTrack.prototype.addCurveHeader = function(curve) {
     let self = this;
     let curveHeader = this.drawingHeaderContainer

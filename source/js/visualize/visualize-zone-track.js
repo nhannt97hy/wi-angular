@@ -39,10 +39,10 @@ function ZoneTrack(config) {
 
     this.idZoneSet = config.idZoneSet;
     this.nameZoneSet = config.nameZoneSet;
-    this.zones = config.zones || []; // Array of visualize zones
+    this.drawings = config.zones || []; // Array of visualize zones
 
-    this.currentZone = null;
-    this.previousZone = null;
+    this.currentDrawing = null;
+    this.previousDrawing = null;
 }
 
 /**
@@ -86,36 +86,40 @@ ZoneTrack.prototype.setProperties = function(props) {
  * @returns {Array} All visualize zones in this track
  */
 ZoneTrack.prototype.getZones = function() {
-    return this.zones;
+    return this.drawings.filter(function(d) {
+        return d.isZone();
+    });
 }
 
 /**
  * @returns {Object} The current visualize zone object
  */
 ZoneTrack.prototype.getCurrentZone = function() {
-    return this.currentZone;
+    let current = this.currentDrawing;
+    if (current && current.isZone && current.isZone()) return current;
+    return null;
 }
 
 /**
- * @param {Object} drawing - The new drawing to set current
+ * @returns {Object} The current visualize drawing object
+ */
+ZoneTrack.prototype.getCurrentDrawing = function() {
+    return this.currentDrawing;
+}
+
+/**
+ * @param {Object} zone - The new drawing to set current
  */
 ZoneTrack.prototype.setCurrentDrawing = function(drawing) {
-    this.setCurrentZone(drawing);
-}
+    if (drawing == this.currentDrawing) return;
+    this.previousDrawing = this.currentDrawing;
+    this.currentDrawing = drawing;
 
-/**
- * @param {Object} zone - The new zone to set current
- */
-ZoneTrack.prototype.setCurrentZone = function(zone) {
-    if (zone == this.currentZone) return;
-    this.previousZone = this.currentZone;
-    this.currentZone = zone;
+    this.plotDrawing(this.previousDrawing);
+    this.plotDrawing(this.currentDrawing);
 
-    this.plotZone(this.previousZone);
-    this.plotZone(this.currentZone);
-
-    this.highlightHeader(this.previousZone);
-    this.highlightHeader(this.currentZone);
+    this.highlightHeader(this.previousDrawing);
+    this.highlightHeader(this.currentDrawing);
 }
 
 /**
@@ -124,8 +128,12 @@ ZoneTrack.prototype.setCurrentZone = function(zone) {
  */
 ZoneTrack.prototype.init = function(baseElement) {
     Track.prototype.init.call(this, baseElement);
+    let self = this;
     this.trackContainer
-        .classed('vi-zone-track-container', true);
+        .classed('vi-zone-track-container', true)
+        .on('mousedown', function() {
+            self.setCurrentDrawing(null);
+        });
 
     this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing vi-track-svg-container');
@@ -138,17 +146,35 @@ ZoneTrack.prototype.init = function(baseElement) {
  */
 ZoneTrack.prototype.doPlot = function(highlight) {
     Track.prototype.doPlot.call(this, highlight);
-    this.plotAllZones();
+    this.plotAllDrawings();
 }
 
 /**
- * Plot all zones
+ * Plot all drawings
  */
-ZoneTrack.prototype.plotAllZones = function() {
+ZoneTrack.prototype.plotAllDrawings = function() {
     let self = this;
-    this.zones.forEach(function(z) {
-        self.plotZone(z);
+    this.drawings.forEach(function(d) {
+        self.plotDrawing(d);
     });
+}
+
+/**
+ * Plot a specific drawing
+ * @param {Object} drawing - a visualize drawing
+ */
+ZoneTrack.prototype.plotDrawing = function(drawing) {
+    if (!drawing || !drawing.doPlot) return;
+    let windowY = this.getWindowY();
+    drawing.minY = windowY[0];
+    drawing.maxY = windowY[1];
+    if (drawing == this.currentDrawing) {
+        drawing.doPlot(true);
+        drawing.raise();
+    }
+    else {
+        drawing.doPlot(false);
+    }
 }
 
 /**
@@ -156,31 +182,63 @@ ZoneTrack.prototype.plotAllZones = function() {
  * @param {Object} zone - a visualize zone
  */
 ZoneTrack.prototype.plotZone = function(zone) {
-    if (!zone || !zone.doPlot) return;
-    let windowY = this.getWindowY();
-    zone.minY = windowY[0];
-    zone.maxY = windowY[1];
-    zone.doPlot(zone == this.currentZone);
+    if (zone && zone.isZone && zone.isZone())
+        this.plotDrawing(zone);
 }
 
 /**
  * Add a zone to zone track
  */
 ZoneTrack.prototype.addZone = function(config) {
-    if (!config.name) config.name = '' + this.zones.length;
+    if (!config.fill) {
+        config.fill = {
+            pattern: {
+                name: 'chert',
+                background: this.genColor(),
+                foreground: 'white'
+            }
+        }
+    }
     let zone = new Zone(config);
     zone.init(this.plotContainer);
     zone.header = this.addZoneHeader(zone);
-    this.zones.push(zone);
+    zone.on('mousedown', function() {
+        self.drawingMouseDownCallback(zone);
+    })
+    this.drawings.push(zone);
     return zone;
+}
+
+/**
+ * Auto rename zone from 1 to zone length
+ */
+ZoneTrack.prototype.autoName = function(cb) {
+    let zones = this.getZones();
+    zones.forEach(function(zone, i) {
+        zone.name = i;
+    });
+    if (cb) cb(zones);
+}
+
+/**
+ * @params {Object} drawing - The drawing to remove
+ */
+ZoneTrack.prototype.removeDrawing = function(drawing) {
+    if (!drawing) return;
+    drawing.destroy();
+    let idx = this.drawings.indexOf(drawing);
+    this.drawings.splice(idx, 1);
+
+    if (drawing == this.currentDrawing)
+        this.currentDrawing = null;
 }
 
 /**
  * @params {Object} zone - The zone to remove
  */
 ZoneTrack.prototype.removeZone = function(zone) {
-    if (!zone) return;
-    zone.destroy();
+    if (!zone || !zone.isZone || !zone.isZone()) return;
+    this.removeDrawing(zone);
 }
 
 /**
@@ -194,31 +252,44 @@ ZoneTrack.prototype.addZoneHeader = function(zone) {
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .on('mousedown', function() {
-            self.zoneHeaderMouseDownCallback(zone);
+            self.drawingHeaderMouseDownCallback(zone);
         });
 
     let nameBlock = header.append('div')
-        .attr('class', 'vi-drawing-header-name vi-zone-header-name');
+        .attr('class', 'vi-drawing-header-highlight-area vi-drawing-header-name vi-zone-header-name');
 
     return header;
 }
 
+ZoneTrack.prototype.onZoneMouseDown = function(zone, cb) {
+    let self = this;
+    zone.on('mousedown', function() {
+        self.drawingMouseDownCallback(zone);
+        cb();
+    });
+}
+
 ZoneTrack.prototype.onZoneHeaderMouseDown = function(zone, cb) {
     let self = this;
-    zone.header
-        .on('mousedown', function() {
-            self.zoneHeaderMouseDownCallback(zone);
-            cb();
-        });
+    zone.header.on('mousedown', function() {
+        self.drawingHeaderMouseDownCallback(zone);
+        cb();
+    });
 }
 
-ZoneTrack.prototype.zoneHeaderMouseDownCallback = function(zone) {
-    this.setCurrentZone(zone);
+ZoneTrack.prototype.drawingMouseDownCallback = function(drawing) {
+    this.setCurrentDrawing(drawing);
+    d3.event.stopPropagation();
+    this.trackContainer.node().focus();
 }
 
-ZoneTrack.prototype.highlightHeader = function(zone) {
-    if (!zone) return;
+ZoneTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
+    this.setCurrentDrawing(drawing);
+}
+
+ZoneTrack.prototype.highlightHeader = function(drawing) {
+    if (!drawing || !drawing.header) return;
     let self = this;
-    zone.header.select('.vi-drawing-header-name')
-        .style('background-color', zone == self.currentZone ? self.HEADER_HIGHLIGHT_COLOR : 'white');
+    drawing.header.select('.vi-drawing-header-highlight-area')
+        .style('background-color', drawing == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'white');
 }

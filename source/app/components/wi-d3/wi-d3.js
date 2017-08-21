@@ -226,11 +226,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!track || !track.addZone) return;
         let zone = track.addZone(config);
         track.plotZone(zone);
+        track.onZoneMouseDown(zone, function() {
+            if (d3.event.button == 2) {
+                _zoneOnRightClick();
+            }
+        });
         track.onZoneHeaderMouseDown(zone, function() {
             if (d3.event.button == 2) {
                 _zoneOnRightClick();
             }
         });
+        zone.on('dblclick', _zoneOnDoubleClick);
         zone.header.on('dblclick', _zoneOnDoubleClick);
         return zone;
     }
@@ -415,6 +421,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _setCurrentTrack(track) {
+        if (_currentTrack == track) return;
         _previousTrack = _currentTrack;
         _currentTrack = track;
         _currentTrack.highlightCallback();
@@ -495,7 +502,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _registerZoneTrackCallback(track) {
         track.plotContainer.call(d3.drag()
             .on('start', function() {
-                track.setCurrentZone(null);
+                track.setCurrentDrawing(null);
                 track.startY = d3.mouse(track.plotContainer.node())[1];
             })
             .on('drag', function() {
@@ -503,26 +510,33 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let y2 = track.startY;
                 let minY = d3.min([y1, y2]);
                 let maxY = d3.max([y1, y2]);
+                let zone = track.getCurrentZone();
 
-                if (!track.getCurrentZone()) {
-                    track.setCurrentZone(self.addZoneToTrack(track, {
+                if (!zone) {
+                    zone = self.addZoneToTrack(track, {
                         minY: track.minY,
                         maxY: track.maxY
-                    }));
+                    });
+                    track.setCurrentDrawing(zone);
                 }
 
-                let zone = track.getCurrentZone();
                 let transformY = zone.getTransformY();
+                let startDepth = transformY.invert(minY);
+                let endDepth = transformY.invert(maxY);
                 zone.setProperties({
-                    startDepth: transformY.invert(minY),
-                    endDepth: transformY.invert(maxY)
+                    name: parseInt(startDepth),
+                    startDepth: startDepth,
+                    endDepth: endDepth
                 });
-
+                // TO DO: Send api to create zone in server
                 track.plotZone(zone);
             })
         );
         track.on('focus', function() {
             _setCurrentTrack(track);
+        });
+        track.on('keydown', function() {
+            _onTrackKeyPressCallback(track);
         });
         track.on('dblclick', function() {
             openTrackPropertiesDialog();
@@ -566,10 +580,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         switch (d3.event.key) {
             case 'Backspace':
             case 'Delete':
-                let curve = track.getCurrentCurve();
-                console.log(curve);
+                let drawing = track.getCurrentDrawing();
+                if (!drawing) return;
 
-                if(curve) {
+                if (drawing.isCurve()) {
+                    let curve = drawing;
                     let props = curve.getProperties();
                     console.log(props);
                     let idLine = props.idLine;
@@ -577,7 +592,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                        track.removeCurve(curve);
                     });
                 }
-
+                else if (drawing.isShading()) {
+                    // TO DO
+                    // Send api before deleting
+                    track.removeDrawing(drawing);
+                }
+                else if (drawing.isZone()) {
+                    // TO DO
+                    // Send api before deleting
+                    track.removeDrawing(drawing);
+                }
 
                 return;
         }
