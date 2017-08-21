@@ -255,9 +255,14 @@ ZoneTrack.prototype.addZoneHeader = function(zone) {
             self.drawingHeaderMouseDownCallback(zone);
         });
 
-    let nameBlock = header.append('div')
+    header.append('div')
         .attr('class', 'vi-drawing-header-highlight-area vi-drawing-header-name vi-zone-header-name');
 
+    let rect = header.node().getBoundingClientRect();
+    header.append('svg')
+        .attr('class', 'vi-drawing-header-fill vi-zone-header-fill')
+        .attr('width', rect.width)
+        .attr('height', rect.height);
     return header;
 }
 

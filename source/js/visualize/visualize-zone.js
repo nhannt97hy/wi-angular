@@ -53,12 +53,13 @@ Zone.prototype.init = function(plotContainer) {
         .classed('vi-track-svg-group', true);
 
 
-    this.pattern = this.svgGroup.append('defs')
+    this.patternDefs = this.svgGroup.append('defs')
         .append('pattern')
-        .attr('id', 'vi-zone-pattern-' + this.id)
         .attr('patternUnits', 'userSpaceOnUse')
         .attr('width', 16)
-        .attr('width', 16);
+        .attr('height', 16);
+
+    this.patternGroup = this.patternDefs.append('g');
     this.rect = this.svgGroup.append('rect');
 }
 
@@ -94,7 +95,6 @@ Zone.prototype.doPlot = function(highlight) {
         .attr('stroke-dasharray', highlight ? '5, 5' : '');
 
     let fill = this.createFillStyle();
-    console.log('fill', fill);
     this.rect
         .attr('x', minX)
         .attr('y', minY)
@@ -111,17 +111,24 @@ Zone.prototype.createFillStyle = function() {
     let src = CanvasHelper.RAW_PATTERNS[Utils.lowercase(pattern.name)];
     if (!src) return null;
 
+    let patId = this.createPatternId(pattern);
+    let patUrl = 'url(#' + patId + ')';
+    if (patId == this.patternDefs.attr('id')) {
+        return patUrl;
+    }
+
     if (pattern.foreground)
         src = src.replace(/(stroke=")\w+(")/, '$1'+pattern.foreground+'$2');
     if (pattern.background)
         src = src.replace(/(fill=")\w+(")/, '$1'+pattern.background+'$2');
-    this.pattern.selectAll('image').remove();
-    this.pattern.append('image')
+    this.patternDefs.selectAll('image').remove();
+    this.patternDefs.attr('id', patId)
+        .append('image')
         .attr('xlink:href', src)
         .attr('width', 16)
         .attr('height', 16);
-    return 'url(#vi-zone-pattern-' + this.id + ')';
 
+    return patUrl;
 }
 
 Zone.prototype.on = function(type, cb) {
@@ -131,4 +138,31 @@ Zone.prototype.on = function(type, cb) {
 Zone.prototype.getAllColors = function() {
     if (!this.fill || !this.fill.pattern) return [];
     return [this.fill.pattern.background];
+}
+
+Zone.prototype.createPatternId = function(pattern) {
+    return 'vi-zone-pattern-' + this.id + '-' + btoa(pattern.name + '-' + pattern.background + '-' + pattern.foreground);
+}
+
+Zone.prototype.updateHeader = function() {
+    Drawing.prototype.updateHeader.call(this);
+    if (!this.header) return;
+    let rect = this.header.node().getBoundingClientRect();
+    let headerBorderWidth = parseInt(this.header.style('border-width'));
+
+    let width = rect.width - headerBorderWidth;
+    let height = rect.height - headerBorderWidth;
+
+    let fillArea = this.header.select('.vi-drawing-header-fill')
+        .attr('width', width)
+        .attr('height', height)
+        .selectAll('rect')
+        .data([{ x: 0, y: 0, width: width, height: height }]);
+    fillArea.enter().append('rect');
+    fillArea
+        .attr('x', function(d) { return d.x; })
+        .attr('y', function(d) { return d.y; })
+        .attr('width', function(d) { return d.width; })
+        .attr('height', function(d) { return d.height; })
+        .attr('fill', this.createFillStyle());
 }
