@@ -190,6 +190,11 @@ ZoneTrack.prototype.plotZone = function(zone) {
  * Add a zone to zone track
  */
 ZoneTrack.prototype.addZone = function(config) {
+    function within(y1, y2) {
+        let min = d3.min([y1, y2]);
+        let max = d3.max([y1, y2]);
+    }
+    let self = this;
     if (!config.fill) {
         config.fill = {
             pattern: {
@@ -204,20 +209,48 @@ ZoneTrack.prototype.addZone = function(config) {
     zone.header = this.addZoneHeader(zone);
     zone.on('mousedown', function() {
         self.drawingMouseDownCallback(zone);
-    })
+    });
     this.drawings.push(zone);
     return zone;
 }
 
+ZoneTrack.prototype.adjustZonesOnZoneChange = function(zone) {
+    let self = this;
+    let updatedZones = [];
+    let deletedZones = [];
+    this.getZones().forEach(function(z) {
+        if (z == zone) return;
+        if (zone.startDepth > z.startDepth && zone.startDepth < z.endDepth) {
+            z.endDepth = zone.startDepth;
+            self.plotZone(z);
+            updatedZones.push(z);
+        }
+        else if (zone.endDepth > z.startDepth && zone.endDepth < z.endDepth) {
+            z.startDepth = zone.endDepth;
+            self.plotZone(z);
+            updatedZones.push(z);
+        }
+        else if (zone.startDepth < z.startDepth && zone.endDepth > z.endDepth) {
+            self.removeZone(z);
+            deletedZones.push(z);
+        }
+    });
+    return [updatedZones, deletedZones];
+}
+
 /**
  * Auto rename zone from 1 to zone length
+ * @returns {Array} - Zones with modified name
  */
-ZoneTrack.prototype.autoName = function(cb) {
-    let zones = this.getZones();
-    zones.forEach(function(zone, i) {
-        zone.name = i;
+ZoneTrack.prototype.autoName = function() {
+    let zones = [];
+    this.getZones().forEach(function(zone, i) {
+        if (zone.name != (i + 1) && zone.name != (i + 1).toString()) {
+            zone.name = (i + 1).toString();
+            zones.push(zone);
+        }
     });
-    if (cb) cb(zones);
+    return zones;
 }
 
 /**

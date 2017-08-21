@@ -238,6 +238,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         zone.on('dblclick', _zoneOnDoubleClick);
         zone.header.on('dblclick', _zoneOnDoubleClick);
+        zone.onLineDragEnd(function() {
+            let zones = track.adjustZonesOnZoneChange(zone);
+            let updatedZones = zones[0];
+            let deletedZones = zones[1];
+            // TO DO: send api to update or delete zones
+        })
         return zone;
     }
 
@@ -500,6 +506,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _registerZoneTrackCallback(track) {
+        let zone;
         track.plotContainer.call(d3.drag()
             .on('start', function() {
                 track.setCurrentDrawing(null);
@@ -510,7 +517,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let y2 = track.startY;
                 let minY = d3.min([y1, y2]);
                 let maxY = d3.max([y1, y2]);
-                let zone = track.getCurrentZone();
+                zone = track.getCurrentZone();
 
                 if (!zone) {
                     zone = self.addZoneToTrack(track, {
@@ -528,8 +535,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     startDepth: startDepth,
                     endDepth: endDepth
                 });
-                // TO DO: Send api to create zone in server
                 track.plotZone(zone);
+            })
+            .on('end', function() {
+                // TO DO: Send api to create new zone on server
+                let modifiedZones = track.adjustZonesOnZoneChange(zone);
+                let updatedZones = modifiedZones[0];
+                let deletedZones = modifiedZones[1];
+                // TO DO: Send api to update or delete zones
             })
         );
         track.on('focus', function() {
