@@ -377,6 +377,7 @@ Track.prototype.genColor = function() {
     const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
     let usedColors = [];
     this.drawings.forEach(function(d) {
+        if (!d.getAllColors) return;
         usedColors = usedColors.concat(d.getAllColors());
     });
 

@@ -24,6 +24,28 @@ exports.getScaleFunc = getScaleFunc;
 exports.setIfNotNull = setIfNotNull;
 exports.setIfNotUndefined = setIfNotUndefined;
 exports.isJson = isJson;
+exports.only = only;
+exports.merge = merge;
+
+/**
+ * Filter only object with only specified attributes
+ */
+function only(obj, attrs) {
+    let newObj = {};
+    attrs.forEach(function(attr) {
+        if (obj[attr] === 'undefined') return;
+        newObj[attr] = obj[attr];
+    });
+    return newObj;
+}
+
+function merge(obj, props, evalFunc) {
+    Object.keys(props).forEach(function(key) {
+        console.log('key', key)
+        setIfNotUndefined(obj, key, evalFunc ? evalFunc(props, key) : props[key]);
+        console.log(evalFunc(props, key))
+    });
+}
 
 function isJson(str) {
     try {

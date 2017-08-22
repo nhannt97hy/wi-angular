@@ -246,6 +246,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return zone;
     }
 
+    this.addImageToTrack = function(track, config) {
+        if (!track || !track.addImage) return;
+        let image = track.addImage(config);
+        console.log('image', image);
+        track.plotDrawing(image);
+    }
+
     this.addLeftShadingToTrack = function (track, curve, config) {
         if (!track || !track.addShading) return;
         let shading = track.addShading(null, curve, null, config);
@@ -1003,7 +1010,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Image",
             icon: 'image-add-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                self.addImageToTrack(_currentTrack, {});
             }
         },
         {
