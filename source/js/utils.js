@@ -12,6 +12,10 @@ exports.objcpy = function (destObj, sourceObj) {
     }
 };
 
+exports.objClone = function (obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 exports.isEqual = function (a, b) {
     if (!a || !b) return false;
     let aProps = Object.getOwnPropertyNames(a);
@@ -185,7 +189,7 @@ function crossplotToTreeConfig(crossplot) {
             openCrossplotTab(__GLOBAL.wiComponentService, selectedNode);
         }
     }
-    
+
     return crossplotModel;
 }
 exports.crossplotToTreeConfig = crossplotToTreeConfig;
@@ -1040,7 +1044,7 @@ exports.mergeShadingObj = function(shadingOptions, fillPatternStyles, variableSh
         }
         else {
             shadingObj.positiveFill = fillPatternStyles.positiveFill;
-            shadingObj.negativeFill = fillPatternStyles.negativeFill;    
+            shadingObj.negativeFill = fillPatternStyles.negativeFill;
         }
     }
     else {
@@ -1196,11 +1200,11 @@ function hexToRgbA(hex){
             c = [c[0], c[0], c[1], c[1], c[2], c[2]];
         }
         c = '0x' + c.join('');
-        
+
         return {
-            r: (c>>16)&255, 
-            g: (c>>8)&255, 
-            b: c&255 , 
+            r: (c>>16)&255,
+            g: (c>>8)&255,
+            b: c&255 ,
             a: 1
         };
     }

@@ -158,12 +158,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
-        track.on('focus', function () {
-            _setCurrentTrack(track);
-        });
-        track.on('dblclick', function() {
-            openTrackPropertiesDialog();
-        });
+        _registerTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
     };
 
@@ -227,6 +222,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let zone = track.addZone(config);
         track.plotZone(zone);
         track.onZoneMouseDown(zone, function() {
+            if (track.mode == 'SplitZone') {
+                _splitZone(track, zone);
+                track.setMode(null);
+            }
             if (d3.event.button == 2) {
                 _zoneOnRightClick();
             }
@@ -240,9 +239,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         zone.header.on('dblclick', _zoneOnDoubleClick);
         zone.onLineDragEnd(function() {
             let zones = track.adjustZonesOnZoneChange(zone);
-            let updatedZones = zones[0];
+            let newZones = zones[0];
             let deletedZones = zones[1];
-            // TO DO: send api to update or delete zones
+            // TO DO: send api to add or delete zones
         })
         return zone;
     }
@@ -412,6 +411,40 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     /* Private Begin */
+    function _splitZone(track, zone) {
+        let props = Utils.objClone(zone.getProperties());
+        let zone1 = self.addZoneToTrack(track, {});
+        let zone2 = self.addZoneToTrack(track, {});
+
+        zone1.setProperties(props);
+        zone2.setProperties(props);
+
+        let fill = props.fill;
+        let fill1 = Utils.objClone(fill);
+        fill1.pattern.background = track.genColor();
+        zone1.fill = fill1;
+
+        let fill2 = Utils.objClone(fill);
+        fill2.pattern.background = track.genColor();
+        zone2.fill = fill2;
+
+        let y = d3.mouse(track.plotContainer.node())[1];
+        let depth = zone.getTransformY().invert(y);
+
+        // TO DO: Send api to create zones;
+        zone1.id = null;
+        zone2.id = null;
+        zone1.endDepth = depth;
+        zone2.startDepth = depth;
+        zone2.name = parseInt(depth);
+
+        // TO DO: Send api to remove zone
+        track.removeZone(zone);
+
+        track.plotZone(zone1);
+        track.plotZone(zone2);
+    }
+
     function _drawTooltip(track) {
         if (!_tooltip) return;
         let svg = document.getElementById(self.svgId);
@@ -494,15 +527,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.plotContainer.on('mousemove', function() {
             _drawTooltip(track);
         });
-        track.on('focus', function() {
-            _setCurrentTrack(track);
-        });
         track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
         });
-        track.on('dblclick', function() {
-            openTrackPropertiesDialog();
-        });
+        _registerTrackCallback(track);
     }
 
     function _registerZoneTrackCallback(track) {
@@ -510,9 +538,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.plotContainer.call(d3.drag()
             .on('start', function() {
                 track.setCurrentDrawing(null);
+                if (track.mode != 'AddZone') return;
                 track.startY = d3.mouse(track.plotContainer.node())[1];
             })
             .on('drag', function() {
+                if (track.mode != 'AddZone') return;
                 let y1 = d3.mouse(track.plotContainer.node())[1];
                 let y2 = track.startY;
                 let minY = d3.min([y1, y2]);
@@ -538,19 +568,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 track.plotZone(zone);
             })
             .on('end', function() {
+                if (track.mode != 'AddZone') return;
                 // TO DO: Send api to create new zone on server
                 let modifiedZones = track.adjustZonesOnZoneChange(zone);
                 let updatedZones = modifiedZones[0];
                 let deletedZones = modifiedZones[1];
                 // TO DO: Send api to update or delete zones
+                track.setMode(null);
             })
         );
-        track.on('focus', function() {
-            _setCurrentTrack(track);
-        });
         track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
         });
+        _registerTrackCallback(track);
+    }
+
+    function _registerTrackCallback(track) {
+        track.on('focus', function() {
+            _setCurrentTrack(track);
+        });
+        track.on('mousedown', function() {
+            if (d3.event.button == 2) _trackOnRightClick(track);
+        })
         track.on('dblclick', function() {
             openTrackPropertiesDialog();
         });
@@ -590,6 +629,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _onTrackKeyPressCallback(track) {
         if (!d3.event) return;
+        console.log(d3.event.key);
         switch (d3.event.key) {
             case 'Backspace':
             case 'Delete':
@@ -616,6 +656,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     track.removeDrawing(drawing);
                 }
 
+                return;
+            case 'Escape':
+                // Bug
+                if (track && track.setMode) track.setMode(null);
                 return;
         }
     }
@@ -660,6 +704,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Remove Zone",
             handler: function() {
                 _currentTrack.removeZone(zone);
+            }
+        }, {
+            name: "SplitZone",
+            label: "Split Zone",
+            handler: function() {
+                _currentTrack.setMode('SplitZone');
             }
         }]);
     }
@@ -813,6 +863,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }
         ]);
+    }
+
+    function _trackOnRightClick(track) {
+        if (track.isZoneTrack()) {
+            self.setContextMenu([{
+                name: "AddZone",
+                label: "Add Zone",
+                handler: function() {
+                    track.setMode('AddZone');
+                }
+            }]);
+        }
     }
 
     function _getWellProps() {

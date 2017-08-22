@@ -43,6 +43,7 @@ function ZoneTrack(config) {
 
     this.currentDrawing = null;
     this.previousDrawing = null;
+    this.mode = null;
 }
 
 /**
@@ -80,6 +81,11 @@ ZoneTrack.prototype.setProperties = function(props) {
     props.zones.forEach(function(z) {
         self.addZone(z);
     })
+}
+
+ZoneTrack.prototype.setMode = function(newMode) {
+    this.mode = newMode;
+    this.trackContainer.style('cursor', newMode == null ? 'default' : 'copy');
 }
 
 /**
@@ -190,10 +196,6 @@ ZoneTrack.prototype.plotZone = function(zone) {
  * Add a zone to zone track
  */
 ZoneTrack.prototype.addZone = function(config) {
-    function within(y1, y2) {
-        let min = d3.min([y1, y2]);
-        let max = d3.max([y1, y2]);
-    }
     let self = this;
     if (!config.fill) {
         config.fill = {
@@ -204,6 +206,8 @@ ZoneTrack.prototype.addZone = function(config) {
             }
         }
     }
+    if (config.minY == null) config.minY = this.minY;
+    if (config.maxY == null) config.maxY = this.maxY;
     let zone = new Zone(config);
     zone.init(this.plotContainer);
     zone.header = this.addZoneHeader(zone);
