@@ -230,6 +230,7 @@ Curve.prototype.init = function(plotContainer) {
 
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing')
+        .attr('id', this.id)
         .style('cursor', 'crosshair');
 
     this.adjustSize(rect);

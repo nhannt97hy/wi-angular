@@ -73,6 +73,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks;
     };
 
+    this.getLines = function () {
+        let lines = [];
+        _tracks.forEach(function (track) {
+            if (track.isLogTrack()) {
+                track.drawings.forEach(function (line) {
+                    lines.push(line);
+                })
+            }
+        })
+        return lines;
+    }
+
     this.addLogTrack = function(trackTitle, callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {

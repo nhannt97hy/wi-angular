@@ -20,27 +20,92 @@ exports.SaveAsButtonClicked = function() {
     console.log('SaveAsButton is clicked');
 };
 
-exports.PrintButtonClicked = function() {
-    console.log('PrintButton is clicked');
+exports.PrintButtonClicked = function () {
+    console.log('------------------', this);
+    let $timeout = this.$timeout;
+    let wiLogplotCtrl = this.wiLogplot;
+    let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+    let wiLogplotElement = $(`wi-logplot[id=${wiLogplotCtrl.id}]`);
+    // let maxDepth = wiD3Ctrl.getMaxDepth();
+    // let minDepth = wiD3Ctrl.getMinDepth();
+    // let trackRealLengthCm = (maxDepth - minDepth) * 100;
+    let trackHeight = 32767 // max canvas height;
+    let trackHeaderHeight = wiLogplotElement.find('.vi-track-header-container').height();
+    let trackHorizontalResizer = wiLogplotElement.find('.vi-track-horizontal-resizer').height();
+    let trackBodyHeight = trackHeight - trackHeaderHeight - trackHorizontalResizer - 10;
+    wiLogplotElement.find('wi-d3').height(trackHeight + 'px');
+    wiLogplotElement.find('div.vi-track-body-container').height(trackBodyHeight + 'px');
+    let tracks = wiD3Ctrl.getTracks();
+    for (let track of tracks) {
+        if (track.isDepthTrack()) {
+            track.yTicks = 1000;
+        }
+    }
+    wiD3Ctrl.plotAll();
+    wiLogplotCtrl.handlers.ScaleFullButtonClicked();
+    $timeout(function () {
+        let d3area = wiLogplotElement.find('.track-area').clone();
+        let lines = wiD3Ctrl.getLines();
+        if (lines && lines.length) {
+            let lastLineId = lines[lines.length - 1].id;
+            for (let line of lines) {
+                let img = document.createElement('img');
+                img.style.position = "absolute";
+                img.src = wiLogplotElement.find(`canvas.vi-track-drawing[id=${line.id}]`).get(0).toDataURL();
+                d3area.find(`canvas.vi-track-drawing[id=${line.id}]`).replaceWith(img);
+            }
+        }
+        wiLogplotElement.find('wi-d3').height('unset');
+        wiLogplotElement.find('div.vi-track-body-container').height('70%');
+        for (let track of tracks) {
+            if (track.isDepthTrack()) {
+                track.yTicks = 10;
+            }
+        }
+        wiD3Ctrl.plotAll();
+        let bodyHtml = '<div class="track-area" style="background-color: #fff; margin: 4px; padding: 4px; flex: 1; display: flex; flex-direction: row;">';
+        bodyHtml += d3area.html();
+        bodyHtml += '</div>';
+        let iframe = document.createElement('iframe');
+        // iframe.height = '100%';
+        // iframe.width = '100%';
+        iframe.onload = function () {
+            let doc = iframe.contentDocument ? iframe.contentDocument : iframe.contentWindow.document;
+            let headHtml = `
+                    <link href="vendor/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+                    <link href="css/graph.css" rel="stylesheet" type="text/css">
+                    <link href="css/wi-logplot.css" rel="stylesheet" type="text/css">
+                    <link href="css/wi-d3.css" rel="stylesheet" type="text/css">
+                `;
+            doc.head.innerHTML = headHtml;
+            doc.body.innerHTML = bodyHtml;
+            $timeout(function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                document.body.removeChild(iframe);
+            });
+        }
+        document.body.appendChild(iframe);
+    })
 };
 
 exports.PrintToImageButtonClicked = function() {
     console.log('PrintToImageButton is clicked');
 };
 
-function scaleTo(rangeUnit, wiLogplot) {
-    let utils = this.wiComponentService.getComponent(wiComponentService.UTILS);
+function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     let wiSlidingbarCtrl = wiLogplot.getSlidingbarCtrl();
     let maxDepth = wiD3Ctrl.getMaxDepth();
     let minDepth = wiD3Ctrl.getMinDepth();
     let realLengthCm = (maxDepth - minDepth) * 100;
     let dpCm = utils.getDpcm();
-    let trackHeight = d3.select('.track-area .vi-track-plot-container').node().clientHeight;
+    let trackHeight = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`).height();
     let trackHeightCm = trackHeight/dpCm;
     let trackRealLengthCm = trackHeightCm*rangeUnit;
     let rangeHandlerByPercent = (trackRealLengthCm/realLengthCm) * 100;
-    console.log('scale handler', rangeHandlerByPercent, trackRealLengthCm, realLengthCm);
+    // console.log('scale handler', rangeHandlerByPercent, trackRealLengthCm, realLengthCm);
     if (rangeHandlerByPercent > 100) {
         rangeHandlerByPercent = 100;
     }
@@ -50,62 +115,63 @@ function scaleTo(rangeUnit, wiLogplot) {
 
 exports.Scale20ButtonClicked = function() {
     let rangeUnit = 20;
-    scaleTo(rangeUnit, this.wiLogplot);
+    console.log(this);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale50ButtonClicked = function() {
     let rangeUnit = 50;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale100ButtonClicked = function() {
     let rangeUnit = 100;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale200ButtonClicked = function() {
     let rangeUnit = 200;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale300ButtonClicked = function() {
     let rangeUnit = 300;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale500ButtonClicked = function() {
     let rangeUnit = 500;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale1000ButtonClicked = function() {
     let rangeUnit = 1000;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale2000ButtonClicked = function() {
     let rangeUnit = 2000;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale2500ButtonClicked = function() {
     let rangeUnit = 2500;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale3000ButtonClicked = function() {
     let rangeUnit = 3000;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.Scale5000ButtonClicked = function() {
     let rangeUnit = 5000;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.ScaleFullButtonClicked = function() {
     let rangeUnit = this.wiLogplot.getwiD3Ctrl().getMaxDepth()*100;
-    scaleTo(rangeUnit, this.wiLogplot);
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
 exports.ZoomInButtonClicked = function() {

@@ -21,7 +21,7 @@ function Track(config) {
     this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
-    this.type = config.type || Utils.pascalCaseToLowerDash(this.constructor.name);
+    this.type = Utils.pascalCaseToLowerDash(this.constructor.name);
     this.justification = config.justification || 'center';
     this.showTitle = (config.showTitle == null) ? true : config.showTitle;
 

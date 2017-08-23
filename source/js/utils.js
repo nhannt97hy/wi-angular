@@ -1155,6 +1155,7 @@ function getDpi() {
     document.body.appendChild(inch);
     let devicePixelRatio = window.devicePixelRatio || 1;
     let dpi = inch.clientWidth * devicePixelRatio;
+    document.body.removeChild(inch);
     return dpi;
 }
 exports.getDpi = getDpi;

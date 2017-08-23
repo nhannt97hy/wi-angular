@@ -23,8 +23,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             wiComponentService: wiComponentService,
             wiApiService: wiApiService,
             ModalService: ModalService,
+            $timeout: $timeout,
             wiLogplot: self
         });
+        self.handlers = $scope.handlers;
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
