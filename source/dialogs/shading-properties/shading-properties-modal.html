@@ -47,9 +47,8 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-6 small-text">Foreground</label>
                                 <div class="col-sm-6 text-left">
-                                    <div class="addon valign-middle" 
-                                        ng-style="{'background-color':wiModal.props.positiveFill.foreground}"><img/></div>
                                     <button ng-click="wiModal.foreground()"
+                                            ng-style="{'background-color':wiModal.props.positiveFill.foreground}"
                                             class="form-control wi-form-control width-80px">Change</button>
                                 </div>
                             </div>
@@ -58,8 +57,8 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-6 small-text" for="background">Background</label>
                                 <div class="col-sm-6 text-left">
-                                    <div class="addon valign-middle" ng-style="{'background-color':wiModal.props.positiveFill.background}"><img/></div>
                                     <button ng-click="wiModal.background()"
+                                            ng-style="{'background-color':wiModal.props.positiveFill.background}"
                                             class="form-control wi-form-control width-80px">Change</button>
                                 </div>
                             </div>
@@ -71,8 +70,8 @@
                                 <label class="normal-text">
                                     <input type="checkbox" id="displayFill"
                                            value="" name=""
-                                           ng-model="wiModal.props.isNegPosFilling"
-                                           ng-change="wiModal.enableFill('positiveNegative', wiModal.props.isNegPosFilling);">
+                                           ng-model="wiModal.props.isNegPosFill"
+                                           ng-change="wiModal.enableFill('positiveNegative', wiModal.props.isNegPosFill);">
                                     Positive/Negative Fill
                                 </label>
                             </div>
@@ -106,9 +105,8 @@
                                             <div class="form-group">
                                                 <label class="control-label col-sm-6 small-text">Positive Color</label>
                                                 <div class="col-sm-6 text-left">
-                                                    <div class="addon valign-middle" 
-                                                        ng-style="{'background-color':wiModal.options.positiveFill.foreground}"><img/></div>
                                                     <button ng-click="wiModal.posPositiveForeground()"
+                                                            ng-style="{'background-color':wiModal.options.positiveFill.foreground}"
                                                             class="form-control wi-form-control width-80px">Change</button>
                                                 </div>
                                             </div>
@@ -130,9 +128,8 @@
                                             <div class="form-group">
                                                 <label class="control-label col-sm-6 small-text" >Negative color</label>
                                                 <div class="col-sm-6 text-left">
-                                                    <div class="addon valign-middle" 
-                                                        ng-style="{'background-color':wiModal.options.negativeFill.foreground}"><img/></div>
                                                     <button ng-click="wiModal.negPositiveForeground()"
+                                                            ng-style="{'background-color':wiModal.options.negativeFill.foreground}"
                                                             class="form-control wi-form-control width-80px">
                                                             Change
                                                     </button>

@@ -30,7 +30,7 @@ Utils.extend(Drawing, Shading);
  * @param {Number} [config.fill.gradient.endX]
  * @param {String} [config.fill.gradient.startColor]
  * @param {String} [config.fill.gradient.endColor]
- * @param {Boolean} [config.isNegPosFilling] - Indicate whether to plot with negative and positive styles
+ * @param {Boolean} [config.isNegPosFill] - Indicate whether to plot with negative and positive styles
  * @param {Object} [config.negativeFill] - Configurations of fill style for negative values
  * @param {Object} [config.positiveFill] - Configurations of fill style for positive values
  * @param {Number} [config.refLineWidth] - Width in pixel of reference line
@@ -48,7 +48,8 @@ function Shading(config) {
     this.fill = config.fill;
     this.negativeFill = config.negativeFill;
     this.positiveFill = config.positiveFill;
-    this.isNegPosFilling = config.isNegPosFilling == null ? false : config.isNegPosFilling;
+    //this.isNegPosFilling = config.isNegPosFilling == null ? false : config.isNegPosFilling;
+    this.isNegPosFill = config.isNegPosFill == null ? false : config.isNegPosFill;
 
     this.leftCurve = config.leftCurve;
     this.rightCurve = config.rightCurve;
@@ -58,7 +59,9 @@ function Shading(config) {
 
     this.refLineWidth = config.refLineWidth || 2;
     this.refLineColor = config.refLineColor || '#3e3e3e';
-    this.showRefLine = config.showRefLine == null ? true : config.showRefLine;
+    this.showRefLine = config.showRefLine == null
+        ? ( this.leftCurve && this.rightCurve ? false : true ) 
+        : config.showRefLine;
 
     this.vpX = {
         left: null,
@@ -107,10 +110,14 @@ Shading.prototype.getProperties = function() {
         idShading: this.id,
         idTrack: this.idTrack,
         name: this.name,
-        fill: this.isNegPosFilling ? null: this.fill,
-        negativeFill: this.isNegPosFilling ? this.negativeFill : null,
-        positiveFill: this.isNegPosFilling ? this.positiveFill : this.fill,
-        isNegPosFilling: this.isNegPosFilling,
+        //fill: this.isNegPosFilling ? null: this.fill,
+        fill: this.isNegPosFill ? null: this.fill,
+        //negativeFill: this.isNegPosFilling ? Utils.clone(this.negativeFill) : null,
+        negativeFill: this.isNegPosFill ? Utils.clone(this.negativeFill) : null,
+        //positiveFill: this.isNegPosFilling ? Utils.clone(this.positiveFill) : Utils.clone(this.fill),
+        positiveFill: this.isNegPosFill ? Utils.clone(this.positiveFill) : Utils.clone(this.fill),
+        //isNegPosFilling: this.isNegPosFilling,
+        isNegPosFill: this.isNegPosFill,
         idLeftLine: (leftCurve || {}).id,
         idRightLine: (rightCurve || {}).id,
         leftFixedValue: leftX,
@@ -124,8 +131,10 @@ Shading.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this,'idTrack', props.idTrack);
     Utils.setIfNotNull(this, 'id', props.idShading);
     Utils.setIfNotNull(this, 'name', props.name);
-    Utils.setIfNotNull(this, 'isNegPosFilling', props.isNegPosFilling);
-    if (props.isNegPosFilling) {
+    //Utils.setIfNotNull(this, 'isNegPosFilling', props.isNegPosFilling);
+    Utils.setIfNotNull(this, 'isNegPosFill', props.isNegPosFill);
+    //if (props.isNegPosFilling) {
+    if (props.isNegPosFill) {
         Utils.setIfNotNull(this, 'positiveFill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
         Utils.setIfNotNull(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
     }
@@ -283,8 +292,9 @@ Shading.prototype.doPlot = function(highlight) {
         let fill = fillStyles[0];
         let posFill = fillStyles[1];
         let negFill = fillStyles[2];
-        if (!self.isNegPosFilling) {
-            posFill = negFill = fill;
+        //if (!self.isNegPosFilling) {
+        if (!self.isNegPosFill) {
+             posFill = negFill = fill;
         }
 
         ctx.clearRect(0, 0, rect.width, rect.height);
@@ -441,8 +451,17 @@ function drawCurveLine(ctx, data, highlight) {
 }
 
 function drawRefLine(shading) {
-    if (shading.vpX.ref < 0 || shading.vpX.ref > shading.root.node().clientWidth)
-        return;
+    let tranformX = shading.getTransformX(shading.selectedCurve);
+    let viewportX = shading.getViewportX();
+
+    if (shading.vpX.ref < viewportX[0]) {
+        shading.vpX.ref = viewportX[0];
+        shading.refX = tranformX.invert(shading.vpX.ref);
+    } 
+    else if (shading.vpX.ref > viewportX[1]) {
+        shading.vpX.ref = viewportX[1];
+        shading.refX = tranformX.invert(shading.vpX.ref); 
+    }
 
     shading.refLine
         .attr('x1', shading.vpX.ref)
@@ -475,7 +494,8 @@ function drawHeader(shading) {
     let fills = shading.prepareFillStyles(true);
     Utils.createFillStyles(hCtx, fills, function(fillStyles) {
         hCtx.save();
-        if (shading.isNegPosFilling) {
+        //if (shading.isNegPosFilling) {
+        if (shading.isNegPosFill) {
             hCtx.fillStyle = fillStyles[2];
             hCtx.fillRect(0, 0, width / 2, height);
             hCtx.fillStyle = fillStyles[1];

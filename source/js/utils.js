@@ -76,7 +76,6 @@ exports.lineToTreeConfig = lineToTreeConfig;
 function lineToTreeConfig(line) {
     let lineModel = new Object();
     let curveModel = getCurveFromId(line.idCurve);
-    console.log(curveModel);
     lineModel.name = curveModel.properties.name;
     lineModel.type = 'line';
     lineModel.id = line.idLine;
@@ -115,7 +114,31 @@ function lineToTreeConfig(line) {
     }
     return lineModel;
 }
-
+function shadingToTreeConfig(shading) {
+    let shadingModel = new Object();
+    shadingModel.id = shading.idShading;  // OK
+    shadingModel.idLeftLine = shading.idLeftLine;  // OK
+    shadingModel.idRightLine = shading.idRightLine;  // OK
+    shadingModel.data = {
+        id: shading.idShading,
+        name: shading.name,
+        refX: shading.refX,
+        leftX: shading.leftFixedValue,
+        rightX: shading.rightFixedValue,
+        // minY: shading.minY,
+        // maxY: shading.maxY,
+        fill: shading.fill?JSON.parse(shading.fill):null,
+        //isNegPosFilling: shading.isNegPosFill,
+        isNegPosFill: shading.isNegPosFill,
+        positiveFill: shading.positiveFill?JSON.parse(shading.positiveFill):null,
+        negativeFill: shading.negativeFill?JSON.parse(shading.negativeFill):null,
+        refLineWidth: shading.refLineWidth || 5,
+        refLineColor: shading.refLineColor || '#3e3e3e',
+        showRefLine: shading.showRefLine
+    };
+    return shadingModel;
+}
+exports.shadingToTreeConfig = shadingToTreeConfig;
 function trackToModel(track) {
     var trackModel = new Object();
     trackModel.idPlot = track.idPlot;
@@ -554,7 +577,6 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             if (wiD3Ctrl && track) {
                 apiService.post(apiService.CREATE_LINE, { idTrack: track.id, idCurve: idCurve })
                     .then(function(line){
-                        console.log('line created', line);
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
@@ -628,7 +650,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
         .then(function (plot) {
             if (logplotModel.properties.referenceCurve) {
-                console.log(logplotModel.properties.referenceCurve);
                 slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
             }
             let tracks = new Array();
@@ -648,6 +669,39 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                 return track1.orderNum.localeCompare(track2.orderNum);
             });
             */
+            function drawAllShadings(someTrack, trackObj) {
+                someTrack.shadings.forEach(function(shading) {
+                    let shadingModel = shadingToTreeConfig(shading);
+                    let linesOfTrack = trackObj.getCurves();
+                    console.log("LinhTinh:", linesOfTrack, shading);
+                    let lineObj1 = null;
+                    let lineObj2 = null;
+                    if (!shadingModel.idRightLine) return;
+                    if (!shadingModel.idLeftLine) {
+                        for (let line of linesOfTrack) {
+                            console.log("line", line);
+                            if (line.id == shading.idRightLine) {
+                                lineObj1 = line;
+                                break;
+                            }
+                        }
+                        let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                        console.log('shading', tmp);
+                    };
+                    if(shadingModel.idLeftLine && shadingModel.idRightLine) {
+                        for (let line of linesOfTrack) {
+                            if (line.id == shading.idRightLine) {
+                                lineObj1 = line;
+                            }
+                            if (line.id == shading.idLeftLine) {
+                                lineObj2 = line;
+                            }
+                        }
+                        let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                        console.log('shading2', tmp);
+                    };
+                });
+            };
             let aTrack = tracks.shift();
             while( aTrack ) {
                 if (aTrack.idDepthAxis) {
@@ -659,6 +713,19 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack = tracks.shift();
                         continue;
                     }
+                    
+                    let lineCount = 0;
+                    let lineNum = aTrack.lines.length;
+                    let eventEmitter = new EventEmitter();
+                    eventEmitter.on('line-drawed', function(someTrack) {
+                        console.log(someTrack);
+                        lineCount++;
+                        if (lineCount == lineNum) {
+                            drawAllShadings(someTrack, trackObj);
+                        }
+                    });
+
+                    let someTrack = aTrack;
                     aTrack.lines.forEach(function (line) {
                         getCurveData(wiApiService, line.idCurve, function (err, data) {
                             let lineModel = lineToTreeConfig(line);
@@ -669,8 +736,27 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 console.error(err);
                                 wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                             }
+                            eventEmitter.emitEvent('line-drawed', [someTrack]);
                         });
                     });
+                    // aTrack.shadings.forEach(function(shading) {
+                    //     let shadingModel = shadingToTreeConfig(shading);
+                    //     console.log(shading);
+                    //     wiApiService.infoLine(shading.idRightLine, function(line) {
+                    //         console.log(line);
+                    //         getCurveData(wiApiService, line.idCurve, function (err, data) {
+                    //             let lineModel = lineToTreeConfig(line);
+                    //             if (!err) {
+                    //                 let lineObj = wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                    //                 wiD3Ctrl.addLeftShadingToTrack(trackObj, lineObj, shadingModel.data);
+                    //             }
+                    //             else {
+                    //                 console.error(err);
+                    //                 wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                    //             }
+                    //         });
+                    //     })
+                    // });
                 }
                 aTrack = tracks.shift();
             }
@@ -803,7 +889,6 @@ exports.findWellByLogplot = function(idLogplot) {
 exports.trackProperties = function (ModalService, wiComponentService) {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
-        console.log("OKOK");
     });
 };
 
@@ -861,7 +946,6 @@ exports.createDataset = function () {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'well') return;
-    console.log("test", selectedNode.properties);
     let promptConfig = {
         title: '<span class="dataset-new-16x16"></span> Create New Dataset',
         inputName: 'Name',
@@ -923,7 +1007,6 @@ exports.renameCurve = function () {
             dataset: selectedNode.properties.dataset,
             unit: selectedNode.properties.unit
         }
-        console.log(curveInfo);
         wiApiService.editCurve(curveInfo, function () {
             __GLOBAL.$timeout(function () {
                 selectedNode.data.label = ret;
@@ -957,7 +1040,6 @@ exports.pasteCurve = function () {
     // if copying
     let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
     if (copyingCurve) {
-        console.log('copying curve');
         if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
         let currentDatasetName = "";
         if (selectedNode.type == 'curve') {
@@ -981,7 +1063,6 @@ exports.pasteCurve = function () {
     // if cutting
     let cuttingCurve = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
     if (cuttingCurve) {
-        console.log('cutting curve');
         if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
         let curveInfo = {
             idCurve: cuttingCurve.properties.idCurve,
@@ -990,7 +1071,6 @@ exports.pasteCurve = function () {
             name: cuttingCurve.properties.name,
             unit: cuttingCurve.properties.unit
         }
-        console.log(curveInfo);
         wiApiService.editCurve(curveInfo, function () {
             refreshProjectState();
         });
@@ -1034,12 +1114,11 @@ exports.mergeLineObj = function(curveOptions, lineStyle, symbolStyle) {
 };
 exports.mergeShadingObj = function(shadingOptions, fillPatternStyles, variableShadingStyle) {
 
-    console.log("CHECK----:", shadingOptions, fillPatternStyles, variableShadingStyle);
-
     let shadingObj = new Object();
     angular.extend(shadingObj, shadingOptions);
     if (shadingObj.shadingStyle == 'fillPattern') {
-        if (!shadingObj.isNegPosFilling) {
+        //if (!shadingObj.isNegPosFilling) {
+        if (!shadingObj.isNegPosFill) {
             shadingObj.fill = fillPatternStyles.fill;
         }
         else {
@@ -1049,8 +1128,8 @@ exports.mergeShadingObj = function(shadingOptions, fillPatternStyles, variableSh
     }
     else {
         shadingObj.fill = variableShadingStyle;
+        shadingObj.fill.display = true;
     }
-    console.log("CHECK:", shadingObj);
     return shadingObj;
 }
 
@@ -1073,7 +1152,6 @@ function editProperty(item) {
             let infoWell = angular.copy(properties);
             infoWell[item.key] = item.value;
             if (JSON.stringify(infoWell) === JSON.stringify(properties)) return;
-            console.log(infoWell);
             wiApiService.editWell(infoWell, function () {
                 refreshProjectState();
             });
@@ -1082,7 +1160,6 @@ function editProperty(item) {
             let infoDataset = angular.copy(properties);
             infoDataset[item.key] = item.value;
             if (JSON.stringify(infoDataset) === JSON.stringify(properties)) return;
-            console.log(infoDataset);
             wiApiService.editDataset(infoDataset, function () {
                 refreshProjectState();
             });
@@ -1091,7 +1168,6 @@ function editProperty(item) {
             let infoCurve = angular.copy(properties);
             infoCurve[item.key] = item.value;
             if (JSON.stringify(infoCurve) === JSON.stringify(properties)) return;
-            console.log(infoCurve);
             wiApiService.editCurve(infoCurve, function () {
                 refreshProjectState();
             });
@@ -1100,7 +1176,6 @@ function editProperty(item) {
             let infoLogplot = angular.copy(properties);
             infoLogplot[item.key] = item.value;
             if (JSON.stringify(infoLogplot) === JSON.stringify(properties)) return;
-            console.log(infoLogplot);
             wiApiService.editLogplot(infoLogplot, function () {
                 refreshProjectState();
             });
@@ -1191,7 +1266,6 @@ exports.pixelToCm = pixelToCm;
 function hexToRgbA(hex){
     var c;
     var hexStr = hex;
-    console.log("hex", hex);
     if (!hex || hex.length == 0) {
         hexStr = '#FFFFFE';
     }

@@ -1547,6 +1547,9 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, op
                 }
             };
         }
+
+        this.checkboxVal = !this.options.fill.display;
+
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.enableFill = function (idEnable, value) {
             $('#'+ idEnable + ":button").attr("disabled", value);
@@ -1583,7 +1586,8 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, op
             });
         }
         this.correctFillingStyle = function() {
-            self.options1.isNegPosFilling = !self.options.fill.display;
+            self.options1.isNegPosFill = !self.options.fill.display;
+            //self.options1.isNegPosFilling = !self.options.fill.display;
             self.options.positiveFill.display = !self.options.fill.display;
             self.options.negativeFill.display = self.options.positiveFill.display;
         }
@@ -1614,23 +1618,26 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, op
         });
     });
 };
-exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback) {
-
+exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
+    let wiModal = null;
     function ModalController($scope, wiComponentService, $timeout, close, $compile) {
         let error = null;
         let self = this;
-
+        wiModal = self;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
 
+        this.tabFlags = options.tabs;
         this.datasets = new Array();
 
         this.curves = new Array();
         this.curvesLineOptions = new Array();
         this.curvesSymbolOptions = new Array();
         this.curvesChanged = new Array(); // 1: change line, 2: add line
+        this.curvesOnDataset = new Array(); // curveList + dataset.Curve
         this.shadingChanged = new Array();
 
         this.curvesArr = [];
@@ -1660,7 +1667,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.lineCurve = [];
         this.fillPatternOptions = new Array();
         this.variableShadingOptions = new Array();
-
+        this.curveList.forEach(function(item) {
+            let curvesOnDatasetItem = item;
+            curvesOnDatasetItem.datasetCurve = utils.findDatasetById(item.idDataset).properties.name + '.' + item.name;
+            self.curvesOnDataset.push(curvesOnDatasetItem);            
+        })
         this.curvesArr.forEach(function(item) {
             let selectedCurve = item.properties.datasetName + '.' + item.properties.name;
             self.selectCurveArr.push(selectedCurve);
@@ -1697,15 +1708,21 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             shadingItem.idRightLine = shadingProp.idRightLine;
             shadingItem.rightFixedValue = shadingProp.rightFixedValue;
             shadingItem.name = shadingProp.name;
-            shadingItem.shadingStyle = getShadingStyle(shadingProp.isNegPosFilling?shading.positiveFill:shading.fill);
+            shadingItem.shadingStyle = getShadingStyle(shadingProp.isNegPosFill?shading.positiveFill:shading.fill);
+            //shadingItem.shadingStyle = getShadingStyle(shadingProp.isNegPosFilling?shading.positiveFill:shading.fill);
             shadingItem.idControlCurve = shadingProp.idControlCurve;
-            shadingItem.isNegPosFilling = shadingProp.isNegPosFilling;
+            shadingItem.isNegPosFill = shadingProp.isNegPosFill;
+            //shadingItem.isNegPosFilling = shadingProp.isNegPosFilling;
             shadingItem.type = shadingProp.type;
+            shadingItem._index = index;
 
-            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFilling);
-            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFilling);
-            var condition3 = (shadingItem.shadingStyle == "variableShading" && !shadingItem.isNegPosFilling);
-            // var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFilling); // Not use right now
+            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFill);
+            //var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFilling);
+            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFill);
+            //var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFilling);
+            var condition3 = (shadingItem.shadingStyle == "variableShading");
+            // var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFill); // Not use right now
+            //// var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFilling); // Not use right now
 
             fillPatternItem.fill = {
                 display: condition1,  
@@ -1732,24 +1749,28 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     background: (condition2?shadingProp.positiveFill.pattern.background:null)
                 }
             }
-            variableShadingItem.gradient = {
+            fillPatternItem._index = index;
+            variableShadingItem = {
                 display: condition3,
-                startX: condition3?shadingProp.fill.gradient.startX:null,
-                endX: condition3?shadingProp.fill.gradient.endX:null,
-                startColor: condition3?shadingProp.fill.gradient.startColor:null,
-                endColor: condition3?shadingProp.fill.gradient.endColor:null
+                idControlCurve: shadingProp.idControlCurve,
+                gradient: {
+                    startX: condition3?shadingProp.positiveFill.gradient.startX:null,
+                    endX: condition3?shadingProp.positiveFill.gradient.endX:null,
+                    startColor: condition3?shadingProp.positiveFill.gradient.startColor:null,
+                    endColor: condition3?shadingProp.positiveFill.gradient.endColor:null
+                }
             }
+            variableShadingItem._index = index;
 
             shadingChangedItem = {
                 change: "0",
-                index: null,
+                _index: index
             }
             self.shadingArr.push(shadingItem);
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
             self.shadingChanged.push(shadingChangedItem);
         });
-        
         this.curveList.forEach(function (curve, index) {
             let curveOptions = {};
             let lineOptions = {};
@@ -1924,47 +1945,93 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         this.setClickedRowShading = function(index) {
             $scope.selectedRowShading = index;
+            self.__idx = self.getShadings()[index]._index;
+            console.log("onClickedRow", self.__idx, index, self.getShadings()[index]._index);
         }
         this.onChangeShading = function(index){
-            if(self.shadingChanged[index].change == '0') self.shadingChanged[index].change = '1';
-            console.log("shadingChanged", self.shadingChanged[index]);
+            if(self.shadingChanged[index].change == '0') self.shadingChanged[index].change = '1';            
         }
         this.removeRowShading = function() {//TODO
-            console.log("removeRowShading");
+            if(self.shadingChanged[self.__idx].change == '2') self.shadingChanged[self.__idx] = '4';
+            else self.shadingChanged[self.__idx].change = '3';
+            console.log("removeRowShading", self.shadingChanged[self.__idx], self.__idx);
         }
-        function removeShading(idShading){//TODO
-
+        this.setShadingName = function(curveId, idx, isRight) {
+            var curveName = null;
+            var leftPart = null;
+            var rightPart = null;
+            if( self.shadingArr[idx].name.indexOf('_') < 0 ) self.shadingArr[idx].name = "xx_yy";
+            if (isRight) {
+                if (!curveId) {
+                    rightPart = 'right';
+                }
+                else {
+                    for (curve of self.curvesOnDataset) {
+                        if (curve.id == parseInt(curveId)) {
+                            rightPart = curve.name;
+                            break;
+                        }
+                    }
+                }
+                self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/_.+/g, "_" + rightPart);
+            }
+            else {
+                if (!curveId) {
+                    leftPart = 'left';
+                }
+                else {
+                    for (curve of self.curvesOnDataset) {
+                        if (curve.id == parseInt(curveId)) {
+                            leftPart = curve.name;
+                            break;
+                        }
+                    }
+                }
+                self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/^.+_/g, leftPart + "_");
+            }
         }
         this.addRowShading = function() {
             var shadingItem = {
-                name: 'noname',
+                idTrack: currentTrack.id,
+                name: 'xx_yy',
                 shadingStyle: "fillPattern",
-                isNegPosFilling: false,
-                type: 'left'
+                isNegPosFill: false,
+                //isNegPosFilling: false,
+                type: 'left',
+                _index: self.shadingArr.length 
             };
-            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFilling);
-            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFilling);
+            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFill);
+            //var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFilling);
+            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFill);
+            //var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFilling);
             var condition3 = (shadingItem.shadingStyle == "variableShading");
 
             var fillPatternItem = {
                 fill : {
                     display: condition1,
-                    pattern: "none",
-                    foreground: "#fff",
-                    background: "#000"
+                    pattern: {
+                        name: "none",
+                        foreground: "#fff",
+                        background: "#000"
+                    }
                 },
                 positiveFill: {
                     display: condition2,
-                    parttern: "none",
-                    foreground: "#fff",
-                    background: "000"
+                    pattern: {
+                        name: "none",
+                        foreground: "#fff",
+                        background: "000"
+                    }
                 },
                 negativeFill: {
                     display: condition2,
-                    pattern: "none",
-                    foreground: "#fff",
-                    background: "#000"
-                }
+                    pattern: {
+                        name: "none",
+                        foreground: "#fff",
+                        background: "#000"
+                    }
+                },
+                _index: self.fillPatternOptions.length 
             };
             var variableShadingItem = {
                 gradient: {
@@ -1973,58 +2040,95 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     endX: null,
                     startColor: "#fff",
                     endColor: "#000"
-                }
+                },
+                _index: self.variableShadingOptions.length 
             };
-
             var shadingChangedItem = {
                 change: '2',
-                index: null
-            }
-            
+                _index: self.shadingArr.length 
+            };
             self.shadingArr.push(shadingItem);
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
-
-            console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions);
+            self.shadingChanged.push(shadingChangedItem);
+            console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions, self.shadingChanged);
         }
         
         function updateShadings(){//TODO
             self.shadingChanged.forEach(function(item, index){
                 if(item.change == "1") {
-                    console.log("change", item.change);
+                    console.log("111",self.shadingArr[index],
+                                                     self.fillPatternOptions[index], 
+                                                     self.variableShadingOptions[index]);
                     let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
                                                      self.fillPatternOptions[index], 
                                                      self.variableShadingOptions[index]);
                     console.log(shadingObj);
-                    shadingList[index].setProperties(shadingObj);
                     console.log('visualize-+-shading', shadingList[index]);
-
-                    // wiApiService.editShading(shadingObj, function(result) {
-                    //     console.log(result);
-                    //     // TODO
-                    // });
+                    // if(shadingObj.fill) shadingObj.fill = JSON.stringify(shadingObj.fill);
+                    // if(shadingObj.positiveFill) shadingObj.positiveFill = JSON.stringify(shadingObj.positiveFill);
+                    // if(shadingObj.negativeFill) shadingObj.negativeFill = JSON.stringify(shadingObj.negativeFill);
+                    wiApiService.editShading(shadingObj, function(result) {
+                        console.log(result, shadingObj);
+                        shadingList[index].setProperties(shadingObj);
+                        $timeout(function() {
+                            currentTrack.plotDrawing(shadingList[index]);
+                        });
+                    });
                 }
             });
         }
-        function createNewShadings() {//TODO
-            // shadingChanged.forEach(function(item, idex){})
-        }
-        function removeShadings(){//TODO
-
+        function createNewShadings() {
+            self.shadingChanged.forEach(function(item, index){
+                if(item.change == '2') {
+                    let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
+                                                     self.fillPatternOptions[index], 
+                                                     self.variableShadingOptions[index]);
+                    if (shadingObj.positiveFill == null) {
+                        shadingObj.positiveFill = shadingObj.fill;
+                    };
+                    console.log("shadingObj", shadingObj);
+                    wiApiService.createShading(shadingObj, function(shading) {
+                        let shadingModel = utils.shadingToTreeConfig(shading);
+                        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                        let lineObj1 = null;
+                        let lineObj2 = null;
+                        if(!shadingModel.idRightLine) return;
+                        if(!shadingModel.idLeftLine) {
+                            for(let line of self.curveList) {
+                                if(line.id == shading.idRightLine){
+                                    lineObj1 = line;
+                                    break;
+                                }
+                            }
+                            wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                        }
+                        if(shadingModel.idLeftLine && shadingModel.idRightLine) {
+                            for(let line of self.curveList) {
+                                if(line.id == shading.idLeftLine) {
+                                    lineObj1 = line;
+                                }
+                                if(line.id == shading.idRightLine) {
+                                    lineObj2 = line;
+                                }
+                                wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
+                            }
+                        }
+                    })
+                }
+            })
         }
         // Dialog buttons
         this.defineButtonClicked = function(index){
                 var shading = self.shadingArr[index];
                 if(shading.shadingStyle == "fillPattern") {
                     DialogUtils.fillPatternSettingDialog(ModalService, function (options) {
-                        //console.log("fillPattern", self.fillPatternOptions[index]);
                     }, self.fillPatternOptions[index], self.shadingArr[index] );
                     return;
                 }
                 if(shading.shadingStyle == "variableShading") {
                     DialogUtils.variableShadingDialog(ModalService, function(options) {
-                        console.log("variableShading", self.variableShadingOptions[index].gradient);
-                    }, self.variableShadingOptions[index].gradient);
+                    }, self.variableShadingOptions[index], self.lineCurve);
                     return;
                 }
                 else return;
@@ -2032,14 +2136,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.lineStyleButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
             DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {
-                console.log("lineStyle");
             }, self.curvesLineOptions[self.__idx]);
             $event.stopPropagation();
         };
         this.symbolStyleButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
             DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {
-                console.log("symbolStyle");
             }, self.curvesSymbolOptions[self.__idx]);
             $event.stopPropagation();
         };
@@ -2059,7 +2161,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let lineOptions = self.curvesLineOptions[index].lineStyle;
             let symbolOptions = self.curvesSymbolOptions[index].symbolStyle;
             let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
-            console.log("LINE", lineObj, curveOptions, lineOptions, symbolOptions);
             utils.changeLine(lineObj, wiApiService, function() {
                 self.curveList[index].setProperties(lineObj);
                 currentTrack.plotCurve(self.curveList[index]);
@@ -2081,7 +2182,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 if (item.change == '2') return total + 1;
                 return total;
             }, 0);
-            console.log(numberberOfNewLines);
             if (numberberOfNewLines  == 0) {
                 roundTwo();
             }
@@ -2099,7 +2199,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             function roundTwo() {
                 self.curvesChanged.forEach(function(item, index) {
-                    console.log("indexRoundTwo", index, item);
                     if(item.change == '1') {
                         updateLine(index);
                         item.change = '0';
@@ -2111,7 +2210,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 // remove all deleted curve from self.curves and self.curvesChanged. IMPORTANT!
                 for (let idx = self.curvesChanged.length - 1; idx > -1; idx--) {
                     if (self.curvesChanged[idx].change == "3") {
-                        console.log("splice");
                         self.curvesChanged.splice(idx,1);
                         self.curves.splice(idx, 1);
                         self.curvesSymbolOptions.splice(idx, 1);
@@ -2120,10 +2218,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         self.arr.splice(idx, 1);
                     }
                 }
-                console.log(self.curves, self.curvesChanged, self.curvesLineOptions, self.curvesSymbolOptions);
             }
             function roundOne() {
-                console.log('roundOne:', self.curves);
                 self.curvesChanged.forEach(function(item, index) {
                     if(item.change == '2') {
                         let lineObj = {
@@ -2132,19 +2228,16 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         }
                         wiApiService.createLine(lineObj, function(line){
                             console.log("CREATE:", line);
-                            let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
                             utils.getCurveData(wiApiService, line.idCurve, function(err, data){
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
                                     wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curves[index].idLine = line.idLine;
                                     self.curvesChanged[index].change = '1';
-                                    console.log(eventEmitter);
                                     eventEmitter.emitEvent("line-created");
-                                    console.log("99999999)))))",eventEmitter);
                                 }
                                 else {
-                                    console.log(err);
+                                    console.error(err);
                                 }
                             });
                         });
@@ -2152,8 +2245,33 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 });
 
             }
+        };
+        this.getShadings = function() {
+            return self.shadingArr.filter(function(c, index){
+                return (self.shadingChanged[index].change < '3');
+            });
         }
-
+        function removeShadings() {
+            self.shadingChanged.forEach(function(item, index) {
+                if(item.change == '3') {
+                    wiApiService.removeShading(self.shadingArr[index].idShading, function(result) {
+                        console.log("removeShading");
+                        let currentShading = currentTrack.findShadingById(result.idShading);
+                        wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
+                        self.shadingChanged.splice(1, index);
+                        self.shadingArr.slice(1, index);
+                        self.fillPatternOptions.slice(1, index);
+                        self.variableShadingOptions.slice(1, index);
+                    });
+                };
+                if(item.change == '4') {
+                    self.shadingChanged.splice(1, index);
+                    self.shadingArr.slice(1, index);
+                    self.fillPatternOptions.slice(1, index);
+                    self.variableShadingOptions.slice(1, index);
+                }
+            });
+        };
         function updateShadingsTab() {
             updateShadings();
             createNewShadings();
@@ -2181,6 +2299,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        if (options.shadingOnly) {wiModal.shadingOnly = true};
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
@@ -2360,7 +2479,6 @@ exports.aboutDialog = function (ModalService, callback) {
             build : "2017-08-01"
         }
         this.onCancelButtonClicked = function () {
-            console.log('onCancelButtonClicked');
             close(null);
         }
     }
@@ -2393,7 +2511,6 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
             close(self);
         }
         this.onCancelButtonClicked = function () {
-            console.log('onCancelButtonClicked');
             wiD3Ctr.setDepthRange(self.depthRange);
             close(null);
         }
@@ -2509,7 +2626,6 @@ exports.colorPickerDialog1 = function(ModalService, currentColor, callback) {
             }
         }).on('changeColor', function(evt) {
             var temp = evt.color.toRGB();
-            console.log("color", temp);
             thisTimeout(function() {wiModal.color = temp;});
         });
         $('#cp').colorpicker('setValue', currentColor);
@@ -2524,7 +2640,6 @@ exports.colorPickerDialog1 = function(ModalService, currentColor, callback) {
 
 exports.colorPickerDialog = function (ModalService, currentColor, callback) {
     if(!currentColor) currentColor = "#fff";
-    console.log("Color:",currentColor);
     function colorToString(color) {
 		var retArray = [color.r, color.g, color.b, color.a];
 		return 'rgba(' + retArray.join(',') + ')';
@@ -2702,7 +2817,6 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             }
         }
         $('#cp').colorpicker(cpOptions).on('changeColor', function(event) {
-            console.log(modalCtrl.currentColor);
             timeoutFunc(function() {modalCtrl.currentColor = event.color.toRGB();});
         });
         $('#cp').colorpicker('setValue', currentColor);
@@ -2714,31 +2828,35 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
     })
 }
 
-exports.variableShadingDialog = function (ModalService, callback, options) {
+exports.variableShadingDialog = function (ModalService, callback, options, selectCurve) {
     function ModalController($scope, wiComponentService, close) {
         let error = null;
         let self = this;
-        console.log(options);
+        this.selectCurve = selectCurve;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         if (options) {
             this.options = options;
         }
         else {
             this.options = {
-                startX: null,
-                endX: null,
-                startColor: "transparent",
-                endColor: "transparent"
+                display: true,
+                idControlCurve: null,
+                gradient: {
+                    startX: null,
+                    endX: null,
+                    startColor: "transparent",
+                    endColor: "transparent"
+                }
             };
         }
         this.startColor = function(){
-            DialogUtils.colorPickerDialog(ModalService, self.options.startColor, function (colorStr) {
-                self.options.startColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.gradient.startColor, function (colorStr) {
+                self.options.gradient.startColor = colorStr;
             });
         }
         this.endColor = function(){
-            DialogUtils.colorPickerDialog(ModalService, self.options.endColor, function (colorStr) {
-                self.options.endColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.options.gradient.endColor, function (colorStr) {
+                self.options.gradient.endColor = colorStr;
             });
         }
         this.onOkButtonClicked = function () {
@@ -2755,6 +2873,7 @@ exports.variableShadingDialog = function (ModalService, callback, options) {
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -2792,7 +2911,8 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
             this.props = {
                 idTrack: currentTrack.id,
                 name: currentCurve.name,
-                isNegPosFilling: false,
+                isNegPosFill: false,
+                //isNegPosFilling: false,
                 negativeFill: null,
                 positiveFill: fill.pattern,
                 idLeftLine: null,

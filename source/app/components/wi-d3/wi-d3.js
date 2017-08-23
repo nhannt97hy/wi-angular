@@ -283,9 +283,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.addCustomShadingToTrack = function (track, curve, value, config) {
         if (!track || !track.addShading) return;
-        let shading = track.addShading(curve, null, value, config);
+        let shading = track.addShading(null, curve, value, config);
         track.plotShading(shading);
         _registerShadingHeaderMouseDownCallback(track, shading);
+        console.log('shading', shading);
         return shading;
     };
 
@@ -736,10 +737,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _shadingOnRightClick() {
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         self.setContextMenu([{
+            name: "ShadingProperties",
+            label: "Shading Properties",
+            icon: "shading-properties-16x16",
+            handler: function() {
+                let currentShading = _currentTrack.getCurrentShading();
+                console.log("Shading Properties", currentShading);
+                DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                    if (props) {
+                        console.log('logTrackPropertiesData', props);
+                    }
+                }, {
+                    tabs:['false', 'false', 'true'],
+                    shadingOnly: true
+                });
+            }
+        },
+        {
             name: "RemoveShading",
             label: "Remove Shading",
+            icon: "shading-delete-16x16",
             handler: function () {
-                self.removeCurrentShading();
+                let currentShading = _currentTrack.getCurrentShading();
+                wiApiService.removeShading(currentShading.id, function(ret){
+                    console.log(ret, currentShading);
+                    self.removeShadingFromTrack(_currentTrack, currentShading);
+                });
                 // self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
 
             }
@@ -828,13 +851,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let curve1 = _currentTrack.getCurrentCurve();
                 let curve2 = _currentTrack.getTmpCurve();
-                console.log("create shading!!");
+                console.log("create shading!!", curve1);
                 if (!curve1) return;
                 if (!curve2) {
                     // This should open dialog
 
                     var config = {
-                        isNegPosFilling : true,
+                        //isNegPosFilling : false,
+                        isNegPosFill : false,
+                        fill: {
+                            pattern: {
+                                name: "chert",
+                                foreground: "blue",
+                                background: "pink"
+                            }
+                        },
                         positiveFill: {
                             gradient: {
                                 startX:0,
@@ -855,7 +886,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     };
                     // var config = {
                     //     type: 'custom',
-                    //     isNegPosFilling : true,
+                    //     isNegPosFill : true,
                     //     positiveFill: {
                     //         gradient: {
                     //             startX:0,
@@ -874,6 +905,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     //     },
                     //     showRefLine: true
                     // };
+                    console.log("curve1", _currentTrack, curve1);
                     self.addLeftShadingToTrack(_currentTrack, curve1, config);
                 }
                 else {
@@ -914,6 +946,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (props) {
                     console.log('logTrackPropertiesData', props);
                 }
+            }, {
+                tabs:['true', 'true','true']
             });
         } else if (_currentTrack.isDepthTrack()) {
             DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
