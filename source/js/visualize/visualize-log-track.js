@@ -1,7 +1,8 @@
-let Track = require('./visualize-track.js');
-let Curve = require('./visualize-curve.js');
-let Shading = require('./visualize-shading.js');
-let Utils = require('./visualize-utils.js');
+let Track = require('./visualize-track');
+let Curve = require('./visualize-curve');
+let Shading = require('./visualize-shading');
+let ViImage = require('./visualize-image');
+let Utils = require('./visualize-utils');
 
 module.exports = LogTrack;
 
@@ -150,7 +151,13 @@ LogTrack.prototype.getCurves = function() {
 LogTrack.prototype.getShadings = function() {
     return this.drawings.filter(function(d) {
         return d.isShading();
-    })
+    });
+}
+
+LogTrack.prototype.getImages = function() {
+    return this.drawings.filter(function(d) {
+        return d.isImage();
+    });
 }
 
 /**
@@ -325,6 +332,16 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     return shading;
 }
 
+LogTrack.prototype.addImage = function(config) {
+    if (config.top == null) config.top = this.minY;
+    if (config.bottom == null) config.bottom = this.maxY;
+    let image = new ViImage(config);
+    image.init(this.plotContainer);
+    image.lower();
+    this.drawings.push(image);
+    return image;
+}
+
 /**
  * Remove a drawing from track
  * @param {Object} drawing - The curve or shading object to remove
@@ -461,6 +478,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
         drawing.doPlot();
     }
     this.svgContainer.raise();
+    this.getImages().forEach(function(img) { img.lower(); });
 }
 
 /**

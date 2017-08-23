@@ -43,6 +43,7 @@ function ZoneTrack(config) {
 
     this.currentDrawing = null;
     this.previousDrawing = null;
+    this.mode = null;
 }
 
 /**
@@ -80,6 +81,11 @@ ZoneTrack.prototype.setProperties = function(props) {
     props.zones.forEach(function(z) {
         self.addZone(z);
     })
+}
+
+ZoneTrack.prototype.setMode = function(newMode) {
+    this.mode = newMode;
+    this.trackContainer.style('cursor', newMode == null ? 'default' : 'copy');
 }
 
 /**
@@ -190,6 +196,7 @@ ZoneTrack.prototype.plotZone = function(zone) {
  * Add a zone to zone track
  */
 ZoneTrack.prototype.addZone = function(config) {
+    let self = this;
     if (!config.fill) {
         config.fill = {
             pattern: {
@@ -199,25 +206,55 @@ ZoneTrack.prototype.addZone = function(config) {
             }
         }
     }
+    if (config.minY == null) config.minY = this.minY;
+    if (config.maxY == null) config.maxY = this.maxY;
     let zone = new Zone(config);
     zone.init(this.plotContainer);
     zone.header = this.addZoneHeader(zone);
     zone.on('mousedown', function() {
         self.drawingMouseDownCallback(zone);
-    })
+    });
     this.drawings.push(zone);
     return zone;
 }
 
+ZoneTrack.prototype.adjustZonesOnZoneChange = function(zone) {
+    let self = this;
+    let updatedZones = [];
+    let deletedZones = [];
+    this.getZones().forEach(function(z) {
+        if (z == zone) return;
+        if (zone.startDepth > z.startDepth && zone.startDepth < z.endDepth) {
+            z.endDepth = zone.startDepth;
+            self.plotZone(z);
+            updatedZones.push(z);
+        }
+        else if (zone.endDepth > z.startDepth && zone.endDepth < z.endDepth) {
+            z.startDepth = zone.endDepth;
+            self.plotZone(z);
+            updatedZones.push(z);
+        }
+        else if (zone.startDepth < z.startDepth && zone.endDepth > z.endDepth) {
+            self.removeZone(z);
+            deletedZones.push(z);
+        }
+    });
+    return [updatedZones, deletedZones];
+}
+
 /**
  * Auto rename zone from 1 to zone length
+ * @returns {Array} - Zones with modified name
  */
-ZoneTrack.prototype.autoName = function(cb) {
-    let zones = this.getZones();
-    zones.forEach(function(zone, i) {
-        zone.name = i;
+ZoneTrack.prototype.autoName = function() {
+    let zones = [];
+    this.getZones().forEach(function(zone, i) {
+        if (zone.name != (i + 1) && zone.name != (i + 1).toString()) {
+            zone.name = (i + 1).toString();
+            zones.push(zone);
+        }
     });
-    if (cb) cb(zones);
+    return zones;
 }
 
 /**

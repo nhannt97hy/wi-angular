@@ -7,6 +7,7 @@ module.exports = Drawing;
  * @constructor
  */
 function Drawing(config) {
+    if (typeof config != 'object') config = {};
     this.minY = config.minY;
     this.maxY = config.maxY;
 }
@@ -33,6 +34,10 @@ Drawing.prototype.isShading = function() {
  */
 Drawing.prototype.isZone = function() {
     return this.constructor.name == 'Zone';
+}
+
+Drawing.prototype.isImage = function() {
+    return this.constructor.name == 'ViImage';
 }
 
 /**
@@ -66,6 +71,14 @@ Drawing.prototype.nearPoint = function(x, y, e) {
 Drawing.prototype.raise = function() {
     if (this.canvas) this.canvas.raise();
     if (this.svgGroup) this.svgGroup.raise();
+}
+
+/**
+ * Re-insert the drawing to the beginning of its parent
+ */
+Drawing.prototype.lower = function() {
+    if (this.canvas) this.canvas.lower();
+    if (this.svgGroup) this.svgGroup.lower();
 }
 
 /**

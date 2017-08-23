@@ -43,10 +43,17 @@ Zone.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'startDepth', props.startDepth);
     Utils.setIfNotNull(this, 'endDepth', props.endDepth);
     Utils.setIfNotNull(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
+
+    if (this.startDepth > this.endDepth) {
+        let tmp = this.startDepth;
+        this.startDepth = this.endDepth;
+        this.endDepth = tmp;
+    }
 }
 
 Zone.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
+    let self = this;
 
     this.svgContainer = plotContainer.select('.vi-track-svg-container');
     this.svgGroup = this.svgContainer.append('g')
@@ -61,6 +68,22 @@ Zone.prototype.init = function(plotContainer) {
 
     this.patternGroup = this.patternDefs.append('g');
     this.rect = this.svgGroup.append('rect');
+    this.lines = this.svgGroup.selectAll('line.vi-zone-line')
+        .data(['', ''])
+        .enter()
+        .append('line')
+        .attr('class', 'vi-zone-line');
+
+    this.lines.call(d3.drag()
+        .on('drag', function() {
+            self.lineDragCallback(d3.select(this));
+        })
+    );
+    this.textRect = this.svgGroup.append('rect')
+        .attr('class', 'vi-zone-text-rect');
+    this.text = this.svgGroup.append('text')
+        .attr('class', 'vi-zone-text')
+        .attr('font-size', 10);
 }
 
 Zone.prototype.doPlot = function(highlight) {
@@ -69,23 +92,17 @@ Zone.prototype.doPlot = function(highlight) {
 
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
-    let y1 = transformY(this.startDepth);
-    let y2 = transformY(this.endDepth);
 
+    let minY = transformY(this.startDepth);
+    let maxY = transformY(this.endDepth);
     let minX = d3.min(viewportX);
     let maxX = d3.max(viewportX);
-    let minY = d3.min([y1, y2]);
-    let maxY = d3.max([y1, y2]);
 
-    this.lines = this.svgGroup.selectAll('line.vi-zone-line')
+    this.lines
         .data([
             { x1: minX, y1: minY, x2: maxX, y2: minY },
             { x1: minX, y1: maxY, x2: maxX, y2: maxY }
-        ]);
-
-    this.lines.enter().append('line')
-        .attr('class', 'vi-zone-line');
-    this.lines
+        ])
         .attr('x1', function(d) { return d.x1; })
         .attr('x2', function(d) { return d.x2; })
         .attr('y1', function(d) { return d.y1; })
@@ -94,13 +111,43 @@ Zone.prototype.doPlot = function(highlight) {
         .attr('stroke-width', highlight ? 3 : 1)
         .attr('stroke-dasharray', highlight ? '5, 5' : '');
 
-    let fill = this.createFillStyle();
     this.rect
         .attr('x', minX)
         .attr('y', minY)
         .attr('width', maxX - minX)
         .attr('height', maxY - minY)
-        .attr('fill', fill);
+        .attr('fill', this.createFillStyle());
+    this.updateText();
+}
+
+Zone.prototype.updateText = function() {
+    this.text
+        .style('display', this.showName ? 'block' : 'none')
+        .text(this.name);
+    this.textRect
+        .style('display', this.showName ? 'block' : 'none');
+
+    let textRect = this.text.node().getBBox();
+    let rect = this.rect.node().getBBox();
+
+    let x = rect.x + (rect.width - textRect.width) / 2;
+    let y = rect.y + (rect.height - textRect.height) / 2;
+    let paddingBottom = 5;
+
+    if (y < rect.y || y + textRect.height + paddingBottom > rect.y + rect.height) {
+        this.text.style('display', 'none');
+        this.textRect.style('display', 'none')
+    }
+
+    this.text
+        .attr('x', x)
+        .attr('y', y + textRect.height);
+    this.textRect
+        .attr('x', x)
+        .attr('y', y)
+        .attr('width', textRect.width)
+        .attr('height', textRect.height + paddingBottom)
+        .attr('fill', 'white');
 }
 
 Zone.prototype.createFillStyle = function() {
@@ -165,4 +212,38 @@ Zone.prototype.updateHeader = function() {
         .attr('width', function(d) { return d.width; })
         .attr('height', function(d) { return d.height; })
         .attr('fill', this.createFillStyle());
+}
+
+Zone.prototype.lineDragCallback = function(line) {
+    let y = d3.mouse(this.root.node())[1];
+    let transformY = this.getTransformY();
+    line
+        .attr('y1', y)
+        .attr('y2', y);
+
+    let newYs = [];
+    this.lines.each(function() {
+        newYs.push(parseFloat(d3.select(this).attr('y1')));
+    });
+
+    let minY = d3.min(newYs);
+    let maxY = d3.max(newYs);
+
+    this.rect
+        .attr('y', minY)
+        .attr('height', maxY - minY);
+
+    this.startDepth = transformY.invert(minY);
+    this.endDepth = transformY.invert(maxY);
+    this.updateText();
+}
+
+Zone.prototype.onLineDragEnd = function(cb) {
+    let self = this;
+    this.lines.call(d3.drag()
+        .on('drag', function() {
+            self.lineDragCallback(d3.select(this));
+        })
+        .on('end', cb)
+    );
 }
