@@ -21,7 +21,6 @@ exports.SaveAsButtonClicked = function() {
 };
 
 exports.PrintButtonClicked = function () {
-    console.log('------------------', this);
     let $timeout = this.$timeout;
     let wiLogplotCtrl = this.wiLogplot;
     let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
@@ -286,7 +285,19 @@ exports.AnnotationsButtonClicked = function() {
 };
 
 exports.AddImageButtonClicked = function() {
-    console.log('AddImageButton is clicked');
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
+    let currentTrack = wiD3Ctrl.getCurrentTrack();
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let [top, bottom] = wiD3Ctrl.getDepthRangeFromSlidingBar();
+    let defaultConfig = {
+        top: top,
+        bottom: bottom,
+        left: 0,
+        width: 100
+    }
+    DialogUtils.imagePropertiesDialog(this.ModalService, wiD3Ctrl, defaultConfig, function (config) {
+        wiD3Ctrl.addImageToTrack(currentTrack, config);
+    })
 };
 
 exports.AddShadingButtonClicked = function() {
