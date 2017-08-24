@@ -4,6 +4,7 @@ const moduleName = 'wi-d3-crossplot';
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
     let graph = wiComponentService.getComponent('GRAPH');
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let viCrossplot;
 
     this.$onInit = function () {
@@ -23,14 +24,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Refresh",
             icon: "reload-16x16",
             handler: function () {
-
             }
         }, {
             name: "Properties",
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-
+                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function() {
+                    console.log("crossplotFormatDialog");
+                })
             }
         }, {
             name: "ShowOverlay",

@@ -1,0 +1,501 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Crossplot Format</h4>
+            </div>
+            <div class="modal-body padding-0 text-11px">
+                <wi-tabset>
+                    <wi-tab heading="Scales">
+                        <div class="container-fluid">
+                            <form class="form-horizontal form-condensed">
+                                <p></p>
+                                <div class="row">
+                                    <div class="col-sm-1 border-right">
+                                        <h6 class="text-bold"><strong>Axis</strong></h6>
+                                        <h6 class="padding-tb-normal">X</h6>
+                                        <h6 class="padding-tb-normal">Y</h6>
+                                        <h6 class="padding-tb-normal">Color</h6>
+                                    </div>
+                                    <div class="col-sm-2 border-right">
+                                        <h6 class="text-center text-bold"><strong>Curve Name</strong></h6>
+                                            <div class="padding-tb-small">
+                                                <select ng-model=""
+                                                        class="form-control wi-form-control padding-tb-small"
+                                                        ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"></select>
+                                                </td>
+                                            </div>
+                                            <div class="padding-tb-small">
+                                                <select ng-model=""
+                                                        class="form-control wi-form-control padding-tb-small"
+                                                        ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"></select>
+                                            </div>
+                                            <div class="padding-tb-small">
+                                                <select ng-model=""
+                                                        class="form-control wi-form-control padding-tb-small"
+                                                        ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"></select>
+                                            </div>
+                                    </div>
+
+                                    <div class="col-sm-5 border-right">
+                                        <h6 class="text-center text-bold"><strong>Scales</strong></h6>
+                                        <div class="col-sm-5 padding-tb-small margin-right-0_5em">
+                                            <label class="control-label col-sm-4 padding-tb-small">Left</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                            <label class="control-label col-sm-4 padding-tb-small">Bottom</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                            <label class="control-label col-sm-4 padding-tb-small">Min</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5 padding-tb-small margin-right-0_5em">
+                                            <label class="control-label col-sm-4 padding-tb-small">Right</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                            <label class="control-label col-sm-4 padding-tb-small">Top</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                            <label class="control-label col-sm-4 padding-tb-small">Max</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-1 padding-tb-small padding-left-20px">
+                                            <div class="checkbox padding-1em">
+                                                <label><input type="checkbox" value="">Log</label>
+                                            </div>
+                                            <div class="checkbox padding-1em">
+                                                <label><input type="checkbox" value="">Log</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <h6 class="text-center text-bold"><strong>Marjor</strong></h6>
+                                        <div class="padding-tb-normal">
+                                            <input type="number" class="form-control wi-form-control">
+                                        </div>
+                                        <div class="padding-tb-normal">
+                                            <input type="number" class="form-control wi-form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <h6 class="text-center text-bold"><strong>Minor</strong></h6>
+                                        <div class="padding-tb-normal">
+                                            <input type="number" class="form-control wi-form-control">
+                                        </div>
+                                        <div class="padding-tb-normal">
+                                            <input type="number" class="form-control wi-form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label class="control-label col-sm-3 padding-tb-small">Colors</label>
+                                            <div class="col-sm-9 padding-tb-small">
+                                                <input type="text" class="form-control wi-form-control">
+                                            </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">
+                                                Point Symbol
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control wi-form-control"
+                                                        ng-model=""
+                                                        ng-options="item for item in wiModal.selectPointSymbol">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Point Size</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3">
+                                                Color
+                                            </label>
+                                            <div class="col-sm-9">
+                                                <div class="float-left">
+                                                    <button ng-click="wiModal.colorCurve();"
+                                                            ng-style="{'background-color':wiModal.props.general.color}"
+                                                            class="form-control wi-form-control width-80px thick-border">
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2">
+                                                Overlay Lines
+                                            </label>
+                                            <div class="col-sm-10">
+                                                <select class="form-control wi-form-control">
+                                                    <option value="none">-------------</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <div class="checkbox padding-left-5-percent">
+                                                <label><input type="checkbox" value="">Standalone Pickett Crossplot</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-2 padding-left-3em">
+                                        <label>
+                                            <input type="radio" value="">
+                                            Interval Depths
+                                        </label>
+                                        <label>
+                                            <input type="radio" value="">
+                                            Zonal Depth
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Top (m)</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">
+                                                Zone set
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control wi-form-control">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Bottom (m)</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">
+                                                Active Zone
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control wi-form-control">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <div class="checkbox padding-left-15-percent">
+                                                    <label><input type="checkbox" value="">Show line</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div class="col-sm-4 padding-top-1em">
+                                                Line Mode
+                                            </div>
+                                            <div class="col-sm-8">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="">Horizontal
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="">Vertical
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Discriminators">
+                        <div class="container-fluid">
+                            <form class="form-horizontal form-condensed">
+                                <p></p>
+                                <h4>DISCRIMINATORS</h4>
+                                <p>Data are plotted when discriminators are true</p>
+                                <div class="col-sm-10">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <td>Use</td>
+                                                <td>Curve</td>
+                                                <td>Function</td>
+                                                <td>Curve/Value</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="curve in wiModal.getCurves()"
+                                                ng-class="{selected:$index == selectedRow}"
+                                                ng-click="wiModal.setClickedRow($index)">
+                                                <td>
+                                                    <input type="checkbox" value="">
+                                                </td> 
+                                                <td>
+                                                    <select ng-model=""
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item.id as item.datasetCurve for item in wiModal.arr"></select>
+                                                </td>
+                                                <td>
+                                                    <select ng-model=""
+                                                            class="form-control wi-form-control">
+                                                            <option value="">></option>
+                                                            <option value="">>=</option>            
+                                                            <option value="">=</option>            
+                                                            <option value=""><</option>            
+                                                            <option value=""><=</option>            
+
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select ng-model=""
+                                                            class="form-control wi-form-control"
+                                                            ng-options="item.id as item.datasetCurve for item in wiModal.arr"></select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-sm-2">
+                                    <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                                        <span class="delete-16x16"></span>
+                                    </button>
+                                    <button class="btn btn-default" ng-click="wiModal.addRow();">
+                                        <span class="ok-16x16"></span>
+                                    </button>
+                                    <p></p>
+                                    <p>Combine With</p>
+                                    <select class="form-control wi-form-control">
+                                        <option value="and">and</option>
+                                        <option value="or">or</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Axis Colors">
+                        <div class="container-fluid">
+                            <div class="empty">
+                            </div>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Options">
+                        <div class="container-fluid">
+                            <form class="form-horizontal form-condensed">
+                            <br>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2">Crossplot Title</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control wi-form-control"
+                                                        ng-model="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">X Axis Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control"
+                                                        ng-model="">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Y Axis Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control"
+                                                        ng-model="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Z Axis Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control"
+                                                        ng-model="">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Z1 Axis Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control"
+                                                        ng-model="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <div class="checkbox padding-left-5-percent">
+                                                <label><input type="checkbox" value="">Put regression line equation on plot</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <h5>Hard Copy</h5>
+                                        <div class="col-sm-6">
+                                            <label class="control-label col-sm-4 padding-tb-small">Width (inch)</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                            <label class="control-label col-sm-4 padding-tb-small">Height (inch)</label>
+                                            <div class="col-sm-8 padding-tb-small">
+                                                <input type="number" class="form-control wi-form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 padding-tb-small padding-left-20px">
+                                            <div class="checkbox padding-1em">
+                                                <label><input type="checkbox" value="">Plot Zone, depth and parameter info</label>
+                                            </div>
+                                            <div class="checkbox padding-1em">
+                                                <label><input type="checkbox" value="">Plot Achive Zone Title</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <h5>Frequency</h5>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <div class="checkbox padding-left-15-percent">
+                                                    <label><input type="checkbox" value="">Display</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3">Position</label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control wi-form-control"
+                                                            ng-model="wiModal.props.general.title"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3">
+                                                    Color
+                                                </label>
+                                                <div class="col-sm-9">
+                                                    <div class="float-left">
+                                                        <button ng-click="wiModal.colorCrossplot();"
+                                                                ng-style="{'background-color':wiModal.props.general.color}"
+                                                                class="form-control wi-form-control width-80px thick-border">
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Reference Colors">
+                        <div class="container-fluid">
+                            <form class="form-horizontal form-condensed">
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5">Top Depth (m)</label>
+                                                <div class="col-sm-7">
+                                                    <input type="number" class="form-control wi-form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5">Scale</label>
+                                                <div class="col-sm-7">
+                                                    <select class="form-control wi-form-control"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5">Bottom Depth (m)</label>
+                                                <div class="col-sm-7">
+                                                    <input type="number" class="form-control wi-form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5">Vert. Line Number</label>
+                                                <div class="col-sm-7">
+                                                    <select class="form-control wi-form-control"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" value="">Depth Default</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" value="">Display</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <div class="checkbox padding-left-5-percent">
+                                                <label><input type="checkbox" value="">Show Depth Grid Line</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                            </form>
+                        </div>
+                    </wi-tab>
+                </wi-tabset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

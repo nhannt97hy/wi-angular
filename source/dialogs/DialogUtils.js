@@ -1624,6 +1624,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let error = null;
         let self = this;
         wiModal = self;
+        console.log("logPlot", wiLogplotCtrl);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
@@ -2972,3 +2973,88 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
     });
 }
 */
+exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback){
+    function ModalController(wiComponentService, close) {
+        let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        this.datasetsInWell = new Array();
+        this.curvesInWell = new Array();
+        this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
+        console.log("Crossplot", wiCrossplotCtrl);
+        this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
+        this.well.children.forEach( function(child) {
+            if(child.type == 'dataset') self.datasetsInWell.push(child);
+        });
+        this.datasetsInWell.forEach(function(child) {
+            child.children.forEach(function(item) {
+                if(item.type == 'curve') self.curvesInWell.push(item);
+            })
+        });
+        this.curvesInWell.forEach(function(item, index) {
+            let curvesOnDatasetItem = item;
+            curvesOnDatasetItem.datasetCurve = utils.findDatasetById(item.properties.idDataset).properties.name + '.' + item.properties.name;
+            self.curvesOnDataset.push(curvesOnDatasetItem);    
+        });
+        console.log("curve", this.curvesOnDataset);
+
+        this.props = {
+            scales: {
+
+            },
+            discriminators: {
+
+            },
+            axisColor: {
+
+            },
+            options: {
+
+            },
+            referenceColor: {
+
+            }
+        };
+        this.selectPointSymbol = ["Cicle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        // modal button
+        this.colorCurve = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        };
+        this.colorCrossplot = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        }
+        this.removeRow = function(){
+            console.log("removeRowClicked");
+        };
+        this.addRow = function() {
+            console.log("addRowClicked");
+        };
+        this.onOkButtonClicked = function() {
+            close(self);
+        };
+        this.onApplyButtonClicked = function() {
+            console.log("onApplyButtonClicked");
+        };
+        this.onCancelButtonClicked = function() {
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "crossplot-format/crossplot-format-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+};

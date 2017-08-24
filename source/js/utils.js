@@ -878,7 +878,12 @@ exports.findWellByLogplot = function(idLogplot) {
     }) || [];
     return path[1];
 };
-
+exports.findWellByCrossplot = function(idCrossplot) {
+    var path = getSelectedPath(function(node) {
+        return node.type == 'crossplot' && node.id == idCrossplot;
+    }) || [];
+    return path[1];
+}
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';
