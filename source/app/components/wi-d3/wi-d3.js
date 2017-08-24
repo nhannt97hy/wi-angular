@@ -1056,7 +1056,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Image",
             icon: 'image-add-16x16',
             handler: function () {
-                self.addImageToTrack(_currentTrack, {});
+                logplotHandlers.AddImageButtonClicked();
             }
         },
         {

@@ -3,9 +3,13 @@ const moduleName = 'wi-api-service';
 
 let app = angular.module(moduleName, []);
 
+const BASE_URL = 'http://54.169.109.34';
+// const BASE_URL = 'http://localhost:3000';
+
 // route: GET, CREATE, UPDATE, DELETE
 const UPLOAD_FILE = '/file-1';
 const IMPORT_FILE = '/file-2';
+const UPLOAD_IMAGE = '/image-upload'
 
 const GET_PROJECT = '/project/fullinfo';
 
@@ -181,7 +185,7 @@ Service.prototype.postWithFile = function (route, dataPayload) {
     });
 }
 
-Service.prototype.postMultiFiles = function (route, dataPayload) {
+/* Service.prototype.postMultiFiles = function (route, dataPayload) {
     var self = this;
     return new Promise(function (resolve, reject) {
         let configUpload = {
@@ -214,7 +218,7 @@ Service.prototype.postMultiFiles = function (route, dataPayload) {
             }
         );
     });
-}
+} */
 
 Service.prototype.uploadFile = function (data, callback) {
     let self = this;
@@ -608,9 +612,18 @@ Service.prototype.infoShading = function(idShading, callback) {
             self.getUtils().error(err);
         });
 }
+Service.prototype.uploadImage = function (data, callback) {
+    let self = this;
+    this.postWithFile(UPLOAD_IMAGE, data)
+        .then(function (returnData) {
+            callback(BASE_URL + returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
-    const BASE_URL = 'http://54.169.109.34';
-    //const BASE_URL = 'http://localhost:3000';
     return new Service(BASE_URL, $http, wiComponentService, Upload);
 });
 

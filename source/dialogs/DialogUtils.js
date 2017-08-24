@@ -3041,7 +3041,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             console.log("onApplyButtonClicked");
         };
         this.onCancelButtonClicked = function() {
-            close(null);
+             close(null);
         }
     }
     ModalService.showModal({
@@ -3054,7 +3054,86 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+            if (!ret) return;
             callback(ret);
         });
     });
 };
+exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);       
+        this.imageFile = null;
+        this.src = config.src || '';
+        this.top = config.top;
+        this.bottom = config.bottom;
+        this.left = config.left;
+        this.width = config.width;
+
+        this.onUploadButtonClicked = function () {
+            wiApiService.uploadImage({ file: self.imageFile }, function (imageUrl) {
+                $scope.$apply(function () {
+                    self.src = imageUrl;
+                    self.onImageUrlChange();
+                });
+            })
+        }
+        
+        // current track dimensions
+        let currentTrack = wiD3Ctrl.getCurrentTrack();
+        let trackHeight = $(`wi-d3[name=${wiD3Ctrl.name}] .vi-track-container[data-order-num=${currentTrack.orderNum}] .vi-track-plot-container`).height();
+        let trackWidth = $(`wi-d3[name=${wiD3Ctrl.name}] .vi-track-container[data-order-num=${currentTrack.orderNum}] .vi-track-plot-container`).width();
+
+        let [trackTop, trackBottom] = wiD3Ctrl.getDepthRangeFromSlidingBar(); // top & bottom track in meter
+        let mPerPx = (trackBottom-trackTop)/trackHeight;
+        this.onImageUrlChange = utils.debounce(function () {
+            let img = new Image();
+            img.onload = function(){
+                let imageWidth = this.width;
+                let imageHeight = this.height;
+                $scope.$apply(function () {
+                    self.left = 50;
+                    self.width = 50;
+                    let imageScaleRatio = trackWidth/imageWidth;
+                    let imageScaleHeight = imageHeight * imageScaleRatio * (self.width/100); // image height in pixel
+                    console.log(mPerPx, imageScaleRatio, imageScaleHeight);
+                    self.bottom = (mPerPx * imageScaleHeight) + self.top;
+                });
+            };
+            img.src = self.src;
+        }, 500)
+
+        function getConfig() {
+            return {
+                src: self.src,
+                top: self.top,
+                bottom: self.bottom,
+                left: self.left,
+                width: self.width
+            }
+        }
+        this.onApplyButtonClicked = function () {
+            callback(getConfig());
+        }
+        this.onOkButtonClicked = function () {
+            close(getConfig(), 200);
+        }
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "image-properties/image-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+            callback(ret);
+        });
+    });
+}
