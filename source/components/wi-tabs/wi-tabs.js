@@ -30,7 +30,7 @@ function TabsetController() {
 
     this.addTab = function (tab) {
         self.tabs.push(tab);
-        self.tabs[self.tabs.length - 1].active = (self.tabs.length === 1);
+        self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
     };
 
     function deactiveAllTabs(tabs) {
@@ -51,8 +51,9 @@ app.component(tabsetComponentName, {
 
 function TabController() {
     let self = this;
-
+        
     this.$onInit = function () {
+        if (!self.enabled) self.enabled = 'true';
         self.wiTabsetCtrl.addTab(self);
     };
 }
@@ -67,7 +68,9 @@ app.component(tabComponentName, {
     },
     bindings: {
         heading: '@',
-        closable: '@'
+        closable: '@',
+        active: '<',
+        enabled: '<'
     }
 });
 

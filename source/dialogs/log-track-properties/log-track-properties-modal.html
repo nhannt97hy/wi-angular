@@ -7,8 +7,8 @@
             </div>
             <div class="modal-body padding-0">
                 <wi-tabset>
-                    <wi-tab heading="General">
-                        <div class="container-fluid">
+                    <wi-tab heading="General" enabled="wiModal.tabFlags[0]">
+                        <div ng-show="wiModal.tabFlags[0] == 'true'" class="container-fluid">
                             <form action="" class="form-horizontal form-condensed">
                                 <div id="header">
                                     <h5>Header</h5>
@@ -160,12 +160,8 @@
                                             </label>
                                             <div class="col-sm-7">
                                                 <div class="float-left">
-                                                    <!-- <input kendo-color-picker k-palette="'websafe'"
-                                                           class="form-control wi-form-control"
-                                                        ng-model="wiModal.props.general.color"/> -->
-                                                    <div class="addon valign-middle" 
-                                                        ng-style="{'background-color':wiModal.props.general.color}"><img/></div>
                                                     <button ng-click="wiModal.colorTrack();"
+                                                            ng-style="{'background-color':wiModal.props.general.color}"
                                                             class="form-control wi-form-control width-80px">
                                                             Change
                                                     </button>
@@ -178,8 +174,8 @@
                             </form>
                         </div>
                     </wi-tab>
-                    <wi-tab heading="Curve">
-                        <div class="container-fluid">
+                    <wi-tab heading="Curve" enabled="wiModal.tabFlags[1]">
+                        <div ng-show="wiModal.tabFlags[1] == 'true'" class="container-fluid">
                             <form action="" class="form-horizontal">
                                 <div class="width-95-percent float-left">
                                     <table class="font-size-10px table table-bordered curveTable">
@@ -273,8 +269,8 @@
                             </form>
                         </div>
                     </wi-tab>
-                    <wi-tab heading="Shading">
-                        <div class="container-fluid padding-top-2em padding-bottom-2em">
+                    <wi-tab heading="Shading" active="wiModal.shadingOnly;" enabled="wiModal.tabFlags[2]">
+                        <div ng-show="wiModal.tabFlags[2] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="col-sm-11">
                                     <table style="border-collapse: collapse;" class="font-size-10px shadingTable col-sm-12">
@@ -295,31 +291,32 @@
                                                 <td class="text-center border"><strong>Shading Style</strong></td>
                                                 <td class="text-center border border-style1-right"><strong>Shading Options</strong></td>
                                             </tr>
-                                            <tr ng-repeat="shading in wiModal.shadingArr" 
+                                            <tr ng-repeat="shading in wiModal.getShadings()" 
                                                 ng-class="{'selected':$index == selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
                                                 <td class="border border-style1-left">
                                                     <select ng-model="shading.idLeftLine" name="curveName"
                                                             class="form-control wi-form-control" 
-                                                            ng-options="item.id as item.name for item in wiModal.curveList"
-                                                            ng-change="wiModal.onChangeShading($index)"></select>
+                                                            ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
+                                                            ng-change="wiModal.onChangeShading($index);
+                                                            wiModal.setShadingName(shading.idLeftLine, shading._index, false);"></select>
                                                 </td>
                                                 <td class="border border-style1-right">
-                                                    <input type="text" ng-model="shading.leftFixedValue" 
+                                                    <input type="number" ng-model="shading.leftFixedValue" 
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index)"
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, false);"
                                                             size="6">
                                                 </td>
                                                 <td class="border">
                                                     <select ng-model="shading.idRightLine" name="curveName"
                                                             class="form-control wi-form-control" 
-                                                            ng-options="item.id as item.name for item in wiModal.curveList"
-                                                            ng-change="wiModal.onChangeShading($index)"></select>
+                                                            ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading._index, true);"></select>
                                                 </td>
                                                 <td class="border border-style1-right">
-                                                    <input type="text" ng-model="shading.rightFixedValue" 
+                                                    <input type="number" ng-model="shading.rightFixedValue" 
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index)" size="6">
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, true);" size="6">
                                                 </td>
                                                 <td class="border">
                                                     <input type="text" ng-model="shading.name" 

@@ -278,7 +278,7 @@ function createFillStyles(ctx, fills, callback) {
         function(loop) {
             let fill = fills[loop.iteration()];
             if (!fill) {
-                patterns.push(null);
+                patterns.push('transparent');
                 loop.next();
             }
             else if (fill.color) {
@@ -305,11 +305,12 @@ function createFillStyles(ctx, fills, callback) {
                 let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
                 let transform = d3.scaleLinear()
                     .domain([startX, endX])
-                    .range([startColor, endColor]);
+                    .range([startColor, endColor])
+                    .clamp(true);
 
                 for (let i = 0; i < data.length - 1; i ++) {
                     let x = data[i].x;
-                    let color = x < startX ? startColor : (x > endX ? endColor : transform(x));
+                    let color = transform(x);
                     gradient.addColorStop((data[i].y - minY) / (maxY-minY), color);
                     gradient.addColorStop((data[i+1].y - minY) / (maxY-minY), color);
                 }
@@ -317,7 +318,7 @@ function createFillStyles(ctx, fills, callback) {
                 loop.next();
             }
             else {
-                patterns.push(null);
+                patterns.push('transparent');
                 loop.next();
             }
         },

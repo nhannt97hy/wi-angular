@@ -299,7 +299,8 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     let rightName = rightCurve ? rightCurve.name : 'right';
     config.name = config.name || (leftName + ' - ' + rightName);
 
-    if (config.isNegPosFilling == null && !config.fill) {
+//    if (config.isNegPosFilling == null && !config.fill) {
+    if (config.isNegPosFill == null && !config.fill) {
         config.fill = {
             pattern: {
                 name: 'none',
@@ -371,7 +372,9 @@ LogTrack.prototype.removeCurve = function(curve) {
  * @param {Object} shading - The shading object to remove
  */
 LogTrack.prototype.removeShading = function(shading) {
+    console.log("shading", shading);
     if (shading && shading.isShading())
+
         this.removeDrawing(shading);
 }
 
