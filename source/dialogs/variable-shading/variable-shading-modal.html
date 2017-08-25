@@ -15,7 +15,8 @@
                         <div class="col-sm-3">
                             <select class="form-control wi-form-control"
                                     ng-model="wiModal.options.idControlCurve"
-                                    ng-options="item.properties.idCurve as item.datasetCurve for item in wiModal.selectCurve"></select>
+                                    ng-options="item.idCurve as item.datasetCurve for item in wiModal.selectCurve"
+                                    ng-change="wiModal.selectedControlCurve(wiModal.options.idControlCurve)"></select>
                         </div>
                     </div>
                     <div class="row">
@@ -58,12 +59,12 @@
                         <div class="col-sm-3">
                                     <button ng-click="wiModal.startColor()"
                                             ng-style="{'background-color':wiModal.options.gradient.startColor}"
-                                            class="form-control wi-form-control width-80px">Change</button>
+                                            class="form-control wi-form-control width-80px thick-border"></button>
                         </div>
                         <div class="col-sm-3">
                                     <button ng-click="wiModal.endColor()"
                                             ng-style="{'background-color':wiModal.options.gradient.endColor}"
-                                            class="form-control wi-form-control width-80px">Change</button>
+                                            class="form-control wi-form-control width-80px thick-border"></button>
                         </div>
                     </div>
                     <!-- <div class="row">

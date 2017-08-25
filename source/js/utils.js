@@ -108,6 +108,8 @@ function lineToTreeConfig(line) {
         scale: line.displayType,
         alias: curveModel.properties.alias,
         showHeader: line.showHeader,
+        blockPosition: line.blockPosition,
+        wrapMode: line.wrapMode,
         line: null,
         symbol: null
     };
@@ -756,24 +758,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             eventEmitter.emitEvent('line-drawed', [someTrack]);
                         });
                     });
-                    // aTrack.shadings.forEach(function(shading) {
-                    //     let shadingModel = shadingToTreeConfig(shading);
-                    //     console.log(shading);
-                    //     wiApiService.infoLine(shading.idRightLine, function(line) {
-                    //         console.log(line);
-                    //         getCurveData(wiApiService, line.idCurve, function (err, data) {
-                    //             let lineModel = lineToTreeConfig(line);
-                    //             if (!err) {
-                    //                 let lineObj = wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
-                    //                 wiD3Ctrl.addLeftShadingToTrack(trackObj, lineObj, shadingModel.data);
-                    //             }
-                    //             else {
-                    //                 console.error(err);
-                    //                 wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                    //             }
-                    //         });
-                    //     })
-                    // });
+                    
                 }
                 aTrack = tracks.shift();
             }
@@ -1121,8 +1106,8 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         autoValueScale: false,
         displayType : currentCurve.scale,
         displayMode : getDisplayMode(currentCurve),
-        wrapMode : "None", //default
-        blockPosition : "None", //default
+        wrapMode : currentCurve.wrapMode.capitalize(), 
+        blockPosition : currentCurve.blockPosition.capitalize(), 
         displayAs : "Normal" //default
     }
     return options;

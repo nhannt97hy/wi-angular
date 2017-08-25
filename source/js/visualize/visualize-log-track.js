@@ -821,7 +821,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
         d3.event.currentDrawing = this.currentDrawing;
         return;
     }
-    this.getShadings().concat(this.getCurves()).forEach(function(d) {
+    this.getCurves().concat(this.getShadings()).forEach(function(d) {
         if (!current && d.nearPoint(x, y)) {
             current = d;
             d3.event.currentDrawing = current;

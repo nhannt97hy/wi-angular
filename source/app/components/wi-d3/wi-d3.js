@@ -787,7 +787,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, _currentTrack, self.wiLogplotCtrl)
+                DialogUtils.curvePropertiesDialog(
+                    ModalService, 
+                    wiComponentService, 
+                    wiApiService, 
+                    DialogUtils, 
+                    currentCurve, 
+                    _currentTrack, 
+                    self.wiLogplotCtrl)
             }
         }, {
             name: "EditCurve",
@@ -906,7 +913,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     //     showRefLine: true
                     // };
                     console.log("curve1", _currentTrack, curve1);
-                    self.addLeftShadingToTrack(_currentTrack, curve1, config);
+                    self.addCustomShadingToTrack(_currentTrack, curve1, 100, config);
                 }
                 else {
                     self.addPairShadingToTrack(_currentTrack, curve1, curve2, {});

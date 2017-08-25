@@ -91,7 +91,7 @@ exports.buildLogTrack = function(config) {
 /**
  * Build a new visualize curve object without creating DOM element
  * @param {Object} config - Configurations of new Curve
- * @param {Array} data - Curve data
+ * @param {Array} data - Array containing x, y coordinates
  * @returns {Object} The built curve
  */
 exports.buildCurve = function(config, data) {

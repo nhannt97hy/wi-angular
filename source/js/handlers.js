@@ -908,3 +908,4 @@ exports.AboutButtonClicked = function () {
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
+

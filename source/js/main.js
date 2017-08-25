@@ -1,3 +1,8 @@
+String.prototype.capitalize = function() {
+    if (this.length < 1) return this;
+    return this.replace(this[0], this[0].toUpperCase());
+}
+
 let appConfig = require('./app.config');
 let utils = require('./utils');
 
@@ -32,6 +37,7 @@ let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
+// let crossplotHanders = require('./wi-crossplot-handlers');
 
 let graph = require('./visualize/visualize');
 let dragMan = {

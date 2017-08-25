@@ -17,7 +17,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(self.crossplotAreaId)
         $timeout(createVisualizeCrossplot);
     };
+    function PropertyGridButtonClicked() {
+        console.log('PropertyGridButton is clicked');
+        let layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
 
+            layoutManager.putComponentRight('property-block', 'Reference Window');
+    }
     this.contextMenu = [
         {
             name: "Refresh",
@@ -53,7 +58,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Show Reference Window",
             icon: "logplot-blank-16x16",
             handler: function () {
-
+                PropertyGridButtonClicked();
             }
         }, {
             name: "ShowTooltip",
