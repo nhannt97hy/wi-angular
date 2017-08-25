@@ -39,11 +39,12 @@ function only(obj, attrs) {
     return newObj;
 }
 
+/**
+ * Merge props into obj with each value in props being processed by evalFunc
+ */
 function merge(obj, props, evalFunc) {
     Object.keys(props).forEach(function(key) {
-        console.log('key', key)
         setIfNotUndefined(obj, key, evalFunc ? evalFunc(props, key) : props[key]);
-        console.log(evalFunc(props, key))
     });
 }
 

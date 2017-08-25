@@ -5,9 +5,19 @@ module.exports = ViImage;
 
 Utils.extend(Drawing, ViImage);
 
+/**
+ * Represents an Image
+ * @constructor
+ * @param {Object} config - Configurations of new image
+ * @param {Number} [config.idImage] - The id of this image in backend
+ * @param {String} [config.src] - Link to the image
+ * @param {Number} [config.top] - Top depth of the image
+ * @param {Number} [config.bottom] - Bottom depth of the image
+ * @param {Number} [config.left] - Margin left of the image (in percent)
+ * @param {Number} [config.width] - Width of the image (in percent)
+ */
 function ViImage(config) {
     Drawing.call(this, config);
-    console.log('config', config);
 
     this.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSarZEJPiMYzVmU_95UQAahZB2Fi6hH24UstuGJC-23Qzsvoktr';
     this.top = null;
@@ -24,7 +34,7 @@ ViImage.prototype.FLOAT_PROPERTIES = ['top', 'bottom', 'left', 'width'];
 
 ViImage.prototype.getProperties = function() {
     let props = Utils.only(this, this.PROPERTIES);
-    props.idImage = this.image;
+    props.idImage = this.id;
     return props;
 }
 

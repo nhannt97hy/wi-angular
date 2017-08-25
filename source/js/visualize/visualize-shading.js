@@ -139,7 +139,7 @@ Shading.prototype.setProperties = function(props) {
         Utils.setIfNotNull(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
     }
     else {
-        if (props.fill) 
+        if (props.fill)
             Utils.setIfNotNull(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
         else Utils.setIfNotNull(this, 'fill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
     }
@@ -209,14 +209,13 @@ Shading.prototype.destroy = function() {
 
 /**
  * Adjust shading when bounding rectangle changes
- * @param {Object} rect - The bounding rectangle
  */
-Shading.prototype.adjustSize = function(rect) {
+Shading.prototype.adjustSize = function() {
     let vpRefX = this.getTransformX(this.selectedCurve)(this.refX);
     this.refLine
         .attr('x1', vpRefX)
         .attr('x2', vpRefX);
-    Drawing.prototype.adjustSize.call(this, rect);
+    Drawing.prototype.adjustSize.call(this);
     return this;
 }
 
@@ -261,7 +260,7 @@ Shading.prototype.doPlot = function(highlight) {
 
     if (!this.leftCurve && !this.rightCurve) return;
     let rect = this.root.node().getBoundingClientRect();
-    this.adjustSize(rect);
+    this.adjustSize();
 
     let leftData = this.prepareData(this.leftCurve);
     let rightData = this.prepareData(this.rightCurve);
