@@ -37,7 +37,7 @@ let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
-// let crossplotHanders = require('./wi-crossplot-handlers');
+let crossplotHanders = require('./wi-crossplot-handlers');
 
 let graph = require('./visualize/visualize');
 let dragMan = {
@@ -134,21 +134,24 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
     wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
-
+    // Crossplot Handlers
+    wiComponentService.putComponent(wiComponentService.CROSSPLOT_HANDLERS, crossplotHanders);
     // dependency 3rd component
     // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
     
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(globalHandlers, logplotHandlers, functionBindingProp);
+    utils.bindFunctions(globalHandlers, crossplotHanders, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
     utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
+
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
-
+    window.__HANDLERS = globalHandlers;
 
     // config explorer block - treeview
     // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
