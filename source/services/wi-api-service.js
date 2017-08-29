@@ -4,13 +4,15 @@ const moduleName = 'wi-api-service';
 let app = angular.module(moduleName, []);
 
 const BASE_URL = 'http://54.169.109.34';
-// const BASE_URL = 'http://localhost:3000';
+//const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
+const UPLOAD_MULTIFILES = '/files';
+const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
-const IMPORT_FILE = '/file-2';
 const UPLOAD_IMAGE = '/image-upload'
 
+const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
 
 const EDIT_WELL = '/project/well/edit';
@@ -26,6 +28,8 @@ const EXPORT_CURVE = '/project/well/dataset/curve/export';
 const CREATE_CURVE = '/project/well/dataset/curve/new';
 const EDIT_CURVE = '/project/well/dataset/curve/edit';
 const DELETE_CURVE = '/project/well/dataset/curve/delete';
+const COPY_CURVE = '/project/well/dataset/curve/copy';
+const CUT_CURVE = '/project/well/dataset/curve/move';
 
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
@@ -90,7 +94,7 @@ Service.prototype.GET_SHADING = GET_SHADING;
 
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
-Service.prototype.getUtils = function() {
+Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     // console.log(utils);
     return utils;
@@ -164,14 +168,14 @@ Service.prototype.postWithFile = function (route, dataPayload) {
 
         self.Upload.upload(configUpload).then(
             function (responseSuccess) {
-                if (responseSuccess.data && responseSuccess.data.content){
+                if (responseSuccess.data && responseSuccess.data.content) {
                     return resolve(responseSuccess.data.content);
                 } else {
                     return reject('Response is invalid!');
                 }
             },
             function (responseError) {
-                if (responseError.data && responseError.data.content){
+                if (responseError.data && responseError.data.content) {
                     return reject(responseError.data.reason);
                 } else {
                     return reject(responseError);
@@ -185,28 +189,29 @@ Service.prototype.postWithFile = function (route, dataPayload) {
     });
 }
 
-/* Service.prototype.postMultiFiles = function (route, dataPayload) {
+Service.prototype.uploadMultiFiles = function (dataPayload) {
     var self = this;
     return new Promise(function (resolve, reject) {
         let configUpload = {
-            url: self.baseUrl + route,
+            url: self.baseUrl + UPLOAD_MULTIFILES,
             headers: {
                 'Referrer-Policy': 'no-referrer'
             },
+            arrayKey: '',
             data: dataPayload
         };
 
         self.Upload.upload(configUpload).then(
             function (responseSuccess) {
-                console.log('response', responseSuccess);
-                if (responseSuccess.data && responseSuccess.data.content){
+                //console.log('response', responseSuccess);
+                if (responseSuccess.data && responseSuccess.data.content) {
                     return resolve(responseSuccess.data.content);
                 } else {
                     return reject('Response is invalid!');
                 }
             },
             function (responseError) {
-                if (responseError.data && responseError.data.content){
+                if (responseError.data && responseError.data.content) {
                     return reject(responseError.data.reason);
                 } else {
                     return reject(responseError);
@@ -218,7 +223,43 @@ Service.prototype.postWithFile = function (route, dataPayload) {
             }
         );
     });
-} */
+}
+
+Service.prototype.uploadMultiFilesPrepare = function (dataPayLoad, callback) {
+    let self = this;
+    let configUpload = {
+        url: self.baseUrl + UPLOAD_MULTIFILES_PREPARE,
+        headers: {
+            'Referrer-Policy': 'no-referrer'
+        },
+        arrayKey: '',
+        data: dataPayLoad
+    };
+    self.Upload.upload(configUpload).then(function (response) {
+        callback(response.data.content);
+    }).catch(function (err) {
+        console.log(err);
+        self.getUtils().error(err);
+    });
+}
+
+// Service.prototype.uploadMultiFiles = function (dataPayLoad, callback) {
+//     let self = this;
+//     let configUpload = {
+//         url: self.baseUrl + UPLOAD_MULTIFILES,
+//         headers: {
+//             'Referrer-Policy': 'no-referrer'
+//         },
+//         arrayKey: '',
+//         data: dataPayLoad
+//     };
+//     self.Upload.upload(configUpload).then(function (response) {
+//         callback(response.data.content);
+//     }).catch(function (err) {
+//         console.log(err);
+//         self.getUtils().error(err);
+//     });
+// }
 
 Service.prototype.uploadFile = function (data, callback) {
     let self = this;
@@ -243,53 +284,11 @@ Service.prototype.uploadFile = function (data, callback) {
             callback(returnData);
         })
         .catch(function (err) {
-            self.getUtils().error(err);            
+            self.getUtils().error(err);
         });*/
 }
 
-Service.prototype.uploadMultiFiles = function (data, callback) {
-    let self = this;
-    let returnData = [
-        {
-            well: 'W4',
-            step: 0.1524,
-            topDepth: 1119.8325,
-            bottomDepth: 2184.8064,
-            depthUnit: 'M',
-            curves: [
-                {
-                    lasName: 'DTCO3',
-                    unit: 'US/F'
-                }, {
-                    lasName: 'ECGR',
-                    unit: 'GAPI'
-                }
-            ]
-        }, {
-            well: 'W3',
-            step: 0.1524,
-            topDepth: 1146.048,
-            bottomDepth: 2108.3016,
-            depthUnit: 'M',
-            curves: [
-                {
-                    lasName: 'ECGR',
-                    unit: 'GAPI'
-                }
-            ]
-        }
-    ];
-    callback(returnData);
-    /*this.postWithFile(UPLOAD_MULTI_FILES, data)
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);            
-        });*/
-}
-
-Service.prototype.editWell = function(infoWell, callback) {
+Service.prototype.editWell = function (infoWell, callback) {
     let self = this;
     console.log('infoWell', infoWell);
     this.post(EDIT_WELL, infoWell)
@@ -300,8 +299,8 @@ Service.prototype.editWell = function(infoWell, callback) {
         });
 }
 
-Service.prototype.removeWell = function(idWell, callback) {
-    let self = this;    
+Service.prototype.removeWell = function (idWell, callback) {
+    let self = this;
     let dataRequest = {
         idWell: idWell
     }
@@ -332,7 +331,7 @@ Service.prototype.editDataset = function (infoDataset, callback) {
         });
 }
 
-Service.prototype.removeDataset = function(idDataset, callback) {
+Service.prototype.removeDataset = function (idDataset, callback) {
     let self = this;
     let dataRequest = {
         idDataset: idDataset
@@ -344,7 +343,24 @@ Service.prototype.removeDataset = function(idDataset, callback) {
             self.getUtils().error(err);
         });
 }
-
+//hoangbd start
+Service.prototype.copyCurve = function (copyData, callback) {
+    let self = this;
+    this.post(COPY_CURVE, copyData).then(function (rs) {
+        callback(rs);
+    }).catch(function (err) {
+        self.getUtils().error(err);
+    });
+}
+Service.prototype.cutCurve = function (cutData, callback) {
+    let self = this;
+    this.post(CUT_CURVE, cutData).then(function (rs) {
+        callback(rs);
+    }).catch(function (err) {
+        self.getUtils().error(err);
+    });
+}
+//end hoangbd
 Service.prototype.createCurve = function (curveInfo, callback) {
     let self = this;
     console.log(curveInfo);
@@ -374,7 +390,7 @@ Service.prototype.editCurve = function (curveInfo, callback) {
 
 Service.prototype.infoCurve = function (idCurve, callback) {
     let self = this;
-    this.post(INFO_CURVE, { idCurve: idCurve })
+    this.post(INFO_CURVE, {idCurve: idCurve})
         .then(function (res) {
             callback(res)
         })
@@ -406,7 +422,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
     });
 }
 
-Service.prototype.removeCurve = function(idCurve, callback) {
+Service.prototype.removeCurve = function (idCurve, callback) {
     let self = this;
     let dataRequest = {
         idCurve: idCurve
@@ -430,7 +446,7 @@ Service.prototype.editLogplot = function (infoLogplot, callback) {
         });
 }
 
-Service.prototype.createLogTrack = function(idPlot, orderNum, callback) {
+Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
     var self = this;
     let dataRequest = {
         idPlot: idPlot,
@@ -447,20 +463,20 @@ Service.prototype.createLogTrack = function(idPlot, orderNum, callback) {
         });
 }
 
-Service.prototype.removeLogTrack = function(idTrack, callback) {
+Service.prototype.removeLogTrack = function (idTrack, callback) {
     var self = this;
     let dataRequest = {
         idTrack: idTrack
     };
     this.delete(DELETE_LOG_TRACK, dataRequest)
         .then(callback)
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
 }
 
-Service.prototype.infoTrack = function(idTrack, callback) {
+Service.prototype.infoTrack = function (idTrack, callback) {
     let self = this;
     let dataRequest = {
         idTrack: idTrack
@@ -470,27 +486,27 @@ Service.prototype.infoTrack = function(idTrack, callback) {
             if (!callback) return;
             callback(infoTrack);
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
 }
 
-Service.prototype.editTrack = function(trackObj, callback) {
+Service.prototype.editTrack = function (trackObj, callback) {
     var self = this;
     let dataRequest = trackObj;
     this.post(EDIT_TRACK, dataRequest)
-        .then(function(track) {
-            if (!callback) return;            
+        .then(function (track) {
+            if (!callback) return;
             callback(track);
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
 }
 
-Service.prototype.createDepthTrack = function(idPlot, orderNum, callback) {
+Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     var self = this;
     console.log("createDepthTrack", self);
     let dataRequest = {
@@ -499,32 +515,32 @@ Service.prototype.createDepthTrack = function(idPlot, orderNum, callback) {
     };
     this.post(CREATE_DEPTH_AXIS, dataRequest)
         .then(callback)
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
 }
-Service.prototype.removeDepthTrack = function(idDepthAxis, callback) {
+Service.prototype.removeDepthTrack = function (idDepthAxis, callback) {
     var self = this;
     let dataRequest = {
         idDepthAxis: idDepthAxis
     };
     this.delete(DELETE_DEPTH_AXIS, dataRequest)
         .then(callback)
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
 }
 
-Service.prototype.removeLine = function(idLine, callback) {
+Service.prototype.removeLine = function (idLine, callback) {
     var self = this;
     let dataRequest = {
         idLine: idLine
     };
     this.delete(DELETE_LINE, dataRequest)
         .then(callback)
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
@@ -551,7 +567,7 @@ Service.prototype.editLine = function (lineObj, callback) {
             self.getUtils().error(err);
         });
 }
-Service.prototype.infoLine = function(idLine, callback) {
+Service.prototype.infoLine = function (idLine, callback) {
     let self = this;
     let dataRequest = {
         idLine: idLine
@@ -561,11 +577,11 @@ Service.prototype.infoLine = function(idLine, callback) {
             if (!callback) return;
             callback(infoLine);
         })
-        .catch(function(err) {
+        .catch(function (err) {
             self.getUtils().error(err);
         });
 }
-Service.prototype.createShading = function(shadingObj, callback) {
+Service.prototype.createShading = function (shadingObj, callback) {
     var self = this;
     let dataRequest = shadingObj;
     this.post(CREATE_SHADING, dataRequest)
@@ -575,7 +591,7 @@ Service.prototype.createShading = function(shadingObj, callback) {
             self.getUtils().error(err);
         });
 }
-Service.prototype.editShading = function(shadingObj, callback) {
+Service.prototype.editShading = function (shadingObj, callback) {
     let self = this;
     let dataRequest = shadingObj;
 
@@ -586,19 +602,19 @@ Service.prototype.editShading = function(shadingObj, callback) {
             self.getUtils().error(err);
         });
 }
-Service.prototype.removeShading = function(idShading, callback) {
+Service.prototype.removeShading = function (idShading, callback) {
     var self = this;
     let dataRequest = {
         idShading: idShading
     };
     this.delete(DELETE_SHADING, dataRequest)
         .then(callback)
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
         });
 }
-Service.prototype.infoShading = function(idShading, callback) {
+Service.prototype.infoShading = function (idShading, callback) {
     let self = this;
     let dataRequest = {
         idShading: idShading
@@ -608,7 +624,7 @@ Service.prototype.infoShading = function(idShading, callback) {
             if (!callback) return;
             callback(infoShading);
         })
-        .catch(function(err) {
+        .catch(function (err) {
             self.getUtils().error(err);
         });
 }
