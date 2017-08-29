@@ -65,6 +65,7 @@ app.factory(wiServiceName, function () {
         UTILS: 'UTILS',
         COPYING_CURVE: 'copying-curve',
         CUTTING_CURVE: 'cutting-curve',
+        CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
         ITEM_ACTIVE_PAYLOAD: 'item-active-payload',

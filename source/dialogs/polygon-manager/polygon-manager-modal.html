@@ -6,9 +6,31 @@
                 <h4><span class=""></span>&nbsp;FRM Polygon Manager</h4>
             </div>
             <div class="modal-body text-center">
-                <form class="form-horizontal">
-                    
-                </form>
+                <div class="col-sm-11">
+                    <form class="form-horizontal">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <td></td>
+                                    <td>Polygons</td>
+                                    <td>Line Styke</td>
+                                    <td>Display</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr></tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                        <span class="delete-16x16"></span>
+                    </button>
+                    <button class="btn btn-default" ng-click="wiModal.addRow();">
+                            <span class="ok-16x16"></span>
+                    </button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>

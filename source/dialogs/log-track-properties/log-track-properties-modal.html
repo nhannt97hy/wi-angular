@@ -297,7 +297,9 @@
                                                             class="form-control wi-form-control" 
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
                                                             ng-change="wiModal.onChangeShading($index);
-                                                            wiModal.setShadingName(shading.idLeftLine, shading._index, false);" ng-disabled="!shading.idRightLine"></select>
+                                                            wiModal.setShadingName(shading.idLeftLine, shading._index, false);" ng-disabled="!shading.idRightLine">
+                                                                <option></option>
+                                                            </select>
                                                 </td>
                                                 <td class="border border-style1-right">
                                                     <input type="number" ng-model="shading.leftFixedValue" 

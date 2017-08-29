@@ -5,17 +5,17 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
                 <h4>Attribute</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body small-text">
                 <wi-tabset>
-                    <wi-tab heading="Line" ng-if="wiModal.lineOptions">
+                    <wi-tab heading="Line" ng-if="wiModal.lineOptions.display">
                         <div class="container-fluid">
                             <form action="" class="form-horizontal">
                                 <br>
                                 <div class="row">
-                                    <div class="col-sm-7">
+                                    <div class="col-sm-8">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4 normal-text" for="style">Line Style</label>
-                                            <div class="col-sm-8">
+                                            <label class="control-label col-sm-3" for="style">Line Style</label>
+                                            <div class="col-sm-9">
                                                 <ui-select theme="bootstrap" ng-model="wiModal.lineOptions.lineStyle.lineStyle">
                                                     <ui-select-match>
                                                         <svg height="10" width="100%" class="col-sm-12">
@@ -36,12 +36,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-5">
+                                    <div class="col-sm-4">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-6 normal-text" for="line-width">Line Width</label>
+                                            <label class="control-label col-sm-6" for="line-width">Line Width</label>
                                             <div class="col-sm-6">
                                                 <input type="number" id="line-width"
-                                                    min="1" max="50"
+                                                    min="1" max="10"
                                                     class="form-control wi-form-control"
                                                     ng-model="wiModal.lineOptions.lineStyle.lineWidth">
                                             </div>
@@ -49,13 +49,9 @@
                                     </div>
                                     <div class="col-sm-12">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-12 normal-text">Line Color</label>
+                                            <label class="control-label col-sm-12">Line Color</label>
                                             <div class="col-sm-12">
-                                                <!-- <input kendo-color-picker k-palette="'websafe'"
-                                                    class="form-control wi-form-control"
-                                                    ng-model="wiModal.lineOptions.lineStyle.lineColor"/>
-                                                {{wiModal.lineOptions.lineStyle.lineColor}} -->
-                                                <div class="valign-middle pull-left" style="height: 28px; width: 90%;" ng-style="{'background-color':wiModal.lineOptions.lineStyle.lineColor}"></div>
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.lineOptions.lineStyle.lineColor}"></div>
                                                 <button ng-click="wiModal.lineColor();" class="wi-form-control">...</button>
                                             </div>
                                         </div>
@@ -64,14 +60,14 @@
                             </form>
                         </div>
                     </wi-tab>
-                    <wi-tab heading="Symbol" ng-if="wiModal.symbolOptions">
+                    <wi-tab heading="Symbol" ng-if="wiModal.symbolOptions.display">
                         <div class="container-fluid">
                             <form class="form-horizontal">
                                 <br>
                                 <div class="row">
-                                    <div class="col-sm-7">
+                                    <div class="col-sm-8">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4 normal-text" for="style">Symbol Style</label>
+                                            <label class="control-label col-sm-4" for="style">Symbol Style</label>
                                             <div class="col-sm-8">
                                                 <ui-select theme="bootstrap" ng-model="wiModal.symbolOptions.symbolStyle.symbolLineDash">
                                                     <ui-select-match>
@@ -80,7 +76,7 @@
                                                                     style="stroke: {{wiModal.symbolOptions.symbolStyle.symbolStrokeStyle}}; stroke-width: 1}"></line>
                                                         </svg>
                                                     </ui-select-match>
-                                                    <ui-select-choices repeat="style in wiModal.symbolStyles" class="text-left">
+                                                    <ui-select-choices repeat="style in wiModal.lineStyles" class="text-left">
                                                         <div class="container-fluid">
                                                             <!--<div class="col-sm-2 text-left"></div>-->
                                                             <svg height="10" width="100%" class="col-sm-12">
@@ -94,12 +90,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-5">
+                                    <div class="col-sm-4">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-6 normal-text" for="style">Symbol Size</label>
+                                            <label class="control-label col-sm-6 padding-right-0">Symbol Size</label>
                                             <div class="col-sm-6">
                                                 <input type="number" id="symbol-size"
-                                                    min="1" max="50"
+                                                    min="1" max="30"
                                                     class="form-control wi-form-control"
                                                     ng-model="wiModal.symbolOptions.symbolStyle.symbolSize">
                                             </div>
@@ -107,8 +103,21 @@
                                     </div>
                                     <div class="col-sm-12">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4 normal-text">Pattern</label>
-                                            <div class="col-sm-8">
+                                            <label class="control-label col-sm-3">Border Color</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.symbolOptions.symbolStyle.symbolStrokeStyle}"></div>
+                                                <button ng-click="wiModal.borderColor();" class="wi-form-control">...</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3">Pattern</label>
+                                            <div class="col-sm-9">
                                                 <ui-select theme="bootstrap" ng-model="wiModal.symbolOptions.patternFill.pattern">
                                                     <ui-select-match>
                                                         <wi-canvas-rect name="_selectedPatternFill" 
@@ -128,14 +137,18 @@
                                                 </ui-select>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-sm-12">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4 normal-text" for="color">Border Color</label>
-                                            <div class="col-sm-8 text-left">
-                                                <button ng-click="wiModal.lineColor();" 
-                                                        ng-style="{'background-color':wiModal.symbolOptions.symbolStyle.symbolStrokeStyle}"
-                                                        class="form-control wi-form-control width-80px">Change</button>
+                                            <label class="control-label col-sm-3">Foreground</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.symbolOptions.patternFill.foreground}"></div>
+                                                <button ng-click="wiModal.foregroundColor();" class="wi-form-control">...</button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3">Background</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.symbolOptions.patternFill.foreground}"></div>
+                                                <button ng-click="wiModal.backgroundColor();" class="wi-form-control">...</button>
                                             </div>
                                         </div>
                                     </div>

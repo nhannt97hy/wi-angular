@@ -64,7 +64,7 @@ exports.UserDefineLineButtonClicked = function() {
 
 exports.PolygonManagerButtonClicked = function() {
     console.log('PolygonManagerButton is clicked');
-    let this = self;
+    let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.polygonManagerDialog(this.ModalService, function(){

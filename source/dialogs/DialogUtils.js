@@ -913,7 +913,7 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
 
         this.lineOptions = lineOptions;
         this.symbolOptions = symbolOptions;
-        
+        console.log("options", this)
         this.lineStyles = [[8, 2, 2, 2, 2, 2], [8, 2, 2, 2], [2, 2], [8, 2], [1, 0], [0, 1]];
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
@@ -924,6 +924,23 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
             });
+        };
+        this.borderColor = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.symbolStyle.symbolStrokeStyle, function (colorStr) {
+                self.symbolOptions.symbolStyle.symbolStrokeStyle = colorStr;
+            });
+        };
+        this.foregroundColor = function() {
+            console.log("patternForegroundColor");
+            /*DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.patternFill.foreground, function (colorStr) {
+                self.symbolOptions.patternFill.foreground = colorStr;
+            });*/
+        }
+        this.backgroundColor = function () {
+            console.log("patternBackgroundColor");
+            /*DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.patternFill.foreground, function (colorStr) {
+                self.symbolOptions.patternFill.foreground = colorStr;
+            });*/
         }
         this.onOkButtonClicked = function () {
             close(self.lineOptions, self.symbolOptions);
@@ -1196,7 +1213,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 default:
                     break;
             }
-            DialogUtils.curveAttributeDialog(ModalService, wiComponentService, lineOptions, symbolOptions, function (lineOptions, symbolOptions) {
+            DialogUtils.curveAttributeDialog(ModalService, wiComponentService, self.lineOptions, self.symbolOptions, function (lineOptions, symbolOptions) {
                 if (lineOptions) self.lineOptions = lineOptions;
                 if (symbolOptions) self.symbolOptions = symbolOptions;
                 self.drawSample();
@@ -3157,7 +3174,13 @@ exports.polygonManagerDialog = function (ModalService, callback){
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
+        // modal buttons
+        this.removeRow = function() {
+            console.log("removeRowButtonClicked");
+        };
+        this.addRow = function() {
+            console.log("addRowButtonClicked");
+        }
         this.onOkButtonClicked = function() {
             close(self);
         };
