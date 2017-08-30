@@ -1402,13 +1402,15 @@ exports.importLASDialog1 = function (ModalService, callback) {
 exports.importMultiLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
+        this.lasInfos = null;
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.isDisabled = true;
-        this.lasFiles = [];
+        this.lasFiles = null;
         this.selectedWells = [];
         this.selectedDatasets = [];
         this.transactionId = Date.now();
-        
+
+
         this.settings = {
             isOverwriteWellHeader: false,
             isCreateNewWellIfDupe: false,
@@ -1427,49 +1429,42 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             'Volume'
         ];
         this.selectedFamilies = {};
-        this.families.forEach(function(family) {
+        this.families.forEach(function (family) {
             self.selectedFamilies[family] = true;
         });
-
         this.onUploadButtonClicked = function () {
-            let dataRequest = {
-                files: self.lasFiles,
+            let payloadParams = {
+                file: self.lasFiles,
                 transactionId: self.transactionId
-            }
-            wiApiService.uploadMultiFiles(dataRequest, function (lasInfos) {
+            };
+            //console.log(payloadParams);
+            wiApiService.uploadMultiFilesPrepare(payloadParams, function (lasInfos) {
                 self.lasInfos = lasInfos;
                 self.curves = lasInfos[0].curves;
-                // self.lasInputs = angular.copy(lasInfos);
                 self.lasInfos.forEach(function (lasInfo) {
                     lasInfo.isLoad = true;
-                    lasInfo.wellName = lasInfo.lasName;
-                    lasInfo.dataset = "Data_Input";
-                    lasInfo.selectedWell = null;
-                    lasInfo.selectedDataset = null;
-                //     lasInfo.curves.forEach(function(curve) {
-                //         curve.inputName = curve.lasName;
-                //         curve.isLoad = true;
-                //     });
+                    lasInfo.LASName = lasInfo.originalname;
+                    lasInfo.wellInfo.depthUnit = 'M';
                 });
                 self.isDisabled = false;
             });
         }
-
         $scope.fileIndex = 0;
-        this.onLasClick = function($index) {
+        this.onLasClick = function ($index) {
             $scope.fileIndex = $index;
             self.curves = self.lasInfos[$index].curves;
         }
 
-        this.onRemoveFileClick = function() {
-            self.lasInfos.splice($scope.fileIndex,1);
+        this.onRemoveFileClick = function () {
+            self.lasInfos.splice($scope.fileIndex, 1);
             if (!self.lasInfos.length) {
                 self.isDisabled = true;
             }
         }
 
-        this.onRemoveAllFilesClick = function() {
+        this.onRemoveAllFilesClick = function () {
             self.lasInfos = [];
+            self.curves = [];
             self.isDisabled = true;
         }
 
@@ -1480,28 +1475,29 @@ exports.importMultiLASDialog = function (ModalService, callback) {
                 id_datasets: []
             };
             payloadParams.file = self.lasFiles;
-
+            console.log(self.selectedWell);
             for (let i = 0; i < self.lasFiles.length; i++) {
                 if (self.selectedWells[i]) {
-                    payloadParams.id_wells[i] = self.selectedWells[i].idWell;
+                    payloadParams.id_wells[i] = self.selectedWell[i];
                 } else {
-                    payloadParams.id_wells[i] = "";
+                    payloadParams.id_wells[i] = "None";
                 }
                 if (self.selectedDatasets[i]) {
-                    payloadParams.id_datasets[i] = self.selectedDatasets[i].idDataset;
+                    payloadParams.id_datasets[i] = self.selectedDatasets[i];
                 } else {
-                    payloadParams.id_datasets[i] = "";
+                    payloadParams.id_datasets[i] = "None";
                 }
             }
             console.log('payloadParams', payloadParams);
-            wiApiService.postMultiFiles('/files', payloadParams)
+            wiApiService.uploadMultiFiles(payloadParams)
                 .then(function (wells) {
                     console.log('wells response', wells);
-                    return close(wells, 100);
+                    return close(wells, 500);
                 })
                 .catch(function (err) {
                     console.log('err', err);
                 });
+
         };
 
         this.onCancelButtonClicked = function () {
