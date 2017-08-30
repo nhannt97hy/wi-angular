@@ -2331,60 +2331,39 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
     });
 };
 
-exports.depthTrackPropertiesDialog = function(ModalService, callback) {
+exports.depthTrackPropertiesDialog = function(ModalService, currentTrack, wiApiService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let props = {
-            isShowTitle: true,
-            title : "Depth",
-            topJustification: "center",
-            bottomJustification: "center",
-            trackColor: '#ffffff',
-            width: 0.500,
-            depthType: null,
-            unitType: 'M',
-            decimals: 0
-        }
-        this.isShowTitle = props.isShowTitle;
-        this.title = props.title;
-        this.topJustification = props.topJustification;
-        this.bottomJustification = props.bottomJustification;
-        this.trackColor = props.trackColor;
-        this.width = props.width;
-        this.depthType = props.depthType;
-        this.unitType = props.unitType;
-        this.decimals = props.decimals;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        console.log("Depth track", currentTrack);
+        this.props = currentTrack.getProperties();
+        this.props.geometryWidth = utils.pixelToInch(this.props.geometryWidth);
+        console.log('props', this.props);
         // Dialog buttons
         this.trackBackground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
-                self.trackColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.props.trackBackground, function (colorStr) {
+                self.props.trackBackground = colorStr;
             });
         }
+        function updateDepthTrack() {
+            utils.editDepthTrack(self.props, wiApiService);
+            let newProps = angular.copy(self.props);            
+            newProps.geometryWidth = utils.inchToPixel(self.props.geometryWidth);
+            currentTrack.setProperties(newProps);
+            currentTrack.doPlot(true);
+        };
         this.onApplyButtonClicked = function () {
-            bindProps();
-            callback(props);
+            updateDepthTrack();
+
         };
         this.onOkButtonClicked = function () {
-            bindProps();
-            close(props, 100);
+            updateDepthTrack();
+            close(self.props, 100);
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
-        function bindProps() {
-            props = {
-                isShowTitle: self.isShowTitle,
-                title : self.title,
-                topJustification: self.topJustification,
-                bottomJustification: self.bottomJustification,
-                trackColor: self.trackColor,
-                width: self.width,
-                depthType: self.depthType,
-                unitType: self.unitType,
-                decimals: self.decimals
-            }
-        }
     }
     ModalService.showModal({
         templateUrl: "depth-track-properties/depth-track-properties-modal.html",
@@ -3048,6 +3027,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
             }
         };
+        this.compare = false;
         this.selectPointSymbol = ["Cicle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
         // modal button
         this.colorCurve = function () {
@@ -3170,16 +3150,86 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
     });
 }
 exports.polygonManagerDialog = function (ModalService, callback){
-    function ModalController(wiComponentService, close) {
+    function ModalController($scope, wiComponentService, close) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        this.polygonChanged = new Array;
+        this.polygonsCreated = new Array;
+        this.data = [{
+            data: '313232,323212',
+            polygonColor: '#ccc',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: false
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        }];
+        this.data.forEach(function(item, index){
+            let polygonsCreatedItem = item;
+            let polygonChangedItem = {};
+            polygonsCreatedItem._index = index;
+            polygonChangedItem={
+                change: '0',
+                _index: index
+            };
+            self.polygonsCreated.push(polygonsCreatedItem);
+            self.polygonChanged.push(polygonChangedItem);
+        });
+        this.getPolygons = function() {
+            return self.polygonsCreated.filter(function(item, index) {
+                return self.polygonChanged[index].change != '3';
+            });
+        };
+        this.__idx = null;
+        this.setClickedRow = function(index) {
+            $scope.selectedRow = index;
+            self.__idx = self.getPolygons()[index]._index;
+        }
+        this.onChange = function(index) {
+            if(self.polygonChanged[index].change == '0') self.polygonChanged[index].change = '1';
+        }
         // modal buttons
         this.removeRow = function() {
             console.log("removeRowButtonClicked");
+            if(self.polygonChanged[self.__idx].change == '2') self.polygonChanged[self.__idx].change = '4';
+            else self.polygonChanged[self.__idx].change = '3';
         };
         this.addRow = function() {
             console.log("addRowButtonClicked");
+            self.polygonsCreated.push({_index: self.polygonsCreated.length});
+            self.polygonChanged.push({
+                change: '2',
+                _index: self.polygonChanged.length
+            });
+            console.log("polygonChanged", this.polygonChanged);
+        };
+        this.polygonLineColor = function(index) {
+            console.log("polygonLineColorButtonClick");
+            // DialogUtils.colorPickerDialog(ModalService, self.getPolygons[index].polygonColor, function (colorStr) {
+            //     self.getPolygons[index].polygonColor = colorStr;
+            // });
+        }
+        this.createPolygon = function(index) {
+            console.log("createPolygonButtonClicked");
+            $('#polygon-modal').modal('hide');
         }
         this.onOkButtonClicked = function() {
             close(self);

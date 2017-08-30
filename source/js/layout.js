@@ -25,7 +25,6 @@ let layoutConfig = {
                 },
                 {
                     type: 'stack',
-                    width: 60,
                     id: 'right',
                     isClosable: false,
                     content: []

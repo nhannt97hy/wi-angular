@@ -675,6 +675,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 
             if (plot.depth_axes && plot.depth_axes.length) {
                 plot.depth_axes.forEach(function(depthTrack) {
+                    console.log("depthTrack", depthTrack);
                     tracks.push(depthTrack);
                 });
             }
@@ -1147,6 +1148,11 @@ exports.changeLine = function(lineObj, wiApiService, callback) {
 }
 exports.changeTrack = function(trackObj, wiApiService, callback) {
     wiApiService.editTrack(trackObj, function (result) {
+        if(callback) callback(result);
+    });
+}
+exports.editDepthTrack = function(depthTrackObj, wiApiService, callback) {
+    wiApiService.editDepthTrack(depthTrackObj, function(result) {
         if(callback) callback(result);
     });
 }

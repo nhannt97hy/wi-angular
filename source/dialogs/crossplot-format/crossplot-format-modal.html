@@ -248,39 +248,50 @@
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
+                                                <td></td>
                                                 <td>Use</td>
                                                 <td>Curve</td>
                                                 <td>Function</td>
-                                                <td>Curve/Value</td>
+                                                <td>Curve</td>
+                                                <td>Value</td>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-repeat="curve in wiModal.getCurves()"
+                                        {{wiModal.compare}}
+                                            <tr 
                                                 ng-class="{selected:$index == selectedRow}"
                                                 ng-click="wiModal.setClickedRow($index)">
+                                                <td>{{$index + 1}}</td>
                                                 <td>
-                                                    <input type="checkbox" value="">
+                                                    <input type="checkbox" value=""
+                                                            ng-model="">
                                                 </td> 
                                                 <td>
                                                     <select ng-model=""
                                                             class="form-control wi-form-control"
-                                                            ng-options="item.id as item.datasetCurve for item in wiModal.arr"></select>
+                                                            ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"></select>
                                                 </td>
                                                 <td>
                                                     <select ng-model=""
                                                             class="form-control wi-form-control">
-                                                            <option value="">></option>
-                                                            <option value="">>=</option>            
-                                                            <option value="">=</option>            
-                                                            <option value=""><</option>            
-                                                            <option value=""><=</option>            
-
+                                                            <option value="">&gt;</option>
+                                                            <option value="">&gt;&#61;</option>            
+                                                            <option value="">&#61;</option>            
+                                                            <option value="">&lt;</option>            
+                                                            <option value="">&lt;&#61;</option>            
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <select ng-model=""
                                                             class="form-control wi-form-control"
-                                                            ng-options="item.id as item.datasetCurve for item in wiModal.arr"></select>
+                                                            ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"
+                                                            ng-disabled="wiModal.compare"></select>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" ng-model="wiModal.compare" value="value">
+                                                    <input type="number" class="form-control wi-form-control"
+                                                            ng-model=""
+                                                            ng-disabled="!wiModal.compare">
                                                 </td>
                                             </tr>
                                         </tbody>

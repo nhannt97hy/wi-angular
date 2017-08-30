@@ -43,6 +43,7 @@ const GET_LOG_TRACK = '/project/well/plot/track/info';
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
 const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
+const EDIT_DEPTH_AXIS = '/project/well/plot/depth-axis/edit';
 
 const CREATE_LINE = '/project/well/plot/track/line/new';
 const DELETE_LINE = '/project/well/plot/track/line/delete';
@@ -81,7 +82,7 @@ Service.prototype.GET_LOG_TRACK = GET_LOG_TRACK; //'/project/well/plot/track/inf
 Service.prototype.CREATE_DEPTH_AXIS = CREATE_DEPTH_AXIS; //'/project/well/plot/depth-axis/new';
 Service.prototype.DELETE_DEPTH_AXIS = DELETE_DEPTH_AXIS;//'/project/well/plot/depth-axis/delete';
 Service.prototype.GET_DEPTH_AXIS = GET_DEPTH_AXIS; //'/project/well/plot/depth-axis/info';
-
+Service.prototype.EDIT_DEPTH_AXIS = EDIT_DEPTH_AXIS; // '/project/well/plot/depth-axis/edit';
 Service.prototype.CREATE_LINE = CREATE_LINE; //'/project/well/plot/track/line/new';
 Service.prototype.DELETE_LINE = DELETE_LINE;
 Service.prototype.EDIT_LINE = EDIT_LINE;
@@ -527,6 +528,19 @@ Service.prototype.removeDepthTrack = function (idDepthAxis, callback) {
     };
     this.delete(DELETE_DEPTH_AXIS, dataRequest)
         .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editDepthTrack = function (depthTrackObj, callback) {
+    var self = this;
+    let dataRequest = depthTrackObj;
+    this.post(EDIT_DEPTH_AXIS, dataRequest)
+        .then(function (depthTrack) {
+            if (!callback) return;
+            callback(depthTrack);
+        })
         .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);

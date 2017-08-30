@@ -75,7 +75,7 @@ DepthTrack.prototype.getProperties = function() {
         trackBackground: this.bgColor,
         geometryWidth: this.width,
         justification: Utils.capitalize(this.justification),
-        depthType: '',
+        depthType: 'MD',
         unitType: this.unit,
         decimals: this.yDecimal
     };
