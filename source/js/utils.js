@@ -201,10 +201,11 @@ function zoneSetToTreeConfig(zoneSet) {
         icon: 'project-16x16-edit',
         label: zoneSet.name
     }
-    zoneSetModel.zones = new Array();
+    zoneSetModel.children = new Array();
+    console.log(zoneSet);
     if (!zoneSet.zones) return zoneSetModel;
     zoneSet.zones.forEach(function(zone) {
-        zoneSetModel.zones.push(zoneToTreeConfig(zone));
+        zoneSetModel.children.push(zoneToTreeConfig(zone));
     });
     return zoneSetModel;
 }
