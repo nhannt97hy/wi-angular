@@ -913,7 +913,7 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
 
         this.lineOptions = lineOptions;
         this.symbolOptions = symbolOptions;
-        
+        console.log("options", this)
         this.lineStyles = [[8, 2, 2, 2, 2, 2], [8, 2, 2, 2], [2, 2], [8, 2], [1, 0], [0, 1]];
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
@@ -924,6 +924,23 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
             });
+        };
+        this.borderColor = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.symbolStyle.symbolStrokeStyle, function (colorStr) {
+                self.symbolOptions.symbolStyle.symbolStrokeStyle = colorStr;
+            });
+        };
+        this.foregroundColor = function() {
+            console.log("patternForegroundColor");
+            /*DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.patternFill.foreground, function (colorStr) {
+                self.symbolOptions.patternFill.foreground = colorStr;
+            });*/
+        }
+        this.backgroundColor = function () {
+            console.log("patternBackgroundColor");
+            /*DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.patternFill.foreground, function (colorStr) {
+                self.symbolOptions.patternFill.foreground = colorStr;
+            });*/
         }
         this.onOkButtonClicked = function () {
             close(self.lineOptions, self.symbolOptions);
@@ -964,6 +981,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
         let dataset = utils.getModel('dataset', currentCurve.idDataset);
 
+        console.log("CURRENTCURVE", currentCurve, currentTrack);
+        
         let extentY = currentCurve.getExtentY();
 
         if (currentCurve.line) {
@@ -1019,7 +1038,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         }
 
         this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
-        
+        console.log("CURVEOPTONS", this.curveOptions, currentCurve);
         this.onToggleShowDataset = function () {
             self.curveOptions.alias = self.curveOptions.showDataset? self.lineObjTemplate.name : currentCurve.name;
         }
@@ -1030,8 +1049,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.selectData = {
             displayMode: ["Line", "Symbol", "Both", "None"],
             wrapMode: ["None", "Left", "Right", "Both"],
-            symbolType: ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"],
-            blockPosition: ["None", "Start", "Middle", "End", "None"],
+            symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            blockPosition: ["Start", "Middle", "End", "None"],
             logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Culmulative", "Mirror", "Pid"]
         };
@@ -1113,7 +1132,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.disabledByBoth = function() {
             $('#wrapMode').prop("disabled", false);
             $('#symbolType').prop("disabled", false);
-            $('#blockPosition').prop("disabled", true);
+            $('#blockPosition').prop("disabled", false);
             $('#ignore').prop("disabled", false);
             $('#symbolSize').prop("disabled", false);
             $('#editSymbolStyle').prop("disabled", false);
@@ -1133,17 +1152,17 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             self.symbolOptions.display = false;
         }
         this.changeOther = function () {
-            switch (self.curveOptions.displayMode) {
-                case "Line":
+            switch (self.curveOptions.displayMode.toLowerCase()) {
+                case "line":
                     self.disabledByLine();
                     break;
-                case "Symbol":
+                case "symbol":
                     self.disabledBySymbol();
                     break;
-                case "Both":
+                case "both":
                     self.disabledByBoth();
                     break;
-                case "None":
+                case "none":
                     self.disabledByNone();
                     break;
                 default:
@@ -1154,7 +1173,9 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         };
         function updateLine(callback) {
             let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
+            console.log(self.curveOptions, self.lineOptions);
             utils.changeLine(lineObj, wiApiService, function () {
+                console.log("lineObj", lineObj);    
                 currentCurve.setProperties(lineObj);
                 currentTrack.plotCurve(currentCurve);
 
@@ -1192,7 +1213,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 default:
                     break;
             }
-            DialogUtils.curveAttributeDialog(ModalService, wiComponentService, lineOptions, symbolOptions, function (lineOptions, symbolOptions) {
+            DialogUtils.curveAttributeDialog(ModalService, wiComponentService, self.lineOptions, self.symbolOptions, function (lineOptions, symbolOptions) {
                 if (lineOptions) self.lineOptions = lineOptions;
                 if (symbolOptions) self.symbolOptions = symbolOptions;
                 self.drawSample();
@@ -1381,13 +1402,15 @@ exports.importLASDialog1 = function (ModalService, callback) {
 exports.importMultiLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         let self = this;
+        this.lasInfos = null;
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.isDisabled = true;
-        this.lasFiles = [];
+        this.lasFiles = null;
         this.selectedWells = [];
         this.selectedDatasets = [];
         this.transactionId = Date.now();
-        
+
+
         this.settings = {
             isOverwriteWellHeader: false,
             isCreateNewWellIfDupe: false,
@@ -1406,49 +1429,42 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             'Volume'
         ];
         this.selectedFamilies = {};
-        this.families.forEach(function(family) {
+        this.families.forEach(function (family) {
             self.selectedFamilies[family] = true;
         });
-
         this.onUploadButtonClicked = function () {
-            let dataRequest = {
-                files: self.lasFiles,
+            let payloadParams = {
+                file: self.lasFiles,
                 transactionId: self.transactionId
-            }
-            wiApiService.uploadMultiFiles(dataRequest, function (lasInfos) {
+            };
+            //console.log(payloadParams);
+            wiApiService.uploadMultiFilesPrepare(payloadParams, function (lasInfos) {
                 self.lasInfos = lasInfos;
                 self.curves = lasInfos[0].curves;
-                // self.lasInputs = angular.copy(lasInfos);
                 self.lasInfos.forEach(function (lasInfo) {
                     lasInfo.isLoad = true;
-                    lasInfo.wellName = lasInfo.lasName;
-                    lasInfo.dataset = "Data_Input";
-                    lasInfo.selectedWell = null;
-                    lasInfo.selectedDataset = null;
-                //     lasInfo.curves.forEach(function(curve) {
-                //         curve.inputName = curve.lasName;
-                //         curve.isLoad = true;
-                //     });
+                    lasInfo.LASName = lasInfo.originalname;
+                    lasInfo.wellInfo.depthUnit = 'M';
                 });
                 self.isDisabled = false;
             });
         }
-
         $scope.fileIndex = 0;
-        this.onLasClick = function($index) {
+        this.onLasClick = function ($index) {
             $scope.fileIndex = $index;
             self.curves = self.lasInfos[$index].curves;
         }
 
-        this.onRemoveFileClick = function() {
-            self.lasInfos.splice($scope.fileIndex,1);
+        this.onRemoveFileClick = function () {
+            self.lasInfos.splice($scope.fileIndex, 1);
             if (!self.lasInfos.length) {
                 self.isDisabled = true;
             }
         }
 
-        this.onRemoveAllFilesClick = function() {
+        this.onRemoveAllFilesClick = function () {
             self.lasInfos = [];
+            self.curves = [];
             self.isDisabled = true;
         }
 
@@ -1459,28 +1475,29 @@ exports.importMultiLASDialog = function (ModalService, callback) {
                 id_datasets: []
             };
             payloadParams.file = self.lasFiles;
-
+            console.log(self.selectedWell);
             for (let i = 0; i < self.lasFiles.length; i++) {
                 if (self.selectedWells[i]) {
-                    payloadParams.id_wells[i] = self.selectedWells[i].idWell;
+                    payloadParams.id_wells[i] = self.selectedWell[i];
                 } else {
-                    payloadParams.id_wells[i] = "";
+                    payloadParams.id_wells[i] = "None";
                 }
                 if (self.selectedDatasets[i]) {
-                    payloadParams.id_datasets[i] = self.selectedDatasets[i].idDataset;
+                    payloadParams.id_datasets[i] = self.selectedDatasets[i];
                 } else {
-                    payloadParams.id_datasets[i] = "";
+                    payloadParams.id_datasets[i] = "None";
                 }
             }
             console.log('payloadParams', payloadParams);
-            wiApiService.postMultiFiles('/files', payloadParams)
+            wiApiService.uploadMultiFiles(payloadParams)
                 .then(function (wells) {
                     console.log('wells response', wells);
-                    return close(wells, 100);
+                    return close(wells, 500);
                 })
                 .catch(function (err) {
                     console.log('err', err);
                 });
+
         };
 
         this.onCancelButtonClicked = function () {
@@ -1624,6 +1641,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let error = null;
         let self = this;
         wiModal = self;
+        
+        console.log("logPlot", wiLogplotCtrl);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
@@ -1678,6 +1697,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             item.datasetCurve = selectedCurve;
             self.arr.push(item);
         })
+        console.log("curveDataset", this.curvesOnDataset, this.arr);
         let shadingList = currentTrack.getShadings();
         console.log("shadingList", shadingList);
         function getShadingStyle(fillObj) {
@@ -1990,6 +2010,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/^.+_/g, leftPart + "_");
             }
         }
+        // this.chooseRightCurve(index) 
         this.addRowShading = function() {
             var shadingItem = {
                 idTrack: currentTrack.id,
@@ -2079,14 +2100,19 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             });
         }
         function createNewShadings() {
+            function findInVisCurveListById(idLine) {
+                for(let line of self.curveList) {
+                    if(line.id == idLine){
+                        return line;
+                    }
+                }
+                return null;
+            }
             self.shadingChanged.forEach(function(item, index){
                 if(item.change == '2') {
                     let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
                                                      self.fillPatternOptions[index], 
                                                      self.variableShadingOptions[index]);
-                    if (shadingObj.positiveFill == null) {
-                        shadingObj.positiveFill = shadingObj.fill;
-                    };
                     console.log("shadingObj", shadingObj);
                     wiApiService.createShading(shadingObj, function(shading) {
                         let shadingModel = utils.shadingToTreeConfig(shading);
@@ -2095,23 +2121,15 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         let lineObj2 = null;
                         if(!shadingModel.idRightLine) return;
                         if(!shadingModel.idLeftLine) {
-                            for(let line of self.curveList) {
-                                if(line.id == shading.idRightLine){
-                                    lineObj1 = line;
-                                    break;
-                                }
-                            }
+                            lineObj1 = findInVisCurveListById(shading.idRightLine);
                             wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                        }
-                        if(shadingModel.idLeftLine && shadingModel.idRightLine) {
-                            for(let line of self.curveList) {
-                                if(line.id == shading.idLeftLine) {
-                                    lineObj1 = line;
-                                }
-                                if(line.id == shading.idRightLine) {
-                                    lineObj2 = line;
-                                }
+                        } else {
+                            lineObj1 = findInVisCurveListById(shading.idLeftLine);
+                            lineObj2 = findInVisCurveListById(shading.idRightLine);
+                            if (lineObj1 && lineObj2) 
                                 wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
+                            else {
+                                console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
                             }
                         }
                     })
@@ -2128,7 +2146,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
                 if(shading.shadingStyle == "variableShading") {
                     DialogUtils.variableShadingDialog(ModalService, function(options) {
-                    }, self.variableShadingOptions[index], self.lineCurve);
+                    }, self.variableShadingOptions[index], self.curveList);
                     return;
                 }
                 else return;
@@ -2309,60 +2327,39 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
     });
 };
 
-exports.depthTrackPropertiesDialog = function(ModalService, callback) {
+exports.depthTrackPropertiesDialog = function(ModalService, currentTrack, wiApiService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let props = {
-            isShowTitle: true,
-            title : "Depth",
-            topJustification: "center",
-            bottomJustification: "center",
-            trackColor: '#ffffff',
-            width: 0.500,
-            depthType: null,
-            unitType: 'M',
-            decimals: 0
-        }
-        this.isShowTitle = props.isShowTitle;
-        this.title = props.title;
-        this.topJustification = props.topJustification;
-        this.bottomJustification = props.bottomJustification;
-        this.trackColor = props.trackColor;
-        this.width = props.width;
-        this.depthType = props.depthType;
-        this.unitType = props.unitType;
-        this.decimals = props.decimals;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        console.log("Depth track", currentTrack);
+        this.props = currentTrack.getProperties();
+        this.props.geometryWidth = utils.pixelToInch(this.props.geometryWidth);
+        console.log('props', this.props);
         // Dialog buttons
         this.trackBackground = function() {
-            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
-                self.trackColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.props.trackBackground, function (colorStr) {
+                self.props.trackBackground = colorStr;
             });
         }
+        function updateDepthTrack() {
+            utils.editDepthTrack(self.props, wiApiService);
+            let newProps = angular.copy(self.props);            
+            newProps.geometryWidth = utils.inchToPixel(self.props.geometryWidth);
+            currentTrack.setProperties(newProps);
+            currentTrack.doPlot(true);
+        };
         this.onApplyButtonClicked = function () {
-            bindProps();
-            callback(props);
+            updateDepthTrack();
+
         };
         this.onOkButtonClicked = function () {
-            bindProps();
-            close(props, 100);
+            updateDepthTrack();
+            close(self.props, 100);
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
-        function bindProps() {
-            props = {
-                isShowTitle: self.isShowTitle,
-                title : self.title,
-                topJustification: self.topJustification,
-                bottomJustification: self.bottomJustification,
-                trackColor: self.trackColor,
-                width: self.width,
-                depthType: self.depthType,
-                unitType: self.unitType,
-                decimals: self.decimals
-            }
-        }
     }
     ModalService.showModal({
         templateUrl: "depth-track-properties/depth-track-properties-modal.html",
@@ -2906,6 +2903,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
         let self = this;
         this.selectCurve = selectCurve;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        console.log("selectCurve", selectCurve);
         if (options) {
             this.options = options;
         }
@@ -2920,6 +2918,16 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
                     endColor: "transparent"
                 }
             };
+        }
+        this.selectedControlCurve = function(idCurve){
+            self.selectCurve.forEach(function(item, index) {
+                if(item.idCurve == idCurve) {
+                    console.log("find startX endX", item);
+                    self.options.gradient.startX = item.minX;
+                    self.options.gradient.endX = item.maxX;
+                }
+            })
+            
         }
         this.startColor = function(){
             DialogUtils.colorPickerDialog(ModalService, self.options.gradient.startColor, function (colorStr) {
@@ -3044,7 +3052,93 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
     });
 }
 */
+exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback){
+    function ModalController(wiComponentService, close) {
+        let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
+        this.datasetsInWell = new Array();
+        this.curvesInWell = new Array();
+        this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
+        console.log("Crossplot", wiCrossplotCtrl);
+        this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
+        this.well.children.forEach( function(child) {
+            if(child.type == 'dataset') self.datasetsInWell.push(child);
+        });
+        this.datasetsInWell.forEach(function(child) {
+            child.children.forEach(function(item) {
+                if(item.type == 'curve') self.curvesInWell.push(item);
+            })
+        });
+        this.curvesInWell.forEach(function(item, index) {
+            let curvesOnDatasetItem = item;
+            curvesOnDatasetItem.datasetCurve = utils.findDatasetById(item.properties.idDataset).properties.name + '.' + item.properties.name;
+            self.curvesOnDataset.push(curvesOnDatasetItem);    
+        });
+        console.log("curve", this.curvesOnDataset);
+
+        this.props = {
+            scales: {
+
+            },
+            discriminators: {
+
+            },
+            axisColor: {
+
+            },
+            options: {
+
+            },
+            referenceColor: {
+
+            }
+        };
+        this.compare = false;
+        this.selectPointSymbol = ["Cicle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        // modal button
+        this.colorCurve = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        };
+        this.colorCrossplot = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        }
+        this.removeRow = function(){
+            console.log("removeRowClicked");
+        };
+        this.addRow = function() {
+            console.log("addRowClicked");
+        };
+        this.onOkButtonClicked = function() {
+            close(self);
+        };
+        this.onApplyButtonClicked = function() {
+            console.log("onApplyButtonClicked");
+        };
+        this.onCancelButtonClicked = function() {
+             close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "crossplot-format/crossplot-format-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+            callback(ret);
+        });
+    });
+};
 exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
@@ -3123,3 +3217,110 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         });
     });
 }
+exports.polygonManagerDialog = function (ModalService, callback){
+    function ModalController($scope, wiComponentService, close) {
+        let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        this.polygonChanged = new Array;
+        this.polygonsCreated = new Array;
+        this.data = [{
+            data: '313232,323212',
+            polygonColor: '#ccc',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: false
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        },{
+            data: '313232,6547657',
+            polygonColor: '#fff',
+            display: true
+        }];
+        this.data.forEach(function(item, index){
+            let polygonsCreatedItem = item;
+            let polygonChangedItem = {};
+            polygonsCreatedItem._index = index;
+            polygonChangedItem={
+                change: '0',
+                _index: index
+            };
+            self.polygonsCreated.push(polygonsCreatedItem);
+            self.polygonChanged.push(polygonChangedItem);
+        });
+        this.getPolygons = function() {
+            return self.polygonsCreated.filter(function(item, index) {
+                return self.polygonChanged[index].change != '3';
+            });
+        };
+        this.__idx = null;
+        this.setClickedRow = function(index) {
+            $scope.selectedRow = index;
+            self.__idx = self.getPolygons()[index]._index;
+        }
+        this.onChange = function(index) {
+            if(self.polygonChanged[index].change == '0') self.polygonChanged[index].change = '1';
+        }
+        // modal buttons
+        this.removeRow = function() {
+            console.log("removeRowButtonClicked");
+            if(self.polygonChanged[self.__idx].change == '2') self.polygonChanged[self.__idx].change = '4';
+            else self.polygonChanged[self.__idx].change = '3';
+        };
+        this.addRow = function() {
+            console.log("addRowButtonClicked");
+            self.polygonsCreated.push({_index: self.polygonsCreated.length});
+            self.polygonChanged.push({
+                change: '2',
+                _index: self.polygonChanged.length
+            });
+            console.log("polygonChanged", this.polygonChanged);
+        };
+        this.polygonLineColor = function(index) {
+            console.log("polygonLineColorButtonClick");
+            // DialogUtils.colorPickerDialog(ModalService, self.getPolygons[index].polygonColor, function (colorStr) {
+            //     self.getPolygons[index].polygonColor = colorStr;
+            // });
+        }
+        this.createPolygon = function(index) {
+            console.log("createPolygonButtonClicked");
+            $('#polygon-modal').modal('hide');
+        }
+        this.onOkButtonClicked = function() {
+            close(self);
+        };
+        this.onApplyButtonClicked = function() {
+            console.log("onApplyButtonClicked");
+        };
+        this.onCancelButtonClicked = function() {
+             close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "polygon-manager/polygon-manager-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+            callback(ret);
+        });
+    });
+};

@@ -165,25 +165,26 @@ exports.ImportLASButtonClicked1 = function () {
         }
     })
 };
-
 exports.ImportMultiLASButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.importMultiLASDialog(this.ModalService, function (wellResponses) {
         if (wellResponses) {
             for (let wellRes of wellResponses) {
-                let wellModel = utils.wellToTreeConfig(wellRes.content);
-                let selectedProjectNode = utils.getSelectedProjectNode();
-                let found = false;
-                for (let i in selectedProjectNode.children) {
-                    if (selectedProjectNode.children[i].id == wellModel.id) {
-                        selectedProjectNode.children[i] = wellModel;
-                        found = true;
-                        break;
+                if (!wellRes.errors) {
+                    let wellModel = utils.wellToTreeConfig(wellRes);
+                    let selectedProjectNode = utils.getSelectedProjectNode();
+                    let found = false;
+                    for (let i in selectedProjectNode.children) {
+                        if (selectedProjectNode.children[i].id == wellModel.id) {
+                            selectedProjectNode.children[i] = wellModel;
+                            found = true;
+                            break;
+                        }
                     }
-                }
-                if (!found) {
-                    selectedProjectNode.children.push(wellModel);
+                    if (!found) {
+                        selectedProjectNode.children.push(wellModel);
+                    }
                 }
             }
         }
@@ -908,3 +909,4 @@ exports.AboutButtonClicked = function () {
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
+

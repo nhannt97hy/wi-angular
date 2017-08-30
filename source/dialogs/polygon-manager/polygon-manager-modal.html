@@ -1,0 +1,66 @@
+<div class='modal fade' id="polygon-modal">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class=""></span>&nbsp;FRM Polygon Manager</h4>
+            </div>
+            <div class="modal-body text-center">
+                <div class="container-fluid">
+                    <div class="col-sm-11">
+                        <form class="form-horizontal">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <td></td>
+                                        <td>Polygons</td>
+                                        <td>Line Color</td>
+                                        <td>Display</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="polygon in wiModal.getPolygons()"
+                                        ng-class="{selected:$index == selectedRow}"
+                                        ng-click="wiModal.setClickedRow($index)">
+                                        <td>{{$index + 1}}</td>
+                                        <td>
+                                            <input ng-model="polygon.data"
+                                                    type="text" class="form-control wi-form-control
+                                                    valign-middle pull-left" style="height: 25px; width: 85%;"
+                                                    ng-change="wiModal.onChange($index)">
+                                                <button ng-click="wiModal.createPolygon($index);wiModal.onChange($index)" 
+                                                        class="wi-form-control">...</button>
+                                        </td>
+                                        <td>
+                                            <button ng-style="{'background-color':polygon.polygonColor}"
+                                                    ng-click="wiModal.polygonLineColor($index);wiModal.onChange($index)"
+                                                    class="form-control wi-form-control width-80px thick-border">
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" ng-model="polygon.display"
+                                                    ng-change="wiModal.onChange($index)">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="col-sm-1">
+                        <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                            <span class="delete-16x16"></span>
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.addRow();">
+                                <span class="ok-16x16"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

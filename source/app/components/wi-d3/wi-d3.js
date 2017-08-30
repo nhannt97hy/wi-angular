@@ -152,11 +152,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let config = {
             id: depthTrack.idDepthAxis,
             idPlot: depthTrack.idPlot,
+            name: depthTrack.title,
             orderNum: depthTrack.orderNum,
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth),
-            width: Utils.inchToPixel(depthTrack.width)            
+            showTitle: depthTrack.showTitle,
+            justification: depthTrack.justification,
+            width: Utils.inchToPixel(depthTrack.geometryWidth),
+            depthType: depthTrack.depthType,
+            unit: depthTrack.unitType,
+            bgColor: depthTrack.trackBackground,
+            decimal: depthTrack.decimals
         };
+        console.log("config", config);
 
         let track = graph.createDepthTrack(config, document.getElementById(self.plotAreaId));
         graph.rearangeTracks(self);
@@ -885,7 +893,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "curve-properties-16x16",
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
-                DialogUtils.curvePropertiesDialog(ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, _currentTrack, self.wiLogplotCtrl)
+                DialogUtils.curvePropertiesDialog(
+                    ModalService, 
+                    wiComponentService, 
+                    wiApiService, 
+                    DialogUtils, 
+                    currentCurve, 
+                    _currentTrack, 
+                    self.wiLogplotCtrl)
             }
         }, {
             name: "EditCurve",
@@ -1004,7 +1019,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     //     showRefLine: true
                     // };
                     console.log("curve1", _currentTrack, curve1);
-                    self.addLeftShadingToTrack(_currentTrack, curve1, config);
+                    self.addCustomShadingToTrack(_currentTrack, curve1, 100, config);
                 }
                 else {
                     self.addPairShadingToTrack(_currentTrack, curve1, curve2, {});
@@ -1095,7 +1110,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 tabs:['true', 'true','true']
             });
         } else if (_currentTrack.isDepthTrack()) {
-            DialogUtils.depthTrackPropertiesDialog(ModalService, function (props) {
+            DialogUtils.depthTrackPropertiesDialog(ModalService, _currentTrack, wiApiService, function (props) {
                 if (props) {
                     console.log('depthTrackPropertiesData', props);
                 }

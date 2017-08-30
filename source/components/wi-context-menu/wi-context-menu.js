@@ -1,7 +1,6 @@
 const componentName = 'wiContextMenu';
 const moduleName = 'wi-context-menu';
 
-__WICS = null;
 function Controller($scope, wiComponentService) {
     let self = this;
     self.shown = false;

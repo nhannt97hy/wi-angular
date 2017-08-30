@@ -1,16 +1,17 @@
 'use strict';
 
 var __GLOBAL = null;
-exports.setGlobalObj = function(gObj) {
+exports.setGlobalObj = function (gObj) {
     __GLOBAL = gObj;
 }
 
 exports.debounce = debounce;
+
 function debounce(func, wait, immediate) {
     var timeout;
-    return function() {
+    return function () {
         var context = this, args = arguments;
-        var later = function() {
+        var later = function () {
             timeout = null;
             if (!immediate) func.apply(context, args);
         };
@@ -63,7 +64,7 @@ exports.error = function (errorMessage) {
     errorMessage = errorMessage || "Something's wrong!";
     let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
-    DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage );
+    DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage);
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {
@@ -80,7 +81,7 @@ function getCurveFromId(idCurve) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes) return;
     let curve = null;
-    rootNodes.forEach(function(node) {
+    rootNodes.forEach(function (node) {
         visit(node, function (aNode) {
             if (aNode.type == 'curve' && aNode.id == idCurve) {
                 curve = aNode;
@@ -89,7 +90,9 @@ function getCurveFromId(idCurve) {
     });
     return curve;
 }
+
 exports.lineToTreeConfig = lineToTreeConfig;
+
 function lineToTreeConfig(line) {
     let lineModel = new Object();
     let curveModel = getCurveFromId(line.idCurve);
@@ -108,18 +111,20 @@ function lineToTreeConfig(line) {
         scale: line.displayType,
         alias: curveModel.properties.alias,
         showHeader: line.showHeader,
+        blockPosition: line.blockPosition,
+        wrapMode: line.wrapMode,
         line: null,
         symbol: null
     };
     let temp = line.displayMode.toLowerCase().trim();
-    if ( temp == 'line' || temp == 'both') {
+    if (temp == 'line' || temp == 'both') {
         lineModel.data.line = {
             dash: eval(line.lineStyle),
             color: line.lineColor,
             width: line.lineWidth
         }
     }
-    if ( temp == 'symbol' || temp == 'both') {
+    if (temp == 'symbol' || temp == 'both') {
         lineModel.data.symbol = {
             style: line.symbolName.toLowerCase(),
             fillStyle: line.symbolFillStyle,
@@ -131,6 +136,7 @@ function lineToTreeConfig(line) {
     }
     return lineModel;
 }
+
 function shadingToTreeConfig(shading) {
     let shadingModel = new Object();
     shadingModel.id = shading.idShading;  // OK
@@ -144,17 +150,18 @@ function shadingToTreeConfig(shading) {
         rightX: shading.rightFixedValue,
         // minY: shading.minY,
         // maxY: shading.maxY,
-        fill: shading.fill?JSON.parse(shading.fill):null,
+        fill: shading.fill ? JSON.parse(shading.fill) : null,
         //isNegPosFilling: shading.isNegPosFill,
         isNegPosFill: shading.isNegPosFill,
-        positiveFill: shading.positiveFill?JSON.parse(shading.positiveFill):null,
-        negativeFill: shading.negativeFill?JSON.parse(shading.negativeFill):null,
+        positiveFill: shading.positiveFill ? JSON.parse(shading.positiveFill) : null,
+        negativeFill: shading.negativeFill ? JSON.parse(shading.negativeFill) : null,
         refLineWidth: shading.refLineWidth || 5,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
     };
     return shadingModel;
 }
+
 exports.shadingToTreeConfig = shadingToTreeConfig;
 
 function zoneToTreeConfig(zone) {
@@ -274,16 +281,17 @@ function logplotToTreeConfig(plot) {
     plotModel.tracks = new Array();
     if (!plot.tracks) return plotModel;
 
-    plot.tracks.forEach(function(track) {
+    plot.tracks.forEach(function (track) {
         plotModel.tracks.push(trackToModel(track));
     });
     //TODO: refactor
-    plot.depth_axes.forEach(function(depthTrack){
+    plot.depth_axes.forEach(function (depthTrack) {
         plotModel.tracks.push(trackToModel(depthTrack));
     });
     */
     return plotModel;
 }
+
 exports.logplotToTreeConfig = logplotToTreeConfig;
 
 function crossplotToTreeConfig(crossplot) {
@@ -310,6 +318,7 @@ function crossplotToTreeConfig(crossplot) {
 
     return crossplotModel;
 }
+
 exports.crossplotToTreeConfig = crossplotToTreeConfig;
 
 function histogramToTreeConfig(histogram) {
@@ -336,6 +345,7 @@ function histogramToTreeConfig(histogram) {
 
     return histogramModel;
 }
+
 exports.histogramToTreeConfig = histogramToTreeConfig;
 
 function curveToTreeConfig(curve) {
@@ -361,6 +371,7 @@ function curveToTreeConfig(curve) {
     curveModel.curveData = null;
     return curveModel;
 }
+
 exports.curveToTreeConfig = curveToTreeConfig;
 
 function datasetToTreeConfig(dataset) {
@@ -383,12 +394,13 @@ function datasetToTreeConfig(dataset) {
     datasetModel.children = new Array();
     if (!dataset.curves) return datasetModel;
 
-    dataset.curves.forEach(function(curve) {
+    dataset.curves.forEach(function (curve) {
         datasetModel.children.push(curveToTreeConfig(curve));
     });
 
     return datasetModel;
 }
+
 exports.datasetToTreeConfig = datasetToTreeConfig;
 
 function createZoneSetsNode(well) {
@@ -424,12 +436,13 @@ function createLogplotNode(well) {
     }
     logplotModel.children = new Array();
     if (!well.plots) return logplotModel;
-    well.plots.forEach(function(plot) {
+    well.plots.forEach(function (plot) {
         logplotModel.children.push(logplotToTreeConfig(plot));
     });
 
     return logplotModel;
 }
+
 function createCrossplotNode(well) {
     let crossplotModel = new Object();
     crossplotModel.name = 'crossplots';
@@ -449,14 +462,15 @@ function createCrossplotNode(well) {
         name: 'MockCrossPlot'
     }];
 
-    if(!well.crossplots) return crossplotModel;
+    if (!well.crossplots) return crossplotModel;
     crossplotModel.children = new Array();
-    well.crossplots.forEach(function(crossplot) {
+    well.crossplots.forEach(function (crossplot) {
         crossplotModel.children.push(crossplotToTreeConfig(crossplot));
     });
 
     return crossplotModel;
 }
+
 function createHistogramNode(well) {
     let histogramModel = new Object();
     histogramModel.name = 'histograms';
@@ -476,13 +490,14 @@ function createHistogramNode(well) {
         name: 'MockHistogram'
     }];
 
-    if(!well.histograms) return histogramModel;
+    if (!well.histograms) return histogramModel;
     histogramModel.children = new Array();
-    well.histograms.forEach(function(histogram) {
+    well.histograms.forEach(function (histogram) {
         histogramModel.children.push(histogramToTreeConfig(histogram));
     });
     return histogramModel;
 }
+
 function wellToTreeConfig(well) {
     var wellModel = new Object();
     wellModel.name = "well";
@@ -505,7 +520,7 @@ function wellToTreeConfig(well) {
     wellModel.children = new Array();
 
     if (well.datasets) {
-        well.datasets.forEach(function(dataset) {
+        well.datasets.forEach(function (dataset) {
             wellModel.children.push(datasetToTreeConfig(dataset));
         });
     }
@@ -519,9 +534,10 @@ function wellToTreeConfig(well) {
     wellModel.children.push(histogramNode);
     return wellModel;
 }
+
 exports.wellToTreeConfig = wellToTreeConfig;
 
-exports.projectToTreeConfig = function(project) {
+exports.projectToTreeConfig = function (project) {
     var projectModel = new Object();
     projectModel.type = 'project';
     projectModel.name = 'project';
@@ -543,35 +559,39 @@ exports.projectToTreeConfig = function(project) {
 
     if (!project.wells) return projectModel;
 
-    project.wells.forEach(function(well) {
+    project.wells.forEach(function (well) {
         projectModel.children.push(wellToTreeConfig(well));
     });
     return projectModel;
 }
 
 exports.visit = visit;
+
 function visit(node, callback, options) {
     if (options && options.found) return;
-    if( node.data && node.data.deleted) return;
+    if (node.data && node.data.deleted) return;
     if (options && options.path && options.path.push)
         options.path.push(node);
-    if ( callback(node, options) ) {
+    if (callback(node, options)) {
         if (options) options.found = true
     }
     if (node.children) {
-        node.children.forEach(function(child){
+        node.children.forEach(function (child) {
             visit(child, callback, options);
         });
     }
     if (options && options.path && options.path.pop)
         options.path.pop();
 }
+
 exports.getSelectedNode = getSelectedNode;
+
 function getSelectedNode() {
     return getSelectedPath().pop();
 }
 
 exports.getSelectedProjectNode = getSelectedProjectNode;
+
 function getSelectedProjectNode() {
     const wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
@@ -581,6 +601,7 @@ function getSelectedProjectNode() {
 }
 
 exports.getSelectedPath = getSelectedPath;
+
 function getSelectedPath(foundCB) {
     const wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
@@ -632,6 +653,7 @@ exports.pushProjectToExplorer = function (self, project, wiComponentService, WiT
 };
 
 exports.updateWellProject = updateWellProject;
+
 function updateWellProject(wiComponentService, well) {
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     if (!project) return;
@@ -664,8 +686,9 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 };
 
 exports.getCurveData = getCurveData;
+
 function getCurveData(apiService, idCurve, callback) {
-    apiService.post(apiService.DATA_CURVE, { idCurve })
+    apiService.post(apiService.DATA_CURVE, {idCurve})
         .then(function (curve) {
             callback(null, curve);
         })
@@ -673,6 +696,7 @@ function getCurveData(apiService, idCurve, callback) {
             callback(err, null);
         });
 }
+
 //exports.getCurveDataByName = getCurveDataByName;
 
 exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
@@ -691,14 +715,14 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.track = null;
             let idCurve = ui.helper.attr('data');
             if (wiD3Ctrl && track) {
-                apiService.post(apiService.CREATE_LINE, { idTrack: track.id, idCurve: idCurve })
-                    .then(function(line){
+                apiService.post(apiService.CREATE_LINE, {idTrack: track.id, idCurve: idCurve})
+                    .then(function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
                     })
-                    .catch(function(err){
+                    .catch(function (err) {
                         console.error(err);
                         wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                         return;
@@ -715,7 +739,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: 'clone',
         containment: 'document',
         cursor: 'move',
-        cursorAt: { top: 0, left: 0 }
+        cursorAt: {top: 0, left: 0}
     });
 };
 
@@ -738,18 +762,18 @@ exports.deleteLogplot = function () {
     if (selectedNode.type != 'logplot') return;
     const wiComponentService = __GLOBAL.wiComponentService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function(yes){
+    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function (yes) {
         if (!yes) return;
         const wiApiService = __GLOBAL.wiApiService;
-        wiApiService.delete(wiApiService.DELETE_PLOT, { idPlot: selectedNode.properties.idPlot })
-            .then(function(res){
-                __GLOBAL.$timeout(function(){
+        wiApiService.delete(wiApiService.DELETE_PLOT, {idPlot: selectedNode.properties.idPlot})
+            .then(function (res) {
+                __GLOBAL.$timeout(function () {
                     selectedNode.data.deleted = true;
                     wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
                 });
-            }).catch(function(err){
-                console.error('logplot delete error',err);
-            });
+            }).catch(function (err) {
+            console.error('logplot delete error', err);
+        });
     });
 };
 
@@ -763,7 +787,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.post(wiApiService.GET_PLOT, { idPlot: logplotModel.id })
+    wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
         .then(function (plot) {
             if (logplotModel.properties.referenceCurve) {
                 slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
@@ -785,13 +809,14 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     tracks.push(zoneTrack);
                 })
             }
+
             /*
             tracks.sort(function(track1, track2) {
                 return track1.orderNum.localeCompare(track2.orderNum);
             });
             */
             function drawAllShadings(someTrack, trackObj) {
-                someTrack.shadings.forEach(function(shading) {
+                someTrack.shadings.forEach(function (shading) {
                     let shadingModel = shadingToTreeConfig(shading);
                     let linesOfTrack = trackObj.getCurves();
                     console.log("LinhTinh:", linesOfTrack, shading);
@@ -808,8 +833,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         }
                         let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
                         console.log('shading', tmp);
-                    };
-                    if(shadingModel.idLeftLine && shadingModel.idRightLine) {
+                    }
+                    ;
+                    if (shadingModel.idLeftLine && shadingModel.idRightLine) {
                         for (let line of linesOfTrack) {
                             if (line.id == shading.idRightLine) {
                                 lineObj1 = line;
@@ -820,25 +846,26 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         }
                         let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
                         console.log('shading2', tmp);
-                    };
+                    }
+                    ;
                 });
             };
             let aTrack = tracks.shift();
-            while( aTrack ) {
+            while (aTrack) {
                 if (aTrack.idDepthAxis) {
                     wiD3Ctrl.pushDepthTrack(aTrack);
                 }
                 else if (aTrack.idTrack) {
                     let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-                    if ( !aTrack.lines || aTrack.lines.length == 0 ) {
+                    if (!aTrack.lines || aTrack.lines.length == 0) {
                         aTrack = tracks.shift();
                         continue;
                     }
-                    
+
                     let lineCount = 0;
                     let lineNum = aTrack.lines.length;
                     let eventEmitter = new EventEmitter();
-                    eventEmitter.on('line-drawed', function(someTrack) {
+                    eventEmitter.on('line-drawed', function (someTrack) {
                         console.log(someTrack);
                         lineCount++;
                         if (lineCount == lineNum) {
@@ -860,43 +887,13 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             eventEmitter.emitEvent('line-drawed', [someTrack]);
                         });
                     });
-                    // aTrack.shadings.forEach(function(shading) {
-                    //     let shadingModel = shadingToTreeConfig(shading);
-                    //     console.log(shading);
-                    //     wiApiService.infoLine(shading.idRightLine, function(line) {
-                    //         console.log(line);
-                    //         getCurveData(wiApiService, line.idCurve, function (err, data) {
-                    //             let lineModel = lineToTreeConfig(line);
-                    //             if (!err) {
-                    //                 let lineObj = wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
-                    //                 wiD3Ctrl.addLeftShadingToTrack(trackObj, lineObj, shadingModel.data);
-                    //             }
-                    //             else {
-                    //                 console.error(err);
-                    //                 wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                    //             }
-                    //         });
-                    //     })
-                    // });
-                } else if (aTrack.idZoneTrack) {
-                    let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
-                    wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneSet) {
-                        if (zoneSet.zones && zoneSet.zones.length) {
-                            let zones = zoneSet.zones;
-                            for(let zone of zones) {
-                                let zoneModel = zoneToTreeConfig(zone);
-                                console.log(zoneModel);
-                                wiD3Ctrl.addZoneToTrack(viTrack, zoneModel.properties);
-                            }
-                        }
-                    })
 
                 }
                 aTrack = tracks.shift();
             }
             if (callback) callback();
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             wiComponentService.getComponent(wiComponentService.UTILS).error(err);
         });
@@ -956,13 +953,14 @@ function getModel(type, id) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let model = null;
-    visit(rootNodes[0], function(node) {
+    visit(rootNodes[0], function (node) {
         if (node.type == type && node.id == id) {
             model = node;
         }
     });
     return model;
 }
+
 exports.getModel = getModel;
 
 exports.findLogplotModelById = function (logplotId) {
@@ -970,7 +968,7 @@ exports.findLogplotModelById = function (logplotId) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let plot = null;
-    visit(rootNodes[0], function(node) {
+    visit(rootNodes[0], function (node) {
         if (node.type == 'logplot' && node.id == logplotId) {
             plot = node;
         }
@@ -983,13 +981,14 @@ function findDatasetById(idDataset) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let dataset = null;
-    visit(rootNodes[0], function(node) {
+    visit(rootNodes[0], function (node) {
         if (node.type == 'dataset' && node.id == idDataset) {
             dataset = node;
         }
     });
     return dataset;
 }
+
 exports.findDatasetById = findDatasetById;
 
 function findWellById(idWell) {
@@ -997,22 +996,28 @@ function findWellById(idWell) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
-    visit(rootNodes[0], function(node) {
+    visit(rootNodes[0], function (node) {
         if (node.type == 'well' && node.id == idWell) {
             well = node;
         }
     });
     return well;
 }
+
 exports.findWellById = findWellById;
 
-exports.findWellByLogplot = function(idLogplot) {
-    var path = getSelectedPath(function(node) {
+exports.findWellByLogplot = function (idLogplot) {
+    var path = getSelectedPath(function (node) {
         return node.type == "logplot" && node.id == idLogplot;
     }) || [];
     return path[1];
 };
-
+exports.findWellByCrossplot = function (idCrossplot) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'crossplot' && node.id == idCrossplot;
+    }) || [];
+    return path[1];
+}
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';
@@ -1027,25 +1032,26 @@ exports.trackProperties = function (ModalService, wiComponentService) {
 };
 
 exports.refreshProjectState = refreshProjectState;
+
 function refreshProjectState() {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
     if (!project) return;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         let payload = {
             idProject: project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
         wiApiService.post(wiApiService.GET_PROJECT, payload)
-            .then(function(projectRefresh) {
+            .then(function (projectRefresh) {
                 wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
                 wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
 
                 resolve();
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 console.error('refreshProjectState', err);
 
                 reject();
@@ -1090,9 +1096,9 @@ exports.createDataset = function () {
         let wiApiService = __GLOBAL.wiApiService;
         let datasetInfo = {
             name: ret,
-            idWell : selectedNode.properties.idWell,
-            datasetKey : selectedNode.properties.name,
-            datasetLabel : selectedNode.properties.name
+            idWell: selectedNode.properties.idWell,
+            datasetKey: selectedNode.properties.name,
+            datasetLabel: selectedNode.properties.name
         }
         wiApiService.createDataset(datasetInfo, function () {
             __GLOBAL.$timeout(function () {
@@ -1183,12 +1189,14 @@ exports.pasteCurve = function () {
             currentDatasetName = selectedNode.properties.name;
         }
         let curveInfo = {
-            idDataset: selectedNode.properties.idDataset,
-            dataset: currentDatasetName,
-            name: copyingCurve.properties.name,
-            unit: copyingCurve.properties.unit
+            idCurve: copyingCurve.properties.idCurve,
+            desDatasetId: selectedNode.properties.idDataset
+            // idDataset: selectedNode.properties.idDataset,
+            // dataset: currentDatasetName,
+            // name: copyingCurve.properties.name,
+            // unit: copyingCurve.properties.unit
         }
-        wiApiService.createCurve(curveInfo, function (curve) {
+        wiApiService.copyCurve(curveInfo, function (curve) {
             refreshProjectState();
         });
         wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
@@ -1200,53 +1208,52 @@ exports.pasteCurve = function () {
         if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
         let curveInfo = {
             idCurve: cuttingCurve.properties.idCurve,
-            idDataset: selectedNode.properties.idDataset,
-            dataset: cuttingCurve.properties.dataset,
-            name: cuttingCurve.properties.name,
-            unit: cuttingCurve.properties.unit
+            desDatasetId: selectedNode.properties.idDataset,
         }
-        wiApiService.editCurve(curveInfo, function () {
+        wiApiService.cutCurve(curveInfo, function () {
             refreshProjectState();
         });
         wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
         return;
     }
 }
+
 function getDisplayMode(currentCurve) {
-    if(currentCurve.line && currentCurve.symbol) return "Both";
-    if(currentCurve.line && !currentCurve.symbol) return "Line";
-    if(!currentCurve.line && currentCurve.symbol) return "Symbol";
+    if (currentCurve.line && currentCurve.symbol) return "Both";
+    if (currentCurve.line && !currentCurve.symbol) return "Line";
+    if (!currentCurve.line && currentCurve.symbol) return "Symbol";
     return "None";
 }
+
 exports.curveOptions = function (currentTrack, currentCurve, index) {
     let options = {
         // Locally use properties
-        _index : index,
-        idLine : currentCurve.id,
+        _index: index,
+        idLine: currentCurve.id,
         idTrack: currentTrack.id,
-        showHeader : currentCurve.showHeader,
-        showDataset : false, // add to currentCurve - Canh
+        showHeader: currentCurve.showHeader,
+        showDataset: false, // add to currentCurve - Canh
         ignoreMissingValues: false,
         alias: currentCurve.alias,
         minValue: currentCurve.minX,
         maxValue: currentCurve.maxX,
         autoValueScale: false,
-        displayType : currentCurve.scale,
-        displayMode : getDisplayMode(currentCurve),
-        wrapMode : "None", //default
-        blockPosition : "None", //default
-        displayAs : "Normal" //default
+        displayType: currentCurve.scale,
+        displayMode: getDisplayMode(currentCurve),
+        wrapMode: currentCurve.wrapMode.capitalize(),
+        blockPosition: currentCurve.blockPosition.capitalize(),
+        displayAs: "Normal" //default
     }
     return options;
 }
-exports.mergeLineObj = function(curveOptions, lineStyle, symbolStyle) {
+exports.mergeLineObj = function (curveOptions, lineStyle, symbolStyle) {
     let lineObj = {};
     angular.extend(lineObj, curveOptions, lineStyle, symbolStyle);
     lineObj.lineStyle = JSON.stringify(lineObj.lineStyle);
     lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
     return lineObj;
 };
-exports.mergeShadingObj = function(shadingOptions, fillPatternStyles, variableShadingStyle) {
+exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableShadingStyle) {
 
     let shadingObj = new Object();
     angular.extend(shadingObj, shadingOptions);
@@ -1267,13 +1274,18 @@ exports.mergeShadingObj = function(shadingOptions, fillPatternStyles, variableSh
     return shadingObj;
 }
 
-exports.changeLine = function(lineObj, wiApiService, callback) {
+exports.changeLine = function (lineObj, wiApiService, callback) {
     wiApiService.editLine(lineObj, function (result) {
-        if( callback ) callback(result);
+        if (callback) callback(result);
     });
 }
-exports.changeTrack = function(trackObj, wiApiService, callback) {
+exports.changeTrack = function (trackObj, wiApiService, callback) {
     wiApiService.editTrack(trackObj, function (result) {
+        if (callback) callback(result);
+    });
+}
+exports.editDepthTrack = function(depthTrackObj, wiApiService, callback) {
+    wiApiService.editDepthTrack(depthTrackObj, function(result) {
         if(callback) callback(result);
     });
 }
@@ -1318,7 +1330,8 @@ function editProperty(item) {
             return;
     }
 }
-exports.upperCaseFirstLetter = function(string){
+
+exports.upperCaseFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 exports.editProperty = editProperty;
@@ -1371,49 +1384,60 @@ function getDpi() {
     document.body.removeChild(inch);
     return dpi;
 }
+
 exports.getDpi = getDpi;
+
 function inchToPixel(inch) {
-    return getDpi()*inch;
+    return getDpi() * inch;
 }
+
 exports.inchToPixel = inchToPixel;
+
 function pixelToInch(px) {
-    let inch = Math.round(px/getDpi() * 1000) / 1000;
+    let inch = Math.round(px / getDpi() * 1000) / 1000;
     return inch
 }
+
 exports.pixelToInch = pixelToInch;
+
 function getDpcm() {
     return getDpi() * 2.54;
 }
+
 exports.getDpcm = getDpcm;
+
 function cmToPixel(cm) {
-    let dpCm = getDpi()/2.54;
-    return dpCm*cm;
+    let dpCm = getDpi() / 2.54;
+    return dpCm * cm;
 }
+
 exports.cmToPixel = cmToPixel;
+
 function pixelToCm(px) {
-    let dpCm = getDpi()/2.54;
-    let cm = Math.round(px/dpCm * 1000) / 1000;
+    let dpCm = getDpi() / 2.54;
+    let cm = Math.round(px / dpCm * 1000) / 1000;
     return cm
 }
+
 exports.pixelToCm = pixelToCm;
 
-function hexToRgbA(hex){
+function hexToRgbA(hex) {
     var c;
     var hexStr = hex;
     if (!hex || hex.length == 0) {
         hexStr = '#FFFFFE';
     }
-    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hexStr)) {
+    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hexStr)) {
         c = hexStr.substring(1).split('');
-        if ( c.length == 3 ) {
+        if (c.length == 3) {
             c = [c[0], c[0], c[1], c[1], c[2], c[2]];
         }
         c = '0x' + c.join('');
 
         return {
-            r: (c>>16)&255,
-            g: (c>>8)&255,
-            b: c&255 ,
+            r: (c >> 16) & 255,
+            g: (c >> 8) & 255,
+            b: c & 255,
             a: 1
         };
     }
@@ -1423,6 +1447,6 @@ function hexToRgbA(hex){
 
 exports.hexToRgbA = hexToRgbA;
 
-exports.rgbaObjToString = function(rgbaObj){
-    return 'rgba('+rgbaObj.r+','+rgbaObj.g+','+rgbaObj.b+','+rgbaObj.a+')';
+exports.rgbaObjToString = function (rgbaObj) {
+    return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
 }

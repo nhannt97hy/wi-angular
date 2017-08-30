@@ -3,101 +3,103 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Depth Track Properties</h4>
+                <h4 class="modal-title"><span class="tri-tracks-blank-32x32"></span>Depth Track Properties</h4>
             </div>
             <div class="modal-body padding-0">
-                <form action="" class="form-horizontal">
+                <form action="" class="form-horizontal form-condensed">
                     <div class="container-fluid">
+                        <br>
                         <div id="header">
                             <h5>Header</h5>
-                            <div class="form-group">
-                                <div class="col-sm-7">
-                                    <label for="isShowTitle" class="normal-text">
-                                        <input type="checkbox" id="isShowTitle" ng-model="wiModal.isShowTitle">Show title
-                                    </label>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="col-sm-7">
+                                        <label for="isShowTitle" class="normal-text">
+                                            <input type="checkbox" id="isShowTitle" ng-model="wiModal.props.showTitle">Show title
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="title">Title</label>
-                                <div class="col-sm-7">
-                                    <input type="text" class="form-control wi-form-control" value="" name="title" id="title" ng-model="wiModal.title" ng-disabled="!wiModal.isShowTitle">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-5 normal-text" for="title">Title</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" class="form-control wi-form-control" value="" name="title" id="title" ng-model="wiModal.props.title" ng-disabled="!wiModal.props.showTitle">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="topJust" class="control-label col-sm-5 normal-text">Top Justification</label>
-                                <div class="col-sm-7">
-                                    <select ng-model="wiModal.topJustification" name="topJust" value="" class="form-control wi-form-control" id="topJust" ng-disabled="!wiModal.isShowTitle">
-                                            <option value="left">Left</option>
-                                            <option value="center">Center</option>
-                                            <option value="right">Right</option>
-                                        </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="bottomJust" class="control-label col-sm-5 normal-text">Bottom Justification</label>
-                                <div class="col-sm-7">
-                                    <select ng-model="wiModal.bottomJustification" name="bottomJust" value="" class="form-control wi-form-control" id="bottomJust"
-                                        ng-disabled="!wiModal.isShowTitle">
-                                            <option value="left">Left</option>
-                                            <option value="center">Center</option>
-                                            <option value="right">Right</option>
-                                        </select>
+                                <div class="form-group">
+                                    <label for="topJust" class="control-label col-sm-5 normal-text">Justification</label>
+                                    <div class="col-sm-7">
+                                        <select ng-model="wiModal.props.justification" name="topJust" value="" class="form-control wi-form-control" id="topJust" ng-disabled="!wiModal.props.showTitle">
+                                                <option value="Left">Left</option>
+                                                <option value="Center">Center</option>
+                                                <option value="Right">Right</option>
+                                            </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div id="color">
                             <h5>Color</h5>
-                            <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="track-background">Track background</label>
-                                <div class="col-sm-7">
-                                    <div class="float-left">
-                                        <button ng-click="wiModal.trackBackground();"
-                                                ng-style="{'background-color':wiModal.trackColor}"
-                                                class="form-control wi-form-control width-80px">
-                                                    Change
-                                        </button>
-                                    </div>
-                                    <div class="float-left">
-                                        <input type="text" class="form-control wi-form-control" id="track-background" ng-model="wiModal.trackColor">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-5 normal-text" for="track-background">Track background</label>
+                                    <div class="col-sm-7">
+                                        <div class="float-left">
+                                            <button ng-click="wiModal.trackBackground();"
+                                                    ng-style="{'background-color':wiModal.props.trackBackground}"
+                                                    class="form-control wi-form-control width-80px thick-border">
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div id="geometry">
                             <h5>Geomatry</h5>
-                            <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="width">Width (inchs)</label>
-                                <div class="col-sm-7">
-                                        <input type="number" step="0.001" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-5 normal-text" for="width">Width (inchs)</label>
+                                    <div class="col-sm-7">
+                                            <input type="number" step="0.001" class="form-control wi-form-control" id="width" ng-model="wiModal.props.geometryWidth">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div id="depth-type">
                             <h5>Depth Type</h5>
-                            <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="depth-type">Depth Type</label>
-                                <div class="col-sm-7">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="unit-type">Units Type</label>
-                                <div class="col-sm-7">
-                                        <select ng-model="wiModal.unitType" id="unit-type" class="form-control wi-form-control">
-                                            <option value="Cm">Cm</option>
-                                            <option value="Dm">Dm</option>
-                                            <option value="M">M</option>
-                                            <option value="Km">Km</option>
-                                            <option value="In">In</option>
-                                            <option value="Ft">Ft</option>
-                                            <option value="Yd">Yd</option>
-                                            <option value="Mi">Mi</option>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-5 normal-text" for="depth-type">Depth Type</label>
+                                    <div class="col-sm-7">
+                                        <select ng-model="wiModal.props.depthType"
+                                                class="form-control wi-form-control">
+                                            <option value="MD">MD</option>
+                                            <option value="TVD">TVD</option>
+                                            <option value="TVDSS">TVDSS</option> 
                                         </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="decimals">Decimals</label>
-                                <div class="col-sm-7">
-                                    <input type="number" class="form-control wi-form-control" id="decimals" ng-model="wiModal.decimals">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-5 normal-text" for="unit-type">Units Type</label>
+                                    <div class="col-sm-7">
+                                            <select ng-model="wiModal.props.unitType" id="unit-type" class="form-control wi-form-control">
+                                                <option value="Cm">Cm</option>
+                                                <option value="Dm">Dm</option>
+                                                <option value="M">M</option>
+                                                <option value="Km">Km</option>
+                                                <option value="In">In</option>
+                                                <option value="Ft">Ft</option>
+                                                <option value="Yd">Yd</option>
+                                                <option value="Mi">Mi</option>
+                                            </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-5 normal-text" for="decimals">Decimals</label>
+                                    <div class="col-sm-7">
+                                        <input type="number" min="0" 
+                                                class="form-control wi-form-control" id="decimals" 
+                                                ng-model="wiModal.props.decimals">
+                                    </div>
                                 </div>
                             </div>
                         </div>

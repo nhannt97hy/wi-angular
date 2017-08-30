@@ -14,6 +14,7 @@ let layoutConfig = {
     content: [
         {
             type: "row",
+            id: "layout",
             content: [
                 {
                     type: 'column',
@@ -82,7 +83,17 @@ module.exports.putRight = function(templateId, title) {
         title: title
     });
 }
-
+module.exports.putComponentRight = function( text, title) {
+    layoutManager.root.getItemsById('layout')[0].addChild(
+        {
+            title: title,
+            width: 5,
+            type: 'component',
+            componentName: 'wi-block',
+            componentState: { text: text }
+        });
+  
+};
 module.exports.putTabRightWithModel = function(model) {
     LAYOUT = layoutManager;
     let wiComponentService = this.wiComponentService;

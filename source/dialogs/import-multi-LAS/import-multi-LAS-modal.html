@@ -103,7 +103,7 @@
                                                         <input type="checkbox" ng-model="lasInfo.isLoad" class="form-control wi-form-control">
                                                     </td>
                                                     <td>
-                                                        <input type="text" ng-value="lasInfo.well" class="form-control wi-form-control" disabled>
+                                                        <input type="text" ng-value="lasInfo.originalname" class="form-control wi-form-control" disabled>
                                                     </td>
                                                     <td>
                                                         <select name="selectWell" class="form-control wi-form-control"
@@ -141,7 +141,7 @@
                                                 <tbody>
                                                     <tr ng-repeat="curve in wiModal.curves">
                                                         <td>
-                                                            <input type="text" ng-value="curve.lasName" class="form-control wi-form-control" disabled>
+                                                            <input type="text" ng-value="curve.name" class="form-control wi-form-control" disabled>
                                                         </td>
                                                         <td>
                                                             <input type="text" ng-model="curve.unit" class="form-control wi-form-control">
@@ -153,22 +153,22 @@
                                         <div class="col-sm-4">
                                             <div class="form-group">
                                                 <label class="control-label normal-text" for="wellStep">Step</label>
-                                                <input type="number" id="wellStep" name="wellStep" ng-value="wiModal.lasInfos[fileIndex].step" class="form-control wi-form-control"
+                                                <input type="number" id="wellStep" name="wellStep" ng-value="wiModal.lasInfos[fileIndex].wellInfo.step" class="form-control wi-form-control"
                                                     disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label normal-text" for="topDepth">Top Depth</label>
-                                                <input type="number" id="topDepth" name="topDepth" ng-value="wiModal.lasInfos[fileIndex].topDepth" class="form-control wi-form-control"
+                                                <input type="number" id="topDepth" name="topDepth" ng-value="wiModal.lasInfos[fileIndex].wellInfo.topDepth" class="form-control wi-form-control"
                                                     disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label normal-text" for="bottomDepth">Bottom Depth</label>
-                                                <input type="number" id="bottomDepth" name="bottomDepth" ng-value="wiModal.lasInfos[fileIndex].bottomDepth" class="form-control wi-form-control"
+                                                <input type="number" id="bottomDepth" name="bottomDepth" ng-value="wiModal.lasInfos[fileIndex].wellInfo.bottomDepth" class="form-control wi-form-control"
                                                     disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label normal-text" for="depthUnit">Depth Unit</label>
-                                                <input type="text" id="depthUnit" name="depthUnit" ng-value="wiModal.lasInfos[fileIndex].depthUnit" class="form-control wi-form-control"
+                                                <input type="text" id="depthUnit" name="depthUnit" ng-value="wiModal.lasInfos[fileIndex].wellInfo.depthUnit" class="form-control wi-form-control"
                                                     disabled>
                                             </div>
                                         </div>

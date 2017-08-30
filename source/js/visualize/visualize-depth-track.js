@@ -10,7 +10,6 @@ Utils.extend(Track, DepthTrack);
  * @constructor
  * @param {Object} config - Contain configurations.
  * @param {Number} [config.id] - The id of this track in backend (idDepthAxis field)
- * @param {String} [config.type] - The type of this track ('depth-track' of 'log-track')
  * @param {Boolean} [config.showTitle] - Flag to indicate whether to show title
  * @param {Boolean} [config.justification] - Alignment of the title (left, center, right)
  * @param {String} [config.name] - Name of the track
@@ -23,12 +22,13 @@ Utils.extend(Track, DepthTrack);
  * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
  * @param {Number} [config.yStep] - Y gap between two consecutive points
  * @param {String} [config.bgColor] - Background color for the track
- * @param {Number} [config.yDecimal] - Precision of float number. Default: 2
+ * @param {Number} [config.decimal] - Precision of float number. Default: 2
  */
 function DepthTrack(config) {
     Track.call(this, config);
 
     this.id = config.id;
+    this.idPlot = config.idPlot;
 
     this.name = config.name || 'Depth';
     this.width = config.width || 60;
@@ -65,6 +65,34 @@ DepthTrack.prototype.init = function(baseElement) {
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black');
 }
 
+DepthTrack.prototype.getProperties = function() {
+    return {
+        idDepthAxis: this.id,
+        idPlot: this.idPlot,
+        orderNum: this.orderNum,
+        showTitle: this.showTitle,
+        title: this.name,
+        trackBackground: this.bgColor,
+        geometryWidth: this.width,
+        justification: Utils.capitalize(this.justification),
+        depthType: 'MD',
+        unitType: this.unit,
+        decimals: this.yDecimal
+    };
+}
+
+DepthTrack.prototype.setProperties = function(props) {
+    Utils.setIfNotNull(this, 'id', props.idDepthAxis);
+    Utils.setIfNotNull(this, 'idPlot', props.idPlot);
+    Utils.setIfNotNull(this, 'orderNum', props.orderNum);
+    Utils.setIfNotNull(this, 'showTitle', props.showTitle);
+    Utils.setIfNotNull(this, 'name', props.title);
+    Utils.setIfNotNull(this, 'bgColor', props.trackBackground);
+    Utils.setIfNotNull(this, 'width', props.geometryWidth);
+    Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.justification));
+    Utils.setIfNotNull(this, 'unit', props.unitType);
+    Utils.setIfNotNull(this, 'yDecimal', props.decimals);
+}
 
 /**
  * Actually draw the track
