@@ -12,7 +12,7 @@ function Zone(config) {
     this.id = config.idZone;
     this.idZoneSet = config.idZoneSet;
     this.idZoneTrack = config.idZoneTrack;
-    this.fill = config.fill;
+    this.fill = Utils.isJson(config.fill) ? JSON.parse(config.fill) : config.fill;
 
     this.name = config.name || 'Zone';
     this.showName = config.showName == null ? true : config.showName;
@@ -87,7 +87,6 @@ Zone.prototype.init = function(plotContainer) {
 }
 
 Zone.prototype.doPlot = function(highlight) {
-    this.updateHeader();
     if (this.startDepth == null || this.endDepth == null) return;
 
     let transformY = this.getTransformY();
@@ -117,6 +116,7 @@ Zone.prototype.doPlot = function(highlight) {
         .attr('width', maxX - minX)
         .attr('height', maxY - minY)
         .attr('fill', this.createFillStyle());
+    this.updateHeader();
     this.updateText();
 }
 
@@ -202,16 +202,17 @@ Zone.prototype.updateHeader = function() {
 
     let fillArea = this.header.select('.vi-drawing-header-fill')
         .attr('width', width)
-        .attr('height', height)
-        .selectAll('rect')
-        .data([{ x: 0, y: 0, width: width, height: height }]);
-    fillArea.enter().append('rect');
+        .attr('height', height);
+
+    fillArea.selectAll('rect').remove();
+    let fill = this.createFillStyle();
     fillArea
-        .attr('x', function(d) { return d.x; })
-        .attr('y', function(d) { return d.y; })
-        .attr('width', function(d) { return d.width; })
-        .attr('height', function(d) { return d.height; })
-        .attr('fill', this.createFillStyle());
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', fill);
 }
 
 Zone.prototype.lineDragCallback = function(line) {

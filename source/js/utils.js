@@ -202,7 +202,6 @@ function zoneSetToTreeConfig(zoneSet) {
         label: zoneSet.name
     }
     zoneSetModel.children = new Array();
-    console.log(zoneSet);
     if (!zoneSet.zones) return zoneSetModel;
     zoneSet.zones.forEach(function(zone) {
         zoneSetModel.children.push(zoneToTreeConfig(zone));
@@ -889,6 +888,13 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         });
                     });
 
+                } else if(aTrack.idZoneTrack) {
+                    let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
+                    wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
+                        for (let zone of zoneset.zones) {
+                            wiD3Ctrl.addZoneToTrack(viTrack, zone);
+                        }
+                    })
                 }
                 aTrack = tracks.shift();
             }

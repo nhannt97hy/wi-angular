@@ -793,6 +793,7 @@ Service.prototype.getZone = function (idZone, callback) {
 }
 Service.prototype.removeZone = function (idZone, callback) {
     let self = this;
+    console.log('idZone to delete', idZone);
     this.delete(DELETE_ZONE, { idZone: idZone })
         .then(function (returnData) {
             callback();

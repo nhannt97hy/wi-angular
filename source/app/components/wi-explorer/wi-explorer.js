@@ -69,7 +69,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         if (preItem.data.deleted) currItem.data.deleted = preItem.data.deleted;
         if (preItem.data.selected) currItem.data.selected = preItem.data.selected;
         if (preItem.data.opened) currItem.data.opened = preItem.data.opened;
-        currItem.data.childExpanded = preItem.data.childExpanded;
+        if (preItem.data.childExpanded) currItem.data.childExpanded = preItem.data.childExpanded;
     };
 
     this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
@@ -392,6 +392,51 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
+            case 'zoneset':
+                return [
+                    {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16-edit",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            self.handlers.DeleteItemButtonClicked();
+                        }
+                    }, {
+                        name: "ZoneManager",
+                        label: "Zone Manager",
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ]
+            case 'zone':
+                return [
+                    {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            self.handlers.DeleteItemButtonClicked();
+                        }
+                    }, {
+                        name: "ZoneManager",
+                        label: "Zone Manager",
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ]
             case 'logplots':
                 return [
                     {
@@ -503,7 +548,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Delete",
                         icon: "delete-16x16",
                         handler: function() {
-                            utils.deleteLogplot();
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         separator: '1'
@@ -623,7 +668,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Delete",
                         icon: "delete-16x16",
                         handler: function() {
-                           
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         separator: '1'

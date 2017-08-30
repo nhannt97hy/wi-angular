@@ -69,7 +69,8 @@ exports.DeleteItemButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = utils.getSelectedNode();
-    dialogUtils.confirmDialog(this.ModalService, "Delete confirm", "Are you sure to delete " + selectedNode.data.label + "?", function (yes) {
+    if (!selectedNode || !selectedNode.data) return;
+    dialogUtils.confirmDialog(this.ModalService, "Delete confirm", `Are you sure to delete ${selectedNode.type} ${selectedNode.data.label}?`, function (yes) {
         if (yes) {
             switch (selectedNode.type) {
                 case 'well':
@@ -92,6 +93,38 @@ exports.DeleteItemButtonClicked = function () {
                             selectedNode.data.deleted = true;
                         });
                     });
+                    break;
+                case 'zoneset':
+                    wiApiService.removeZoneSet(selectedNode.properties.idZoneSet, function () {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                        });
+                    });
+                    break;
+                case 'zone':
+                    wiApiService.removeZone(selectedNode.properties.idZone, function () {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                        });
+                    });
+                    break;
+                case 'logplot':
+                    utils.deleteLogplot();
+                    break;
+                case 'crossplot':
+                    wiApiService.removeCrossplot(selectedNode.properties.idCrospslot, function () {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                        });
+                    });
+                    break;
+                case 'histogram':
+                    wiApiService.removeHistogram(selectedNode.properties.idHistogram, function () {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                        });
+                    });
+                    break;
                 default: return;
             }
         }
