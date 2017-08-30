@@ -146,25 +146,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             error("Cannot create depth track");
         }
     }
-    /**
- * Represents a depth track
- * @constructor
- * @param {Object} config - Contain configurations.
- * @param {Number} [config.id] - The id of this track in backend (idDepthAxis field)
- * @param {Boolean} [config.showTitle] - Flag to indicate whether to show title
- * @param {Boolean} [config.justification] - Alignment of the title (left, center, right)
- * @param {String} [config.name] - Name of the track
- * @param {Number} [config.width] - Width in pixel of the bounding rectangle. Default: 60
- * @param {Number} [config.minY] - Min y value to show
- * @param {Number} [config.maxY] - Max y value to show
- * @param {String} [config.unit] - Depth unit. Default: 'm'
- * @param {Number} [config.yTicks] - Number of ticks shown in y axis. Default: 10
- * @param {Number} [config.xPadding] - Horizontal padding for inner drawings. Default: 1
- * @param {Number} [config.yPadding] - Vertical padding for inner drawings. Default: 5
- * @param {Number} [config.yStep] - Y gap between two consecutive points
- * @param {String} [config.bgColor] - Background color for the track
- * @param {Number} [config.decimal] - Precision of float number. Default: 2
- */
     this.pushDepthTrack = function (depthTrack) {
         //let graph = wiComponentService.getComponent('GRAPH');
         console.log('pushDepthTrack:', depthTrack);
@@ -177,7 +158,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             offsetY: parseFloat(_getWellProps().topDepth),
             showTitle: depthTrack.showTitle,
             justification: depthTrack.justification,
-            //width: depthTrack.width,
+            width: Utils.inchToPixel(depthTrack.geometryWidth),
             depthType: depthTrack.depthType,
             unit: depthTrack.unitType,
             bgColor: depthTrack.trackBackground,
