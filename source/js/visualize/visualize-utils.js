@@ -26,6 +26,7 @@ exports.setIfNotUndefined = setIfNotUndefined;
 exports.isJson = isJson;
 exports.only = only;
 exports.merge = merge;
+exports.getDecimalFormatter = getDecimalFormatter;
 
 /**
  * Filter only object with only specified attributes
@@ -33,7 +34,7 @@ exports.merge = merge;
 function only(obj, attrs) {
     let newObj = {};
     attrs.forEach(function(attr) {
-        if (obj[attr] === 'undefined') return;
+        if (obj[attr] === undefined) return;
         newObj[attr] = obj[attr];
     });
     return newObj;
@@ -71,6 +72,11 @@ function getScaleFunc(scale) {
         'linear': d3.scaleLinear(),
         'logarithmic': d3.scaleLog()
     }[lowercase(scale)];
+}
+
+function getDecimalFormatter(decimal) {
+    decimal = decimal < 0 ? 0 : decimal;
+    return d3.format('.' + decimal + 'f');
 }
 
 /**
