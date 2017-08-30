@@ -2379,21 +2379,23 @@ exports.depthTrackPropertiesDialog = function(ModalService, callback) {
     });
 };
 
-exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
-    function ModalController($scope, wiComponentService, close) {
+exports.zoneTrackPropertiesDialog = function(ModalService, wiLogplotCtrl, zoneTrackProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let props = {
+        let props = zoneTrackProperties || {
             isShowTitle: true,
             title : "New Zone",
             topJustification: "center",
             bottomJustification: "center",
             trackColor: '#ffffff',
-            width: 0.500,
+            width: 1.000,
             parameterSet: null,
-            zoneSets: [],
             zoneSet: null
         }
+        console.log(props);
         this.isShowTitle = props.isShowTitle;
         this.title = props.title;
         this.topJustification = props.topJustification;
@@ -2401,9 +2403,22 @@ exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
         this.trackColor = props.trackColor;
         this.width = props.width;
         this.parameterSet = props.parameterSet;
-        this.zoneSets = props.zoneSets;
+        this.zoneSets = [];
+        function refreshZoneSets () {
+            wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
+                $scope.$apply(function () {
+                    self.zoneSets = zoneSets;
+                })
+            });
+        }
+        refreshZoneSets();
         this.zoneSet = props.zoneSet;
         // Dialog buttons
+        this.createZoneSet = function () {
+            utils.createZoneSet(wiLogplotModel.properties.idWell, function () {
+                refreshZoneSets();
+            });
+        } 
         this.trackBackground = function() {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
                 self.trackColor = colorStr;
@@ -2429,13 +2444,70 @@ exports.zoneTrackPropertiesDialog = function(ModalService, callback) {
                 trackColor: self.trackColor,
                 width: self.width,
                 parameterSet: self.parameterSet,
-                zoneSets: self.zoneSets,
-                zoneSet: self.zoneSet
+                idZoneSet: self.zoneSet.idZoneSet
             }
         }
     }
     ModalService.showModal({
         templateUrl: "zone-track-properties/zone-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    });
+}
+
+exports.zonePropertiesDialog = function(ModalService, zoneTrackProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = zoneTrackProperties || {};
+        console.log(props);
+        this.startDepth = Math.round(props.startDepth * 10000)/10000;
+        this.endDepth = Math.round(props.endDepth * 10000)/10000;
+        this.fill = props.fill;
+        this.showName = props.showName;
+        this.name = props.name;
+        
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.foreground = function() {
+            dialogUtils.colorPickerDialog(ModalService, self.fill.pattern.foreground, function (colorStr) {
+                self.fill.pattern.foreground = colorStr;
+            });
+        }
+        this.background = function(){
+            dialogUtils.colorPickerDialog(ModalService, self.fill.pattern.background, function (colorStr) {
+                self.fill.pattern.background = colorStr;
+            });
+        }
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+        function bindProps() {
+            props.name= self.name,
+            props.showName= self.showName,
+            props.startDepth= self.startDepth,
+            props.endDepth= self.endDepth,
+            props.fill= self.fill
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "zone-properties/zone-properties-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

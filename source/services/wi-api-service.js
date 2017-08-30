@@ -35,6 +35,7 @@ const GET_PLOT = '/project/well/plot/info';
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
 const GET_LOG_TRACK = '/project/well/plot/track/info';
+const EDIT_TRACK = '/project/well/plot/track/edit';
 
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
@@ -50,8 +51,21 @@ const DELETE_SHADING = '/project/well/plot/track/shading/delete';
 const EDIT_SHADING = '/project/well/plot/track/shading/edit';
 const GET_SHADING = '/project/well/plot/track/shading/info';
 
+const CREATE_ZONE_TRACK = '/project/well/plot/zone-track/new';
+const EDIT_ZONE_TRACK = '/project/well/plot/zone-track/edit';
+const GET_ZONE_TRACK = '/project/well/plot/zone-track/info';
+const DELETE_ZONE_TRACK = '/project/well/plot/zone-track/delete';
 
-const EDIT_TRACK = '/project/well/plot/track/edit';
+const CREATE_ZONE_SET = '/project/well/zone-set/new';
+const LIST_ZONE_SET = '/project/well/zone-set/list';
+const EDIT_ZONE_SET = '/project/well/zone-set/edit';
+const GET_ZONE_SET = '/project/well/zone-set/info';
+const DELETE_ZONE_SET = '/project/well/zone-set/delete';
+
+const CREATE_ZONE = '/project/well/zone-set/zone/new';
+const EDIT_ZONE = '/project/well/zone-set/zone/edit';
+const GET_ZONE = '/project/well/zone-set/zone/info';
+const DELETE_ZONE = '/project/well/zone-set/zone/delete';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -622,6 +636,143 @@ Service.prototype.uploadImage = function (data, callback) {
             self.getUtils().error(err);
         });
 }
+
+Service.prototype.createZoneTrack = function (data, callback) {
+    let self = this;
+    this.post(CREATE_ZONE_TRACK, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editZoneTrack = function (data, callback) {
+    let self = this;
+    this.post(EDIT_ZONE_TRACK, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getZoneTrack = function (idZoneTrack, callback) {
+    let self = this;
+    this.post(GET_ZONE_TRACK, { idZoneTrack: idZoneTrack })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeZoneTrack = function (idZoneTrack, callback) {
+    let self = this;
+    this.delete(DELETE_ZONE_TRACK, { idZoneTrack: idZoneTrack })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.createZoneSet = function (data, callback) {
+    let self = this;
+    this.post(CREATE_ZONE_SET, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editZoneSet = function (data, callback) {
+    let self = this;
+    this.post(EDIT_ZONE_SET, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.listZoneSet = function (idWell, callback) {
+    let self = this;
+    this.post(LIST_ZONE_SET, { idWell: idWell })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getZoneSet = function (idZoneSet, callback) {
+    let self = this;
+    this.post(GET_ZONE_SET, { idZoneSet: idZoneSet })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeZoneSet = function (idZoneSet, callback) {
+    let self = this;
+    this.delete(DELETE_ZONE_SET, { idZoneSet: idZoneSet })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+
+Service.prototype.createZone = function (data, callback) {
+    let self = this;
+    this.post(CREATE_ZONE, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            callback(null, err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editZone = function (data, callback) {
+    let self = this;
+    this.post(EDIT_ZONE, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getZone = function (idZone, callback) {
+    let self = this;
+    this.post(GET_ZONE, { idZone: idZone })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeZone = function (idZone, callback) {
+    let self = this;
+    this.delete(DELETE_ZONE, { idZone: idZone })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);

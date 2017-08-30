@@ -156,6 +156,82 @@ function shadingToTreeConfig(shading) {
     return shadingModel;
 }
 exports.shadingToTreeConfig = shadingToTreeConfig;
+
+function zoneToTreeConfig(zone) {
+    var zoneModel = new Object();
+    zoneModel.name = 'zone';
+    zoneModel.type = 'zone';
+    zoneModel.id = zone.idZone;
+    zoneModel.properties = {
+        idZoneSet: zone.idZoneSet,
+        idZone: zone.idZone,
+        startDepth: zone.startDepth,
+        endDepth: zone.endDepth,
+        name: zone.name,
+        fill: JSON.parse(zone.fill),
+        background: JSON.parse(zone.fill).pattern.background,
+        foreground: JSON.parse(zone.fill).pattern.foreground,
+    };
+    zoneModel.data = {
+        icon: 'zone-table-16x16',
+        label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}`
+    }
+    return zoneModel;
+}
+exports.zoneToTreeConfig = zoneToTreeConfig;
+function zoneSetToTreeConfig(zoneSet) {
+    var zoneSetModel = new Object();
+    zoneSetModel.name = 'zoneset';
+    zoneSetModel.type = 'zoneset';
+    zoneSetModel.id = zoneSet.idZoneSet;
+    zoneSetModel.properties = {
+        idWell: zoneSet.idWell,
+        idZoneSet: zoneSet.idZoneSet,
+        name: zoneSet.name,
+    };
+    zoneSetModel.data = {
+        childExpanded: false,
+        icon: 'project-16x16-edit',
+        label: zoneSet.name
+    }
+    zoneSetModel.zones = new Array();
+    if (!zoneSet.zones) return zoneSetModel;
+    zoneSet.zones.forEach(function(zone) {
+        zoneSetModel.zones.push(zoneToTreeConfig(zone));
+    });
+    return zoneSetModel;
+}
+exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
+exports.createZoneSet = function (idWell, callback) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type == 'zonesets') {
+        idWell = selectedNode.properties.idWell;
+    }
+    if (!idWell) return;
+    let promptConfig = {
+        title: '<span class="zone-edit-16x16"></span> Create New Zonation Set',
+        inputName: 'Name',
+        input: ''
+    }
+    DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
+        if (!ret) return;
+        let wiApiService = __GLOBAL.wiApiService;
+        let zoneSetInfo = {
+            name: ret,
+            idWell: idWell
+        }
+        wiApiService.createZoneSet(zoneSetInfo, function () {
+            __GLOBAL.$timeout(function () {
+                refreshProjectState();
+                if (callback) callback();
+            })
+        });
+    });
+}
+
+/*
 function trackToModel(track) {
     var trackModel = new Object();
     trackModel.idPlot = track.idPlot;
@@ -170,6 +246,7 @@ function trackToModel(track) {
     }
     return trackModel;
 }
+*/
 
 function logplotToTreeConfig(plot) {
     var plotModel = new Object();
@@ -193,6 +270,7 @@ function logplotToTreeConfig(plot) {
             openLogplotTab(__GLOBAL.wiComponentService, selectedNode);
         }
     }
+    /*
     plotModel.tracks = new Array();
     if (!plot.tracks) return plotModel;
 
@@ -203,7 +281,7 @@ function logplotToTreeConfig(plot) {
     plot.depth_axes.forEach(function(depthTrack){
         plotModel.tracks.push(trackToModel(depthTrack));
     });
-    //plot.dep
+    */
     return plotModel;
 }
 exports.logplotToTreeConfig = logplotToTreeConfig;
@@ -313,6 +391,25 @@ function datasetToTreeConfig(dataset) {
 }
 exports.datasetToTreeConfig = datasetToTreeConfig;
 
+function createZoneSetsNode(well) {
+    let zoneSetsModel = new Object();
+    zoneSetsModel.name = 'zonesets';
+    zoneSetsModel.type = 'zonesets';
+    zoneSetsModel.data = {
+        childExpanded: false,
+        icon: 'user-define-16x16',
+        label: "User Defined"
+    };
+    zoneSetsModel.properties = {
+        idWell: well.idWell
+    }
+    zoneSetsModel.children = new Array();
+    if (!well.zonesets) return zoneSetsModel;
+    well.zonesets.forEach(function(zoneSet) {
+        zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+    });
+    return zoneSetsModel;
+}
 function createLogplotNode(well) {
     let logplotModel = new Object();
     logplotModel.name = 'logplots';
@@ -412,9 +509,11 @@ function wellToTreeConfig(well) {
             wellModel.children.push(datasetToTreeConfig(dataset));
         });
     }
+    let zoneSetsNode = createZoneSetsNode(well);
     let logplotNode = createLogplotNode(well);
     let crossplotNode = createCrossplotNode(well);
     let histogramNode = createHistogramNode(well);
+    wellModel.children.push(zoneSetsNode);
     wellModel.children.push(logplotNode);
     wellModel.children.push(crossplotNode);
     wellModel.children.push(histogramNode);
@@ -681,6 +780,11 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     tracks.push(track);
                 });
             }
+            if (plot.zone_tracks && plot.zone_tracks.length) {
+                plot.zone_tracks.forEach(function (zoneTrack) {
+                    tracks.push(zoneTrack);
+                })
+            }
             /*
             tracks.sort(function(track1, track2) {
                 return track1.orderNum.localeCompare(track2.orderNum);
@@ -774,6 +878,19 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     //         });
                     //     })
                     // });
+                } else if (aTrack.idZoneTrack) {
+                    let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
+                    wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneSet) {
+                        if (zoneSet.zones && zoneSet.zones.length) {
+                            let zones = zoneSet.zones;
+                            for(let zone of zones) {
+                                let zoneModel = zoneToTreeConfig(zone);
+                                console.log(zoneModel);
+                                wiD3Ctrl.addZoneToTrack(viTrack, zoneModel.properties);
+                            }
+                        }
+                    })
+
                 }
                 aTrack = tracks.shift();
             }

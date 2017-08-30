@@ -373,18 +373,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
-            case 'userdefined':
+            case 'zonesets':
                 return [
                     {
                         name: "NewZoneSet",
                         label: "New Zone Set",
                         icon: "",
                         handler: function () {
+                            utils.createZoneSet();
                         }
                     }, {
                         name: "ZoneManager",
                         label: "Zone Manager",
-                        icon: "zone-management-16x16"
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                        }
                     }, {
                         separator: '1'
                     }

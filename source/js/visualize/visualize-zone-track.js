@@ -200,7 +200,7 @@ ZoneTrack.prototype.addZone = function(config) {
     if (!config.fill) {
         config.fill = {
             pattern: {
-                name: 'chert',
+                name: 'none',
                 background: this.genColor(),
                 foreground: 'white'
             }

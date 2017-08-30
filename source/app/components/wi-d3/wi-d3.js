@@ -154,7 +154,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idPlot: depthTrack.idPlot,
             orderNum: depthTrack.orderNum,
             yStep: parseFloat(_getWellProps().step),
-            offsetY: parseFloat(_getWellProps().topDepth)
+            offsetY: parseFloat(_getWellProps().topDepth),
+            width: Utils.inchToPixel(depthTrack.width)            
         };
 
         let track = graph.createDepthTrack(config, document.getElementById(self.plotAreaId));
@@ -176,10 +177,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.addZoneTrack = function(callback) {
         let trackOrder = getOrderKey();
+        console.log(trackOrder);
         if (trackOrder) {
-            // TO DO
-            // Send api to create zone track
-            self.pushZoneTrack({ orderNum: trackOrder });
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, null, function (zoneTrackProperties) {
+                let dataRequest = {
+                    idPlot: self.logPlotCtrl.id,
+                    title: zoneTrackProperties.title,
+                    showTitle: zoneTrackProperties.isShowTitle,
+                    topJustification: zoneTrackProperties.topJustification,
+                    bottomJustification: zoneTrackProperties.bottomJustification,
+                    color: zoneTrackProperties.trackColor,
+                    width: zoneTrackProperties.width,
+                    idZoneSet: zoneTrackProperties.idZoneSet,
+                    orderNum: trackOrder
+                }
+                wiApiService.createZoneTrack(dataRequest, function (returnZoneTrack) {
+                    let zoneTrack = dataRequest;
+                    zoneTrack.idZoneTrack = returnZoneTrack.idZoneTrack;
+                    self.pushZoneTrack(zoneTrack);
+                })
+            })
         }
         else {
             error('Cannot create zone track');
@@ -187,14 +204,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.pushZoneTrack = function(zoneTrack) {
-        let config = {
-            id: zoneTrack.idZoneTrack,
-            idPlot: zoneTrack.idPlot,
-            orderNum: zoneTrack.orderNum,
-            yStep: parseFloat(_getWellProps().step),
-            offsetY: parseFloat(_getWellProps().topDepth)
-        }
-
+        let config = angular.copy(zoneTrack);
+        config.id = zoneTrack.idZoneTrack;
+        config.name = zoneTrack.title;
+        config.yStep = parseFloat(_getWellProps().step);
+        config.offsetY = parseFloat(_getWellProps().topDepth);
+        config.width = Utils.inchToPixel(zoneTrack.width);
+        console.log(config);
+        
         let track = graph.createZoneTrack(config, document.getElementById(self.plotAreaId));
         graph.rearangeTracks(self);
         _tracks.push(track);
@@ -208,6 +225,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerZoneTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
+        return track;
     }
 
     this.addCurveToTrack = function (track, data, config) {
@@ -253,7 +271,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let zones = track.adjustZonesOnZoneChange(zone);
             let newZones = zones[0];
             let deletedZones = zones[1];
-            // TO DO: send api to add or delete zones
+            // send api to add or delete zones
+            for (let newZone of newZones) {
+                wiApiService.createZone(newZone, function () {});
+            }
+            for (let deletedZone of deletedZones) {
+                wiApiService.removeZone(deletedZone.idZone, function () {})
+            }
         })
         return zone;
     }
@@ -451,18 +475,38 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let y = d3.mouse(track.plotContainer.node())[1];
         let depth = zone.getTransformY().invert(y);
 
-        // TO DO: Send api to create zones;
-        zone1.id = null;
-        zone2.id = null;
-        zone1.endDepth = depth;
-        zone2.startDepth = depth;
-        zone2.name = parseInt(depth);
-
-        // TO DO: Send api to remove zone
-        track.removeZone(zone);
-
-        track.plotZone(zone1);
-        track.plotZone(zone2);
+        // Send api to create zones;
+        let dataZone1 = {
+            idZoneSet: track.idZoneSet,
+            name: zone1.name,
+            startDepth: zone1.startDepth,
+            endDepth: zone1.endDepth,
+            fill: zone1.fill
+        }
+        let dataZone2 = {
+            idZoneSet: track.idZoneSet,
+            name: zone2.name,
+            startDepth: zone2.startDepth,
+            endDepth: zone2.endDepth,
+            fill: zone2.fill
+        }
+        wiApiService.createZone(dataZone1, function (data, err) {
+            if (err) return;
+            wiApiService.createZone(dataZone2, function (data, err) {
+                if (err) return;
+                zone1.id = null;
+                zone2.id = null;
+                zone1.endDepth = depth;
+                zone2.startDepth = depth;
+                zone2.name = parseInt(depth);
+            })
+        })
+        // Send api to remove zone
+        wiApiService.removeZone(zone.id, function () {
+            track.removeZone(zone);
+            track.plotZone(zone1);
+            track.plotZone(zone2);
+        })
     }
 
     function _drawTooltip(track) {
@@ -589,11 +633,36 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
             .on('end', function() {
                 if (track.mode != 'AddZone') return;
-                // TO DO: Send api to create new zone on server
+                // Send api to create new zone on server
+                let zoneData = {
+                    idZoneSet: track.idZoneSet,
+                    name: zone.name,
+                    startDepth: zone.startDepth,
+                    endDepth: zone.endDepth,
+                    fill: zone.fill
+                }
+                wiApiService.createZone(zoneData, function (createdZone, err) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    zone.setProperties(createdZone);
+                })
                 let modifiedZones = track.adjustZonesOnZoneChange(zone);
                 let updatedZones = modifiedZones[0];
                 let deletedZones = modifiedZones[1];
-                // TO DO: Send api to update or delete zones
+                // Send api to update or delete zones
+                if (updatedZones && updatedZones.length) {
+                    updatedZones.forEach(function (updatingZone) {
+                        updatingZone.idZone = updatingZone.id;
+                        wiApiService.editZone(updatingZone, function () {});
+                    });
+                }
+                if (deletedZones && deletedZones.length) {
+                    deletedZones.forEach(function (deletingZone) {
+                        wiApiService.removeZone(deletingZone.id, function () {});
+                    });
+                }
                 track.setMode(null);
             })
         );
@@ -671,9 +740,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     track.removeDrawing(drawing);
                 }
                 else if (drawing.isZone()) {
-                    // TO DO
                     // Send api before deleting
-                    track.removeDrawing(drawing);
+                    wiApiService.removeZone(drawing.id, function () {
+                        track.removeDrawing(drawing);
+                    })
                 }
 
                 return;
@@ -685,9 +755,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _zoneOnDoubleClick() {
-        console.log('Zone double clicked');
-        // TODO
-
+        zoneProperties();
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
@@ -716,22 +784,52 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         d3.event.stopPropagation();
     }
 
+    function zoneProperties () {
+        let zone = _currentTrack.getCurrentZone();
+        DialogUtils.zonePropertiesDialog(ModalService, zone.getProperties(), function (props) {
+            wiApiService.editZone(props, function () {
+                zone.setProperties(props);
+                zone.doPlot();
+            })
+        })
+    }
+
     function _zoneOnRightClick() {
         let zone = _currentTrack.getCurrentZone();
 
-        self.setContextMenu([{
-            name: "RemoveZone",
-            label: "Remove Zone",
-            handler: function() {
-                _currentTrack.removeZone(zone);
+        self.setContextMenu([
+            {
+                name: "AutoZoneNamed",
+                label: "Auto Zone Named",
+                handler: function () {}
+            }, {
+                name: "ZoneProperties",
+                label: "Zone Properties",
+                icon: "zone-edit-16x16",
+                handler: zoneProperties
+            }, {
+                name: "RemoveZone",
+                label: "Remove Zone",
+                icon: "zone-delete-16x16",
+                handler: function () {
+                    wiApiService.removeZone(zone.id, function () {
+                        _currentTrack.removeZone(zone);
+                    });
+                }
+            }, {
+                name: "ZoneTable",
+                label: "Zone Table",
+                icon: "zone-table-16x16",
+                handler: function () {
+                }
+            }, {
+                name: "SplitZone",
+                label: "Split Zone",
+                handler: function () {
+                    _currentTrack.setMode('SplitZone');
+                }
             }
-        }, {
-            name: "SplitZone",
-            label: "Split Zone",
-            handler: function() {
-                _currentTrack.setMode('SplitZone');
-            }
-        }]);
+        ]);
     }
 
     function _shadingOnRightClick() {
@@ -918,13 +1016,60 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _trackOnRightClick(track) {
         if (track.isZoneTrack()) {
-            self.setContextMenu([{
-                name: "AddZone",
-                label: "Add Zone",
-                handler: function() {
-                    track.setMode('AddZone');
-                }
-            }]);
+            self.setContextMenu([
+                {
+                    name: "TrackProperties",
+                    label: "Track Properties",
+                    icon: 'track-properties-16x16',
+                    handler: openTrackPropertiesDialog
+                }, {
+                    separator: '1'
+                }, {
+                    name: "AddDepthTrack",
+                    label: "Add Depth Track",
+                    icon: 'depth-axis-add-16x16',
+                    handler: function () {
+                        self.addDepthTrack();
+                    }
+                }, {
+                    name: "AddLogTrack",
+                    label: "Add Log Track",
+                    icon: 'logplot-blank-16x16',
+                    handler: function () {
+                        self.addLogTrack();
+                    }
+                }, {
+                    name: "AddZonationTrack",
+                    label: "Add Zonation Track",
+                    icon: 'zonation-track-add-16x16',
+                    handler: function () {
+                        self.addZoneTrack();
+                    }
+                }, {
+                    separator: '1'
+                }, {
+                    name: "AddZone",
+                    label: "Add Zone",
+                    icon: "zone-edit-16x16",
+                    handler: function () {
+                        track.setMode('AddZone');
+                    }
+                }, {
+                    name: "DuplicateTrack",
+                    label: "Duplicate Track",
+                    icon: 'track-duplicate-16x16',
+                    handler: function () {
+                        logplotHandlers.DuplicateTrackButtonClicked();
+                    }
+                }, {
+                    name: "DeleteTrack",
+                    label: "Delete Track",
+                    icon: 'track-delete-16x16',
+                    handler: function () {
+                        logplotHandlers.DeleteTrackButtonClicked();
+                    }
+                }, 
+            ]);
         }
     }
 
@@ -956,7 +1101,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         } else if (_currentTrack.isZoneTrack()) {
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, function (props) {
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
                 if (props) {
                     console.log('zoneTrackPropertiesData', props);
                 }

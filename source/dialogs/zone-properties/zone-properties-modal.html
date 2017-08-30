@@ -1,0 +1,81 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Zone Track Properties</h4>
+            </div>
+            <div class="modal-body padding-0">
+                <form action="" class="form-horizontal">
+                    <div class="container-fluid">
+                        <div id="position">
+                            <h5>Position</h5>
+                            <div class="form-group">
+                                <label for="start-depth" class="control-label col-sm-4 normal-text">Start (depth)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" min="0" step="0.0001" class="form-control wi-form-control" id="start-depth" ng-model="wiModal.startDepth">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="start-depth" class="control-label col-sm-4 normal-text">End (depth)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" min="0" step="0.0001" class="form-control wi-form-control" id="end-depth" ng-model="wiModal.endDepth">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="fill">
+                            <h5>Fill</h5>
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Fill pattern</label>
+                                <div class="col-sm-8">
+                                    <ui-select theme="bootstrap" ng-model="wiModal.fill.pattern.name">
+                                        <ui-select-match>
+                                            <wi-canvas-rect name="_selectedPatternCanvas" pattern="{{wiModal.fill.pattern.name}}" width="300" height="20" foreground="{{wiModal.fill.pattern.foreground}}"
+                                                background='{{wiModal.fill.pattern.background}}'>
+                                            </wi-canvas-rect>
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" width="300" height="20" foreground="{{wiModal.fill.pattern.foreground}}"
+                                                background='{{wiModal.fill.pattern.background}}'>
+                                            </wi-canvas-rect>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-4 small-text">Foreground</label>
+                                <div class="col-sm-8 text-left">
+                                    <button ng-click="wiModal.foreground()" ng-style="{'background-color':wiModal.fill.pattern.foreground}" class="form-control wi-form-control width-80px thick-border"></button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-4 small-text">Background</label>
+                                <div class="col-sm-8 text-left">
+                                    <button ng-click="wiModal.background()" ng-style="{'background-color':wiModal.fill.pattern.background}" class="form-control wi-form-control width-80px thick-border"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="zone-label">
+                            <h5>Zone Label</h5>
+                            <div class="form-group">
+                                <label for="isShowName" class="normal-text">
+                                    <input type="checkbox" id="isShowName" ng-model="wiModal.showName">Show Name
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-5 normal-text" for="name">Title</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control wi-form-control" id="name" ng-model="wiModal.name" ng-disabled="!wiModal.showName">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

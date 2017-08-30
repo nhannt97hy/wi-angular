@@ -264,9 +264,7 @@ exports.DeleteTrackButtonClicked = function() {
             } else if (currentTrack.type == 'depth-track') {
                 wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
             } else if (currentTrack.type == 'zone-track') {
-                // TO DO
-                // Send api to remove zone track
-                wiD3Ctrl.removeCurrentTrack();
+                wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
             }
         }
     );
