@@ -28,3 +28,9 @@ source/app/components/wi-logplot/template/toolbar/*
 # Explorer generate
 source/app/components/wi-explorer/wi-explorer.html
 source/app/components/wi-explorer/template/toolbar/*
+
+# VSCode
+.vscode
+
+# Yarn
+yarn.lock
