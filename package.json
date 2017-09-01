@@ -2,7 +2,7 @@
   "name": "wi-angular",
   "version": "1.0.0",
   "description": "Well Insight web app",
-  "main": "build/js/index.js",
+  "main": "../index.js",
   "dependencies": {
     "angular-bootstrap-colorpicker": "^3.0.31",
     "bootstrap-colorpicker": "^2.5.1",
