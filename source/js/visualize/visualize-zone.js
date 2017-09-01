@@ -57,7 +57,7 @@ Zone.prototype.init = function(plotContainer) {
 
     this.svgContainer = plotContainer.select('.vi-track-svg-container');
     this.svgGroup = this.svgContainer.append('g')
-        .classed('vi-track-svg-group', true);
+        .classed('vi-zone-svg-group', true);
 
 
     this.patternDefs = this.svgGroup.append('defs')

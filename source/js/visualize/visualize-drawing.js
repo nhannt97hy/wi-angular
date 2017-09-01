@@ -36,8 +36,20 @@ Drawing.prototype.isZone = function() {
     return this.constructor.name == 'Zone';
 }
 
+/**
+ * Check if class of this instance is ViImage
+ * @returns {Boolean}
+ */
 Drawing.prototype.isImage = function() {
     return this.constructor.name == 'ViImage';
+}
+
+/**
+ * Check if class of this instance is Marker
+ * @returns {Boolean}
+ */
+Drawing.prototype.isMarker = function() {
+    return this.constructor.name == 'Marker';
 }
 
 /**
@@ -83,9 +95,9 @@ Drawing.prototype.lower = function() {
 
 /**
  * Adjust drawing size when bounding rectangle changes
- * @param {Object} rect - The bounding rectangle
  */
-Drawing.prototype.adjustSize = function(rect) {
+Drawing.prototype.adjustSize = function() {
+    let rect = this.root.node().getBoundingClientRect();
     if (this.canvas) {
         this.canvas
             .attr('width', rect.width)
@@ -145,6 +157,9 @@ Drawing.prototype.init = function(plotContainer) {
     this.root = (typeof plotContainer.node == 'function') ? plotContainer : d3.select(plotContainer);
 }
 
+Drawing.prototype.doPlot = function(highlight) {
+    this.adjustSize();
+}
 
 Drawing.prototype.updateHeader = function() {
     if (!this.header) return;

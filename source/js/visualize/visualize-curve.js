@@ -224,16 +224,12 @@ Curve.prototype.autoScaleX = function(granularity) {
 Curve.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
 
-    let rect = plotContainer
-        .node()
-        .getBoundingClientRect();
-
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing')
         .attr('id', this.id)
         .style('cursor', 'crosshair');
 
-    this.adjustSize(rect);
+    this.adjustSize();
 
     this.ctx = this.canvas.node().getContext('2d');
     return this;
@@ -307,7 +303,7 @@ Curve.prototype.getTransformX = function() {
 Curve.prototype.doPlot = function(highlight) {
     let self = this;
     let rect = this.root.node().getBoundingClientRect();
-    this.adjustSize(rect);
+    this.adjustSize();
     this.updateHeader();
 
     let transformX = this.getTransformX();

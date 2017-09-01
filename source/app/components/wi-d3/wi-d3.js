@@ -224,7 +224,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         config.offsetY = parseFloat(_getWellProps().topDepth);
         config.width = Utils.inchToPixel(zoneTrack.width);
         console.log(config);
-        
+
         let track = graph.createZoneTrack(config, document.getElementById(self.plotAreaId));
         graph.rearangeTracks(self);
         _tracks.push(track);
@@ -302,6 +302,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return zone;
     }
 
+    this.addMarkerToTrack = function(track, config) {
+        if (!track || !track.addMarker) return;
+        let marker = track.addMarker(config);
+        track.plotMarker(marker);
+        track.onMarkerMouseDown(marker, function() {
+            if (d3.event.button == 2) {
+                _markerOnRightClick();
+            }
+        });
+        marker.on('dblclick', _markerOnDoubleClick);
+        marker.onLineDragEnd(function() {
+            // TO DO: send api to update this marker
+        });
+        return marker;
+    }
+
     this.addImageToTrack = function(track, config) {
         if (!track || !track.addImage) return;
         let image = track.addImage(config);
@@ -360,6 +376,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.removeShadingFromTrack = function (track, shading) {
         if (!track || !track.removeShading) return;
         track.removeShading(shading);
+    }
+
+    this.removeMarkerFromTrack = function(track, marker) {
+        if (!track || !track.removeMarker) return;
+        track.removeMarker(marker);
     }
 
     this.removeCurrentTrack = function () {
@@ -564,6 +585,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _onPlotMouseDownCallback(track) {
+        if (track.mode == 'AddMarker') {
+            let y = d3.mouse(track.plotContainer.node())[1];
+
+            let marker = self.addMarkerToTrack(track, {
+                minY: track.minY,
+                maxY: track.maxY
+            });
+
+            let transformY = track.getTransformY();
+            let depth = transformY.invert(y);
+            marker.setProperties({
+                depth: depth
+            });
+
+            // TO DO: send api to create new marker
+
+            // TO DO: set marker id
+            marker.setProperties({ idMarker: null });
+            track.setCurrentDrawing(marker);
+            track.plotDrawing(marker);
+            track.setMode(null);
+            return;
+        }
         if (d3.event.currentDrawing && d3.event.button == 2) {
             if (d3.event.currentDrawing.isCurve()) {
                 _curveOnRightClick();
@@ -781,6 +825,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    function _markerOnDoubleClick() {
+        console.log('Marker double clicked');
+        // TODO
+
+        d3.event.stopPropagation();
+    }
+
     function _zoneOnDoubleClick() {
         zoneProperties();
         // Prevent track properties dialog from opening
@@ -819,6 +870,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 zone.doPlot();
             })
         })
+    }
+
+    function _markerOnRightClick() {
+        let marker = _currentTrack.getCurrentMarker();
+        self.setContextMenu([{
+            name: "RemoveMarker",
+            label: "Remove Marker",
+            handler: function() {
+                // TO DO: send api to remove marker
+                _currentTrack.removeMarker(marker);
+            }
+        }]);
     }
 
     function _zoneOnRightClick() {
@@ -914,12 +977,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
                 DialogUtils.curvePropertiesDialog(
-                    ModalService, 
-                    wiComponentService, 
-                    wiApiService, 
-                    DialogUtils, 
-                    currentCurve, 
-                    _currentTrack, 
+                    ModalService,
+                    wiComponentService,
+                    wiApiService,
+                    DialogUtils,
+                    currentCurve,
+                    _currentTrack,
                     self.wiLogplotCtrl)
             }
         }, {
@@ -1124,7 +1187,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     handler: function () {
                         logplotHandlers.DeleteTrackButtonClicked();
                     }
-                }, 
+                },
             ]);
         }
     }
@@ -1241,7 +1304,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Maker",
             icon: 'marker-add-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
+                    _currentTrack.setMode('AddMarker');
+                }
             }
         },
         {

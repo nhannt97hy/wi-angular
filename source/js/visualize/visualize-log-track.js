@@ -2,6 +2,7 @@ let Track = require('./visualize-track');
 let Curve = require('./visualize-curve');
 let Shading = require('./visualize-shading');
 let ViImage = require('./visualize-image');
+let Marker = require('./visualize-marker');
 let Utils = require('./visualize-utils');
 
 module.exports = LogTrack;
@@ -63,6 +64,7 @@ function LogTrack(config) {
     this.gridColor = 'gray';
 
     this.curvesRemoved = 0;
+    this.mode = null;
 }
 
 LogTrack.prototype.getProperties = function() {
@@ -104,6 +106,11 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
 }
 
+LogTrack.prototype.setMode = function(newMode) {
+    this.mode = newMode;
+    this.svgContainer.style('cursor', newMode == null ? 'crosshair' : 'copy');
+}
+
 /**
  * Get x window of track
  * @returns {Array} Range of actual x values to show
@@ -134,6 +141,12 @@ LogTrack.prototype.getCurrentShading = function() {
     return null;
 }
 
+LogTrack.prototype.getCurrentMarker = function() {
+    let current = this.currentDrawing;
+    if (current && current.isMarker()) return current;
+    return null;
+}
+
 /**
  * Get all the curves
  * @returns {Array}
@@ -157,6 +170,12 @@ LogTrack.prototype.getShadings = function() {
 LogTrack.prototype.getImages = function() {
     return this.drawings.filter(function(d) {
         return d.isImage();
+    });
+}
+
+LogTrack.prototype.getMarkers = function() {
+    return this.drawings.filter(function(d) {
+        return d.isMarker();
     });
 }
 
@@ -226,8 +245,8 @@ LogTrack.prototype.init = function(baseElement) {
 
     this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing vi-track-svg-container')
-        .style('cursor', 'crosshair')
-        .style('overflow', 'visible');
+        .style('cursor', 'crosshair');
+        // .style('overflow', 'visible');
 
     this.xAxisGroup = this.axisContainer.append('g')
         .attr('class', 'vi-track-axis');
@@ -343,6 +362,13 @@ LogTrack.prototype.addImage = function(config) {
     return image;
 }
 
+LogTrack.prototype.addMarker = function(config) {
+    let marker = new Marker(config);
+    marker.init(this.plotContainer);
+    this.drawings.push(marker);
+    return marker;
+}
+
 /**
  * Remove a drawing from track
  * @param {Object} drawing - The curve or shading object to remove
@@ -378,6 +404,11 @@ LogTrack.prototype.removeShading = function(shading) {
         this.removeDrawing(shading);
 }
 
+LogTrack.prototype.removeMarker = function(marker) {
+    if (marker && marker.isMarker())
+        this.removeDrawing(marker);
+}
+
 /**
  * Remove curve by its id
  */
@@ -398,6 +429,13 @@ LogTrack.prototype.removeShadingById = function(id) {
     this.removeShading(shadings[0]);
 }
 
+LogTrack.prototype.removeMarkerById = function(id) {
+    let markers = this.getMarkers().filter(function(m) {
+        return m.id == id;
+    });
+    this.removeMarker(markers[0]);
+}
+
 LogTrack.prototype.findCurveById = function(id) {
     return this.getCurves().filter(function(c) {
         return c.id == id;
@@ -407,6 +445,12 @@ LogTrack.prototype.findCurveById = function(id) {
 LogTrack.prototype.findShadingById = function(id) {
     return this.getShadings().filter(function(sh) {
         return sh.id == id;
+    })[0];
+}
+
+LogTrack.prototype.findMarkerById = function(m) {
+    return this.getMarkers().filter(function(m) {
+        return m.id == id;
     })[0];
 }
 
@@ -432,6 +476,17 @@ LogTrack.prototype.findShadings = function(props) {
     });
 }
 
+LogTrack.prototype.findMarkers = function(props) {
+    return this.getMarkers().filter(function(m) {
+        let mProps = m.getProperties();
+        let match = true;
+        Object.keys(props).forEach(function(k) {
+            match = match && (mProps[k] == props[k]);
+        });
+        return match;
+    });
+}
+
 /**
  * Remove current curve from track
  */
@@ -444,6 +499,10 @@ LogTrack.prototype.removeCurrentCurve = function() {
  */
 LogTrack.prototype.removeCurrentShading = function() {
     this.removeShading(this.currentDrawing);
+}
+
+LogTrack.prototype.removeCurrentMarker = function() {
+    this.removeMarker(this.currentDrawing);
 }
 
 /**
@@ -482,6 +541,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     }
     this.svgContainer.raise();
     this.getImages().forEach(function(img) { img.lower(); });
+    this.getMarkers().forEach(function(marker) { marker.raise(); });
 }
 
 /**
@@ -500,6 +560,11 @@ LogTrack.prototype.plotCurve = function(curve) {
 LogTrack.prototype.plotShading = function(shading) {
     if (!shading || !shading.isShading || !shading.isShading()) return;
     this.plotDrawing(shading);
+}
+
+LogTrack.prototype.plotMarker = function(marker) {
+    if (!marker || !marker.isMarker || !marker.isMarker()) return;
+    this.plotDrawing(marker);
 }
 
 /**
@@ -559,6 +624,14 @@ LogTrack.prototype.onPlotDoubleClick = function(cb) {
             self.plotMouseDownCallback();
             cb();
         });
+}
+
+LogTrack.prototype.onMarkerMouseDown = function(marker, cb) {
+    let self = this;
+    marker.on('mousedown', function() {
+        self.markerMouseDownCallback(marker);
+        cb();
+    });
 }
 
 /**
@@ -810,6 +883,12 @@ LogTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
     else {
         this.setCurrentDrawing(drawing);
     }
+}
+
+LogTrack.prototype.markerMouseDownCallback = function(marker) {
+    this.setCurrentDrawing(marker);
+    // d3.event.stopPropagation();
+    // this.trackContainer.node().focus();
 }
 
 LogTrack.prototype.plotMouseDownCallback = function() {
