@@ -8,14 +8,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let viCrossplot;
 
     this.$onInit = function () {
-        self.crossplotAreaId = self.name + 'CrossplotArea';
+        self.crossplotAreaId = self.name.replace('D3Area', '');
 
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
         console.log(self.crossplotAreaId)
-        $timeout(createVisualizeCrossplot);
     };
     function PropertyGridButtonClicked() {
         console.log('PropertyGridButton is clicked');
@@ -91,22 +90,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .open(event.clientX, event.clientY, self.contextMenu);
     }
 
-    function createVisualizeCrossplot() {
-
-        function genSamples(extentX, extentY) {
-            let samples = [];
-            let transform = d3.scaleLinear().domain([0,1]).range(extentX);
-
-            for (let i = extentY[0]; i <= extentY[1]; i++) {
-                samples.push({y: i, x: transform(Math.random())});
-            }
-            return samples;
-        }
-
-        let xData = genSamples([0,10], [0,1000]);
-        let yData = genSamples([0,5], [0,1000]);
-        let xCurve = graph.buildCurve({}, xData);
-        let yCurve = graph.buildCurve({}, yData);
+    this.createVisualizeCrossplot = function (xCurveData, yCurveData) {
+        let xCurve = graph.buildCurve({}, xCurveData);
+        let yCurve = graph.buildCurve({}, yCurveData);
         let domElem = document.getElementById(self.crossplotAreaId);
         viCrossplot = graph.createCrossplot(xCurve, yCurve, {}, domElem);
     }

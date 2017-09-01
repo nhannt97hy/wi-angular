@@ -112,7 +112,7 @@ exports.DeleteItemButtonClicked = function () {
                     utils.deleteLogplot();
                     break;
                 case 'crossplot':
-                    wiApiService.removeCrossplot(selectedNode.properties.idCrospslot, function () {
+                    wiApiService.removeCrossplot(selectedNode.properties.idCrossplot, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                         });

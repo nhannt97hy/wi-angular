@@ -604,15 +604,21 @@ exports.ResultButtonClicked = function () {
 };
 
 exports.BlankCrossPlotButtonClicked = function () {
-    console.log('BlankCrossPlotButton is clicked');
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    DialogUtils.newBlankCrossplotDialog(ModalService, function (crossplotName) {
-        console.log(crossplotName);
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'crossplots') return;
+    let promptConfig = {
+        title: 'Create New Crossplot',
+        inputName: 'Crossplot Name',
+        input: 'BlankCrossplot'
+    }
+    DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+        utils.createCrossplot(selectedNode.properties.idWell, crossplotName);
     });
 };
 

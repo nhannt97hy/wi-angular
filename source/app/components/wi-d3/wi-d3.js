@@ -202,7 +202,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.createZoneTrack(dataRequest, function (returnZoneTrack) {
                     let zoneTrack = dataRequest;
                     zoneTrack.idZoneTrack = returnZoneTrack.idZoneTrack;
-                    self.pushZoneTrack(zoneTrack);
+                    wiApiService.getZoneSet(zoneTrack.idZoneSet, function (zoneset) {
+                        let viTrack = self.pushZoneTrack(zoneTrack);
+                        for (let zone of zoneset.zones) {
+                            self.addZoneToTrack(viTrack, zone);
+                        }
+                    })
                 })
             })
         }
@@ -963,6 +968,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
                 else {
                     console.log('Create crossplot', curve1, curve2);
+                    let promptConfig = {
+                        title: 'Create New Crossplot',
+                        inputName: 'Crossplot Name',
+                        input: curve1.name + '_' + curve2.name
+                    }
+                    DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+                        let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
+                        Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
+                            let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+                            console.log(wiCrossplotCtrl);
+                            let dataPointSet = {
+                                idCrossPlot: wiCrossplotCtrl.id,
+                                idWell: idWell,
+                                idCurveX: curve1.idCurve,
+                                idCurveY: curve2.idCurve,
+                            }
+                            Utils.createPointSet(dataPointSet, function (pointSet) {
+                                wiD3CrossplotCtrl.createVisualizeCrossplot(curve1.data, curve2.data);
+                            })
+                        });
+                    })
                 }
             }
         }, {

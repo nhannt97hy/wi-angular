@@ -3,7 +3,7 @@ const moduleName = 'wi-crossplot';
 
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
-    
+        
     // this.$onInit = function () {
     //     self.slidingbarName = self.name + 'Slidingbar';
     //     self.wiD3AreaName = self.name + 'D3Area';
@@ -28,10 +28,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     //     if (self.name) wiComponentService.putComponent(self.name, self);
     // };
     this.$onInit = function () {
+        self.wiD3CrossplotAreaName = self.name + 'D3Area';
         var globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
         $scope.handlers = globalHandlers;
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
+
+    this.getWiD3CrossplotCtrl = function () {
+        return wiComponentService.getComponent(self.wiD3CrossplotAreaName);
+    }
 }
 
 let app = angular.module(moduleName, []);

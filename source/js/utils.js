@@ -298,10 +298,10 @@ function crossplotToTreeConfig(crossplot) {
     var crossplotModel = new Object();
     crossplotModel.name = 'crossplot';
     crossplotModel.type = 'crossplot';
-    crossplotModel.id = crossplot.idCrossplot;
+    crossplotModel.id = crossplot.idCrossPlot;
     crossplotModel.properties = {
         idWell: crossplot.idWell,
-        idCrossplot: crossplot.idCrossplot,
+        idCrossplot: crossplot.idCrossPlot,
         name: crossplot.name
     };
     crossplotModel.data = {
@@ -312,7 +312,7 @@ function crossplotToTreeConfig(crossplot) {
     crossplotModel.handler = function () {
         let selectedNode = getSelectedNode();
         if (selectedNode && selectedNode.type == 'crossplot') {
-            openCrossplotTab(__GLOBAL.wiComponentService, selectedNode);
+            openCrossplotTab(selectedNode);
         }
     }
 
@@ -455,12 +455,6 @@ function createCrossplotNode(well) {
     crossplotModel.properties = {
         idWell: well.idWell
     };
-    // mock
-    well.crossplots = [{
-        idCrossplot: 2810,
-        idWell: well.idWell,
-        name: 'MockCrossPlot'
-    }];
 
     if (!well.crossplots) return crossplotModel;
     crossplotModel.children = new Array();
@@ -1354,11 +1348,49 @@ exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, cr
     return wiApiService.post(route, dataRequest);
 };
 
-function openCrossplotTab(wiComponentService, crossplotModel, callback) {
+exports.createPointSet = function (pointSetData, callback) {
+    __GLOBAL.wiApiService.createPointSet(pointSetData, function (pointSet) {
+        console.log(pointSet);
+        callback(pointSet);
+    })
+}
+
+exports.createCrossplot = function (idWell, crossplotName, callback) {
+    __GLOBAL.wiApiService.createCrossplot({ idWell: idWell, name: crossplotName }, function (crossplot) {
+        console.log("Created new crossplot", crossplot);
+        let crossplotModel = crossplotToTreeConfig(crossplot);
+        refreshProjectState();
+        openCrossplotTab(crossplotModel, callback);
+    })
+}
+
+function openCrossplotTab(crossplotModel, callback) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let wiApiService = __GLOBAL.wiApiService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(crossplotModel);
     if (crossplotModel.data.opened) return;
     crossplotModel.data.opened = true;
+    let crossplotName = 'crossplot' + crossplotModel.properties.idCrossplot;
+    let wiCrossplotCtrl = __GLOBAL.wiComponentService.getComponent(crossplotName);
+    let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+    wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
+        if (crossplot.pointsets && crossplot.pointsets.length) {
+            let pointSet = crossplot.pointsets[0];
+            wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
+                wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
+                    if (pointSet.idCurveZ) {
+                        wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
+                            // TODO
+                        })
+                    } else {
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(xCurveData, yCurveData)
+                    }
+                })
+            })
+        }
+    })
+    if(callback) callback(wiCrossplotCtrl);
 };
 exports.openCrossplotTab = openCrossplotTab;
 

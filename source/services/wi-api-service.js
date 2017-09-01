@@ -72,6 +72,26 @@ const EDIT_ZONE = '/project/well/zone-set/zone/edit';
 const GET_ZONE = '/project/well/zone-set/zone/info';
 const DELETE_ZONE = '/project/well/zone-set/zone/delete';
 
+const CREATE_CROSSPLOT = '/project/well/cross-plot/new';
+const EDIT_CROSSPLOT = '/project/well/cross-plot/edit';
+const GET_CROSSPLOT = '/project/well/cross-plot/info';
+const DELETE_CROSSPLOT = '/project/well/cross-plot/delete';
+
+const CREATE_POINTSET = '/project/well/cross-plot/point-set/new';
+const EDIT_POINTET = '/project/well/cross-plot/point-set/edit';
+const GET_POINTSET = '/project/well/cross-plot/point-set/info';
+const DELETE_POINTSET = '/project/well/cross-plot/point-set/delete';
+
+const CREATE_POLYGON = '/project/well/cross-plot/polygon/new';
+const EDIT_POLYGON = '/project/well/cross-plot/polygon/edit';
+const GET_POLYGON = '/project/well/cross-plot/polygon/info';
+const DELETE_POLYGON = '/project/well/cross-plot/polygon/delete';
+
+const CREATE_DISCRIM = '/project/well/cross-plot/discrim/new';
+const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
+const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
+const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -406,6 +426,18 @@ Service.prototype.editCurve = function (curveInfo, callback) {
 Service.prototype.infoCurve = function (idCurve, callback) {
     let self = this;
     this.post(INFO_CURVE, {idCurve: idCurve})
+        .then(function (res) {
+            callback(res)
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        })
+}
+
+Service.prototype.dataCurve = function (idCurve, callback) {
+    let self = this;
+    this.post(DATA_CURVE, {idCurve: idCurve})
         .then(function (res) {
             callback(res)
         })
@@ -793,7 +825,6 @@ Service.prototype.getZone = function (idZone, callback) {
 }
 Service.prototype.removeZone = function (idZone, callback) {
     let self = this;
-    console.log('idZone to delete', idZone);
     this.delete(DELETE_ZONE, { idZone: idZone })
         .then(function (returnData) {
             callback();
@@ -803,7 +834,169 @@ Service.prototype.removeZone = function (idZone, callback) {
         });
 }
 
+Service.prototype.createCrossplot = function (data, callback) {
+    let self = this;
+    this.post(CREATE_CROSSPLOT, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editCrossplot = function (data, callback) {
+    let self = this;
+    this.post(EDIT_CROSSPLOT, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getCrossplot = function (idCrossplot, callback) {
+    let self = this;
+    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossplot })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeCrossplot = function (idCrossplot, callback) {
+    let self = this;
+    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossplot })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 
+Service.prototype.createPointSet = function (data, callback) {
+    let self = this;
+    this.post(CREATE_POINTSET, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editPointSet = function (data, callback) {
+    let self = this;
+    this.post(EDIT_POINTSET, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getPointSet = function (idPointSet, callback) {
+    let self = this;
+    this.post(GET_POINTSET, { idPointSet: idPointSet })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removePointSet = function (idPointSet, callback) {
+    let self = this;
+    this.delete(DELETE_POINTSET, { idPointSet: idPointSet })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.createPolygon = function (data, callback) {
+    let self = this;
+    this.post(CREATE_POLYGON, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editPolygon = function (data, callback) {
+    let self = this;
+    this.post(EDIT_POLYGON, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getPolygon = function (idPolygon, callback) {
+    let self = this;
+    this.post(GET_POLYGON, { idPolygon: idPolygon })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removePolygon = function (idPolygon, callback) {
+    let self = this;
+    this.delete(DELETE_POLYGON, { idPolygon: idPolygon })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.createDiscrim = function (data, callback) {
+    let self = this;
+    this.post(CREATE_DISCRIM, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editDiscrim = function (data, callback) {
+    let self = this;
+    this.post(EDIT_DISCRIM, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getDiscrim = function (idDiscrim, callback) {
+    let self = this;
+    this.post(GET_DISCRIM, { idDiscrim: idDiscrim })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeDiscrim = function (idDiscrim, callback) {
+    let self = this;
+    this.delete(DELETE_DISCRIM, { idDiscrim: idDiscrim })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);
