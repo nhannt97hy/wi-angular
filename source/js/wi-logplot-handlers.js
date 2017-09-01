@@ -219,35 +219,34 @@ exports.DuplicateTrackButtonClicked = function() {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
-    let curves = currentTrack.getCurves();
+    if (!currentTrack.isLogTrack()) {
+        utils.warning('Can not duplicate this track. Please choose a Log Track!');
+        return;
+    }
     let wiApiService = this.wiApiService;
     let props = currentTrack.getProperties();
-    wiD3Ctrl.addLogTrack(props.title, function(track) {
-        props.orderNum = track.orderNum;
-        props.idTrack = track.id;
+    wiD3Ctrl.addLogTrack(props.title, function(newTrack) {
+        props.orderNum = newTrack.orderNum;
+        props.idTrack = newTrack.id;
+        props.width = utils.pixelToInch(props.width);
         wiApiService.editTrack(props, function(ret) {
-            track.setProperties(props);
-        });
-        if (!curves.length) return;
-        curves.forEach(function(curve) {
-            wiApiService.post(wiApiService.CREATE_LINE, { idTrack: track.id, idCurve: curve.idCurve })
-                .then(function(line) {
-                    let newCurve = wiD3Ctrl.addCurveToTrack(track, curve.rawData, {});
+            props.width = utils.inchToPixel(props.width);
+            newTrack.setProperties(props);
+            let curves = currentTrack.getCurves();
+            if (!curves.length) return;
+            curves.forEach(function(curve) {
+                wiApiService.createLine({ idTrack: newTrack.id, idCurve: curve.idCurve }, function (line) {
                     let newCurveProps = curve.getProperties();
                     newCurveProps.idLine = line.idLine;
-                    newCurveProps.idTrack = track.id;
-                    console.log('newCurveProps', newCurveProps);
+                    newCurveProps.idTrack = newTrack.id;
                     newCurveProps.lineStyle = JSON.stringify(newCurveProps.lineStyle);
                     wiApiService.editLine(newCurveProps, function() {
+                        let newCurve = wiD3Ctrl.addCurveToTrack(newTrack, curve.rawData, {});
                         newCurve.setProperties(newCurveProps);
-                        track.plotCurve(newCurve);
+                        newTrack.plotCurve(newCurve);
                     });
                 })
-                .catch(function(err){
-                    console.error(err);
-                    utils.error(err);
-                    return;
-                });
+            });
         });
     })
 };

@@ -2540,6 +2540,29 @@ exports.errorMessageDialog = function (ModalService, errorMessage) {
         })
     });
 };
+
+exports.warningMessageDialog = function (ModalService, warningMessage) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.warning = warningMessage;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: 'warning-message/warning-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        })
+    });
+};
+
 exports.aboutDialog = function (ModalService, callback) {
     function ModalController($scope, close) {
         let self = this;

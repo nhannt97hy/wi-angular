@@ -66,6 +66,13 @@ exports.error = function (errorMessage) {
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
     DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage);
 }
+exports.warning = function (warningMessage) {
+    if (!warningMessage) return;
+    warningMessage = warningMessage;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.warningMessageDialog(__GLOBAL.ModalService, warningMessage);
+}
 
 exports.projectOpen = function (wiComponentService, projectData) {
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);

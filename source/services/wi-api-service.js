@@ -610,7 +610,9 @@ Service.prototype.createLine = function (lineObj, callback) {
     var self = this;
     let dataRequest = lineObj;
     this.post(CREATE_LINE, dataRequest)
-        .then(callback)
+        .then(function (line) {
+            callback(line);
+        })
         .catch(function (err) {
             console.error(err);
             self.getUtils().error(err);
