@@ -2101,11 +2101,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             variableShadingItem.negativeFill = {
                 display: condition4,
                 varShading: {
-                    startX: condition4?shadingProp.positiveFill.varShading.startX:null,
-                    endX: condition4?shadingProp.positiveFill.varShading.endX:null,
+                    startX: condition4?shadingProp.negativeFill.varShading.startX:null,
+                    endX: condition4?shadingProp.negativeFill.varShading.endX:null,
                     gradient: {
-                        startColor: condition4?shadingProp.positiveFill.varShading.gradient.startColor:null,
-                        endColor: condition4?shadingProp.positiveFill.varShading.gradient.endColor:null
+                        startColor: condition4?shadingProp.negativeFill.varShading.gradient.startColor:null,
+                        endColor: condition4?shadingProp.negativeFill.varShading.gradient.endColor:null
                     },
                     palette: {},
                     values: {}
@@ -2118,7 +2118,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 _index: index
             }
             self.shadingArr.push(shadingItem);
-            console.log("fillPattern____", variableShadingItem, shadingItem, condition1, condition2, condition3, condition4);
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
             self.shadingChanged.push(shadingChangedItem);

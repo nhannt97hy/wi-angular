@@ -351,7 +351,6 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
         }
         ret.push({ varShading: varShading });
     });
-    console.log("prepareFillStyle:", ret);
     return ret;
 }
 
