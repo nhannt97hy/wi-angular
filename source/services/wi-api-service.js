@@ -558,7 +558,8 @@ Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     console.log("createDepthTrack", self);
     let dataRequest = {
         idPlot: idPlot,
-        orderNum: orderNum
+        orderNum: orderNum, 
+        geogetryWidth: 1
     };
     this.post(CREATE_DEPTH_AXIS, dataRequest)
         .then(callback)

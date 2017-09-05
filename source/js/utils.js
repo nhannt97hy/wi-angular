@@ -97,7 +97,7 @@ function getCurveFromId(idCurve) {
     });
     return curve;
 }
-
+exports.getCurveFromId = getCurveFromId;
 exports.lineToTreeConfig = lineToTreeConfig;
 
 function lineToTreeConfig(line) {
@@ -1275,9 +1275,18 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
             shadingObj.negativeFill = fillPatternStyles.negativeFill;
         }
     }
+    else if (shadingObj.shadingStyle == 'variableShading') {
+        if(!shadingObj.isNegPosFill){
+            shadingObj.fill = variableShadingStyle.fill;
+        }
+        else {
+            shadingObj.positiveFill = variableShadingStyle.positiveFill;
+            shadingObj.negativeFill = variableShadingStyle.negativeFill;
+        }
+        // shadingObj.fill.display = true;
+    }
     else {
-        shadingObj.fill = variableShadingStyle;
-        shadingObj.fill.display = true;
+        alert("shadingObj has undefined shadingStyle");
     }
     return shadingObj;
 }

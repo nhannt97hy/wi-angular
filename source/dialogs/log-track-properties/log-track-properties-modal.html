@@ -297,14 +297,16 @@
                                                             class="form-control wi-form-control" 
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
                                                             ng-change="wiModal.onChangeShading($index);
-                                                            wiModal.setShadingName(shading.idLeftLine, shading._index, false);" ng-disabled="!shading.idRightLine">
+                                                            wiModal.setShadingName(shading.idLeftLine, shading._index, false); shading.leftFixedValue = null; wiModal.validate(shading._index); wiModal.setFillDisplay(shading._index);" 
+                                                            ng-disabled="!shading.idRightLine">
                                                                 <option></option>
                                                             </select>
                                                 </td>
                                                 <td class="border border-style1-right">
                                                     <input type="number" ng-model="shading.leftFixedValue" 
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, false);"
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, false);shading.idLeftLine = null"
+                                                            ng-disabled="!shading.idRightLine"
                                                             size="6">
                                                 </td>
                                                 <td class="border">
@@ -318,7 +320,8 @@
                                                 <td class="border border-style1-right">
                                                     <input type="number" ng-model="shading.rightFixedValue" 
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, true);" size="6">
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, true);" size="6"
+                                                            disabled>
                                                 </td>
                                                 <td class="border">
                                                     <input type="text" ng-model="shading.name" 

@@ -25,11 +25,23 @@ Utils.extend(Drawing, Shading);
  * @param {String} [config.fill.pattern.name]
  * @param {String} [config.fill.pattern.foreground]
  * @param {String} [config.fill.pattern.background]
+
+ * ------ NEW -----------
+ * @param {Object} [config.fill.varShading.gradient]
+ * @param {Number} [config.fill.varShading.startX]
+ * @param {Number} [config.fill.varShading.endX]
+ * @param {String} [config.fill.varShading.gradient.startColor]
+ * @param {String} [config.fill.varShading.gradient.endColor]
+
+ * ----- DEPRECATED -----
  * @param {Object} [config.fill.gradient]
  * @param {Number} [config.fill.gradient.startX]
  * @param {Number} [config.fill.gradient.endX]
  * @param {String} [config.fill.gradient.startColor]
  * @param {String} [config.fill.gradient.endColor]
+
+
+
  * @param {Boolean} [config.isNegPosFill] - Indicate whether to plot with negative and positive styles
  * @param {Object} [config.negativeFill] - Configurations of fill style for negative values
  * @param {Object} [config.positiveFill] - Configurations of fill style for positive values
@@ -110,13 +122,9 @@ Shading.prototype.getProperties = function() {
         idShading: this.id,
         idTrack: this.idTrack,
         name: this.name,
-        //fill: this.isNegPosFilling ? null: this.fill,
         fill: this.isNegPosFill ? null: this.fill,
-        //negativeFill: this.isNegPosFilling ? Utils.clone(this.negativeFill) : null,
         negativeFill: this.isNegPosFill ? Utils.clone(this.negativeFill) : null,
-        //positiveFill: this.isNegPosFilling ? Utils.clone(this.positiveFill) : Utils.clone(this.fill),
         positiveFill: this.isNegPosFill ? Utils.clone(this.positiveFill) : Utils.clone(this.fill),
-        //isNegPosFilling: this.isNegPosFilling,
         isNegPosFill: this.isNegPosFill,
         idLeftLine: (leftCurve || {}).id,
         idRightLine: (rightCurve || {}).id,
@@ -131,9 +139,7 @@ Shading.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this,'idTrack', props.idTrack);
     Utils.setIfNotNull(this, 'id', props.idShading);
     Utils.setIfNotNull(this, 'name', props.name);
-    //Utils.setIfNotNull(this, 'isNegPosFilling', props.isNegPosFilling);
     Utils.setIfNotNull(this, 'isNegPosFill', props.isNegPosFill);
-    //if (props.isNegPosFilling) {
     if (props.isNegPosFill) {
         Utils.setIfNotNull(this, 'positiveFill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
         Utils.setIfNotNull(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
@@ -309,7 +315,48 @@ Shading.prototype.doPlot = function(highlight) {
     return this;
 }
 
+
 Shading.prototype.prepareFillStyles = function(forHeader) {
+    let self = this;
+    let fills = [this.fill, this.positiveFill, this.negativeFill];
+    let ret = [];
+    fills.forEach(function(fill) {
+        if (!fill || !fill.varShading) {
+            ret.push(fill);
+            return;
+        }
+        let varShading = Utils.clone(fill.varShading);
+
+        if (forHeader) {
+            let rect = self.header.node().getBoundingClientRect();
+            varShading.startX = 0;
+            varShading.endX = rect.width;
+            varShading.gradient.data = Utils.range(0, 1, 0.1).map(function(d) {
+                return {
+                    x: d * rect.width,
+                    y: d * rect.height
+                }
+            });
+        }
+        else {
+            let transformX = self.getTransformX(self.selectedCurve);
+            if (varShading.gradient) {
+                varShading.gradient.data = self.prepareData(self.selectedCurve);
+            }
+            else {
+                // TODO ??? For pallete
+            }
+            varShading.startX = transformX(varShading.startX);
+            varShading.endX = transformX(varShading.endX);
+        }
+        ret.push({ varShading: varShading });
+    });
+    console.log("prepareFillStyle:", ret);
+    return ret;
+}
+
+
+Shading.prototype._prepareFillStyles = function(forHeader) {
     let self = this;
     let fills = [this.fill, this.positiveFill, this.negativeFill];
     let ret = [];
