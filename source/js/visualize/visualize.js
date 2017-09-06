@@ -9,6 +9,7 @@ let ZoneTrack = require('./visualize-zone-track');
 let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
+let Histogram = require('./visualize-histogram');
 
 exports.CanvasHelper = CanvasHelper;
 
@@ -188,3 +189,15 @@ exports.createCrossplot = function(xCurve, yCurve, config, domElem) {
     return crossplot;
 }
 
+/**
+ * Create and draw a new Histogram inside a specified DOM elementa
+ * @param {Object} curve - The curve to plot histogram
+ * @param {Object} config - Configurations of the new Histogram
+ * @param {HtmlDomElem} domElem - The DOM element that contains the Histogram
+ * @returns {Object} The newly created histogram
+ */
+exports.createHistogram = function(config, domElem) {
+    let histogram = new Histogram(config);
+    histogram.init(domElem);
+    return histogram;
+}

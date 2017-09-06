@@ -101,6 +101,64 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
     }
+
+    function buildConfigFromHistogramModel(histogramModel, callback) {
+        var config = {
+            idHistogram: histogramModel.properties.idHistogram,
+            histogramTitle: histogramModel.properties.histogramTitle || "Noname",
+            hardCopyWidth: histogramModel.properties.hardCopyWidth,
+            hardCopyHeight: histogramModel.properties.hardCopyHeight,
+            intervalDepthTop: histogramModel.properties.intervalDepthTop,
+            intervalDepthBottom: histogramModel.properties.intervalDepthBottom,
+            divisions: histogramModel.properties.divisions,
+            leftScale: histogramModel.properties.leftScale,
+            rightScale: histogramModel.properties.rightScale,
+            showGaussian: histogramModel.properties.showGaussian || false,
+            loga: histogramModel.properties.loga || false,
+            showGrid: histogramModel.properties.showGrid || false,
+            flipHorizontal: histogramModel.properties.flipHorizontal || false,
+            line: {
+                color: histogramModel.properties.lineColor,
+                width: histogramModel.properties.lineWidth,
+                dash: histogramModel.properties.lineStyle
+            },
+            plotType: histogramModel.properties.plotType,
+            fill: {
+                pattern: null,
+                background: histogramModel.properties.color,
+                foreground: histogramModel.properties.color
+            },
+            discriminators: {},
+            idWell: histogramModel.properties.idWell,
+            idCurve: histogramModel.properties.idCurve,
+            //idZoneSet: null
+            data: null,
+            zones: null,
+        }
+        // set config.data (curveData) and config.zones
+        wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
+            console.log(data);
+            config.data = data;
+            if (histogramModel.properties.idZoneSet) {
+                wiApiService.getZoneSet(histogramModel.properties.idZoneSet, function(zoneSet) {
+                    console.log(zoneSet);
+                    config.zones = zoneSet.zones;
+                    if( callback ) callback(config);
+                });
+            }
+            else {
+                if( callback ) callback(config);
+            }
+        });
+    }
+ 
+    this.createVisualizeHistogram = function(histogram) {
+        console.log('createHistogram:' , histogram, self.histogramAreaId);
+        buildConfigFromHistogramModel(histogram, function(config) {
+            let visHistogram = graph.createHistogram(config, document.getElementById(self.histogramAreaId));
+            console.log(visHistogram);
+        });
+    }
 }
 
 let app = angular.module(moduleName, []);

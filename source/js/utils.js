@@ -334,14 +334,34 @@ function histogramToTreeConfig(histogram) {
     histogramModel.type = 'histogram';
     histogramModel.id = histogram.idHistogram;
     histogramModel.properties = {
-        idWell: histogram.idWell,
         idHistogram: histogram.idHistogram,
-        name: histogram.name
+        histogramTitle: histogram.histogramTitle,
+        hardCopyWidth: histogram.hardCopyWidth,
+        hardCopyHeight: histogram.hardCopyHeight,
+        intervalDepthTop: histogram.intervalDepthTop,
+        intervalDepthBottom: histogram.intervalDepthBottom,
+        divisions: histogram.divisions,
+        leftScale: histogram.leftScale,
+        rightScale: histogram.rightScale,
+        showGaussian: histogram.showGaussian,
+        loga: histogram.loga,
+        showGrid: histogram.showGrid,
+        flipHorizontal:histogram.flipHorizontal,
+        lineStyle: histogram.lineStyle,
+        lineColor: histogram.lineColor,
+        plotType: histogram.plotType,
+        color: histogram.color,
+        discriminators: histogram.discriminators,
+        idWell: histogram.idWell,
+        idCurve: histogram.idCurve,
+        idZoneSet: histogram.idZoneSet,
+        // ????
+        name: histogram.histogramTitle
     };
     histogramModel.data = {
         childExpanded: false,
         icon: 'histogram-blank-16x16',
-        label: histogram.name
+        label: histogram.histogramTitle
     }
     histogramModel.handler = function () {
         let selectedNode = getSelectedNode();
@@ -487,8 +507,28 @@ function createHistogramNode(well) {
     // mock
     well.histograms = [{
         idHistogram: 2810,
+        histogramTitle: 'CuongHistogram',
+        hardCopyWidth: null,
+        hardCopyHeight: null,
+        intervalDepthTop: 1200,
+        intervalDepthBottom: 1900,
+        divisions: 50,
+        leftScale: 0,
+        rightScale: 0,
+        showGaussian: false,
+        loga: false,
+        showGrid: false,
+        flipHorizontal: false,
+        lineStyle: "Custom",
+        lineColor: "Blue",
+        plotType: "Frequency",
+        color: "Blue",
+        discriminators: null,
+        createdAt: "2017-09-06T07:44:10.000Z",
+        updatedAt: "2017-09-06T07:44:10.000Z",
         idWell: well.idWell,
-        name: 'MockHistogram'
+        idCurve: 220,
+        idZoneSet: 6
     }];
 
     if (!well.histograms) return histogramModel;
@@ -1426,6 +1466,12 @@ function openHistogramTab(wiComponentService, histogramModel, callback) {
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
     histogramModel.data.opened = true;
+    console.log('openHistogramTab:', histogramModel);
+    let histogramName = 'histogram' + histogramModel.properties.idHistogram;
+    let histogramCtrl = wiComponentService.getComponent(histogramName);
+    console.log(histogramName, histogramCtrl);
+    histogramCtrl.getwiD3Ctrl().createVisualizeHistogram(histogramModel);
+    if(callback) callback();
 };
 exports.openHistogramTab = openHistogramTab;
 
