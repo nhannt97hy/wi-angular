@@ -2813,20 +2813,20 @@ exports.zoneTrackPropertiesDialog = function(ModalService, wiLogplotCtrl, zoneTr
         let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let props = zoneTrackProperties || {
-            isShowTitle: true,
+            showTitle: true,
             title : "New Zone",
             topJustification: "center",
             bottomJustification: "center",
             trackColor: '#ffffff',
-            width: 1.000,
-            parameterSet: null,
-            zoneSet: null
+            width: utils.inchToPixel(1),
+            parameterSet: null
         }
+        props.width = utils.pixelToInch(props.width);
         console.log(props);
-        this.isShowTitle = props.isShowTitle;
+        this.isShowTitle = props.showTitle;
         this.title = props.title;
-        this.topJustification = props.topJustification;
-        this.bottomJustification = props.bottomJustification;
+        this.topJustification = props.topJustification.toLowerCase();
+        this.bottomJustification = props.bottomJustification.toLowerCase();
         this.trackColor = props.trackColor;
         this.width = props.width;
         this.parameterSet = props.parameterSet;
@@ -2839,7 +2839,7 @@ exports.zoneTrackPropertiesDialog = function(ModalService, wiLogplotCtrl, zoneTr
             });
         }
         refreshZoneSets();
-        this.zoneSet = props.zoneSet;
+        this.idZoneSet = props.idZoneSet;
         // Dialog buttons
         this.createZoneSet = function () {
             utils.createZoneSet(wiLogplotModel.properties.idWell, function () {
@@ -2864,14 +2864,14 @@ exports.zoneTrackPropertiesDialog = function(ModalService, wiLogplotCtrl, zoneTr
         };
         function bindProps() {
             props = {
-                isShowTitle: self.isShowTitle,
+                showTitle: self.isShowTitle,
                 title : self.title,
                 topJustification: self.topJustification,
                 bottomJustification: self.bottomJustification,
                 trackColor: self.trackColor,
                 width: self.width,
                 parameterSet: self.parameterSet,
-                idZoneSet: self.zoneSet.idZoneSet
+                idZoneSet: self.idZoneSet
             }
         }
     }

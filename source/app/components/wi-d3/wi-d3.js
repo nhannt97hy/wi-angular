@@ -699,6 +699,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .on('end', function() {
                 if (track.mode != 'AddZone') return;
                 // Send api to create new zone on server
+                if (!track.idZoneSet) {
+                    track.idZoneSet = _currentTrack.isZoneTrack() ? _currentTrack.idZoneSet : undefined;
+                    if (!track.idZoneSet) return;
+                }
+                console.log(track);
                 let zoneData = {
                     idZoneSet: track.idZoneSet,
                     name: zone.name,
@@ -1229,7 +1234,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         } else if (_currentTrack.isZoneTrack()) {
             DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {                
                 if (props) {
-                    console.log('zoneTrackPropertiesData', props);
+                    props.idZoneTrack = _currentTrack.id;
+                    console.log(props);
+                    wiApiService.editZoneTrack(props, function () { 
+                        props.width = Utils.inchToPixel(props.width);
+                        _currentTrack.setProperties(props);
+                        _currentTrack.doPlot(true);
+                    });
                 }
             });
         }

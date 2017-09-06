@@ -891,6 +891,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 
                 } else if(aTrack.idZoneTrack) {
                     let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
+                    if (!aTrack.zoneset) {
+                        aTrack = tracks.shift();
+                        continue;
+                    }
                     wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
                         for (let zone of zoneset.zones) {
                             wiD3Ctrl.addZoneToTrack(viTrack, zone);
