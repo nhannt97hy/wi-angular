@@ -6,17 +6,6 @@ module.exports = Crossplot;
 function Crossplot(config) {
     this.setProperties(config);
 
-    this.scaleLeft = this.scaleLeft == null ? (this.curveX || {}).minX : this.scaleLeft;
-    this.scaleRight = this.scaleRight == null ? (this.curveX || {}).maxX : this.scaleRight;
-    this.labelX = this.labelX || (this.curveX || {}).name;
-
-    this.scaleBottom = this.scaleBottom == null ? (this.curveY || {}).minX : this.scaleBottom;
-    this.scaleTop = this.scaleTop == null ? (this.curveY || {}).maxX : this.scaleTop;
-    this.labelY = this.labelY || (this.curveY || {}).name;
-
-    this.scaleMin = this.scaleMin == null ? (this.curveZ || {}).minX : this.scaleMin;
-    this.scaleMax = this.scaleMax == null ? (this.curveZ || {}).maxX : this.scaleMax;
-
     this.paddingLeft = 100;
     this.paddingRight = 50;
     this.paddingTop = 50;
@@ -29,44 +18,61 @@ Crossplot.prototype.PROPERTIES = {
     idCrossplot: { type: 'Integer' },
     idWell: { type: 'Integer'},
     name: { type: 'String', default: 'Noname' },
-    curveX: { type: 'Object' },
-    logX: { type: 'Boolean', default: false },
-    majorX: { type: 'Integer', default: 5 },
-    minorX : { type: 'Integer', default: 1 },
-    scaleLeft: { type: 'Float' },
-    scaleRight: { type: 'Float' },
-    labelX: { type: 'String' },
-    decimalsX: { type: 'Integer', default: 2 },
-    curveY: { type: 'Object' },
-    logY: { type: 'Boolean', default: false },
-    majorY: { type: 'Integer', default: 5 },
-    minorY: { type: 'Integer', default: 1 },
-    scaleBottom: { type: 'Float' },
-    scaleTop: { type: 'Float' },
-    labelY: { type: 'String' },
-    decimalsY: { type: 'Integer', default: 2 },
-    curveZ: { type: 'Object' },
-    scaleMin: { type: 'Float' },
-    scaleMax: { type: 'Float' },
-    numColor: { type: 'Integer', default: 5 },
-    decimalsZ: { type: 'Float', default: 2 },
-    pointSymbol: { type: 'Enum', values: ['Circle', 'Square', 'Cross', 'Diamond', 'Plus', 'Star'], default: 'Circle' },
-    pointSize: { type: 'Integer', default: 2 },
-    pointColor: { type: 'String', default: 'Blue' },
-    topDepth: { type: 'Float' },
-    bottomDepth: { type: 'Float' }
+    pointSet: {
+        type: 'Object',
+        properties: {
+            idPointSet: { type: 'Integer' },
+            curveX: { type: 'Object' },
+            logX: { type: 'Boolean', default: false },
+            majorX: { type: 'Integer', default: 5 },
+            minorX : { type: 'Integer', default: 1 },
+            scaleLeft: { type: 'Float' },
+            scaleRight: { type: 'Float' },
+            labelX: { type: 'String' },
+            decimalsX: { type: 'Integer', default: 2 },
+            curveY: { type: 'Object' },
+            logY: { type: 'Boolean', default: false },
+            majorY: { type: 'Integer', default: 5 },
+            minorY: { type: 'Integer', default: 1 },
+            scaleBottom: { type: 'Float' },
+            scaleTop: { type: 'Float' },
+            labelY: { type: 'String' },
+            decimalsY: { type: 'Integer', default: 2 },
+            curveZ: { type: 'Object' },
+            scaleMin: { type: 'Float' },
+            scaleMax: { type: 'Float' },
+            numColor: { type: 'Integer', default: 5 },
+            decimalsZ: { type: 'Float', default: 2 },
+            pointSymbol: {
+                type: 'Enum',
+                values: ['Circle', 'Square', 'Cross', 'Diamond', 'Plus', 'Star'],
+                default: 'Circle'
+            },
+            pointSize: { type: 'Integer', default: 2 },
+            pointColor: { type: 'String', default: 'Blue' },
+            topDepth: { type: 'Float' },
+            bottomDepth: { type: 'Float' }
+        }
+    }
 };
 
 Crossplot.prototype.getProperties = function() {
-    let props = Utils.only(this, Object.keys(this.PROPERTIES));
-    props.idCurveX = (this.curveX || {}).idCurve;
-    props.idCurveY = (this.curveY || {}).idCurve;
-    props.idCurveZ = (this.curveZ || {}).idCurve;
-    return props;
+    return Utils.getProperties(this);
 }
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleLeft', (this.pointSet.curveX || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleRight', (this.pointSet.curveX || {}).maxX);
+    Utils.setIfSelfNull(this.pointSet, 'labelX', (this.pointSet.curveX || {}).name);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleBottom', (this.pointSet.curveY || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleTop', (this.pointSet.curveY || {}).maxX);
+    Utils.setIfSelfNull(this.pointSet, 'labelY', (this.pointSet.curveY || {}).name);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleMin', (this.pointSet.curveZ || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleMax', (this.pointSet.curveZ || {}).maxX);
 }
 
 Crossplot.prototype.getViewportX = function() {
@@ -78,29 +84,27 @@ Crossplot.prototype.getViewportY = function() {
 }
 
 Crossplot.prototype.getWindowX = function() {
-    return [this.scaleLeft, this.scaleRight];
+    return [this.pointSet.scaleLeft, this.pointSet.scaleRight];
 }
 
 Crossplot.prototype.getWindowY = function() {
-    return [this.scaleBottom, this.scaleTop];
+    return [this.pointSet.scaleBottom, this.pointSet.scaleTop];
 }
 
 Crossplot.prototype.getWindowZ = function() {
-    return [this.scaleMin, this.scaleMax];
+    return [this.pointSet.scaleMin, this.pointSet.scaleMax];
 }
 
 Crossplot.prototype.getTransformX = function() {
     return d3.scaleLinear()
         .domain(this.getWindowX())
-        .range(this.getViewportX())
-        .clamp(true);
+        .range(this.getViewportX());
 }
 
 Crossplot.prototype.getTransformY = function() {
     return d3.scaleLinear()
         .domain(this.getWindowY())
-        .range(this.getViewportY())
-        .clamp(true);
+        .range(this.getViewportY());
 }
 
 Crossplot.prototype.getTransformZ = function() {
@@ -203,7 +207,7 @@ Crossplot.prototype.adjustSize = function() {
 Crossplot.prototype.doPlot = function() {
     this.prepareData();
     this.genColorList();
-    this.rectZWidth = this.curveZ ? 20 : 0;
+    this.rectZWidth = this.pointSet.curveZ ? 20 : 0;
 
     this.adjustSize();
     this.updateHeader();
@@ -214,7 +218,7 @@ Crossplot.prototype.doPlot = function() {
 Crossplot.prototype.updateHeader = function() {
     this.headerContainer
         .selectAll('div.vi-crossplot-header-row')
-        .data([this.name, 'Reference: [' + this.topDepth + ' - ' + this.bottomDepth + ']'])
+        .data([this.name, 'Reference: [' + this.pointSet.topDepth + ' - ' + this.pointSet.bottomDepth + ']'])
         .text(function(d) { return d; });
 }
 
@@ -231,16 +235,16 @@ Crossplot.prototype.updateAxisTicks = function() {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
 
-    let stepX = (wdX[1]-wdX[0]) / (this.majorX*this.minorX || 1);
-    let stepY = (wdY[1]-wdY[0]) / (this.majorY*this.minorY || 1);
+    let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX || 1);
+    let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY || 1);
 
     let axisX = d3.axisBottom(this.getTransformX())
         .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
-        .tickFormat(Utils.getDecimalFormatter(this.decimalsX));
+        .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsX));
 
     let axisY = d3.axisLeft(this.getTransformY())
         .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
-        .tickFormat(Utils.getDecimalFormatter(this.decimalsY));
+        .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsY));
 
     this.axisContainer.select('g.vi-crossplot-axis-x-ticks')
         .call(axisX)
@@ -250,10 +254,10 @@ Crossplot.prototype.updateAxisTicks = function() {
         .call(axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
 
-    if (!this.curveZ) return;
+    if (!this.pointSet.curveZ) return;
 
     let wdZ = this.getWindowZ();
-    let stepZ = (wdZ[1]-wdZ[0]) / (this.numColor || 1);
+    let stepZ = (wdZ[1]-wdZ[0]) / (this.pointSet.numColor || 1);
 
     let transformZ = d3.scaleLinear()
         .domain(wdZ)
@@ -261,7 +265,7 @@ Crossplot.prototype.updateAxisTicks = function() {
 
     let axisZ = d3.axisRight(transformZ)
         .tickValues(d3.range(wdZ[0], wdZ[1] + stepZ/2, stepZ))
-        .tickFormat(Utils.getDecimalFormatter(this.decimalsZ));
+        .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsZ));
 
     this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
         .call(axisZ)
@@ -276,8 +280,8 @@ Crossplot.prototype.updateAxisGrids = function() {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
 
-    let stepX = (wdX[1]-wdX[0]) / (this.majorX*this.minorX || 1);
-    let stepY = (wdY[1]-wdY[0]) / (this.majorY*this.minorY || 1);
+    let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX*this.pointSet.minorX || 1);
+    let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY*this.pointSet.minorY || 1);
 
     let gridX = d3.axisBottom(this.getTransformX())
         .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
@@ -294,7 +298,7 @@ Crossplot.prototype.updateAxisGrids = function() {
         .style('transform', 'translateY(' + vpY[0] + 'px)')
         .selectAll('.tick line')
             .attr('class', function(d, i) {
-                return (!self.minorX || i % self.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
             });
 
     this.axisContainer.select('g.vi-crossplot-axis-y-grids')
@@ -302,13 +306,13 @@ Crossplot.prototype.updateAxisGrids = function() {
         .style('transform', 'translateX(' + vpX[0] + 'px)')
         .selectAll('.tick line')
             .attr('class', function(d, i) {
-                return (!self.minorY || i % self.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
             });
 }
 
 Crossplot.prototype.updateAxisZRects = function() {
     let rectGroup = this.axisContainer.select('.vi-crossplot-axis-z-rects');
-    if (!this.curveZ) {
+    if (!this.pointSet.curveZ) {
         rectGroup.style('display', 'none');
         return;
     }
@@ -316,7 +320,7 @@ Crossplot.prototype.updateAxisZRects = function() {
     rectGroup.style('display', 'block');
 
     let vpY = this.getViewportY();
-    let stepY = (vpY[1]-vpY[0]) / (this.numColor || 1);
+    let stepY = (vpY[1]-vpY[0]) / (this.pointSet.numColor || 1);
     let colors = this.colors;
     let MARGIN_LEFT = 4;
 
@@ -346,7 +350,7 @@ Crossplot.prototype.updateAxisLabels = function() {
     let PADDING_LEFT = 10;
 
     let labelXElem = this.axisContainer.select('text.vi-crossplot-axis-x-label')
-        .text(this.labelX);
+        .text(this.pointSet.labelX);
     let bbX = labelXElem.node().getBBox();
     labelXElem
         .attr('transform',
@@ -358,7 +362,7 @@ Crossplot.prototype.updateAxisLabels = function() {
         );
 
     let labelYElem = this.axisContainer.select('text.vi-crossplot-axis-y-label')
-        .text(this.labelY);
+        .text(this.pointSet.labelY);
     let bbY = labelYElem.node().getBBox();
     labelYElem
         .attr('text-anchor', 'middle')
@@ -375,47 +379,57 @@ Crossplot.prototype.plotSymbol = function() {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
     let transformZ = this.getTransformZ();
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+    let rect = this.getPlotRect();
 
     let ctx = this.ctx;
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.save();
+
+    ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX)-d3.min(vpX), d3.max(vpY)-d3.min(vpY));
+    ctx.clip();
+
     let helper = new CanvasHelper(ctx, {
         strokeStyle: 'none',
-        fillStyle: this.pointColor,
-        size: this.pointSize
+        fillStyle: this.pointSet.pointColor,
+        size: this.pointSet.pointSize
     });
 
-    let plotFunc = helper[Utils.lowercase(this.pointSymbol)];
+    let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
     if (typeof plotFunc != 'function') return;
 
     let self = this;
     this.data.forEach(function(d) {
-        if (self.curveZ) {
+        if (self.pointSet.curveZ) {
             helper.fillStyle = transformZ(d.z);
         }
         plotFunc.call(helper, transformX(d.x), transformY(d.y));
     });
+    ctx.restore();
 }
 
 Crossplot.prototype.prepareData = function() {
     this.data = [];
-    if (!this.curveX || !this.curveY || !this.curveX.data || !this.curveY.data)
+    if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
     let mapX = {};
-    this.curveX.data.forEach(function(d) {
+    this.pointSet.curveX.data.forEach(function(d) {
         mapX[d.y] = d.x;
     });
 
     let mapZ = {};
-    if (this.curveZ && this.curveZ.data) {
-        this.curveZ.data.forEach(function(d) {
+    if (this.pointSet.curveZ && this.pointSet.curveZ.data) {
+        this.pointSet.curveZ.data.forEach(function(d) {
             mapZ[d.y] = d.x;
         })
     }
 
     let self = this;
-    this.curveY.data.forEach(function(d) {
-        if (self.topDepth != null && d.y < self.topDepth) return;
-        if (self.bottomDepth != null & d.y > self.bottomDepth) return;
+    this.pointSet.curveY.data.forEach(function(d) {
+        if (self.pointSet.topDepth != null && d.y < self.pointSet.topDepth) return;
+        if (self.pointSet.bottomDepth != null & d.y > self.pointSet.bottomDepth) return;
         if (d.y != null && mapX[d.y] != null) {
             self.data.push({
                 x: mapX[d.y],
@@ -432,8 +446,8 @@ Crossplot.prototype.genColorList = function() {
     }
 
     const DEFAULT_COLORS = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
-    if (this.numColor <=  DEFAULT_COLORS.length) {
-        this.colors = DEFAULT_COLORS.slice(0, this.numColor);
+    if (this.pointSet.numColor <=  DEFAULT_COLORS.length) {
+        this.colors = DEFAULT_COLORS.slice(0, this.pointSet.numColor);
         return;
     }
 
@@ -443,7 +457,7 @@ Crossplot.prototype.genColorList = function() {
 
     let i = colors.length;
     let color;
-    while (i < this.numColor) {
+    while (i < this.pointSet.numColor) {
         do {
             color = d3.rgb(rand(255), rand(255), rand(255)).toString();
         }

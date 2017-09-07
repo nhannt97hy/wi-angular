@@ -181,8 +181,10 @@ exports.sheetDraggable = function(domElem) {
  * @returns {Object} The created crossplot
  */
 exports.createCrossplot = function(curveX, curveY, config, domElem) {
-    config.curveX = curveX;
-    config.curveY = curveY;
+    let pointSet = (config || {}).pointSet || {};
+    pointSet.curveX = curveX;
+    pointSet.curveY = curveY;
+    config.pointSet = pointSet;
     let crossplot = new Crossplot(config);
     crossplot.init(domElem);
     return crossplot;
