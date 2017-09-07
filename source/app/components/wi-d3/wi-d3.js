@@ -301,6 +301,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return zone;
     }
 
+    this.addMarker = function () {
+        if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
+            _currentTrack.setMode('AddMarker');
+        }
+    }
+
     this.addMarkerToTrack = function(track, config) {
         if (!track || !track.addMarker) return;
         let marker = track.addMarker(config);
@@ -312,7 +318,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         marker.on('dblclick', _markerOnDoubleClick);
         marker.onLineDragEnd(function() {
-            // TO DO: send api to update this marker
+            // send api to update this marker
+            wiApiService.editMarker(marker.getProperties(), function () {});
         });
         return marker;
     }
@@ -589,7 +596,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
             let marker = self.addMarkerToTrack(track, {
                 minY: track.minY,
-                maxY: track.maxY
+                maxY: track.maxY,
+                idTrack: track.id
             });
 
             let transformY = track.getTransformY();
@@ -597,14 +605,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             marker.setProperties({
                 depth: depth
             });
-
-            // TO DO: send api to create new marker
-
-            // TO DO: set marker id
-            marker.setProperties({ idMarker: null });
-            track.setCurrentDrawing(marker);
-            track.plotDrawing(marker);
-            track.setMode(null);
+            
+            // send api to create new marker
+            wiApiService.createMarker(marker.getProperties(), function (returnMarker) {
+                marker.setProperties({ idMarker: returnMarker.idMarker });
+                track.setCurrentDrawing(marker);
+                track.plotDrawing(marker);
+                track.setMode(null);
+            });
             return;
         }
         if (d3.event.currentDrawing && d3.event.button == 2) {
@@ -890,8 +898,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "RemoveMarker",
             label: "Remove Marker",
             handler: function() {
-                // TO DO: send api to remove marker
-                _currentTrack.removeMarker(marker);
+                // send api to remove marker
+                wiApiService.removeMarker(marker.id, function () {
+                    _currentTrack.removeMarker(marker);
+                })
             }
         }]);
     }
@@ -1322,9 +1332,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Maker",
             icon: 'marker-add-16x16',
             handler: function () {
-                if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
-                    _currentTrack.setMode('AddMarker');
-                }
+                self.addMarker();
             }
         },
         {

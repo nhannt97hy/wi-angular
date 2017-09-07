@@ -270,7 +270,7 @@ exports.DeleteTrackButtonClicked = function() {
 };
 
 exports.AddMarkerButtonClicked = function() {
-    console.log('AddMarkerButton is clicked');
+    this.wiD3Ctrl.addMarker();
 };
 
 exports.AddZoneButtonClicked = function() {

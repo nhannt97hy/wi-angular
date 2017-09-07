@@ -11,6 +11,7 @@ Utils.extend(Drawing, Marker);
  * @constructor
  * @param {Object} config - Configurations of new image
  * @param {Number} [config.idMarker] - The id of this marker in backend
+ * @param {Number} [config.idTrack] - The id of the track in backend
  * @param {String} [config.name] - Name of the marker
  * @param {String} [config.nameHAlign] - Horizontal alignment of name (Left, Center, Right)
  * @param {String} [config.nameVAlign] - Vertical alignment of name (High, Center, Low, None)
@@ -33,6 +34,8 @@ function Marker(config) {
     Drawing.call(this, config);
 
     // Set default values
+    this.id = config.idMarker || config.id;
+    this.idTrack = config.idTrack;
     this.name = 'Marker';
     this.nameHAlign = 'Left';
     this.nameVAlign = 'None';
@@ -71,6 +74,9 @@ Marker.prototype.ARRAY_PROPERTIES = ['lineDash', 'symbolLineDash'];
 Marker.prototype.getProperties = function() {
     let props = Utils.only(this, this.PROPERTIES);
     props.idMarker = this.id;
+    props.idTrack = this.idTrack;
+    props.lineDash = JSON.stringify(this.lineDash);
+    props.symbolLineDash = JSON.stringify(this.symbolLineDash);
     return props;
 }
 

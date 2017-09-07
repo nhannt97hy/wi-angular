@@ -230,6 +230,233 @@ function Controller(wiComponentService) {
                 }
                 listConfig.push(config);
                 break;
+            case 'crossplot':
+                var well = utils.findWellById(itemProperties.idWell);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Informations',
+                    data: [{
+                        key: 'depthReference',
+                        label: 'Depth Reference',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'name',
+                        label: 'Name',
+                        value: itemProperties.name,
+                        editable: true
+                    }, {
+                        key: 'wellName',
+                        label: 'Well Name',
+                        value: well.properties.name,
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Interval',
+                    data: [{
+                        key: 'intervalBottom',
+                        label: 'Interval Bottom',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'intervalTop',
+                        label: 'Interval Top',
+                        value: '',
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Misc',
+                    data: [{
+                        key: 'pointSymbol',
+                        label: 'Point Symbol',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'activeColorAxisColor',
+                        label: 'Active Color Axis Color',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'symbolColor',
+                        label: 'Symbol Color',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'useActiveZonesColor',
+                        label: 'Use Active Zone Color',
+                        type: 'checkbox',
+                        value: false
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Utilities',
+                    data: [{
+                        key: 'invert',
+                        label: 'Invert',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'horizontalDisplay',
+                        label: 'Horizontal Display',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showGrid',
+                        label: 'Show Grid',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showOverlay',
+                        label: 'Show Overlay',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showTooltip',
+                        label: 'Show Tooltip',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showYAxisAsPercent',
+                        label: 'Show Y Axis As Percent',
+                        type: 'checkbox',
+                        value: false
+                    }]
+                }
+                listConfig.push(config);
+            case 'histogram':
+                var well = utils.findWellById(itemProperties.idWell);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Divison and Scales',
+                    data: [{
+                        key: 'histogramDivison',
+                        label: 'Histogram Divison',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'maxScale',
+                        label: 'Max Scale',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'minScale',
+                        label: 'Min Scale',
+                        value: '',
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Informations',
+                    data: [{
+                        key: 'depthReference',
+                        label: 'Depth Reference',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'displayType',
+                        label: 'Display Type',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'name',
+                        label: 'Name',
+                        value: itemProperties.name,
+                        editable: true
+                    }, {
+                        key: 'wellName',
+                        label: 'Well Name',
+                        value: well.properties.name,
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Interval',
+                    data: [{
+                        key: 'intervalBottom',
+                        label: 'Interval Bottom',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'intervalTop',
+                        label: 'Interval Top',
+                        value: '',
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Misc',
+                    data: [{
+                        key: 'pointSymbol',
+                        label: 'Point Symbol',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'symbolColor',
+                        label: 'Symbol Color',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'useActiveZonesColor',
+                        label: 'Use Active Zone Color',
+                        type: 'checkbox',
+                        value: false
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Utilities',
+                    data: [{
+                        key: 'cumulate',
+                        label: 'Cumulate',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'displayAsCurve',
+                        label: 'Display As Curve',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'invert',
+                        label: 'Invert',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'horizontalDisplay',
+                        label: 'Horizontal Display',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showOverlay',
+                        label: 'Show Overlay',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showTooltip',
+                        label: 'Show Tooltip',
+                        type: 'checkbox',
+                        value: false
+                    }, {
+                        key: 'showYAxisAsPercent',
+                        label: 'Show Y Axis As Percent',
+                        type: 'checkbox',
+                        value: false
+                    }]
+                }
+                listConfig.push(config);
+                break;
             default:
                 break;
         }

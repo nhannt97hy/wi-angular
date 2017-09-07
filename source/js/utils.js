@@ -858,6 +858,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                 }
                 else if (aTrack.idTrack) {
                     let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+                    aTrack.markers.forEach(function (marker) {
+                        wiD3Ctrl.addMarkerToTrack(trackObj, marker);
+                    });
                     if (!aTrack.lines || aTrack.lines.length == 0) {
                         aTrack = tracks.shift();
                         continue;
@@ -888,7 +891,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             eventEmitter.emitEvent('line-drawed', [someTrack]);
                         });
                     });
-
                 } else if(aTrack.idZoneTrack) {
                     let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
                     if (!aTrack.zoneset) {
