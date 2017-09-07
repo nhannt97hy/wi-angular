@@ -174,15 +174,15 @@ exports.sheetDraggable = function(domElem) {
 
 /**
  * Create and draw a new Crossplot inside a specified DOM element
- * @param {Object} xCurve - The curve in x axis
- * @param {Object} yCurve - The curve in y axis
+ * @param {Object} curveX - The curve in x axis
+ * @param {Object} curveY - The curve in y axis
  * @param {Object} config - Configurations of new Crossplot
  * @param {Object} domElem - The DOM element to contain the crossplot
  * @returns {Object} The created crossplot
  */
-exports.createCrossplot = function(xCurve, yCurve, config, domElem) {
-    config.xCurve = xCurve;
-    config.yCurve = yCurve;
+exports.createCrossplot = function(curveX, curveY, config, domElem) {
+    config.curveX = curveX;
+    config.curveY = curveY;
     let crossplot = new Crossplot(config);
     crossplot.init(domElem);
     return crossplot;
