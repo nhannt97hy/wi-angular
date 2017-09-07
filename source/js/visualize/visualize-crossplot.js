@@ -4,39 +4,18 @@ let CanvasHelper = require('./visualize-canvas-helper');
 module.exports = Crossplot;
 
 function Crossplot(config) {
-    this.name = config.name || 'Noname';
+    this.setProperties(config);
 
-    this.curveX = config.curveX;
-    this.logX = config.logX == null ? false : config.logX;
-    this.majorX = config.majorX || 5;
-    this.minorX = config.minorX || 1;
-    this.scaleLeft = config.scaleLeft || (this.curveX || {}).minX;
-    this.scaleRight = config.scaleRight || (this.curveX || {}).maxX;
-    this.labelX = config.labelX || (this.curveX || {}).name;
-    this.decimalsX = 2;
+    this.scaleLeft = this.scaleLeft == null ? (this.curveX || {}).minX : this.scaleLeft;
+    this.scaleRight = this.scaleRight == null ? (this.curveX || {}).maxX : this.scaleRight;
+    this.labelX = this.labelX || (this.curveX || {}).name;
 
-    this.curveY = config.curveY;
-    this.logY = config.logY == null ? false : config.logY;
-    this.majorY = config.majorY || 5;
-    this.minorY = config.minorY || 1;
-    this.scaleBottom = config.scaleBottom || (this.curveY || {}).minX;
-    this.scaleTop = config.scaleTop || (this.curveY || {}).maxX;
-    this.labelY = config.labelY || (this.curveY || {}).name;
-    this.decimalsY = 2;
+    this.scaleBottom = this.scaleBottom == null ? (this.curveY || {}).minX : this.scaleBottom;
+    this.scaleTop = this.scaleTop == null ? (this.curveY || {}).maxX : this.scaleTop;
+    this.labelY = this.labelY || (this.curveY || {}).name;
 
-    this.curveZ = config.curveZ;
-    this.scaleMin = config.scaleMin || (this.curveZ || {}).minX;
-    this.scaleMax = config.scaleMax || (this.curveZ || {}).maxX;
-    this.numColor = config.numColor || 5;
-    this.decimalsZ = 2;
-    this.colors = ['red', 'blue', 'yellow', 'green', 'black'];
-
-    this.pointSymbol = config.pointSymbol || 'circle';
-    this.pointSize = config.pointSize || 2;
-    this.pointColor = config.pointColor || 'blue';
-
-    this.topDepth = config.topDepth;
-    this.bottomDepth = config.bottomDepth;
+    this.scaleMin = this.scaleMin == null ? (this.curveZ || {}).minX : this.scaleMin;
+    this.scaleMax = this.scaleMax == null ? (this.curveZ || {}).maxX : this.scaleMax;
 
     this.paddingLeft = 100;
     this.paddingRight = 50;
@@ -44,13 +23,51 @@ function Crossplot(config) {
     this.paddingBottom = 50;
 
     this.rectZWidth = 0;
-
-    this.prepareData();
 }
 
-Crossplot.prototype.getProperties = function() {}
+Crossplot.prototype.PROPERTIES = {
+    idCrossplot: { type: 'Integer' },
+    idWell: { type: 'Integer'},
+    name: { type: 'String', default: 'Noname' },
+    curveX: { type: 'Object' },
+    logX: { type: 'Boolean', default: false },
+    majorX: { type: 'Integer', default: 5 },
+    minorX : { type: 'Integer', default: 1 },
+    scaleLeft: { type: 'Float' },
+    scaleRight: { type: 'Float' },
+    labelX: { type: 'String' },
+    decimalsX: { type: 'Integer', default: 2 },
+    curveY: { type: 'Object' },
+    logY: { type: 'Boolean', default: false },
+    majorY: { type: 'Integer', default: 5 },
+    minorY: { type: 'Integer', default: 1 },
+    scaleBottom: { type: 'Float' },
+    scaleTop: { type: 'Float' },
+    labelY: { type: 'String' },
+    decimalsY: { type: 'Integer', default: 2 },
+    curveZ: { type: 'Object' },
+    scaleMin: { type: 'Float' },
+    scaleMax: { type: 'Float' },
+    numColor: { type: 'Integer', default: 5 },
+    decimalsZ: { type: 'Float', default: 2 },
+    pointSymbol: { type: 'Enum', values: ['Circle', 'Square', 'Cross', 'Diamond', 'Plus', 'Star'], default: 'Circle' },
+    pointSize: { type: 'Integer', default: 2 },
+    pointColor: { type: 'String', default: 'Blue' },
+    topDepth: { type: 'Float' },
+    bottomDepth: { type: 'Float' }
+};
 
-Crossplot.prototype.setProperties = function() {}
+Crossplot.prototype.getProperties = function() {
+    let props = Utils.only(this, Object.keys(this.PROPERTIES));
+    props.idCurveX = (this.curveX || {}).idCurve;
+    props.idCurveY = (this.curveY || {}).idCurve;
+    props.idCurveZ = (this.curveZ || {}).idCurve;
+    return props;
+}
+
+Crossplot.prototype.setProperties = function(props) {
+    Utils.setProperties(this, props);
+}
 
 Crossplot.prototype.getViewportX = function() {
     return [this.paddingLeft, this.bodyContainer.node().clientWidth - this.paddingRight - this.rectZWidth];
@@ -184,6 +201,8 @@ Crossplot.prototype.adjustSize = function() {
 }
 
 Crossplot.prototype.doPlot = function() {
+    this.prepareData();
+    this.genColorList();
     this.rectZWidth = this.curveZ ? 20 : 0;
 
     this.adjustSize();
@@ -405,4 +424,32 @@ Crossplot.prototype.prepareData = function() {
             });
         }
     });
+}
+
+Crossplot.prototype.genColorList = function() {
+    function rand(x) {
+        return Math.floor(Math.random() * x);
+    }
+
+    const DEFAULT_COLORS = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+    if (this.numColor <=  DEFAULT_COLORS.length) {
+        this.colors = DEFAULT_COLORS.slice(0, this.numColor);
+        return;
+    }
+
+    let colors = DEFAULT_COLORS.map(function(c) {
+        return d3.color(c).toString();
+    });
+
+    let i = colors.length;
+    let color;
+    while (i < this.numColor) {
+        do {
+            color = d3.rgb(rand(255), rand(255), rand(255)).toString();
+        }
+        while (colors.indexOf(color) >= 0);
+        colors.push(color);
+        i += 1;
+    }
+    this.colors = colors;
 }

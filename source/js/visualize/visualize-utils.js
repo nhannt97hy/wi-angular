@@ -27,6 +27,24 @@ exports.isJson = isJson;
 exports.only = only;
 exports.merge = merge;
 exports.getDecimalFormatter = getDecimalFormatter;
+exports.setProperties = setProperties;
+
+function setProperties(obj, props) {
+    Object.keys(obj.PROPERTIES).forEach(function(key) {
+        let value = props[key];
+        let schema = obj.PROPERTIES[key];
+
+        if (value === undefined) {
+            if (schema.default !== undefined) obj[key] = schema.default;
+        }
+        else if (schema.type == 'Integer') obj[key] = parseInt(value);
+        else if (schema.type == 'Float') obj[key] = parseFloat(value);
+        else if (schema.type == 'Enum') {
+            if (schema.values.indexOf(value) == -1) obj[key] = schema.default;
+        }
+        else obj[key] = value;
+    });
+}
 
 /**
  * Filter only object with only specified attributes
