@@ -839,8 +839,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _markerOnDoubleClick() {
         console.log('Marker double clicked');
-        // TODO
-
+        markerProperties();
         d3.event.stopPropagation();
     }
 
@@ -892,18 +891,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
     }
 
+    function markerProperties (marker) {
+        if (!marker) {
+            marker = _currentTrack.getCurrentMarker();
+            console.log(_currentTrack.getCurrentMarker());
+        }
+        DialogUtils.markerPropertiesDialog(ModalService, marker.getProperties(), function (props) {
+            wiApiService.editMarker(props, function () {
+                marker.setProperties(props);
+                marker.doPlot();
+            })
+        })
+    }
+
     function _markerOnRightClick() {
         let marker = _currentTrack.getCurrentMarker();
-        self.setContextMenu([{
-            name: "RemoveMarker",
-            label: "Remove Marker",
-            handler: function() {
-                // send api to remove marker
-                wiApiService.removeMarker(marker.id, function () {
-                    _currentTrack.removeMarker(marker);
-                })
+        self.setContextMenu([
+            {
+                name: "MarkerProperties",
+                label: "Marker Properties",
+                icon: "marker-properties-16x16",
+                handler: function () {
+                    markerProperties(marker);
+                }
+            }, {
+                name: "RemoveMarker",
+                label: "Remove Marker",
+                icon: "marker-delete-16x16",
+                handler: function () {
+                    // send api to remove marker
+                    wiApiService.removeMarker(marker.id, function () {
+                        _currentTrack.removeMarker(marker);
+                    })
+                }
             }
-        }]);
+        ]);
     }
 
     function _zoneOnRightClick() {
