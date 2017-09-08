@@ -507,42 +507,42 @@ function createHistogramNode(well) {
         idWell: well.idWell
     };
     // mock
-    well.histograms = [{
-        idHistogram: 2810,
-        histogramTitle: 'CuongHistogram',
-        hardCopyWidth: null,
-        hardCopyHeight: null,
-        intervalDepthTop: 1200,
-        intervalDepthBottom: 1900,
-        divisions: 50,
-        leftScale: 0,
-        rightScale: 0,
-        showGaussian: false,
-        loga: false,
-        showGrid: false,
-        flipHorizontal: false,
-        lineStyle: "Custom",
-        lineColor: "Blue",
-        plotType: "Frequency",
-        color: "Blue",
-        discriminators: null,
-        createdAt: "2017-09-06T07:44:10.000Z",
-        updatedAt: "2017-09-06T07:44:10.000Z",
-        idWell: well.idWell,
-        idCurve: 1,
-        idZoneSet: 1,
-        zones: [{
-            "idZone": 2,
-            "startDepth": 1144.03,
-            "endDepth": 1175.72,
-            "fill": "{\"pattern\":{\"name\":\"none\",\"background\":\"rgb(0, 0, 255)\",\"foreground\":\"white\"}}",
-            "showName": true,
-            "name": "1144",
-            "createdAt": "2017-09-07T10:32:17.000Z",
-            "updatedAt": "2017-09-07T10:32:17.000Z",
-            "idZoneSet": 1
-        }]
-    }];
+    // well.histograms = [{
+    //     idHistogram: 2810,
+    //     histogramTitle: 'CuongHistogram',
+    //     hardCopyWidth: null,
+    //     hardCopyHeight: null,
+    //     intervalDepthTop: 1200,
+    //     intervalDepthBottom: 1900,
+    //     divisions: 50,
+    //     leftScale: 0,
+    //     rightScale: 0,
+    //     showGaussian: false,
+    //     loga: false,
+    //     showGrid: false,
+    //     flipHorizontal: false,
+    //     lineStyle: "Custom",
+    //     lineColor: "Blue",
+    //     plotType: "Frequency",
+    //     color: "Blue",
+    //     discriminators: null,
+    //     createdAt: "2017-09-06T07:44:10.000Z",
+    //     updatedAt: "2017-09-06T07:44:10.000Z",
+    //     idWell: well.idWell,
+    //     idCurve: 1,
+    //     idZoneSet: 1,
+    //     zones: [{
+    //         "idZone": 2,
+    //         "startDepth": 1144.03,
+    //         "endDepth": 1175.72,
+    //         "fill": "{\"pattern\":{\"name\":\"none\",\"background\":\"rgb(0, 0, 255)\",\"foreground\":\"white\"}}",
+    //         "showName": true,
+    //         "name": "1144",
+    //         "createdAt": "2017-09-07T10:32:17.000Z",
+    //         "updatedAt": "2017-09-07T10:32:17.000Z",
+    //         "idZoneSet": 1
+    //     }]
+    // }];
 
     if (!well.histograms) return histogramModel;
     histogramModel.children = new Array();

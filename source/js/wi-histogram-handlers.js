@@ -1,5 +1,5 @@
 exports.SaveFormatButtonClicked = function() {
-    console.log('SaveFormatButton is clicked');
+    console.log('SaveFormatButton is clicked', this.wiHistogram);
 }
 
 exports.PrintButtonClicked = function() {
@@ -16,6 +16,22 @@ exports.ActiveZoneButtonClicked = function() {
 
 exports.FrequencyInfoButtonClicked = function() {
     console.log('FrequencyInfoButton is clicked');
+}
+
+exports.GaussianButtonClicked = function() {
+    console.log('GaussianButton is clicked');
+}
+
+exports.CumulativeButtonClicked = function() {
+    console.log('CumulativeButton is clicked');
+}
+
+exports.PlotBarsButtonClicked = function() {
+    console.log('PlotBarsButton is clicked');
+}
+
+exports.PlotCurvesButtonClicked = function() {
+    console.log('PlotCurvesButton is clicked');
 }
 
 exports.FrequencyButtonClicked = function() {

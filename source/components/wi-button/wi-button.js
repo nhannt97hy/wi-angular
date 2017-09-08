@@ -19,7 +19,7 @@ function ButtonController(wiComponentService) {
             self.checked = !self.checked;
         }
         if (self.handler) {
-            self.handler();
+            self.handler(self.index);
         }
     };
 
@@ -64,6 +64,7 @@ app.component(wiButtonName, {
         type: '@',
         isCheckType: '<',
         name: '@',
+        index: "<",
         tooltip: '@',
         label: '@',
         layout: '@',

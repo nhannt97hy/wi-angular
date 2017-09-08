@@ -3,6 +3,17 @@ const moduleName = 'wi-histogram';
 
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
+    $scope.handlers = new Object();
+    let histogramHandlers = wiComponentService.getComponent(wiComponentService.HISTOGRAM_HANDLERS);
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    utils.bindFunctions($scope.handlers, histogramHandlers, {
+        $scope: $scope,
+        wiComponentService: wiComponentService,
+        wiApiService: wiApiService,
+        ModalService: ModalService,
+        $timeout: $timeout,
+        wiHistogram: self
+    });
     this.$onInit = function () {
         self.wiD3AreaName = self.name + "D3Area";
         if (self.name) wiComponentService.putComponent(self.name, self);
