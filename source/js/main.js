@@ -38,6 +38,7 @@ let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
 let crossplotHanders = require('./wi-crossplot-handlers');
+let histogramHandlers = require('./wi-histogram-handlers');
 
 let graph = require('./visualize/visualize');
 let dragMan = {
@@ -148,6 +149,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
+    wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
