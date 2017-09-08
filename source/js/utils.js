@@ -1025,9 +1025,7 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     });
 };
 
-exports.refreshProjectState = refreshProjectState;
-
-function refreshProjectState() {
+let refreshProjectState = debounce(function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -1051,7 +1049,8 @@ function refreshProjectState() {
                 reject();
             });
     });
-};
+}, 500);
+exports.refreshProjectState = refreshProjectState;
 
 exports.renameDataset = function () {
     let wiComponentService = __GLOBAL.wiComponentService;

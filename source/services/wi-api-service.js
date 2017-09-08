@@ -866,6 +866,7 @@ Service.prototype.createZone = function (data, callback) {
     this.post(CREATE_ZONE, data)
         .then(function (returnData) {
             callback(returnData);
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             callback(null, err);
@@ -877,6 +878,7 @@ Service.prototype.editZone = function (data, callback) {
     this.post(EDIT_ZONE, data)
         .then(function (returnData) {
             callback();
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -887,6 +889,7 @@ Service.prototype.getZone = function (idZone, callback) {
     this.post(GET_ZONE, { idZone: idZone })
         .then(function (returnData) {
             callback(returnData);
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -897,6 +900,7 @@ Service.prototype.removeZone = function (idZone, callback) {
     this.delete(DELETE_ZONE, { idZone: idZone })
         .then(function (returnData) {
             callback();
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             self.getUtils().error(err);
