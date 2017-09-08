@@ -1,10 +1,12 @@
 <html>
+
 <head>
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href='css/wi-button.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="css/sprite_32.css">
     <link rel="stylesheet" href="css/sprite_16.css">
+    <link rel="stylesheet" href="vendor/css/themify-icons.css">
 
     <script src="vendor/js/jquery.min.js"></script>
     <script src="vendor/js/bootstrap.min.js"></script>
@@ -14,8 +16,8 @@
 
     <title>Test button</title>
     <style>
-        wi-button{
-            float: left; 
+        wi-button {
+            float: left;
         }
         /*wi-button:nth-child(n+5){
             float: none;
@@ -24,20 +26,23 @@
         wi-button:nth-child(5n){
             float: left;
         }*/
+
         wi-button button {
-            border: 1px solid black !important; 
+            border: 1px solid black !important;
         }
-            
     </style>
 </head>
 
 <body ng-app='helloapp'>
-<div ng-controller="WiDummy" style="overflow: scroll; vertical-align: top; height: 700px; width:600px;">
-    <wi-button name='Test2Button' type="normal" tooltip="Test button 2" icon="project-new-32x32" layout='icon-left'
-               handler="myHandler"></wi-button>
-    <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
-               handler="myHandler"></wi-button>
-   <!-- <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
+    <div ng-controller="WiDummy" style="overflow: scroll; vertical-align: top; height: 700px; width:600px;">
+        <wi-button name='TestButton' type="normal" tooltip="Test button 2" icon="project-new-32x32" layout='icon-left' handler="myHandler2"></wi-button>
+        <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'></wi-button>
+        <!-- <wi-button name='Test3Button' type="checked" label="Test button 3" layout='icon-left'></wi-button> -->
+        <wi-button name='Test4Button' type="small" is-check-type='true' label="Test button 4" layout='icon-left' handler="myHandler"
+            checked="isChecked"></wi-button>
+        <wi-button name='Test5Button' type="small" is-check-type='true' label="Test button 5" layout='icon-left' handler="myHandler"
+            checked="!isChecked"></wi-button>
+        <!-- <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-left'
                handler="myHandler"></wi-button>
     <wi-button name='Test2Button' type="normal" label="Test button 2" icon="project-new-32x32" layout='icon-top' 
                handler="myHandler"></wi-button>                                 
@@ -60,9 +65,10 @@
                handler="myHandler"></wi-button>
 
     <wi-button name='NoLabelButton'></wi-button> -->
-</div>
+    </div>
 
 
 
 </body>
+
 </html>
