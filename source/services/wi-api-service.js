@@ -92,6 +92,10 @@ const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
 const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
 
+const CREATE_HISTORAM = '/project/well/histogram/new';
+const EDIT_HISTOGRAM = '/project/well/histogram/edit';
+const DELTE_HISTOGRAM = '/project/well/histogram/delete';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -128,6 +132,11 @@ Service.prototype.EDIT_SHADING = EDIT_SHADING;
 Service.prototype.GET_SHADING = GET_SHADING;
 
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
+
+
+Service.prototype.CREATE_HISTORAM = '/project/well/histogram/new';
+Service.prototype.EDIT_HISTOGRAM = '/project/well/histogram/edit';
+Service.prototype.DELTE_HISTOGRAM = '/project/well/histogram/delete';
 
 Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
@@ -999,6 +1008,28 @@ Service.prototype.removeDiscrim = function (idDiscrim, callback) {
         .catch(function (err) {
             self.getUtils().error(err);
         });
+}
+
+Service.prototype.createHistogram = function(idWell, callback) {
+    let self = this;
+    this.post(CREATE_HISTOGRAM, { idWell: idWell })
+        .then(function (histogram) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.editHistogram = function(histogram, callback) {
+    let self = this;
+    this.post(EDIT_HISTOGRAM, histogram)
+        .then(function(histogram) {
+            callback();
+        })
+        .catch(function(err) {
+            self.getUtils().error(err);
+        })
 }
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {

@@ -354,8 +354,7 @@ function histogramToTreeConfig(histogram) {
         discriminators: histogram.discriminators,
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
-        idZoneSet: histogram.idZoneSet,
-        // ????
+        zones: histogram.zones, //??? clone?
         name: histogram.histogramTitle
     };
     histogramModel.data = {

@@ -3,8 +3,10 @@ const moduleName = 'wi-d3-histogram';
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    this.visHistogram = null;
     let graph = wiComponentService.getComponent('GRAPH');
 
+    this.curveName = "Linh tinh";
     this.$onInit = function () {
         self.histogramAreaId = self.name + 'HistogramArea';
         
@@ -133,30 +135,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idCurve: histogramModel.properties.idCurve,
             //idZoneSet: null
             data: null,
-            zones: null,
+            zones: histogramModel.protoperties.zones
         }
-        // set config.data (curveData) and config.zones
-        wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
-            console.log(data);
-            config.data = data;
-            if (histogramModel.properties.idZoneSet) {
-                wiApiService.getZoneSet(histogramModel.properties.idZoneSet, function(zoneSet) {
-                    console.log(zoneSet);
-                    config.zones = zoneSet.zones;
-                    if( callback ) callback(config);
-                });
-            }
-            else {
-                if( callback ) callback(config);
-            }
-        });
+        return config;
     }
- 
+
     this.createVisualizeHistogram = function(histogram) {
         console.log('createHistogram:' , histogram, self.histogramAreaId);
-        buildConfigFromHistogramModel(histogram, function(config) {
-            let visHistogram = graph.createHistogram(config, document.getElementById(self.histogramAreaId));
-            console.log(visHistogram);
+        config = buildConfigFromHistogramModel(histogram);
+        self.visHistogram = graph.createHistogram(config, document.getElementById(self.histogramAreaId));
+    }
+    function loadCurve(histogramModel) {
+        wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
+            visHistogram.setCurve(data);
+        });
+    }
+    this.addCurve = function(curveId, histogram) {
+        histogram.properties.idCurve = idCurve;
+        wiApiService.editHistogram(histogram.properties, function(histogram) {
+            loadCurve(histogram)
         });
     }
 }
