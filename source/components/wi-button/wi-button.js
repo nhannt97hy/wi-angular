@@ -15,6 +15,9 @@ function ButtonController(wiComponentService) {
     };
 
     this.onClick = function () {
+        if(self.isCheckType){
+            self.checked = !self.checked;
+        }
         if (self.handler) {
             self.handler();
         }
