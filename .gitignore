@@ -1,6 +1,7 @@
 node_modules
 build
 .idea
+wi-angular.iml
 .publish
 data-analysis-tab.json
 data-processing-tab.json
@@ -18,6 +19,8 @@ source/js/handlers.js.tmpl
 source/js/wi-logplot-handlers.js.tmpl
 source/js/wi-explorer-handlers.js.tmpl
 wi-logplot.json
+wi-crossplot.json
+wi-histogram.json
 wi-explorer.json
 .DS_Store
 
