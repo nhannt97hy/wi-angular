@@ -32,63 +32,71 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, {
             name: "FlipHorizontalAxis",
             label: "Flip Horizontal Axis",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowGrid",
             label: "Show Grid",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowGaussian",
             label: "Show Gaussian",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowAxisYAsPercent",
             label: "Show Axis Y as Percent",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowReferenceWindow",
             label: "Show Reference Window",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowCumulative",
             label: "Show Cumulative",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowCumulativeCurve",
             label: "Show Cumulative Curve",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "ShowTooltip",
             label: "Show Tooltip",
-            icon: "",
+            "isCheckType": "true",
+            checked: true,
             handler: function () {
                 
             }
         }, {
             name: "FrequencyInfor",
             label: "Frequency Infor",
-            icon: "",
+            icon: "ti-info-alt",
             handler: function () {
                 
             }
@@ -133,22 +141,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idCurve: histogramModel.properties.idCurve,
             //idZoneSet: null
             data: null,
-            zones: null,
+            zones: histogramModel.properties.zones
         }
         // set config.data (curveData) and config.zones
         wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
             console.log(data);
             config.data = data;
-            if (histogramModel.properties.idZoneSet) {
-                wiApiService.getZoneSet(histogramModel.properties.idZoneSet, function(zoneSet) {
-                    console.log(zoneSet);
-                    config.zones = zoneSet.zones;
-                    if( callback ) callback(config);
-                });
-            }
-            else {
-                if( callback ) callback(config);
-            }
+            if( callback ) callback(config);
         });
     }
  
