@@ -497,6 +497,16 @@ Service.prototype.editLogplot = function (infoLogplot, callback) {
             self.getUtils().error(err);
         });
 }
+Service.prototype.removeLogplot = function (idLogplot, callback) {
+    let self = this;
+    this.delete(DELETE_PLOT, { idPlot: idLogplot })
+        .then(function () {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 
 Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
     var self = this;
