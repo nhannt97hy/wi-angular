@@ -1,64 +1,50 @@
 <div class="histogram-toolbar-wrapper">
-    
-    <wi-toolbar name="CrossPlotToolbar1">
-    		<wi-button name="SaveFormatButton" icon="save-16x16" type="small" tooltip="Edit Format" handler="handlers.SaveFormatButtonClicked">
+    <wi-toolbar name="HistogramToolbar1">
+    	<wi-button name="SaveFormatButton" icon="save-16x16" type="small" tooltip="Save Format" handler="handlers.SaveFormatButtonClicked">
 
-    		</wi-button>
-    		<wi-button name="PrintButton" icon="print-16x16" type="small" tooltip="Print" handler="handlers.PrintButtonClicked">
+    	</wi-button>
+    	<wi-button name="PrintButton" icon="print-16x16" type="small" tooltip="Print" handler="handlers.PrintButtonClicked">
 
-    		</wi-button>
-    		<wi-button name="EditFormatButton" icon="properties-16x16" type="small" tooltip="Edit Format" handler="handlers.EditFormatButtonClicked">
+    	</wi-button>
+    	<wi-button name="EditFormatButton" icon="properties-16x16" type="small" tooltip="Edit Format" handler="handlers.EditFormatButtonClicked">
 
-    		</wi-button>
-    		<wi-button name="ActiveZoneButton" icon="zone-edit-16x16" type="small" tooltip="Active Zone" handler="handlers.ActiveZoneButtonClicked">
+    	</wi-button>
+    	<wi-button name="ActiveZoneButton" icon="zone-edit-16x16" type="small" tooltip="Active Zone" handler="handlers.ActiveZoneButtonClicked">
 
-    		</wi-button>
-    		<wi-button name="FrequencyInfoButton" label="Frequency Info" type="small" handler="handlers.FrequencyInfoButtonClicked">
+    	</wi-button>
+    	<wi-button name="FrequencyInfoButton" label="Frequency Info" type="small" handler="handlers.FrequencyInfoButtonClicked">
 
-    		</wi-button>
-
-    </wi-toolbar>
-    <wi-toolbar name="CrossPlotToolbar2">
-    			<name/>
-    			<attrs>
-    				<name/>
-    				<type>small</type>
-    </attrs>
-    			<children>
-    </children>
-
-    			<name/>
-    			<attrs>
-    				<name/>
-    				<type>small</type>
-    </attrs>
-    			<children>
-    </children>
-
+    	</wi-button>
 
     </wi-toolbar>
-    <wi-toolbar name="CrossPlotToolbar3">
-    		<wi-dropdown name="PlotTypeDropdown" label="Plot Type" type="small">
-    				<wi-button name="FrequencyButton" label="Frequency" type="small" class="height-auto" handler="handlers.FrequencyButtonClicked">
+    <wi-toolbar name="HistogramToolbar2">
+    	<wi-button name="GaussianButton" label="Gaussian" type="small" layout="icon-left" is-check-type="true" checked=true handler="handlers.GaussianButtonClicked"></wi-button>
+    	<wi-button name="CumulativeButton" label="Cumulative" type="small" is-check-type="true" layout="icon-left" checked=false
+    	    handler="handlers.CumulativeButtonClicked"></wi-button>
+    </wi-toolbar>
+    <wi-toolbar name="HistogramToolbar3">
+    	<wi-button name="PlotBarsButton" label="Plot Bars" type="small" is-check-type="true" checked=false layout="icon-left" handler="handlers.PlotBarsButtonClicked"></wi-button>
+    	<wi-button name="PlotCurvesButton" label="Plot Curvea" type="small" is-check-type="true" checked=false layout="icon-left" handler="handlers.PlotCurvesButtonClicked"></wi-button>
+    </wi-toolbar>
+    <wi-toolbar name="HistogramToolbar4">
+    	<wi-dropdown name="PlotTypeDropdown" label="Plot Type" type="small">
+    		<wi-button name="FrequencyButton" label="Frequency" type="small" is-check-type="true" checked=false class="height-auto" layout="icon-left" handler="handlers.FrequencyButtonClicked">
 
-    				</wi-button>
-    				<wi-button name="PercentButton" label="Percent" type="small" class="height-auto" handler="handlers.PercentButtonClicked">
+    		</wi-button>
+    		<wi-button name="PercentButton" label="Percent" type="small" is-check-type="true" checked=false layout="icon-left" class="height-auto" handler="handlers.PercentButtonClicked">
+    		</wi-button>
 
-    				</wi-button>
+    	</wi-dropdown>
+    	<wi-dropdown name="ColorDropdown" label="Color" type="small">
+    		<wi-button name="ColorByZoneButton" label="Color by Zone" type="small" layout="icon-left" is-check-type="true" layout="icon-left" checked=false class="height-auto" handler="handlers.ColorByZoneButtonClicked">
 
-    		</wi-dropdown>
-    		<wi-dropdown name="ColorDropdown" label="Color" type="small">
-    				<wi-button name="ColorByZoneButton" label="Color by Zone" type="small" class="height-auto" handler="handlers.ColorByZoneButtonClicked">
+    		</wi-button>
+    		<wi-button name="ColorByInputCurveButton" label="Color by Inpur Curve" type="small" layout="icon-left" layout="icon-left" is-check-type="true" checked=false class="height-auto" handler="handlers.ColorByInputCurveButtonClicked">
+    		</wi-button>
 
-    				</wi-button>
-    				<wi-button name="ColorByInputCurveButton" label="Color by Inpur Curve" type="small" class="height-auto" handler="handlers.ColorByInputCurveButtonClicked">
-
-    				</wi-button>
-
-    		</wi-dropdown>
+    	</wi-dropdown>
 
     </wi-toolbar>
-
 </div>
 <div class="histogram-main-content" style="flex: 1; display: flex; flex-direction: row;">
     <wi-d3-histogram style="width: 100%; flex: 1; display: flex;"

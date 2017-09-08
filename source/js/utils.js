@@ -10,7 +10,8 @@ exports.debounce = debounce;
 function debounce(func, wait, immediate) {
     var timeout;
     return function () {
-        var context = this, args = arguments;
+        var context = this,
+            args = arguments;
         var later = function () {
             timeout = null;
             if (!immediate) func.apply(context, args);
@@ -146,9 +147,9 @@ function lineToTreeConfig(line) {
 
 function shadingToTreeConfig(shading) {
     let shadingModel = new Object();
-    shadingModel.id = shading.idShading;  // OK
-    shadingModel.idLeftLine = shading.idLeftLine;  // OK
-    shadingModel.idRightLine = shading.idRightLine;  // OK
+    shadingModel.id = shading.idShading; // OK
+    shadingModel.idLeftLine = shading.idLeftLine; // OK
+    shadingModel.idRightLine = shading.idRightLine; // OK
     shadingModel.data = {
         id: shading.idShading,
         name: shading.name,
@@ -193,6 +194,7 @@ function zoneToTreeConfig(zone) {
     return zoneModel;
 }
 exports.zoneToTreeConfig = zoneToTreeConfig;
+
 function zoneSetToTreeConfig(zoneSet) {
     var zoneSetModel = new Object();
     zoneSetModel.name = 'zoneset';
@@ -210,7 +212,7 @@ function zoneSetToTreeConfig(zoneSet) {
     }
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
-    zoneSet.zones.forEach(function(zone) {
+    zoneSet.zones.forEach(function (zone) {
         zoneSetModel.children.push(zoneToTreeConfig(zone));
     });
     return zoneSetModel;
@@ -346,7 +348,7 @@ function histogramToTreeConfig(histogram) {
         showGaussian: histogram.showGaussian,
         loga: histogram.loga,
         showGrid: histogram.showGrid,
-        flipHorizontal:histogram.flipHorizontal,
+        flipHorizontal: histogram.flipHorizontal,
         lineStyle: histogram.lineStyle,
         lineColor: histogram.lineColor,
         plotType: histogram.plotType,
@@ -443,11 +445,12 @@ function createZoneSetsNode(well) {
     }
     zoneSetsModel.children = new Array();
     if (!well.zonesets) return zoneSetsModel;
-    well.zonesets.forEach(function(zoneSet) {
+    well.zonesets.forEach(function (zoneSet) {
         zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
     });
     return zoneSetsModel;
 }
+
 function createLogplotNode(well) {
     let logplotModel = new Object();
     logplotModel.name = 'logplots';
@@ -526,8 +529,19 @@ function createHistogramNode(well) {
         createdAt: "2017-09-06T07:44:10.000Z",
         updatedAt: "2017-09-06T07:44:10.000Z",
         idWell: well.idWell,
-        idCurve: 220,
-        idZoneSet: 6
+        idCurve: 1,
+        idZoneSet: 1,
+        zones: [{
+            "idZone": 2,
+            "startDepth": 1144.03,
+            "endDepth": 1175.72,
+            "fill": "{\"pattern\":{\"name\":\"none\",\"background\":\"rgb(0, 0, 255)\",\"foreground\":\"white\"}}",
+            "showName": true,
+            "name": "1144",
+            "createdAt": "2017-09-07T10:32:17.000Z",
+            "updatedAt": "2017-09-07T10:32:17.000Z",
+            "idZoneSet": 1
+        }]
     }];
 
     if (!well.histograms) return histogramModel;
@@ -654,8 +668,7 @@ function getSelectedPath(foundCB) {
                     selectedPath = options.path.slice();
                     return true;
                 }
-            }
-            else if (node.data.selected == true) {
+            } else if (node.data.selected == true) {
                 selectedPath = options.path.slice();
                 return true;
             }
@@ -728,7 +741,9 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 exports.getCurveData = getCurveData;
 
 function getCurveData(apiService, idCurve, callback) {
-    apiService.post(apiService.DATA_CURVE, {idCurve})
+    apiService.post(apiService.DATA_CURVE, {
+            idCurve
+        })
         .then(function (curve) {
             callback(null, curve);
         })
@@ -755,7 +770,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.track = null;
             let idCurve = ui.helper.attr('data');
             if (wiD3Ctrl && track) {
-                apiService.post(apiService.CREATE_LINE, {idTrack: track.id, idCurve: idCurve})
+                apiService.post(apiService.CREATE_LINE, {
+                        idTrack: track.id,
+                        idCurve: idCurve
+                    })
                     .then(function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
@@ -779,7 +797,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: 'clone',
         containment: 'document',
         cursor: 'move',
-        cursorAt: {top: 0, left: 0}
+        cursorAt: {
+            top: 0,
+            left: 0
+        }
     });
 };
 
@@ -805,15 +826,17 @@ exports.deleteLogplot = function () {
     DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function (yes) {
         if (!yes) return;
         const wiApiService = __GLOBAL.wiApiService;
-        wiApiService.delete(wiApiService.DELETE_PLOT, {idPlot: selectedNode.properties.idPlot})
+        wiApiService.delete(wiApiService.DELETE_PLOT, {
+                idPlot: selectedNode.properties.idPlot
+            })
             .then(function (res) {
                 __GLOBAL.$timeout(function () {
                     selectedNode.data.deleted = true;
                     wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
                 });
             }).catch(function (err) {
-            console.error('logplot delete error', err);
-        });
+                console.error('logplot delete error', err);
+            });
     });
 };
 
@@ -827,7 +850,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
+    wiApiService.post(wiApiService.GET_PLOT, {
+            idPlot: logplotModel.id
+        })
         .then(function (plot) {
             if (logplotModel.properties.referenceCurve) {
                 slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
@@ -835,7 +860,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
             let tracks = new Array();
 
             if (plot.depth_axes && plot.depth_axes.length) {
-                plot.depth_axes.forEach(function(depthTrack) {
+                plot.depth_axes.forEach(function (depthTrack) {
                     tracks.push(depthTrack);
                 });
             }
@@ -873,8 +898,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         }
                         let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
                         console.log('shading', tmp);
-                    }
-                    ;
+                    };
                     if (shadingModel.idLeftLine && shadingModel.idRightLine) {
                         for (let line of linesOfTrack) {
                             if (line.id == shading.idRightLine) {
@@ -886,16 +910,14 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         }
                         let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
                         console.log('shading2', tmp);
-                    }
-                    ;
+                    };
                 });
             };
             let aTrack = tracks.shift();
             while (aTrack) {
                 if (aTrack.idDepthAxis) {
                     wiD3Ctrl.pushDepthTrack(aTrack);
-                }
-                else if (aTrack.idTrack) {
+                } else if (aTrack.idTrack) {
                     let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
                     if (!aTrack.lines || aTrack.lines.length == 0) {
                         aTrack = tracks.shift();
@@ -919,8 +941,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             let lineModel = lineToTreeConfig(line);
                             if (!err) {
                                 wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
-                            }
-                            else {
+                            } else {
                                 console.error(err);
                                 wiComponentService.getComponent(wiComponentService.UTILS).error(err);
                             }
@@ -928,7 +949,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         });
                     });
 
-                } else if(aTrack.idZoneTrack) {
+                } else if (aTrack.idZoneTrack) {
                     let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
                     wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
                         for (let zone of zoneset.zones) {
@@ -1074,8 +1095,7 @@ exports.findWellByCrossplot = function (idCrossplot) {
 
 exports.trackProperties = function (ModalService, wiComponentService) {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
-    });
+    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
 exports.refreshProjectState = refreshProjectState;
@@ -1162,7 +1182,9 @@ exports.exportCurve = function () {
     if (selectedNode.type != 'curve') return;
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.exportCurve(selectedNode.properties.idCurve, function (data, type) {
-        let blob = new Blob([data], {type: type});
+        let blob = new Blob([data], {
+            type: type
+        });
         let a = document.createElement('a');
         let fileName = selectedNode.properties.name;
         a.download = fileName;
@@ -1308,23 +1330,19 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         //if (!shadingObj.isNegPosFilling) {
         if (!shadingObj.isNegPosFill) {
             shadingObj.fill = fillPatternStyles.fill;
-        }
-        else {
+        } else {
             shadingObj.positiveFill = fillPatternStyles.positiveFill;
             shadingObj.negativeFill = fillPatternStyles.negativeFill;
         }
-    }
-    else if (shadingObj.shadingStyle == 'variableShading') {
-        if(!shadingObj.isNegPosFill){
+    } else if (shadingObj.shadingStyle == 'variableShading') {
+        if (!shadingObj.isNegPosFill) {
             shadingObj.fill = variableShadingStyle.fill;
-        }
-        else {
+        } else {
             shadingObj.positiveFill = variableShadingStyle.positiveFill;
             shadingObj.negativeFill = variableShadingStyle.negativeFill;
         }
         // shadingObj.fill.display = true;
-    }
-    else {
+    } else {
         alert("shadingObj has undefined shadingStyle");
     }
     return shadingObj;
@@ -1340,11 +1358,12 @@ exports.changeTrack = function (trackObj, wiApiService, callback) {
         if (callback) callback(result);
     });
 }
-exports.editDepthTrack = function(depthTrackObj, wiApiService, callback) {
-    wiApiService.editDepthTrack(depthTrackObj, function(result) {
-        if(callback) callback(result);
+exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
+    wiApiService.editDepthTrack(depthTrackObj, function (result) {
+        if (callback) callback(result);
     });
 }
+
 function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
@@ -1411,7 +1430,10 @@ exports.createPointSet = function (pointSetData, callback) {
 }
 
 exports.createCrossplot = function (idWell, crossplotName, callback) {
-    __GLOBAL.wiApiService.createCrossplot({ idWell: idWell, name: crossplotName }, function (crossplot) {
+    __GLOBAL.wiApiService.createCrossplot({
+        idWell: idWell,
+        name: crossplotName
+    }, function (crossplot) {
         console.log("Created new crossplot", crossplot);
         let crossplotModel = crossplotToTreeConfig(crossplot);
         refreshProjectState();
@@ -1445,7 +1467,7 @@ function openCrossplotTab(crossplotModel, callback) {
             })
         }
     })
-    if(callback) callback(wiCrossplotCtrl);
+    if (callback) callback(wiCrossplotCtrl);
 };
 exports.openCrossplotTab = openCrossplotTab;
 
@@ -1470,7 +1492,7 @@ function openHistogramTab(wiComponentService, histogramModel, callback) {
     let histogramCtrl = wiComponentService.getComponent(histogramName);
     console.log(histogramName, histogramCtrl);
     histogramCtrl.getwiD3Ctrl().createVisualizeHistogram(histogramModel);
-    if(callback) callback();
+    if (callback) callback();
 };
 exports.openHistogramTab = openHistogramTab;
 
