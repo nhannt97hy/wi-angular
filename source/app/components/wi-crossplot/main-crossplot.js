@@ -88,6 +88,14 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
 
         let dataX = genSamples([0,10], [0,1000]);
         let dataY = genSamples([0,5], [0,1000]);
-        wiD3CrossplotCtrl.createVisualizeCrossplot(dataX, dataY, {curveZ: graph.buildCurve({}, dataX)});
+        wiD3CrossplotCtrl.createVisualizeCrossplot(dataX, dataY, {
+            pointSet: {
+                curveZ: graph.buildCurve({}, dataX),
+                numColor: 10,
+                scaleLeft: -10,
+                minorX: 3,
+                labelX: 10
+            }
+        });
     });
 });

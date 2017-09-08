@@ -22,25 +22,55 @@ exports.clone = clone;
 exports.range = range;
 exports.getScaleFunc = getScaleFunc;
 exports.setIfNotNull = setIfNotNull;
+exports.setIfSelfNull = setIfSelfNull;
 exports.setIfNotUndefined = setIfNotUndefined;
 exports.isJson = isJson;
 exports.only = only;
 exports.merge = merge;
 exports.getDecimalFormatter = getDecimalFormatter;
 exports.setProperties = setProperties;
+exports.getProperties = getProperties;
+
+function getProperties(obj) {
+    let props = {};
+    Object.keys(obj.PROPERTIES).forEach(function(key) {
+        let value = obj[key];
+        let schema = obj.PROPERTIES[key];
+
+        if (schema.type != 'Object' || schema.properties === undefined) {
+            if (value === undefined) return;
+            props[key] = value;
+        }
+        else {
+            let tmpObj = obj[key];
+            tmpObj.PROPERTIES = schema.properties;
+            let tmpProps = getProperties(tmpObj);
+            props[key] = tmpProps;
+        }
+    });
+    return props;
+}
 
 function setProperties(obj, props) {
+    if (typeof props != 'object') props = {};
+
     Object.keys(obj.PROPERTIES).forEach(function(key) {
         let value = props[key];
         let schema = obj.PROPERTIES[key];
 
-        if (value === undefined) {
+        if (value === undefined && schema.type != 'Object') {
             if (schema.default !== undefined) obj[key] = schema.default;
         }
         else if (schema.type == 'Integer') obj[key] = parseInt(value);
         else if (schema.type == 'Float') obj[key] = parseFloat(value);
         else if (schema.type == 'Enum') {
             if (schema.values.indexOf(value) == -1) obj[key] = schema.default;
+        }
+        else if (schema.type == 'Object' && schema.properties !== undefined) {
+            let tmpObj = { PROPERTIES: schema.properties };
+            setProperties(tmpObj, props[key]);
+            delete tmpObj.PROPERTIES;
+            obj[key] = tmpObj;
         }
         else obj[key] = value;
     });
@@ -79,6 +109,10 @@ function isJson(str) {
 
 function setIfNotNull(obj, attr, newProp) {
     obj[attr] = newProp == null ? obj[attr] : newProp;
+}
+
+function setIfSelfNull(obj, attr, newProp) {
+    obj[attr] = obj[attr] == null ? newProp : obj[attr];
 }
 
 function setIfNotUndefined(obj, attr, newProp) {
