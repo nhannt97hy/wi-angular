@@ -388,18 +388,18 @@ function _createFillStyles(ctx, fills, callback) {
     );
 }
 function createFillStyles(ctx, fills, callback) {
-    let patterns = [];
+    let fillStyles = [];
 
     asyncLoop(
         fills.length,
         function(loop) {
             let fill = fills[loop.iteration()];
             if (!fill) {
-                patterns.push('transparent');
+                fillStyles.push('transparent');
                 loop.next();
             }
             else if (fill.color) {
-                patterns.push(fill.color);
+                fillStyles.push(fill.color);
                 loop.next();
             }
             else if (fill.pattern) {
@@ -407,45 +407,55 @@ function createFillStyles(ctx, fills, callback) {
                 let fg = fill.pattern.foreground;
                 let bg = fill.pattern.background;
                 CanvasHelper.createPattern(ctx, name, fg, bg, function(pattern) {
-                    patterns.push(pattern);
+                    fillStyles.push(pattern);
                     loop.next();
                 });
             }
             else if (fill.varShading) {
                 let startX = fill.varShading.startX;
                 let endX = fill.varShading.endX;
+                let data = fill.varShading.data;
+                let minY = data[0].y;
+                let maxY = data[data.length-1].y;
+                let transform;
+                let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
+
                 if (fill.varShading.gradient) {
                     let startColor = fill.varShading.gradient.startColor;
                     let endColor = fill.varShading.gradient.endColor;
-                    let data = fill.varShading.gradient.data;
-                    let minY = data[0].y;
-                    let maxY = data[data.length-1].y;
-                    let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
-                    let transform = d3.scaleLinear()
+                    transform = d3.scaleLinear()
                         .domain([startX, endX])
                         .range([startColor, endColor])
                         .clamp(true);
 
+                }
+                else if (fill.varShading.pallete) {
+                    let pallete = fill.varShading.pallete.map(function(c) {
+                        return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
+                    });
+                    transform = d3.scaleQuantize()
+                        .domain([startX, endX])
+                        .range(pallete);
+                }
+
+                if (transform)
                     for (let i = 0; i < data.length - 1; i ++) {
                         let x = data[i].x;
                         let color = transform(x);
                         gradient.addColorStop((data[i].y - minY) / (maxY-minY), color);
                         gradient.addColorStop((data[i+1].y - minY) / (maxY-minY), color);
                     }
-                    patterns.push(gradient);
-                }
-                else {
-                    // TODO ??? for pallete
-                }
+
+                fillStyles.push(gradient);
                 loop.next();
             }
             else {
-                patterns.push('transparent');
+                fillStyles.push('transparent');
                 loop.next();
             }
         },
         function() {
-            callback(patterns);
+            callback(fillStyles);
         }
     );
 }
