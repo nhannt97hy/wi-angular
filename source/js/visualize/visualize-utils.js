@@ -37,21 +37,24 @@ function getProperties(obj) {
         let value = obj[key];
         let schema = obj.PROPERTIES[key];
 
-        if (schema.type != 'Object' || schema.properties === undefined) {
-            if (value === undefined) return;
-            props[key] = value;
-        }
-        else {
+        if (schema.type == 'Object' && schema.properties !== undefined) {
             let tmpObj = obj[key];
             tmpObj.PROPERTIES = schema.properties;
             let tmpProps = getProperties(tmpObj);
             props[key] = tmpProps;
         }
+        else if (schema.type == 'Array' && schema.item !== undefined) {
+            props[key] = getArrayFromSchema(value, schema.item);
+        }
+        else {
+            if (value === undefined) return;
+            props[key] = value;
+        }
     });
     return props;
 }
 
-function setProperties(obj, props) {
+function setProperties(obj, props, forArray) {
     if (typeof props != 'object') props = {};
 
     Object.keys(obj.PROPERTIES).forEach(function(key) {
@@ -72,8 +75,30 @@ function setProperties(obj, props) {
             delete tmpObj.PROPERTIES;
             obj[key] = tmpObj;
         }
+        else if (schema.type == 'Array' && schema.item !== undefined) {
+            obj[key] = getArrayFromSchema(value, schema.item);
+        }
         else obj[key] = value;
     });
+}
+
+function getArrayFromSchema(arr, schema) {
+    let tmpArr = [];
+    arr.forEach(function(val) {
+        if (schema.type == 'Integer') tmpArr.push(parseInt(val))
+        else if (schema.type == 'Float') tmpArr.push(parseFloat(val))
+        else if (schema.type == 'Object' && schema.properties !== undefined) {
+            let tmpObj = { PROPERTIES: schema.properties };
+            setProperties(tmpObj, val);
+            delete tmpObj.PROPERTIES;
+            tmpArr.push(tmpObj);
+        }
+        else if (schema.type == 'Array' && schema.item != undefined) {
+            tmpArr.push(getArrayFromSchema(val, schema.item));
+        }
+        else tmpArr.push(val);
+    });
+    return tmpArr;
 }
 
 /**

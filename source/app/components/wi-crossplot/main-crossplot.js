@@ -93,9 +93,28 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                 curveZ: graph.buildCurve({}, dataX),
                 numColor: 10,
                 scaleLeft: -10,
-                minorX: 3,
-                labelX: 10
-            }
+                minorX: 3
+            },
+            polygons: [
+                {
+                    lineStyle: 'red',
+                    points: [
+                        { x: -6, y: 4 },
+                        { x: -2, y: 2 },
+                        { x: 6, y: 4.5 },
+                        { x: -2, y: 4 }
+                    ]
+                },
+                {
+                    lineStyle: 'gray',
+                    points: [
+                        { x: 2, y: 1 },
+                        { x: 6, y: 1 },
+                        { x: 6, y: 2 },
+                        { x: 2, y: 2 }
+                    ]
+                }
+            ]
         });
     });
 });

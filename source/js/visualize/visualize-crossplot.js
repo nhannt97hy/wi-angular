@@ -53,6 +53,28 @@ Crossplot.prototype.PROPERTIES = {
             topDepth: { type: 'Float' },
             bottomDepth: { type: 'Float' }
         }
+    },
+    polygons: {
+        type: 'Array',
+        item: {
+            type: 'Object',
+            properties: {
+                idPolygon: { type: 'Integer' },
+                lineStyle: { type: 'String', default: 'Blue' },
+                display: { type: 'Boolean', default: true },
+                points: {
+                    type: 'Array',
+                    item: {
+                        type: 'Object',
+                        properties: {
+                            x: { type: 'Float' },
+                            y: { type: 'Float' }
+                        }
+                    }
+                }
+            }
+        },
+        default: []
     }
 };
 
@@ -148,7 +170,7 @@ Crossplot.prototype.init = function(domElem) {
         .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label'])
         .enter()
             .append('text')
-            .attr('class', function(d) { return 'vi-crossplot-axis-label ' +d; })
+            .attr('class', function(d) { return 'vi-crossplot-axis-label ' + d; })
             .text('-');
 
     this.canvas = this.bodyContainer.append('canvas')
@@ -211,8 +233,9 @@ Crossplot.prototype.doPlot = function() {
 
     this.adjustSize();
     this.updateHeader();
-    this.updateAxis();
-    this.plotSymbol();
+    this.updateAxises();
+    this.plotSymbols();
+    this.plotPolygons();
 }
 
 Crossplot.prototype.updateHeader = function() {
@@ -222,7 +245,7 @@ Crossplot.prototype.updateHeader = function() {
         .text(function(d) { return d; });
 }
 
-Crossplot.prototype.updateAxis = function() {
+Crossplot.prototype.updateAxises = function() {
     this.updateAxisTicks();
     this.updateAxisGrids();
     this.updateAxisZRects();
@@ -375,7 +398,32 @@ Crossplot.prototype.updateAxisLabels = function() {
         );
 }
 
-Crossplot.prototype.plotSymbol = function() {
+Crossplot.prototype.plotPolygons = function() {
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let polygons = this.svgContainer.selectAll('path.vi-crossplot-polygon')
+        .data(this.polygons);
+
+    polygons.enter().append('path')
+        .attr('class', 'vi-crossplot-polygon')
+        .merge(polygons)
+        .attr('d', function(d) { return line(d.points.concat([d.points[0]])); })
+        .attr('stroke', function(d) { return d.lineStyle; })
+        .attr('fill', function(d) {
+            let color = d3.color(d.lineStyle);
+            color.opacity = 0.1;
+            return color.toString();
+        })
+        .style('display', function(d) { return d.display ? 'block' : 'none'; });
+    polygons.exit().remove();
+}
+
+Crossplot.prototype.plotSymbols = function() {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
     let transformZ = this.getTransformZ();
@@ -391,7 +439,7 @@ Crossplot.prototype.plotSymbol = function() {
     ctx.clip();
 
     let helper = new CanvasHelper(ctx, {
-        strokeStyle: 'none',
+        strokeStyle: this.pointSet.pointColor,
         fillStyle: this.pointSet.pointColor,
         size: this.pointSet.pointSize
     });
@@ -402,6 +450,7 @@ Crossplot.prototype.plotSymbol = function() {
     let self = this;
     this.data.forEach(function(d) {
         if (self.pointSet.curveZ) {
+            helper.strokeStyle = transformZ(d.z);
             helper.fillStyle = transformZ(d.z);
         }
         plotFunc.call(helper, transformX(d.x), transformY(d.y));
@@ -466,4 +515,8 @@ Crossplot.prototype.genColorList = function() {
         i += 1;
     }
     this.colors = colors;
+}
+
+Crossplot.prototype.getSvgClipId = function() {
+    return 'vi-crossplot-svg-clip-' + this.idCrossplot;
 }
