@@ -251,6 +251,10 @@ exports.DuplicateTrackButtonClicked = function() {
     })
 };
 
+exports.AddZonationTrackButtonClicked = function() {
+    this.wiLogplot.getwiD3Ctrl().addZoneTrack();
+}
+
 exports.DeleteTrackButtonClicked = function() {
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
@@ -270,7 +274,7 @@ exports.DeleteTrackButtonClicked = function() {
 };
 
 exports.AddMarkerButtonClicked = function() {
-    console.log('AddMarkerButton is clicked');
+    this.wiD3Ctrl.addMarker();
 };
 
 exports.AddZoneButtonClicked = function() {

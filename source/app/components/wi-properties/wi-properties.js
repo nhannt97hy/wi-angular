@@ -154,6 +154,92 @@ function Controller(wiComponentService) {
                 }
                 listConfig.push(config);
                 break;
+            case 'zoneset':
+                var well = utils.findWellById(itemProperties.idWell);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Properties',
+                    data: [
+                        {
+                            key: 'isDefault',
+                            label: 'Is Default',
+                            type: 'checkbox'
+                        }, {
+                            key: 'name',
+                            label: 'Name',
+                            value: itemProperties.name,
+                            editable: true
+                        }, {
+                            key: 'type',
+                            label: 'Type',
+                            value: 'Zonation',
+                        }, {
+                            key: 'well',
+                            label: 'Well',
+                            value: well.properties.name
+                        }
+                    ]
+                }
+                listConfig.push(config);
+                break;
+            case 'zone':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Colors',
+                    data: [
+                        {
+                            key: 'backgroundColor',
+                            label: 'Background Color',
+                            value: itemProperties.background,
+                            editable: true
+                        }, {
+                            key: 'lineColor',
+                            label: 'Line Color',
+                            value: '',
+                            editable: true
+                        }, {
+                            key: 'textColor',
+                            label: 'Text Color',
+                            value: '',
+                            editable: true
+                        }
+                    ]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Depths',
+                    data: [{
+                        key: 'endDepth',
+                        label: 'End Depth',
+                        value: itemProperties.endDepth
+                    }, {
+                        key: 'startDepth',
+                        label: 'Start Depth',
+                        value: itemProperties.startDepth
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Informations',
+                    data: [{
+                        key: 'isDefault',
+                        label: 'Is Default',
+                        type: 'checkbox'
+                    }, {
+                        key: 'name',
+                        label: 'Name',
+                        value: itemProperties.name,
+                        editable: true
+                    }, {
+                        key: 'zoneType',
+                        label: 'Zone Type',
+                        value: 'Zonation',
+                    }]
+                }
+                listConfig.push(config);
+                break;
             case 'logplot':
                 var well = utils.findWellById(itemProperties.idWell);
                 config = {
@@ -215,17 +301,264 @@ function Controller(wiComponentService) {
                         key: 'invert',
                         label: 'Invert',
                         type: 'checkbox',
-                        value: false
+                        value: false,
+                        editable: true
                     }, {
                         key: 'horizontalDisplay',
                         label: 'Horizontal Display',
                         type: 'checkbox',
-                        value: false
+                        value: false,
+                        editable: true
                     }, {
                         key: 'showTooltip',
                         label: 'Show Tooltip',
                         type: 'checkbox',
-                        value: false
+                        value: false,
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'crossplot':
+                var well = utils.findWellById(itemProperties.idWell);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Informations',
+                    data: [{
+                        key: 'depthReference',
+                        label: 'Depth Reference',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'name',
+                        label: 'Name',
+                        value: itemProperties.name,
+                        editable: true
+                    }, {
+                        key: 'wellName',
+                        label: 'Well Name',
+                        value: well.properties.name,
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Interval',
+                    data: [{
+                        key: 'intervalBottom',
+                        label: 'Interval Bottom',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'intervalTop',
+                        label: 'Interval Top',
+                        value: '',
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Misc',
+                    data: [{
+                        key: 'pointSymbol',
+                        label: 'Point Symbol',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'activeColorAxisColor',
+                        label: 'Active Color Axis Color',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'symbolColor',
+                        label: 'Symbol Color',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'useActiveZonesColor',
+                        label: 'Use Active Zone Color',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Utilities',
+                    data: [{
+                        key: 'invert',
+                        label: 'Invert',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'horizontalDisplay',
+                        label: 'Horizontal Display',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showGrid',
+                        label: 'Show Grid',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showOverlay',
+                        label: 'Show Overlay',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showTooltip',
+                        label: 'Show Tooltip',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showYAxisAsPercent',
+                        label: 'Show Y Axis As Percent',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'histogram':
+                var well = utils.findWellById(itemProperties.idWell);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Divison and Scales',
+                    data: [{
+                        key: 'histogramDivison',
+                        label: 'Histogram Divison',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'maxScale',
+                        label: 'Max Scale',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'minScale',
+                        label: 'Min Scale',
+                        value: '',
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Informations',
+                    data: [{
+                        key: 'depthReference',
+                        label: 'Depth Reference',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'displayType',
+                        label: 'Display Type',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'name',
+                        label: 'Name',
+                        value: itemProperties.name,
+                        editable: true
+                    }, {
+                        key: 'wellName',
+                        label: 'Well Name',
+                        value: well.properties.name,
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Interval',
+                    data: [{
+                        key: 'intervalBottom',
+                        label: 'Interval Bottom',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'intervalTop',
+                        label: 'Interval Top',
+                        value: '',
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Misc',
+                    data: [{
+                        key: 'pointSymbol',
+                        label: 'Point Symbol',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'symbolColor',
+                        label: 'Symbol Color',
+                        value: '',
+                        editable: true
+                    }, {
+                        key: 'useActiveZonesColor',
+                        label: 'Use Active Zone Color',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }]
+                }
+                listConfig.push(config);
+                config = {
+                    name: currentItem.name,
+                    heading: 'Utilities',
+                    data: [{
+                        key: 'cumulate',
+                        label: 'Cumulate',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'displayAsCurve',
+                        label: 'Display As Curve',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'invert',
+                        label: 'Invert',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'horizontalDisplay',
+                        label: 'Horizontal Display',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showOverlay',
+                        label: 'Show Overlay',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showTooltip',
+                        label: 'Show Tooltip',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
+                    }, {
+                        key: 'showYAxisAsPercent',
+                        label: 'Show Y Axis As Percent',
+                        type: 'checkbox',
+                        value: false,
+                        editable: true
                     }]
                 }
                 listConfig.push(config);

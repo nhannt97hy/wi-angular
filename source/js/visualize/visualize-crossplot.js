@@ -4,113 +4,235 @@ let CanvasHelper = require('./visualize-canvas-helper');
 module.exports = Crossplot;
 
 function Crossplot(config) {
-    this.name = config.name || 'Noname';
+    this.setProperties(config);
 
-    this.xCurve = config.xCurve;
-    this.xLog = config.xLog == null ? false : config.xLog;
-    this.xMajor = config.xMajor || 5;
-    this.xMinor = config.xMinor || 1;
-    this.scaleLeft = config.scaleLeft || (this.xCurve || {}).minX;
-    this.scaleRight = config.scaleRight || (this.xCurve || {}).maxX;
+    this.paddingLeft = 100;
+    this.paddingRight = 50;
+    this.paddingTop = 50;
+    this.paddingBottom = 50;
 
-    this.yCurve = config.yCurve;
-    this.yLog = config.yLog == null ? false : config.yLog;
-    this.yMajor = config.yMajor || 5;
-    this.yMinor = config.yMinor || 1;
-    this.scaleBottom = config.scaleBottom || (this.yCurve || {}).minX;
-    this.scaleTop = config.scaleTop || (this.yCurve || {}).maxX;
+    this.rectZWidth = 0;
+}
 
-    this.colorCurve = config.colorCurve;
-    this.scaleMin = config.scaleMin;
-    this.scaleMax = config.scaleMax;
-    this.colorNum = config.colorNum || 5;
+Crossplot.prototype.PROPERTIES = {
+    idCrossplot: { type: 'Integer' },
+    idWell: { type: 'Integer'},
+    name: { type: 'String', default: 'Noname' },
+    pointSet: {
+        type: 'Object',
+        properties: {
+            idPointSet: { type: 'Integer' },
+            curveX: { type: 'Object' },
+            logX: { type: 'Boolean', default: false },
+            majorX: { type: 'Integer', default: 5 },
+            minorX : { type: 'Integer', default: 1 },
+            scaleLeft: { type: 'Float' },
+            scaleRight: { type: 'Float' },
+            labelX: { type: 'String' },
+            decimalsX: { type: 'Integer', default: 2 },
+            curveY: { type: 'Object' },
+            logY: { type: 'Boolean', default: false },
+            majorY: { type: 'Integer', default: 5 },
+            minorY: { type: 'Integer', default: 1 },
+            scaleBottom: { type: 'Float' },
+            scaleTop: { type: 'Float' },
+            labelY: { type: 'String' },
+            decimalsY: { type: 'Integer', default: 2 },
+            curveZ: { type: 'Object' },
+            scaleMin: { type: 'Float' },
+            scaleMax: { type: 'Float' },
+            numColor: { type: 'Integer', default: 5 },
+            decimalsZ: { type: 'Float', default: 2 },
+            pointSymbol: {
+                type: 'Enum',
+                values: ['Circle', 'Square', 'Cross', 'Diamond', 'Plus', 'Star'],
+                default: 'Circle'
+            },
+            pointSize: { type: 'Integer', default: 2 },
+            pointColor: { type: 'String', default: 'Blue' },
+            topDepth: { type: 'Float' },
+            bottomDepth: { type: 'Float' }
+        }
+    },
+    polygons: {
+        type: 'Array',
+        item: {
+            type: 'Object',
+            properties: {
+                idPolygon: { type: 'Integer' },
+                lineStyle: { type: 'String', default: 'Blue' },
+                display: { type: 'Boolean', default: true },
+                points: {
+                    type: 'Array',
+                    item: {
+                        type: 'Object',
+                        properties: {
+                            x: { type: 'Float' },
+                            y: { type: 'Float' }
+                        }
+                    }
+                }
+            }
+        },
+        default: []
+    }
+};
 
-    this.symbolName = config.symbolName || 'circle';
-    this.symbolSize = config.symbolSize || 5;
-    this.symbolColor = config.symbolColor || 'blue';
+Crossplot.prototype.getProperties = function() {
+    return Utils.getProperties(this);
+}
 
-    this.topDepth = config.topDepth;
-    this.bottomDepth = config.bottomDepth;
-    this.padding = 50;
+Crossplot.prototype.setProperties = function(props) {
+    Utils.setProperties(this, props);
 
-    this.prepareData();
+    Utils.setIfSelfNull(this.pointSet, 'scaleLeft', (this.pointSet.curveX || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleRight', (this.pointSet.curveX || {}).maxX);
+    Utils.setIfSelfNull(this.pointSet, 'labelX', (this.pointSet.curveX || {}).name);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleBottom', (this.pointSet.curveY || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleTop', (this.pointSet.curveY || {}).maxX);
+    Utils.setIfSelfNull(this.pointSet, 'labelY', (this.pointSet.curveY || {}).name);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleMin', (this.pointSet.curveZ || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleMax', (this.pointSet.curveZ || {}).maxX);
 }
 
 Crossplot.prototype.getViewportX = function() {
-    return [this.padding, this.svgContainer.node().clientWidth - this.padding];
+    return [this.paddingLeft, this.bodyContainer.node().clientWidth - this.paddingRight - this.rectZWidth];
 }
 
 Crossplot.prototype.getViewportY = function() {
-    return [this.svgContainer.node().clientHeight - this.padding, this.padding];
+    return [this.bodyContainer.node().clientHeight - this.paddingBottom, this.paddingTop];
+}
+
+Crossplot.prototype.getWindowX = function() {
+    return [this.pointSet.scaleLeft, this.pointSet.scaleRight];
+}
+
+Crossplot.prototype.getWindowY = function() {
+    return [this.pointSet.scaleBottom, this.pointSet.scaleTop];
+}
+
+Crossplot.prototype.getWindowZ = function() {
+    return [this.pointSet.scaleMin, this.pointSet.scaleMax];
+}
+
+Crossplot.prototype.getTransformX = function() {
+    return d3.scaleLinear()
+        .domain(this.getWindowX())
+        .range(this.getViewportX());
+}
+
+Crossplot.prototype.getTransformY = function() {
+    return d3.scaleLinear()
+        .domain(this.getWindowY())
+        .range(this.getViewportY());
+}
+
+Crossplot.prototype.getTransformZ = function() {
+    return d3.scaleQuantize()
+        .domain(this.getWindowZ())
+        .range(this.colors);
+}
+
+Crossplot.prototype.getPlotRect = function() {
+    return this.bodyContainer.node().getBoundingClientRect();
+}
+
+Crossplot.prototype.setMode = function(mode) {
+    this.svgContainer.style('cursor', mode == null ? 'default' : 'copy');
+    this.mode = mode;
 }
 
 Crossplot.prototype.init = function(domElem) {
     let self = this;
     this.root = typeof domElem == 'function' ? domElem : d3.select(domElem);
-
     this.createContainer();
-    let rect = this.bodyContainer.node().getBoundingClientRect();
+
+    let rect = this.getPlotRect();
+
+    this.axisContainer = this.bodyContainer.append('svg')
+        .attr('class', 'vi-crossplot-axis-container')
+        .attr('width', rect.width)
+        .attr('height', rect.height);
+
+    this.axisContainer
+        .selectAll('g.vi-crossplot-axis-group')
+        .data([
+            'vi-crossplot-axis-ticks vi-crossplot-axis-x-ticks',
+            'vi-crossplot-axis-grids vi-crossplot-axis-x-grids',
+            'vi-crossplot-axis-ticks vi-crossplot-axis-y-ticks',
+            'vi-crossplot-axis-grids vi-crossplot-axis-y-grids',
+            'vi-crossplot-axis-ticks vi-crossplot-axis-z-ticks',
+            'vi-crossplot-axis-z-rects'
+        ])
+        .enter()
+            .append('g')
+            .attr('class', function(d) { return 'vi-crossplot-axis-group ' + d; });
+
+    this.axisContainer
+        .selectAll('text.vi-crossplot-axis-label')
+        .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label'])
+        .enter()
+            .append('text')
+            .attr('class', function(d) { return 'vi-crossplot-axis-label ' + d; })
+            .text('-');
+
     this.canvas = this.bodyContainer.append('canvas')
         .attr('width', rect.width)
-        .attr('height', rect.height)
-        .style('position', 'absolute')
-        .style('top', 0)
-        .style('left', 0);
+        .attr('height', rect.height);
 
     this.ctx = this.canvas.node().getContext('2d');
 
     this.svgContainer = this.bodyContainer.append('svg')
+        .attr('class', 'vi-crossplot-svg-container')
         .attr('width', rect.width)
-        .attr('height', rect.height)
-        .style('position', 'absolute')
-        .style('top', 0)
-        .style('left', 0);
+        .attr('height', rect.height);
 
-    this.xAxisGroup = this.svgContainer.append('g')
-        .attr('class', 'vi-track-axis-group vi-track-x-axis-group');
+    this.svgContainer.append('clipPath')
+        .attr('id', this.getSvgClipId())
+        .append('rect');
 
-    this.yAxisGroup = this.svgContainer.append('g')
-        .attr('class', 'vi-track-axis-group vi-track-y-axis-group');
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-polygons')
 
     d3.select(window)
         .on('resize', function() {
-            self.adjustSize();
             self.doPlot();
         });
 
     this.doPlot();
+
+    this.on('mousedown', function() { self.mouseDownCallback() });
+    this.on('mousemove', function() { self.mouseMoveCallback() });
 }
 
 Crossplot.prototype.createContainer = function() {
     this.container = this.root.append('div')
-        .attr('class', 'vi-crossplot-container')
-        .style('position', 'relative')
-        .style('flex', 1)
-        .style('display', 'flex')
-        .style('flex-flow', 'column');
+        .attr('class', 'vi-crossplot-container');
 
     this.headerContainer = this.container.append('div')
-        .attr('class', 'vi-crossplot-header-container')
-        .style('flex', '0 1 auto')
-        .style('text-align', 'center');
+        .attr('class', 'vi-crossplot-header-container');
 
     this.headerContainer
-        .selectAll('div')
-        .data(['vi-crossplot-header-name', 'vi-crossplot-header-info'])
+        .selectAll('div.vi-crossplot-header-row')
+        .data(['vi-crossplot-header-name', 'vi-crossplot-header-reference'])
         .enter()
         .append('div')
-            .attr('class', function(d) { return d; })
+            .attr('class', function(d) { return 'vi-crossplot-header-row ' + d; })
             .text('-');
 
     this.bodyContainer = this.container.append('div')
-        .attr('class', 'vi-crossplot-body-container')
-        .style('position', 'relative')
-        .style('flex', '1 1 auto');
+        .attr('class', 'vi-crossplot-body-container');
 }
 
 Crossplot.prototype.adjustSize = function() {
-    let rect = this.bodyContainer.node().getBoundingClientRect();
+    let rect = this.getPlotRect();
     this.canvas
+        .attr('width', rect.width)
+        .attr('height', rect.height);
+
+    this.axisContainer
         .attr('width', rect.width)
         .attr('height', rect.height);
 
@@ -120,77 +242,434 @@ Crossplot.prototype.adjustSize = function() {
 }
 
 Crossplot.prototype.doPlot = function() {
+    this.prepareData();
+    this.genColorList();
+    this.rectZWidth = this.pointSet.curveZ ? 20 : 0;
+
+    this.adjustSize();
     this.updateHeader();
-    this.updateAxis();
-    this.plotSymbol();
+    this.updateAxises();
+    this.plotSymbols();
+
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    this.svgContainer.select('clipPath')
+        .attr('id', this.getSvgClipId())
+        .select('rect')
+        .attr('x', d3.min(vpX))
+        .attr('y', d3.min(vpY))
+        .attr('width', Math.abs(vpX[0] - vpX[1]))
+        .attr('height', Math.abs(vpY[0] - vpY[1]));
+
+    this.plotPolygons();
 }
 
 Crossplot.prototype.updateHeader = function() {
     this.headerContainer
-        .selectAll('div')
-        .data([this.name, '-'])
+        .selectAll('div.vi-crossplot-header-row')
+        .data([this.name, 'Reference: [' + this.pointSet.topDepth + ' - ' + this.pointSet.bottomDepth + ']'])
         .text(function(d) { return d; });
 }
 
-Crossplot.prototype.updateAxis = function() {
-    let xAxisScale = d3.scaleLinear()
-        .domain([this.scaleLeft, this.scaleRight])
-        .range(this.getViewportX());
-    let xAxis = d3.axisBottom(xAxisScale);
-    this.xAxisGroup.call(xAxis);
-
-    let yAxisScale = d3.scaleLinear()
-        .domain([this.scaleBottom, this.scaleTop])
-        .range(this.getViewportY());
-    let yAxis = d3.axisLeft(yAxisScale);
-    this.yAxisGroup.call(yAxis);
-
-    this.xAxisGroup
-        .style('transform', 'translateY(' + (this.svgContainer.node().clientHeight - this.padding) + 'px)');
-    this.yAxisGroup
-        .style('transform', 'translateX(' + this.padding + 'px)');
+Crossplot.prototype.updateAxises = function() {
+    this.updateAxisTicks();
+    this.updateAxisGrids();
+    this.updateAxisZRects();
+    this.updateAxisLabels();
 }
 
-Crossplot.prototype.plotSymbol = function() {
-    let transformX = d3.scaleLinear()
-        .domain([this.scaleLeft, this.scaleRight])
-        .range(this.getViewportX());
-    let transformY = d3.scaleLinear()
-        .domain([this.scaleBottom, this.scaleTop])
-        .range(this.getViewportY());
+Crossplot.prototype.updateAxisTicks = function() {
+    let wdX = this.getWindowX();
+    let wdY = this.getWindowY();
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX || 1);
+    let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY || 1);
+
+    let axisX = d3.axisBottom(this.getTransformX())
+        .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsX));
+
+    let axisY = d3.axisLeft(this.getTransformY())
+        .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsY));
+
+    this.axisContainer.select('g.vi-crossplot-axis-x-ticks')
+        .call(axisX)
+        .style('transform', 'translateY(' + vpY[0] + 'px)');
+
+    this.axisContainer.select('g.vi-crossplot-axis-y-ticks')
+        .call(axisY)
+        .style('transform', 'translateX(' + vpX[0] + 'px)');
+
+    if (!this.pointSet.curveZ) return;
+
+    let wdZ = this.getWindowZ();
+    let stepZ = (wdZ[1]-wdZ[0]) / (this.pointSet.numColor || 1);
+
+    let transformZ = d3.scaleLinear()
+        .domain(wdZ)
+        .range(vpY);
+
+    let axisZ = d3.axisRight(transformZ)
+        .tickValues(d3.range(wdZ[0], wdZ[1] + stepZ/2, stepZ))
+        .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsZ));
+
+    this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
+        .call(axisZ)
+        .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)');
+}
+
+Crossplot.prototype.updateAxisGrids = function() {
+    let self = this;
+
+    let wdX = this.getWindowX();
+    let wdY = this.getWindowY();
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX*this.pointSet.minorX || 1);
+    let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY*this.pointSet.minorY || 1);
+
+    let gridX = d3.axisBottom(this.getTransformX())
+        .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        .tickFormat('')
+        .tickSize(-Math.abs(vpY[1] - vpY[0]));
+
+    let gridY = d3.axisLeft(this.getTransformY())
+        .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        .tickFormat('')
+        .tickSize(-Math.abs(vpX[1] - vpX[0]));
+
+    this.axisContainer.select('g.vi-crossplot-axis-x-grids')
+        .call(gridX)
+        .style('transform', 'translateY(' + vpY[0] + 'px)')
+        .selectAll('.tick line')
+            .attr('class', function(d, i) {
+                return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+            });
+
+    this.axisContainer.select('g.vi-crossplot-axis-y-grids')
+        .call(gridY)
+        .style('transform', 'translateX(' + vpX[0] + 'px)')
+        .selectAll('.tick line')
+            .attr('class', function(d, i) {
+                return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+            });
+}
+
+Crossplot.prototype.updateAxisZRects = function() {
+    let rectGroup = this.axisContainer.select('.vi-crossplot-axis-z-rects');
+    if (!this.pointSet.curveZ) {
+        rectGroup.style('display', 'none');
+        return;
+    }
+
+    rectGroup.style('display', 'block');
+
+    let vpY = this.getViewportY();
+    let stepY = (vpY[1]-vpY[0]) / (this.pointSet.numColor || 1);
+    let colors = this.colors;
+    let MARGIN_LEFT = 4;
+
+    rectGroup.selectAll('rect').remove();
+
+    rectGroup.selectAll('rect')
+        .data(d3.range(vpY[0], vpY[1], stepY).map(function(d, i) {
+            return {
+                y: d,
+                fill: colors[i]
+            }
+        }))
+        .enter()
+        .append('rect')
+            .attr('x', this.getViewportX()[1] + MARGIN_LEFT)
+            .attr('y', function(d) { return d.y + stepY; })
+            .attr('width', this.rectZWidth - MARGIN_LEFT)
+            .attr('height', -stepY)
+            .attr('fill', function(d) { return d.fill; });
+}
+
+Crossplot.prototype.updateAxisLabels = function() {
+    let rect = this.getPlotRect();
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+    let PADDING_BOTTOM = 10;
+    let PADDING_LEFT = 10;
+
+    let labelXElem = this.axisContainer.select('text.vi-crossplot-axis-x-label')
+        .text(this.pointSet.labelX);
+    let bbX = labelXElem.node().getBBox();
+    labelXElem
+        .attr('transform',
+            'translate('
+            + ((vpX[1]-vpX[0])/2 + vpX[0] - bbX.width/2)
+            + ','
+            + (rect.height - PADDING_BOTTOM)
+            + ')'
+        );
+
+    let labelYElem = this.axisContainer.select('text.vi-crossplot-axis-y-label')
+        .text(this.pointSet.labelY);
+    let bbY = labelYElem.node().getBBox();
+    labelYElem
+        .attr('text-anchor', 'middle')
+        .attr('transform',
+            'translate('
+            + (PADDING_LEFT)
+            + ','
+            + ((vpY[1]-vpY[0])/2 + vpY[0] - bbY.height/2)
+            + ')rotate(-90)'
+        );
+}
+
+Crossplot.prototype.plotPolygons = function() {
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let polygonContainer = this.svgContainer.select('g.vi-crossplot-polygons')
+        .attr('clip-path', 'url(#' + this.getSvgClipId() + ')')
+
+    let polygons = polygonContainer.selectAll('path')
+        .data(this.polygons);
+
+    let self = this;
+    polygons.enter().append('path')
+        .merge(polygons)
+        .attr('d', function(d) {
+            if (d === self.tmpPolygon)
+                return line(d.points);
+            else
+                return line(d.points.concat([d.points[0]]));
+        })
+        .attr('stroke', function(d) { return d.lineStyle; })
+        .attr('fill-rule', 'evenodd')
+        .attr('fill', function(d) {
+            let color = d3.color(d.lineStyle);
+            color.opacity = 0.1;
+            return color.toString();
+        })
+        .style('display', function(d) { return d.display ? 'block' : 'none'; });
+    polygons.exit().remove();
+}
+
+Crossplot.prototype.plotSymbols = function() {
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+    let transformZ = this.getTransformZ();
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+    let rect = this.getPlotRect();
 
     let ctx = this.ctx;
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.save();
+
+    ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX)-d3.min(vpX), d3.max(vpY)-d3.min(vpY));
+    ctx.clip();
+
     let helper = new CanvasHelper(ctx, {
-        strokeStyle: 'none',
-        fillStyle: this.symbolColor,
-        size: this.symbolSize
+        strokeStyle: this.pointSet.pointColor,
+        fillStyle: this.pointSet.pointColor,
+        size: this.pointSet.pointSize
     });
 
-    let plotFunc = helper[Utils.lowercase(this.symbolName)];
+    let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
     if (typeof plotFunc != 'function') return;
 
+    let self = this;
     this.data.forEach(function(d) {
+        if (self.pointSet.curveZ) {
+            helper.strokeStyle = transformZ(d.z);
+            helper.fillStyle = transformZ(d.z);
+        }
         plotFunc.call(helper, transformX(d.x), transformY(d.y));
     });
+    ctx.restore();
 }
 
 Crossplot.prototype.prepareData = function() {
     this.data = [];
-    if (!this.xCurve || !this.yCurve || !this.xCurve.data || !this.yCurve.data)
+    if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
     let mapX = {};
-    this.xCurve.data.forEach(function(d) {
+    this.pointSet.curveX.data.forEach(function(d) {
         mapX[d.y] = d.x;
     });
 
+    let mapZ = {};
+    if (this.pointSet.curveZ && this.pointSet.curveZ.data) {
+        this.pointSet.curveZ.data.forEach(function(d) {
+            mapZ[d.y] = d.x;
+        })
+    }
+
     let self = this;
-    this.yCurve.data.forEach(function(d) {
+    this.pointSet.curveY.data.forEach(function(d) {
+        if (self.pointSet.topDepth != null && d.y < self.pointSet.topDepth) return;
+        if (self.pointSet.bottomDepth != null & d.y > self.pointSet.bottomDepth) return;
         if (d.y != null && mapX[d.y] != null) {
             self.data.push({
                 x: mapX[d.y],
-                y: d.x
+                y: d.x,
+                z: mapZ[d.y]
             });
         }
     });
+}
+
+Crossplot.prototype.genColorList = function() {
+    function rand(x) {
+        return Math.floor(Math.random() * x);
+    }
+
+    const DEFAULT_COLORS = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+    if (this.pointSet.numColor <=  DEFAULT_COLORS.length) {
+        this.colors = DEFAULT_COLORS.slice(0, this.pointSet.numColor);
+        return;
+    }
+
+    let colors = DEFAULT_COLORS.map(function(c) {
+        return d3.color(c).toString();
+    });
+
+    let i = colors.length;
+    let color;
+    while (i < this.pointSet.numColor) {
+        do {
+            color = d3.rgb(rand(255), rand(255), rand(255)).toString();
+        }
+        while (colors.indexOf(color) >= 0);
+        colors.push(color);
+        i += 1;
+    }
+    this.colors = colors;
+}
+
+Crossplot.prototype.genColor = function() {
+    function rand(x) {
+        return Math.floor(Math.random() * x);
+    }
+
+    const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+    let usedColors = [];
+    this.polygons.forEach(function(d) {
+        usedColors = usedColors.concat(d3.color(d.lineStyle).toString());
+    });
+
+    let color;
+    for (let i = 0; i <= this.polygons.length; i++)  {
+        if (i >= DEFAULT_COLORS.length) {
+            do {
+                color = d3.rgb(rand(255), rand(255), rand(255)).toString();
+            }
+            while (usedColors.indexOf(color) >= 0);
+        }
+        else color = d3.color(DEFAULT_COLORS[i]).toString();
+        if (usedColors.indexOf(color) < 0) break;
+    }
+    return color;
+}
+
+Crossplot.prototype.getSvgClipId = function() {
+    return 'vi-crossplot-svg-clip-' + this.idCrossplot;
+}
+
+Crossplot.prototype.on = function(type, cb) {
+    this.svgContainer.on(type, cb);
+}
+
+Crossplot.prototype.mouseMoveCallback = function() {
+    let mouse = d3.mouse(this.svgContainer.node());
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    if (mouse[0] < d3.min(vpX) || mouse[0] > d3.max(vpX) || mouse[1] < d3.min(vpY) || mouse[1] > d3.max(vpY))
+        return;
+
+    let x = this.getTransformX().invert(mouse[0]);
+    let y = this.getTransformY().invert(mouse[1]);
+
+    if (this.mode == 'PlotPolygon') {
+        if (!this.tmpPolygon) return;
+        if (!this.tmpPolygonPoint) {
+            this.tmpPolygonPoint = {x: x, y: y};
+            this.tmpPolygon.points.push(this.tmpPolygonPoint);
+        }
+        else {
+            this.tmpPolygonPoint.x = x;
+            this.tmpPolygonPoint.y = y;
+        }
+        this.plotPolygons();
+    }
+}
+
+Crossplot.prototype.mouseDownCallback = function() {
+    let mouse = d3.mouse(this.svgContainer.node());
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    if (mouse[0] < d3.min(vpX) || mouse[0] > d3.max(vpX) || mouse[1] < d3.min(vpY) || mouse[1] > d3.max(vpY))
+        return;
+
+    let x = this.getTransformX().invert(mouse[0]);
+    let y = this.getTransformY().invert(mouse[1]);
+
+    if (this.mode == 'PlotPolygon') {
+        if (!this.tmpPolygon) {
+            this.tmpPolygon = {
+                lineStyle: this.genColor(),
+                display: true,
+                points: [{x: x, y: y}]
+            };
+            this.polygons.push(this.tmpPolygon);
+        }
+        this.tmpPolygonPoint = null;
+        this.plotPolygons();
+    }
+}
+
+Crossplot.prototype.startAddPolygon = function() {
+    this.setMode('PlotPolygon');
+}
+
+Crossplot.prototype.endAddPolygon = function() {
+    this.setMode(null);
+    if (this.tmpPolygonPoint) {
+        this.tmpPolygon.points.pop();
+    }
+    let addedPolygon = this.tmpPolygon;
+    this.tmpPolygon = null;
+    this.plotPolygons();
+    return addedPolygon;
+}
+
+Crossplot.prototype.startEditPolygon = function(id) {
+    let polygon = this.polygons.filter(function(p) {
+        return p.idPolygon == id;
+    })[0];
+    if (!polygon) return;
+
+    this.setMode('PlotPolygon');
+    this.tmpPolygon = polygon;
+    this.tmpPolygonPoint = Utils.clone(polygon.points[polygon.points.length -1]);
+    this.tmpPolygon.points.push(this.tmpPolygonPoint);
+}
+
+Crossplot.prototype.endEditPolygon = function() {
+    this.setMode(null);
+    if (this.tmpPolygonPoint) {
+        this.tmpPolygon.points.pop();
+    }
+    let edittedPolygon = this.tmpPolygon;
+    this.tmpPolygon = null;
+    this.plotPolygons();
+    return edittedPolygon;
 }

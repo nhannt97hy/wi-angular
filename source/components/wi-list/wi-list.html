@@ -10,8 +10,8 @@
         </td>
         <td>
             <input class="width-95-percent" ng-if="!item.type" type="text" ng-model="item.value" ng-disabled="!item.editable"
-            wi-enter="wiList.onChange(item); $event.currentTarget.blur();" ng-blur="wiList.onChange(item)">
-            <input class="width-95-percent" ng-if="item.type == 'checkbox'" type="checkbox" ng-model="item.value" ng-change="wiList.onChange(item)">
+            wi-enter="$event.currentTarget.blur();" ng-blur="wiList.onChange(item)">
+            <input class="width-95-percent" ng-if="item.type == 'checkbox'" type="checkbox" ng-model="item.value" ng-disabled="!item.editable" ng-change="wiList.onChange(item)">
         </td>
     </tr>
 </table>

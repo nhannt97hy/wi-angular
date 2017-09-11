@@ -34,7 +34,7 @@ let layoutConfig = {
     ]
 };
 
-module.exports.createLayout = function(domId, $scope, $compile) {
+module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
     layoutManager = new GoldenLayout(layoutConfig, document.getElementById(domId));
@@ -50,7 +50,7 @@ module.exports.createLayout = function(domId, $scope, $compile) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
         let modelRef = componentState.model;
-        container.on('destroy', function() {
+        container.on('destroy', function () {
             let model = utils.getModel(modelRef.type, modelRef.id);
             if (!model) return;
             model.data.opened = false;
@@ -60,7 +60,7 @@ module.exports.createLayout = function(domId, $scope, $compile) {
     layoutManager.init();
 }
 
-module.exports.putLeft = function(templateId, title) {
+module.exports.putLeft = function (templateId, title) {
     layoutManager.root.getItemsById('left')[0].addChild({
         type: 'component',
         id: templateId,
@@ -72,7 +72,7 @@ module.exports.putLeft = function(templateId, title) {
     });
 }
 
-module.exports.putRight = function(templateId, title) {
+module.exports.putRight = function (templateId, title) {
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
         id: templateId,
@@ -83,7 +83,7 @@ module.exports.putRight = function(templateId, title) {
         title: title
     });
 }
-module.exports.putComponentRight = function( text, title) {
+module.exports.putComponentRight = function (text, title) {
     layoutManager.root.getItemsById('layout')[0].addChild(
         {
             title: title,
@@ -92,9 +92,9 @@ module.exports.putComponentRight = function( text, title) {
             componentName: 'wi-block',
             componentState: { text: text }
         });
-  
+
 };
-module.exports.putTabRightWithModel = function(model) {
+module.exports.putTabRightWithModel = function (model) {
     LAYOUT = layoutManager;
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
@@ -113,12 +113,12 @@ module.exports.putTabRightWithModel = function(model) {
             name = 'crossplot' + model.properties.idCrossplot;
             htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossplot + '"></wi-crossplot>'
             break;
-        case 'histogram':      
+        case 'histogram':
             itemId = 'histogram' + model.id;
             tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
             name = 'histogram' + model.properties.idHistogram;
             htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
-            
+
             break;
         default:
             console.log('model type is not valid');
@@ -147,27 +147,33 @@ module.exports.putTabRightWithModel = function(model) {
             console.log(tabContainer);
             break;
         case 'histogram':
-            console.log(tabContainer);        
+            console.log(tabContainer);
             break;
         default:
             return;
     }
 }
 
-module.exports.removeTabWithModel = function(model) {
+module.exports.removeTabWithModel = function (model) {
     switch (model.type) {
         case 'logplot':
-            var item = layoutManager.root.getItemsById('logplot'+model.id)[0];    
+            var item = layoutManager.root.getItemsById('logplot' + model.id)[0];
+            break;
+        case 'crossplot':
+            var item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
+            break;
+        case 'histogram':
+            var item = layoutManager.root.getItemsById('histogram' + model.id)[0];
             break;
         default:
-            console.log('model type is not valid');        
+            console.log('model type is not valid');
             return;
     }
     if (!item) return;
     layoutManager.root.getItemsById('right')[0].removeChild(item);
 }
 
-module.exports.removeAllRightTabs = function() {
+module.exports.removeAllRightTabs = function () {
     let childItems = getChildContentItems('right');
     let childItemsLength = childItems.length;
     for (let i = 0; i < childItemsLength; i++) {
@@ -179,10 +185,10 @@ function getChildContentItems(itemId) {
     return layoutManager.root.getItemsById(itemId)[0].contentItems;
 }
 
-module.exports.isComponentExist = function(id) {
+module.exports.isComponentExist = function (id) {
     return (layoutManager.root.getItemsById(id).length ? true : false);
 }
 
-module.exports.updateSize = function() {
+module.exports.updateSize = function () {
     layoutManager.updateSize();
 }

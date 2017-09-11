@@ -17,8 +17,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.$onInit = function () {
         self.wiD3AreaName = self.name + "D3Area";
         if (self.name) wiComponentService.putComponent(self.name, self);
-        
-        $timeout()
     };
     this.getwiD3Ctrl = function() {
         return wiComponentService.getComponent(self.wiD3AreaName);

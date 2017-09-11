@@ -39,3 +39,40 @@
 .vi-marker-svg-group {
     cursor: row-resize;
 }
+
+.vi-crossplot-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+
+    .vi-crossplot-header-container {
+        flex: 0 1 auto;
+        text-align: center;
+    }
+
+    .vi-crossplot-body-container {
+        position: relative;
+        flex: 1 1 auto;
+
+        canvas, svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .vi-crossplot-axis-container {
+            .vi-crossplot-axis-grids {
+                .tick {
+                    line {
+                        stroke: gray;
+                        stroke-dasharray: 20, 2;
+                        stroke-width: 1;
+                    }
+                    .vi-major-tick { stroke-opacity: 0.8; }
+                    .vi-minor-tick { stroke-opacity: 0.3; }
+                }
+            }
+        }
+    }
+}

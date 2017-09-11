@@ -22,11 +22,84 @@ exports.clone = clone;
 exports.range = range;
 exports.getScaleFunc = getScaleFunc;
 exports.setIfNotNull = setIfNotNull;
+exports.setIfSelfNull = setIfSelfNull;
 exports.setIfNotUndefined = setIfNotUndefined;
 exports.isJson = isJson;
 exports.only = only;
 exports.merge = merge;
 exports.getDecimalFormatter = getDecimalFormatter;
+exports.setProperties = setProperties;
+exports.getProperties = getProperties;
+
+function getProperties(obj) {
+    let props = {};
+    Object.keys(obj.PROPERTIES).forEach(function(key) {
+        let value = obj[key];
+        let schema = obj.PROPERTIES[key];
+
+        if (schema.type == 'Object' && schema.properties !== undefined) {
+            let tmpObj = obj[key];
+            tmpObj.PROPERTIES = schema.properties;
+            let tmpProps = getProperties(tmpObj);
+            props[key] = tmpProps;
+        }
+        else if (schema.type == 'Array' && schema.item !== undefined) {
+            props[key] = getArrayFromSchema(value, schema.item);
+        }
+        else {
+            if (value === undefined) return;
+            props[key] = value;
+        }
+    });
+    return props;
+}
+
+function setProperties(obj, props, forArray) {
+    if (typeof props != 'object') props = {};
+
+    Object.keys(obj.PROPERTIES).forEach(function(key) {
+        let value = props[key];
+        let schema = obj.PROPERTIES[key];
+
+        if (value === undefined && schema.type != 'Object') {
+            if (schema.default !== undefined) obj[key] = schema.default;
+        }
+        else if (schema.type == 'Integer') obj[key] = parseInt(value);
+        else if (schema.type == 'Float') obj[key] = parseFloat(value);
+        else if (schema.type == 'Enum') {
+            if (schema.values.indexOf(value) == -1) obj[key] = schema.default;
+        }
+        else if (schema.type == 'Object' && schema.properties !== undefined) {
+            let tmpObj = { PROPERTIES: schema.properties };
+            setProperties(tmpObj, props[key]);
+            delete tmpObj.PROPERTIES;
+            obj[key] = tmpObj;
+        }
+        else if (schema.type == 'Array' && schema.item !== undefined) {
+            obj[key] = getArrayFromSchema(value, schema.item);
+        }
+        else obj[key] = value;
+    });
+}
+
+function getArrayFromSchema(arr, schema) {
+    let tmpArr = [];
+    arr.forEach(function(val) {
+        if (schema.type == 'Integer') tmpArr.push(parseInt(val))
+        else if (schema.type == 'Float') tmpArr.push(parseFloat(val))
+        else if (schema.type == 'Object' && schema.properties !== undefined) {
+            let tmpObj = { PROPERTIES: schema.properties };
+            setProperties(tmpObj, val);
+            delete tmpObj.PROPERTIES;
+            tmpArr.push(tmpObj);
+        }
+        else if (schema.type == 'Array' && schema.item != undefined) {
+            tmpArr.push(getArrayFromSchema(val, schema.item));
+        }
+        else tmpArr.push(val);
+    });
+    return tmpArr;
+}
 
 /**
  * Filter only object with only specified attributes
@@ -61,6 +134,10 @@ function isJson(str) {
 
 function setIfNotNull(obj, attr, newProp) {
     obj[attr] = newProp == null ? obj[attr] : newProp;
+}
+
+function setIfSelfNull(obj, attr, newProp) {
+    obj[attr] = obj[attr] == null ? newProp : obj[attr];
 }
 
 function setIfNotUndefined(obj, attr, newProp) {
@@ -336,18 +413,18 @@ function _createFillStyles(ctx, fills, callback) {
     );
 }
 function createFillStyles(ctx, fills, callback) {
-    let patterns = [];
+    let fillStyles = [];
 
     asyncLoop(
         fills.length,
         function(loop) {
             let fill = fills[loop.iteration()];
             if (!fill) {
-                patterns.push('transparent');
+                fillStyles.push('transparent');
                 loop.next();
             }
             else if (fill.color) {
-                patterns.push(fill.color);
+                fillStyles.push(fill.color);
                 loop.next();
             }
             else if (fill.pattern) {
@@ -355,45 +432,55 @@ function createFillStyles(ctx, fills, callback) {
                 let fg = fill.pattern.foreground;
                 let bg = fill.pattern.background;
                 CanvasHelper.createPattern(ctx, name, fg, bg, function(pattern) {
-                    patterns.push(pattern);
+                    fillStyles.push(pattern);
                     loop.next();
                 });
             }
             else if (fill.varShading) {
                 let startX = fill.varShading.startX;
                 let endX = fill.varShading.endX;
+                let data = fill.varShading.data;
+                let minY = data[0].y;
+                let maxY = data[data.length-1].y;
+                let transform;
+                let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
+
                 if (fill.varShading.gradient) {
                     let startColor = fill.varShading.gradient.startColor;
                     let endColor = fill.varShading.gradient.endColor;
-                    let data = fill.varShading.gradient.data;
-                    let minY = data[0].y;
-                    let maxY = data[data.length-1].y;
-                    let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
-                    let transform = d3.scaleLinear()
+                    transform = d3.scaleLinear()
                         .domain([startX, endX])
                         .range([startColor, endColor])
                         .clamp(true);
 
+                }
+                else if (fill.varShading.pallete) {
+                    let pallete = fill.varShading.pallete.map(function(c) {
+                        return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
+                    });
+                    transform = d3.scaleQuantize()
+                        .domain([startX, endX])
+                        .range(pallete);
+                }
+
+                if (transform)
                     for (let i = 0; i < data.length - 1; i ++) {
                         let x = data[i].x;
                         let color = transform(x);
                         gradient.addColorStop((data[i].y - minY) / (maxY-minY), color);
                         gradient.addColorStop((data[i+1].y - minY) / (maxY-minY), color);
                     }
-                    patterns.push(gradient);
-                }
-                else {
-                    // TODO ??? for pallete
-                }
+
+                fillStyles.push(gradient);
                 loop.next();
             }
             else {
-                patterns.push('transparent');
+                fillStyles.push('transparent');
                 loop.next();
             }
         },
         function() {
-            callback(patterns);
+            callback(fillStyles);
         }
     );
 }
