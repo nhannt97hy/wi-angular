@@ -7,7 +7,15 @@ exports.PrintButtonClicked = function() {
 }
 
 exports.EditFormatButtonClicked = function() {
+    var wiComponentService = this.wiComponentService;
+    var ModalService = this.ModalService;
+    
+    let wiHistogramCtrl = this.wiHistogram;
+    var dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     console.log('EditFormatButton is clicked');
+    dialogUtils.histogramFormatDialog(ModalService, wiHistogramCtrl, function() {
+        console.log('return');
+    })
 }
 
 exports.ActiveZoneButtonClicked = function() {

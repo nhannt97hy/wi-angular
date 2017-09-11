@@ -130,6 +130,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function buildConfigFromHistogramModel(histogramModel, callback) {
         var config = {
             idHistogram: histogramModel.properties.idHistogram,
+            name: histogramModel.properties.name,
             histogramTitle: histogramModel.properties.histogramTitle || "Noname",
             hardCopyWidth: histogramModel.properties.hardCopyWidth,
             hardCopyHeight: histogramModel.properties.hardCopyHeight,
@@ -161,11 +162,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             zones: histogramModel.properties.zones
         }
         // set config.data (curveData) and config.zones
-        wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
+        /*wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
             console.log(data);
             config.data = data;
             if( callback ) callback(config);
-        });
+        });*/
     }
  
     this.createVisualizeHistogram = function(histogram) {

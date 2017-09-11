@@ -3714,3 +3714,61 @@ exports.polygonManagerDialog = function (ModalService, callback){
         });
     });
 };
+
+exports.histogramFormatDialog = histogramFormatDialog;
+function histogramFormatDialog(ModalService, wiHistogramCtrl, callback) {
+    function ModalController(close, wiComponentService) {
+        let self = this;
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
+        console.log(histogramModel);
+        this.histogramProps = histogramModel.properties;
+        this.depthType = histogramModel.properties.idZoneSet? "zonalDepth":"intervalDepth";
+        
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+        this.onDepthTypeChanged = function() {
+            console.log("onDepthTypeChanged", self.depthType);
+            switch(self.depthType) {
+            case "intervalDepth":
+                histogramModel.properties.idZoneSet = null;
+                break;
+            case "zonalDepth":
+                // TODO
+                break;
+            }
+        }
+        this.chooseChartColor = function() {
+            console.log("Awc");
+            DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
+                self.histogramProps.color = colorStr;
+            });
+        }
+        this.onApplyButtonClicked = function() {
+            console.log("onApplyButtonClicked");
+        };
+        this.onCancelButtonClicked = function() {
+            console.log("on cancel clicked");
+            close(null);
+        }
+        this.onOKButtonClicked = function() {
+            console.log("on OK clicked");
+            close(null);
+        }
+        // console.log("ac ac");
+    }
+    ModalService.showModal({
+        templateUrl: "histogram-format/histogram-format-modal.html", 
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function(modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function(ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+            callback(ret);
+        })
+    });
+}

@@ -337,6 +337,7 @@ function histogramToTreeConfig(histogram) {
     histogramModel.id = histogram.idHistogram;
     histogramModel.properties = {
         idHistogram: histogram.idHistogram,
+        name: histogram.name,
         histogramTitle: histogram.histogramTitle,
         hardCopyWidth: histogram.hardCopyWidth,
         hardCopyHeight: histogram.hardCopyHeight,
@@ -358,12 +359,11 @@ function histogramToTreeConfig(histogram) {
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,
         // ????
-        name: histogram.histogramTitle
     };
     histogramModel.data = {
         childExpanded: false,
         icon: 'histogram-blank-16x16',
-        label: histogram.histogramTitle
+        label: histogram.name
     }
     histogramModel.handler = function () {
         let selectedNode = getSelectedNode();
