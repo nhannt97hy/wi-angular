@@ -95,6 +95,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let yCurve = graph.buildCurve({}, yCurveData);
         let domElem = document.getElementById(self.crossplotAreaId);
         viCrossplot = graph.createCrossplot(xCurve, yCurve, config, domElem);
+        return viCrossplot;
     }
 }
 
