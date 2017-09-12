@@ -3717,29 +3717,60 @@ exports.polygonManagerDialog = function (ModalService, callback){
 
 exports.histogramFormatDialog = histogramFormatDialog;
 function histogramFormatDialog(ModalService, wiHistogramCtrl, callback) {
-    function ModalController(close, wiComponentService) {
+    function ModalController(close, wiComponentService, wiApiService) {
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
-        console.log(histogramModel);
         this.histogramProps = histogramModel.properties;
+        console.log(this.histogramProps);
         this.depthType = histogramModel.properties.idZoneSet? "zonalDepth":"intervalDepth";
         
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.SelectedZone = {};
+        this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
+        this.listZoneSet = [];
+        wiApiService.listZoneSet(this.histogramProps.idWell, function(ZoneSets){
+            self.listZoneSet = ZoneSets;
+            
+            self.listZoneSet.forEach(function(z,i){
+                z.id = i;
+                if(self.histogramProps.idZoneSet && z.idZoneSet == self.histogramProps.idZoneSet){
+                    self.SelectedZone = z;
+                }else{
+                    self.SelectedZone = self.listZoneSet[0];
+                }
+                wiApiService.getZoneSet(z.idZoneSet, function(ret){
+                    z.zones = ret.zones;
+                })
+            })
+          
+        })
+
+        this.onZoneSetChange = function(){
+            if(self.SelectedZone){
+                self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+            }
+        }
+
+        this.onActiveZoneChange = function(){
+            if(self.SelectedActiveZone){
+                self.histogramProps.activeZone = self.SelectedActiveZone;
+            }
+        }
 
         this.onDepthTypeChanged = function() {
-            console.log("onDepthTypeChanged", self.depthType);
             switch(self.depthType) {
             case "intervalDepth":
                 histogramModel.properties.idZoneSet = null;
                 break;
             case "zonalDepth":
                 // TODO
+                histogramModel.properties.intervalDepthTop = null;
+                histogramModel.properties.intervalDepthBottom = null;
                 break;
             }
         }
         this.chooseChartColor = function() {
-            console.log("Awc");
             DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
                 self.histogramProps.color = colorStr;
             });
@@ -3753,7 +3784,7 @@ function histogramFormatDialog(ModalService, wiHistogramCtrl, callback) {
         }
         this.onOKButtonClicked = function() {
             console.log("on OK clicked");
-            close(null);
+            close(self.histogramProps);
         }
         // console.log("ac ac");
     }
@@ -3771,6 +3802,35 @@ function histogramFormatDialog(ModalService, wiHistogramCtrl, callback) {
             callback(ret);
         })
     });
+}
+
+exports.histogramFrequencyInfoDialog = function(ModalService, callback){
+    function ModalController($scope, close){
+        var self = this;
+
+        this.onCancelButtonClicked = function() {
+            console.log("on cancel clicked");
+            close(null);
+        }
+        this.onCloseButtonClicked = function() {
+            console.log("on Close clicked");
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "histogram-frequency-info/histogram-frequency-info-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal){
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();        
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    })
 }
 exports.markerPropertiesDialog = function(ModalService, markerProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {

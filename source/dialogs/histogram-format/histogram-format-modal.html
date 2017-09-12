@@ -9,7 +9,7 @@
             <div class="modal-body">
                 <wi-tabset>
                     <wi-tab heading='Scales'>
-                        <div class="padding-1em containser-fluid">
+                        <div class="padding-1em container-fluid">
                             <div class="row">
                                 <form class='col-sm-12 form-horizontal form-condensed'>
                                     <div id="choosedepth">
@@ -35,13 +35,25 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-sm-3">Zones</label>
-                                                <div class="col-sm-3"><select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'">
-                                                    <option value="">None</option>
-                                                </select></div>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'"
+                                                    ng-model="wiModal.SelectedZone"
+                                                    ng-change="wiModal.onZoneSetChange()"
+                                                    ng-options="ZoneSet as ZoneSet.name for ZoneSet in wiModal.listZoneSet track by ZoneSet.id">
+                                                    </select>
+                                                </div>
                                                 <label class="col-sm-3">Active Zones</label>
-                                                <div class="col-sm-3"><select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'">
-                                                    <option value="">None</option>
-                                                </select></div>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'"
+                                                    ng-model="wiModal.SelectedActiveZone"
+                                                    ng-change="wiModal.onActiveZoneChange()">
+                                                        <option value="All" ng-selected="wiModal.histogramProps.activeZone=='All'">All</option>
+                                                        <option value="{{Zone.idZone}}" ng-repeat="Zone in wiModal.listZoneSet[wiModal.SelectedZone.id].zones"
+                                                        ng-selected="wiModal.histogramProps.activeZone==Zone.idZone">
+                                                            {{Zone.name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -129,7 +141,7 @@
                         </div>
                     </wi-tab>
                     <wi-tab heading='Discriminators'>
-                        <div class="containser-fluid">
+                        <div class="container-fluid">
                             <form class='form-horizontal'>
                                 <div>
                                     <h5>Discriminators</h5>
@@ -189,14 +201,14 @@
                         </div>
                     </wi-tab>
                     <wi-tab heading='Options'>
-                        <div class="containser-fluid">
+                        <div class="container-fluid">
                             <form class='form-horizontal'>
 
                             </form>
                         </div>
                     </wi-tab>
                     <wi-tab heading='Refrence Window'>
-                        <div class="containser-fluid">
+                        <div class="container-fluid">
                             <form class='form-horizontal'>
 
                             </form>

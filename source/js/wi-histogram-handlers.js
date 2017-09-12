@@ -1,5 +1,15 @@
 exports.SaveFormatButtonClicked = function() {
     console.log('SaveFormatButton is clicked', this.wiHistogram);
+    var wiComponentService = this.wiComponentService;
+    
+    let idHistogram = this.wiHistogram.id;
+    let wiApiService = this.wiApiService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let histogramModel = utils.getModel("histogram", idHistogram);
+    wiApiService.editHistogram(histogramModel.properties, function(){
+        console.log('Saving Histogram......');
+    })
+
 }
 
 exports.PrintButtonClicked = function() {
@@ -13,8 +23,8 @@ exports.EditFormatButtonClicked = function() {
     let wiHistogramCtrl = this.wiHistogram;
     var dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     console.log('EditFormatButton is clicked');
-    dialogUtils.histogramFormatDialog(ModalService, wiHistogramCtrl, function() {
-        console.log('return');
+    dialogUtils.histogramFormatDialog(ModalService, wiHistogramCtrl, function(ret) {
+        console.log(ret);
     })
 }
 
@@ -23,6 +33,12 @@ exports.ActiveZoneButtonClicked = function() {
 }
 
 exports.FrequencyInfoButtonClicked = function() {
+    var ModalService = this.ModalService;
+    
+    var dialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    dialogUtils.histogramFrequencyInfoDialog(ModalService, function(ret){
+        console.log(ret);
+    })
     console.log('FrequencyInfoButton is clicked');
 }
 

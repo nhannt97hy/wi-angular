@@ -343,6 +343,7 @@ function histogramToTreeConfig(histogram) {
         hardCopyHeight: histogram.hardCopyHeight,
         intervalDepthTop: histogram.intervalDepthTop,
         intervalDepthBottom: histogram.intervalDepthBottom,
+        activeZone: histogram.activeZone,
         divisions: histogram.divisions,
         leftScale: histogram.leftScale,
         rightScale: histogram.rightScale,
@@ -358,7 +359,7 @@ function histogramToTreeConfig(histogram) {
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,
-        // ????
+        zones: histogram.zoneset != null ? histogram.zoneset.zones : null
     };
     histogramModel.data = {
         childExpanded: false,
@@ -1495,10 +1496,10 @@ function openHistogramTab(wiComponentService, histogramModel, callback) {
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
     histogramModel.data.opened = true;
-    console.log('openHistogramTab:', histogramModel);
+    // console.log('openHistogramTab:', histogramModel);
     let histogramName = 'histogram' + histogramModel.properties.idHistogram;
     let histogramCtrl = wiComponentService.getComponent(histogramName);
-    console.log(histogramName, histogramCtrl);
+    // console.log(histogramName, histogramCtrl);
     histogramCtrl.getwiD3Ctrl().createVisualizeHistogram(histogramModel);
     if (callback) callback();
 };

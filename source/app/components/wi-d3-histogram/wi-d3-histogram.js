@@ -136,6 +136,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             hardCopyHeight: histogramModel.properties.hardCopyHeight,
             intervalDepthTop: histogramModel.properties.intervalDepthTop,
             intervalDepthBottom: histogramModel.properties.intervalDepthBottom,
+            activeZone: histogramModel.properties.activeZone,
             divisions: histogramModel.properties.divisions,
             leftScale: histogramModel.properties.leftScale,
             rightScale: histogramModel.properties.rightScale,
@@ -157,20 +158,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             discriminators: {},
             idWell: histogramModel.properties.idWell,
             idCurve: histogramModel.properties.idCurve,
-            //idZoneSet: null
-            data: null,
+            idZoneSet: histogramModel.properties.idZoneSet,
+            dataCurve: null,
             zones: histogramModel.properties.zones
         }
         // set config.data (curveData) and config.zones
-        /*wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
-            console.log(data);
-            config.data = data;
-            if( callback ) callback(config);
-        });*/
+        if(histogramModel.properties.idCurve){
+            wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
+                console.log(data);
+                config.dataCurve = data;
+            });
+        }
+
+        if( callback ) callback(config);
     }
  
     this.createVisualizeHistogram = function(histogram) {
-        console.log('createHistogram:' , histogram, self.histogramAreaId);
+        // console.log('createHistogram:' , histogram, self.histogramAreaId);
         buildConfigFromHistogramModel(histogram, function(config) {
             let visHistogram = graph.createHistogram(config, document.getElementById(self.histogramAreaId));
             console.log(visHistogram);
