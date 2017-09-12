@@ -748,7 +748,15 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'logplots') return;
     let well = getModel('well', selectedNode.properties.idWell);
-    let firstCurve = well.children[0].children[0];
+    let firstCurve = null;
+    for (let child of well.children) {
+        if (child.type == "dataset") {
+            if (child.children && child.children.length) {
+                firstCurve = child.children[0]
+                break;
+            }
+        }
+    }
     let dataRequest = {
         idWell: selectedNode.properties.idWell,
         name: logplotName,
