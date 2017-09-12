@@ -97,6 +97,11 @@ const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
 const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
 
+const CREATE_HISTOGRAM = '/project/well/histogram/new';
+const EDIT_HISTOGRAM = '/project/well/histogram/edit';
+const GET_HISTOGRAM = '/project/well/histogram/info';
+const DELETE_HISTOGRAM = '/project/well/histogram/delete';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -1063,6 +1068,48 @@ Service.prototype.getDiscrim = function (idDiscrim, callback) {
 Service.prototype.removeDiscrim = function (idDiscrim, callback) {
     let self = this;
     this.delete(DELETE_DISCRIM, { idDiscrim: idDiscrim })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+// histogram apis
+Service.prototype.createHistogram = function (data, callback) {
+    let self = this;
+    this.post(CREATE_HISTOGRAM, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editHistogram = function (data, callback) {
+    let self = this;
+    this.post(EDIT_HISTOGRAM, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getHistogram = function (idHistogram, callback) {
+    let self = this;
+    this.post(GET_HISTOGRAM, { idHistogram: idHistogram })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeHistogram = function (idHistogram, callback) {
+    let self = this;
+    this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram })
         .then(function (returnData) {
             callback();
         })
