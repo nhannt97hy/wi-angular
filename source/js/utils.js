@@ -1095,6 +1095,13 @@ exports.findWellByCrossplot = function (idCrossplot) {
     }) || [];
     return path[1];
 }
+
+exports.findWellByHistogram = function (idHistogram) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'histogram' && node.id == idHistogram;
+    }) || [];
+    return path[1];
+}
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';

@@ -22,11 +22,11 @@
                                             <div class='form-group'>
                                                 <label class="col-sm-3">Top(m)</label>
                                                 <div class="col-sm-3">
-                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.intervalDepthTop" ng-disabled="!(wiModal.depthType=='intervalDepth')">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.intervalDepthTop" ng-disabled="!(wiModal.depthType=='intervalDepth')" required>
                                                 </div>
                                                 <label class="col-sm-3">Bottom(m)</label>
                                                 <div class="col-sm-3">
-                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.intervalDepthBottom" ng-disabled="!(wiModal.depthType=='intervalDepth')">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.intervalDepthBottom" ng-disabled="!(wiModal.depthType=='intervalDepth')" required>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -63,8 +63,10 @@
                                             <div class='form-group'>
                                                 <label class="col-sm-3">Curve name</label>
                                                 <div class="col-sm-3">
-                                                    <select class="form-control wi-form-control">
-                                                        <option value="">None</option>
+                                                    <select class="form-control wi-form-control"
+                                                    ng-model="wiModal.SelectedCurve"
+                                                    ng-change="wiModal.onSelectCurveChange()"
+                                                    ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
                                                     </select>
                                                 </div>
                                                 <label class="col-sm-3">Number of Divisions</label>
@@ -123,7 +125,7 @@
                                                     <label>Frequency count</label>
                                                 </div>
                                                 <div class="col-sm-4">
-                                                    <input type="radio" name='plotType' ng-model="wiModal.histogramProps.plotType" value="Percentile">
+                                                    <input type="radio" name='plotType' ng-model="wiModal.histogramProps.plotType" value="Percent">
                                                     <label>Percentile</label>
                                                 </div>
                                                 <div class="col-sm-4">

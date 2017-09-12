@@ -4355,6 +4355,27 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.SelectedZone = {};
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
         this.listZoneSet = [];
+        this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
+        this.datasets = [];
+        this.curvesArr = [];
+        this.SelectedCurve = {};
+        
+        this.well.children.forEach(function (child) {
+            if (child.type == 'dataset') self.datasets.push(child);
+        });
+        this.datasets.forEach(function (child) {
+            child.children.forEach(function (item) {
+                if (item.type == 'curve') {
+                    var d = item;
+                    d.datasetCurve = child.properties.name + "." + item.properties.name;
+                    self.curvesArr.push(d);
+                    if(d.id == self.histogramProps.idCurve){
+                        self.SelectedCurve = d;
+                    }
+                }
+            })
+        });
+
         wiApiService.listZoneSet(this.histogramProps.idWell, function (ZoneSets) {
             self.listZoneSet = ZoneSets;
             if (self.listZoneSet.length > 0 && !self.histogramProps.idZoneSet) {
@@ -4386,6 +4407,10 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             if (self.SelectedActiveZone) {
                 self.histogramProps.activeZone = self.SelectedActiveZone;
             }
+        }
+
+        this.onSelectCurveChange = function(){
+            self.histogramProps.idCurve = self.SelectedCurve.id;
         }
 
         this.onDepthTypeChanged = function () {

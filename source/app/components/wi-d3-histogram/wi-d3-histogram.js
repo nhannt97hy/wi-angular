@@ -163,12 +163,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             zones: histogramModel.properties.zones
         }
         // set config.data (curveData) and config.zones
-        if(histogramModel.properties.idCurve){
-            wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
-                console.log(data);
-                config.dataCurve = data;
-            });
-        }
+        // if(histogramModel.properties.idCurve){
+        //     wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
+        //         console.log(data);
+        //         config.dataCurve = data;
+        //     });
+        // }
 
         if( callback ) callback(config);
     }
