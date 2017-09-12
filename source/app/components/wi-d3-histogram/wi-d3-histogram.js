@@ -7,9 +7,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent('GRAPH');
     self.histogramModel = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
     function getIdHistogram() {
-        return self.name.replace('histogram',"").replace("D3Area", "");
+        return self.name.replace('histogram', "").replace("D3Area", "");
     }
 
     function getHistogramModel() {
@@ -18,7 +19,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.$onInit = function () {
-        self.histogramAreaId = self.name + 'HistogramArea';    
+        self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = getHistogramModel();
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
@@ -26,8 +27,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
 
-    this.contextMenu = [
-        {
+    
+
+    this.showContextMenu = function (event) {
+        if (event.button != 2) return;
+        self.contextMenu = [{
             name: "Refresh",
             label: "Refresh",
             icon: "reload-16x16",
@@ -39,24 +43,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                
+                DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function (ret) {
+                    console.log(ret);
+                })
             }
         }, {
             name: "FlipHorizontalAxis",
             label: "Flip Horizontal Axis",
             "isCheckType": "true",
-            checked: self.histogramModel?self.histogramModel.properties.flipHorizontal:false,
+            checked: self.histogramModel ? self.histogramModel.properties.flipHorizontal : false,
             handler: function (index) {
                 self.histogramModel.properties.flipHorizontal = !self.histogramModel.properties.flipHorizontal;
-                self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;                
+                self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;
                 // TODO
             }
         }, {
             name: "ShowGrid",
             label: "Show Grid",
             "isCheckType": "true",
-            checked: self.histogramModel?self.histogramModel.properties.showGrid:false,
-            handler: function (index) {                
+            checked: self.histogramModel ? self.histogramModel.properties.showGrid : false,
+            handler: function (index) {
                 self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
                 self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
                 //
@@ -66,27 +72,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowGaussian",
             label: "Show Gaussian",
             "isCheckType": "true",
-            checked: self.histogramModel?self.histogramModel.properties.showGaussian:false,
+            checked: self.histogramModel ? self.histogramModel.properties.showGaussian : false,
             handler: function (index) {
                 self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
-                self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;                
+                self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
             }
         }, {
             name: "ShowAxisYAsPercent",
             label: "Show Axis Y as Percent",
             "isCheckType": "true",
-            checked: self.histogramModel?(self.histogramModel.properties.plotType=="Percentile"):false,
+            checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percentile") : false,
             handler: function (index) {
-                if (self.histogramModel.properties.plotType == "Frequency") 
+                if (self.histogramModel.properties.plotType == "Frequency")
                     self.histogramModel.properties.plotType = "Percentile";
                 else self.histogramModel.properties.plotType = "Frequency";
-                self.contextMenu[index].checked = self.histogramModel?(self.histogramModel.properties.plotType=="Percentile"):false;                
+                self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percentile") : false;
             }
         }, {
             name: "ShowReferenceWindow",
             label: "Show/Hide Reference Window",
             handler: function () {
-                
+    
             }
         }, {
             name: "ShowCumulative",
@@ -94,7 +100,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             "isCheckType": "true",
             checked: false, // TODO
             handler: function () {
-                
+    
             }
         }, {
             name: "ShowCumulativeCurve",
@@ -102,26 +108,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             "isCheckType": "true",
             checked: false, // TODO
             handler: function () {
-                
+    
             }
         }, {
             name: "ShowTooltip",
             label: "Show/Hide Tooltip",
             handler: function () {
-                
+    
             }
         }, {
             name: "FrequencyInfor",
             label: "Frequency Infor",
             icon: "ti-info-alt",
             handler: function () {
-                
+    
             }
-        }
-    ];
-
-    this.showContextMenu = function (event) {
-        if (event.button != 2) return;
+        }];
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
@@ -170,12 +172,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //     });
         // }
 
-        if( callback ) callback(config);
+        if (callback) callback(config);
     }
- 
-    this.createVisualizeHistogram = function(histogram) {
+
+    this.createVisualizeHistogram = function (histogram) {
         // console.log('createHistogram:' , histogram, self.histogramAreaId);
-        buildConfigFromHistogramModel(histogram, function(config) {
+        buildConfigFromHistogramModel(histogram, function (config) {
             let visHistogram = graph.createHistogram(config, document.getElementById(self.histogramAreaId));
             console.log(visHistogram);
         });
