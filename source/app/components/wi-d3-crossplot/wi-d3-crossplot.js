@@ -33,7 +33,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function() {
+                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, viCrossplot, function() {
                     console.log("crossplotFormatDialog");
                 })
             }
@@ -89,12 +89,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .open(event.clientX, event.clientY, self.contextMenu);
     }
 
-    this.createVisualizeCrossplot = function (xCurveData, yCurveData, config) {
+    this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (!config) config = {};
-        let xCurve = graph.buildCurve({}, xCurveData);
-        let yCurve = graph.buildCurve({}, yCurveData);
         let domElem = document.getElementById(self.crossplotAreaId);
-        viCrossplot = graph.createCrossplot(xCurve, yCurve, config, domElem);
+        viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
     }
 }
 

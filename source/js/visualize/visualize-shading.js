@@ -32,7 +32,7 @@ Utils.extend(Drawing, Shading);
  * @param {Object} [config.fill.varShading.gradient]
  * @param {String} [config.fill.varShading.gradient.startColor]
  * @param {String} [config.fill.varShading.gradient.endColor]
- * @param {String} [config.fill.varShading.pallete] - Object containing array of color
+ * @param {String} [config.fill.varShading.palette] - Object containing array of color
 
 
 
@@ -44,6 +44,7 @@ Utils.extend(Drawing, Shading);
  * @param {Boolean} [config.showRefLine] - Indicate whether to plot reference line
  */
 function Shading(config) {
+
     Drawing.call(this, config);
     if (typeof config != 'object') config = {};
 
@@ -84,6 +85,7 @@ function Shading(config) {
             ? this.selectedCurve.maxX
             : this.selectedCurve.minX;
     }
+
 }
 
 Shading.prototype.getProperties = function() {
@@ -105,12 +107,15 @@ Shading.prototype.getProperties = function() {
     let e = 0.000001;
     let type;
 
-    if (Math.abs(this.refX - this.selectedCurve.maxX) < e)
-        type = 'right';
-    else if (Math.abs(this.refX - this.selectedCurve.minX) < e)
-        type = 'left';
-    else
-        type = 'custom';
+    // if (Math.abs(this.refX - this.selectedCurve.maxX) < e)
+    //     type = 'right';
+    // else if (Math.abs(this.refX - this.selectedCurve.minX) < e)
+    //     type = 'left';
+    // else
+    //     type = 'custom';
+    if(this.refX == this.selectedCurve.maxX) type = 'right';
+    else if (this.refX == this.selectedCurve.minX) type = 'left';
+    else type = 'custom';
 
     return {
         idShading: this.id,
@@ -158,7 +163,7 @@ Shading.prototype.setProperties = function(props) {
         Utils.setIfNotUndefined(this, 'rightCurve', props.rightCurve);
         Utils.setIfNotNull(this, 'rightX', props.rightFixedValue);
     }
-
+    
     Utils.setIfNotUndefined(this, 'selectedCurve', props.controlCurve);
 }
 
@@ -291,7 +296,6 @@ Shading.prototype.doPlot = function(highlight) {
         let fill = fillStyles[0];
         let posFill = fillStyles[1];
         let negFill = fillStyles[2];
-        //if (!self.isNegPosFilling) {
         if (!self.isNegPosFill) {
              posFill = negFill = fill;
         }

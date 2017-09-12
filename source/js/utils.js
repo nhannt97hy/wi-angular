@@ -158,13 +158,13 @@ function shadingToTreeConfig(shading) {
         // minY: shading.minY,
         // maxY: shading.maxY,
         fill: shading.fill ? JSON.parse(shading.fill) : null,
-        //isNegPosFilling: shading.isNegPosFill,
         isNegPosFill: shading.isNegPosFill,
         positiveFill: shading.positiveFill ? JSON.parse(shading.positiveFill) : null,
         negativeFill: shading.negativeFill ? JSON.parse(shading.negativeFill) : null,
         refLineWidth: shading.refLineWidth || 5,
         refLineColor: shading.refLineColor || '#3e3e3e',
-        showRefLine: shading.showRefLine
+        // showRefLine: shading.showRefLine
+        showRefLine: false
     };
     return shadingModel;
 }
@@ -823,23 +823,25 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     console.log("LinhTinh:", linesOfTrack, shading);
                     let lineObj1 = null;
                     let lineObj2 = null;
-                    if (!shadingModel.idRightLine) return;
-                    if (!shadingModel.idLeftLine) {
-                        for (let line of linesOfTrack) {
-                            console.log("line", line);
-                            if (line.id == shading.idRightLine) {
-                                lineObj1 = line;
-                                break;
-                            }
-                        }
-                        let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                        console.log('shading', tmp);
+
+                    /*if (!shadingModel.idRightLine && !shadingModel.idLeftLine) {
+                        console.error('Shading info is invalid', shading);
+                        return;
                     }
-                    ;
+                    
+                    var __lineId = shadingModel.idRightLine;
+                    var __refX = shadingModel.data.leftX;
+                    var isLeft = false;
+                    if (!__lineId) {
+                        __lineId = shadingModel.idLeftLine;
+                        __refX = shadingModel.data.rightX;
+                        isLeft = true;
+                    }
+
                     if (shadingModel.idLeftLine && shadingModel.idRightLine) {
                         for (let line of linesOfTrack) {
                             if (line.id == shading.idRightLine) {
-                                lineObj1 = line;
+                                  lineObj1 = line;
                             }
                             if (line.id == shading.idLeftLine) {
                                 lineObj2 = line;
@@ -848,7 +850,44 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
                         console.log('shading2', tmp);
                     }
-                    ;
+                    else {
+                        for (let line of linesOfTrack) {
+                            //if (line.id == shading.idRightLine) {
+                            if (line.id == __lineId) {
+                                lineObj1 = line;
+                                break;
+                            }
+                        }
+                        // let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                        let tmp;
+                        if(isLeft) 
+                            tmp = wiD3Ctrl.addCustomShadingToTrackWithLeftCurve(trackObj, lineObj1, __refX, shadingModel.data);
+                        else 
+                            tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, __refX, shadingModel.data);
+                        console.log('shading', tmp);
+                    }*/
+
+                    if(!shadingModel.idRightLine) return;
+                    if(!shadingModel.idLeftLine) {
+                        for (let line of linesOfTrack) {
+                            if (line.id == shading.idRightLine) {
+                                  lineObj1 = line;
+                            }
+                        }
+                        wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                    }
+                    else {
+                        for (let line of linesOfTrack) {
+                            if (line.id == shading.idRightLine) {
+                                  lineObj1 = line;
+                            }
+                            if (line.id == shading.idLeftLine) {
+                                lineObj2 = line;
+                            }
+                        }
+                        wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                    }
+                    
                 });
             };
             let aTrack = tracks.shift();
@@ -1391,14 +1430,19 @@ function openCrossplotTab(crossplotModel, callback) {
     let wiApiService = __GLOBAL.wiApiService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(crossplotModel);
+    let graph = wiComponentService.getComponent('GRAPH');
     if (crossplotModel.data.opened) return;
     crossplotModel.data.opened = true;
     let crossplotName = 'crossplot' + crossplotModel.properties.idCrossplot;
     let wiCrossplotCtrl = __GLOBAL.wiComponentService.getComponent(crossplotName);
     let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+
+    let wellProps = findWellById(crossplotModel.properties.idWell);
+
     wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
+            console.log("pointsets", pointSet);
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
                 wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
                     if (pointSet.idCurveZ) {
@@ -1406,7 +1450,16 @@ function openCrossplotTab(crossplotModel, callback) {
                             // TODO
                         })
                     } else {
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(xCurveData, yCurveData)
+                        let curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
+                        let curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(curveX, curveY, {
+                            name: crossplotName,
+                            idPointSet: pointSet.idPointSet,
+                            idCrossPlot: wiCrossplotCtrl.id,
+                            idWell: wellProps.id,
+                            topDepth: wellProps.topDepth,
+                            bottomDepth: wellProps.bottomDepth
+                        });
                     }
                 })
             })
@@ -1511,3 +1564,11 @@ exports.hexToRgbA = hexToRgbA;
 exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
 }
+function getAllPalettes(wiApiService){
+    let paletteList = null;
+    wiApiService.getPalettes(function(pals){
+        paletteList = pals;
+    });
+    return paletteList;
+}
+exports.getAllPalettes = getAllPalettes;

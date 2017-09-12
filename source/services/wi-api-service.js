@@ -83,7 +83,7 @@ const GET_CROSSPLOT = '/project/well/cross-plot/info';
 const DELETE_CROSSPLOT = '/project/well/cross-plot/delete';
 
 const CREATE_POINTSET = '/project/well/cross-plot/point-set/new';
-const EDIT_POINTET = '/project/well/cross-plot/point-set/edit';
+const EDIT_POINTSET = '/project/well/cross-plot/point-set/edit';
 const GET_POINTSET = '/project/well/cross-plot/point-set/info';
 const DELETE_POINTSET = '/project/well/cross-plot/point-set/delete';
 
@@ -96,6 +96,7 @@ const CREATE_DISCRIM = '/project/well/cross-plot/discrim/new';
 const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
 const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
+const GET_PALETTES = '/pal/all';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -134,6 +135,7 @@ Service.prototype.GET_SHADING = GET_SHADING;
 
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
+Service.prototype.GET_PALETTES = GET_PALETTES;
 Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     // console.log(utils);
@@ -1062,4 +1064,14 @@ app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);
 });
 
+Service.prototype.getPalettes = function (callback) {
+    let self = this;
+    this.post(GET_PALETTES, {})
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 exports.name = moduleName;

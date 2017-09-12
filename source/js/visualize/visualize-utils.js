@@ -429,13 +429,13 @@ function createFillStyles(ctx, fills, callback) {
                         .clamp(true);
 
                 }
-                else if (fill.varShading.pallete) {
-                    let pallete = fill.varShading.pallete.map(function(c) {
+                else if (fill.varShading.palette) {
+                    let palette = fill.varShading.palette.map(function(c) {
                         return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
                     });
                     transform = d3.scaleQuantize()
                         .domain([startX, endX])
-                        .range(pallete);
+                        .range(palette);
                 }
 
                 if (transform)
