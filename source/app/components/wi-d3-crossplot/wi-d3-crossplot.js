@@ -92,7 +92,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (!config) config = {};
         let domElem = document.getElementById(self.crossplotAreaId);
-        viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+        viCrossplot = graph.createCrossplot(xCurve, yCurve, config, domElem);
+        return viCrossplot;
     }
 }
 

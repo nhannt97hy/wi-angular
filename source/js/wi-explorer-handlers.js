@@ -74,7 +74,7 @@ exports.DeleteItemButtonClicked = function () {
         if (yes) {
             switch (selectedNode.type) {
                 case 'well':
-                    wiApiService.removeWell(selectedNode.properties.idWell, function() {
+                    wiApiService.removeWell(selectedNode.properties.idWell, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                         });
@@ -109,12 +109,18 @@ exports.DeleteItemButtonClicked = function () {
                     });
                     break;
                 case 'logplot':
-                    utils.deleteLogplot();
+                    wiApiService.removeLogplot(selectedNode.properties.idPlot, function () {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                            wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
+                        });
+                    });
                     break;
                 case 'crossplot':
                     wiApiService.removeCrossplot(selectedNode.properties.idCrossplot, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
                         });
                     });
                     break;
@@ -122,6 +128,7 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeHistogram(selectedNode.properties.idHistogram, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
                         });
                     });
                     break;

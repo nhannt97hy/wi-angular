@@ -53,6 +53,28 @@ Crossplot.prototype.PROPERTIES = {
             topDepth: { type: 'Float' },
             bottomDepth: { type: 'Float' }
         }
+    },
+    polygons: {
+        type: 'Array',
+        item: {
+            type: 'Object',
+            properties: {
+                idPolygon: { type: 'Integer' },
+                lineStyle: { type: 'String', default: 'Blue' },
+                display: { type: 'Boolean', default: true },
+                points: {
+                    type: 'Array',
+                    item: {
+                        type: 'Object',
+                        properties: {
+                            x: { type: 'Float' },
+                            y: { type: 'Float' }
+                        }
+                    }
+                }
+            }
+        },
+        default: []
     }
 };
 
@@ -117,6 +139,11 @@ Crossplot.prototype.getPlotRect = function() {
     return this.bodyContainer.node().getBoundingClientRect();
 }
 
+Crossplot.prototype.setMode = function(mode) {
+    this.svgContainer.style('cursor', mode == null ? 'default' : 'copy');
+    this.mode = mode;
+}
+
 Crossplot.prototype.init = function(domElem) {
     let self = this;
     this.root = typeof domElem == 'function' ? domElem : d3.select(domElem);
@@ -148,7 +175,7 @@ Crossplot.prototype.init = function(domElem) {
         .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label'])
         .enter()
             .append('text')
-            .attr('class', function(d) { return 'vi-crossplot-axis-label ' +d; })
+            .attr('class', function(d) { return 'vi-crossplot-axis-label ' + d; })
             .text('-');
 
     this.canvas = this.bodyContainer.append('canvas')
@@ -162,12 +189,22 @@ Crossplot.prototype.init = function(domElem) {
         .attr('width', rect.width)
         .attr('height', rect.height);
 
+    this.svgContainer.append('clipPath')
+        .attr('id', this.getSvgClipId())
+        .append('rect');
+
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-polygons')
+
     d3.select(window)
         .on('resize', function() {
             self.doPlot();
         });
 
     this.doPlot();
+
+    this.on('mousedown', function() { self.mouseDownCallback() });
+    this.on('mousemove', function() { self.mouseMoveCallback() });
 }
 
 Crossplot.prototype.createContainer = function() {
@@ -211,8 +248,21 @@ Crossplot.prototype.doPlot = function() {
 
     this.adjustSize();
     this.updateHeader();
-    this.updateAxis();
-    this.plotSymbol();
+    this.updateAxises();
+    this.plotSymbols();
+
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    this.svgContainer.select('clipPath')
+        .attr('id', this.getSvgClipId())
+        .select('rect')
+        .attr('x', d3.min(vpX))
+        .attr('y', d3.min(vpY))
+        .attr('width', Math.abs(vpX[0] - vpX[1]))
+        .attr('height', Math.abs(vpY[0] - vpY[1]));
+
+    this.plotPolygons();
 }
 
 Crossplot.prototype.updateHeader = function() {
@@ -222,7 +272,7 @@ Crossplot.prototype.updateHeader = function() {
         .text(function(d) { return d; });
 }
 
-Crossplot.prototype.updateAxis = function() {
+Crossplot.prototype.updateAxises = function() {
     this.updateAxisTicks();
     this.updateAxisGrids();
     this.updateAxisZRects();
@@ -375,7 +425,41 @@ Crossplot.prototype.updateAxisLabels = function() {
         );
 }
 
-Crossplot.prototype.plotSymbol = function() {
+Crossplot.prototype.plotPolygons = function() {
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let polygonContainer = this.svgContainer.select('g.vi-crossplot-polygons')
+        .attr('clip-path', 'url(#' + this.getSvgClipId() + ')')
+
+    let polygons = polygonContainer.selectAll('path')
+        .data(this.polygons);
+
+    let self = this;
+    polygons.enter().append('path')
+        .merge(polygons)
+        .attr('d', function(d) {
+            if (d === self.tmpPolygon)
+                return line(d.points);
+            else
+                return line(d.points.concat([d.points[0]]));
+        })
+        .attr('stroke', function(d) { return d.lineStyle; })
+        .attr('fill-rule', 'evenodd')
+        .attr('fill', function(d) {
+            let color = d3.color(d.lineStyle);
+            color.opacity = 0.1;
+            return color.toString();
+        })
+        .style('display', function(d) { return d.display ? 'block' : 'none'; });
+    polygons.exit().remove();
+}
+
+Crossplot.prototype.plotSymbols = function() {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
     let transformZ = this.getTransformZ();
@@ -391,7 +475,7 @@ Crossplot.prototype.plotSymbol = function() {
     ctx.clip();
 
     let helper = new CanvasHelper(ctx, {
-        strokeStyle: 'none',
+        strokeStyle: this.pointSet.pointColor,
         fillStyle: this.pointSet.pointColor,
         size: this.pointSet.pointSize
     });
@@ -402,6 +486,7 @@ Crossplot.prototype.plotSymbol = function() {
     let self = this;
     this.data.forEach(function(d) {
         if (self.pointSet.curveZ) {
+            helper.strokeStyle = transformZ(d.z);
             helper.fillStyle = transformZ(d.z);
         }
         plotFunc.call(helper, transformX(d.x), transformY(d.y));
@@ -466,4 +551,125 @@ Crossplot.prototype.genColorList = function() {
         i += 1;
     }
     this.colors = colors;
+}
+
+Crossplot.prototype.genColor = function() {
+    function rand(x) {
+        return Math.floor(Math.random() * x);
+    }
+
+    const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+    let usedColors = [];
+    this.polygons.forEach(function(d) {
+        usedColors = usedColors.concat(d3.color(d.lineStyle).toString());
+    });
+
+    let color;
+    for (let i = 0; i <= this.polygons.length; i++)  {
+        if (i >= DEFAULT_COLORS.length) {
+            do {
+                color = d3.rgb(rand(255), rand(255), rand(255)).toString();
+            }
+            while (usedColors.indexOf(color) >= 0);
+        }
+        else color = d3.color(DEFAULT_COLORS[i]).toString();
+        if (usedColors.indexOf(color) < 0) break;
+    }
+    return color;
+}
+
+Crossplot.prototype.getSvgClipId = function() {
+    return 'vi-crossplot-svg-clip-' + this.idCrossplot;
+}
+
+Crossplot.prototype.on = function(type, cb) {
+    this.svgContainer.on(type, cb);
+}
+
+Crossplot.prototype.mouseMoveCallback = function() {
+    let mouse = d3.mouse(this.svgContainer.node());
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    if (mouse[0] < d3.min(vpX) || mouse[0] > d3.max(vpX) || mouse[1] < d3.min(vpY) || mouse[1] > d3.max(vpY))
+        return;
+
+    let x = this.getTransformX().invert(mouse[0]);
+    let y = this.getTransformY().invert(mouse[1]);
+
+    if (this.mode == 'PlotPolygon') {
+        if (!this.tmpPolygon) return;
+        if (!this.tmpPolygonPoint) {
+            this.tmpPolygonPoint = {x: x, y: y};
+            this.tmpPolygon.points.push(this.tmpPolygonPoint);
+        }
+        else {
+            this.tmpPolygonPoint.x = x;
+            this.tmpPolygonPoint.y = y;
+        }
+        this.plotPolygons();
+    }
+}
+
+Crossplot.prototype.mouseDownCallback = function() {
+    let mouse = d3.mouse(this.svgContainer.node());
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    if (mouse[0] < d3.min(vpX) || mouse[0] > d3.max(vpX) || mouse[1] < d3.min(vpY) || mouse[1] > d3.max(vpY))
+        return;
+
+    let x = this.getTransformX().invert(mouse[0]);
+    let y = this.getTransformY().invert(mouse[1]);
+
+    if (this.mode == 'PlotPolygon') {
+        if (!this.tmpPolygon) {
+            this.tmpPolygon = {
+                lineStyle: this.genColor(),
+                display: true,
+                points: [{x: x, y: y}]
+            };
+            this.polygons.push(this.tmpPolygon);
+        }
+        this.tmpPolygonPoint = null;
+        this.plotPolygons();
+    }
+}
+
+Crossplot.prototype.startAddPolygon = function() {
+    this.setMode('PlotPolygon');
+}
+
+Crossplot.prototype.endAddPolygon = function() {
+    this.setMode(null);
+    if (this.tmpPolygonPoint) {
+        this.tmpPolygon.points.pop();
+    }
+    let addedPolygon = this.tmpPolygon;
+    this.tmpPolygon = null;
+    this.plotPolygons();
+    return addedPolygon;
+}
+
+Crossplot.prototype.startEditPolygon = function(id) {
+    let polygon = this.polygons.filter(function(p) {
+        return p.idPolygon == id;
+    })[0];
+    if (!polygon) return;
+
+    this.setMode('PlotPolygon');
+    this.tmpPolygon = polygon;
+    this.tmpPolygonPoint = Utils.clone(polygon.points[polygon.points.length -1]);
+    this.tmpPolygon.points.push(this.tmpPolygonPoint);
+}
+
+Crossplot.prototype.endEditPolygon = function() {
+    this.setMode(null);
+    if (this.tmpPolygonPoint) {
+        this.tmpPolygon.points.pop();
+    }
+    let edittedPolygon = this.tmpPolygon;
+    this.tmpPolygon = null;
+    this.plotPolygons();
+    return edittedPolygon;
 }

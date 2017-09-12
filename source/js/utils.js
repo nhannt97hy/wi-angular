@@ -758,26 +758,6 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
 
-exports.deleteLogplot = function () {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'logplot') return;
-    const wiComponentService = __GLOBAL.wiComponentService;
-    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function (yes) {
-        if (!yes) return;
-        const wiApiService = __GLOBAL.wiApiService;
-        wiApiService.delete(wiApiService.DELETE_PLOT, {idPlot: selectedNode.properties.idPlot})
-            .then(function (res) {
-                __GLOBAL.$timeout(function () {
-                    selectedNode.data.deleted = true;
-                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
-                });
-            }).catch(function (err) {
-            console.error('logplot delete error', err);
-        });
-    });
-};
-
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(logplotModel);
@@ -1084,9 +1064,7 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     });
 };
 
-exports.refreshProjectState = refreshProjectState;
-
-function refreshProjectState() {
+let refreshProjectState = debounce(function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -1110,7 +1088,8 @@ function refreshProjectState() {
                 reject();
             });
     });
-};
+}, 500);
+exports.refreshProjectState = refreshProjectState;
 
 exports.renameDataset = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -1355,36 +1334,37 @@ function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
+    let newProperties = angular.copy(properties);
+    newProperties[item.key] = item.value;
+    if (JSON.stringify(newProperties) === JSON.stringify(properties)) return;
     switch (selectedNode.type) {
         case 'well':
-            let infoWell = angular.copy(properties);
-            infoWell[item.key] = item.value;
-            if (JSON.stringify(infoWell) === JSON.stringify(properties)) return;
-            wiApiService.editWell(infoWell, function () {
+            wiApiService.editWell(newProperties, function () {
                 refreshProjectState();
             });
             break;
         case 'dataset':
-            let infoDataset = angular.copy(properties);
-            infoDataset[item.key] = item.value;
-            if (JSON.stringify(infoDataset) === JSON.stringify(properties)) return;
-            wiApiService.editDataset(infoDataset, function () {
+            wiApiService.editDataset(newProperties, function () {
                 refreshProjectState();
             });
             break;
         case 'curve':
-            let infoCurve = angular.copy(properties);
-            infoCurve[item.key] = item.value;
-            if (JSON.stringify(infoCurve) === JSON.stringify(properties)) return;
-            wiApiService.editCurve(infoCurve, function () {
+            wiApiService.editCurve(newProperties, function () {
+                refreshProjectState();
+            });
+            break;
+        case 'zoneset':
+            wiApiService.editZoneSet(newProperties, function () {
+                refreshProjectState();
+            });
+            break;
+        case 'zone':
+            wiApiService.editZone(newProperties, function () {
                 refreshProjectState();
             });
             break;
         case 'logplot':
-            let infoLogplot = angular.copy(properties);
-            infoLogplot[item.key] = item.value;
-            if (JSON.stringify(infoLogplot) === JSON.stringify(properties)) return;
-            wiApiService.editLogplot(infoLogplot, function () {
+            wiApiService.editLogplot(newProperties, function () {
                 refreshProjectState();
             });
             break;

@@ -261,6 +261,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.addZoneToTrack = function (track, config) {
         if (!track || !track.addZone) return;
+        if (!config || !config.idZoneSet) {
+            config.idZoneSet = _currentTrack.isZoneTrack() ? _currentTrack.idZoneSet : undefined;
+        }
+        if (!config.idZoneSet) return;
         let zone = track.addZone(config);
         track.plotZone(zone);
         track.onZoneMouseDown(zone, function() {
@@ -288,14 +292,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             console.log('updated zones', updatedZones);
             for (let updatedZone of updatedZones) {
                 updatedZone.idZone = updatedZone.id;
-                wiApiService.editZone(updatedZone, function () {
-                    Utils.refreshProjectState();
-                });
+                wiApiService.editZone(updatedZone, function () { });
             }
             for (let deletedZone of deletedZones) {
-                wiApiService.removeZone(deletedZone.id, function () {
-                    Utils.refreshProjectState();
-                })
+                wiApiService.removeZone(deletedZone.id, function () { })
             }
         })
         return zone;
@@ -530,40 +530,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let y = d3.mouse(track.plotContainer.node())[1];
         let depth = zone.getTransformY().invert(y);
-                
-        // Send api to create zones;
-        let dataZone1 = {
-            idZoneSet: track.idZoneSet,
-            name: zone1.name,
-            startDepth: zone1.startDepth,
-            endDepth: zone1.endDepth,
-            fill: zone1.fill
-        }
-        let dataZone2 = {
-            idZoneSet: track.idZoneSet,
-            name: zone2.name,
-            startDepth: zone2.startDepth,
-            endDepth: zone2.endDepth,
-            fill: zone2.fill
-        }
-        wiApiService.createZone(dataZone1, function (data, err) {
-            if (err) return;
-            wiApiService.createZone(dataZone2, function (data, err) {
-                if (err) return;
-                zone1.id = null;
-                zone2.id = null;
-                zone1.endDepth = depth;
-                zone2.startDepth = depth;
-                zone2.name = parseInt(depth);
-                Utils.refreshProjectState();
-            })
-        })
+        console.log('--------------------------', props);
         // Send api to remove zone
         wiApiService.removeZone(zone.id, function () {
-            track.removeZone(zone);
-            track.plotZone(zone1);
-            track.plotZone(zone2);
-            Utils.refreshProjectState();
+            zone1.endDepth = depth;
+            zone2.startDepth = depth;
+            zone2.name = parseInt(depth);
+            // Send api to create zones;
+            wiApiService.createZone(zone1.getProperties(), function (zone1Return, err) {
+                if (err) return;
+                zone1.id = zone1Return.idZone;
+                wiApiService.createZone(zone2.getProperties(), function (zone2Return, err) {
+                    if (err) return;
+                    zone2.id = zone2Return.idZone;
+                    track.plotZone(zone1);
+                    track.plotZone(zone2);
+                    track.removeZone(zone);
+                })
+            })
         })
     }
 
@@ -734,7 +718,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         return;
                     }
                     zone.setProperties(createdZone);
-                    Utils.refreshProjectState();
                 })
                 let modifiedZones = track.adjustZonesOnZoneChange(zone);
                 let updatedZones = modifiedZones[0];
@@ -743,16 +726,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (updatedZones && updatedZones.length) {
                     updatedZones.forEach(function (updatingZone) {
                         updatingZone.idZone = updatingZone.id;
-                        wiApiService.editZone(updatingZone, function () {
-                            Utils.refreshProjectState();
-                        });
+                        console.log(updatingZone);
+                        wiApiService.editZone(updatingZone, function () { });
                     });
                 }
                 if (deletedZones && deletedZones.length) {
                     deletedZones.forEach(function (deletingZone) {
-                        wiApiService.removeZone(deletingZone.id, function () {
-                            Utils.refreshProjectState();
-                        });
+                        wiApiService.removeZone(deletingZone.id, function () { });
                     });
                 }
                 track.setMode(null);
@@ -957,7 +937,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function () {
                     wiApiService.removeZone(zone.id, function () {
                         _currentTrack.removeZone(zone);
-                        Utils.refreshProjectState();
                     });
                 }
             }, {
