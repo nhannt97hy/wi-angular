@@ -44,26 +44,52 @@ exports.FrequencyInfoButtonClicked = function() {
 
 exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
+    let wiHistogramCtrl = this.wiHistogram;
+    wiHistogramCtrl.histogramModel.properties.showGaussian = !wiHistogramCtrl.histogramModel.properties.showGaussian;
 }
 
 exports.CumulativeButtonClicked = function() {
     console.log('CumulativeButton is clicked');
+    let wiHistogramCtrl = this.wiHistogram;
+    wiHistogramCtrl.histogramModel.properties.showCumulative = !wiHistogramCtrl.histogramModel.properties.showCumulative;
 }
 
-exports.PlotBarsButtonClicked = function() {
+exports.PlotBarsButtonClicked = PlotBarsButtonClicked;
+function PlotBarsButtonClicked() {
     console.log('PlotBarsButton is clicked');
+    let wiHistogramCtrl = this.wiHistogram;
+    var plot = wiHistogramCtrl.histogramModel.properties.plot;
+    switch(plot) {
+    case 'Curve':
+        wiHistogramCtrl.histogramModel.properties.plot = "Bar";
+        break;
+    default:
+        wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+    }
 }
 
 exports.PlotCurvesButtonClicked = function() {
     console.log('PlotCurvesButton is clicked');
+    PlotBarsButtonClicked.call(this);
 }
 
-exports.FrequencyButtonClicked = function() {
+exports.FrequencyButtonClicked = FrequencyButtonClicked;
+function FrequencyButtonClicked() {
     console.log('FrequencyButton is clicked');
+    let wiHistogramCtrl = this.wiHistogram;
+    var temp = wiHistogramCtrl.histogramModel.properties.plotType;
+    switch(temp) {
+    case 'Percent':
+        wiHistogramCtrl.histogramModel.properties.plotType = "Frequency";
+        break;
+    default:
+        wiHistogramCtrl.histogramModel.properties.plotType = "Percent";
+    }
 }
 
 exports.PercentButtonClicked = function() {
     console.log('PercentButton is clicked');
+    FrequencyButtonClicked.call(this);
 }
 
 exports.ColorByZoneButtonClicked = function() {

@@ -98,9 +98,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowCumulative",
             label: "Show Cumulative",
             "isCheckType": "true",
-            checked: false, // TODO
-            handler: function () {
-    
+            checked: self.histogramModel ? self.histogramModel.properties.showCumulative : false,
+            handler: function (index) {
+                self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
+                self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
             }
         }, {
             name: "ShowCumulativeCurve",
@@ -121,7 +122,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Frequency Infor",
             icon: "ti-info-alt",
             handler: function () {
-    
+                DialogUtils.histogramFrequencyInfoDialog(ModalService, function(){
+                    console.log('Frequency Info!!!!!');
+                })
             }
         }];
         event.stopPropagation();
@@ -145,18 +148,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             showGaussian: histogramModel.properties.showGaussian || false,
             loga: histogramModel.properties.loga || false,
             showGrid: histogramModel.properties.showGrid || false,
+            showCumulative: histogramModel.properties.showCumulative || false,
             flipHorizontal: histogramModel.properties.flipHorizontal || false,
             line: {
                 color: histogramModel.properties.lineColor,
                 width: histogramModel.properties.lineWidth,
                 dash: histogramModel.properties.lineStyle
             },
+            plot: histogramModel.properties.plot,
             plotType: histogramModel.properties.plotType,
             fill: {
                 pattern: null,
                 background: histogramModel.properties.color,
                 foreground: histogramModel.properties.color
             },
+            color: histogramModel.properties.color,
             discriminators: {},
             idWell: histogramModel.properties.idWell,
             idCurve: histogramModel.properties.idCurve,

@@ -350,9 +350,11 @@ function histogramToTreeConfig(histogram) {
         showGaussian: histogram.showGaussian,
         loga: histogram.loga,
         showGrid: histogram.showGrid,
+        showCumulative: histogram.showCumulative,
         flipHorizontal: histogram.flipHorizontal,
         lineStyle: histogram.lineStyle,
         lineColor: histogram.lineColor,
+        plot: histogram.plot,
         plotType: histogram.plotType,
         color: histogram.color,
         discriminators: histogram.discriminators,
@@ -1101,6 +1103,19 @@ exports.findWellByHistogram = function (idHistogram) {
         return node.type == 'histogram' && node.id == idHistogram;
     }) || [];
     return path[1];
+}
+
+exports.findHistogramModelById = function(idHistogram){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let his = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'histogram' && node.id == idHistogram) {
+            his = node;
+        }
+    });
+    return his;
 }
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
