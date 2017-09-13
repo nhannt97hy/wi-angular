@@ -347,40 +347,6 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
     return ret;
 }
 
-
-Shading.prototype._prepareFillStyles = function(forHeader) {
-    let self = this;
-    let fills = [this.fill, this.positiveFill, this.negativeFill];
-    let ret = [];
-    fills.forEach(function(fill) {
-        if (!fill || !fill.gradient) {
-            ret.push(fill);
-            return;
-        }
-        let gradient = Utils.clone(fill.gradient);
-
-        if (forHeader) {
-            let rect = self.header.node().getBoundingClientRect();
-            gradient.startX = 0;
-            gradient.endX = rect.width;
-            gradient.data = Utils.range(0, 1, 0.1).map(function(d) {
-                return {
-                    x: d * rect.width,
-                    y: d * rect.height
-                }
-            })
-        }
-        else {
-            let transformX = self.getTransformX(self.selectedCurve);
-            gradient.data = self.prepareData(self.selectedCurve);
-            gradient.startX = transformX(gradient.startX);
-            gradient.endX = transformX(gradient.endX);
-        }
-        ret.push({ gradient: gradient });
-    });
-    return ret;
-}
-
 /**
  * Register drag event on ref line
  * @param {Function} cb - Callback function
@@ -478,14 +444,14 @@ function drawCurveLine(ctx, data, highlight) {
     data.forEach(function(item) {
         ctx.lineTo(item.x, item.y);
     });
-    if (highlight) {
-        ctx.shadowColor = 'black';
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
-        ctx.shadowBlur = 2;
-        ctx.lineWidth = 0;
-        ctx.stroke();
-    }
+    // if (highlight) {
+    //     ctx.shadowColor = 'grey';
+    //     ctx.shadowOffsetX = 2;
+    //     ctx.shadowOffsetY = 2;
+    //     ctx.shadowBlur = 2;
+    //     ctx.lineWidth = 0;
+    //     ctx.stroke();
+    // }
 }
 
 function drawRefLine(shading) {

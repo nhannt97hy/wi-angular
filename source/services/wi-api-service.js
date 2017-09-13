@@ -3,8 +3,8 @@ const moduleName = 'wi-api-service';
 
 let app = angular.module(moduleName, []);
 
-const BASE_URL = 'http://54.169.109.34';
-//const BASE_URL = 'http://localhost:3000';
+// const BASE_URL = 'http://54.169.109.34';
+const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const UPLOAD_MULTIFILES = '/files';
