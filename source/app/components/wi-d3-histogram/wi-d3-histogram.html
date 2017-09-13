@@ -1,5 +1,10 @@
 <div wi-right-click='wiD3Histogram.showContextMenu($event)' style="border: 1px solid black">
-    <h2>Histogram {{wiD3Histogram.curveName}}</h2>
-    <h5>Subtitle {{wiD3Histogram.refCurveUnit}}</h5>
+    <h4>Histogram: {{wiD3Histogram.histogramModel.properties.histogramTitle}}</h4>
+    <h5 ng-show="!wiD3Histogram.histogramModel.properties.idZoneSet">
+        Reference({{wiD3Histogram.curveModel.properties.unit}}): [{{wiD3Histogram.histogramModel.properties.intervalDepthTop}} - {{wiD3Histogram.histogramModel.properties.intervalDepthBottom}}]
+    </h5>
+    <h5 ng-show="wiD3Histogram.histogramModel.properties.idZoneSet">
+        Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
+    </h5>
     <div id='{{wiD3Histogram.histogramAreaId}}' class='d3-histogram-region' style="border: 1px solid blue"></div>
 </div>

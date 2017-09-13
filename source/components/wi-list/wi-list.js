@@ -14,9 +14,9 @@ function Controller(wiComponentService) {
     };
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    this.onChange = utils.debounce(function (item) {
+    this.onChange = function (item) {
         utils.editProperty(item);
-    }, 300);
+    }
 }
 
 let app = angular.module(moduleName, []);

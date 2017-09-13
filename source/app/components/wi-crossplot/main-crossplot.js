@@ -62,7 +62,7 @@ let app = angular.module('helloapp', [
     wiLogplotsModel.name
 ]);
 
-app.controller('WiDummy', function ($scope, wiComponentService) {
+app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);
     wiComponentService.putComponent("UTILS", utils);
     wiComponentService.putComponent('DRAG_MAN', dragMan);
@@ -71,4 +71,52 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         wiComponentService
     };
     utils.setGlobalObj(functionBindingProp);
+
+    function genSamples(extentX, extentY) {
+        let samples = [];
+        let transform = d3.scaleLinear().domain([0,1]).range(extentX);
+
+        for (let i = extentY[0]; i <= extentY[1]; i++) {
+            samples.push({y: i, x: transform(Math.random())});
+        }
+        return samples;
+    }
+
+    $timeout(function() {
+        let wiCrossplotCtrl = wiComponentService.getComponent('myCrossPlot');
+        let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+
+        let dataX = genSamples([0,10], [0,1000]);
+        let dataY = genSamples([0,5], [0,1000]);
+        let viCrossplot = wiD3CrossplotCtrl.createVisualizeCrossplot(dataX, dataY, {
+            pointSet: {
+                curveZ: graph.buildCurve({}, dataX),
+                numColor: 10,
+                scaleLeft: -10,
+                minorX: 3
+            },
+            polygons: [
+                {
+                    lineStyle: 'red',
+                    points: [
+                        { x: -6, y: 4 },
+                        { x: -2, y: 2 },
+                        { x: 6, y: 4.5 },
+                        { x: -2, y: 6 }
+                    ]
+                },
+                {
+                    idPolygon: '1',
+                    lineStyle: 'gray',
+                    points: [
+                        { x: 2, y: 1 },
+                        { x: 6, y: 1 },
+                        { x: 6, y: 2 },
+                        { x: 2, y: 2 }
+                    ]
+                }
+            ]
+        });
+        viCrossplot.startAddPolygon();
+    });
 });

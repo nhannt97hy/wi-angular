@@ -56,6 +56,11 @@ const DELETE_SHADING = '/project/well/plot/track/shading/delete';
 const EDIT_SHADING = '/project/well/plot/track/shading/edit';
 const GET_SHADING = '/project/well/plot/track/shading/info';
 
+const CREATE_MARKER = '/project/well/plot/track/marker/new';
+const EDIT_MARKER = '/project/well/plot/track/marker/edit';
+const GET_MARKER = '/project/well/plot/track/marker/info';
+const DELETE_MARKER = '/project/well/plot/track/marker/delete';
+
 const CREATE_ZONE_TRACK = '/project/well/plot/zone-track/new';
 const EDIT_ZONE_TRACK = '/project/well/plot/zone-track/edit';
 const GET_ZONE_TRACK = '/project/well/plot/zone-track/info';
@@ -92,9 +97,10 @@ const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
 const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
 
-const CREATE_HISTORAM = '/project/well/histogram/new';
+const CREATE_HISTOGRAM = '/project/well/histogram/new';
 const EDIT_HISTOGRAM = '/project/well/histogram/edit';
-const DELTE_HISTOGRAM = '/project/well/histogram/delete';
+const GET_HISTOGRAM = '/project/well/histogram/info';
+const DELETE_HISTOGRAM = '/project/well/histogram/delete';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -501,6 +507,16 @@ Service.prototype.editLogplot = function (infoLogplot, callback) {
             self.getUtils().error(err);
         });
 }
+Service.prototype.removeLogplot = function (idLogplot, callback) {
+    let self = this;
+    this.delete(DELETE_PLOT, { idPlot: idLogplot })
+        .then(function () {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 
 Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
     var self = this;
@@ -700,6 +716,57 @@ Service.prototype.infoShading = function (idShading, callback) {
             self.getUtils().error(err);
         });
 }
+
+Service.prototype.createMarker = function (markerObj, callback) {
+    var self = this;
+    let dataRequest = markerObj;
+    this.post(CREATE_MARKER, dataRequest)
+        .then(function (marker) {
+            callback(marker)
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editMarker = function (markerObj, callback) {
+    let self = this;
+    let dataRequest = markerObj;
+
+    this.post(EDIT_MARKER, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getMarker = function (idMarker, callback) {
+    let self = this;
+    let dataRequest = {
+        idMarker: idMarker
+    };
+    this.post(GET_MARKER, dataRequest)
+        .then(function (infoMarker) {
+            if (!callback) return;
+            callback(infoMarker);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeMarker = function (idMarker, callback) {
+    var self = this;
+    let dataRequest = {
+        idMarker: idMarker
+    };
+    this.delete(DELETE_MARKER, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
 Service.prototype.uploadImage = function (data, callback) {
     let self = this;
     this.postWithFile(UPLOAD_IMAGE, data)
@@ -809,6 +876,7 @@ Service.prototype.createZone = function (data, callback) {
     this.post(CREATE_ZONE, data)
         .then(function (returnData) {
             callback(returnData);
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             callback(null, err);
@@ -820,6 +888,7 @@ Service.prototype.editZone = function (data, callback) {
     this.post(EDIT_ZONE, data)
         .then(function (returnData) {
             callback();
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -830,6 +899,7 @@ Service.prototype.getZone = function (idZone, callback) {
     this.post(GET_ZONE, { idZone: idZone })
         .then(function (returnData) {
             callback(returnData);
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -840,6 +910,7 @@ Service.prototype.removeZone = function (idZone, callback) {
     this.delete(DELETE_ZONE, { idZone: idZone })
         .then(function (returnData) {
             callback();
+            self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -1010,10 +1081,41 @@ Service.prototype.removeDiscrim = function (idDiscrim, callback) {
         });
 }
 
-Service.prototype.createHistogram = function(idWell, callback) {
+// histogram apis
+Service.prototype.createHistogram = function (data, callback) {
     let self = this;
-    this.post(CREATE_HISTOGRAM, { idWell: idWell })
-        .then(function (histogram) {
+    this.post(CREATE_HISTOGRAM, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editHistogram = function (data, callback) {
+    let self = this;
+    this.post(EDIT_HISTOGRAM, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getHistogram = function (idHistogram, callback) {
+    let self = this;
+    this.post(GET_HISTOGRAM, { idHistogram: idHistogram })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeHistogram = function (idHistogram, callback) {
+    let self = this;
+    this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram })
+        .then(function (returnData) {
             callback();
         })
         .catch(function (err) {
@@ -1021,16 +1123,6 @@ Service.prototype.createHistogram = function(idWell, callback) {
         });
 }
 
-Service.prototype.editHistogram = function(histogram, callback) {
-    let self = this;
-    this.post(EDIT_HISTOGRAM, histogram)
-        .then(function(histogram) {
-            callback();
-        })
-        .catch(function(err) {
-            self.getUtils().error(err);
-        })
-}
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);

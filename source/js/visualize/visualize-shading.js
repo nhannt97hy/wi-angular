@@ -27,18 +27,12 @@ Utils.extend(Drawing, Shading);
  * @param {String} [config.fill.pattern.background]
 
  * ------ NEW -----------
- * @param {Object} [config.fill.varShading.gradient]
  * @param {Number} [config.fill.varShading.startX]
  * @param {Number} [config.fill.varShading.endX]
+ * @param {Object} [config.fill.varShading.gradient]
  * @param {String} [config.fill.varShading.gradient.startColor]
  * @param {String} [config.fill.varShading.gradient.endColor]
-
- * ----- DEPRECATED -----
- * @param {Object} [config.fill.gradient]
- * @param {Number} [config.fill.gradient.startX]
- * @param {Number} [config.fill.gradient.endX]
- * @param {String} [config.fill.gradient.startColor]
- * @param {String} [config.fill.gradient.endColor]
+ * @param {String} [config.fill.varShading.pallete] - Object containing array of color
 
 
 
@@ -72,7 +66,7 @@ function Shading(config) {
     this.refLineWidth = config.refLineWidth || 2;
     this.refLineColor = config.refLineColor || '#3e3e3e';
     this.showRefLine = config.showRefLine == null
-        ? ( this.leftCurve && this.rightCurve ? false : true ) 
+        ? ( this.leftCurve && this.rightCurve ? false : true )
         : config.showRefLine;
 
     this.vpX = {
@@ -331,7 +325,7 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
             let rect = self.header.node().getBoundingClientRect();
             varShading.startX = 0;
             varShading.endX = rect.width;
-            varShading.gradient.data = Utils.range(0, 1, 0.1).map(function(d) {
+            varShading.data = Utils.range(0, 1, 0.1).map(function(d) {
                 return {
                     x: d * rect.width,
                     y: d * rect.height
@@ -340,14 +334,9 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
         }
         else {
             let transformX = self.getTransformX(self.selectedCurve);
-            if (varShading.gradient) {
-                varShading.gradient.data = self.prepareData(self.selectedCurve);
-            }
-            else {
-                // TODO ??? For pallete
-            }
             varShading.startX = transformX(varShading.startX);
             varShading.endX = transformX(varShading.endX);
+            varShading.data = self.prepareData(self.selectedCurve);
         }
         ret.push({ varShading: varShading });
     });
@@ -502,10 +491,10 @@ function drawRefLine(shading) {
     if (shading.vpX.ref < viewportX[0]) {
         shading.vpX.ref = viewportX[0];
         shading.refX = tranformX.invert(shading.vpX.ref);
-    } 
+    }
     else if (shading.vpX.ref > viewportX[1]) {
         shading.vpX.ref = viewportX[1];
-        shading.refX = tranformX.invert(shading.vpX.ref); 
+        shading.refX = tranformX.invert(shading.vpX.ref);
     }
 
     shading.refLine

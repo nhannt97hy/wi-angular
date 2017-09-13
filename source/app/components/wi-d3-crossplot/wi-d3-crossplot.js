@@ -9,7 +9,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
-
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -90,11 +89,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .open(event.clientX, event.clientY, self.contextMenu);
     }
 
-    this.createVisualizeCrossplot = function (xCurveData, yCurveData) {
+    this.createVisualizeCrossplot = function (xCurveData, yCurveData, config) {
+        if (!config) config = {};
         let xCurve = graph.buildCurve({}, xCurveData);
         let yCurve = graph.buildCurve({}, yCurveData);
         let domElem = document.getElementById(self.crossplotAreaId);
-        viCrossplot = graph.createCrossplot(xCurve, yCurve, {}, domElem);
+        viCrossplot = graph.createCrossplot(xCurve, yCurve, config, domElem);
+        return viCrossplot;
     }
 }
 
