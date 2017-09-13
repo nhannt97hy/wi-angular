@@ -4347,7 +4347,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
-        this.histogramProps = histogramModel.properties;
+        this.histogramProps = angular.copy(histogramModel.properties);
         console.log(this.histogramProps);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
 
@@ -4359,7 +4359,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.datasets = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
-        
+
         this.well.children.forEach(function (child) {
             if (child.type == 'dataset') self.datasets.push(child);
         });
@@ -4369,7 +4369,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     var d = item;
                     d.datasetCurve = child.properties.name + "." + item.properties.name;
                     self.curvesArr.push(d);
-                    if(d.id == self.histogramProps.idCurve){
+                    if (d.id == self.histogramProps.idCurve) {
                         self.SelectedCurve = d;
                     }
                 }
@@ -4409,19 +4409,19 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             }
         }
 
-        this.onSelectCurveChange = function(){
+        this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
         }
 
         this.onDepthTypeChanged = function () {
             switch (self.depthType) {
                 case "intervalDepth":
-                    histogramModel.properties.idZoneSet = null;
+                    self.histogramProps.idZoneSet = null;
                     break;
                 case "zonalDepth":
                     // TODO
-                    histogramModel.properties.intervalDepthTop = null;
-                    histogramModel.properties.intervalDepthBottom = null;
+                    self.histogramProps.intervalDepthTop = null;
+                    self.histogramProps.intervalDepthBottom = null;
                     break;
             }
         }
@@ -4430,16 +4430,15 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                 self.histogramProps.color = colorStr;
             });
         }
-        this.onApplyButtonClicked = function () {
-            console.log("onApplyButtonClicked");
-        };
+
         this.onCancelButtonClicked = function () {
             console.log("on cancel clicked");
-            close(null);
+            close(histogramModel.properties);
         }
         this.onOKButtonClicked = function () {
             console.log("on OK clicked");
-            close(self.histogramProps);
+            histogramModel.properties = self.histogramProps;
+            close(histogramModel.properties);
         }
         // console.log("ac ac");
     }
