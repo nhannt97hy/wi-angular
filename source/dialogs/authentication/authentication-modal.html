@@ -1,0 +1,65 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Login</h4>
+            </div>
+            <div class="modal-body">
+                <wi-tabset>
+                    <wi-tab heading="Login">
+                        <div class="container-fluid">
+                            <p></p>
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="username">Username</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="username" name="username" ng-model="wiModal.username" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="password">Password</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" class="form-control" id="password" name="password" ng-model="wiModal.password" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-default" ng-click="wiModal.onLoginButtonClicked()">Login</button>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Register">
+                        <div class="container-fluid">
+                            <p></p>
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="usernameReg">Username</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="usernameReg" name="usernameReg" ng-model="wiModal.usernameReg" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="passwordReg">Password</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" class="form-control" id="passwordReg" name="passwordReg" ng-model="wiModal.passwordReg" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="passwordConfirm">Confirm your password</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" ng-model="wiModal.passwordConfirm"
+                                            required ng-blur="wiModal.checkPasswords()">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-default" ng-click="wiModal.onRegisterButtonClicked()">Register</button>
+                            </form>
+                        </div>
+                    </wi-tab>
+                </wi-tabset>
+                <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
+            </div>
+            <div class="modal-footer">
+                <!-- for development -->
+                <button type="button" class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -118,6 +118,12 @@ let app = angular.module('wiapp',
 app.controller('AppController', function ($scope, $rootScope, $timeout,
     $compile, wiComponentService,
     ModalService, wiApiService) {
+    DialogUtils.authenticationDialog(ModalService, function (userInfo) {
+        console.log(userInfo);
+        window.localStorage.username = userInfo.username;
+        window.localStorage.password = userInfo.password;
+        window.localStorage.token = userInfo.token;
+    });
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};

@@ -7,6 +7,9 @@ const BASE_URL = 'http://54.169.109.34';
 //const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
+const REGISTER = '/register';
+const LOGIN = '/login';
+
 const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
@@ -195,6 +198,18 @@ Service.prototype.delete = function (route, payload) {
             reject
         );
     });
+}
+
+Service.prototype.register = function (data, callback) {
+    if (!data || !callback) return;
+    let self = this;
+    this.post(REGISTER, data)
+        .then(function (ret) {
+            callback(ret);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
 }
 
 Service.prototype.postWithFile = function (route, dataPayload) {
