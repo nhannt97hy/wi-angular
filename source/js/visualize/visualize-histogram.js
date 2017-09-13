@@ -38,7 +38,10 @@ function Histogram(config) {
     idZoneSet = config.idZoneSet;
     this.data = null;
     this.zones = config.zones;
-    
+
+    // visualize instant vars
+    this.svg = null;
+
 }
 
 Histogram.prototype.setCurve = function(data) {
@@ -51,5 +54,7 @@ Histogram.prototype.doPlot = function() {
 
 Histogram.prototype.init = function(domElem) {
     console.log("init histogram into domElem:", domElem);
-    d3.select(domElem);
+    this.container = d3.select(domElem).attr('class', 'vi-histogram-container');
+    this.svg = this.container.append('svg')
+        .attr('class', 'vi-histogram-svg');
 }

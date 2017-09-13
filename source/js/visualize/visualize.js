@@ -200,6 +200,7 @@ exports.createCrossplot = function(curveX, curveY, config, domElem) {
  */
 exports.createHistogram = function(config, domElem) {
     let histogram = new Histogram(config);
+    console.log('---', domElem);
     histogram.init(domElem);
     return histogram;
 }

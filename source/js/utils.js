@@ -1518,11 +1518,6 @@ function openHistogramTab(wiComponentService, histogramModel, callback) {
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
     histogramModel.data.opened = true;
-    // console.log('openHistogramTab:', histogramModel);
-    let histogramName = 'histogram' + histogramModel.properties.idHistogram;
-    let histogramCtrl = wiComponentService.getComponent(histogramName);
-    // console.log(histogramName, histogramCtrl);
-    histogramCtrl.getwiD3Ctrl().createVisualizeHistogram(histogramModel);
     if (callback) callback();
 };
 exports.openHistogramTab = openHistogramTab;

@@ -33,6 +33,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
     }
 
+    this.onReady = function() {
+        self.createVisualizeHistogram(self.histogramModel);
+    }
     this.$onInit = function () {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
@@ -192,9 +195,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.createVisualizeHistogram = function(histogram) {
-        console.log('createHistogram:' , histogram, self.histogramAreaId);
+        var elem = document.getElementById(self.histogramAreaId);
+        console.log('createHistogram:' , self.histogramAreaId, elem);
         config = buildConfigFromHistogramModel(histogram);
-        self.visHistogram = graph.createHistogram(config, document.getElementById(self.histogramAreaId));
+        self.visHistogram = graph.createHistogram(config, elem);
         if (histogram.properties.idCurve) loadCurve(histogram);
     }
     function loadCurve(histogramModel) {
