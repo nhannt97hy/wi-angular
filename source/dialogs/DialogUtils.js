@@ -4376,7 +4376,7 @@ exports.newBlankHistogramDialog = function(ModalService, callback){
 }
 
 exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
-    function ModalController(close, wiComponentService, wiApiService) {
+    function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
@@ -4422,8 +4422,10 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                 wiApiService.getZoneSet(z.idZoneSet, function (ret) {
                     z.zones = ret.zones;
                     if (z.idZoneSet == self.histogramProps.idZoneSet) {
-                        self.SelectedZone = z;
-                        self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+                        $timeout(function() {
+                            self.SelectedZone = z;
+                            self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+                        },0);
                     }
                 })
             })

@@ -19,13 +19,11 @@ exports.PrintButtonClicked = function() {
 exports.EditFormatButtonClicked = function() {
     var wiComponentService = this.wiComponentService;
     var ModalService = this.ModalService;
-    
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiHistogramCtrl = this.wiHistogram;
     var dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     console.log('EditFormatButton is clicked');
-    dialogUtils.histogramFormatDialog(ModalService, wiHistogramCtrl, function(ret) {
-        console.log(ret);
-    })
+    utils.histogramFormat(ModalService, wiComponentService, wiHistogramCtrl);
 }
 
 exports.ActiveZoneButtonClicked = function() {

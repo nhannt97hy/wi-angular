@@ -53,8 +53,16 @@ Histogram.prototype.doPlot = function() {
 }
 
 Histogram.prototype.init = function(domElem) {
+    var self = this;
     console.log("init histogram into domElem:", domElem);
     this.container = d3.select(domElem).attr('class', 'vi-histogram-container');
+    new ResizeSensor($(this.container.node()), function(param) {
+        console.log("On resize", param, this);
+        self.svg.attr('width',self.container.node().clientWidth)
+            .attr('height', self.container.node().clientHeight);
+    });
     this.svg = this.container.append('svg')
-        .attr('class', 'vi-histogram-svg');
+        .attr('class', 'vi-histogram-svg')
+        .attr('width',this.container.node().clientWidth)
+        .attr('height', this.container.node().clientHeight);
 }

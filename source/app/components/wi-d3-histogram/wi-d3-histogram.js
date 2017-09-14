@@ -9,6 +9,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     self.curveModel = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    this.zoneArr = new Array();
 
     function getIdHistogram() {
         return self.name.replace('histogram', "").replace("D3Area", "");
@@ -26,13 +27,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return "Empty";
     }
-    function linkModels() {
+    this.linkModels = function () {
         if (self.histogramModel.properties.idCurve) 
             self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-        if (self.histogramModel.properties.idZoneSet) 
+        if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
-    }
+            self.zoneArr = self.zoneSetModel.children;
+            self.zoneArr.forEach(function(zone){
+                zone.handler = function() {
+                    console.log("----", zone.properties.idZone);
+                }
+            })
 
+            console.log(self.zoneArr);
+            self.histogramModel.properties.histogramTitle = getHistogramTitle();            
+        } 
+    }
+    this.getZoneName = function() {
+        return self.name + "Zone";
+    }
+    this.getZoneCtrl = function() {
+        return wiComponentService.getComponent(self.getZoneName());
+    }
     this.onReady = function() {
         self.createVisualizeHistogram(self.histogramModel);
     }
@@ -40,7 +56,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         self.histogramModel.properties.histogramTitle = getHistogramTitle();
-        linkModels();
+        self.linkModels();
 
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
@@ -64,9 +80,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function (ret) {
-                    console.log(ret);
-                })
+                utils.histogramFormat(ModalService, wiComponentService, self.wiHistogramCtrl);
             }
         }, {
             name: "FlipHorizontalAxis",

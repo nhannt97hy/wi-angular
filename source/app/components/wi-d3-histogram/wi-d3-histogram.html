@@ -1,6 +1,6 @@
 <div style="display:flex; flex-direction:row">
     <wi-resizable-x width="80" min-width="50" resize-right="true">
-        zone area
+            <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone" all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
     </wi-resizable-x>
     <div style='flex:1; display: flex;flex-direction:column;'>
         <div wi-right-click='wiD3Histogram.showContextMenu($event)' style="flex:1;display:flex;flex-direction:column;">

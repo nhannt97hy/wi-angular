@@ -64,6 +64,7 @@ let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
 let wiLogplotsModel = require('./wi-logplots.model');
 let wiLogplotModel = require('./wi-logplot.model');
+let wiZone = require('./wi-zone');
 
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
@@ -108,7 +109,8 @@ let app = angular.module('wiapp',
         wiApiService.name,
         wiComponentService.name,
 
-        wiCanvasRect.name, 
+        wiCanvasRect.name,
+        wiZone.name, 
         
         'angularModalService',
 

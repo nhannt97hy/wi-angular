@@ -1,9 +1,9 @@
-<div>
+<div ng-show="wiZone.zones.length">
     <button ng-click="wiZone.AllZoneButtonClick()">All Zone</button>
     <button ng-click="wiZone.ActiveZoneButtonClick()">Active Zone</button>
     <button ng-repeat="button in wiZone.zones track by $index"
-    ng-click="wiZone.SelectZoneButtonClick($index, button.idZone)"
-    ng-style="{'background-color': button.background}"
-    ng-class="{'inActive': wiZone.isInActive(button.idZone)}">
-    {{button.name}}</button>
+    ng-click="wiZone.SelectZoneButtonClick($index)"
+    ng-style="{'background-color': button.properties.fill.pattern.background}"
+    ng-class="{'inActive': wiZone.zoneArr[$index]}">
+    {{button.properties.name}}</button>
 </div>
