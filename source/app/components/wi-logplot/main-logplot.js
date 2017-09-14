@@ -149,20 +149,38 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
                 varShading: {
                     startX: 1,
                     endX: 0,
-                    palette: [
-                        {
-                            "red": 0,
-                            "green": 255,
-                            "blue": 255,
-                            "alpha": 1
-                        },
-                        {
-                            "red": 255,
-                            "green": 0,
-                            "blue": 255,
-                            "alpha": 1
-                        }
-                    ]
+                    // palette: [
+                    //     {
+                    //         "red": 0,
+                    //         "green": 255,
+                    //         "blue": 255,
+                    //         "alpha": 1
+                    //     },
+                    //     {
+                    //         "red": 255,
+                    //         "green": 0,
+                    //         "blue": 255,
+                    //         "alpha": 1
+                    //     }
+                    // ]
+                    customFills: {
+                        content: [
+                            {
+                                lowVal: 0.4,
+                                highVal: 0.6,
+                                pattern: 'chert',
+                                foreground: 'green',
+                                background: 'gray'
+                            },
+                            {
+                                lowVal: 0.6,
+                                highVal: 0.8,
+                                pattern: 'basement',
+                                foreground: 'gray',
+                                background: 'green'
+                            }
+                        ]
+                    }
                 }
             },
             positiveFill: {

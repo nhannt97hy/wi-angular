@@ -196,6 +196,7 @@ Shading.prototype.init = function(plotContainer) {
 Shading.prototype.destroy = function() {
     Drawing.prototype.destroy.call(this);
     this.refLine.remove();
+    d3.select('#shading-' + this.id + '-pattern-canvas').remove();
 }
 
 /**
@@ -321,12 +322,23 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
                     y: d * rect.height
                 }
             });
+
+            if (fill.varShading.customFills) return ret.push(null);
         }
         else {
             let transformX = self.getTransformX(self.selectedCurve);
             varShading.startX = transformX(varShading.startX);
             varShading.endX = transformX(varShading.endX);
             varShading.data = self.prepareData(self.selectedCurve);
+
+            if (varShading.customFills) {
+                varShading.customFills.patCanvasId = 'shading-' + self.id + '-pattern-canvas';
+                varShading.customFills.content.forEach(function(d) {
+                    d.lowVal = transformX(d.lowVal);
+                    d.highVal = transformX(d.highVal);
+                });
+                varShading.customFills.content = Utils.sortByKey(varShading.customFills.content, 'lowVal');
+            }
         }
         ret.push({ varShading: varShading });
     });

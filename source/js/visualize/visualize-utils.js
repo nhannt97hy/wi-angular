@@ -30,6 +30,7 @@ exports.merge = merge;
 exports.getDecimalFormatter = getDecimalFormatter;
 exports.setProperties = setProperties;
 exports.getProperties = getProperties;
+exports.sortByKey = sortByKey;
 
 function getProperties(obj) {
     let props = {};
@@ -355,63 +356,7 @@ function isWithinYRange(item, extentY) {
  * @param {String} [fills[].pattern.background] - Pattern background
  * @param {Function} callback - The function to call back after creating fillstyles
  */
-function _createFillStyles(ctx, fills, callback) {
-    let patterns = [];
 
-    asyncLoop(
-        fills.length,
-        function(loop) {
-            let fill = fills[loop.iteration()];
-            if (!fill) {
-                patterns.push('transparent');
-                loop.next();
-            }
-            else if (fill.color) {
-                patterns.push(fill.color);
-                loop.next();
-            }
-            else if (fill.pattern) {
-                let name = fill.pattern.name;
-                let fg = fill.pattern.foreground;
-                let bg = fill.pattern.background;
-                CanvasHelper.createPattern(ctx, name, fg, bg, function(pattern) {
-                    patterns.push(pattern);
-                    loop.next();
-                });
-            }
-            else if (fill.gradient) {
-                let startX = fill.gradient.startX;
-                let endX = fill.gradient.endX;
-                let startColor = fill.gradient.startColor;
-                let endColor = fill.gradient.endColor;
-                let data = fill.gradient.data;
-                let minY = data[0].y;
-                let maxY = data[data.length-1].y;
-                let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
-                let transform = d3.scaleLinear()
-                    .domain([startX, endX])
-                    .range([startColor, endColor])
-                    .clamp(true);
-
-                for (let i = 0; i < data.length - 1; i ++) {
-                    let x = data[i].x;
-                    let color = transform(x);
-                    gradient.addColorStop((data[i].y - minY) / (maxY-minY), color);
-                    gradient.addColorStop((data[i+1].y - minY) / (maxY-minY), color);
-                }
-                patterns.push(gradient);
-                loop.next();
-            }
-            else {
-                patterns.push('transparent');
-                loop.next();
-            }
-        },
-        function() {
-            callback(patterns);
-        }
-    );
-}
 function createFillStyles(ctx, fills, callback) {
     let fillStyles = [];
 
@@ -441,7 +386,7 @@ function createFillStyles(ctx, fills, callback) {
                 let endX = fill.varShading.endX;
                 let data = fill.varShading.data;
 
-                if (!data || !data.length) {
+                if (!data || data.length <= 1) {
                     fillStyles.push('transparent');
                     loop.next();
                     return;
@@ -468,6 +413,67 @@ function createFillStyles(ctx, fills, callback) {
                     transform = d3.scaleQuantize()
                         .domain([startX, endX])
                         .range(palette);
+                }
+
+                else if (fill.varShading.customFills) {
+                    let customFills = fill.varShading.customFills;
+                    let content = customFills.content;
+                    let patCanvasId = customFills.patCanvasId;
+
+                    let minX = d3.min(data, function(d) { return d.x; });
+                    let maxX = d3.max(data, function(d) { return d.x; });
+
+                    if (minX == null || maxX == null || maxX - minX == 0) {
+                        fillStyles.push('transparent');
+                        loop.next();
+                        return;
+                    }
+
+                    let patCanvas = d3.select('#' + patCanvasId);
+                    if (!patCanvas.node()) patCanvas = d3.select('body').append('canvas');
+
+                    patCanvas
+                        .attr('id', patCanvasId)
+                        .attr('width', maxX - minX)
+                        .attr('height', maxY - minY)
+                        .style('display', 'none');
+                    let patCtx = patCanvas.node().getContext('2d');
+
+                    let patFills = content.map(function(d) {
+                        return {
+                            pattern: {
+                                name: d.pattern,
+                                foreground: d.foreground,
+                                background: d.background
+                            }
+                        };
+                    });
+
+                    createFillStyles(ctx, patFills, function(patFillStyles) {
+                        let range = ['transparent'];
+                        patFillStyles.forEach(function (p) {
+                            range.push(p);
+                            range.push('transparent');
+                        });
+
+                        let domain = [minX - 1];
+                        content.forEach(function(d) {
+                            domain.push(d.lowVal);
+                            domain.push(d.highVal);
+                        });
+                        domain.push(maxX + 1);
+                        transform = d3.scaleQuantile().domain(domain).range(range);
+
+                        for (let i = 0; i < data.length - 1; i ++) {
+                            let patFillStyle = transform(data[i].x);
+                            if (patFillStyle == 'transparent') continue;
+                            patCtx.fillStyle = patFillStyle;
+                            patCtx.fillRect(0, data[i].y - minY, maxX - minX, data[i+1].y - data[i].y);
+                        }
+                        fillStyles.push(ctx.createPattern(patCanvas.node(), 'no-repeat'));
+                        loop.next();
+                    });
+                    return;
                 }
 
                 if (transform)
@@ -547,4 +553,12 @@ function asyncLoop(iterations, func, callback) {
     };
     loop.next();
     return loop;
+}
+
+function sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        let x = a[key];
+        let y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
 }
