@@ -55,7 +55,6 @@ function Shading(config) {
     this.fill = config.fill;
     this.negativeFill = config.negativeFill;
     this.positiveFill = config.positiveFill;
-    //this.isNegPosFilling = config.isNegPosFilling == null ? false : config.isNegPosFilling;
     this.isNegPosFill = config.isNegPosFill == null ? false : config.isNegPosFill;
 
     this.leftCurve = config.leftCurve;
@@ -104,19 +103,6 @@ Shading.prototype.getProperties = function() {
         leftX = leftX == null ? this.refX : leftX;
     }
 
-    let e = 0.000001;
-    let type;
-
-    // if (Math.abs(this.refX - this.selectedCurve.maxX) < e)
-    //     type = 'right';
-    // else if (Math.abs(this.refX - this.selectedCurve.minX) < e)
-    //     type = 'left';
-    // else
-    //     type = 'custom';
-    if(this.refX == this.selectedCurve.maxX) type = 'right';
-    else if (this.refX == this.selectedCurve.minX) type = 'left';
-    else type = 'custom';
-
     return {
         idShading: this.id,
         idTrack: this.idTrack,
@@ -130,7 +116,7 @@ Shading.prototype.getProperties = function() {
         leftFixedValue: leftX,
         rightFixedValue: rightX,
         idControlCurve: (this.selectedCurve || {}).idCurve,
-        type: type
+        type: this.getType()
     }
 }
 
@@ -163,7 +149,7 @@ Shading.prototype.setProperties = function(props) {
         Utils.setIfNotUndefined(this, 'rightCurve', props.rightCurve);
         Utils.setIfNotNull(this, 'rightX', props.rightFixedValue);
     }
-    
+
     Utils.setIfNotUndefined(this, 'selectedCurve', props.controlCurve);
 }
 
@@ -395,6 +381,7 @@ function drawCluster(shading, clustered, negFill, posFill, highlight) {
         rightSide = clustered[1],
         leftTranslateX = [],
         rightTranslateX = [];
+    if (!leftSide || !rightSide || !leftSide.length || !rightSide.length) return;
 
     if (shading.leftCurve) {
         leftSide = shading.leftCurve.calculateDataForBlockPosition(leftSide);
@@ -404,21 +391,23 @@ function drawCluster(shading, clustered, negFill, posFill, highlight) {
         rightSide = shading.rightCurve.calculateDataForBlockPosition(rightSide);
         rightTranslateX = shading.rightCurve.getCanvasTranslateXForWrapMode();
     }
-    let data = leftSide.concat(rightSide.reverse());
     let translateX = Utils.uniq(leftTranslateX.concat(rightTranslateX));
     let ctx = shading.ctx;
     translateX.forEach(function(trX) {
         ctx.save();
         ctx.translate(trX, 0);
-        drawNegAndPosRegions(shading, data, negFill, posFill, trX, highlight);
+        drawNegAndPosRegions(shading, leftSide, rightSide, negFill, posFill, trX, highlight);
         ctx.restore();
     });
 }
 
-function drawNegAndPosRegions(shading, data, negFill, posFill, trX, highlight) {
+function drawNegAndPosRegions(shading, leftSide, rightSide, negFill, posFill, trX, highlight) {
     let ctx = shading.ctx;
     let rect = shading.root.node().getBoundingClientRect();
     let vpRefX = shading.vpX.ref;
+    let data = leftSide.concat(rightSide.slice().reverse());
+
+    let type = shading.getType();
 
     // Draw negative regions
     ctx.save();
@@ -426,16 +415,34 @@ function drawNegAndPosRegions(shading, data, negFill, posFill, trX, highlight) {
     ctx.fillStyle = negFill;
     drawCurveLine(ctx, data, highlight);
     ctx.clip();
-    ctx.fillRect(-trX, 0, vpRefX, rect.height);
+    ctx.beginPath();
+    if (type == 'pair') {
+        drawCurveLine(ctx, rightSide.concat([
+            {x: -trX, y: rightSide[rightSide.length-1].y},
+            {x: -trX, y: rightSide[0].y},
+            {x: rightSide[0].x, y: rightSide[0].y}
+        ]));
+        ctx.fill();
+    }
+    else ctx.fillRect(-trX, 0, vpRefX, rect.height);
     ctx.restore();
 
-    // Draw postive regions
+    // // Draw postive regions
     ctx.save();
     ctx.beginPath();
     ctx.fillStyle = posFill;
     drawCurveLine(ctx, data, highlight);
     ctx.clip();
-    ctx.fillRect(vpRefX - trX, 0, rect.width - vpRefX, rect.height);
+    ctx.beginPath();
+    if (type == 'pair') {
+        drawCurveLine(ctx, rightSide.concat([
+            {x: rect.width - trX, y: rightSide[rightSide.length-1].y},
+            {x: rect.width - trX, y: rightSide[0].y},
+            {x: rightSide[0].x, y: rightSide[0].y}
+        ]));
+        ctx.fill();
+    }
+    else ctx.fillRect(vpRefX - trX, 0, rect.width - vpRefX, rect.height);
     ctx.restore();
 }
 
@@ -512,4 +519,13 @@ function drawHeader(shading) {
         hCtx.restore();
         hCanvas.lower();
     });
+}
+
+Shading.prototype.getType = function() {
+    let type;
+    if (this.leftCurve && this.rightCurve) type = 'pair';
+    else if (this.refX == this.selectedCurve.maxX) type = 'right';
+    else if (this.refX == this.selectedCurve.minX) type = 'left';
+    else type = 'custom';
+    return type;
 }

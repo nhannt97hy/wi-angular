@@ -440,6 +440,13 @@ function createFillStyles(ctx, fills, callback) {
                 let startX = fill.varShading.startX;
                 let endX = fill.varShading.endX;
                 let data = fill.varShading.data;
+
+                if (!data || !data.length) {
+                    fillStyles.push('transparent');
+                    loop.next();
+                    return;
+                }
+
                 let minY = data[0].y;
                 let maxY = data[data.length-1].y;
                 let transform;

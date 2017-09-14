@@ -108,9 +108,6 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
             }
         })
         wiD3Ctrl.addCurveToTrack(track, data, {
-            symbol: {
-                style: 'circle'
-            },
             line: {
                 color: 'green'
             }
@@ -149,11 +146,23 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         let track = wiD3Ctrl.getCurrentTrack();
         wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {
             fill: {
-                gradient: {
-                    startColor: 'red',
-                    endColor: 'blue',
+                varShading: {
                     startX: 1,
-                    endX: 2
+                    endX: 0,
+                    palette: [
+                        {
+                            "red": 0,
+                            "green": 255,
+                            "blue": 255,
+                            "alpha": 1
+                        },
+                        {
+                            "red": 255,
+                            "green": 0,
+                            "blue": 255,
+                            "alpha": 1
+                        }
+                    ]
                 }
             },
             positiveFill: {
@@ -185,12 +194,40 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
         if (curves.length < 2) return;
         wiD3Ctrl.addPairShadingToTrack(track, curves[0], curves[1], {
             fill: {
-                pattern: {
-                    foreground: 'red',
-                    background: 'blue',
-                    name: 'basement'
+                varShading: {
+                    startX: 1,
+                    endX: 0,
+                    palette: [
+                        {
+                            "red": 0,
+                            "green": 255,
+                            "blue": 255,
+                            "alpha": 1
+                        },
+                        {
+                            "red": 255,
+                            "green": 0,
+                            "blue": 255,
+                            "alpha": 1
+                        }
+                    ]
                 }
-            }
+            },
+            // positiveFill: {
+            //     pattern: {
+            //         foreground: 'red',
+            //         background: 'blue',
+            //         name: 'basement'
+            //     }
+            // },
+            // negativeFill: {
+            //     pattern: {
+            //         foreground: 'black',
+            //         background: 'white',
+            //         name: 'chert'
+            //     }
+            // },
+            // isNegPosFill: true
         });
     }
 
