@@ -4342,6 +4342,39 @@ exports.polygonManagerDialog = function (ModalService, callback) {
     });
 };
 
+exports.newBlankHistogramDialog = function(ModalService, callback){
+    function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
+        let self = this;
+        self.name = "BlankHistogram";
+        self.error = null;
+        self.disabled = false;
+
+        this.onOkButtonClicked = function () {
+            close(self.name);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+
+    }
+
+    ModalService.showModal({
+        templateUrl: "blank-histogram/blank-histogram-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (newPlot) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (callback) callback(newPlot);
+        });
+    });
+}
+
 exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
     function ModalController(close, wiComponentService, wiApiService) {
         let self = this;
@@ -4394,7 +4427,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     }
                 })
             })
-
         })
 
         this.onZoneSetChange = function () {

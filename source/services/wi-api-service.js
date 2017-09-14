@@ -140,9 +140,9 @@ Service.prototype.GET_SHADING = GET_SHADING;
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
 
-Service.prototype.CREATE_HISTORAM = '/project/well/histogram/new';
-Service.prototype.EDIT_HISTOGRAM = '/project/well/histogram/edit';
-Service.prototype.DELTE_HISTOGRAM = '/project/well/histogram/delete';
+Service.prototype.CREATE_HISTOGRAM = CREATE_HISTOGRAM;
+Service.prototype.EDIT_HISTOGRAM = EDIT_HISTOGRAM;
+Service.prototype.DELTE_HISTOGRAM = DELETE_HISTOGRAM;
 
 Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);

@@ -1507,10 +1507,9 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
     if (selectedNode.type != 'histograms') return;
     let dataRequest = {
         idWell: selectedNode.properties.idWell,
-        name: histogramName,
-        option: 'blank-plot'
+        name: histogramName
     };
-    return wiApiService.post(route, dataRequest);
+    return wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest);
 };
 
 function openHistogramTab(wiComponentService, histogramModel, callback) {
