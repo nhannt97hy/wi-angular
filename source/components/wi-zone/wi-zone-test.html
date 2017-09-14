@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>wiZone Test</title>
+    <link rel="stylesheet" href="css/wi-zone.css">
+    <link rel="stylesheet" href="vendor/css/bootstrap.min.css">
+</head>
+
+<body ng-app="helloapp">
+    <div ng-controller="WiDummy" class="container">
+        <div class="col-sm-6">
+            <wi-zone name="HistogramZone" zones="zones" active-zone="actZone" all-zone-handler="AllZoneClick" active-zone-handler="ActiveZoneClick"></wi-zone>
+        </div>
+        <div class="col-sm-6">
+        </div>
+    </div>
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src="js/main-zone.js.bundle.js"></script>
+</body>
+
+</html>
