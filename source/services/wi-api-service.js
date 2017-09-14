@@ -101,6 +101,8 @@ const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
 const GET_PALETTES = '/pal/all';
 
+const GET_CUSTOM_FILLS = '/custom-fill/all';
+const SAVE_CUSTOM_FILLS = '/custom-fill/save';
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -139,6 +141,10 @@ Service.prototype.GET_SHADING = GET_SHADING;
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
 Service.prototype.GET_PALETTES = GET_PALETTES;
+Service.prototype.GET_CUSTOM_FILLS = GET_CUSTOM_FILLS;
+Service.prototype.SAVE_CUSTOM_FILLS = SAVE_CUSTOM_FILLS;
+
+
 Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     // console.log(utils);
@@ -1096,6 +1102,26 @@ app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
 Service.prototype.getPalettes = function (callback) {
     let self = this;
     this.post(GET_PALETTES, {})
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getCustomFills = function (callback) {
+    let self = this;
+    this.post(GET_CUSTOM_FILLS, {})
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.saveCustomFills = function (customFills, callback) {
+    let self = this;
+    this.post(SAVE_CUSTOM_FILLS, customFills)
         .then(function (returnData) {
             callback(returnData);
         })

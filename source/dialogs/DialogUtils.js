@@ -2093,48 +2093,52 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         }
         //customFills
 
-        this.customFillsCurrent = {
-            name: "customFills1",
-            content: [
-                {
-                    lowVal: 40, 
-                    highVal: 50, 
-                    pattern: "chert", 
-                    foreground: "black", 
-                    background: "blue", 
-                    description: ""
-                },{
-                    lowVal: 50, 
-                    highVal: 70, 
-                    pattern: "chert", 
-                    foreground: "yellow", 
-                    background: "blue", 
-                    description: ""
-                }, {
-                    lowVal: 70, 
-                    highVal: 90, 
-                    pattern: "chert", 
-                    foreground: "white", 
-                    background: "red", 
-                    description: ""
-                },{
-                    lowVal: 90, 
-                    highVal: 140, 
-                    pattern: "chert", 
-                    foreground: "green", 
-                    background: "orange", 
-                    description: "9879707"
-                }
-            ]
-        }
+        // this.customFillsCurrent = {
+        //     name: "customFills1",
+        //     content: [
+        //         {
+        //             lowVal: 40, 
+        //             highVal: 50, 
+        //             pattern: "chert", 
+        //             foreground: "black", 
+        //             background: "blue", 
+        //             description: ""
+        //         },{
+        //             lowVal: 50, 
+        //             highVal: 70, 
+        //             pattern: "chert", 
+        //             foreground: "yellow", 
+        //             background: "blue", 
+        //             description: ""
+        //         }, {
+        //             lowVal: 70, 
+        //             highVal: 90, 
+        //             pattern: "chert", 
+        //             foreground: "white", 
+        //             background: "red", 
+        //             description: ""
+        //         },{
+        //             lowVal: 90, 
+        //             highVal: 140, 
+        //             pattern: "chert", 
+        //             foreground: "green", 
+        //             background: "orange", 
+        //             description: "9879707"
+        //         }
+        //     ]
+        // }
+        // this.customFillsCurrent = angular.copy(self.variableShadingOptions.fill.varShading.customFills);
+        if(this.variableShadingOptions.fill.varShading.customFills){
+            this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills;
+        };
         this.foregroundCustomFills = function(index){
-            DialogUtils.colorPickerDialog(ModalService, self.customFillsCurrent.content[index].foreground, function (colorStr) {
-                self.customFillsCurrent.content[index].foreground = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].foreground, function (colorStr) {
+                self.variableShadingOptions.fill.varShading.customFills.content[index].foreground = colorStr;
             });
         }
         this.backgroundCustomFills = function(index){
-            DialogUtils.colorPickerDialog(ModalService, self.customFillsCurrent.content[index].background, function (colorStr) {
-                self.customFillsCurrent.content[index].background = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].background, function (colorStr) {
+                self.variableShadingOptions.fill.varShading.customFills.content[index].background = colorStr;
             });
         };
         this.idx = null;
@@ -2143,11 +2147,48 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             self.idx = index;
         };
         this.removeRow = function() {
-            self.customFillsCurrent.content.slice(self.idx, 1);
-            console.log("self", self.customFillsCurrent.content, self.idx);
+            self.variableShadingOptions.fill.varShading.customFills.content.splice(self.idx, 1);
+            console.log("self", self.variableShadingOptions.fill.varShading.customFills.content, self.idx);
         }
         this.addRow = function(){
-            self.customFillsCurrent.content.push({});
+            self.variableShadingOptions.fill.varShading.customFills.content.push({});
+        }
+        this.customFillsList = null;
+        wiApiService.getCustomFills(function(customFillsList){
+            self.customFillsList = customFillsList;
+        });
+        this.setCustomFills = function(){
+            self.variableShadingOptions.fill.varShading.customFills = self.customFillsCurrent;
+            console.log("CF", self.variableShadingOptions.fill.varShading.customFills, self.customFillsCurrent);
+        };
+        this.saveCustomFills = function() {
+            self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
+            if(!self.customFillsCurrent.name) {
+                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
+            }
+            else {
+                wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
+                    DialogUtils.errorMessageDialog(ModalService, "CustomFills: " + customFills.name + " saved successfully!");
+                });
+            }
+        };
+        this.setCustomFillsIfNull = function(){
+            if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.customFills) {
+                self.variableShadingOptions.fill.varShading.customFills = {
+                    name:null,
+                    content: [
+                        {
+                            lowVal: null,
+                            highVal: null,
+                            pattern: "none",
+                            foreground: "transparent",
+                            background: "transparent",
+                            description: ""
+                        }
+                    ]
+                }
+            }
+           
         }
         function isValid() {
             self.errorReason = null;
@@ -2181,7 +2222,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     self.variableShadingOptions.fill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
-                    self.variableShadingOptions.fill.varShading.value = null;
+                    self.variableShadingOptions.fill.varShading.customFills = null;
                     self.variableShadingOptions.positiveFill.varShading.customFills = null;
                     self.variableShadingOptions.positiveFill.varShading.customFills = null;
 
@@ -2193,6 +2234,9 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     self.variableShadingOptions.fill.varShading.palette = null;
                     self.variableShadingOptions.positiveFill.varShading.palette = null;
                     self.variableShadingOptions.positiveFill.varShading.palette = null;
+                    self.variableShadingOptions.fill.varShading.palName = null;
+                    self.variableShadingOptions.positiveFill.varShading.palName = null;
+                    self.variableShadingOptions.positiveFill.varShading.palName = null;
                     self.variableShadingOptions.fill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;

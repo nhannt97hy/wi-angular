@@ -706,18 +706,44 @@
                             
                             <div class="row padding-left-2em" >
                                 <label>
-                                    <input type="radio" value="customFills" ng-model="wiModal.varShadingType">
+                                    <input type="radio" value="customFills" ng-model="wiModal.varShadingType"
+                                            ng-change="wiModal.setCustomFillsIfNull()">
                                     Values
                                 </label>
                             </div>
                             <div class="row" ng-show="wiModal.varShadingType == 'customFills'">
+                                <div class="row padding-bottom-1em padding-left-1em">
+                                    <div class="col-sm-3">
+                                        Curve Value:
+                                    </div> 
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4 padding-0">Low</label>
+                                            <div class="col-sm-8 padding-0">
+                                                <input type="number" name=""
+                                                        class="form-control wi-form-control"
+                                                        ng-model="wiModal.variableShadingOptions.fill.varShading.startX">
+                                            </div>
+                                        </div>
+                                    </div>  
+                                    <div class="col-sm-5 padding-0">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <div class="col-sm-7">
+                                                <input type="number" name=""
+                                                        class="form-control wi-form-control"
+                                                        ng-model="wiModal.variableShadingOptions.fill.varShading.endX">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label class="control-label col-sm-2">
                                         Name
                                     </label>
                                     <div class="col-sm-5 padding-0">
                                         <input type="text" 
-                                                ng-model="wiModal.customFillsCurrent.name"
+                                                ng-model="wiModal.variableShadingOptions.fill.varShading.customFills.name"
                                                 class="form-control wi-form-control normal-text">
                                     </div>
                                 </div>
@@ -736,7 +762,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr ng-repeat="fill in wiModal.customFillsCurrent.content"
+                                                <tr ng-repeat="fill in wiModal.variableShadingOptions.fill.varShading.customFills.content"
                                                     ng-class="{'selected':$index == selectedRow}"
                                                     ng-click="wiModal.setClickedRow($index)">
                                                     <td style="width: 12%">
@@ -793,8 +819,13 @@
                                     <div class="width-15-percent float-left padding-left-5px">
                                         <button class="btn btn-default" ng-click="wiModal.removeRow()"><span class="delete-16x16"></span></button>
                                         <button class="btn btn-default" ng-click="wiModal.addRow()"><span class="ok-16x16"></span></button>
-                                        <button ng-click="wiModal.saveCustomFills()" style="font-size: 9px">Save customFills</button>
-                                        <select ></select> 
+                                        <br><br>
+                                        <button ng-click="wiModal.saveCustomFills()" style="font-size: 9px">Save custom</button>
+                                        <br><br>
+                                        <select ng-model="wiModal.customFillsCurrent"
+                                                class="form-control wi-form-control normal-text"
+                                                ng-options="customFills as customFills.name for customFills in wiModal.customFillsList"
+                                                ng-change="wiModal.setCustomFills()"></select> 
 
                                     </div>
                                 </form>

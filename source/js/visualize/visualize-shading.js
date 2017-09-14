@@ -241,6 +241,7 @@ Shading.prototype.getAllColors = function() {
  * @param {Boolean} highlight
  */
 Shading.prototype.doPlot = function(highlight) {
+    console.log(this.fill);
     function cloneCurveData(data, newX) {
         return data.map(function(d) {
             return {
