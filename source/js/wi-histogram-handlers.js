@@ -27,7 +27,9 @@ exports.EditFormatButtonClicked = function() {
 }
 
 exports.ActiveZoneButtonClicked = function() {
-    console.log('ActiveZoneButton is clicked');
+    console.log('ActiveZoneButton is clicked', this.Histogram);
+    let wiD3Ctrl = this.wiHistogram.getwiD3Ctrl();
+    wiD3Ctrl.toggleShowWiZone();
 }
 
 exports.FrequencyInfoButtonClicked = function() {

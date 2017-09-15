@@ -374,11 +374,11 @@ function histogramToTreeConfig(histogram) {
         plot: histogram.plot,
         plotType: histogram.plotType,
         color: histogram.color,
-        discriminators: histogram.discriminators,
+        // discriminators: histogram.discriminators,
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,
-        zones: histogram.zoneset != null ? histogram.zoneset.zones : null
+        // zones: histogram.zoneset != null ? histogram.zoneset.zones : null
     };
     histogramModel.data = {
         childExpanded: false,
@@ -409,7 +409,9 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name // TODO
+        alias: curve.name, // TODO
+        minScale: curve.LineProperty.minScale,
+        maxScale: curve.LineProperty.maxScale
     };
     curveModel.data = {
         childExpanded: false,

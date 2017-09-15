@@ -3,13 +3,16 @@ const moduleName = 'wi-d3-histogram';
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
-    this.visHistogram = null;
+    this.visHistogram = {};
     let graph = wiComponentService.getComponent('GRAPH');
     self.histogramModel = null;
     self.curveModel = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.zoneArr = new Array();
+
+    this.isShowWiZone = true;
+    this.isShowReferenceWindow = true;
 
     function getIdHistogram() {
         return self.name.replace('histogram', "").replace("D3Area", "");
@@ -21,7 +24,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
         let datasetId = curve.properties.idDataset;
         for (let dataset of well.children) {
-            if(dataset.type == 'dataset' && dataset.id == datasetId) {
+            if (dataset.type == 'dataset' && dataset.id == datasetId) {
                 return well.properties.name + "." + dataset.properties.name;
             }
         }
@@ -33,37 +36,38 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
                 self.currentCurveId = self.histogramModel.properties.idCurve;
                 loadCurve(self.currentCurveId);
-            }
-            else {
-                self.visHistogram.signal('histogram-update', "no load curve");
+            } else {
+                // self.visHistogram.signal('histogram-update', "no load curve");
+                console.log('histogram-update no-load-curve');
             }
         }
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
-            self.zoneArr.forEach(function(zone){
-                zone.handler = function() {
+            self.zoneArr.forEach(function (zone) {
+                zone.handler = function () {
                     console.log("----", zone.properties.idZone);
                 }
             })
 
-            console.log(self.zoneArr);
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
-        } 
+        }
     }
-    this.getZoneName = function() {
+    this.getZoneName = function () {
         return self.name + "Zone";
     }
-    this.getZoneCtrl = function() {
+    this.getZoneCtrl = function () {
         return wiComponentService.getComponent(self.getZoneName());
     }
-    this.onReady = function() {
+    this.onReady = function () {
         self.createVisualizeHistogram(self.histogramModel);
     }
     this.$onInit = function () {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         self.histogramModel.properties.histogramTitle = getHistogramTitle();
+        self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
+
         self.linkModels();
 
         if (self.name) {
@@ -72,6 +76,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
 
+    this.toggleShowWiZone = function() {
+        self.isShowWiZone = !self.isShowWiZone;
+    }
+
+    this.toogleShowReferenceWindow = function () {
+        self.isShowReferenceWindow = !self.isShowReferenceWindow;
+    }
+
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         self.contextMenu = [{
@@ -79,7 +91,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Refresh",
             icon: "reload-16x16",
             handler: function () {
-                
+
             }
         }, {
             name: "Properties",
@@ -133,7 +145,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowReferenceWindow",
             label: "Show/Hide Reference Window",
             handler: function () {
-    
+                self.toogleShowReferenceWindow();
             }
         }, {
             name: "ShowCumulative",
@@ -150,20 +162,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             "isCheckType": "true",
             checked: false, // TODO
             handler: function () {
-    
+
             }
         }, {
             name: "ShowTooltip",
             label: "Show/Hide Tooltip",
             handler: function () {
-    
+
             }
         }, {
             name: "FrequencyInfor",
             label: "Frequency Infor",
             icon: "ti-info-alt",
             handler: function () {
-                DialogUtils.histogramFrequencyInfoDialog(ModalService, function(){
+                DialogUtils.histogramFrequencyInfoDialog(ModalService, function () {
                     console.log('Frequency Info!!!!!');
                 })
             }
@@ -214,17 +226,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return config;
     }
 
-    this.createVisualizeHistogram = function(histogramModel) {
+    this.createVisualizeHistogram = function (histogramModel) {
         var elem = document.getElementById(self.histogramAreaId);
-        console.log('createHistogram:' , self.histogramAreaId, elem);
+        console.log('createHistogram:', self.histogramAreaId, elem);
         self.visHistogram = graph.createHistogram(histogramModel, elem);
         if (self.visHistogram.idCurve) loadCurve(self.visHistogram.idCurve);
     }
 
     function loadCurve(idCurve) {
-        wiApiService.dataCurve(idCurve, function(data) {
+        wiApiService.dataCurve(idCurve, function (data) {
             console.log('load Curve');
-            if(self.visHistogram) {
+            if (self.visHistogram) {
                 self.visHistogram.setCurve(data);
                 self.visHistogram.signal('histogram-update', "linh tinh");
             }

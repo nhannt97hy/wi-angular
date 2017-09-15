@@ -39,18 +39,13 @@ function ZoneController(wiComponentService, $timeout){
         if(self.zones[i].handler) self.zones[i].handler();
     }
 
-    // this.isInActive = function(id){
-    //     if (this.activeZone == "All") return false;
-    //     return self.zoneArr.indexOf(id) == -1;
-    // }
     this.zoneUpdate = function() {
-        console.log('zone Update');
         self.zoneArr.length = 0;
         self.zones.forEach(function(element, i) {
             self.zoneArr.push(!(element.properties.idZone == self.activeZone || self.activeZone == "All"));
         });
     }
-    window.ZONECTRL = this;
+    // window.ZONECTRL = this;
 }
 
 let app = angular.module(moduleName, []);

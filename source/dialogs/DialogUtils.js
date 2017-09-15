@@ -4276,6 +4276,8 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
+            self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+            self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
         }
 
         this.onDepthTypeChanged = function () {
@@ -4300,7 +4302,10 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             histogramModel.properties = self.histogramProps;
             close(histogramModel.properties);
         }
-        // console.log("ac ac");
+        this.onCancelButtonClicked = function () {
+            close(null);
+            
+        }
     }
     ModalService.showModal({
         templateUrl: "histogram-format/histogram-format-modal.html",
