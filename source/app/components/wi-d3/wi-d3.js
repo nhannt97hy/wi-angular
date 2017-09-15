@@ -356,6 +356,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return shading;
     };
 
+    this.addCustomShadingToTrackWithLeftCurve = function (track, curve, value, config) {
+        if (!track || !track.addShading) return;
+        let shading = track.addShading(curve, null, value, config);
+        track.plotShading(shading);
+        _registerShadingHeaderMouseDownCallback(track, shading);
+        console.log('shading', shading);
+        return shading;
+    };
+
     this.addPairShadingToTrack = function(track, lCurve, rCurve, config) {
         if (!track || !track.addShading) return;
         let shading = track.addShading(lCurve, rCurve, null, config);
@@ -1062,16 +1071,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
                         let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                         Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
+                            console.log("wiCrossplotCtrl", wiCrossplotCtrl);
                             let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                            console.log(wiCrossplotCtrl);
                             let dataPointSet = {
                                 idCrossPlot: wiCrossplotCtrl.id,
                                 idWell: idWell,
                                 idCurveX: curve1.idCurve,
                                 idCurveY: curve2.idCurve,
                             }
+                            let wellProps = _getWellProps();
                             Utils.createPointSet(dataPointSet, function (pointSet) {
-                                wiD3CrossplotCtrl.createVisualizeCrossplot(curve1.data, curve2.data);
+                                wiD3CrossplotCtrl.createVisualizeCrossplot(curve1, curve2, {
+                                    name: crossplotName,
+                                    idCrossPlot: wiCrossplotCtrl.id,
+                                    idWell: idWell,
+                                    topDepth: wellProps.topDepth,
+                                    bottomDepth: wellProps.bottomDepth
+                                });
                             })
                         });
                     })

@@ -111,6 +111,8 @@ CanvasHelper.createPattern2 = function(ctx, name, foreground, background, callba
     }
 }
 
+CanvasHelper.PATTERN_WIDTH = 16;
+
 CanvasHelper.RAW_PATTERNS = {
     basement: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M2,0L8,6M9,15L15,9" stroke="black" fill="none"/></g></svg>',
     chert: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M0,3L3,0L6,3M8,7L11,4L14,7M1,11L4,8L7,11M9,15L12,12L15,15" stroke="black" fill="none"/></g></svg>',

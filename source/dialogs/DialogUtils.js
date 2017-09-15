@@ -1,5 +1,66 @@
 //const SHADING_STYLES = [{value:"fillPattern", name:"Fill Pattern"}, {value:"variableShading", name:"Variable Shading"}];
 
+
+
+exports.authenticationDialog = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService) {
+        let self = this;
+        this.disabled = false;
+        this.error = null;
+        this.checkPasswords = function () {
+            if (!self.passwordReg || !self.passwordConfirm) {
+                self.error = 'Passwords must not be empty.'
+            }
+            if (self.passwordReg != self.passwordConfirm) {
+                self.error = 'Passwords do not match.'
+                
+            }
+        }
+        this.onRegisterButtonClicked = function () {
+            self.error = null;
+            self.checkPasswords();
+            if (self.error) return;
+            let dataRequest = {
+                    userName: self.usernameReg,
+                    password: self.passwordReg
+            }
+            wiApiService.register(dataRequest, function (token) {
+                let userInfo = {
+                    username: self.usernameReg,
+                    password: self.passwordReg,
+                    token: token
+                }
+                close(userInfo);
+            })
+        }
+        this.onLoginButtonClicked = function () {
+            self.error = null;
+            
+            if (self.error) return;           
+
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'authentication/authentication-modal.html',
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $('.modal-backdrop').css('opacity', 1).css('background-color', 'white');
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (callback && data) callback(data);
+        });
+    });
+};
+
+
 exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
@@ -68,7 +129,6 @@ exports.openProjectDialog = function (ModalService, callback) {
 
         wiApiService.post('/project/list', null)
             .then(function (projects) {
-                console.log('response', projects);
 
                 self.projects = projects;
             })
@@ -78,6 +138,7 @@ exports.openProjectDialog = function (ModalService, callback) {
             .then(function () {
                 $scope.$apply();
             });
+        console.log('response', this.projects);
 
         this.fillInfo = function () {
             self.projects.forEach(function (item) {
@@ -1545,7 +1606,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-exports.fillPatternSettingDialog = function (ModalService, callback, options, options1) {
+exports.fillPatternSettingDialog = function (ModalService, callback, options, shadingOptions) {
     let thisModal = null;
 
     function ModalController($scope, close, wiComponentService, $timeout) {
@@ -1559,7 +1620,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, op
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         console.log("$$", options);
 
-        this.options1 = options1;
+        this.shadingOptions = shadingOptions;
         if (options) {
             this.options = options;
         } else {
@@ -1628,8 +1689,8 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, op
                 self.options.negativeFill.pattern.background = colorStr;
             });
         }
-        this.correctFillingStyle = function () {
-            self.options1.isNegPosFill = !self.options.fill.display;
+        this.correctFillingStyle = function() {
+            self.shadingOptions.isNegPosFill = !self.options.fill.display;
             self.options.positiveFill.display = !self.options.fill.display;
             self.options.negativeFill.display = self.options.positiveFill.display;
         }
@@ -1723,7 +1784,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
         });
     });
 }
-exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOptions, variableShadingOptions, options1, selectCurve) {
+exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, fillPatternOptions, variableShadingOptions, shadingOptions, selectCurve, curvesOnDataset){
     let thisModal = null;
 
     function ModalController($scope, close, wiComponentService, $timeout) {
@@ -1731,14 +1792,26 @@ exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOp
         thisModal = this;
         this.disabled = false;
         this.error = null;
-        console.log("options", fillPatternOptions, variableShadingOptions, options1, selectCurve);
+        this.paletteList = null;
+        this.paletteName = null;
+        console.log("options", fillPatternOptions, variableShadingOptions, shadingOptions, selectCurve);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         //fillPatternOptions
-        this.options1 = options1;
+        this.shadingOptions = shadingOptions;
+        this.curvesOnDataset = curvesOnDataset;
 
-        if (!fillPatternOptions) {
+        this.namePals = new Array();
+        wiApiService.getPalettes(function(pals){
+            self.paletteList = pals;
+            self.paletteName = Object.keys(self.paletteList);
+        });
+        // this.paletteList = utils.getAllPalettes(wiApiService);
+        // this.paletteList = palettes;
+        // this.namePals = Object.keys(self.paletteList);
+        // console.log("paletteList", this.namePals);
+        if (!fillPatternOptions) {  
             fillPatternOptions = {
                 fill: {
                     display: false,
@@ -1811,20 +1884,18 @@ exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOp
                 self.fillPatternOptions.negativeFill.pattern.background = colorStr;
             });
         }
-        this.correctFillingStyle = function () {
-            self.options1.isNegPosFill = !self.fillPatternOptions.fill.display;
+        this.correctFillingStyle = function() {
+            self.shadingOptions.isNegPosFill = !self.fillPatternOptions.fill.display;
             self.fillPatternOptions.positiveFill.display = !self.fillPatternOptions.fill.display;
             self.fillPatternOptions.negativeFill.display = self.fillPatternOptions.positiveFill.display;
         }
         //variableShadingOptions
-        this.gradientType = "gradient";
-
         this.selectCurve = selectCurve;
         if (!variableShadingOptions) {
             variableShadingOptions = {
-                display: true,
                 idControlCurve: null,
                 fill: {
+                    display: false,
                     variable: {
                         startX: null,
                         endX: null,
@@ -1832,11 +1903,13 @@ exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOp
                             startColor: "transparent",
                             endColor: "transparent"
                         },
-                        palette: {},
-                        values: {}
+                        palette: null,
+                        palName: null,
+                        customFills: null
                     }
                 },
                 positiveFill: {
+                    display: false,
                     variable: {
                         startX: null,
                         endX: null,
@@ -1844,40 +1917,41 @@ exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOp
                             startColor: "transparent",
                             endColor: "transparent"
                         },
-                        palette: {},
-                        values: {}
+                        palette: null,
+                        palName: null,
+                        customFills: null
                     }
                 },
                 negativeFill: {
                     variable: {
+                    display: false,
                         startX: null,
                         endX: null,
                         gradient: {
                             startColor: "transparent",
                             endColor: "transparent"
                         },
-                        palette: {},
-                        values: {}
+                        palette: null,
+                        palName: null,
+                        customFills: null
                     }
                 }
             };
         }
         this.variableShadingOptions = variableShadingOptions;
-
-        this.displayType = !this.variableShadingOptions.fill.display ? "posNegSides" : "bothSides";
-
-        this.selectedControlCurve = function (idCurve) {
-            self.selectCurve.forEach(function (item, index) {
-                if (item.idCurve == idCurve) {
-                    console.log("find startX endX", item);
-                    console.log("*******");
+        console.log("varShading", this.variableShadingOptions);
+        // this.displayType = !this.variableShadingOptions.fill.display?"posNegSides":"bothSides";
+        this.displayType = !this.variableShadingOptions.fill.display;
+        this.selectedControlCurve = function(idCurve){
+            self.selectCurve.forEach(function(item, index) {
+                if(item.idCurve == idCurve) {
                     self.variableShadingOptions.positiveFill.varShading.startX = item.minX;
-                    self.variableShadingOptions.positiveFill.varShading.endX = item.maxX;
+                    self.variableShadingOptions.positiveFill.varShading.endX = item.maxX;    
                     self.variableShadingOptions.negativeFill.varShading.startX = item.minX;
                     self.variableShadingOptions.negativeFill.varShading.endX = item.maxX;
-
+                
                     self.variableShadingOptions.fill.varShading.startX = item.minX;
-                    self.variableShadingOptions.fill.varShading.endX = item.maxX;
+                    self.variableShadingOptions.fill.varShading.endX = item.maxX;    
                 }
             })
         }
@@ -1912,20 +1986,296 @@ exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOp
                 self.variableShadingOptions.negativeFill.varShading.gradient.endColor = colorStr;
             });
         }
-
-        if (this.options1.idLeftLine) {
-            this.options1.isNegPosFill = false;
+        this.correctFillingStyleVarShading = function() {
+            self.shadingOptions.isNegPosFill = !self.variableShadingOptions.fill.display;
+            self.variableShadingOptions.positiveFill.display = !self.variableShadingOptions.fill.display;
+            self.variableShadingOptions.negativeFill.display = self.variableShadingOptions.positiveFill.display;
+        }
+        if(this.shadingOptions.idLeftLine) {
+            this.shadingOptions.isNegPosFill = false;
             this.fillPatternOptions.fill.display = true;
             this.variableShadingOptions.fill.display = true;
-            this.displayType = 'bothSides';
+            // this.displayType = 'bothSides';
         }
+        wiApiService.getPalettes(function(paletteList){
+            let paletteNameArr = Object.keys(paletteList);
+            let paletteValArr = JSON.stringify(Object.values(paletteList));
+            function getPaletteNameByValue(palVal) {
+                let idx = paletteValArr.indexOf(JSON.stringify(palVal));
+                return paletteNameArr[idx];
+            }
+
+            if(self.variableShadingOptions.fill && self.variableShadingOptions.fill.display == true) {
+                if(self.variableShadingOptions.fill.varShading.gradient) self.varShadingType = "gradient";
+                else if (self.variableShadingOptions.fill.varShading.palette) {
+                    self.varShadingType = "palette";
+                    if(Array.isArray(self.variableShadingOptions.fill.varShading.palette)) 
+                        self.variableShadingOptions.fill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.fill.varShading.palette);
+                    
+                }
+                else self.varShadingType = "customFills";
+            }
+            if(self.variableShadingOptions.positiveFill && self.variableShadingOptions.positiveFill.display == true){
+                if(self.variableShadingOptions.positiveFill.varShading.gradient) self.varShadingType = "gradient";
+                else if (self.variableShadingOptions.positiveFill.varShading.palette) {
+                    self.varShadingType = "palette";
+                    if(Array.isArray(self.variableShadingOptions.positiveFill.varShading.palette)) 
+                        self.variableShadingOptions.positiveFill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.positiveFill.varShading.palette);
+                }
+                else self.varShadingType = "customFills";
+            }
+            if(self.variableShadingOptions.negativeFill && self.variableShadingOptions.negativeFill.display == true){
+                if(self.variableShadingOptions.negativeFill.varShading.gradient) self.varShadingType = "gradient";
+                else if (self.variableShadingOptions.negativeFill.varShading.palette) {
+                    self.varShadingType = "palette";
+                    if(Array.isArray(self.variableShadingOptions.negativeFill.varShading.palette)) 
+                        self.variableShadingOptions.negativeFill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.negativeFill.varShading.palette);
+                }
+                else self.varShadingType = "customFills";
+            }
+        })
+        this.setGradientIfNull = function(){
+            if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.gradient) self.variableShadingOptions.fill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+            if(self.variableShadingOptions.positiveFill.display && !self.variableShadingOptions.positiveFill.varShading.gradient) self.variableShadingOptions.positiveFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+            if(self.variableShadingOptions.positiveFill.display && !self.variableShadingOptions.negativeFill.varShading.gradient) self.variableShadingOptions.negativeFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+            
+        }
+        // function isValid() {
+        //     self.errorReason = null;
+        //     if(!self.shadingOptions.idRightLine && !self.shadingOptions.idLeftLine) {
+        //         self.errorReason = "Right curve or left curve are required";
+        //         return false;
+        //     }
+        //     if ( self.shadingOptions.idRightLine == self.shadingOptions.idLeftLine ) {
+        //         self.errorReason = "Right curve and left curve cannot be the same";
+        //         return false;
+        //     }
+
+        //     if ( isNaN(parseInt(self.shadingOptions.leftFixedValue)) 
+        //         && isNaN(parseInt(self.shadingOptions.rightFixedValue)) 
+        //         && (!self.shadingOptions.idRightLine || !self.shadingOptions.idLeftLine) ) {
+
+        //         self.errorReason = "Shading properties is invalid";
+        //         return false;
+        //     }
+        //     return true;
+        // }
+        this.setShadingName = function(curveId, isRight) {
+            var curveName = null;
+            var leftPart = null;
+            var rightPart = null;
+            if( self.shadingOptions.name.indexOf('_') < 0 ) self.shadingOptions.name = "xx_yy";
+            if (isRight) {
+                if (!curveId) {
+                    rightPart = 'right';
+                }
+                else {
+                    for (curve of self.curvesOnDataset) {
+                        if (curve.id == parseInt(curveId)) {
+                            rightPart = curve.name;
+                            break;
+                        }
+                    }
+                }
+                self.shadingOptions.name = self.shadingOptions.name.replace(/_.+/g, "_" + rightPart);
+            }
+            else {
+                if (!curveId) {
+                    leftPart = 'left';
+                }
+                else {
+                    for (curve of self.curvesOnDataset) {
+                        if (curve.id == parseInt(curveId)) {
+                            leftPart = curve.name;
+                            break;
+                        }
+                    }
+                }
+                self.shadingOptions.name = self.shadingOptions.name.replace(/^.+_/g, leftPart + "_");
+            }
+        }
+        this.setLimit2 = function() {
+            if(self.shadingOptions.idLeftLine == '-1') {
+                self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).minX;
+            }
+            if(self.shadingOptions.idLeftLine == '-2') {
+                self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).maxX;
+            }
+            if(self.shadingOptions.idLeftLine > 0) self.shadingOptions.leftFixedValue = null;
+        }
+        this.arrayPaletteToString = function(palette){
+            return JSON.stringify(palette);
+        }
+        function findInVisCurveListByIdLine(idLine) {
+            for(let line of self.curvesOnDataset) {
+                if(line.id == idLine){
+                    return line;
+                }
+            }
+            return null;
+        }
+        //customFills
+
+        // this.customFillsCurrent = {
+        //     name: "customFills1",
+        //     content: [
+        //         {
+        //             lowVal: 40, 
+        //             highVal: 50, 
+        //             pattern: "chert", 
+        //             foreground: "black", 
+        //             background: "blue", 
+        //             description: ""
+        //         },{
+        //             lowVal: 50, 
+        //             highVal: 70, 
+        //             pattern: "chert", 
+        //             foreground: "yellow", 
+        //             background: "blue", 
+        //             description: ""
+        //         }, {
+        //             lowVal: 70, 
+        //             highVal: 90, 
+        //             pattern: "chert", 
+        //             foreground: "white", 
+        //             background: "red", 
+        //             description: ""
+        //         },{
+        //             lowVal: 90, 
+        //             highVal: 140, 
+        //             pattern: "chert", 
+        //             foreground: "green", 
+        //             background: "orange", 
+        //             description: "9879707"
+        //         }
+        //     ]
+        // }
+        // this.customFillsCurrent = angular.copy(self.variableShadingOptions.fill.varShading.customFills);
+        if(this.variableShadingOptions.fill.varShading.customFills){
+            this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills;
+        };
+        this.foregroundCustomFills = function(index){
+            DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].foreground, function (colorStr) {
+                self.variableShadingOptions.fill.varShading.customFills.content[index].foreground = colorStr;
+            });
+        }
+        this.backgroundCustomFills = function(index){
+            DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].background, function (colorStr) {
+                self.variableShadingOptions.fill.varShading.customFills.content[index].background = colorStr;
+            });
+        };
+        this.idx = null;
+        this.setClickedRow = function(index){
+            $scope.selectedRow = index;
+            self.idx = index;
+        };
+        this.removeRow = function() {
+            self.variableShadingOptions.fill.varShading.customFills.content.splice(self.idx, 1);
+            console.log("self", self.variableShadingOptions.fill.varShading.customFills.content, self.idx);
+        }
+        this.addRow = function(){
+            self.variableShadingOptions.fill.varShading.customFills.content.push({});
+        }
+        this.customFillsList = null;
+        wiApiService.getCustomFills(function(customFillsList){
+            self.customFillsList = customFillsList;
+        });
+        this.setCustomFills = function(){
+            self.variableShadingOptions.fill.varShading.customFills = self.customFillsCurrent;
+            console.log("CF", self.variableShadingOptions.fill.varShading.customFills, self.customFillsCurrent);
+        };
+        this.saveCustomFills = function() {
+            self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
+            if(!self.customFillsCurrent.name) {
+                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
+            }
+            else {
+                wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
+                    DialogUtils.errorMessageDialog(ModalService, "CustomFills: " + customFills.name + " saved successfully!");
+                });
+            }
+        };
+        this.setCustomFillsIfNull = function(){
+            if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.customFills) {
+                self.variableShadingOptions.fill.varShading.customFills = {
+                    name:null,
+                    content: [
+                        {
+                            lowVal: null,
+                            highVal: null,
+                            pattern: "none",
+                            foreground: "transparent",
+                            background: "transparent",
+                            description: ""
+                        }
+                    ]
+                }
+            }
+           
+        }
+        function isValid() {
+            self.errorReason = null;
+            if(!self.shadingOptions.idRightLine) {
+                self.errorReason = "Right curve is required"; 
+                return false;
+            }
+            if ( self.shadingOptions.idRightLine == self.shadingOptions.idLeftLine ) {
+                self.errorReason = "Right curve and left curve cannot be the same";
+                return false;
+            }
+            if (!self.shadingOptions.idLeftLine && isNaN(parseInt(self.shadingOptions.leftFixedValue))) {
+                self.errorReason = "Shading properties is invalid";
+                return false;
+            }
+            return true;
+
+        }
+        
         this.onOkButtonClicked = function () {
-            console.log("onOkShadingAttribute", self.fillPatternOptions, self.variableShadingOptions, self.options1);
-            close(JSON.stringify({
-                fillPatternOptions: self.fillPatternOptions,
-                variableShadingOptions: self.variableShadingOptions,
-                options1: self.options1
-            }), 200);
+            switch (self.varShadingType) {
+                case "gradient":
+                    self.variableShadingOptions.fill.varShading.palette = null;
+                    self.variableShadingOptions.positiveFill.varShading.palette = null;
+                    self.variableShadingOptions.positiveFill.varShading.palette = null;
+                    self.variableShadingOptions.fill.varShading.value = null;
+                    self.variableShadingOptions.positiveFill.varShading.customFills = null;
+                    self.variableShadingOptions.positiveFill.varShading.customFills = null;
+                    break;
+                case "palette":
+                    self.variableShadingOptions.fill.varShading.gradient = null;
+                    self.variableShadingOptions.positiveFill.varShading.gradient = null;
+                    self.variableShadingOptions.positiveFill.varShading.gradient = null;
+                    self.variableShadingOptions.fill.varShading.customFills = null;
+                    self.variableShadingOptions.positiveFill.varShading.customFills = null;
+                    self.variableShadingOptions.positiveFill.varShading.customFills = null;
+
+                    self.variableShadingOptions.fill.varShading.palette = self.variableShadingOptions.fill.varShading.palName;
+                    self.variableShadingOptions.positiveFill.varShading.palette = self.variableShadingOptions.positiveFill.varShading.palName;
+                    self.variableShadingOptions.positiveFill.varShading.palette = self.variableShadingOptions.negativeFill.varShading.palName;
+                    break;
+                case "customFills":
+                    self.variableShadingOptions.fill.varShading.palette = null;
+                    self.variableShadingOptions.positiveFill.varShading.palette = null;
+                    self.variableShadingOptions.positiveFill.varShading.palette = null;
+                    self.variableShadingOptions.fill.varShading.palName = null;
+                    self.variableShadingOptions.positiveFill.varShading.palName = null;
+                    self.variableShadingOptions.positiveFill.varShading.palName = null;
+                    self.variableShadingOptions.fill.varShading.gradient = null;
+                    self.variableShadingOptions.positiveFill.varShading.gradient = null;
+                    self.variableShadingOptions.positiveFill.varShading.gradient = null;
+                    break;
+            }
+            console.log("onOkShadingAttribute", self.fillPatternOptions, self.variableShadingOptions, self.shadingOptions);
+            if (isValid()) {
+                close(JSON.stringify({
+                    fillPatternOptions:self.fillPatternOptions, 
+                    variableShadingOptions:self.variableShadingOptions, 
+                    shadingOptions: self.shadingOptions
+                }), 200);
+            }
+            else {
+                DialogUtils.errorMessageDialog(ModalService, self.errorReason);
+            }
 
         };
         // this.onCancelButtonClicked = function () {
@@ -1946,15 +2296,14 @@ exports.shadingAttributeDialog = function (ModalService, callback, fillPatternOp
             $('body').removeClass('modal-open');
             if (data) {
                 var objData = JSON.parse(data);
-                callback(objData.fillPatternOptions, objData.variableShadingOptions, objData.options1);
+                callback(objData.fillPatternOptions, objData.variableShadingOptions, objData.shadingOptions);
             }
         });
     });
 }
 exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
     let wiModal = null;
-
-    function ModalController($scope, wiComponentService, $timeout, close, $compile) {
+    function ModalController($scope, wiComponentService, $timeout, close, $compile, $http) {
         let error = null;
         let self = this;
         wiModal = self;
@@ -2014,8 +2363,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.selectCurveArr.push(selectedCurve);
             item.datasetCurve = selectedCurve;
             self.arr.push(item);
-        })
+        });
         console.log("curveDataset", this.curvesOnDataset, this.arr);
+        let customLimit = [{"id": -1, "datasetCurve": "left"}, {"id": -2, "datasetCurve": "right"}, {"id": -3, "datasetCurve": "custom"}];
+        this.leftLimit = customLimit.concat(self.curvesOnDataset);
         let shadingList = currentTrack.getShadings();
         console.log("shadingList", shadingList);
 
@@ -2031,8 +2382,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             };
             return "fillPattern";
         }
-
-        shadingList.forEach(function (shading, index) {
+        
+        shadingList.forEach(function(shading, index){
             var shadingItem = new Object();
             var shadingProp = shading.getProperties();
             var fillPatternItem = new Object();
@@ -2057,6 +2408,15 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFill);
             var condition3 = (shadingItem.shadingStyle == "variableShading" && !shadingItem.isNegPosFill);
             var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFill);
+
+            var condition3gradient = condition3 && shadingProp.fill.varShading.gradient;
+            var condition4gradient = condition4 && shadingProp.positiveFill.varShading.gradient;
+
+            var condition3palette = condition3 && shadingProp.fill.varShading.palette;
+            var condition4palette = condition4 && shadingProp.positiveFill.varShading.palette;
+
+            var condition3customFills = condition3 && shadingProp.fill.varShading.customFills;
+            var condition4customFills = condition4 && shadingProp.positiveFill.varShading.customFills;
 
             fillPatternItem.fill = {
                 display: condition1,
@@ -2101,40 +2461,43 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             variableShadingItem.fill = {
                 display: condition3,
                 varShading: {
-                    startX: condition3 ? shadingProp.fill.varShading.startX : null,
-                    endX: condition3 ? shadingProp.fill.varShading.endX : null,
-                    gradient: {
-                        startColor: condition3 ? shadingProp.fill.varShading.gradient.startColor : null,
-                        endColor: condition3 ? shadingProp.fill.varShading.gradient.endColor : null
-                    },
-                    palette: {},
-                    values: {}
+                    startX: condition3?shadingProp.fill.varShading.startX:null,
+                    endX: condition3?shadingProp.fill.varShading.endX:null,
+                    gradient: condition3gradient?{
+                        startColor: condition3?shadingProp.fill.varShading.gradient.startColor:null,
+                        endColor: condition3?shadingProp.fill.varShading.gradient.endColor:null
+                    }:null,
+                    palette: condition3palette?(condition3?shadingProp.fill.varShading.palette:null):null,
+                    palName: condition3palette?(condition3?shadingProp.fill.varShading.palName:null):null,
+                    customFills: condition3customFills?(condition3?shadingProp.fill.varShading.customFills:null):null
                 }
             };
             variableShadingItem.positiveFill = {
                 display: condition4,
                 varShading: {
-                    startX: condition4 ? shadingProp.positiveFill.varShading.startX : null,
-                    endX: condition4 ? shadingProp.positiveFill.varShading.endX : null,
-                    gradient: {
-                        startColor: condition4 ? shadingProp.positiveFill.varShading.gradient.startColor : null,
-                        endColor: condition4 ? shadingProp.positiveFill.varShading.gradient.endColor : null
-                    },
-                    palette: {},
-                    values: {}
+                    startX: condition4?shadingProp.positiveFill.varShading.startX:null,
+                    endX: condition4?shadingProp.positiveFill.varShading.endX:null,
+                    gradient: condition4gradient?{
+                        startColor: condition4?shadingProp.positiveFill.varShading.gradient.startColor:null,
+                        endColor: condition4?shadingProp.positiveFill.varShading.gradient.endColor:null
+                    }:null,
+                    palette: condition4palette?( condition4?shadingProp.positiveFill.varShading.palette:null):null,
+                    palName: condition4palette?(condition3?shadingProp.positiveFill.varShading.palName:null):null,
+                    customFills: condition4customFills?( condition4?shadingProp.positiveFill.varShading.customFills:null):null
                 }
             };
             variableShadingItem.negativeFill = {
                 display: condition4,
                 varShading: {
-                    startX: condition4 ? shadingProp.negativeFill.varShading.startX : null,
-                    endX: condition4 ? shadingProp.negativeFill.varShading.endX : null,
-                    gradient: {
-                        startColor: condition4 ? shadingProp.negativeFill.varShading.gradient.startColor : null,
-                        endColor: condition4 ? shadingProp.negativeFill.varShading.gradient.endColor : null
-                    },
-                    palette: {},
-                    values: {}
+                    startX: condition4?shadingProp.negativeFill.varShading.startX:null,
+                    endX: condition4?shadingProp.negativeFill.varShading.endX:null,
+                    gradient: condition4gradient?{
+                        startColor: condition4?shadingProp.negativeFill.varShading.gradient.startColor:null,
+                        endColor: condition4?shadingProp.negativeFill.varShading.gradient.endColor:null
+                    }:null,
+                    palette: condition4palette?( condition4?shadingProp.negativeFill.varShading.palette:null):null,
+                    palName: condition4palette?(condition3?shadingProp.negativeFill.varShading.palName:null):null,
+                    customFills: condition4customFills?( condition4?shadingProp.negativeFill.varShading.customFills:null):null
                 }
             }
             variableShadingItem._index = index;
@@ -2147,6 +2510,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
             self.shadingChanged.push(shadingChangedItem);
+            console.log("variableShadingOptions", self.variableShadingOptions);
         });
         this.curveList.forEach(function (curve, index) {
             let curveOptions = {};
@@ -2320,9 +2684,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             console.log(self.curvesChanged[self.__idx]);
         }
         this.addRowCurve = function () {
-            self.curves.push({
-                _index: self.curves.length
-            });
+            self.curves.push({ _index: self.curves.length });
             console.log(self.curves);
             self.curvesChanged.push({
                 _index: self.curvesChanged.length,
@@ -2339,7 +2701,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.onChangeShading = function (index) {
             if (self.shadingChanged[index].change == '0') self.shadingChanged[index].change = '1';
         }
-        this.removeRowShading = function () { //TODO
+        this.removeRowShading = function () {//TODO
             if (self.shadingChanged[self.__idx].change == '2') self.shadingChanged[self.__idx] = '4';
             else self.shadingChanged[self.__idx].change = '3';
             console.log("removeRowShading", self.shadingChanged[self.__idx], self.__idx);
@@ -2375,8 +2737,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/^.+_/g, leftPart + "_");
             }
         }
-        // this.chooseRightCurve(index) 
-        this.addRowShading = function () {
+        this.addRowShading = function() {
             var shadingItem = {
                 idTrack: currentTrack.id,
                 name: 'xx_yy',
@@ -2428,8 +2789,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             startColor: "#fff",
                             endColor: "#000"
                         },
-                        palette: {},
-                        values: {}
+                        palette: null,
+                        palName: null,
+                        customFills: null
                     }
                 },
                 positiveFill: {
@@ -2441,8 +2803,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             startColor: "#fff",
                             endColor: "#000"
                         },
-                        palette: {},
-                        values: {}
+                        palette: null,
+                        palName: null,
+                        customFills: null
                     }
                 },
                 negativeFill: {
@@ -2454,8 +2817,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             startColor: "#fff",
                             endColor: "#000"
                         },
-                        palette: {},
-                        values: {}
+                        palette: null,
+                        palName: null,
+                        customFills: null
                     }
                 },
 
@@ -2471,36 +2835,60 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.shadingChanged.push(shadingChangedItem);
             console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions, self.shadingChanged);
         }
-        this.validate = function (index) {
-            if (self.shadingArr[index].idLeftLine == self.shadingArr[index].idRightLine) {
+        this.shadingArr.forEach(function(index, item){
+            if(!item.idLeftLine){
+                if(item.type == 'left') item.idLeftLine = -1;
+                if(item.type == 'right') item.idLeftLine = -2;
+                if(item.type == 'custom') item.idLeftLine = -3;
+            }
+        })
+        this.validate = function(index) {
+            if(self.shadingArr[index].idLeftLine == self.shadingArr[index].idRightLine) {
                 DialogUtils.errorMessageDialog(ModalService, "leftCurve and rightCurve cannot be the same!");
                 self.shadingArr[index].idLeftLine = null;
                 self.shadingArr[index].leftFixedValue = 0;
             };
         }
 
-        function updateShadings() {
-            self.shadingChanged.forEach(function (item, index) {
-                if (item.change == "1") {
-                    console.log("111", self.shadingArr[index],
-                        self.fillPatternOptions[index],
-                        self.variableShadingOptions[index]);
-                    let shadingObj = utils.mergeShadingObj(self.shadingArr[index],
-                        self.fillPatternOptions[index],
-                        self.variableShadingOptions[index]);
+        function updateShadings(){
+            console.log("update shadings");
+            self.shadingChanged.forEach(function(item, index){
+                if(item.change == "1") {
+                    console.log("111",self.shadingArr[index],
+                                                     self.fillPatternOptions[index], 
+                                                     self.variableShadingOptions[index]);
+                    let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
+                                                     self.fillPatternOptions[index], 
+                                                     self.variableShadingOptions[index]);
+                    if(shadingObj.idLeftLine < 0) shadingObj.idLeftLine = null;
+                    if(shadingObj.idLeftLine > 0) {
+                        shadingObj.leftFixedValue = null;
+                        shadingObj.idLeftLine = parseInt(shadingObj.idLeftLine);
+                    }
                     console.log(shadingObj);
                     console.log('visualize-+-shading', shadingList[index]);
                     wiApiService.editShading(shadingObj, function (result) {
                         console.log(result, shadingObj);
                         let shadingObjToSet = angular.copy(shadingObj);
-                        shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
-                        shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
-                        // shadingObjToSet.controlCurve = graph.buildCurve({}, utils.getCurveFromId(shadingObj.idControlCurve).data);
-                        shadingObjToSet.controlCurve = findInVisCurveListByIdCurve(shadingObj.idControlCurve);
-                        console.log("LEFT/RIGHT CURVE", shadingObjToSet);
-                        shadingList[index].setProperties(shadingObjToSet);
-                        $timeout(function () {
-                            currentTrack.plotAllDrawings();
+                        wiApiService.getPalettes(function(paletteList){
+                            shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
+                            shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
+                            shadingObjToSet.controlCurve = findInVisCurveListByIdCurve(shadingObj.idControlCurve);
+                            if(!shadingObj.isNegPosFill) {
+                                if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette) 
+                                    shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
+                            }
+                            else {
+                                if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette) 
+                                    shadingObjToSet.positiveFill.varShading.palette = paletteList[shadingObjToSet.positiveFill.varShading.palName];
+                                if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette) 
+                                    shadingObjToSet.negativeFill.varShading.palette = paletteList[shadingObjToSet.negativeFill.varShading.palName];
+                            }
+                            console.log("LEFT/RIGHT CURVE", shadingObjToSet);
+                            shadingList[index].setProperties(shadingObjToSet);
+                            $timeout(function() {
+                                currentTrack.plotAllDrawings();
+                            });
                         });
                     });
                 }
@@ -2532,56 +2920,46 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         self.fillPatternOptions[index],
                         self.variableShadingOptions[index]);
                     console.log("shadingObj", shadingObj);
-                    wiApiService.createShading(shadingObj, function (shading) {
-                        let shadingModel = utils.shadingToTreeConfig(shading);
-                        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-                        let lineObj1 = null;
-                        let lineObj2 = null;
-                        if (!shadingModel.idRightLine) return;
-                        if (!shadingModel.idLeftLine) {
-                            lineObj1 = findInVisCurveListByIdLine(shading.idRightLine);
-                            wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                        } else {
-                            lineObj1 = findInVisCurveListByIdLine(shading.idLeftLine);
-                            lineObj2 = findInVisCurveListByIdLine(shading.idRightLine);
-                            if (lineObj1 && lineObj2)
-                                wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
-                            else {
-                                console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
+                    if(shadingObj.idLeftLine < 0) shadingObj.idLeftLine = null;
+                    if(shadingObj.idLeftLine > 0) shadingObj.leftFixedValue = null;
+                    wiApiService.createShading(shadingObj, function(shading) {
+                        wiApiService.getPalettes(function(paletteList){
+
+                            let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
+                            let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                            let lineObj1 = null;
+                            let lineObj2 = null;
+                            if(!shadingModel.idRightLine) return;
+                            if(!shadingModel.idLeftLine) {
+                                lineObj1 = findInVisCurveListByIdLine(shading.idRightLine);
+                                wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                            } else {
+                                lineObj1 = findInVisCurveListByIdLine(shading.idLeftLine);
+                                lineObj2 = findInVisCurveListByIdLine(shading.idRightLine);
+                                if (lineObj1 && lineObj2) 
+                                    wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
+                                else {
+                                    console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
+                                }
                             }
-                        }
+                        })
                     })
                 }
             })
         }
         // Dialog buttons
-        /*this.defineButtonClicked = function(index){
-                var shading = self.shadingArr[index];
-                if(shading.shadingStyle == "fillPattern") {
-                    DialogUtils.fillPatternSettingDialog(ModalService, function (options) {
-                    }, self.fillPatternOptions[index], self.shadingArr[index] );
-                    return;
-                }
-                if(shading.shadingStyle == "variableShading") {
-                    DialogUtils.variableShadingDialog(ModalService, function(options) {
-                    }, self.variableShadingOptions[index], self.curveList);
-                    return;
-                }
-                else return;
-        }*/
         this.defineButtonClicked = function (index) {
             var shading = self.shadingArr[index];
             console.log("shadingAttributeOri88888", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
 
-            DialogUtils.shadingAttributeDialog(ModalService, function (fillPatternOptions, variableShadingOptions, options1) {
-                console.log("shadingAttribute", fillPatternOptions, variableShadingOptions, options1);
+            DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(fillPatternOptions, variableShadingOptions, shadingOptions, curvesOnDataset){
+                console.log("shadingAttribute", fillPatternOptions, variableShadingOptions, shadingOptions);
                 // console.log("shadingAttributeOri", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
-                if (fillPatternOptions) self.fillPatternOptions[index] = fillPatternOptions;
-                if (variableShadingOptions) self.variableShadingOptions[index] = variableShadingOptions;
-                if (options1) self.shadingArr[index] = options1;
-                // if(selectCurve) self.fillPatternOptions[index] = selectCurve;
+                if(fillPatternOptions) self.fillPatternOptions[index] = fillPatternOptions;
+                if(variableShadingOptions) self.variableShadingOptions[index] = variableShadingOptions;
+                if(shadingOptions) self.shadingArr[index] = shadingOptions;
 
-            }, self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index], self.curveList);
+            }, self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index], self.curveList, self.curvesOnDataset);
 
         }
         this.lineStyleButtonClicked = function (index, $event) {
@@ -2728,8 +3106,23 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             });
         };
-
+        this.setLimit2 = function(index) {
+            if(self.shadingArr[index].idLeftLine == -1) {
+                self.shadingArr[index].leftFixedValue = findInVisCurveListByIdLine(self.shadingArr[index].idRightLine).minX;
+            }
+            if(self.shadingArr[index].idLeftLine == -2) {
+                self.shadingArr[index].leftFixedValue = findInVisCurveListByIdLine(self.shadingArr[index].idRightLine).maxX;
+            }
+            if(self.shadingArr[index].idLeftLine > 0) self.shadingArr[index].leftFixedValue = null;
+        }
+        this.matchIdLeftLine = function(index) {
+            if(self.shadingArr[index].idLeftLine > 0) {
+                self.shadingArr[index].leftFixedValue = null;
+                $('#fixedVal').prop('disabled', true);
+            }
+        }
         function validateAll() {
+            // return true;
             for (var index in self.shadingChanged) {
                 if (!self.shadingArr[index].idRightLine) {
                     return false;
@@ -2776,9 +3169,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        if (options.shadingOnly) {
-            wiModal.shadingOnly = true
-        };
+        if (options.shadingOnly) { wiModal.shadingOnly = true };
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
@@ -3187,17 +3578,14 @@ exports.colorPickerDialog1 = function (ModalService, currentColor, callback) {
             }
         }).on('changeColor', function (evt) {
             var temp = evt.color.toRGB();
-            thisTimeout(function () {
-                wiModal.color = temp;
-            });
+            thisTimeout(function () { wiModal.color = temp; });
         });
         $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
 
-            if (callback)
-                if (colorStr) callback(colorStr);
+            if (callback) if (colorStr) callback(colorStr);
         });
     });
 }
@@ -3211,662 +3599,88 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
     }
 
     const ColorTemps = [
-        [{
-                name: 'red-dark',
-                color: {
-                    r: 150,
-                    g: 0,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'orange-dark',
-                color: {
-                    r: 150,
-                    g: 50,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'yellow-dark',
-                color: {
-                    r: 150,
-                    g: 150,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'green-dark',
-                color: {
-                    r: 0,
-                    g: 150,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'cyan-dark',
-                color: {
-                    r: 0,
-                    g: 150,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'blue-dark',
-                color: {
-                    r: 0,
-                    g: 0,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'violet-dark',
-                color: {
-                    r: 50,
-                    g: 0,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'pink-dark',
-                color: {
-                    r: 150,
-                    g: 0,
-                    b: 50,
-                    a: 1
-                }
-            },
-        ],
-        [{
-                name: 'red-lighter',
-                color: {
-                    r: 200,
-                    g: 0,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'orange-lighter',
-                color: {
-                    r: 200,
-                    g: 100,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'yellow-lighter',
-                color: {
-                    r: 200,
-                    g: 200,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'green-lighter',
-                color: {
-                    r: 0,
-                    g: 200,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'cyan-lighter',
-                color: {
-                    r: 0,
-                    g: 200,
-                    b: 200,
-                    a: 1
-                }
-            },
-            {
-                name: 'blue-lighter',
-                color: {
-                    r: 0,
-                    g: 0,
-                    b: 200,
-                    a: 1
-                }
-            },
-            {
-                name: 'violet-lighter',
-                color: {
-                    r: 100,
-                    g: 0,
-                    b: 200,
-                    a: 1
-                }
-            },
-            {
-                name: 'pink-lighter',
-                color: {
-                    r: 200,
-                    g: 0,
-                    b: 100,
-                    a: 1
-                }
-            },
-        ],
-        [{
-                name: 'red-true',
-                color: {
-                    r: 255,
-                    g: 0,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'orange-true',
-                color: {
-                    r: 255,
-                    g: 155,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'yellow-true',
-                color: {
-                    r: 255,
-                    g: 255,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'green-true',
-                color: {
-                    r: 0,
-                    g: 255,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'cyan-true',
-                color: {
-                    r: 0,
-                    g: 255,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'blue-true',
-                color: {
-                    r: 0,
-                    g: 0,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'violet-true',
-                color: {
-                    r: 155,
-                    g: 0,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'pink-true',
-                color: {
-                    r: 255,
-                    g: 0,
-                    b: 155,
-                    a: 1
-                }
-            },
-        ],
-        [{
-                name: 'red-lighter',
-                color: {
-                    r: 255,
-                    g: 50,
-                    b: 50,
-                    a: 1
-                }
-            },
-            {
-                name: 'orange-lighter',
-                color: {
-                    r: 255,
-                    g: 155,
-                    b: 50,
-                    a: 1
-                }
-            },
-            {
-                name: 'yellow-lighter',
-                color: {
-                    r: 255,
-                    g: 255,
-                    b: 50,
-                    a: 1
-                }
-            },
-            {
-                name: 'green-lighter',
-                color: {
-                    r: 50,
-                    g: 255,
-                    b: 50,
-                    a: 1
-                }
-            },
-            {
-                name: 'cyan-lighter',
-                color: {
-                    r: 50,
-                    g: 255,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'blue-lighter',
-                color: {
-                    r: 50,
-                    g: 50,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'violet-lighter',
-                color: {
-                    r: 155,
-                    g: 50,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'pink-lighter',
-                color: {
-                    r: 255,
-                    g: 50,
-                    b: 155,
-                    a: 1
-                }
-            },
-        ],
-        [{
-                name: 'red-lighter',
-                color: {
-                    r: 255,
-                    g: 100,
-                    b: 100,
-                    a: 1
-                }
-            },
-            {
-                name: 'orange-lighter',
-                color: {
-                    r: 255,
-                    g: 155,
-                    b: 100,
-                    a: 1
-                }
-            },
-            {
-                name: 'yellow-lighter',
-                color: {
-                    r: 255,
-                    g: 255,
-                    b: 100,
-                    a: 1
-                }
-            },
-            {
-                name: 'green-lighter',
-                color: {
-                    r: 100,
-                    g: 255,
-                    b: 100,
-                    a: 1
-                }
-            },
-            {
-                name: 'cyan-lighter',
-                color: {
-                    r: 100,
-                    g: 255,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'blue-lighter',
-                color: {
-                    r: 100,
-                    g: 100,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'violet-lighter',
-                color: {
-                    r: 155,
-                    g: 100,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'pink-lighter',
-                color: {
-                    r: 255,
-                    g: 100,
-                    b: 155,
-                    a: 1
-                }
-            },
-        ],
-        [{
-                name: 'red-light',
-                color: {
-                    r: 255,
-                    g: 150,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'orange-light',
-                color: {
-                    r: 255,
-                    g: 155,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'yellow-light',
-                color: {
-                    r: 255,
-                    g: 255,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'green-light',
-                color: {
-                    r: 150,
-                    g: 255,
-                    b: 150,
-                    a: 1
-                }
-            },
-            {
-                name: 'cyan-light',
-                color: {
-                    r: 155,
-                    g: 255,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'blue-light',
-                color: {
-                    r: 150,
-                    g: 150,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'violet-light',
-                color: {
-                    r: 155,
-                    g: 150,
-                    b: 255,
-                    a: 1
-                }
-            },
-            {
-                name: 'pink-light',
-                color: {
-                    r: 255,
-                    g: 150,
-                    b: 155,
-                    a: 1
-                }
-            },
-        ],
-        [{
-                name: 'black',
-                color: {
-                    r: 0,
-                    g: 0,
-                    b: 0,
-                    a: 1
-                }
-            },
-            {
-                name: 'black-gray',
-                color: {
-                    r: 37,
-                    g: 37,
-                    b: 37,
-                    a: 1
-                }
-            },
-            {
-                name: 'gray-dark',
-                color: {
-                    r: 74,
-                    g: 74,
-                    b: 74,
-                    a: 1
-                }
-            },
-            {
-                name: 'gray',
-                color: {
-                    r: 111,
-                    g: 111,
-                    b: 111,
-                    a: 1
-                }
-            },
-            {
-                name: 'gray-light',
-                color: {
-                    r: 148,
-                    g: 148,
-                    b: 148,
-                    a: 1
-                }
-            },
-            {
-                name: 'white-gray',
-                color: {
-                    r: 187,
-                    g: 187,
-                    b: 187,
-                    a: 1
-                }
-            },
-            {
-                name: 'white',
-                color: {
-                    r: 220,
-                    g: 220,
-                    b: 220,
-                    a: 1
-                }
-            },
-            {
-                name: 'white',
-                color: {
-                    r: 255,
-                    g: 255,
-                    b: 255,
-                    a: 1
-                }
-            },
+        [
+            { name: 'red-dark', color: { r: 150, g: 0, b: 0, a: 1 } },
+            { name: 'orange-dark', color: { r: 150, g: 50, b: 0, a: 1 } },
+            { name: 'yellow-dark', color: { r: 150, g: 150, b: 0, a: 1 } },
+            { name: 'green-dark', color: { r: 0, g: 150, b: 0, a: 1 } },
+            { name: 'cyan-dark', color: { r: 0, g: 150, b: 150, a: 1 } },
+            { name: 'blue-dark', color: { r: 0, g: 0, b: 150, a: 1 } },
+            { name: 'violet-dark', color: { r: 50, g: 0, b: 150, a: 1 } },
+            { name: 'pink-dark', color: { r: 150, g: 0, b: 50, a: 1 } },
+        ], [
+            { name: 'red-lighter', color: { r: 200, g: 0, b: 0, a: 1 } },
+            { name: 'orange-lighter', color: { r: 200, g: 100, b: 0, a: 1 } },
+            { name: 'yellow-lighter', color: { r: 200, g: 200, b: 0, a: 1 } },
+            { name: 'green-lighter', color: { r: 0, g: 200, b: 0, a: 1 } },
+            { name: 'cyan-lighter', color: { r: 0, g: 200, b: 200, a: 1 } },
+            { name: 'blue-lighter', color: { r: 0, g: 0, b: 200, a: 1 } },
+            { name: 'violet-lighter', color: { r: 100, g: 0, b: 200, a: 1 } },
+            { name: 'pink-lighter', color: { r: 200, g: 0, b: 100, a: 1 } },
+        ], [
+            { name: 'red-true', color: { r: 255, g: 0, b: 0, a: 1 } },
+            { name: 'orange-true', color: { r: 255, g: 155, b: 0, a: 1 } },
+            { name: 'yellow-true', color: { r: 255, g: 255, b: 0, a: 1 } },
+            { name: 'green-true', color: { r: 0, g: 255, b: 0, a: 1 } },
+            { name: 'cyan-true', color: { r: 0, g: 255, b: 255, a: 1 } },
+            { name: 'blue-true', color: { r: 0, g: 0, b: 255, a: 1 } },
+            { name: 'violet-true', color: { r: 155, g: 0, b: 255, a: 1 } },
+            { name: 'pink-true', color: { r: 255, g: 0, b: 155, a: 1 } },
+        ], [
+            { name: 'red-lighter', color: { r: 255, g: 50, b: 50, a: 1 } },
+            { name: 'orange-lighter', color: { r: 255, g: 155, b: 50, a: 1 } },
+            { name: 'yellow-lighter', color: { r: 255, g: 255, b: 50, a: 1 } },
+            { name: 'green-lighter', color: { r: 50, g: 255, b: 50, a: 1 } },
+            { name: 'cyan-lighter', color: { r: 50, g: 255, b: 255, a: 1 } },
+            { name: 'blue-lighter', color: { r: 50, g: 50, b: 255, a: 1 } },
+            { name: 'violet-lighter', color: { r: 155, g: 50, b: 255, a: 1 } },
+            { name: 'pink-lighter', color: { r: 255, g: 50, b: 155, a: 1 } },
+        ], [
+            { name: 'red-lighter', color: { r: 255, g: 100, b: 100, a: 1 } },
+            { name: 'orange-lighter', color: { r: 255, g: 155, b: 100, a: 1 } },
+            { name: 'yellow-lighter', color: { r: 255, g: 255, b: 100, a: 1 } },
+            { name: 'green-lighter', color: { r: 100, g: 255, b: 100, a: 1 } },
+            { name: 'cyan-lighter', color: { r: 100, g: 255, b: 255, a: 1 } },
+            { name: 'blue-lighter', color: { r: 100, g: 100, b: 255, a: 1 } },
+            { name: 'violet-lighter', color: { r: 155, g: 100, b: 255, a: 1 } },
+            { name: 'pink-lighter', color: { r: 255, g: 100, b: 155, a: 1 } },
+        ], [
+            { name: 'red-light', color: { r: 255, g: 150, b: 150, a: 1 } },
+            { name: 'orange-light', color: { r: 255, g: 155, b: 150, a: 1 } },
+            { name: 'yellow-light', color: { r: 255, g: 255, b: 150, a: 1 } },
+            { name: 'green-light', color: { r: 150, g: 255, b: 150, a: 1 } },
+            { name: 'cyan-light', color: { r: 155, g: 255, b: 255, a: 1 } },
+            { name: 'blue-light', color: { r: 150, g: 150, b: 255, a: 1 } },
+            { name: 'violet-light', color: { r: 155, g: 150, b: 255, a: 1 } },
+            { name: 'pink-light', color: { r: 255, g: 150, b: 155, a: 1 } },
+        ], [
+            { name: 'black', color: { r: 0, g: 0, b: 0, a: 1 } },
+            { name: 'black-gray', color: { r: 37, g: 37, b: 37, a: 1 } },
+            { name: 'gray-dark', color: { r: 74, g: 74, b: 74, a: 1 } },
+            { name: 'gray', color: { r: 111, g: 111, b: 111, a: 1 } },
+            { name: 'gray-light', color: { r: 148, g: 148, b: 148, a: 1 } },
+            { name: 'white-gray', color: { r: 187, g: 187, b: 187, a: 1 } },
+            { name: 'white', color: { r: 220, g: 220, b: 220, a: 1 } },
+            { name: 'white', color: { r: 255, g: 255, b: 255, a: 1 } },
         ],
     ];
-    var colorCustoms = [{
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 1
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 2
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 3
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 4
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 5
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 6
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 7
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 8
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 9
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 10
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 11
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 12
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 13
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 14
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 15
-        },
-        {
-            color: {
-                r: 255,
-                g: 255,
-                b: 254,
-                a: 1
-            },
-            id: 16
-        },
+    var colorCustoms = [
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 1 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 2 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 3 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 4 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 5 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 6 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 7 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 8 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 9 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 10 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 11 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 12 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 13 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 14 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 15 },
+        { color: { r: 255, g: 255, b: 254, a: 1 }, id: 16 },
     ];
 
     let modalCtrl = null;
@@ -3904,9 +3718,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
         };
         self.addToCustom = function () {
             if (self.currentFocus > 0) {
-                self.CpCustoms[self.CpCustoms.map(function (e) {
-                    return e.id;
-                }).indexOf(self.currentFocus)].color = self.currentColor;
+                self.CpCustoms[self.CpCustoms.map(function (e) { return e.id; }).indexOf(self.currentFocus)].color = self.currentColor;
             } else {
                 console.log('please choose one box');
             }
@@ -3959,16 +3771,13 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             }
         }
         $('#cp').colorpicker(cpOptions).on('changeColor', function (event) {
-            timeoutFunc(function () {
-                modalCtrl.currentColor = event.color.toRGB();
-            });
+            timeoutFunc(function () { modalCtrl.currentColor = event.color.toRGB(); });
         });
         $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (callback)
-                if (colorStr) callback(colorStr);
+            if (callback) if (colorStr) callback(colorStr);
         });
     })
 }
@@ -4065,16 +3874,20 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
     });
 }
 */
-exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback) {
-    function ModalController(wiComponentService, close) {
+exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCrossplot, callback){
+    function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let graph = wiComponentService.getComponent('GRAPH');
 
         this.datasetsInWell = new Array();
         this.curvesInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
+        console.log("viCrossplot", viCrossplot);
         console.log("Crossplot", wiCrossplotCtrl);
+        this.cross = viCrossplot.getProperties();
+        console.log("Cross", this.cross);
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.well.children.forEach(function (child) {
             if (child.type == 'dataset') self.datasetsInWell.push(child);
@@ -4090,30 +3903,18 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             self.curvesOnDataset.push(curvesOnDatasetItem);
         });
         console.log("curve", this.curvesOnDataset);
-
-        this.props = {
-            scales: {
-
-            },
-            discriminators: {
-
-            },
-            axisColor: {
-
-            },
-            options: {
-
-            },
-            referenceColor: {
-
-            }
-        };
+        let props = viCrossplot.getProperties();
+        this.pointSet = props.pointSet;
+        this.pointSet.idCurveX = props.pointSet.curveX.idCurve;
+        this.pointSet.idCurveY = props.pointSet.curveY.idCurve;
+        console.log("pointSet", this.pointSet);
         this.compare = false;
-        this.selectPointSymbol = ["Cicle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+
         // modal button
         this.colorCurve = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                self.props.general.color = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.props.pointSet.pointColor, function (colorStr) {
+                self.props.pointSet.pointColor = colorStr;
             });
         };
         this.colorCrossplot = function () {
@@ -4127,11 +3928,43 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.addRow = function () {
             console.log("addRowClicked");
         };
+
+        function updateScalesTab() {
+            let crossplotObj = {};
+            let scalesObj = angular.copy(self.props.scales);
+            let pointsets = angular.copy(self.props.scales);
+            wiApiService.dataCurve(scalesObj.idCurveX, function (xCurveData) {
+                wiApiService.dataCurve(scalesObj.idCurveY, function (yCurveData) {
+                    if (scalesObj.idCurveZ) {
+                        wiApiService.dataCurve(scalesObj.idCurveZ, function (zCurveData) {
+                            scalesObj.curveZ = graph.buildCurve({ idCurve: scalesObj.idCurveZ }, zCurveData);
+                        })
+                    }
+                    scalesObj.curveX = graph.buildCurve({ idCurve: scalesObj.idCurveX }, xCurveData);
+                    scalesObj.curveY = graph.buildCurve({ idCurve: scalesObj.idCurveY }, yCurveData);
+                    scalesObj.idCrossPlot = wiCrossplotCtrl.id;
+
+                    pointsets.curveX = undefined;
+                    pointsets.curveY = undefined;
+                    pointsets.idCrossPlot = wiCrossplotCtrl.id;
+                    console.log(scalesObj);
+                    viCrossplot.setProperties(scalesObj);
+
+                    /*wiApiService.editPointSet(pointsets, function(res){
+                        console.log("OK:", res);
+                        viCrossplot.setProperties(scalesObj);
+                    });*/
+                });
+            });
+
+        };
+
         this.onOkButtonClicked = function () {
             close(self);
         };
         this.onApplyButtonClicked = function () {
             console.log("onApplyButtonClicked");
+            updateScalesTab();
         };
         this.onCancelButtonClicked = function () {
             close(null);
@@ -4297,9 +4130,7 @@ exports.polygonManagerDialog = function (ModalService, callback) {
         };
         this.addRow = function () {
             console.log("addRowButtonClicked");
-            self.polygonsCreated.push({
-                _index: self.polygonsCreated.length
-            });
+            self.polygonsCreated.push({ _index: self.polygonsCreated.length });
             self.polygonChanged.push({
                 change: '2',
                 _index: self.polygonChanged.length
@@ -4464,12 +4295,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                 self.histogramProps.color = colorStr;
             });
         }
-
-        this.onCancelButtonClicked = function () {
-            console.log("on cancel clicked");
-            close(histogramModel.properties);
-        }
-        this.onOKButtonClicked = function () {
+        this.onCloseButtonClicked = function () {
             console.log("on OK clicked");
             histogramModel.properties = self.histogramProps;
             close(histogramModel.properties);

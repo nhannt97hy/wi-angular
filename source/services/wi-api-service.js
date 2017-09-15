@@ -4,9 +4,12 @@ const moduleName = 'wi-api-service';
 let app = angular.module(moduleName, []);
 
 const BASE_URL = 'http://54.169.109.34';
-//const BASE_URL = 'http://localhost:3000';
+// const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
+const REGISTER = '/register';
+const LOGIN = '/login';
+
 const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
@@ -83,7 +86,7 @@ const GET_CROSSPLOT = '/project/well/cross-plot/info';
 const DELETE_CROSSPLOT = '/project/well/cross-plot/delete';
 
 const CREATE_POINTSET = '/project/well/cross-plot/point-set/new';
-const EDIT_POINTET = '/project/well/cross-plot/point-set/edit';
+const EDIT_POINTSET = '/project/well/cross-plot/point-set/edit';
 const GET_POINTSET = '/project/well/cross-plot/point-set/info';
 const DELETE_POINTSET = '/project/well/cross-plot/point-set/delete';
 
@@ -96,12 +99,15 @@ const CREATE_DISCRIM = '/project/well/cross-plot/discrim/new';
 const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
 const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
+const GET_PALETTES = '/pal/all';
 
 const CREATE_HISTOGRAM = '/project/well/histogram/new';
 const EDIT_HISTOGRAM = '/project/well/histogram/edit';
 const GET_HISTOGRAM = '/project/well/histogram/info';
 const DELETE_HISTOGRAM = '/project/well/histogram/delete';
 
+const GET_CUSTOM_FILLS = '/custom-fill/all';
+const SAVE_CUSTOM_FILLS = '/custom-fill/save';
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -139,10 +145,13 @@ Service.prototype.GET_SHADING = GET_SHADING;
 
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
-
 Service.prototype.CREATE_HISTOGRAM = CREATE_HISTOGRAM;
 Service.prototype.EDIT_HISTOGRAM = EDIT_HISTOGRAM;
 Service.prototype.DELTE_HISTOGRAM = DELETE_HISTOGRAM;
+
+Service.prototype.GET_PALETTES = GET_PALETTES;
+Service.prototype.GET_CUSTOM_FILLS = GET_CUSTOM_FILLS;
+Service.prototype.SAVE_CUSTOM_FILLS = SAVE_CUSTOM_FILLS;
 
 Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
@@ -203,6 +212,18 @@ Service.prototype.delete = function (route, payload) {
             reject
         );
     });
+}
+
+Service.prototype.register = function (data, callback) {
+    if (!data || !callback) return;
+    let self = this;
+    this.post(REGISTER, data)
+        .then(function (ret) {
+            callback(ret);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
 }
 
 Service.prototype.postWithFile = function (route, dataPayload) {
@@ -1128,4 +1149,34 @@ app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);
 });
 
+Service.prototype.getPalettes = function (callback) {
+    let self = this;
+    this.post(GET_PALETTES, {})
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getCustomFills = function (callback) {
+    let self = this;
+    this.post(GET_CUSTOM_FILLS, {})
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.saveCustomFills = function (customFills, callback) {
+    let self = this;
+    this.post(SAVE_CUSTOM_FILLS, customFills)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
 exports.name = moduleName;

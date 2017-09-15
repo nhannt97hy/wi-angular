@@ -120,9 +120,8 @@ let app = angular.module('wiapp',
         'ngSanitize',
         'ui.select'
     ]);
-app.controller('AppController', function ($scope, $rootScope, $timeout,
-    $compile, wiComponentService,
-    ModalService, wiApiService) {
+
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -197,4 +196,16 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     $(window).on('resize', function () {
         layoutManager.updateSize();
     });
+}
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+/*
+    DialogUtils.authenticationDialog(ModalService, function (userInfo) {
+        console.log(userInfo);
+        window.localStorage.username = userInfo.username;
+        window.localStorage.password = userInfo.password;
+        window.localStorage.token = userInfo.token;
+        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    });
+*/
+    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
 });

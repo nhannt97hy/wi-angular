@@ -28,8 +28,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return "Empty";
     }
     this.linkModels = function () {
-        if (self.histogramModel.properties.idCurve) 
+        if (self.histogramModel.properties.idCurve) {
             self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+            if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                self.currentCurveId = self.histogramModel.properties.idCurve;
+                loadCurve(self.currentCurveId);
+            }
+            else {
+                self.visHistogram.signal('histogram-update', "no load curve");
+            }
+        }
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
@@ -40,7 +48,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
 
             console.log(self.zoneArr);
-            self.histogramModel.properties.histogramTitle = getHistogramTitle();            
+            self.histogramModel.properties.histogramTitle = getHistogramTitle();
         } 
     }
     this.getZoneName = function() {
@@ -63,8 +71,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
     };
-
-    
 
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
@@ -167,7 +173,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .open(event.clientX, event.clientY, self.contextMenu);
     }
 
-    function buildConfigFromHistogramModel(histogramModel, callback) {
+    function buildConfigFromHistogramModel(histogramModel) {
         var config = {
             idHistogram: histogramModel.properties.idHistogram,
             name: histogramModel.properties.name,
@@ -208,21 +214,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return config;
     }
 
-    this.createVisualizeHistogram = function(histogram) {
+    this.createVisualizeHistogram = function(histogramModel) {
         var elem = document.getElementById(self.histogramAreaId);
         console.log('createHistogram:' , self.histogramAreaId, elem);
-        config = buildConfigFromHistogramModel(histogram);
-        self.visHistogram = graph.createHistogram(config, elem);
-        if (histogram.properties.idCurve) loadCurve(histogram);
+        self.visHistogram = graph.createHistogram(histogramModel, elem);
+        if (self.visHistogram.idCurve) loadCurve(self.visHistogram.idCurve);
     }
-    function loadCurve(histogramModel) {
-        wiApiService.dataCurve(histogramModel.properties.idCurve, function(data) {
-            if(self.visHistogram) self.visHistogram.setCurve(data);
+
+    function loadCurve(idCurve) {
+        wiApiService.dataCurve(idCurve, function(data) {
+            console.log('load Curve');
+            if(self.visHistogram) {
+                self.visHistogram.setCurve(data);
+                self.visHistogram.signal('histogram-update', "linh tinh");
+            }
         });
-    }
-    this.addCurve = function(curveId, histogram) {
-        histogram.properties.idCurve = idCurve;
-        loadCurve(histogram);
     }
 }
 
