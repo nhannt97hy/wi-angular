@@ -3884,93 +3884,114 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         });
     });
 }
-exports.polygonManagerDialog = function (ModalService, callback) {
-    function ModalController($scope, wiComponentService, close) {
+exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
+    function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
-        this.polygonChanged = new Array;
-        this.polygonsCreated = new Array;
-        this.data = [{
-            data: '313232,323212',
-            polygonColor: '#ccc',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: false
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }];
-        this.data.forEach(function (item, index) {
-            let polygonsCreatedItem = item;
-            let polygonChangedItem = {};
-            polygonsCreatedItem._index = index;
-            polygonChangedItem = {
-                change: '0',
-                _index: index
-            };
-            self.polygonsCreated.push(polygonsCreatedItem);
-            self.polygonChanged.push(polygonChangedItem);
-        });
-        this.getPolygons = function () {
-            return self.polygonsCreated.filter(function (item, index) {
-                return self.polygonChanged[index].change != '3';
-            });
-        };
-        this.__idx = null;
-        this.setClickedRow = function (index) {
-            $scope.selectedRow = index;
-            self.__idx = self.getPolygons()[index]._index;
+        let change = {
+            unchanged: 0,
+            created: 1,
+            updated: 2,
+            deleted: 3,
+            uncreated: 4,
         }
-        this.onChange = function (index) {
-            if (self.polygonChanged[index].change == '0') self.polygonChanged[index].change = '1';
+        $scope.change = change;
+        function init() {
+            self.polygons = new Array();        
+            angular.copy(wiD3Crossplot.getPolygons()).forEach(function (polygonItem, index) {
+                polygonItem.points = JSON.stringify(polygonItem.points);
+                polygonItem.change = change.unchanged;
+                polygonItem.index = index;
+                self.polygons.push(polygonItem);
+            });
+        }
+        init();
+        this.getPolygons = function () {
+            return self.polygons.filter(function (item, index) {
+               return (item.change != change.deleted && item.change != change.uncreated);
+           });
+        }
+        this.__idx = 0;
+        $scope.selectedRow = 0;
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+            self.__idx = self.getPolygons()[indexRow].index;
+        }
+        this.onChange = function(index) {
+            if(self.polygons[index].change == change.unchanged) self.polygons[index].change = change.updated;
         }
         // modal buttons
         this.removeRow = function () {
-            console.log("removeRowButtonClicked");
-            if (self.polygonChanged[self.__idx].change == '2') self.polygonChanged[self.__idx].change = '4';
-            else self.polygonChanged[self.__idx].change = '3';
+            if (!self.polygons[self.__idx]) return;
+            if(self.polygons[self.__idx].change == change.created) {
+                self.polygons[self.__idx].change = change.uncreated;
+            } else {
+                self.polygons[self.__idx].change = change.deleted;
+            }
+            if (self.getPolygons().length) {
+                self.setClickedRow(0);
+            }
         };
         this.addRow = function () {
-            console.log("addRowButtonClicked");
-            self.polygonsCreated.push({ _index: self.polygonsCreated.length });
-            self.polygonChanged.push({
-                change: '2',
-                _index: self.polygonChanged.length
+            // self.polygonsCreated.push({index: self.polygonsCreated.length});
+            self.polygons.push({
+                change: change.created,
+                index: self.polygons.length,
+                display: true
             });
-            console.log("polygonChanged", this.polygonChanged);
         };
-        this.polygonLineColor = function (index) {
-            console.log("polygonLineColorButtonClick");
-            // DialogUtils.colorPickerDialog(ModalService, self.getPolygons[index].polygonColor, function (colorStr) {
-            //     self.getPolygons[index].polygonColor = colorStr;
-            // });
-        }
-        this.createPolygon = function (index) {
-            console.log("createPolygonButtonClicked");
+        this.drawPolygon = function (index) {
             $('#polygon-modal').modal('hide');
+            wiD3Crossplot.drawPolygon(self.polygons[index].idPolygon, function (drawingPolygon) {
+                $('#polygon-modal').modal('show');
+                if (self.polygons[index].change == change.unchanged) {
+                    self.polygons[index].change = change.updated;
+                }
+                self.polygons[index].lineStyle = drawingPolygon.lineStyle;
+                self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+            });
+        }
+        this.polygonLineColor = function (index) {
+            dialogUtils.colorPickerDialog(ModalService, self.polygons[index].lineStyle, function (colorStr) {
+                self.polygons[index].lineStyle = colorStr;
+            });
+        }
+        function sendPolygonsAPIs() {
+            const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
+            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged).map(unchangedPolygon => {
+                unchangedPolygon.points = JSON.parse(unchangedPolygon.points);
+                return unchangedPolygon;
+            });
+            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created).map(createdPolygon => {
+                createdPolygon.points = JSON.parse(createdPolygon.points);
+                createdPolygon.idCrossPlot = idCrossPlot;
+                createdPolygon.change = change.unchanged;
+                wiApiService.createPolygon(createdPolygon);
+                return createdPolygon;
+            });
+            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated).map(updatedPolygon => {
+                updatedPolygon.points = JSON.parse(updatedPolygon.points);
+                updatedPolygon.idCrossPlot = idCrossPlot;
+                updatedPolygon.change = change.unchanged;
+                wiApiService.editPolygon(updatedPolygon);
+                return updatedPolygon;
+            });
+            self.polygons.filter((polygon) => polygon.change == change.deleted).map(deletedPolygon => {
+                deletedPolygon.idCrossPlot = idCrossPlot;
+                deletedPolygon.change = change.deleted;
+                wiApiService.removePolygon(deletedPolygon.idPolygon);
+            });
+            wiD3Crossplot.initPolygons(unchangedPolygons.concat(createdPolygons, updatedPolygons));
+            init();
         }
         this.onOkButtonClicked = function () {
-            close(self);
+            sendPolygonsAPIs();
+            close(null);
         };
-        this.onApplyButtonClicked = function () {
-            console.log("onApplyButtonClicked");
+        this.onApplyButtonClicked = function() {
+            sendPolygonsAPIs();
         };
         this.onCancelButtonClicked = function () {
             close(null);
@@ -3985,9 +4006,9 @@ exports.polygonManagerDialog = function (ModalService, callback) {
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
+            $('.modal').remove();
             $('body').removeClass('modal-open');
-            if (!ret) return;
-            callback(ret);
+            if (ret && callback) callback(ret);
         });
     });
 };

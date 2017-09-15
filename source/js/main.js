@@ -146,8 +146,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
     
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
-    utils.bindFunctions(globalHandlers, logplotHandlers, functionBindingProp);
-    utils.bindFunctions(globalHandlers, crossplotHanders, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
     utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
 

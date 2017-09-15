@@ -1448,6 +1448,15 @@ function openCrossplotTab(crossplotModel, callback) {
                             topDepth: wellProps.topDepth,
                             bottomDepth: wellProps.bottomDepth
                         });
+                        if (crossplot.polygons && crossplot.polygons.length) {
+                            for (let polygon of crossplot.polygons) {
+                                try {
+                                    polygon.points = JSON.parse(polygon.points);
+                                } catch (error) {}
+                            }
+                            wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
+                        }
+                        
                     }
                 })
             })
