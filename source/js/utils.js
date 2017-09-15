@@ -144,11 +144,15 @@ function lineToTreeConfig(line) {
     return lineModel;
 }
 
-function shadingToTreeConfig(shading) {
+function shadingToTreeConfig(shading, paletteList) {
     let shadingModel = new Object();
-    shadingModel.id = shading.idShading;  // OK
-    shadingModel.idLeftLine = shading.idLeftLine;  // OK
-    shadingModel.idRightLine = shading.idRightLine;  // OK
+    function getValPal(palName){
+        console.log("getPal", paletteList.palName);
+        return paletteList.palName;
+    };
+    shadingModel.id = shading.idShading;
+    shadingModel.idLeftLine = shading.idLeftLine;
+    shadingModel.idRightLine = shading.idRightLine; 
     shadingModel.data = {
         id: shading.idShading,
         name: shading.name,
@@ -166,6 +170,19 @@ function shadingToTreeConfig(shading) {
         // showRefLine: shading.showRefLine
         showRefLine: false
     };
+    if(shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
+        shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palette;
+        shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palette];
+    }
+    if(shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading && shadingModel.data.positiveFill.varShading.palette) {
+        shadingModel.data.positiveFill.varShading.palName = shadingModel.data.positiveFill.varShading.palette;
+        shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palette];
+    }
+    if(shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading && shadingModel.data.negativeFill.varShading.palette) {
+        shadingModel.data.negativeFill.varShading.palName = shadingModel.data.negativeFill.varShading.palette;
+        shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palette];
+    }
+    console.log("shadingModel:", shadingModel);
     return shadingModel;
 }
 
@@ -776,168 +793,170 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
-        .then(function (plot) {
-            if (logplotModel.properties.referenceCurve) {
-                slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
-            }
-            let tracks = new Array();
-
-            if (plot.depth_axes && plot.depth_axes.length) {
-                plot.depth_axes.forEach(function(depthTrack) {
-                    tracks.push(depthTrack);
-                });
-            }
-            if (plot.tracks && plot.tracks.length) {
-                plot.tracks.forEach(function (track) {
-                    tracks.push(track);
-                });
-            }
-            if (plot.zone_tracks && plot.zone_tracks.length) {
-                plot.zone_tracks.forEach(function (zoneTrack) {
-                    tracks.push(zoneTrack);
-                })
-            }
-
-            /*
-            tracks.sort(function(track1, track2) {
-                return track1.orderNum.localeCompare(track2.orderNum);
-            });
-            */
-            function drawAllShadings(someTrack, trackObj) {
-                someTrack.shadings.forEach(function (shading) {
-                    let shadingModel = shadingToTreeConfig(shading);
-                    let linesOfTrack = trackObj.getCurves();
-                    console.log("LinhTinh:", linesOfTrack, shading);
-                    let lineObj1 = null;
-                    let lineObj2 = null;
-
-                    /*if (!shadingModel.idRightLine && !shadingModel.idLeftLine) {
-                        console.error('Shading info is invalid', shading);
-                        return;
-                    }
-                    
-                    var __lineId = shadingModel.idRightLine;
-                    var __refX = shadingModel.data.leftX;
-                    var isLeft = false;
-                    if (!__lineId) {
-                        __lineId = shadingModel.idLeftLine;
-                        __refX = shadingModel.data.rightX;
-                        isLeft = true;
-                    }
-
-                    if (shadingModel.idLeftLine && shadingModel.idRightLine) {
-                        for (let line of linesOfTrack) {
-                            if (line.id == shading.idRightLine) {
-                                  lineObj1 = line;
-                            }
-                            if (line.id == shading.idLeftLine) {
-                                lineObj2 = line;
-                            }
-                        }
-                        let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
-                        console.log('shading2', tmp);
-                    }
-                    else {
-                        for (let line of linesOfTrack) {
-                            //if (line.id == shading.idRightLine) {
-                            if (line.id == __lineId) {
-                                lineObj1 = line;
-                                break;
-                            }
-                        }
-                        // let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                        let tmp;
-                        if(isLeft) 
-                            tmp = wiD3Ctrl.addCustomShadingToTrackWithLeftCurve(trackObj, lineObj1, __refX, shadingModel.data);
-                        else 
-                            tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, __refX, shadingModel.data);
-                        console.log('shading', tmp);
-                    }*/
-
-                    if(!shadingModel.idRightLine) return;
-                    if(!shadingModel.idLeftLine) {
-                        for (let line of linesOfTrack) {
-                            if (line.id == shading.idRightLine) {
-                                  lineObj1 = line;
-                            }
-                        }
-                        wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                    }
-                    else {
-                        for (let line of linesOfTrack) {
-                            if (line.id == shading.idRightLine) {
-                                  lineObj1 = line;
-                            }
-                            if (line.id == shading.idLeftLine) {
-                                lineObj2 = line;
-                            }
-                        }
-                        wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
-                    }
-                    
-                });
-            };
-            let aTrack = tracks.shift();
-            while (aTrack) {
-                if (aTrack.idDepthAxis) {
-                    wiD3Ctrl.pushDepthTrack(aTrack);
+    wiApiService.getPalettes(function(paletteList){
+        wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
+            .then(function (plot) {
+                if (logplotModel.properties.referenceCurve) {
+                    slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
                 }
-                else if (aTrack.idTrack) {
-                    let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-                    aTrack.markers.forEach(function (marker) {
-                        wiD3Ctrl.addMarkerToTrack(trackObj, marker);
-                    });
-                    if (!aTrack.lines || aTrack.lines.length == 0) {
-                        aTrack = tracks.shift();
-                        continue;
-                    }
+                let tracks = new Array();
 
-                    let lineCount = 0;
-                    let lineNum = aTrack.lines.length;
-                    let eventEmitter = new EventEmitter();
-                    eventEmitter.on('line-drawed', function (someTrack) {
-                        console.log(someTrack);
-                        lineCount++;
-                        if (lineCount == lineNum) {
-                            drawAllShadings(someTrack, trackObj);
-                        }
+                if (plot.depth_axes && plot.depth_axes.length) {
+                    plot.depth_axes.forEach(function(depthTrack) {
+                        tracks.push(depthTrack);
                     });
-
-                    let someTrack = aTrack;
-                    aTrack.lines.forEach(function (line) {
-                        getCurveData(wiApiService, line.idCurve, function (err, data) {
-                            let lineModel = lineToTreeConfig(line);
-                            if (!err) {
-                                wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
-                            }
-                            else {
-                                console.error(err);
-                                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                            }
-                            eventEmitter.emitEvent('line-drawed', [someTrack]);
-                        });
+                }
+                if (plot.tracks && plot.tracks.length) {
+                    plot.tracks.forEach(function (track) {
+                        tracks.push(track);
                     });
-                } else if(aTrack.idZoneTrack) {
-                    let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
-                    if (!aTrack.zoneset) {
-                        aTrack = tracks.shift();
-                        continue;
-                    }
-                    wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
-                        for (let zone of zoneset.zones) {
-                            wiD3Ctrl.addZoneToTrack(viTrack, zone);
-                        }
+                }
+                if (plot.zone_tracks && plot.zone_tracks.length) {
+                    plot.zone_tracks.forEach(function (zoneTrack) {
+                        tracks.push(zoneTrack);
                     })
                 }
-                aTrack = tracks.shift();
-            }
-            if (callback) callback();
-        })
-        .catch(function (err) {
-            console.error(err);
-            wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-        });
+
+                /*
+                tracks.sort(function(track1, track2) {
+                    return track1.orderNum.localeCompare(track2.orderNum);
+                });
+                */
+                function drawAllShadings(someTrack, trackObj) {
+                    someTrack.shadings.forEach(function (shading) {
+                        let shadingModel = shadingToTreeConfig(shading, paletteList);
+                        let linesOfTrack = trackObj.getCurves();
+                        console.log("LinhTinh:", linesOfTrack, shading, shadingModel);
+                        let lineObj1 = null;
+                        let lineObj2 = null;
+
+                        /*if (!shadingModel.idRightLine && !shadingModel.idLeftLine) {
+                            console.error('Shading info is invalid', shading);
+                            return;
+                        }
+                        
+                        var __lineId = shadingModel.idRightLine;
+                        var __refX = shadingModel.data.leftX;
+                        var isLeft = false;
+                        if (!__lineId) {
+                            __lineId = shadingModel.idLeftLine;
+                            __refX = shadingModel.data.rightX;
+                            isLeft = true;
+                        }
+
+                        if (shadingModel.idLeftLine && shadingModel.idRightLine) {
+                            for (let line of linesOfTrack) {
+                                if (line.id == shading.idRightLine) {
+                                      lineObj1 = line;
+                                }
+                                if (line.id == shading.idLeftLine) {
+                                    lineObj2 = line;
+                                }
+                            }
+                            let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                            console.log('shading2', tmp);
+                        }
+                        else {
+                            for (let line of linesOfTrack) {
+                                //if (line.id == shading.idRightLine) {
+                                if (line.id == __lineId) {
+                                    lineObj1 = line;
+                                    break;
+                                }
+                            }
+                            // let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                            let tmp;
+                            if(isLeft) 
+                                tmp = wiD3Ctrl.addCustomShadingToTrackWithLeftCurve(trackObj, lineObj1, __refX, shadingModel.data);
+                            else 
+                                tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, __refX, shadingModel.data);
+                            console.log('shading', tmp);
+                        }*/
+
+                        if(!shadingModel.idRightLine) return;
+                        if(!shadingModel.idLeftLine) {
+                            for (let line of linesOfTrack) {
+                                if (line.id == shading.idRightLine) {
+                                      lineObj1 = line;
+                                }
+                            }
+                            wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                        }
+                        else {
+                            for (let line of linesOfTrack) {
+                                if (line.id == shading.idRightLine) {
+                                      lineObj1 = line;
+                                }
+                                if (line.id == shading.idLeftLine) {
+                                    lineObj2 = line;
+                                }
+                            }
+                            wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                        }
+                        
+                    });
+                };
+                let aTrack = tracks.shift();
+                while (aTrack) {
+                    if (aTrack.idDepthAxis) {
+                        wiD3Ctrl.pushDepthTrack(aTrack);
+                    }
+                    else if (aTrack.idTrack) {
+                        let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+                        aTrack.markers.forEach(function (marker) {
+                            wiD3Ctrl.addMarkerToTrack(trackObj, marker);
+                        });
+                        if (!aTrack.lines || aTrack.lines.length == 0) {
+                            aTrack = tracks.shift();
+                            continue;
+                        }
+
+                        let lineCount = 0;
+                        let lineNum = aTrack.lines.length;
+                        let eventEmitter = new EventEmitter();
+                        eventEmitter.on('line-drawed', function (someTrack) {
+                            console.log(someTrack);
+                            lineCount++;
+                            if (lineCount == lineNum) {
+                                drawAllShadings(someTrack, trackObj);
+                            }
+                        });
+
+                        let someTrack = aTrack;
+                        aTrack.lines.forEach(function (line) {
+                            getCurveData(wiApiService, line.idCurve, function (err, data) {
+                                let lineModel = lineToTreeConfig(line);
+                                if (!err) {
+                                    wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                                }
+                                else {
+                                    console.error(err);
+                                    wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                                }
+                                eventEmitter.emitEvent('line-drawed', [someTrack]);
+                            });
+                        });
+                    } else if(aTrack.idZoneTrack) {
+                        let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
+                        if (!aTrack.zoneset) {
+                            aTrack = tracks.shift();
+                            continue;
+                        }
+                        wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
+                            for (let zone of zoneset.zones) {
+                                wiD3Ctrl.addZoneToTrack(viTrack, zone);
+                            }
+                        })
+                    }
+                    aTrack = tracks.shift();
+                }
+                if (callback) callback();
+            })
+            .catch(function (err) {
+                console.error(err);
+                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+            });
+    });
 };
 exports.openLogplotTab = openLogplotTab;
 
@@ -1561,11 +1580,8 @@ exports.hexToRgbA = hexToRgbA;
 exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
 }
-function getAllPalettes(wiApiService){
-    let paletteList = null;
-    wiApiService.getPalettes(function(pals){
-        paletteList = pals;
-    });
-    return paletteList;
+function getValPalette(palName, paletteList){
+    console.log("NAME", paletteList.palName);
+    return paletteList.palName;
 }
-exports.getAllPalettes = getAllPalettes;
+exports.getValPalette = getValPalette;
