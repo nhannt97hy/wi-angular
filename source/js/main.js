@@ -113,6 +113,7 @@ let app = angular.module('wiapp',
         wiZone.name, 
         
         'angularModalService',
+        'angularResizable',
 
         // 3rd lib
         'ngFileUpload',

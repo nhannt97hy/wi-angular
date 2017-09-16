@@ -37,8 +37,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.currentCurveId = self.histogramModel.properties.idCurve;
                 loadCurve(self.currentCurveId);
             } else {
-                // self.visHistogram.signal('histogram-update', "no load curve");
-                console.log('histogram-update no-load-curve');
+                if(self.visHistogram)
+                    self.visHistogram.signal('histogram-update', "no load curve");
             }
         }
         if (self.histogramModel.properties.idZoneSet) {
@@ -60,15 +60,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return wiComponentService.getComponent(self.getZoneName());
     }
     this.onReady = function () {
+        self.linkModels();
         self.createVisualizeHistogram(self.histogramModel);
+        self.visHistogram.signal('histogram-update', "no load curve");
     }
     this.$onInit = function () {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         self.histogramModel.properties.histogramTitle = getHistogramTitle();
-        self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
-
-        self.linkModels();
 
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
