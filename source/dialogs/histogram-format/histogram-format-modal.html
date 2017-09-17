@@ -1,0 +1,263 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;Histogram Format</h4>
+            </div>
+
+            <div class="modal-body">
+                <wi-tabset>
+                    <wi-tab heading='Scales'>
+                        <div class="padding-1em container-fluid">
+                            <div class="row">
+                                <form class='col-sm-12 form-horizontal form-condensed'>
+                                    <div id="choosedepth">
+                                        <h5>Choose Depth</h5>
+                                        <div class="col-sm-offset-1 col-sm-11 container-fluid">
+                                            <div class="form-group">
+                                                <input class="col-sm-1" type="radio" name="depth" ng-model="wiModal.depthType" ng-change="wiModal.onDepthTypeChanged()" value="intervalDepth">
+                                                <label><span>Interval Depths</span></label>
+                                            </div>
+                                            <div class='form-group'>
+                                                <label class="col-sm-3">Top(m)</label>
+                                                <div class="col-sm-3">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.intervalDepthTop" ng-disabled="!(wiModal.depthType=='intervalDepth')"
+                                                        required min="0">
+                                                </div>
+                                                <label class="col-sm-3">Bottom(m)</label>
+                                                <div class="col-sm-3">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.intervalDepthBottom" ng-disabled="!(wiModal.depthType=='intervalDepth')"
+                                                        required min="0">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <input class="col-sm-1" type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType">
+                                                <label><span>Zone Depths</span></label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Zones</label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'" ng-model="wiModal.SelectedZone"
+                                                        ng-change="wiModal.onZoneSetChange()" ng-options="ZoneSet as ZoneSet.name for ZoneSet in wiModal.listZoneSet track by ZoneSet.id">
+                                                    </select>
+                                                </div>
+                                                <label class="col-sm-3">Active Zones</label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'" ng-model="wiModal.SelectedActiveZone"
+                                                        ng-change="wiModal.onActiveZoneChange()">
+                                                        <option value="All" ng-selected="wiModal.histogramProps.activeZone=='All'">All</option>
+                                                        <option value="{{Zone.idZone}}" ng-repeat="Zone in wiModal.listZoneSet[wiModal.SelectedZone.id].zones"
+                                                        ng-selected="wiModal.histogramProps.activeZone==Zone.idZone">
+                                                            {{Zone.name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="xaxes">
+                                        <h5>X Axes</h5>
+                                        <div class="col-sm-offset-1 col-sm-11 container-fluid">
+                                            <div class='form-group'>
+                                                <label class="col-sm-3">Curve name</label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control wi-form-control" ng-model="wiModal.SelectedCurve" ng-change="wiModal.onSelectCurveChange()" ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
+                                                    </select>
+                                                </div>
+                                                <label class="col-sm-3">Number of Divisions</label>
+                                                <div class="col-sm-3">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.divisions">
+                                                </div>
+                                            </div>
+                                            <div class='form-group'>
+                                                <label class="col-sm-3">Left scale</label>
+                                                <div class="col-sm-3">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.leftScale">
+                                                </div>
+                                                <label class="col-sm-3">Right scale</label>
+                                                <div class="col-sm-3">
+                                                    <input class="form-control wi-form-control" type="number" ng-model="wiModal.histogramProps.rightScale">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-3">
+                                                    <input type="checkbox" ng-model="wiModal.histogramProps.showGaussian">
+                                                    <label>Show Gaussian</label>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <input type="checkbox" ng-model="wiModal.histogramProps.loga">
+                                                    <label>Loga</label>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <input type="checkbox" ng-model="wiModal.histogramProps.showGrid">
+                                                    <label>Show Grid</label>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <input type="checkbox" ng-model="wiModal.histogramProps.flipHorizontal">
+                                                    <label>Flip Horizontal</label>
+                                                </div>
+                                            </div>
+                                            <!-- <div class='form-group'>
+                                                <label class="col-sm-3">Line style</label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control wi-form-control">
+                                                        <option value="">None</option>
+                                                    </select>
+                                                </div>
+                                                <label class="col-sm-3">Line color</label>
+                                                <div class="col-sm-3">
+                                                    <input class="form-control wi-form-control" type="Button">
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    <div id="yaxes">
+                                        <h5>Y Axes</h5>
+                                        <div class="col-sm-offset-1 col-sm-11 container-fluid">
+                                            <div class="form-group">
+                                                <div class="col-sm-4">
+                                                    <input type="radio" name='plotType' ng-model="wiModal.histogramProps.plotType" value="Frequency">
+                                                    <label>Frequency count</label>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <input type="radio" name='plotType' ng-model="wiModal.histogramProps.plotType" value="Percent">
+                                                    <label>Percentile</label>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <label class="col-sm-6">Color</label>
+                                                    <div class="col-sm-6">
+                                                        <input ng-style="{'background-color':wiModal.histogramProps.color}" ng-click="wiModal.chooseChartColor();" class="form-control wi-form-control width-80px thick-border"
+                                                            type="button">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading='Discriminators'>
+                        <div class="container-fluid">
+                            <form class='form-horizontal'>
+                                <div>
+                                    <h5>Discriminators</h5>
+                                    <div class="width-95-percent float-left">
+                                        <table class="font-size-10px table table-bordered curveTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Use</th>
+                                                    <th>Value/ Curve</th>
+                                                    <th>Func</th>
+                                                    <th>Value/ Curve</th>
+                                                    <th>Clear</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="" id="">
+                                                    </td>
+                                                    <td>
+                                                        <select name="" id=""></select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="" id=""></select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="" id=""></select>
+                                                    </td>
+                                                    <td>
+                                                        <button>
+                                                            <span class="delete-16x16"></span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="" id="">
+                                                    </td>
+                                                    <td>
+                                                        <select name="" id=""></select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="" id=""></select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="" id=""></select>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-default">
+                                                            <span class="delete-16x16"></span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading='Options'>
+                        <div class="padding-1em container-fluid">
+                            <div class="row">
+                                <form class='col-sm-12 form-horizontal form-condensed'>
+                                    <div id="histogramname">
+                                        <h5>Histogram Name</h5>
+                                        <div class="col-sm-offset-1 col-sm-11 container-fluid">
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Histogram Name</label>
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control wi-form-control" ng-model="wiModal.histogramProps.name">
+                                                </div>
+                                                <div class="col-sm-6"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="hardcopy">
+                                        <h5>Hard Copy</h5>
+                                        <div class="col-sm-offset-1 col-sm-11 container-fluid">
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Width(inch)</label>
+                                                <div class="col-sm-3">
+                                                    <input type="number" ng-model="wi.histogramProps.hardCopyWidth">
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <input type="checkbox">
+                                                    <label>Plot Zone, depth and parameter i</label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Height(inch)</label>
+                                                <div class="col-sm-3">
+                                                    <input type="number" ng-model="wiModal.histogramProps.hardCopyHeight">
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <input type="checkbox">
+                                                    <label>Plot Archive Zone Ti</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading='Refrence Window'>
+                        <div class="container-fluid">
+                            <form class='form-horizontal'>
+
+                            </form>
+                        </div>
+                    </wi-tab>
+                </wi-tabset>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onCloseButtonClicked();" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;Close</button>
+            </div>
+        </div>
+    </div>
+</div>

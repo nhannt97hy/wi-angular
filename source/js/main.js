@@ -21,6 +21,7 @@ let wiSlidingbar = require('./wi-slidingbar');
 let wiList = require('./wi-list');
 
 let wiContextMenu = require('./wi-context-menu');
+let wiResizableX = require('./wi-resizable-x');
 
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -38,6 +39,7 @@ let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
 let crossplotHanders = require('./wi-crossplot-handlers');
+let histogramHandlers = require('./wi-histogram-handlers');
 
 let graph = require('./visualize/visualize');
 let dragMan = {
@@ -62,6 +64,7 @@ let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
 let wiLogplotsModel = require('./wi-logplots.model');
 let wiLogplotModel = require('./wi-logplot.model');
+let wiZone = require('./wi-zone');
 
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
@@ -77,6 +80,7 @@ let app = angular.module('wiapp',
         wiSlidingbar.name,
         wiList.name,
         wiContextMenu.name,
+        wiResizableX.name,
         wiD3Crossplot.name,
         wiD3Histogram.name,
         wiD3.name,
@@ -105,9 +109,11 @@ let app = angular.module('wiapp',
         wiApiService.name,
         wiComponentService.name,
 
-        wiCanvasRect.name, 
+        wiCanvasRect.name,
+        wiZone.name, 
         
         'angularModalService',
+        'angularResizable',
 
         // 3rd lib
         'ngFileUpload',
@@ -115,15 +121,8 @@ let app = angular.module('wiapp',
         'ngSanitize',
         'ui.select'
     ]);
-app.controller('AppController', function ($scope, $rootScope, $timeout,
-    $compile, wiComponentService,
-    ModalService, wiApiService) {
-    DialogUtils.authenticationDialog(ModalService, function (userInfo) {
-        console.log(userInfo);
-        window.localStorage.username = userInfo.username;
-        window.localStorage.password = userInfo.password;
-        window.localStorage.token = userInfo.token;
-    });
+
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -152,6 +151,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
+    wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
@@ -195,4 +195,16 @@ app.controller('AppController', function ($scope, $rootScope, $timeout,
     $(window).on('resize', function () {
         layoutManager.updateSize();
     });
+}
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+/*
+    DialogUtils.authenticationDialog(ModalService, function (userInfo) {
+        console.log(userInfo);
+        window.localStorage.username = userInfo.username;
+        window.localStorage.password = userInfo.password;
+        window.localStorage.token = userInfo.token;
+        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    });
+*/
+    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
 });

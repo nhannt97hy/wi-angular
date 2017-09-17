@@ -102,6 +102,11 @@ const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
 
 const GET_PALETTES = '/pal/all';
 
+const CREATE_HISTOGRAM = '/project/well/histogram/new';
+const EDIT_HISTOGRAM = '/project/well/histogram/edit';
+const GET_HISTOGRAM = '/project/well/histogram/info';
+const DELETE_HISTOGRAM = '/project/well/histogram/delete';
+
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
 function Service(baseUrl, $http, wiComponentService, Upload) {
@@ -141,10 +146,13 @@ Service.prototype.GET_SHADING = GET_SHADING;
 
 Service.prototype.EDIT_TRACK = EDIT_TRACK;
 
+Service.prototype.CREATE_HISTOGRAM = CREATE_HISTOGRAM;
+Service.prototype.EDIT_HISTOGRAM = EDIT_HISTOGRAM;
+Service.prototype.DELTE_HISTOGRAM = DELETE_HISTOGRAM;
+
 Service.prototype.GET_PALETTES = GET_PALETTES;
 Service.prototype.GET_CUSTOM_FILLS = GET_CUSTOM_FILLS;
 Service.prototype.SAVE_CUSTOM_FILLS = SAVE_CUSTOM_FILLS;
-
 
 Service.prototype.getUtils = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
@@ -1095,6 +1103,48 @@ Service.prototype.getDiscrim = function (idDiscrim, callback) {
 Service.prototype.removeDiscrim = function (idDiscrim, callback) {
     let self = this;
     this.delete(DELETE_DISCRIM, { idDiscrim: idDiscrim })
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+// histogram apis
+Service.prototype.createHistogram = function (data, callback) {
+    let self = this;
+    this.post(CREATE_HISTOGRAM, data)
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editHistogram = function (data, callback) {
+    let self = this;
+    this.post(EDIT_HISTOGRAM, data)
+        .then(function (returnData) {
+            callback();
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getHistogram = function (idHistogram, callback) {
+    let self = this;
+    this.post(GET_HISTOGRAM, { idHistogram: idHistogram })
+        .then(function (returnData) {
+            callback(returnData);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeHistogram = function (idHistogram, callback) {
+    let self = this;
+    this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram })
         .then(function (returnData) {
             callback();
         })

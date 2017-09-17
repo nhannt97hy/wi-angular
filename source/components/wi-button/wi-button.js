@@ -15,7 +15,12 @@ function ButtonController(wiComponentService) {
     };
 
     this.onClick = function () {
-        if (self.handler) self.handler();
+        if(self.isCheckType){
+            self.checked = !self.checked;
+        }
+        if (self.handler) {
+            self.handler(self.index);
+        }
     };
 
     this.$onInit = function () {
@@ -57,11 +62,14 @@ app.component(wiButtonName, {
     bindings: {
         config: '<',
         type: '@',
+        isCheckType: '<',
         name: '@',
+        index: "<",
         tooltip: '@',
         label: '@',
         layout: '@',
         icon: '@',
+        checked: '<',
         handler: '<',
         disabled: '@',
         separator: '@',
