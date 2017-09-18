@@ -38,7 +38,7 @@ Histogram.prototype.signal = function (eventName, data) {
 }
 
 Histogram.prototype.setCurve = function(data) {
-    this.data = data; // ? clone
+    this.data = data.filter(function(d) {return !isNaN(d.x);}); // ? clone
 }
 
 Histogram.prototype.getTickValuesY = function() {
@@ -231,4 +231,88 @@ Histogram.prototype.getTransformY = function() {
     return d3.scaleLinear()
         .domain([wdY[1], wdY[0]])
         .range(this.getViewportY());
+}
+Histogram.prototype.getLength = function () {
+    if (!this.data) return null;
+    return this.data.length;
+}
+
+Histogram.prototype.getMin = function () {
+    if (!this.data) return null;
+    return d3.min(this.data, function (d) {
+        return parseFloat(d.x)
+    });
+}
+
+Histogram.prototype.getMax = function () {
+    if (!this.data) return null;
+    return d3.max(this.data, function (d) {
+        return parseFloat(d.x)
+    });
+}
+
+Histogram.prototype.getAverage = function () {
+    if (!this.data) return null;
+    return d3.mean(this.data, function (d) {
+        return parseFloat(d.x)
+    }).toFixed(4);
+
+}
+
+Histogram.prototype.getAverageDeviation = function () {
+    if (!this.data) return null;
+    var mean = d3.mean(this.data, function (d) {
+        return parseFloat(d.x)
+    });
+
+    return d3.mean(this.data, function (d) {
+        return Math.abs(parseFloat(d.x) - mean)
+    }).toFixed(4);
+
+}
+
+Histogram.prototype.getStandardDeviation = function () {
+    if (!this.data) return null;
+    return d3.deviation(this.data, function (d) {
+        return parseFloat(d.x)
+    }).toFixed(4);
+}
+
+Histogram.prototype.getVariance = function () {
+    if (!this.data) return null;
+    return d3.variance(this.data, function (d) {
+        return parseFloat(d.x)
+    }).toFixed(4);
+}
+
+Histogram.prototype.getSkewness = function () {
+    if (!this.data) return null;
+    var map = this.data.map(function (d) {
+        return parseFloat(d.x);
+    })
+    return ss.sampleSkewness(map).toFixed(4);
+}
+
+Histogram.prototype.getKurtosis = function () {
+    if (!this.data) return null;
+    var map = this.data.map(function (d) {
+        return parseFloat(d.x);
+    })
+    return ss.sampleKurtosis(map).toFixed(4);
+}
+
+Histogram.prototype.getMedian = function () {
+    if (!this.data) return null;
+    return d3.median(this.data, function (d) {
+        return parseFloat(d.x)
+    }).toFixed(4);
+}
+
+Histogram.prototype.getPercentile = function (p) {
+    if (!this.data) return null;
+    return d3.quantile(this.data.sort(function (a, b) {
+        return parseFloat(a.x) - parseFloat(b.x);
+    }), p, function (d) {
+        return parseFloat(d.x)
+    }).toFixed(4);
 }
