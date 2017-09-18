@@ -6,6 +6,7 @@ wi-d3-histogram {
         h1, h2, h3, h4, h5 {
             flex-grow: 0;
             text-align: center;
+            margin:2px 0;
         }
         .d3-histogram-region {
             display: flex;
@@ -15,4 +16,14 @@ wi-d3-histogram {
     }
     //display:flex;
     overflow: hidden;
+    .rg-left, .rg-right {
+        & > span {
+            cursor: col-resize;
+        }
+    }
+    .rg-top, .rg-down {
+        & > span {
+            cursor: row-resize;
+        }
+    }
 }

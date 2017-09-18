@@ -79,12 +79,15 @@
 
 .vi-histogram-container {
     flex: 1;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     .vi-histogram-svg {
-        border: 1px solid blue;
+        overflow: visible;
+        //border: 1px solid blue;
         position: absolute;
-        top: 0; left: 0;
-        background-color: yellow;
+        top: 0;
+        left: 0;
+        padding: 20px 40px;
+        //background-color: yellow;
     }
 }

@@ -30,15 +30,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return "Empty";
     }
+    function getXLabel() {
+        if (self.curveModel) {
+            let idDataset = self.curveModel.properties.idDataset;
+            let datasetModel = utils.getModel('dataset', idDataset);
+            return datasetModel.properties.name + "." + self.curveModel.properties.name;
+        }
+        return "";
+    }
     this.linkModels = function () {
         if (self.histogramModel.properties.idCurve) {
             self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-            if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
-                self.currentCurveId = self.histogramModel.properties.idCurve;
-                loadCurve(self.currentCurveId);
-            } else {
-                if(self.visHistogram)
+            if (self.visHistogram) {
+                if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                    self.currentCurveId = self.histogramModel.properties.idCurve;
+                    loadCurve(self.currentCurveId);
+                }
+                else {
                     self.visHistogram.signal('histogram-update', "no load curve");
+                }
             }
         }
         if (self.histogramModel.properties.idZoneSet) {
@@ -51,6 +61,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
 
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
+            self.histogramModel.properties.xLabel = getXLabel();
         }
     }
     this.getZoneName = function () {
@@ -59,16 +70,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getZoneCtrl = function () {
         return wiComponentService.getComponent(self.getZoneName());
     }
-    this.onReady = function () {
+    this.onReady = function() {
         self.linkModels();
-        self.createVisualizeHistogram(self.histogramModel);
-        self.visHistogram.signal('histogram-update', "no load curve");
+        let domElem = document.getElementById(self.histogramAreaId);
+        console.log(self.histogramAreaId, domElem);
+        self.createVisualizeHistogram(self.histogramModel, domElem);
+        self.histogramModel.properties.histogramTitle = getHistogramTitle();
+
     }
     this.$onInit = function () {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
-
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -133,12 +145,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowAxisYAsPercent",
             label: "Show Axis Y as Percent",
             "isCheckType": "true",
-            checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percentile") : false,
+            checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false,
             handler: function (index) {
                 if (self.histogramModel.properties.plotType == "Frequency")
-                    self.histogramModel.properties.plotType = "Percentile";
+                    self.histogramModel.properties.plotType = "Percent";
                 else self.histogramModel.properties.plotType = "Frequency";
-                self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percentile") : false;
+                self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
+                self.visHistogram.signal('histogram-update', "update frequency/percentile");
             }
         }, {
             name: "ShowReferenceWindow",
@@ -207,8 +220,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: histogramModel.properties.lineWidth,
                 dash: histogramModel.properties.lineStyle
             },
-            plot: histogramModel.properties.plot,
-            plotType: histogramModel.properties.plotType,
+            plot: histogramModel.properties.plot, // Bars or lines
+            plotType: histogramModel.properties.plotType, // Frequency or percent 
             fill: {
                 pattern: null,
                 background: histogramModel.properties.color,
