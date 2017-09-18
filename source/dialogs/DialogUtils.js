@@ -4280,15 +4280,21 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
         }
 
+        function getTopFromWell() {
+            return parseFloat(self.well.properties.topDepth);
+        }
+        function getBottomFromWell() {
+            return parseFloat(self.well.properties.bottomDepth);
+        }
         this.onDepthTypeChanged = function () {
             switch (self.depthType) {
                 case "intervalDepth":
+                    self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop: getTopFromWell();
+                    self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
                     self.histogramProps.idZoneSet = null;
                     break;
                 case "zonalDepth":
-                    // TODO
-                    self.histogramProps.intervalDepthTop = null;
-                    self.histogramProps.intervalDepthBottom = null;
+                    // DO NOTHING
                     break;
             }
         }

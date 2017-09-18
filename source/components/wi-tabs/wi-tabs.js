@@ -6,6 +6,19 @@ function TabsetController() {
     let self = this;
 
     this.tabs = [];
+    this.isExpand = true;
+    this.icon = 'fa fa-chevron-up';
+
+    this.toggleRibbon = function(){
+        self.isExpand = !self.isExpand;
+        if(self.icon == 'fa fa-chevron-down'){
+            self.icon = 'fa fa-chevron-up';
+            if (self.onToggle) self.onToggle(false);
+        }else{
+            self.icon = 'fa fa-chevron-down';
+            if (self.onToggle) self.onToggle(true);
+        }
+    }
 
     this.selectTab = function (index) {
         deactiveAllTabs(self.tabs);
@@ -45,7 +58,11 @@ app.component(tabsetComponentName, {
     templateUrl: 'wi-tabset.html',
     controller: TabsetController,
     controllerAs: tabsetComponentName,
-    transclude: true
+    transclude: true,
+    bindings: {
+        toggle: "<",
+        onToggle: "<"
+    }
 });
 
 

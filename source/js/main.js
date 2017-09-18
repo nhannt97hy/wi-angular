@@ -197,6 +197,18 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     $(window).on('resize', function () {
         layoutManager.updateSize();
     });
+
+    $scope.onRibbonToggle = function(isCollapsed) {
+        if (isCollapsed) {
+            $('.ribbon-wrapper').css('height', 'auto');
+        }
+        else {
+            $('.ribbon-wrapper').css('height', '120px');
+        }
+        setTimeout(function(){
+            layoutManager.updateSize();
+        }, 500);               
+    }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
 /*
