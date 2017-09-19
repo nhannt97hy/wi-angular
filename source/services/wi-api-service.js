@@ -1,9 +1,20 @@
 const wiServiceName = 'wiApiService';
 const moduleName = 'wi-api-service';
 
+var __USERINFO = {
+    username: null,
+    password: null,
+    token: null
+};
+
+__USERINFO.username = window.localStorage.getItem('username');
+__USERINFO.password = window.localStorage.getItem('password');
+__USERINFO.token = window.localStorage.getItem('token');
+
 let app = angular.module(moduleName, []);
 
-const BASE_URL = 'http://54.169.109.34';
+//const BASE_URL = 'http://54.169.109.34';
+const BASE_URL = 'http://sflow.me:3000';
 // const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
@@ -167,7 +178,8 @@ Service.prototype.post = function (route, payload) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Referrer-Policy': 'no-referrer'
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
             },
             data: payload
         };
@@ -195,7 +207,8 @@ Service.prototype.delete = function (route, payload) {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'Referrer-Policy': 'no-referrer'
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
             },
             data: payload
         };
@@ -215,15 +228,23 @@ Service.prototype.delete = function (route, payload) {
     });
 }
 
+Service.prototype.login = function(data, callback) {
+    if (!data || !callback) return;
+    let self = this;
+    this.post(LOGIN, data).then(function(ret) { callback(ret); })
+        .catch(function(err) { console.error(err); alert("Login error", err); });
+}
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
+    console.log(data);
     this.post(REGISTER, data)
         .then(function (ret) {
             callback(ret);
         })
         .catch(function (err) {
-            self.getUtils().error(err);
+            console.error(err);
+            alert('Error', err);
         })
 }
 
@@ -233,7 +254,8 @@ Service.prototype.postWithFile = function (route, dataPayload) {
         let configUpload = {
             url: self.baseUrl + route,
             headers: {
-                'Referrer-Policy': 'no-referrer'
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
             },
             data: dataPayload
         };
@@ -267,7 +289,8 @@ Service.prototype.uploadMultiFiles = function (dataPayload) {
         let configUpload = {
             url: self.baseUrl + UPLOAD_MULTIFILES,
             headers: {
-                'Referrer-Policy': 'no-referrer'
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
             },
             arrayKey: '',
             data: dataPayload
@@ -302,7 +325,8 @@ Service.prototype.uploadMultiFilesPrepare = function (dataPayLoad, callback) {
     let configUpload = {
         url: self.baseUrl + UPLOAD_MULTIFILES_PREPARE,
         headers: {
-            'Referrer-Policy': 'no-referrer'
+            'Referrer-Policy': 'no-referrer',
+            'Authorization': __USERINFO.token
         },
         arrayKey: '',
         data: dataPayLoad
@@ -1188,4 +1212,10 @@ Service.prototype.saveCustomFills = function (customFills, callback) {
             self.getUtils().error(err);
         });
 }
+Service.prototype.setAuthenticationInfo = function(authenInfo) {
+    __USERINFO.username = authenInfo.username;
+    __USERINFO.password = authenInfo.password;
+    __USERINFO.token = authenInfo.token;
+}
 exports.name = moduleName;
+

@@ -41,7 +41,7 @@ function Marker(config) {
     this.nameVAlign = 'None';
     this.depth = this.minY;
     this.depthHAlign = 'Right';
-    this.depthVAlign = 'Top';
+    this.depthVAlign = 'High';
     this.precision = 2;
     this.lineWidth = 2;
     this.lineDash = [];

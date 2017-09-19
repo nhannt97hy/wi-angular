@@ -17,7 +17,7 @@ exports.authenticationDialog = function (ModalService, callback) {
             self.checkPasswords();
             if (self.error) return;
             let dataRequest = {
-                    userName: self.usernameReg,
+                    username: self.usernameReg,
                     password: self.passwordReg
             }
             wiApiService.register(dataRequest, function (token) {
@@ -26,13 +26,25 @@ exports.authenticationDialog = function (ModalService, callback) {
                     password: self.passwordReg,
                     token: token
                 }
+                wiApiService.setAuthenticationInfo(userInfo);
                 close(userInfo);
-            })
+            });
         }
         this.onLoginButtonClicked = function () {
             self.error = null;
-            
-            if (self.error) return;           
+            let dataRequest = {
+                username: self.username,
+                password: self.password
+            }
+            wiApiService.login(dataRequest, function(token) {
+                let userInfo = {
+                    username: self.username,
+                    password: self.password,
+                    token: token
+                };
+                wiApiService.setAuthenticationInfo(userInfo);
+                close(userInfo);
+            });
 
         }
         this.onCancelButtonClicked = function () {
@@ -3288,19 +3300,12 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 self.trackColor = colorStr;
             });
         }
-        this.onApplyButtonClicked = function () {
-            bindProps();
-            callback(props);
-        };
         this.onOkButtonClicked = function () {
-            bindProps();
-            close(props, 100);
-        };
-        this.onCancelButtonClicked = function () {
-            close(null, 100);
-        };
-
-        function bindProps() {
+            self.error = null;
+            if (!self.idZoneSet) {
+                self.error = "Zone Set is required";
+                return;
+            }
             props = {
                 showTitle: self.isShowTitle,
                 title: self.title,
@@ -3311,7 +3316,12 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 parameterSet: self.parameterSet,
                 idZoneSet: self.idZoneSet
             }
-        }
+            if (self.error) return;
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
     }
     ModalService.showModal({
         templateUrl: "zone-track-properties/zone-track-properties-modal.html",
