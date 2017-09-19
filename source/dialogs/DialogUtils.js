@@ -47,9 +47,6 @@ exports.authenticationDialog = function (ModalService, callback) {
             });
 
         }
-        this.onCancelButtonClicked = function () {
-            close(null);
-        }
     }
 
     ModalService.showModal({
