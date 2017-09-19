@@ -1055,44 +1055,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "CrossPlot",
             label: "Cross plot",
             icon: "crossplot-blank-16x16",
-            handler: function () {
-                let curve1 = _currentTrack.getCurrentCurve();
-                let curve2 = _currentTrack.getTmpCurve();
-                if (!curve1 || !curve2) {
-                    console.log('Two curves are needed');
-                }
-                else {
-                    console.log('Create crossplot', curve1, curve2);
-                    let promptConfig = {
-                        title: 'Create New Crossplot',
-                        inputName: 'Crossplot Name',
-                        input: curve1.name + '_' + curve2.name
-                    }
-                    DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-                        let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
-                        Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
-                            console.log("wiCrossplotCtrl", wiCrossplotCtrl);
-                            let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                            let dataPointSet = {
-                                idCrossPlot: wiCrossplotCtrl.id,
-                                idWell: idWell,
-                                idCurveX: curve1.idCurve,
-                                idCurveY: curve2.idCurve,
-                            }
-                            let wellProps = _getWellProps();
-                            Utils.createPointSet(dataPointSet, function (pointSet) {
-                                wiD3CrossplotCtrl.createVisualizeCrossplot(curve1, curve2, {
-                                    name: crossplotName,
-                                    idCrossPlot: wiCrossplotCtrl.id,
-                                    idWell: idWell,
-                                    topDepth: wellProps.topDepth,
-                                    bottomDepth: wellProps.bottomDepth
-                                });
-                            })
-                        });
-                    })
-                }
-            }
+            handler: self.createCrossplot
         }, {
             name: "Histogram",
             label: "Histogram",
@@ -1171,7 +1134,44 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         ]);
     }
-
+    this.createCrossplot = function () {
+        let curve1 = _currentTrack.getCurrentCurve();
+        let curve2 = _currentTrack.getTmpCurve();
+        if (!curve1 || !curve2) {
+            console.log('Two curves are needed');
+        }
+        else {
+            console.log('Create crossplot', curve1, curve2);
+            let promptConfig = {
+                title: 'Create New Crossplot',
+                inputName: 'Crossplot Name',
+                input: curve1.name + '_' + curve2.name
+            }
+            DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+                let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
+                Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
+                    console.log("wiCrossplotCtrl", wiCrossplotCtrl);
+                    let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+                    let dataPointSet = {
+                        idCrossPlot: wiCrossplotCtrl.id,
+                        idWell: idWell,
+                        idCurveX: curve1.idCurve,
+                        idCurveY: curve2.idCurve,
+                    }
+                    let wellProps = _getWellProps();
+                    Utils.createPointSet(dataPointSet, function (pointSet) {
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(curve1, curve2, {
+                            name: crossplotName,
+                            idCrossPlot: wiCrossplotCtrl.id,
+                            idWell: idWell,
+                            topDepth: wellProps.topDepth,
+                            bottomDepth: wellProps.bottomDepth
+                        });
+                    })
+                });
+            })
+        }
+    }
     function _trackOnRightClick(track) {
         if (track.isZoneTrack()) {
             self.setContextMenu([
@@ -1273,6 +1273,31 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    this.openProptertiesDialog = function () {
+        if (_currentTrack.isDepthTrack()) {
+            openTrackPropertiesDialog();
+            return;
+        }
+        let currentDrawing = _currentTrack.getCurrentDrawing();
+        if (!currentDrawing) openTrackPropertiesDialog();
+        else switch (currentDrawing.type) {
+            case 'curve':
+                _curveOnDoubleClick();
+                break;
+            case 'shading':
+                _shadingOnDoubleClick();
+                break;
+            case 'marker':
+                _markerOnDoubleClick();
+                break;
+            case 'zone':
+                _zoneOnDoubleClick();
+                break;
+            default:
+                break;
+        }
+    }
+
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -1345,8 +1370,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             separator: '1'
         },
         {
-            name: "AddMaker",
-            label: "Add Maker",
+            name: "AddMarker",
+            label: "Add Marker",
             icon: 'marker-add-16x16',
             handler: function () {
                 self.addMarker();
