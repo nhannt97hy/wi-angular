@@ -265,17 +265,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.createVisualizeHistogram = function (histogramModel) {
         var elem = document.getElementById(self.histogramAreaId);
-        console.log('createHistogram:', self.histogramAreaId, elem);
-        self.visHistogram = graph.createHistogram(histogramModel, elem);
+
+        var well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
+        self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step), 
+                parseFloat(well.properties.topDepth), 
+                parseFloat(well.properties.bottomDepth), elem);
+
         if (self.visHistogram.idCurve) {
             loadCurve(self.visHistogram.idCurve);
         }
     }
 
     function loadCurve(idCurve) {
-        console.log('Load curve data!!!!!');
         wiApiService.dataCurve(idCurve, function (data) {
-            console.log('load Curve');
             if (self.visHistogram) {
                 self.visHistogram.setCurve(data);
                 self.visHistogram.signal('histogram-update', "linh tinh");

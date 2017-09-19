@@ -16,6 +16,7 @@ function Histogram(histogramModel) {
 
     // visualize instant vars
     this.svgContainer = null;
+    this.depthStep = -1;
 
 }
 Histogram.prototype.trap = function (eventName, handlerCb) {
@@ -50,13 +51,56 @@ Histogram.prototype.getTickValuesY = function() {
     return d3.range(0, d3.max(this.bins, function(d) {return d.length}), 100);
 }
 
-Histogram.prototype.filterF = function(d) {
-    return true;
+Histogram.prototype.filterF = function(d, zoneIdx) {
+    var tempDepth = 0;
+    if (!this.histogramModel) {
+        console.warn('no histogramModel during filter', this);
+        return false;
+    }
+    if (this.histogramModel.properties.idZoneSet & !zoneIdx) {
+        return true;
+    }
+
+    tempDepth = this.startDepth + this.depthStep * parseInt(d.y);
+
+    if(this.histogramModel && this.histogramModel.properties.idZoneSet) {
+        // TODO
+    }
+
+    /*
+    let isANumber = !isNaN(d.y);
+    let gtDepthTop = ( tempDepth >= this.histogramModel.properties.intervalDepthTop );
+    let ltDepthBottom = ( tempDepth < this.histogramModel.properties.intervalDepthBottom );
+    if ( isANumber ) {
+        if ( gtDepthTop ) {
+            if (ltDepthBottom ) {
+                return true;
+            }
+        }
+    }
+    return false;
+    */
+
+    return (!isNaN(d.y) && ( tempDepth >= this.histogramModel.properties.intervalDepthTop ) && 
+            ( tempDepth < this.histogramModel.properties.intervalDepthBottom ));
 }
 
-Histogram.prototype.plotData = function(idx) {
-    return this.data.filter(this.filterF).map(function(d) { return parseFloat(d.x); });
+
+
+Histogram.prototype.zoneData = function(idx) {
+    var self = this;
+    return this.data.filter(function(d) {
+        return self.filterF.call(self, d, idx);
+    }).map(function(d) { return parseFloat(d.x); });
 }
+
+Histogram.prototype.plotData = function() {
+    var self = this;
+    return this.data.filter(function(d) {
+        return self.filterF.call(self, d);
+    }).map(function(d) { return parseFloat(d.x); });
+}
+
 function __reverseBins(bins) {
     let len = bins.length;
     let halfLen = Math.floor(len/2);
@@ -90,7 +134,14 @@ Histogram.prototype.doPlot = function() {
     self.svgContainer.attr('width',self.container.node().clientWidth)
         .attr('height', self.container.node().clientHeight);
 
-    if (!this.data) return;
+    if (!this.data) {
+        console.error('No curve data');
+        return;
+    }
+    if (!this.histogramModel) {
+        console.error('No histogramModel');
+        return;
+    }
     console.log('Do plot begin');
     let wdX = this.getWindowX();
     let vpX = this.getViewportX();
@@ -102,8 +153,12 @@ Histogram.prototype.doPlot = function() {
     let domain = this.getNormalizedWindowX();
     let step = (wdX[1] - wdX[0]) / nBins;
 
+    let realStep = step;
+    let jumpFactor = Math.ceil(nBins/20);
+    if (jumpFactor > 1) realStep = jumpFactor * step;
+
     this.axisX = d3.axisBottom(transformX)
-        .tickValues(d3.range(wdX[0], wdX[1] + step/2, step))
+        .tickValues(d3.range(wdX[0], wdX[1] + realStep/2, realStep))
         .tickFormat(Utils.getDecimalFormatter(0));
 
     this.bins = d3.histogram()
