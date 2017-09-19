@@ -3301,20 +3301,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 self.trackColor = colorStr;
             });
         }
-        this.onApplyButtonClicked = function () {
-            bindProps();
-            if (self.error) return;            
-            callback(props);
-        };
         this.onOkButtonClicked = function () {
-            bindProps();
-            if (self.error) return;
-            close(props, 100);
-        };
-        this.onCancelButtonClicked = function () {
-            close(null, 100);
-        };
-        function bindProps() {
             self.error = null;
             if (!self.idZoneSet) {
                 self.error = "Zone Set is required";
@@ -3330,7 +3317,12 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 parameterSet: self.parameterSet,
                 idZoneSet: self.idZoneSet
             }
-        }
+            if (self.error) return;
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
     }
     ModalService.showModal({
         templateUrl: "zone-track-properties/zone-track-properties-modal.html",

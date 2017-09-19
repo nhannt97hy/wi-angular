@@ -1213,7 +1213,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: "Add Zone",
                     icon: "zone-edit-16x16",
                     handler: function () {
-                        if (track.idZoneSet) {
+                        if (!track.idZoneSet) {
                             Utils.error('Zone Set is required');
                             return;
                         }
