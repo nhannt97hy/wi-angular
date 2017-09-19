@@ -26,13 +26,25 @@ exports.authenticationDialog = function (ModalService, callback) {
                     password: self.passwordReg,
                     token: token
                 }
+                wiApiService.setAuthenticationInfo(userInfo);
                 close(userInfo);
             });
         }
         this.onLoginButtonClicked = function () {
             self.error = null;
-            
-            if (self.error) return;           
+            let dataRequest = {
+                username: self.username,
+                password: self.password
+            }
+            wiApiService.login(dataRequest, function(token) {
+                let userInfo = {
+                    username: self.username,
+                    password: self.password,
+                    token: token
+                };
+                wiApiService.setAuthenticationInfo(userInfo);
+                close(userInfo);
+            });
 
         }
         this.onCancelButtonClicked = function () {
