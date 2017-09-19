@@ -10,6 +10,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.zoneArr = new Array();
+    this.statistics = {
+        length: null,
+        min: null,
+        max: null,
+        avg: null,
+        avg_dev: null,
+        std_dev: null,
+        var: null,
+        skew: null,
+        kur: null,
+        med: null,
+        p10: null,
+        p50: null,
+        p90: null
+    }
 
     this.isShowWiZone = true;
     this.isShowReferenceWindow = true;
@@ -30,6 +45,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return "Empty";
     }
+
     function getXLabel() {
         if (self.curveModel) {
             let idDataset = self.curveModel.properties.idDataset;
@@ -45,8 +61,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
                     self.currentCurveId = self.histogramModel.properties.idCurve;
                     loadCurve(self.currentCurveId);
-                }
-                else {
+                } else {
                     self.visHistogram.signal('histogram-update', "no load curve");
                 }
             }
@@ -70,7 +85,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getZoneCtrl = function () {
         return wiComponentService.getComponent(self.getZoneName());
     }
-    this.onReady = function() {
+    this.onReady = function () {
         self.linkModels();
         let domElem = document.getElementById(self.histogramAreaId);
         console.log(self.histogramAreaId, domElem);
@@ -87,7 +102,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
 
-    this.toggleShowWiZone = function() {
+    this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
     }
 
@@ -242,7 +257,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var elem = document.getElementById(self.histogramAreaId);
         console.log('createHistogram:', self.histogramAreaId, elem);
         self.visHistogram = graph.createHistogram(histogramModel, elem);
-        if (self.visHistogram.idCurve) loadCurve(self.visHistogram.idCurve);
+        if (self.visHistogram.idCurve) {
+            loadCurve(self.visHistogram.idCurve);
+        }
     }
 
     function loadCurve(idCurve) {
@@ -251,7 +268,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.visHistogram) {
                 self.visHistogram.setCurve(data);
                 self.visHistogram.signal('histogram-update', "linh tinh");
+                loadStatistics();
             }
+        });
+    }
+
+    function loadStatistics() {
+        $timeout(function () {
+            self.statistics.length = self.visHistogram.getLength();
+            self.statistics.min = self.visHistogram.getMin();
+            self.statistics.max = self.visHistogram.getMax();
+            self.statistics.avg = self.visHistogram.getAverage();
+            self.statistics.avg_dev = self.visHistogram.getAverageDeviation();
+            self.statistics.std_dev = self.visHistogram.getStandardDeviation();
+            self.statistics.var = self.visHistogram.getVariance();
+            self.statistics.skew = self.visHistogram.getSkewness();
+            self.statistics.kur = self.visHistogram.getKurtosis();
+            self.statistics.med = self.visHistogram.getMedian();
+            self.statistics.p10 = self.visHistogram.getPercentile(0.1);
+            self.statistics.p50 = self.visHistogram.getPercentile(0.5);
+            self.statistics.p90 = self.visHistogram.getPercentile(0.9);
         });
     }
 }
