@@ -171,15 +171,15 @@ function shadingToTreeConfig(shading, paletteList) {
         showRefLine: false
     };
     if(shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
-        shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palette;
+        shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palName;
         shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palette];
     }
     if(shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading && shadingModel.data.positiveFill.varShading.palette) {
-        shadingModel.data.positiveFill.varShading.palName = shadingModel.data.positiveFill.varShading.palette;
+        shadingModel.data.positiveFill.varShading.palName = shadingModel.data.positiveFill.varShading.palName;
         shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palette];
     }
     if(shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading && shadingModel.data.negativeFill.varShading.palette) {
-        shadingModel.data.negativeFill.varShading.palName = shadingModel.data.negativeFill.varShading.palette;
+        shadingModel.data.negativeFill.varShading.palName = shadingModel.data.negativeFill.varShading.palName;
         shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palette];
     }
     console.log("shadingModel:", shadingModel);
@@ -1327,6 +1327,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         }
     }
     else if (shadingObj.shadingStyle == 'variableShading') {
+        shadingObj.idControlCurve = variableShadingStyle.idControlCurve;
         if(!shadingObj.isNegPosFill){
             shadingObj.fill = variableShadingStyle.fill;
         }
