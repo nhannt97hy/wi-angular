@@ -38,8 +38,11 @@
                                             <div class="form-group">
                                                 <label class="col-sm-3">Zones</label>
                                                 <div class="col-sm-3">
-                                                    <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'" ng-model="wiModal.SelectedZone"
-                                                        ng-change="wiModal.onZoneSetChange()" ng-options="ZoneSet as ZoneSet.name for ZoneSet in wiModal.listZoneSet track by ZoneSet.id">
+                                                    <select class="form-control wi-form-control" 
+                                                        ng-disabled="wiModal.depthType=='intervalDepth'" 
+                                                        ng-model="wiModal.selectedZoneSet"
+                                                        ng-change="wiModal.onZoneSetChange()" 
+                                                        ng-options="ZoneSet as ZoneSet.name for ZoneSet in wiModal.zoneSetList track by ZoneSet.id">
                                                     </select>
                                                 </div>
                                                 <label class="col-sm-3">Active Zones</label>
@@ -47,7 +50,7 @@
                                                     <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'" ng-model="wiModal.SelectedActiveZone"
                                                         ng-change="wiModal.onActiveZoneChange()">
                                                         <option value="All" ng-selected="wiModal.histogramProps.activeZone=='All'">All</option>
-                                                        <option value="{{Zone.idZone}}" ng-repeat="Zone in wiModal.listZoneSet[wiModal.SelectedZone.id].zones"
+                                                        <option value="{{Zone.idZone}}" ng-repeat="Zone in wiModal.zoneSetList[wiModal.selectedZoneSet.id].zones"
                                                         ng-selected="wiModal.histogramProps.activeZone==Zone.idZone">
                                                             {{Zone.name}}
                                                         </option>

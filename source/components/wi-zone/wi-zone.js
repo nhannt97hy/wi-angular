@@ -41,11 +41,12 @@ function ZoneController(wiComponentService, $timeout){
 
     this.zoneUpdate = function() {
         self.zoneArr.length = 0;
-        self.zones.forEach(function(element, i) {
-            self.zoneArr.push(!(element.properties.idZone == self.activeZone || self.activeZone == "All"));
-        });
+        if(self.zones){
+            self.zones.forEach(function(element, i) {
+                self.zoneArr.push(!(element.properties.idZone == self.activeZone || self.activeZone == "All"));
+            });
+        }
     }
-    // window.ZONECTRL = this;
 }
 
 let app = angular.module(moduleName, []);

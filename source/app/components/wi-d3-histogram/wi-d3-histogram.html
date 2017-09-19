@@ -1,11 +1,16 @@
 <div style="display:flex; flex-direction:row">
     <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Histogram.isShowWiZone" style="min-width:10%;max-width:20%">
-        <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
-            all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
+        <wi-container name='ZoneHistogramContainer' title='Zone' close-handler='wiD3Histogram.CloseZone'>
+            <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
+                all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
+        </wi-container>
     </div>
+    
+    
     <div style='flex:1; display: flex;flex-direction:column;margin:0px 14px'>
         <div wi-right-click='wiD3Histogram.showContextMenu($event)' style="flex:1;display:flex;flex-direction:column;">
             <h4>Histogram: {{wiD3Histogram.histogramModel.properties.histogramTitle}}</h4>
+            
             <h5 ng-show="!wiD3Histogram.histogramModel.properties.idZoneSet">
                 Reference({{wiD3Histogram.curveModel.properties.unit}}): [{{wiD3Histogram.histogramModel.properties.intervalDepthTop}} -
                 {{wiD3Histogram.histogramModel.properties.intervalDepthBottom}}]
@@ -13,15 +18,90 @@
             <h5 ng-show="wiD3Histogram.histogramModel.properties.idZoneSet">
                 Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
             </h5>
-            <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' style="border: 1px solid blue; flex:1;"></div>
+            <div class='histogram-container'>
+                <div style='padding-left:2em;'>{{wiD3Histogram.histogramModel.properties.plotType}}</div>
+                <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' style="flex:1"></div>
+                <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Histogram.histogramModel.properties.xLabel}}</div>
+            </div>
         </div>
-        <div resizable r-directions="['top']" r-flex="true" style="background-color: green; height:50%; max-height:70%; min-height:10%;margin-top:14px">
-            <h2 style="text-align: center;margin:0">
-                statistic pane
-            </h2>
+
+
+        <div resizable r-directions="['top']" r-flex="true" class="statistic-pane">
+            <h5 class='text-left statistic-header'>
+                <label>Statistics</label>
+            </h5>
+            <div class="scroll-content" ng-show="wiD3Histogram.histogramModel.properties.idCurve">
+                <div>
+                    <div class="row">
+                        <div class="col-sm-3"><label>Variables</label></div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3"></div>
+                    </div>
+                    <div class="row wi-small text-color-steelblue">
+                        <div class="col-sm-3 text-right"><label>{{wiD3Histogram.curveModel.properties.name}}:</label></div>
+                        <div class="col-sm-3">
+                            <span ng-show="!wiD3Histogram.histogramModel.properties.idZoneSet">[{{wiD3Histogram.histogramModel.properties.intervalDepthTop}}-{{wiD3Histogram.histogramModel.properties.intervalDepthBottom}}]</span>
+                            <span ng-show="wiD3Histogram.histogramModel.properties.idZoneSet">[{{wiD3Histogram.zoneSetModel.properties.name}}-Zonation]</span>
+                        </div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"><label>Statistics</label></div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3"></div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>Number Of Values:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.length}}</div>
+                        <div class="col-sm-3 text-right"><label>Min Value:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.min}}</div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>Max Value:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.max}}</div>
+                        <div class="col-sm-3 text-right"><label>Average:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.avg}}</div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>Average Deviation:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.avg_dev}}</div>
+                        <div class="col-sm-3 text-right"><label>Standard Deviation:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.std_dev}}</div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>Variance:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.var}}</div>
+                        <div class="col-sm-3 text-right"><label>Skewness:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.skew}}</div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>Kurtosis:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.kur}}</div>
+                        <div class="col-sm-3 text-right"><label>Median:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.med}}</div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>P10:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.p10}}</div>
+                        <div class="col-sm-3 text-right"><label>P50:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.p50}}</div>
+                    </div>
+                    <div class="row wi-small text-color-lightgray">
+                        <div class="col-sm-3 text-right"><label>P90:</label></div>
+                        <div class="col-sm-3">{{wiD3Histogram.statistics.p90}}</div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Histogram.isShowReferenceWindow" style="min-width:10%;max-width:30%">
-        reference window
+    
+    
+    <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Histogram.isShowReferenceWindow" style="min-width:20%;max-width:30%">
+        <wi-container name='RefHistogramContainer' title='Reference Curve' close-handler='wiD3Histogram.CloseReferenceWindow'></wi-container>
     </div>
 </div>

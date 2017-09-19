@@ -9,7 +9,10 @@
                ng-show="tab.closable == 'true'"
                ng-click="wiTabset.closeTab($index)"></i>
         </li>
+        <li ng-show='wiTabset.toggle'>
+            <wi-button name='ribbonToggle' tooltip='Expand/Minimize the ribbon' icon='{{wiTabset.icon}}' type='small' handler='wiTabset.toggleRibbon'></wi-button>
+        </li>
     </ul>
 
-    <div ng-transclude></div>
+    <div ng-transclude ng-show="wiTabset.isExpand"></div>
 </div>

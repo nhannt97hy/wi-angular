@@ -85,6 +85,7 @@ function FrequencyButtonClicked() {
     default:
         wiHistogramCtrl.histogramModel.properties.plotType = "Percent";
     }
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update frequency/percentile");
 }
 
 exports.PercentButtonClicked = function() {

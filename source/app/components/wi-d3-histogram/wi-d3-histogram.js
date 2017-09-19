@@ -9,7 +9,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     self.curveModel = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    this.zoneArr = new Array();
+    this.statistics = {
+        length: null,
+        min: null,
+        max: null,
+        avg: null,
+        avg_dev: null,
+        std_dev: null,
+        var: null,
+        skew: null,
+        kur: null,
+        med: null,
+        p10: null,
+        p50: null,
+        p90: null
+    }
+    this.zoneArr = null;
 
     this.isShowWiZone = true;
     this.isShowReferenceWindow = true;
@@ -30,17 +45,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return "Empty";
     }
-    this.linkModels = function () {
-        if (self.histogramModel.properties.idCurve) {
-            self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-            if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
-                self.currentCurveId = self.histogramModel.properties.idCurve;
-                loadCurve(self.currentCurveId);
-            } else {
-                if(self.visHistogram)
-                    self.visHistogram.signal('histogram-update', "no load curve");
-            }
+
+    function getXLabel() {
+        if (self.curveModel) {
+            let idDataset = self.curveModel.properties.idDataset;
+            let datasetModel = utils.getModel('dataset', idDataset);
+            return datasetModel.properties.name + "." + self.curveModel.properties.name;
         }
+        return "";
+    }
+    this.linkModels = function () {
+        self.zoneArr = null;
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
@@ -51,6 +66,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
 
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
+            self.histogramModel.properties.xLabel = getXLabel();
+        }
+        if (self.histogramModel.properties.idCurve) {
+            self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+            if (self.visHistogram) {
+                if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                    self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
+                    loadCurve(self.visHistogram.idCurve);
+                }
+                else {
+                    self.visHistogram.signal('histogram-update', "no load curve");
+                }
+            }
         }
     }
     this.getZoneName = function () {
@@ -61,26 +89,35 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.onReady = function () {
         self.linkModels();
-        self.createVisualizeHistogram(self.histogramModel);
-        self.visHistogram.signal('histogram-update', "no load curve");
+        let domElem = document.getElementById(self.histogramAreaId);
+        console.log(self.histogramAreaId, domElem);
+        self.createVisualizeHistogram(self.histogramModel, domElem);
+        self.histogramModel.properties.histogramTitle = getHistogramTitle();
+
     }
     this.$onInit = function () {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
-
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
     };
 
-    this.toggleShowWiZone = function() {
+    this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
+    }
+
+    this.CloseZone = function(){
+        self.isShowWiZone = false;
     }
 
     this.toogleShowReferenceWindow = function () {
         self.isShowReferenceWindow = !self.isShowReferenceWindow;
+    }
+
+    this.CloseReferenceWindow = function(){
+        self.isShowReferenceWindow = false;
     }
 
     this.showContextMenu = function (event) {
@@ -133,12 +170,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowAxisYAsPercent",
             label: "Show Axis Y as Percent",
             "isCheckType": "true",
-            checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percentile") : false,
+            checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false,
             handler: function (index) {
                 if (self.histogramModel.properties.plotType == "Frequency")
-                    self.histogramModel.properties.plotType = "Percentile";
+                    self.histogramModel.properties.plotType = "Percent";
                 else self.histogramModel.properties.plotType = "Frequency";
-                self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percentile") : false;
+                self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
+                self.visHistogram.signal('histogram-update', "update frequency/percentile");
             }
         }, {
             name: "ShowReferenceWindow",
@@ -207,8 +245,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: histogramModel.properties.lineWidth,
                 dash: histogramModel.properties.lineStyle
             },
-            plot: histogramModel.properties.plot,
-            plotType: histogramModel.properties.plotType,
+            plot: histogramModel.properties.plot, // Bars or lines
+            plotType: histogramModel.properties.plotType, // Frequency or percent 
             fill: {
                 pattern: null,
                 background: histogramModel.properties.color,
@@ -229,16 +267,38 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var elem = document.getElementById(self.histogramAreaId);
         console.log('createHistogram:', self.histogramAreaId, elem);
         self.visHistogram = graph.createHistogram(histogramModel, elem);
-        if (self.visHistogram.idCurve) loadCurve(self.visHistogram.idCurve);
+        if (self.visHistogram.idCurve) {
+            loadCurve(self.visHistogram.idCurve);
+        }
     }
 
     function loadCurve(idCurve) {
+        console.log('Load curve data!!!!!');
         wiApiService.dataCurve(idCurve, function (data) {
             console.log('load Curve');
             if (self.visHistogram) {
                 self.visHistogram.setCurve(data);
                 self.visHistogram.signal('histogram-update', "linh tinh");
+                loadStatistics();
             }
+        });
+    }
+
+    function loadStatistics() {
+        $timeout(function () {
+            self.statistics.length = self.visHistogram.getLength();
+            self.statistics.min = self.visHistogram.getMin();
+            self.statistics.max = self.visHistogram.getMax();
+            self.statistics.avg = self.visHistogram.getAverage();
+            self.statistics.avg_dev = self.visHistogram.getAverageDeviation();
+            self.statistics.std_dev = self.visHistogram.getStandardDeviation();
+            self.statistics.var = self.visHistogram.getVariance();
+            self.statistics.skew = self.visHistogram.getSkewness();
+            self.statistics.kur = self.visHistogram.getKurtosis();
+            self.statistics.med = self.visHistogram.getMedian();
+            self.statistics.p10 = self.visHistogram.getPercentile(0.1);
+            self.statistics.p50 = self.visHistogram.getPercentile(0.5);
+            self.statistics.p90 = self.visHistogram.getPercentile(0.9);
         });
     }
 }

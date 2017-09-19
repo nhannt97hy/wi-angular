@@ -22,6 +22,7 @@ let wiList = require('./wi-list');
 
 let wiContextMenu = require('./wi-context-menu');
 let wiResizableX = require('./wi-resizable-x');
+let wiContainer = require('./wi-container');
 
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -110,7 +111,8 @@ let app = angular.module('wiapp',
         wiComponentService.name,
 
         wiCanvasRect.name,
-        wiZone.name, 
+        wiZone.name,
+        wiContainer.name, 
         
         'angularModalService',
         'angularResizable',
@@ -195,6 +197,18 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     $(window).on('resize', function () {
         layoutManager.updateSize();
     });
+
+    $scope.onRibbonToggle = function(isCollapsed) {
+        if (isCollapsed) {
+            $('.ribbon-wrapper').css('height', 'auto');
+        }
+        else {
+            $('.ribbon-wrapper').css('height', '120px');
+        }
+        setTimeout(function(){
+            layoutManager.updateSize();
+        }, 500);               
+    }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
     DialogUtils.authenticationDialog(ModalService, function (userInfo) {
