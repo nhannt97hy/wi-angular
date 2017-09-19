@@ -99,6 +99,7 @@ const CREATE_DISCRIM = '/project/well/cross-plot/discrim/new';
 const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
 const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
 const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
+
 const GET_PALETTES = '/pal/all';
 
 const CREATE_HISTOGRAM = '/project/well/histogram/new';
@@ -1024,7 +1025,9 @@ Service.prototype.createPolygon = function (data, callback) {
     let self = this;
     this.post(CREATE_POLYGON, data)
         .then(function (returnData) {
-            callback(returnData);
+            if (callback) {
+                callback(returnData);
+            }
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -1034,7 +1037,9 @@ Service.prototype.editPolygon = function (data, callback) {
     let self = this;
     this.post(EDIT_POLYGON, data)
         .then(function (returnData) {
-            callback();
+            if (callback) {
+                callback(returnData);
+            }
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -1044,7 +1049,9 @@ Service.prototype.getPolygon = function (idPolygon, callback) {
     let self = this;
     this.post(GET_POLYGON, { idPolygon: idPolygon })
         .then(function (returnData) {
-            callback(returnData);
+            if (callback) {
+                callback(returnData);
+            }
         })
         .catch(function (err) {
             self.getUtils().error(err);
@@ -1054,7 +1061,9 @@ Service.prototype.removePolygon = function (idPolygon, callback) {
     let self = this;
     this.delete(DELETE_POLYGON, { idPolygon: idPolygon })
         .then(function (returnData) {
-            callback();
+            if (callback) {
+                callback(returnData);
+            }
         })
         .catch(function (err) {
             self.getUtils().error(err);

@@ -15,13 +15,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         console.log(self.crossplotAreaId)
     };
+    this.get
     function PropertyGridButtonClicked() {
         console.log('PropertyGridButton is clicked');
         let layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');
 
-            layoutManager.putComponentRight('property-block', 'Reference Window');
+        layoutManager.putComponentRight('property-block', 'Reference Window');
     }
-    this.contextMenu = [
+    let commonCtxMenu = [
         {
             name: "Refresh",
             label: "Refresh",
@@ -33,7 +34,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, viCrossplot, function() {
+                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, viCrossplot, function () {
                     console.log("crossplotFormatDialog");
                 })
             }
@@ -76,12 +77,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "Function",
             label: "Function",
             icon: "",
+            childContextMenu: [
+
+            ],
             handler: function () {
 
             }
         }
     ];
-
+    this.contextMenu = commonCtxMenu;
+    this.setContextMenu = function (contextMenu) {
+        self.contextMenu = contextMenu;
+    }
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
@@ -91,10 +98,53 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (!config) config = {};
-        let domElem = document.getElementById(self.crossplotAreaId);
-        viCrossplot = graph.createCrossplot(xCurve, yCurve, config, domElem);
+        if (!viCrossplot) {
+            let domElem = document.getElementById(self.crossplotAreaId);
+            viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+        } 
         return viCrossplot;
     }
+    this.initPolygons = function (polygons) {
+        viCrossplot.polygons = [];
+        polygons.forEach(function (polygon) {
+            viCrossplot.polygons.push(polygon);
+        })
+        viCrossplot.doPlot();
+    }
+    this.getPolygons = function () {
+        if (!viCrossplot) return [];
+        return viCrossplot.polygons;
+    }
+    this.drawPolygon = function (idPolygon, callback) {
+        if (idPolygon) {
+            viCrossplot.startEditPolygon(idPolygon);            
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        callback(viCrossplot.endEditPolygon());
+                        self.contextMenu = commonCtxMenu;
+                    }
+                }
+            ])
+        } else {
+            viCrossplot.startAddPolygon();
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        callback(viCrossplot.endAddPolygon());
+                        self.contextMenu = commonCtxMenu;
+                    }
+                }
+            ])
+        }
+    }
+    
 }
 
 let app = angular.module(moduleName, []);

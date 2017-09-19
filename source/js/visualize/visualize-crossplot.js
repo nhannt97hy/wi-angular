@@ -558,7 +558,7 @@ Crossplot.prototype.genColor = function() {
         return Math.floor(Math.random() * x);
     }
 
-    const DEFAULT_COLORS = ['Blue', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
+    const DEFAULT_COLORS = ['Cyan', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
     let usedColors = [];
     this.polygons.forEach(function(d) {
         usedColors = usedColors.concat(d3.color(d.lineStyle).toString());
@@ -623,6 +623,7 @@ Crossplot.prototype.mouseDownCallback = function() {
     let y = this.getTransformY().invert(mouse[1]);
 
     if (this.mode == 'PlotPolygon') {
+        if (d3.event.button == 2) return;
         if (!this.tmpPolygon) {
             this.tmpPolygon = {
                 lineStyle: this.genColor(),
