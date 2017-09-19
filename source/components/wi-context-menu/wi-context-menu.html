@@ -5,11 +5,14 @@
          style="top:{{contextMenu.top}}px; left:{{contextMenu.left}}px;min-width: 200px">
         <wi-button ng-repeat='button in contextMenu.buttons track by $index'
                    name='{{contextMenu.name + "." + button.name}}'
+                   index='$index'
                    icon='{{button.icon}}'
                    class='{{button.class}}'
                    layout='icon-left'
                    label='{{button.label}}'
                    type='small'
+                   is-check-type='button.isCheckType'
+                   checked='button.checked'
                    handler="button.handler"
                    separator='{{button.separator}}'
                    ng-mouseenter='wiContextMenu.onMouseEnterButton(button, $event, $index)'

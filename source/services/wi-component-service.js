@@ -54,6 +54,7 @@ app.factory(wiServiceName, function () {
 
         // component
         LOGPLOT_HANDLERS: 'LOGPLOT_HANDLERS',
+        HISTOGRAM_HANDLERS: 'HISTOGRAM_HANDLERS',
         TREE_FUNCTIONS: 'tree-functions',
         GLOBAL_HANDLERS: 'GLOBAL_HANDLERS',
         WI_EXPLORER_HANDLERS: 'wi-explorer-handlers',

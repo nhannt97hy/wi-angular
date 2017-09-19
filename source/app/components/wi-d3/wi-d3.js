@@ -1336,7 +1336,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Switch To Logarithmic",
             icon: 'logarithmic-switch-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                let scale = _currentTrack.scale;
+                if (scale.toLowerCase() == 'linear')
+                    _currentTrack.scale = 'logarithmic';
+                else if (scale.toLowerCase() == 'logarithmic')
+                    _currentTrack.scale = 'linear';
+                _currentTrack.doPlot(true);
             }
         },
         {

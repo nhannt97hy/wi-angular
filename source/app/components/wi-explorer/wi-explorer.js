@@ -673,6 +673,91 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
+            case 'histograms':
+                return [
+                    {
+                        name: "NewHistogram ...",
+                        label: "New Histogram",
+                        icon: "histogram-new-16x16",
+                        class: "has-more",
+                        handler: function () {
+
+                        },
+                        childContextMenu: [
+                            {
+                                name: "BlankHistogram",
+                                label: "Blank Histogram",
+                                icon: "histogram-blank-16x16",
+                                handler: function () {
+                                    globalHandlers.BlankHistogramButtonClicked();
+                                }
+                            },
+                            {
+                                separator: "1"
+                            },
+                            {
+                                name: "GRHistogram",
+                                label: "GR Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            {
+                                name: "DTHistogram",
+                                label: "DT Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            {
+                                name: "NPHIHistogram",
+                                label: "NPHI Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            {
+                                name: "RHOBHistogram",
+                                label: "RHOB Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            {
+                                name: "LLDHistogram",
+                                label: "LLD Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            {
+                                name: "PHI_TOTALHistogram",
+                                label: "PHI_TOTAL Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            {
+                                name: "MSLFHistogram",
+                                label: "MSLF Histogram",
+                                icon: "",
+                                handler: function () {
+
+                                }
+                            },
+                            
+                        ]
+                    },
+                    {
+                        separator: "1"
+                    }
+                ]
             default:
                 return [];
         }

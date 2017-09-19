@@ -675,8 +675,31 @@ exports.PickettButtonClicked = function () {
 };
 
 exports.BlankHistogramButtonClicked = function () {
-    console.log('BlankHistogramButton is clicked');
-};
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    DialogUtils.newBlankHistogramDialog(ModalService, function (histogramtName) {
+        console.log(histogramtName);
+        utils.createNewBlankHistogram(wiComponentService, wiApiService, histogramtName)
+            .then(function(histogram) {
+                console.log("Created new histogram", histogram);
+                let histogramModel = utils.histogramToTreeConfig(histogram);
+                let selectedHistogram = utils.getSelectedNode();
+                selectedHistogram.children.push(histogramModel);
+                utils.openHistogramTab(wiComponentService, histogramModel, function() {
+                    let histogramName = 'histogram' + histogramModel.properties.idHistogram;
+                    let wiD3Ctrl = wiComponentService.getComponent(histogramName).getwiD3Ctrl();
+                    // TODO
+                });
+            })
+            .catch(function(err) {
+                console.error('newBlankHistogramDialog err ' + err);
+                utils.error('newBlankHistogramDialog err ' + err);
+            });
+    });};
 
 exports.PHI_TOTALButtonClicked = function () {
     console.log('PHI_TOTALButton is clicked');

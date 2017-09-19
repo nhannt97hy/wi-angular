@@ -463,7 +463,7 @@ function createFillStyles(ctx, fills, callback) {
                         let startColor = fill.varShading.gradient.startColor;
                         let endColor = fill.varShading.gradient.endColor;
                         transform = d3.scaleLinear()
-                            .domain([startX, endX].sort())
+                            .domain(sort([startX, endX]))
                             .range(reverse ? [startColor, endColor].reverse() : [startColor, endColor] )
                             .clamp(true);
 
@@ -473,7 +473,7 @@ function createFillStyles(ctx, fills, callback) {
                             return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
                         });
                         transform = d3.scaleQuantize()
-                            .domain([startX, endX].sort())
+                            .domain(sort([startX, endX]))
                             .range(reverse ? palette.reverse() : palette);
                     }
 
@@ -563,5 +563,11 @@ function sortByKey(array, key) {
         let x = a[key];
         let y = b[key];
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
+
+function sort(array) {
+    return array.sort(function(a, b) {
+        return a - b;
     });
 }
