@@ -3258,7 +3258,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.zoneSets = [];
 
         function refreshZoneSets() {
-            wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
+            wiApiService.zoneSetList(wiLogplotModel.properties.idWell, function (zoneSets) {
                 $scope.$apply(function () {
                     self.zoneSets = zoneSets;
                 })
@@ -4216,9 +4216,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.SelectedZone = {};
+        this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
-        this.listZoneSet = [];
+        this.zoneSetList = [];
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
         this.datasets = [];
         this.curvesArr = [];
@@ -4241,21 +4241,20 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         });
 
         wiApiService.listZoneSet(this.histogramProps.idWell, function (ZoneSets) {
-            self.listZoneSet = ZoneSets;
-            if (self.listZoneSet.length > 0 && !self.histogramProps.idZoneSet) {
-
-                self.SelectedZone = self.listZoneSet[0];
-                self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+            self.zoneSetList = ZoneSets;
+            if (self.zoneSetList.length > 0 && !self.histogramProps.idZoneSet) {
+                self.selectedZoneSet = self.zoneSetList[0];
+                self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
             }
 
-            self.listZoneSet.forEach(function (z, i) {
+            self.zoneSetList.forEach(function (z, i) {
                 z.id = i;
                 wiApiService.getZoneSet(z.idZoneSet, function (ret) {
                     z.zones = ret.zones;
                     if (z.idZoneSet == self.histogramProps.idZoneSet) {
                         $timeout(function() {
-                            self.SelectedZone = z;
-                            self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+                            self.selectedZoneSet = z;
+                            self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
                         },0);
                     }
                 })
@@ -4263,8 +4262,8 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         })
 
         this.onZoneSetChange = function () {
-            if (self.SelectedZone) {
-                self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+            if (self.selectedZoneSet) {
+                self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
             }
         }
 

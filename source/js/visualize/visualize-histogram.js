@@ -55,8 +55,7 @@ Histogram.prototype.filterF = function(d) {
 }
 
 Histogram.prototype.plotData = function(idx) {
-    console.log('plotData:', this.data, this.data.filter);
-    return this.data.filter(this.filterF).map(function(d) { return d.x; });
+    return this.data.filter(this.filterF).map(function(d) { return parseFloat(d.x); });
 }
 function __reverseBins(bins) {
     let len = bins.length;
@@ -143,7 +142,7 @@ Histogram.prototype.doPlot = function() {
     var gap = 4;
     let colWidth = Math.abs(transformX(self.bins[0].x1) - transformX(self.bins[0].x0));
     gap = Math.min(gap, Math.floor(colWidth/5));
-
+    
     bars.append('rect')
         .attr('x', gap/2)
         .attr('width', Math.abs(transformX(self.bins[0].x1) - transformX(self.bins[0].x0)) - gap)
@@ -157,7 +156,7 @@ Histogram.prototype.doPlot = function() {
             }
             return vpY[1] - transformY(d.length);
         })
-        .attr('fill', 'steelblue');
+        .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
 
 }
 

@@ -9,7 +9,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     self.curveModel = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    this.zoneArr = new Array();
     this.statistics = {
         length: null,
         min: null,
@@ -25,6 +24,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         p50: null,
         p90: null
     }
+    this.zoneArr = null;
 
     this.isShowWiZone = true;
     this.isShowReferenceWindow = true;
@@ -55,17 +55,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return "";
     }
     this.linkModels = function () {
-        if (self.histogramModel.properties.idCurve) {
-            self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-            if (self.visHistogram) {
-                if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
-                    self.currentCurveId = self.histogramModel.properties.idCurve;
-                    loadCurve(self.currentCurveId);
-                } else {
-                    self.visHistogram.signal('histogram-update', "no load curve");
-                }
-            }
-        }
+        self.zoneArr = null;
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
@@ -77,6 +67,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
             self.histogramModel.properties.xLabel = getXLabel();
+        }
+        if (self.histogramModel.properties.idCurve) {
+            self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+            if (self.visHistogram) {
+                if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                    self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
+                    loadCurve(self.visHistogram.idCurve);
+                }
+                else {
+                    self.visHistogram.signal('histogram-update', "no load curve");
+                }
+            }
         }
     }
     this.getZoneName = function () {
@@ -263,6 +265,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function loadCurve(idCurve) {
+        console.log('Load curve data!!!!!');
         wiApiService.dataCurve(idCurve, function (data) {
             console.log('load Curve');
             if (self.visHistogram) {
