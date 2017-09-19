@@ -2429,7 +2429,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var condition4customFills = condition4 && shadingProps.positiveFill.varShading.customFills;
 
             fillPatternItem.fill = {
-                display: condition1,
+                display: (shadingProps.fill && shadingProps.fill.display != null)?shadingProps.fill.display:condition1,
                 pattern: {
                     name: (condition1 ? shadingProps.fill.pattern.name : "none"),
                     foreground: (condition1 ? shadingProps.fill.pattern.foreground : null),
@@ -2437,7 +2437,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             };
             fillPatternItem.positiveFill = {
-                display: condition2,
+                display: (shadingProps.positiveFill && shadingProps.positiveFill.display != null)?shadingProps.positiveFill.display:condition2,
                 pattern: {
                     name: (condition2 ? shadingProps.positiveFill.pattern.name : "none"),
                     foreground: (condition2 ? shadingProps.positiveFill.pattern.foreground : null),
@@ -2446,7 +2446,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             };
 
             fillPatternItem.negativeFill = {
-                display: condition2,
+                display: (shadingProps.negativeFill && shadingProps.negativeFill.display != null)?shadingProps.negativeFill.display:condition2,
                 pattern: {
                     name: (condition2 ? shadingProps.negativeFill.pattern.name : "none"),
                     foreground: (condition2 ? shadingProps.negativeFill.pattern.foreground : null),
@@ -2469,7 +2469,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             variableShadingItem.idControlCurve = shadingProps.idControlCurve;
 
             variableShadingItem.fill = {
-                display: condition3,
+                display: (shadingProps.fill && shadingProps.fill.display != null)?shadingProps.fill.display:condition3,
                 varShading: {
                     startX: condition3?shadingProps.fill.varShading.startX:null,
                     endX: condition3?shadingProps.fill.varShading.endX:null,
@@ -2483,7 +2483,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             };
             variableShadingItem.positiveFill = {
-                display: condition4,
+                display: (shadingProps.positiveFill && shadingProps.positiveFill.display != null)?shadingProps.positiveFill.display:condition4,
                 varShading: {
                     startX: condition4?shadingProps.positiveFill.varShading.startX:null,
                     endX: condition4?shadingProps.positiveFill.varShading.endX:null,
@@ -2497,7 +2497,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             };
             variableShadingItem.negativeFill = {
-                display: condition4,
+                display: (shadingProps.negativeFill && shadingProps.negativeFill.display != null)?shadingProps.negativeFill.display:condition4,
                 varShading: {
                     startX: condition4?shadingProps.negativeFill.varShading.startX:null,
                     endX: condition4?shadingProps.negativeFill.varShading.endX:null,
@@ -2948,7 +2948,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     if(shadingObj.idLeftLine > 0) shadingObj.leftFixedValue = null;
                     wiApiService.createShading(shadingObj, function(shading) {
                         wiApiService.getPalettes(function(paletteList){
-
                             let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
                             let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
                             let lineObj1 = null;
