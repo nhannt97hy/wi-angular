@@ -17,7 +17,7 @@ exports.authenticationDialog = function (ModalService, callback) {
             self.checkPasswords();
             if (self.error) return;
             let dataRequest = {
-                    userName: self.usernameReg,
+                    username: self.usernameReg,
                     password: self.passwordReg
             }
             wiApiService.register(dataRequest, function (token) {
@@ -27,7 +27,7 @@ exports.authenticationDialog = function (ModalService, callback) {
                     token: token
                 }
                 close(userInfo);
-            })
+            });
         }
         this.onLoginButtonClicked = function () {
             self.error = null;

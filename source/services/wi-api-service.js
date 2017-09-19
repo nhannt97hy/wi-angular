@@ -4,6 +4,7 @@ const moduleName = 'wi-api-service';
 let app = angular.module(moduleName, []);
 
 const BASE_URL = 'http://54.169.109.34';
+//const BASE_URL = 'http://sflow.me:3000';
 // const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
@@ -218,12 +219,14 @@ Service.prototype.delete = function (route, payload) {
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
+    console.log(data);
     this.post(REGISTER, data)
         .then(function (ret) {
             callback(ret);
         })
         .catch(function (err) {
-            self.getUtils().error(err);
+            console.error(err);
+            alert('Error', err);
         })
 }
 
