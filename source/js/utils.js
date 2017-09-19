@@ -168,8 +168,8 @@ function shadingToTreeConfig(shading, paletteList) {
         negativeFill: shading.negativeFill ? JSON.parse(shading.negativeFill) : null,
         refLineWidth: shading.refLineWidth || 5,
         refLineColor: shading.refLineColor || '#3e3e3e',
-        // showRefLine: shading.showRefLine
-        showRefLine: false
+        showRefLine: shading.showRefLine
+        // showRefLine: false
     };
     if(shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
         shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palName;

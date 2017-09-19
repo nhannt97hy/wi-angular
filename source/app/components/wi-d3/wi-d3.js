@@ -1109,64 +1109,68 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let curve2 = _currentTrack.getTmpCurve();
                 console.log("create shading!!", curve1);
                 if (!curve1) return;
-                if (!curve2) {
-                    // This should open dialog
-
-                    var config = {
-                        //isNegPosFilling : false,
+                var config = {
                         isNegPosFill : false,
                         fill: {
+                            display: true,
                             pattern: {
-                                name: "chert",
-                                foreground: "blue",
-                                background: "pink"
+                                name: "none",
+                                foreground: "transparent",
+                                background: "blue"
                             }
                         },
                         positiveFill: {
-                            gradient: {
-                                startX:0,
-                                endX: 200,
-                                startColor: 'yellow',
-                                endColor: 'blue'
+                            display: false,
+                            pattern: {
+                                name: "none",
+                                foreground: "transparent",
+                                background: "blue"
                             }
                         },
                         negativeFill: {
-                            gradient: {
-                                startX:0,
-                                endX: 200,
-                                startColor: 'red',
-                                endColor: 'cyan'
+                            display: false,
+                            pattern: {
+                                name: "none",
+                                foreground: "transparent",
+                                background: "blue"
                             }
                         },
-                        showRefLine: true
+                        showRefLine: false
                     };
-                    // var config = {
-                    //     type: 'custom',
-                    //     isNegPosFill : true,
-                    //     positiveFill: {
-                    //         gradient: {
-                    //             startX:0,
-                    //             endX: 200,
-                    //             startColor: 'yellow',
-                    //             endColor: 'blue'
-                    //         }
-                    //     },
-                    //     negativeFill: {
-                    //         gradient: {
-                    //             startX:0,
-                    //             endX: 200,
-                    //             startColor: 'blue',
-                    //             endColor: 'yellow'
-                    //         }
-                    //     },
-                    //     showRefLine: true
-                    // };
+                    
                     console.log("curve1", _currentTrack, curve1);
-                    self.addCustomShadingToTrack(_currentTrack, curve1, 100, config);
-                }
-                else {
-                    self.addPairShadingToTrack(_currentTrack, curve1, curve2, {});
-                }
+                    let shadingObj = {
+                        idTrack: _currentTrack.id,
+                        name: 'Default shading',
+                        negativeFill: config.negativeFill,
+                        positiveFill: config.positiveFill,
+                        fill: config.fill,
+                        isNegPosFill: config.isNegPosFill,
+                        idLeftLine: curve2?curve2.id:null,
+                        idRightLine: curve1.id,
+                        leftFixedValue: curve2?null:curve1.minX,
+                        rightFixedValue: null,
+                        idControlCurve: null
+                    }
+                    wiApiService.createShading(shadingObj, function(shading){
+                        console.log("createShading", shading);
+                        let shadingModel = Utils.shadingToTreeConfig(shading);
+                        if (!curve2) {
+                            // This should open dialog
+                            self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);
+                        }
+                        else {
+                            self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
+                        }
+                        DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                            if (props) {
+                                console.log('logTrackPropertiesData', props);
+                            }
+                        }, {
+                            tabs:['false', 'false', 'true'],
+                            shadingOnly: true
+                        });
+                    })
             }
         }
         ]);
