@@ -243,13 +243,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function () {
                             utils.createDataset();
                         }
-                    }, {
+                    }/* , {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                         }
-                    }, {
+                    } */, {
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16",
@@ -382,13 +382,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function () {
                             utils.createZoneSet();
                         }
-                    }, {
+                    }/* , {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                         }
-                    }, {
+                    } */, {
                         separator: '1'
                     }
                 ];
@@ -408,13 +408,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function() {
                             self.handlers.DeleteItemButtonClicked();
                         }
-                    }, {
+                    }/* , {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                         }
-                    }, {
+                    } */, {
                         separator: '1'
                     }
                 ]
@@ -427,13 +427,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function() {
                             self.handlers.DeleteItemButtonClicked();
                         }
-                    }, {
+                    }/* , {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                         }
-                    }, {
+                    } */, {
                         separator: '1'
                     }
                 ]

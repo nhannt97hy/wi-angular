@@ -37,6 +37,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         layoutManager.putComponentRight('property-block', 'Reference Window');
     }
+    this.propertiesDialog = function () {
+        DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, viCrossplot, function () {
+            console.log("crossplotFormatDialog");
+        })
+    }
     let commonCtxMenu = [
         {
             name: "Refresh",
@@ -49,9 +54,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, viCrossplot, function () {
-                    console.log("crossplotFormatDialog");
-                })
+                self.propertiesDialog();
             }
         }, {
             name: "ShowOverlay",

@@ -1195,6 +1195,7 @@ exports.renameDataset = function () {
         datasetInfo.name = ret;
         wiApiService.editDataset(datasetInfo, function () {
             __GLOBAL.$timeout(function () {
+                selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
             })
         });
@@ -1270,6 +1271,7 @@ exports.renameCurve = function () {
         }
         wiApiService.editCurve(curveInfo, function () {
             __GLOBAL.$timeout(function () {
+                selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
             })
         });
