@@ -216,12 +216,10 @@
                                         <div class="col-sm-7">
                                             <div class="form-group">
                                                 <label>
-                                                    <input type="checkbox" id="PositiveFill"
-                                                           value="" name=""
+                                                    <input type="checkbox" 
                                                            ng-model="wiModal.fillPatternOptions.positiveFill.display"
                                                            ng-disabled="wiModal.fillPatternOptions.fill.display">
                                                     Positive fill
-                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -454,7 +452,18 @@
                             </div>
 
                             <div ng-show="wiModal.displayType && wiModal.varShadingType == 'gradient'">
-                                <h5 class="normal-text">Positive Side</h5>
+                                <!-- <h5 class="normal-text">Positive Side</h5> -->
+                                <div class="row">
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" 
+                                                       ng-model="wiModal.variableShadingOptions.positiveFill.display"
+                                                       ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                                Positive side
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
@@ -506,7 +515,18 @@
                                         </div>
                                     </div>
                                 </div>
-                                <h5 class="normal-text">Negative Side</h5>
+                                <!-- <h5 class="normal-text">Negative Side</h5> -->
+                                <div class="row">
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" 
+                                                       ng-model="wiModal.variableShadingOptions.negativeFill.display"
+                                                       ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                                Negative side
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
@@ -606,15 +626,15 @@
                                 </div>
                             </div>
                             <div ng-show="wiModal.displayType && wiModal.varShadingType == 'palette'">
-                                <h5 class="normal-text">Positive Side</h5>
-                                <!-- <div class="form-group">
+                                <!-- <h5 class="normal-text">Positive Side</h5> -->
+                                <div class="form-group">
                                     <label>
                                         <input type="checkbox"
                                                ng-model="wiModal.variableShadingOptions.positiveFill.display"
                                                ng-disabled="wiModal.variableShadingOptions.fill.display">
                                         Positive Side
                                     </label>
-                                </div> -->
+                                </div>
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
@@ -652,15 +672,15 @@
                                         </div>
                                     </div>
                                 </div>
-                                <h5 class="normal-text">Negative Side</h5>
-                                <!-- <div class="form-group">
+                                <!-- <h5 class="normal-text">Negative Side</h5> -->
+                                <div class="form-group">
                                     <label>
                                         <input type="checkbox"
-                                               ng-model="wiModal.variableShadingOptions.positiveFill.display"
+                                               ng-model="wiModal.variableShadingOptions.negativeFill.display"
                                                ng-disabled="wiModal.variableShadingOptions.fill.display">
-                                        Positive side
+                                        Negative side
                                     </label>
-                                </div> -->
+                                </div>
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
