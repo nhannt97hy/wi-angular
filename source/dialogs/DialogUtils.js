@@ -418,6 +418,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
             speed: ["m/s", "m2", "ft/h", "ratio", "ft/s", "m/min", "rpm", "mn/m"],
             force: ["N"]
         };
+
         function copyObj(sourceObj, destObj) {
             for (var attr in sourceObj) {
                 destObj[attr] = sourceObj[attr];
@@ -554,6 +555,7 @@ exports.wellHeaderDialog = function (ModalService, callback) {
 }
 exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
     console.log(DialogUtils);
+
     function ModalController($scope, close) {
         this.close = function (ret) {
             close(ret);
@@ -887,7 +889,14 @@ exports.lineStyleDialog = function (ModalService, wiComponentService, callback, 
         this.options = options;
 
         console.log("Op", this.options);
-        this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
+        this.styles = [
+            [10, 0],
+            [0, 10],
+            [2, 2],
+            [8, 2],
+            [10, 4, 2, 4],
+            [10, 4, 2, 4, 2, 4]
+        ];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         this.lineColor = function () {
@@ -926,7 +935,14 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         console.log(this.options);
 
         this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
-        this.styles = [[10, 0], [0, 10], [2, 2], [8, 2], [10, 4, 2, 4], [10, 4, 2, 4, 2, 4]];
+        this.styles = [
+            [10, 0],
+            [0, 10],
+            [2, 2],
+            [8, 2],
+            [10, 4, 2, 4],
+            [10, 4, 2, 4, 2, 4]
+        ];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         this.lineColor = function () {
@@ -973,7 +989,14 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
         this.lineOptions = lineOptions;
         this.symbolOptions = symbolOptions;
         console.log("options", this)
-        this.lineStyles = [[8, 2, 2, 2, 2, 2], [8, 2, 2, 2], [2, 2], [8, 2], [1, 0], [0, 1]];
+        this.lineStyles = [
+            [8, 2, 2, 2, 2, 2],
+            [8, 2, 2, 2],
+            [2, 2],
+            [8, 2],
+            [1, 0],
+            [0, 1]
+        ];
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
         this.symbolStyles = ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"];
@@ -1053,8 +1076,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                     lineStyle: currentCurve.line.dash
                 }
             }
-        }
-        else {
+        } else {
             this.lineOptions = {
                 display: false,
                 lineStyle: {
@@ -1076,8 +1098,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                     symbolLineDash: currentCurve.symbol.lineDash
                 }
             }
-        }
-        else {
+        } else {
             this.symbolOptions = {
                 display: false,
                 symbolStyle: {
@@ -1120,6 +1141,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             context.clearRect(0, 0, sample.width, sample.height);
             var x = [5, 50, 100, 150, 195];
             var y = [180, 40, 20, 40, 180];
+
             function drawSegment(context, x1, y1, x2, y2) {
                 let lineColor = lineOptions.lineStyle.lineColor;
                 let lineWidth = lineOptions.lineStyle.lineWidth;
@@ -1132,6 +1154,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 context.lineTo(x2, y2);
                 context.stroke();
             }
+
             function drawSymbol(context, x, y, style) {
                 switch (style.symbolStyle.symbolName) {
                     case "circle":
@@ -1230,6 +1253,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }
             self.drawSample();
         };
+
         function updateLine(callback) {
             let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
             console.log(self.curveOptions, self.lineOptions);
@@ -1580,6 +1604,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
 };
 exports.fillPatternSettingDialog = function (ModalService, callback, options, shadingOptions) {
     let thisModal = null;
+
     function ModalController($scope, close, wiComponentService, $timeout) {
         let self = this;
         thisModal = this;
@@ -1594,8 +1619,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
         this.shadingOptions = shadingOptions;
         if (options) {
             this.options = options;
-        }
-        else {
+        } else {
             this.options = {
                 fill: {
                     display: false,
@@ -1702,8 +1726,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
         console.log("selectCurve", selectCurve);
         if (options) {
             this.options = options;
-        }
-        else {
+        } else {
             this.options = {
                 display: true,
                 idControlCurve: null,
@@ -1759,6 +1782,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
 }
 exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, fillPatternOptions, variableShadingOptions, shadingOptions, selectCurve, curvesOnDataset, leftLimit){
     let thisModal = null;
+
     function ModalController($scope, close, wiComponentService, $timeout) {
         let self = this;
         thisModal = this;
@@ -1925,7 +1949,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 
                     self.variableShadingOptions.fill.varShading.startX = item.minX;
                     self.variableShadingOptions.fill.varShading.endX = item.maxX;    
-
                 }
             })
         }
@@ -2344,6 +2367,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.leftLimit = customLimit.concat(self.curvesOnDataset);
         let shadingList = currentTrack.getShadings();
         console.log("shadingList", shadingList);
+
         function getShadingStyle(fillObj) {
             if (fillObj.pattern) return "fillPattern";
 
@@ -2551,8 +2575,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         symbolLineDash: curve.symbol.lineDash
                     }
                 }
-            }
-            else {
+            } else {
                 symbolOptions = {
                     _index: index,
                     display: false,
@@ -2608,6 +2631,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curvesChanged[self.__idx].change = '3';
             console.log("curvesChanged", self.curvesChanged, self.__idx);
         }
+
         function removeCurve(idLine) {
             wiApiService.removeLine(idLine, function () {
                 currentTrack.removeCurveById(idLine);
@@ -2702,8 +2726,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             if (isRight) {
                 if (!curveId) {
                     rightPart = 'right';
-                }
-                else {
+                } else {
                     for (curve of self.curvesOnDataset) {
                         if (curve.id == parseInt(curveId)) {
                             rightPart = curve.name;
@@ -2712,12 +2735,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     }
                 }
                 self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/_.+/g, "_" + rightPart);
-            }
-            else {
+            } else {
                 if (!curveId) {
                     leftPart = 'left';
-                }
-                else {
+                } else {
                     for (curve of self.curvesOnDataset) {
                         if (curve.id == parseInt(curveId)) {
                             leftPart = curve.name;
@@ -2881,11 +2902,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 currentTrack.plotAllDrawings();
                             });
                         });
-                        
                     });
                 }
             });
         }
+
         function findInVisCurveListByIdLine(idLine) {
             for (let line of self.curveList) {
                 if (line.id == idLine) {
@@ -2894,6 +2915,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             return null;
         }
+
         function findInVisCurveListByIdCurve(idCurve) {
             for (let line of self.curveList) {
                 if (line.idCurve == idCurve) {
@@ -2902,6 +2924,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             return null;
         }
+
         function createNewShadings() {
             self.shadingChanged.forEach(function (item, index) {
                 if (item.change == '2') {
@@ -2937,7 +2960,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             })
         }
         // Dialog buttons
-
         this.defineButtonClicked = function (index) {
             var shading = self.shadingArr[index];
             console.log("shadingAttributeOri88888", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
@@ -2954,14 +2976,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         this.lineStyleButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
-            DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {
-            }, self.curvesLineOptions[self.__idx]);
+            DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesLineOptions[self.__idx]);
             $event.stopPropagation();
         };
         this.symbolStyleButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
-            DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {
-            }, self.curvesSymbolOptions[self.__idx]);
+            DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesSymbolOptions[self.__idx]);
             $event.stopPropagation();
         };
         this.colorTrack = function () {
@@ -2969,12 +2989,14 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.props.general.color = colorStr;
             });
         };
+
         function getCurveFromCurveListById(idLine) {
             lineObjs = self.curveList.filter(function (item, index) {
                 return (item.idCurve == idLine);
             });
             return lineObjs[0];
         }
+
         function updateLine(index) {
             let curveOptions = self.curves[index];
             let lineOptions = self.curvesLineOptions[index].lineStyle;
@@ -2996,6 +3018,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             currentTrack.doPlot(true);
             return true;
         }
+
         function updateCurvesTab() {
 
             function roundTwo() {
@@ -3020,6 +3043,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     }
                 }
             }
+
             function roundOne() {
                 self.curvesChanged.forEach(function (item, index) {
                     if (item.change == '2') {
@@ -3036,8 +3060,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                     self.curves[index].idLine = line.idLine;
                                     self.curvesChanged[index].change = '1';
                                     eventEmitter.emitEvent("line-created");
-                                }
-                                else {
+                                } else {
                                     console.error(err);
                                 }
                             });
@@ -3054,8 +3077,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }, 0);
             if (numberberOfNewLines == 0) {
                 roundTwo();
-            }
-            else {
+            } else {
                 let lineCreatedCount = 0;
                 eventEmitter.on('line-created', function () {
                     lineCreatedCount = lineCreatedCount + 1;
@@ -3074,6 +3096,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 return (self.shadingChanged[index].change < '3');
             });
         }
+
         function removeShadings() {
             self.shadingChanged.forEach(function (item, index) {
                 if (item.change == '3') {
@@ -3121,13 +3144,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             };
             return true;
         }
+
         function updateShadingsTab() {
             if (validateAll()) {
                 updateShadings();
                 createNewShadings();
                 removeShadings();
-            }
-            else {
+            } else {
                 DialogUtils.errorMessageDialog(ModalService, "Shading setting is not valid");
                 return false;
             }
@@ -3185,6 +3208,7 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
                 self.props.trackBackground = colorStr;
             });
         }
+
         function updateDepthTrack() {
             utils.editDepthTrack(self.props, wiApiService);
             let newProps = angular.copy(self.props);
@@ -3244,6 +3268,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.width = props.width;
         this.parameterSet = props.parameterSet;
         this.zoneSets = [];
+
         function refreshZoneSets() {
             wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
                 $scope.$apply(function () {
@@ -3275,6 +3300,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
+
         function bindProps() {
             props = {
                 showTitle: self.isShowTitle,
@@ -3338,6 +3364,7 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
+
         function bindProps() {
             props.name = self.name,
                 props.showName = self.showName,
@@ -3499,11 +3526,13 @@ exports.newBlankCrossplotDialog = function (ModalService, callback) {
 exports.colorPickerDialog1 = function (ModalService, currentColor, callback) {
     let wiModal = null;
     let thisTimeout = null;
+
     function ModalController($scope, close, $timeout, wiComponentService, wiApiService, $compile) {
         let self = this;
         wiModal = this;
         thisScope = $scope;
         thisTimeout = $timeout;
+
         function colorToString(colorObj) {
             var colorStr = 'rgba(' + colorObj.r + ',' + colorObj.g + ',' + colorObj.b + ',' + colorObj.a + ')';
             return colorStr;
@@ -3575,6 +3604,7 @@ exports.colorPickerDialog1 = function (ModalService, currentColor, callback) {
 
 exports.colorPickerDialog = function (ModalService, currentColor, callback) {
     if (!currentColor) currentColor = "#fff";
+
     function colorToString(color) {
         var retArray = [color.r, color.g, color.b, color.a];
         return 'rgba(' + retArray.join(',') + ')';
@@ -3667,6 +3697,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
 
     let modalCtrl = null;
     let timeoutFunc = null;
+
     function Controller($scope, close, $timeout, $window) {
         let self = this;
         modalCtrl = this;
@@ -3978,7 +4009,9 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         this.width = config.width;
 
         this.onUploadButtonClicked = function () {
-            wiApiService.uploadImage({ file: self.imageFile }, function (imageUrl) {
+            wiApiService.uploadImage({
+                file: self.imageFile
+            }, function (imageUrl) {
                 $scope.$apply(function () {
                     self.src = imageUrl;
                     self.onImageUrlChange();
@@ -4044,93 +4077,114 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         });
     });
 }
-exports.polygonManagerDialog = function (ModalService, callback) {
-    function ModalController($scope, wiComponentService, close) {
+exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
+    function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
-        this.polygonChanged = new Array;
-        this.polygonsCreated = new Array;
-        this.data = [{
-            data: '313232,323212',
-            polygonColor: '#ccc',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: false
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }, {
-            data: '313232,6547657',
-            polygonColor: '#fff',
-            display: true
-        }];
-        this.data.forEach(function (item, index) {
-            let polygonsCreatedItem = item;
-            let polygonChangedItem = {};
-            polygonsCreatedItem._index = index;
-            polygonChangedItem = {
-                change: '0',
-                _index: index
-            };
-            self.polygonsCreated.push(polygonsCreatedItem);
-            self.polygonChanged.push(polygonChangedItem);
-        });
-        this.getPolygons = function () {
-            return self.polygonsCreated.filter(function (item, index) {
-                return self.polygonChanged[index].change != '3';
-            });
-        };
-        this.__idx = null;
-        this.setClickedRow = function (index) {
-            $scope.selectedRow = index;
-            self.__idx = self.getPolygons()[index]._index;
+        let change = {
+            unchanged: 0,
+            created: 1,
+            updated: 2,
+            deleted: 3,
+            uncreated: 4,
         }
-        this.onChange = function (index) {
-            if (self.polygonChanged[index].change == '0') self.polygonChanged[index].change = '1';
+        $scope.change = change;
+        function init() {
+            self.polygons = new Array();        
+            angular.copy(wiD3Crossplot.getPolygons()).forEach(function (polygonItem, index) {
+                polygonItem.points = JSON.stringify(polygonItem.points);
+                polygonItem.change = change.unchanged;
+                polygonItem.index = index;
+                self.polygons.push(polygonItem);
+            });
+        }
+        init();
+        this.getPolygons = function () {
+            return self.polygons.filter(function (item, index) {
+               return (item.change != change.deleted && item.change != change.uncreated);
+           });
+        }
+        this.__idx = 0;
+        $scope.selectedRow = 0;
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+            self.__idx = self.getPolygons()[indexRow].index;
+        }
+        this.onChange = function(index) {
+            if(self.polygons[index].change == change.unchanged) self.polygons[index].change = change.updated;
         }
         // modal buttons
         this.removeRow = function () {
-            console.log("removeRowButtonClicked");
-            if (self.polygonChanged[self.__idx].change == '2') self.polygonChanged[self.__idx].change = '4';
-            else self.polygonChanged[self.__idx].change = '3';
+            if (!self.polygons[self.__idx]) return;
+            if(self.polygons[self.__idx].change == change.created) {
+                self.polygons[self.__idx].change = change.uncreated;
+            } else {
+                self.polygons[self.__idx].change = change.deleted;
+            }
+            if (self.getPolygons().length) {
+                self.setClickedRow(0);
+            }
         };
         this.addRow = function () {
-            console.log("addRowButtonClicked");
-            self.polygonsCreated.push({ _index: self.polygonsCreated.length });
-            self.polygonChanged.push({
-                change: '2',
-                _index: self.polygonChanged.length
+            // self.polygonsCreated.push({index: self.polygonsCreated.length});
+            self.polygons.push({
+                change: change.created,
+                index: self.polygons.length,
+                display: true
             });
-            console.log("polygonChanged", this.polygonChanged);
         };
-        this.polygonLineColor = function (index) {
-            console.log("polygonLineColorButtonClick");
-            // DialogUtils.colorPickerDialog(ModalService, self.getPolygons[index].polygonColor, function (colorStr) {
-            //     self.getPolygons[index].polygonColor = colorStr;
-            // });
-        }
-        this.createPolygon = function (index) {
-            console.log("createPolygonButtonClicked");
+        this.drawPolygon = function (index) {
             $('#polygon-modal').modal('hide');
+            wiD3Crossplot.drawPolygon(self.polygons[index].idPolygon, function (drawingPolygon) {
+                $('#polygon-modal').modal('show');
+                if (self.polygons[index].change == change.unchanged) {
+                    self.polygons[index].change = change.updated;
+                }
+                self.polygons[index].lineStyle = drawingPolygon.lineStyle;
+                self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+            });
+        }
+        this.polygonLineColor = function (index) {
+            dialogUtils.colorPickerDialog(ModalService, self.polygons[index].lineStyle, function (colorStr) {
+                self.polygons[index].lineStyle = colorStr;
+            });
+        }
+        function sendPolygonsAPIs() {
+            const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
+            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged).map(unchangedPolygon => {
+                unchangedPolygon.points = JSON.parse(unchangedPolygon.points);
+                return unchangedPolygon;
+            });
+            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created).map(createdPolygon => {
+                createdPolygon.points = JSON.parse(createdPolygon.points);
+                createdPolygon.idCrossPlot = idCrossPlot;
+                createdPolygon.change = change.unchanged;
+                wiApiService.createPolygon(createdPolygon);
+                return createdPolygon;
+            });
+            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated).map(updatedPolygon => {
+                updatedPolygon.points = JSON.parse(updatedPolygon.points);
+                updatedPolygon.idCrossPlot = idCrossPlot;
+                updatedPolygon.change = change.unchanged;
+                wiApiService.editPolygon(updatedPolygon);
+                return updatedPolygon;
+            });
+            self.polygons.filter((polygon) => polygon.change == change.deleted).map(deletedPolygon => {
+                deletedPolygon.idCrossPlot = idCrossPlot;
+                deletedPolygon.change = change.deleted;
+                wiApiService.removePolygon(deletedPolygon.idPolygon);
+            });
+            wiD3Crossplot.initPolygons(unchangedPolygons.concat(createdPolygons, updatedPolygons));
+            init();
         }
         this.onOkButtonClicked = function () {
-            close(self);
+            sendPolygonsAPIs();
+            close(null);
         };
-        this.onApplyButtonClicked = function () {
-            console.log("onApplyButtonClicked");
+        this.onApplyButtonClicked = function() {
+            sendPolygonsAPIs();
         };
         this.onCancelButtonClicked = function () {
             close(null);
@@ -4145,12 +4199,191 @@ exports.polygonManagerDialog = function (ModalService, callback) {
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
+            $('.modal').remove();
             $('body').removeClass('modal-open');
-            if (!ret) return;
-            callback(ret);
+            if (ret && callback) callback(ret);
         });
     });
 };
+
+exports.newBlankHistogramDialog = function(ModalService, callback){
+    function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
+        let self = this;
+        self.name = "BlankHistogram";
+        self.error = null;
+        self.disabled = false;
+
+        this.onOkButtonClicked = function () {
+            close(self.name);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+
+    }
+
+    ModalService.showModal({
+        templateUrl: "blank-histogram/blank-histogram-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (newPlot) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
+            if (callback) callback(newPlot);
+        });
+    });
+}
+
+exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
+    function ModalController(close, wiComponentService, wiApiService, $timeout) {
+        let self = this;
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
+        this.histogramProps = angular.copy(histogramModel.properties);
+        console.log(this.histogramProps);
+        this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
+
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.SelectedZone = {};
+        this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
+        this.listZoneSet = [];
+        this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
+        this.datasets = [];
+        this.curvesArr = [];
+        this.SelectedCurve = {};
+
+        this.well.children.forEach(function (child) {
+            if (child.type == 'dataset') self.datasets.push(child);
+        });
+        this.datasets.forEach(function (child) {
+            child.children.forEach(function (item) {
+                if (item.type == 'curve') {
+                    var d = item;
+                    d.datasetCurve = child.properties.name + "." + item.properties.name;
+                    self.curvesArr.push(d);
+                    if (d.id == self.histogramProps.idCurve) {
+                        self.SelectedCurve = d;
+                    }
+                }
+            })
+        });
+
+        wiApiService.listZoneSet(this.histogramProps.idWell, function (ZoneSets) {
+            self.listZoneSet = ZoneSets;
+            if (self.listZoneSet.length > 0 && !self.histogramProps.idZoneSet) {
+
+                self.SelectedZone = self.listZoneSet[0];
+                self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+            }
+
+            self.listZoneSet.forEach(function (z, i) {
+                z.id = i;
+                wiApiService.getZoneSet(z.idZoneSet, function (ret) {
+                    z.zones = ret.zones;
+                    if (z.idZoneSet == self.histogramProps.idZoneSet) {
+                        $timeout(function() {
+                            self.SelectedZone = z;
+                            self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+                        },0);
+                    }
+                })
+            })
+        })
+
+        this.onZoneSetChange = function () {
+            if (self.SelectedZone) {
+                self.histogramProps.idZoneSet = self.SelectedZone.idZoneSet;
+            }
+        }
+
+        this.onActiveZoneChange = function () {
+            if (self.SelectedActiveZone) {
+                self.histogramProps.activeZone = self.SelectedActiveZone;
+            }
+        }
+
+        this.onSelectCurveChange = function () {
+            self.histogramProps.idCurve = self.SelectedCurve.id;
+            self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+            self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+        }
+
+        this.onDepthTypeChanged = function () {
+            switch (self.depthType) {
+                case "intervalDepth":
+                    self.histogramProps.idZoneSet = null;
+                    break;
+                case "zonalDepth":
+                    // TODO
+                    self.histogramProps.intervalDepthTop = null;
+                    self.histogramProps.intervalDepthBottom = null;
+                    break;
+            }
+        }
+        this.chooseChartColor = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
+                self.histogramProps.color = colorStr;
+            });
+        }
+        this.onCloseButtonClicked = function () {
+            console.log("on OK clicked");
+            histogramModel.properties = self.histogramProps;
+            close(histogramModel.properties);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+            
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "histogram-format/histogram-format-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+            callback(ret);
+        })
+    });
+};
+
+exports.histogramFrequencyInfoDialog = function (ModalService, callback) {
+    function ModalController($scope, close) {
+        var self = this;
+
+        this.onCancelButtonClicked = function () {
+            console.log("on cancel clicked");
+            close(null);
+        }
+        this.onCloseButtonClicked = function () {
+            console.log("on Close clicked");
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "histogram-frequency-info/histogram-frequency-info-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    })
+}
 exports.markerPropertiesDialog = function (ModalService, markerProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
@@ -4171,7 +4404,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         this.depthVAlign = props.depthVAlign.toLowerCase();
         this.showSymbol = props.showSymbol;
         this.symbolSize = props.symbolSize;
-        this.symbolType = props.symbolName.toLowerCase();// TODO: refactor
+        this.symbolType = props.symbolName.toLowerCase(); // TODO: refactor
         this.styles = {
             lineStyle: {
                 lineWidth: props.lineWidth,
@@ -4208,6 +4441,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
+
         function bindProps() {
             props.name = self.name;
             props.nameHAlign = self.nameHAlign;
@@ -4221,7 +4455,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
             props.lineColor = self.styles.lineStyle.lineColor;
             props.showSymbol = self.showSymbol;
             props.symbolSize = self.symbolSize;
-            props.symbolName = self.symbolType;// TODO: refactor
+            props.symbolName = self.symbolType; // TODO: refactor
             props.symbolStrokeStyle = self.styles.symbolStyle.symbolStrokeStyle;
             props.symbolFillStyle = self.styles.symbolStyle.symbolFillStyle;
             props.symbolLineWidth = self.styles.symbolStyle.symbolLineWidth;

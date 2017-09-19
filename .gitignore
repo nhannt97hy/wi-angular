@@ -1,6 +1,7 @@
 node_modules
 build
 .idea
+wi-angular.iml
 .publish
 data-analysis-tab.json
 data-processing-tab.json
@@ -17,13 +18,24 @@ well-tab.json
 source/js/handlers.js.tmpl
 source/js/wi-logplot-handlers.js.tmpl
 source/js/wi-explorer-handlers.js.tmpl
+source/js/wi-histogram-handlers.js.tmpl
 wi-logplot.json
+wi-crossplot.json
+wi-histogram.json
 wi-explorer.json
 .DS_Store
 
 # Logplot generate
 source/app/components/wi-logplot/wi-logplot.html
 source/app/components/wi-logplot/template/toolbar/*
+
+# Crossplot generate
+source/app/components/wi-crossplot/wi-crossplot.html
+source/app/components/wi-crossplot/template/toolbar/*
+
+# Histogram generate
+source/app/components/wi-histogram/wi-histogram.html
+source/app/components/wi-histogram/template/toolbar/*
 
 # Explorer generate
 source/app/components/wi-explorer/wi-explorer.html

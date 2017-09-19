@@ -1,0 +1,9 @@
+<div ng-style='{width: wiResizableX.width + "px"}'>
+    <div ng-if="wiResizableX.resizeLeft" class='knob' ng-mousedown='wiResizableX.onResizeStart($event)' 
+        ng-mousemove="wiResizableX.onResizing($event, -1)"
+        ng-mouseup="wiResizableX.onResizeEnd($event, -1)"></div>
+    <div ng-transclude></div>
+    <div ng-if="wiResizableX.resizeRight" class='knob' ng-mousedown='wiResizableX.onResizeStart($event)' 
+        ng-mousemove="wiResizableX.onResizing($event, 1)"
+        ng-mouseup="wiResizableX.onResizeEnd($event, 1)"></div>
+</div>

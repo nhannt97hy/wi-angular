@@ -63,13 +63,10 @@ exports.UserDefineLineButtonClicked = function() {
 }
 
 exports.PolygonManagerButtonClicked = function() {
-    console.log('PolygonManagerButton is clicked');
-    let self = this;
     let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.polygonManagerDialog(this.ModalService, function(){
-        console.log("polygonManagerDialog");
-    })
+    DialogUtils.polygonManagerDialog(this.ModalService, wiD3Crossplot, function () {});
 }
 
 exports.RegressionLineButtonClicked = function() {

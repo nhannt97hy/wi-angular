@@ -1,12 +1,12 @@
-<div class='modal fade' id="polygon-modal">
-    <div class='modal-dialog'>
+<div class='modal fade' id="polygon-modal" data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
-                <h4><span class=""></span>&nbsp;FRM Polygon Manager</h4>
+                <h4><span class=""></span>&nbsp;Polygon Manager</h4>
             </div>
-            <div class="modal-body text-center">
-                <div class="container-fluid">
+            <div class="modal-body text-center" style="padding: 10 0">
+                <div class="container-fluid" style="padding: 10 0">
                     <div class="col-sm-11">
                         <form class="form-horizontal">
                             <table class="table table-bordered">
@@ -19,27 +19,26 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="polygon in wiModal.getPolygons()"
+                                    <tr ng-repeat="polygon in wiModal.getPolygons() track by $index"
                                         ng-class="{selected:$index == selectedRow}"
                                         ng-click="wiModal.setClickedRow($index)">
                                         <td>{{$index + 1}}</td>
                                         <td>
-                                            <input ng-model="polygon.data"
+                                            <input ng-model="polygon.points"
                                                     type="text" class="form-control wi-form-control
-                                                    valign-middle pull-left" style="height: 25px; width: 85%;"
-                                                    ng-change="wiModal.onChange($index)">
-                                                <button ng-click="wiModal.createPolygon($index);wiModal.onChange($index)" 
-                                                        class="wi-form-control">...</button>
+                                                    valign-middle pull-left" style="height: 25px; width: calc(100% - 30px);"
+                                                    ng-change="wiModal.onChange(polygon.index)">
+                                            <button ng-click="wiModal.drawPolygon(polygon.index);wiModal.onChange(polygon.index)" 
+                                                    class="wi-form-control">...</button>
                                         </td>
-                                        <td>
-                                            <button ng-style="{'background-color':polygon.polygonColor}"
-                                                    ng-click="wiModal.polygonLineColor($index);wiModal.onChange($index)"
+                                        <td style="width: 80px">
+                                            <button ng-style="{'background-color':polygon.lineStyle}"
+                                                    ng-click="wiModal.polygonLineColor(polygon.index);wiModal.onChange(polygon.index)"
                                                     class="form-control wi-form-control width-80px thick-border">
                                             </button>
                                         </td>
-                                        <td>
-                                            <input type="checkbox" ng-model="polygon.display"
-                                                    ng-change="wiModal.onChange($index)">
+                                        <td style="width: 60px">
+                                            <input type="checkbox" ng-model="polygon.display" ng-change="wiModal.onChange(polygon.index)">
                                         </td>
                                     </tr>
                                 </tbody>

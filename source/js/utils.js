@@ -10,7 +10,8 @@ exports.debounce = debounce;
 function debounce(func, wait, immediate) {
     var timeout;
     return function () {
-        var context = this, args = arguments;
+        var context = this,
+            args = arguments;
         var later = function () {
             timeout = null;
             if (!immediate) func.apply(context, args);
@@ -210,6 +211,7 @@ function zoneToTreeConfig(zone) {
     return zoneModel;
 }
 exports.zoneToTreeConfig = zoneToTreeConfig;
+
 function zoneSetToTreeConfig(zoneSet) {
     var zoneSetModel = new Object();
     zoneSetModel.name = 'zoneset';
@@ -227,7 +229,7 @@ function zoneSetToTreeConfig(zoneSet) {
     }
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
-    zoneSet.zones.forEach(function(zone) {
+    zoneSet.zones.forEach(function (zone) {
         zoneSetModel.children.push(zoneToTreeConfig(zone));
     });
     return zoneSetModel;
@@ -351,9 +353,32 @@ function histogramToTreeConfig(histogram) {
     histogramModel.type = 'histogram';
     histogramModel.id = histogram.idHistogram;
     histogramModel.properties = {
-        idWell: histogram.idWell,
         idHistogram: histogram.idHistogram,
-        name: histogram.name
+        name: histogram.name,
+        histogramTitle: histogram.histogramTitle,
+        hardCopyWidth: histogram.hardCopyWidth,
+        hardCopyHeight: histogram.hardCopyHeight,
+        intervalDepthTop: histogram.intervalDepthTop,
+        intervalDepthBottom: histogram.intervalDepthBottom,
+        activeZone: histogram.activeZone,
+        divisions: histogram.divisions,
+        leftScale: histogram.leftScale,
+        rightScale: histogram.rightScale,
+        showGaussian: histogram.showGaussian,
+        loga: histogram.loga,
+        showGrid: histogram.showGrid,
+        showCumulative: histogram.showCumulative,
+        flipHorizontal: histogram.flipHorizontal,
+        lineStyle: histogram.lineStyle,
+        lineColor: histogram.lineColor,
+        plot: histogram.plot,
+        plotType: histogram.plotType,
+        color: histogram.color,
+        // discriminators: histogram.discriminators,
+        idWell: histogram.idWell,
+        idCurve: histogram.idCurve,
+        idZoneSet: histogram.idZoneSet,
+        // zones: histogram.zoneset != null ? histogram.zoneset.zones : null
     };
     histogramModel.data = {
         childExpanded: false,
@@ -384,7 +409,9 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name // TODO
+        alias: curve.name, // TODO
+        minScale: curve.LineProperty.minScale,
+        maxScale: curve.LineProperty.maxScale
     };
     curveModel.data = {
         childExpanded: false,
@@ -441,11 +468,12 @@ function createZoneSetsNode(well) {
     }
     zoneSetsModel.children = new Array();
     if (!well.zonesets) return zoneSetsModel;
-    well.zonesets.forEach(function(zoneSet) {
+    well.zonesets.forEach(function (zoneSet) {
         zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
     });
     return zoneSetsModel;
 }
+
 function createLogplotNode(well) {
     let logplotModel = new Object();
     logplotModel.name = 'logplots';
@@ -502,11 +530,42 @@ function createHistogramNode(well) {
         idWell: well.idWell
     };
     // mock
-    well.histograms = [{
-        idHistogram: 2810,
-        idWell: well.idWell,
-        name: 'MockHistogram'
-    }];
+    // well.histograms = [{
+    //     idHistogram: 2810,
+    //     histogramTitle: 'CuongHistogram',
+    //     hardCopyWidth: null,
+    //     hardCopyHeight: null,
+    //     intervalDepthTop: 1200,
+    //     intervalDepthBottom: 1900,
+    //     divisions: 50,
+    //     leftScale: 0,
+    //     rightScale: 0,
+    //     showGaussian: false,
+    //     loga: false,
+    //     showGrid: false,
+    //     flipHorizontal: false,
+    //     lineStyle: "Custom",
+    //     lineColor: "Blue",
+    //     plotType: "Frequency",
+    //     color: "Blue",
+    //     discriminators: null,
+    //     createdAt: "2017-09-06T07:44:10.000Z",
+    //     updatedAt: "2017-09-06T07:44:10.000Z",
+    //     idWell: well.idWell,
+    //     idCurve: 1,
+    //     idZoneSet: 1,
+    //     zones: [{
+    //         "idZone": 2,
+    //         "startDepth": 1144.03,
+    //         "endDepth": 1175.72,
+    //         "fill": "{\"pattern\":{\"name\":\"none\",\"background\":\"rgb(0, 0, 255)\",\"foreground\":\"white\"}}",
+    //         "showName": true,
+    //         "name": "1144",
+    //         "createdAt": "2017-09-07T10:32:17.000Z",
+    //         "updatedAt": "2017-09-07T10:32:17.000Z",
+    //         "idZoneSet": 1
+    //     }]
+    // }];
 
     if (!well.histograms) return histogramModel;
     histogramModel.children = new Array();
@@ -632,8 +691,7 @@ function getSelectedPath(foundCB) {
                     selectedPath = options.path.slice();
                     return true;
                 }
-            }
-            else if (node.data.selected == true) {
+            } else if (node.data.selected == true) {
                 selectedPath = options.path.slice();
                 return true;
             }
@@ -706,7 +764,9 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 exports.getCurveData = getCurveData;
 
 function getCurveData(apiService, idCurve, callback) {
-    apiService.post(apiService.DATA_CURVE, {idCurve})
+    apiService.post(apiService.DATA_CURVE, {
+            idCurve
+        })
         .then(function (curve) {
             callback(null, curve);
         })
@@ -733,7 +793,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.track = null;
             let idCurve = ui.helper.attr('data');
             if (wiD3Ctrl && track) {
-                apiService.post(apiService.CREATE_LINE, {idTrack: track.id, idCurve: idCurve})
+                apiService.post(apiService.CREATE_LINE, {
+                        idTrack: track.id,
+                        idCurve: idCurve
+                    })
                     .then(function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
@@ -757,7 +820,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: 'clone',
         containment: 'document',
         cursor: 'move',
-        cursorAt: {top: 0, left: 0}
+        cursorAt: {
+            top: 0,
+            left: 0
+        }
     });
 };
 
@@ -783,6 +849,29 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
 };
 
+
+exports.deleteLogplot = function () {
+    let selectedNode = getSelectedNode();
+    if (selectedNode.type != 'logplot') return;
+    const wiComponentService = __GLOBAL.wiComponentService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function (yes) {
+        if (!yes) return;
+        const wiApiService = __GLOBAL.wiApiService;
+        wiApiService.delete(wiApiService.DELETE_PLOT, {
+                idPlot: selectedNode.properties.idPlot
+            })
+            .then(function (res) {
+                __GLOBAL.$timeout(function () {
+                    selectedNode.data.deleted = true;
+                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
+                });
+            }).catch(function (err) {
+                console.error('logplot delete error', err);
+            });
+    });
+};
+
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(logplotModel);
@@ -793,7 +882,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.getPalettes(function(paletteList){
+    wiApiService.getPalettes(function(paletteList) {
         wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
             .then(function (plot) {
                 if (logplotModel.properties.referenceCurve) {
@@ -817,11 +906,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     })
                 }
 
-                /*
-                tracks.sort(function(track1, track2) {
-                    return track1.orderNum.localeCompare(track2.orderNum);
-                });
-                */
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
                         let shadingModel = shadingToTreeConfig(shading, paletteList);
@@ -829,49 +913,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         console.log("LinhTinh:", linesOfTrack, shading, shadingModel);
                         let lineObj1 = null;
                         let lineObj2 = null;
-
-                        /*if (!shadingModel.idRightLine && !shadingModel.idLeftLine) {
-                            console.error('Shading info is invalid', shading);
-                            return;
-                        }
-                        
-                        var __lineId = shadingModel.idRightLine;
-                        var __refX = shadingModel.data.leftX;
-                        var isLeft = false;
-                        if (!__lineId) {
-                            __lineId = shadingModel.idLeftLine;
-                            __refX = shadingModel.data.rightX;
-                            isLeft = true;
-                        }
-
-                        if (shadingModel.idLeftLine && shadingModel.idRightLine) {
-                            for (let line of linesOfTrack) {
-                                if (line.id == shading.idRightLine) {
-                                      lineObj1 = line;
-                                }
-                                if (line.id == shading.idLeftLine) {
-                                    lineObj2 = line;
-                                }
-                            }
-                            let tmp = wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
-                            console.log('shading2', tmp);
-                        }
-                        else {
-                            for (let line of linesOfTrack) {
-                                //if (line.id == shading.idRightLine) {
-                                if (line.id == __lineId) {
-                                    lineObj1 = line;
-                                    break;
-                                }
-                            }
-                            // let tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                            let tmp;
-                            if(isLeft) 
-                                tmp = wiD3Ctrl.addCustomShadingToTrackWithLeftCurve(trackObj, lineObj1, __refX, shadingModel.data);
-                            else 
-                                tmp = wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, __refX, shadingModel.data);
-                            console.log('shading', tmp);
-                        }*/
 
                         if(!shadingModel.idRightLine) return;
                         if(!shadingModel.idLeftLine) {
@@ -1078,6 +1119,26 @@ exports.findWellByCrossplot = function (idCrossplot) {
     }) || [];
     return path[1];
 }
+
+exports.findWellByHistogram = function (idHistogram) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'histogram' && node.id == idHistogram;
+    }) || [];
+    return path[1];
+}
+
+exports.findHistogramModelById = function(idHistogram){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let his = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'histogram' && node.id == idHistogram) {
+            his = node;
+        }
+    });
+    return his;
+}
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
 //     let timestamp = 'DD-MM-YYYY, h:mm:ss a';
@@ -1087,8 +1148,7 @@ exports.findWellByCrossplot = function (idCrossplot) {
 
 exports.trackProperties = function (ModalService, wiComponentService) {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
-    });
+    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
 let refreshProjectState = debounce(function () {
@@ -1174,7 +1234,9 @@ exports.exportCurve = function () {
     if (selectedNode.type != 'curve') return;
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.exportCurve(selectedNode.properties.idCurve, function (data, type) {
-        let blob = new Blob([data], {type: type});
+        let blob = new Blob([data], {
+            type: type
+        });
         let a = document.createElement('a');
         let fileName = selectedNode.properties.name;
         a.download = fileName;
@@ -1320,8 +1382,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         //if (!shadingObj.isNegPosFilling) {
         if (!shadingObj.isNegPosFill) {
             shadingObj.fill = fillPatternStyles.fill;
-        }
-        else {
+        } else {
             shadingObj.positiveFill = fillPatternStyles.positiveFill;
             shadingObj.negativeFill = fillPatternStyles.negativeFill;
         }
@@ -1330,14 +1391,12 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.idControlCurve = variableShadingStyle.idControlCurve;
         if(!shadingObj.isNegPosFill){
             shadingObj.fill = variableShadingStyle.fill;
-        }
-        else {
+        } else {
             shadingObj.positiveFill = variableShadingStyle.positiveFill;
             shadingObj.negativeFill = variableShadingStyle.negativeFill;
         }
         // shadingObj.fill.display = true;
-    }
-    else {
+    } else {
         alert("shadingObj has undefined shadingStyle");
     }
     return shadingObj;
@@ -1353,11 +1412,12 @@ exports.changeTrack = function (trackObj, wiApiService, callback) {
         if (callback) callback(result);
     });
 }
-exports.editDepthTrack = function(depthTrackObj, wiApiService, callback) {
-    wiApiService.editDepthTrack(depthTrackObj, function(result) {
-        if(callback) callback(result);
+exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
+    wiApiService.editDepthTrack(depthTrackObj, function (result) {
+        if (callback) callback(result);
     });
 }
+
 function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
@@ -1425,7 +1485,10 @@ exports.createPointSet = function (pointSetData, callback) {
 }
 
 exports.createCrossplot = function (idWell, crossplotName, callback) {
-    __GLOBAL.wiApiService.createCrossplot({ idWell: idWell, name: crossplotName }, function (crossplot) {
+    __GLOBAL.wiApiService.createCrossplot({
+        idWell: idWell,
+        name: crossplotName
+    }, function (crossplot) {
         console.log("Created new crossplot", crossplot);
         let crossplotModel = crossplotToTreeConfig(crossplot);
         refreshProjectState();
@@ -1468,12 +1531,21 @@ function openCrossplotTab(crossplotModel, callback) {
                             topDepth: wellProps.topDepth,
                             bottomDepth: wellProps.bottomDepth
                         });
+                        if (crossplot.polygons && crossplot.polygons.length) {
+                            for (let polygon of crossplot.polygons) {
+                                try {
+                                    polygon.points = JSON.parse(polygon.points);
+                                } catch (error) {}
+                            }
+                            wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
+                        }
+                        
                     }
                 })
             })
         }
     })
-    if(callback) callback(wiCrossplotCtrl);
+    if (callback) callback(wiCrossplotCtrl);
 };
 exports.openCrossplotTab = openCrossplotTab;
 
@@ -1482,10 +1554,9 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
     if (selectedNode.type != 'histograms') return;
     let dataRequest = {
         idWell: selectedNode.properties.idWell,
-        name: histogramName,
-        option: 'blank-plot'
+        name: histogramName
     };
-    return wiApiService.post(route, dataRequest);
+    return wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest);
 };
 
 function openHistogramTab(wiComponentService, histogramModel, callback) {
@@ -1493,6 +1564,7 @@ function openHistogramTab(wiComponentService, histogramModel, callback) {
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
     histogramModel.data.opened = true;
+    if (callback) callback();
 };
 exports.openHistogramTab = openHistogramTab;
 
@@ -1571,6 +1643,15 @@ exports.hexToRgbA = hexToRgbA;
 
 exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
+}
+
+exports.histogramFormat = function (ModalService, wiComponentService, wiHistogramCtrl) {
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.histogramFormatDialog(ModalService, wiHistogramCtrl, function(ret) {
+        let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+        wiD3Ctrl.linkModels();
+        wiD3Ctrl.getZoneCtrl().zoneUpdate();
+    })
 }
 function getValPalette(palName, paletteList){
     console.log("NAME", paletteList.palName);

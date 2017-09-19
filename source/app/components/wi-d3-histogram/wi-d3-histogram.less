@@ -1,9 +1,18 @@
 wi-d3-histogram {
-    display:flex;
-    .d3-histogram-region {
-        display: flex;
-        position: relative;
-        flex: 1;
+    & > div {
+        display:flex;
+        flex-direction: column;
+        width: 100%;
+        h1, h2, h3, h4, h5 {
+            flex-grow: 0;
+            text-align: center;
+        }
+        .d3-histogram-region {
+            display: flex;
+            position: relative;
+            flex: 1;
+        }
     }
+    //display:flex;
     overflow: hidden;
 }

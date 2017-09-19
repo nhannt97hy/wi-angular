@@ -1,2 +1,27 @@
-<div wi-right-click='wiD3Histogram.showContextMenu($event)' id='{{wiD3Histogram.plotAreaId}}' class='d3-histogram-region'>
+<div style="display:flex; flex-direction:row">
+    <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Histogram.isShowWiZone" style="min-width:10%;max-width:20%">
+        <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
+            all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
+    </div>
+    <div style='flex:1; display: flex;flex-direction:column;margin:0px 14px'>
+        <div wi-right-click='wiD3Histogram.showContextMenu($event)' style="flex:1;display:flex;flex-direction:column;">
+            <h4>Histogram: {{wiD3Histogram.histogramModel.properties.histogramTitle}}</h4>
+            <h5 ng-show="!wiD3Histogram.histogramModel.properties.idZoneSet">
+                Reference({{wiD3Histogram.curveModel.properties.unit}}): [{{wiD3Histogram.histogramModel.properties.intervalDepthTop}} -
+                {{wiD3Histogram.histogramModel.properties.intervalDepthBottom}}]
+            </h5>
+            <h5 ng-show="wiD3Histogram.histogramModel.properties.idZoneSet">
+                Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
+            </h5>
+            <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' style="border: 1px solid blue; flex:1;"></div>
+        </div>
+        <div resizable r-directions="['top']" r-flex="true" style="background-color: green; height:50%; max-height:70%; min-height:10%;margin-top:14px">
+            <h2 style="text-align: center;margin:0">
+                statistic pane
+            </h2>
+        </div>
+    </div>
+    <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Histogram.isShowReferenceWindow" style="min-width:10%;max-width:30%">
+        reference window
+    </div>
 </div>
