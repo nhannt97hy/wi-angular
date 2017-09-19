@@ -3278,7 +3278,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.zoneSets = [];
 
         function refreshZoneSets() {
-            wiApiService.zoneSetList(wiLogplotModel.properties.idWell, function (zoneSets) {
+            wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
                 $scope.$apply(function () {
                     self.zoneSets = zoneSets;
                 })
