@@ -86,7 +86,7 @@
                                 <label class="control-label col-sm-5 normal-text" for="zone-set">
                                   Zone Set</label>
                                 <div class="col-sm-5">
-                                    <select id="zone-set" class="form-control wi-form-control" ng-options="zoneSet.idZoneSet as zoneSet.name for zoneSet in wiModal.zoneSets" ng-model="wiModal.idZoneSet" required>
+                                    <select id="zone-set" class="form-control wi-form-control" ng-options="zoneSet.idZoneSet as zoneSet.name for zoneSet in wiModal.zoneSets" ng-model="wiModal.idZoneSet" ng-change="wiModal.checkZoneSet()" required>
                                     </select>
                                 </div>
                                 <div class="col-sm-2">
@@ -94,6 +94,7 @@
                                 </div>
                             </div>
                         </div>
+                        <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>                    
                     </div>
             </div>
             <div class="modal-footer">

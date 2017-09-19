@@ -686,7 +686,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                     track.setCurrentDrawing(zone);
                 }
-
+                if (!zone) {
+                    track.setMode(null);
+                    return;
+                }
                 let transformY = zone.getTransformY();
                 let startDepth = transformY.invert(minY);
                 let endDepth = transformY.invert(maxY);
@@ -1210,6 +1213,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: "Add Zone",
                     icon: "zone-edit-16x16",
                     handler: function () {
+                        if (track.idZoneSet) {
+                            Utils.error('Zone Set is required');
+                            return;
+                        }
                         track.setMode('AddZone');
                     }
                 }, {

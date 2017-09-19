@@ -3291,17 +3291,23 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         }
         this.onApplyButtonClicked = function () {
             bindProps();
+            if (self.error) return;            
             callback(props);
         };
         this.onOkButtonClicked = function () {
             bindProps();
+            if (self.error) return;
             close(props, 100);
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
-
         function bindProps() {
+            self.error = null;
+            if (!self.idZoneSet) {
+                self.error = "Zone Set is required";
+                return;
+            }
             props = {
                 showTitle: self.isShowTitle,
                 title: self.title,
