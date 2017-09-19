@@ -6,16 +6,31 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent('GRAPH');
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let viCrossplot;
-
+    this.isShowWiZone = true;
+    this.isShowReferenceWindow = true;
+    
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
-        console.log(self.crossplotAreaId)
     };
-    this.get
+    this.toggleShowWiZone = function () {
+        self.isShowWiZone = !self.isShowWiZone;
+    }
+
+    this.CloseZone = function(){
+        self.isShowWiZone = false;
+    }
+
+    this.toogleShowReferenceWindow = function () {
+        self.isShowReferenceWindow = !self.isShowReferenceWindow;
+    }
+
+    this.CloseReferenceWindow = function(){
+        self.isShowReferenceWindow = false;
+    }
     function PropertyGridButtonClicked() {
         console.log('PropertyGridButton is clicked');
         let layoutManager = wiComponentService.getComponent('LAYOUT_MANAGER');

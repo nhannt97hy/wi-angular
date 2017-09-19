@@ -1,9 +1,70 @@
 wi-d3-crossplot {
-    display:flex;
-    .d3-crossplot-region {
-        display: flex;
+    & > div {
+        display:flex;
+        flex-direction: column;
+        width: 100%;
+        h1, h2, h3, h4, h5 {
+            flex-grow: 0;
+            text-align: center;
+            margin:2px 0;
+        }
+        .d3-crossplot-region {
+            display: flex;
+            position: relative;
+            flex: 1;
+        }
+    }
+    //display:flex;
+    overflow: hidden;
+    .rg-left, .rg-right {
+        & > span {
+            cursor: col-resize;
+        }
+    }
+    .rg-top, .rg-down {
+        & > span {
+            cursor: row-resize;
+        }
+    }
+    .statistic-header {
+        padding:1px;
+        padding-left: 0.5em;
         position: relative;
+        overflow: hidden;
+    }
+    .statistic-header:after {
+        position: absolute;
+        content: "";
+        height: 1px;
+        background-color: #e5e5e5;
+        width: 100%;
+        margin-left: 10px;
+        top: 50%;
+    }
+    .statistic-pane {
+        padding-top:14px;
+        max-height:70%; 
+        min-height:10%;
+        display:flex;
+        flex-direction:column;
+    }
+    .rg-top {
+        margin-top: 0;
+    }
+    
+    .scroll-content {
+        flex: 1;
+        padding-left: 1.5em;
+        overflow-y:auto;
+        overflow-x:hidden
+    }
+    .crossplot-container {
+        border: 1px solid #e5e5e5;
+        display: flex;
+        flex-direction: column;
         flex: 1;
     }
-    overflow: hidden;
+    .wi-small{
+        font-size: 85%;
+    }
 }
