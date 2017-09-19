@@ -108,8 +108,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowWiZone = !self.isShowWiZone;
     }
 
+    this.CloseZone = function(){
+        self.isShowWiZone = false;
+    }
+
     this.toogleShowReferenceWindow = function () {
         self.isShowReferenceWindow = !self.isShowReferenceWindow;
+    }
+
+    this.CloseReferenceWindow = function(){
+        self.isShowReferenceWindow = false;
     }
 
     this.showContextMenu = function (event) {

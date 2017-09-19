@@ -1,7 +1,9 @@
 <div style="display:flex; flex-direction:row">
     <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Histogram.isShowWiZone" style="min-width:10%;max-width:20%">
-        <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
-            all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
+        <wi-container name='ZoneHistogramContainer' title='Zone' close-handler='wiD3Histogram.CloseZone'>
+            <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
+                all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
+        </wi-container>
     </div>
     
     
@@ -99,7 +101,7 @@
     </div>
     
     
-    <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Histogram.isShowReferenceWindow" style="min-width:10%;max-width:30%">
-        reference window
+    <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Histogram.isShowReferenceWindow" style="min-width:20%;max-width:30%">
+        <wi-container name='RefHistogramContainer' title='Reference Curve' close-handler='wiD3Histogram.CloseReferenceWindow'></wi-container>
     </div>
 </div>
