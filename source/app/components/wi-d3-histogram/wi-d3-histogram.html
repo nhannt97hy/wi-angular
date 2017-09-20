@@ -1,8 +1,11 @@
 <div style="display:flex; flex-direction:row">
     <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Histogram.isShowWiZone" style="min-width:10%;max-width:20%">
         <wi-container name='ZoneHistogramContainer' title='Zone' close-handler='wiD3Histogram.CloseZone'>
-            <wi-zone name="{{wiD3Histogram.getZoneName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
-                all-zone-handler="wiD3Histogram.AllZoneClick" active-zone-handler="wiD3Histogram.ActiveZoneClick"></wi-zone>
+            <wi-zone name="{{wiD3Histogram.getZoneAreaName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
+                all-zone-handler="wiD3Histogram.AllZoneClick" 
+                active-zone-handler="wiD3Histogram.ActiveZoneClick"
+                on-zone-data-ready="wiD3Histogram.refreshHistogram">
+            </wi-zone>
         </wi-container>
     </div>
     

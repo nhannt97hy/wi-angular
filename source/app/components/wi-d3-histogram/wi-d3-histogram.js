@@ -3,10 +3,12 @@ const moduleName = 'wi-d3-histogram';
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    let curveLoading = false;
     this.visHistogram = {};
     let graph = wiComponentService.getComponent('GRAPH');
     self.histogramModel = null;
     self.curveModel = null;
+    let zoneCtrl = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.statistics = {
@@ -57,7 +59,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.linkModels = function () {
         self.zoneArr = null;
         if (self.histogramModel.properties.idZoneSet) {
-            self.zoneSetModel = utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
+            self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
+            //if (self.visHistogram) self.visHistogram.zoneSetModel = self.zoneSetModel;
+            //if (self.visHistogram) self.visHistogram.zoneSet = self.zoneSetModel.children;
+            //if (self.visHistogram) self.visHistogram.zoneSet = self.getZoneCtrl().getActiveZones();
+            
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {
@@ -67,6 +73,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
             self.histogramModel.properties.xLabel = getXLabel();
+        }
+        else {
+            self.zoneSetModel = null;
+            zoneArr = null;
+            //if (self.visHistogram) self.visHistogram.zoneSetModel = self.zoneSetModel;
+            //if (self.visHistogram) self.visHistogram.zoneSet = null;
         }
         if (self.histogramModel.properties.idCurve) {
             self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
@@ -81,11 +93,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }
     }
-    this.getZoneName = function () {
+    this.refreshHistogram = function() {
+        if (self.visHistogram) self.visHistogram.setZoneSet(self.getZoneCtrl().getActiveZones());
+        self.visHistogram.signal('histogram-update', "refresh");
+    }
+    this.getZoneAreaName = function () {
         return self.name + "Zone";
     }
     this.getZoneCtrl = function () {
-        return wiComponentService.getComponent(self.getZoneName());
+        if (!zoneCtrl) zoneCtrl =  wiComponentService.getComponent(self.getZoneAreaName());
+        return zoneCtrl;
     }
     this.onReady = function () {
         self.linkModels();
@@ -270,6 +287,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step), 
                 parseFloat(well.properties.topDepth), 
                 parseFloat(well.properties.bottomDepth), elem);
+        //self.visHistogram.zoneSetModel = self.zoneSetModel;
+        //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
 
         if (self.visHistogram.idCurve) {
             loadCurve(self.visHistogram.idCurve);
@@ -277,10 +296,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function loadCurve(idCurve) {
+        if (curveLoading) return;
+        curveLoading = true;
         wiApiService.dataCurve(idCurve, function (data) {
             if (self.visHistogram) {
+                console.warn('curve loaded');
                 self.visHistogram.setCurve(data);
-                self.visHistogram.signal('histogram-update', "linh tinh");
+                curveLoading = false;
+                self.refreshHistogram();
                 loadStatistics();
             }
         });

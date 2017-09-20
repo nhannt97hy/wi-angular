@@ -17,7 +17,12 @@ function Histogram(histogramModel) {
     // visualize instant vars
     this.svgContainer = null;
     this.depthStep = -1;
+    this.fullData = null;
+    this.intervalData = null;
+    this.zoneData = new Array();
+    this.zoneBins = new Array();
 
+    this.drawPending = false;
 }
 Histogram.prototype.trap = function (eventName, handlerCb) {
     let eventHandlers = this.handlers[eventName];
@@ -38,8 +43,13 @@ Histogram.prototype.signal = function (eventName, data) {
     }
 }
 
+Histogram.prototype.setZoneSet = function(zoneSet) {
+    this.zoneSet = zoneSet;
+    if (this.drawPending) this.doPlot();
+}
 Histogram.prototype.setCurve = function(data) {
     this.data = data.filter(function(d) {return !isNaN(d.x);}); // ? clone
+    if (this.drawPending) this.doPlot();
 }
 
 Histogram.prototype.getTickValuesY = function() {
@@ -53,10 +63,7 @@ Histogram.prototype.getTickValuesY = function() {
 
 Histogram.prototype.filterF = function(d, zoneIdx) {
     var tempDepth = 0;
-    if (!this.histogramModel) {
-        console.warn('no histogramModel during filter', this);
-        return false;
-    }
+    if (!this.histogramModel) return false;
     if (this.histogramModel.properties.idZoneSet & !zoneIdx) {
         return true;
     }
@@ -65,6 +72,9 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
 
     if(this.histogramModel && this.histogramModel.properties.idZoneSet) {
         // TODO
+        let zone = this.zoneSet[zoneIdx];
+        return (!isNaN(d.y) && ( tempDepth >= zone.properties.startDepth ) && 
+                ( tempDepth < zone.properties.endDepth ));
     }
 
     /*
@@ -87,18 +97,23 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
 
 
 
-Histogram.prototype.zoneData = function(idx) {
+Histogram.prototype.getZoneData = function(idx) {
     var self = this;
     return this.data.filter(function(d) {
         return self.filterF.call(self, d, idx);
     }).map(function(d) { return parseFloat(d.x); });
 }
 
-Histogram.prototype.plotData = function() {
+Histogram.prototype.getIntervalData = function() {
     var self = this;
     return this.data.filter(function(d) {
         return self.filterF.call(self, d);
     }).map(function(d) { return parseFloat(d.x); });
+}
+
+Histogram.prototype.getFullData = function() {
+    var self = this;
+    return this.data.map(function(d) { return parseFloat(d.x); });
 }
 
 function __reverseBins(bins) {
@@ -125,15 +140,14 @@ function __reverseBins(bins) {
         bins[halfLen].x0 = bins[halfLen].x1;
         bins[halfLen].x1 = temp;
     }
-
-    return bins;
 }
 Histogram.prototype.doPlot = function() {
     var self = this;
-
+    // Adjust svgContainer size
     self.svgContainer.attr('width',self.container.node().clientWidth)
         .attr('height', self.container.node().clientHeight);
 
+    // Sanity checking
     if (!this.data) {
         console.error('No curve data');
         return;
@@ -142,6 +156,14 @@ Histogram.prototype.doPlot = function() {
         console.error('No histogramModel');
         return;
     }
+    if (this.histogramModel.properties.idZoneSet && (!this.zoneSet || !this.zoneSet.length)) {
+        console.warn('No zoneSet to draw');
+        return;
+    }
+    // pass checking. Set drawPending = false
+    this.drawPending = false;
+
+    // Local variables
     console.log('Do plot begin');
     let wdX = this.getWindowX();
     let vpX = this.getViewportX();
@@ -157,62 +179,111 @@ Histogram.prototype.doPlot = function() {
     let jumpFactor = Math.ceil(nBins/20);
     if (jumpFactor > 1) realStep = jumpFactor * step;
 
+    // Setup Axis X
     this.axisX = d3.axisBottom(transformX)
         .tickValues(d3.range(wdX[0], wdX[1] + realStep/2, realStep))
         .tickFormat(Utils.getDecimalFormatter(0));
 
-    this.bins = d3.histogram()
-        .domain(domain)
-        .thresholds(d3.range(domain[0], 
-            domain[1], 
-            (domain[1] - domain[0])/nBins)
-        )(this.plotData());
-    if (step < 0) this.bins = __reverseBins(this.bins);
+    // Setup histogram generator
+    let thresholds = d3.range(domain[0], domain[1], (domain[1] - domain[0])/nBins);
+    var histogramGenerator = d3.histogram().domain(domain).thresholds(thresholds);
 
+    // Prepare data and group them in bins: fullData/fullBins, intervalData/intervalBins, zoneData[]/zoneBins[]
+    // We may reverse bins if necessary
+    this.fullData = this.getFullData();
+    this.fullBins = histogramGenerator(this.fullData);
+    if (this.histogramModel.properties.idZoneSet) {
+        delete this.intervalData;
+        delete this.intervalBins;
+        for (let i in this.zoneSet) {
+            this.zoneData[i] = this.getZoneData(i);
+            this.zoneBins[i] = histogramGenerator(this.zoneData[i]);
+            if (step < 0) __reverseBins(this.zoneBins[i]);
+        }
+    }
+    else {
+        this.zoneData.length = 0;
+        this.zoneBins.length = 0;
+        this.intervalData = this.getIntervalData();
+        this.intervalBins = histogramGenerator(this.intervalData);
+        if (step < 0) __reverseBins(this.intervalBins);
+    }
+
+    // After having data, we can setup vertical transformation and Y axis (Y axis) 
+    let wdY = this.getWindowY();
     transformY = this.getTransformY();
 
     this.axisY = d3.axisLeft(transformY)
-        .ticks(10, ',.0f')
-        //.tickValues(this.getTickValuesY())
-        //.tickFormat(d3.format(",.0f"));
+        .ticks(Math.floor(vpY[1]/40), ',.0f');
 
+    // remove previously render histograms
     this.svgContainer.selectAll('.bars').remove();
     
+    // Generate X and Y axes
     this.svgContainer.select('g.vi-histogram-axis-x-ticks')
         .call(this.axisX)
         .style('transform', 'translateY(' + vpY[1] + 'px)');
-
     this.svgContainer.select('g.vi-histogram-axis-y-ticks')
         .call(this.axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
 
-    let bars = this.svgContainer.selectAll('.bars').data(this.bins).enter()
+    // Generate column groups
+    let bars = this.svgContainer.selectAll('.bars').data(this.fullBins).enter()
         .append('g').attr('class', 'bars')
         .attr('transform', function(d) {
             if (self.histogramModel.properties.plotType != 'Frequency') {
                 return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.data.length) + ')';
+                //return 'translate(' + transformX(d.x0) + ', 0)';
             }
             return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length) + ')';
+            //return 'translate(' + transformX(d.x0) + ', 0)';
         });
+
+    // Column width and gap setups
     var gap = 4;
-    let colWidth = Math.abs(transformX(self.bins[0].x1) - transformX(self.bins[0].x0));
+    let colWidth = Math.abs(transformX(self.fullBins[0].x1) - transformX(self.fullBins[0].x0));
     gap = Math.min(gap, Math.floor(colWidth/5));
     
-    bars.append('rect')
-        .attr('x', gap/2)
-        .attr('width', Math.abs(transformX(self.bins[0].x1) - transformX(self.bins[0].x0)) - gap)
-        .attr('height', function(d) {
-            if (self.histogramModel.properties.plotType != 'Frequency') {
-                console.log('drawRect: Percent', vpY[1], 
-                    d.length*100/self.data.length,
-                    transformY(d.length*100/self.data.length),
-                    vpY[1] - transformY(d.length*100/self.data.length));
-                return vpY[1] - transformY(d.length*100/self.data.length);
-            }
-            return vpY[1] - transformY(d.length);
-        })
-        .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
-
+    // Generate histogram segments
+    if (this.intervalBins) {
+        // For intervalDepth case
+        bars.append('rect')
+            .attr('x', gap/2)
+            .attr('width', colWidth - gap)
+            .attr('y', function(d, i) {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    return (transformY(self.intervalBins[i].length * 100 / self.intervalData.length) - transformY(self.fullBins[i].length * 100 / self.data.length));
+                }
+                return (transformY(self.intervalBins[i].length) - transformY(self.fullBins[i].length ));
+            })
+            .attr('height', function(d, i) {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    return transformY(wdY[0]) - transformY(self.intervalBins[i].length * 100 / self.intervalData.length);
+                }
+                return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
+            })
+            .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
+    }
+    else {
+        // For zonalDepth case
+        bars.append('rect')
+            .attr('x', gap/2)
+            .attr('width', colWidth - gap)
+            .attr('y', function(d, i) {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    return (transformY(self.zoneBins[0][i].length * 100 / self.zoneBins[0].length) 
+                            - transformY(self.fullBins[i].length * 100 / self.data.length));
+                }
+                return (transformY(self.zoneBins[0][i].length) - transformY(self.fullBins[i].length ));
+            })
+            .attr('height', function(d, i) {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    return transformY(wdY[0]) - transformY(self.zoneBins[0][i].length*100/self.data.length);
+                }
+                return transformY(wdY[0]) - transformY(self.zoneBins[0][i].length);
+            })
+            .attr('fill', self.zoneSet[0].properties.background?self.zoneSet[0].properties.background:'steelblue');
+    }
 }
 
 Histogram.prototype.init = function(domElem) {
@@ -242,11 +313,12 @@ Histogram.prototype.init = function(domElem) {
             .attr('class', function(d) { return 'vi-histogram-axis-group ' + d; });
 
     this.trap('histogram-update', function() {
-        console.log('Update histogram');
-        if (!self.data) {
-            console.warn('No data to draw');
-            return;
+        console.warn('Update histogram');
+        if (self.drawPending) {
+            console.warn('draw request is pending already');
+            //return;
         }
+        self.drawPending = true;
         self.doPlot();
     });
     window.VISHISTOGRAM = this;
@@ -262,9 +334,9 @@ Histogram.prototype.getWindowY = function() {
     if (this.histogramModel.properties.plotType != 'Frequency') {
         let total = this.data.length;
         console.log('getWindowY: Percent');
-        return [0, d3.max(this.bins, function(d) { return d.length*100/total;})];
+        return [0, d3.max(this.fullBins, function(d) { return d.length*100/total;})];
     }
-    return [0, d3.max(this.bins, function(d) {return d.length;})];
+    return [0, d3.max(this.fullBins, function(d) {return d.length;})];
 }
 Histogram.prototype.getWindowX = function() {
     return [this.histogramModel.properties.leftScale, this.histogramModel.properties.rightScale];

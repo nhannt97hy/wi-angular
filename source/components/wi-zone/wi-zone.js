@@ -9,6 +9,7 @@ function ZoneController(wiComponentService, $timeout){
     this.$onInit = function(){
         if (self.name) wiComponentService.putComponent(self.name, self);
         self.zoneUpdate();
+        if (self.onZoneDataReady) self.onZoneDataReady;
     }
 
     this.AllZoneButtonClick = function(){
@@ -47,6 +48,13 @@ function ZoneController(wiComponentService, $timeout){
             });
         }
     }
+
+    this.getActiveZones = function() {
+        if (!self.zones) return null;
+        return self.zones.filter(function(zone, i) {
+            return !self.zoneArr[i];
+        });
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -60,7 +68,8 @@ app.component(wiZoneName, {
         zones: '<',
         activeZone: '<',
         allZoneHandler: '<',
-        activeZoneHandler: '<'
+        activeZoneHandler: '<',
+        onZoneDataReady: '<'
     }
 });
 
