@@ -36,10 +36,8 @@ exports.FrequencyInfoButtonClicked = function() {
     var wiD3Ctrl = this.wiHistogram.getwiD3Ctrl();
     var visHistogram = wiD3Ctrl.visHistogram;
     var dialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    if(visHistogram){
-        dialogUtils.histogramFrequencyInfoDialog(ModalService, visHistogram, function(ret){
-            console.log(ret);
-        })
+    if(visHistogram.data){
+        dialogUtils.histogramFrequencyInfoDialog(ModalService, wiD3Ctrl);
     }
     console.log('FrequencyInfoButton is clicked');
 }

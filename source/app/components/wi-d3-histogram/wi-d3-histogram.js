@@ -239,10 +239,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Frequency Infor",
             icon: "ti-info-alt",
             handler: function () {
-                if (self.visHistogram) {
-                    DialogUtils.histogramFrequencyInfoDialog(ModalService, self.visHistogram, function () {
-                        console.log('Frequency Info!!!!!');
-                    })
+                if (self.visHistogram.data) {
+                    DialogUtils.histogramFrequencyInfoDialog(ModalService, self);
                 }
             }
         }];

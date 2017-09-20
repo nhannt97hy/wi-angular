@@ -11,18 +11,20 @@
                         <form class="col-sm-12 form-horizontal form-condensed">
                             <div id="frequency">
                                 <h5>Frequency Info</h5>
-                                <div style="height: 35%;overflow: overlay;padding-left: 15px;margin-bottom:20px">
-                                    <table class="table form-group table-striped table-bordered">
+                                <div style="padding-left: 15px;">
+                                    <table class="table form-group table-bordered table-fixed">
                                         <thead>
                                             <tr>
-                                                <th>Value</th>
-                                                <th>Point Num.</th>
+                                                <th class="col-sm-3 text-right">Bin Number</th>
+                                                <th class="col-sm-4">Value Range</th>
+                                                <th class="col-sm-5">Point Num.</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="bin in wiModal.bins">
-                                                <td>{{bin.x0}}&lt;&#45;&#45;&gt;{{bin.x1}}</td>
-                                                <td>{{bin.length > 2? bin.length-2 : 0}}</td>
+                                                <td class="col-sm-3 text-right"  ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">{{$index}}</td>
+                                                <td class="col-sm-4" ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">{{wiModal.getValueRange(bin)}}</td>
+                                                <td class="col-sm-5" ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">{{wiModal.getLength(bin)}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -34,30 +36,33 @@
                                     <div class="form-group">
                                         <label class="col-sm-4">Max Value Range:</label>
                                         <div class="col-sm-4">
-                                            <input type="text" class="form-control wi-form-control">
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <wi-button name="SeachButton" type="small" label="Seach" icon="ti-search" layout="icon-left"></wi-button>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-4">Bin Number:</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control wi-form-control">
+                                            <input type="text" class="form-control wi-form-control" disabled value="{{wiModal.maxValueRange.value}}">
                                         </div>
                                         <div class="col-sm-4"></div>
                                     </div>
                                     <div class="form-group">
+                                        <label class="col-sm-4">Bin Number:</label>
+                                        <div class="col-sm-4">
+                                            <input type="number" class="form-control wi-form-control" min='0' max='{{wiModal.bins.length - 1}}' ng-model='wiModal.SelectedBinNum'>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button class="btn btn-default" ng-click='wiModal.onSearchButtonClick()' ng-disabled="wiModal.SelectedBinNum == null">
+                                                <i class="ti-search"></i>
+                                                <span>Search</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
                                         <label class="col-sm-4">Max Value:</label>
                                         <div class="col-sm-4">
-                                            <input type="text" class="form-control wi-form-control">
+                                            <input type="text" class="form-control wi-form-control" disabled value="{{wiModal.Max_Value}}">
                                         </div>
                                         <div class="col-sm-4"></div>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-4">Point Number:</label>
                                         <div class="col-sm-4">
-                                            <input type="text" class="form-control wi-form-control">
+                                            <input type="text" class="form-control wi-form-control" disabled value="{{wiModal.Point_Num}}">
                                         </div>
                                         <div class="col-sm-4"></div>
                                     </div>

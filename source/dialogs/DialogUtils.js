@@ -4357,14 +4357,54 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
     });
 };
 
-exports.histogramFrequencyInfoDialog = function (ModalService, visHistogram, callback) {
+exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
     function ModalController($scope, close) {
         var self = this;
-        this.bins = visHistogram.bins;
+        let visHistogram = wiD3Ctrl.visHistogram;
+        if(wiD3Ctrl.histogramModel.properties.idZoneSet){
+            this.bins = visHistogram.fullBins;
+        }else{
+            this.bins = visHistogram.intervalBins;
+        }
+
+        this.SelectedBinNum = null;
+
+        this.getLength = function(b){
+            return b.length > 2 ? b.length - 2 : 0;
+        }
+
+        this.getValueRange = function(b){
+            return b.x0 + '<-->' + b.x1;
+        }
+
+        this.maxValueRange = getMaxValueRange();
+        function getMaxValueRange(){
+            var max = -99999999;
+            var max_idx = -1;
+            var val = null;
+
+            self.bins.forEach(function(b, i){
+                if(max < self.getLength(b)){
+                    max = self.getLength(b);
+                    max_idx = i;
+                    val = self.getValueRange(b);
+                }
+            })
+
+            return {
+                id: max_idx,
+                value: val
+            }
+        };
+
+        this.onSearchButtonClick = function () {
+            self.Point_Num = self.getLength(self.bins[self.SelectedBinNum]);
+            self.Max_Value = self.bins[self.SelectedBinNum][self.Point_Num - 4];
+        }
 
         this.onCloseButtonClicked = function () {
             console.log("on Close clicked");
-            close(null);
+            close();
         }
     }
 
@@ -4375,10 +4415,9 @@ exports.histogramFrequencyInfoDialog = function (ModalService, visHistogram, cal
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
-        modal.close.then(function (data) {
+        modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (data) callback(data);
         });
     })
 }
