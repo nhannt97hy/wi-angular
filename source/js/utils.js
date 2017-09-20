@@ -1649,6 +1649,7 @@ exports.histogramFormat = function (ModalService, wiComponentService, wiHistogra
         let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
         wiD3Ctrl.linkModels();
         wiD3Ctrl.getZoneCtrl().zoneUpdate();
+        console.log(ret);
     })
 }
 function getValPalette(palName, paletteList){

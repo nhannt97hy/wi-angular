@@ -74,8 +74,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
                     self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
                     loadCurve(self.visHistogram.idCurve);
-                }
-                else {
+                } else {
                     self.visHistogram.signal('histogram-update', "no load curve");
                 }
             }
@@ -108,7 +107,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowWiZone = !self.isShowWiZone;
     }
 
-    this.CloseZone = function(){
+    this.CloseZone = function () {
         self.isShowWiZone = false;
     }
 
@@ -116,7 +115,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowReferenceWindow = !self.isShowReferenceWindow;
     }
 
-    this.CloseReferenceWindow = function(){
+    this.CloseReferenceWindow = function () {
         self.isShowReferenceWindow = false;
     }
 
@@ -212,9 +211,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Frequency Infor",
             icon: "ti-info-alt",
             handler: function () {
-                DialogUtils.histogramFrequencyInfoDialog(ModalService, function () {
-                    console.log('Frequency Info!!!!!');
-                })
+                if (self.visHistogram) {
+                    DialogUtils.histogramFrequencyInfoDialog(ModalService, self.visHistogram, function () {
+                        console.log('Frequency Info!!!!!');
+                    })
+                }
             }
         }];
         event.stopPropagation();
@@ -267,9 +268,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var elem = document.getElementById(self.histogramAreaId);
 
         var well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
-        self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step), 
-                parseFloat(well.properties.topDepth), 
-                parseFloat(well.properties.bottomDepth), elem);
+        self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step),
+            parseFloat(well.properties.topDepth),
+            parseFloat(well.properties.bottomDepth), elem);
 
         if (self.visHistogram.idCurve) {
             loadCurve(self.visHistogram.idCurve);
