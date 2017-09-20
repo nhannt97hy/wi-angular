@@ -9,7 +9,6 @@ function ZoneController(wiComponentService, $timeout){
     this.$onInit = function(){
         if (self.name) wiComponentService.putComponent(self.name, self);
         self.zoneUpdate();
-        if (self.onZoneDataReady) self.onZoneDataReady;
     }
 
     this.AllZoneButtonClick = function(){
@@ -47,6 +46,7 @@ function ZoneController(wiComponentService, $timeout){
                 self.zoneArr.push(!(element.properties.idZone == self.activeZone || self.activeZone == "All"));
             });
         }
+        if (self.onZoneDataReady) self.onZoneDataReady();
     }
 
     this.getActiveZones = function() {

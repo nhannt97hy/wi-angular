@@ -21,7 +21,6 @@ exports.EditFormatButtonClicked = function() {
     var ModalService = this.ModalService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiHistogramCtrl = this.wiHistogram;
-    var dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     console.log('EditFormatButton is clicked');
     utils.histogramFormat(ModalService, wiComponentService, wiHistogramCtrl);
 }
@@ -34,11 +33,14 @@ exports.ActiveZoneButtonClicked = function() {
 
 exports.FrequencyInfoButtonClicked = function() {
     var ModalService = this.ModalService;
-    
+    var wiD3Ctrl = this.wiHistogram.getwiD3Ctrl();
+    var visHistogram = wiD3Ctrl.visHistogram;
     var dialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    dialogUtils.histogramFrequencyInfoDialog(ModalService, function(ret){
-        console.log(ret);
-    })
+    if(visHistogram){
+        dialogUtils.histogramFrequencyInfoDialog(ModalService, visHistogram, function(ret){
+            console.log(ret);
+        })
+    }
     console.log('FrequencyInfoButton is clicked');
 }
 

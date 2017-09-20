@@ -3258,7 +3258,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.zoneSets = [];
 
         function refreshZoneSets() {
-            wiApiService.zoneSetList(wiLogplotModel.properties.idWell, function (zoneSets) {
+            wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
                 $scope.$apply(function () {
                     self.zoneSets = zoneSets;
                 })
@@ -4233,58 +4233,65 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
-        console.log(this.histogramProps);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
-        this.zoneSetList = [];
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
         this.datasets = [];
+        this.zoneSetList = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
 
-        this.well.children.forEach(function (child) {
-            if (child.type == 'dataset') self.datasets.push(child);
-        });
-        this.datasets.forEach(function (child) {
-            child.children.forEach(function (item) {
-                if (item.type == 'curve') {
-                    var d = item;
-                    d.datasetCurve = child.properties.name + "." + item.properties.name;
-                    self.curvesArr.push(d);
-                    if (d.id == self.histogramProps.idCurve) {
-                        self.SelectedCurve = d;
-                    }
-                }
-            })
-        });
+        this.well.children.forEach(function(child, i){
+            switch (child.type){
+            case 'dataset':
+                self.datasets.push(child);
+                break;
 
-        wiApiService.listZoneSet(this.histogramProps.idWell, function (ZoneSets) {
-            self.zoneSetList = ZoneSets;
-            if (self.zoneSetList.length > 0 && !self.histogramProps.idZoneSet) {
-                self.selectedZoneSet = self.zoneSetList[0];
-                self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
+            case 'zonesets':
+                self.zoneSetList = angular.copy(child.children);
+                break;
             }
 
-            self.zoneSetList.forEach(function (z, i) {
-                z.id = i;
-                wiApiService.getZoneSet(z.idZoneSet, function (ret) {
-                    z.zones = ret.zones;
-                    if (z.idZoneSet == self.histogramProps.idZoneSet) {
-                        $timeout(function() {
-                            self.selectedZoneSet = z;
-                            self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
-                        },0);
+            if (i == self.well.children.length - 1) {
+                // set default curve
+                self.datasets.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            var d = item;
+                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                            self.curvesArr.push(d);
+                            if (d.id == self.histogramProps.idCurve) {
+                                self.SelectedCurve = d;
+                            }
+                        }
+                    })
+                });
+                
+                // set default zone && activezone
+                if (self.zoneSetList && self.zoneSetList.length > 0) {
+                    if (!self.histogramProps.idZoneSet) {
+                        self.selectedZoneSet = self.zoneSetList[0];
                     }
-                })
-            })
+                    
+                    for (let i = self.zoneSetList.length - 1; i >= 0; i--) {
+                        self.zoneSetList[i].idx = i;
+                        if (self.zoneSetList[i].properties.idZoneSet == self.histogramProps.idZoneSet) {
+                            self.selectedZoneSet = self.zoneSetList[i];
+                        }
+                        if ( !self.zoneSetList[i].children || !self.zoneSetList[i].children.length ) {
+                            self.zoneSetList.splice(i, 1);
+                        }
+                    }
+                }
+            }
         })
 
         this.onZoneSetChange = function () {
             if (self.selectedZoneSet) {
-                self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
+                self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
             }
         }
 
@@ -4314,7 +4321,8 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     self.histogramProps.idZoneSet = null;
                     break;
                 case "zonalDepth":
-                    // DO NOTHING
+                    self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                   
                     break;
             }
         }
@@ -4349,14 +4357,11 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
     });
 };
 
-exports.histogramFrequencyInfoDialog = function (ModalService, callback) {
+exports.histogramFrequencyInfoDialog = function (ModalService, visHistogram, callback) {
     function ModalController($scope, close) {
         var self = this;
+        this.bins = visHistogram.bins;
 
-        this.onCancelButtonClicked = function () {
-            console.log("on cancel clicked");
-            close(null);
-        }
         this.onCloseButtonClicked = function () {
             console.log("on Close clicked");
             close(null);

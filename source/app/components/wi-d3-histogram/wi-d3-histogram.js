@@ -1,6 +1,12 @@
 const componentName = 'wiD3Histogram';
 const moduleName = 'wi-d3-histogram';
 
+
+function isFunction(functionToCheck) {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
     let curveLoading = false;
@@ -63,20 +69,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //if (self.visHistogram) self.visHistogram.zoneSetModel = self.zoneSetModel;
             //if (self.visHistogram) self.visHistogram.zoneSet = self.zoneSetModel.children;
             //if (self.visHistogram) self.visHistogram.zoneSet = self.getZoneCtrl().getActiveZones();
-            
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {
                     console.log("----", zone.properties.idZone);
                 }
-            })
+            });
+            self.getZoneCtrl().zones = self.zoneArr;
 
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
             self.histogramModel.properties.xLabel = getXLabel();
         }
         else {
             self.zoneSetModel = null;
-            zoneArr = null;
             //if (self.visHistogram) self.visHistogram.zoneSetModel = self.zoneSetModel;
             //if (self.visHistogram) self.visHistogram.zoneSet = null;
         }
@@ -86,16 +91,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
                     self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
                     loadCurve(self.visHistogram.idCurve);
-                }
-                else {
+                } else {
                     self.visHistogram.signal('histogram-update', "no load curve");
                 }
             }
         }
     }
     this.refreshHistogram = function() {
-        if (self.visHistogram) self.visHistogram.setZoneSet(self.getZoneCtrl().getActiveZones());
-        self.visHistogram.signal('histogram-update', "refresh");
+        if (self.visHistogram) {
+            let activeZones = self.getZoneCtrl().getActiveZones();
+            console.warn("---", activeZones);
+            if ( isFunction(self.visHistogram.setZoneSet) ) 
+                self.visHistogram.setZoneSet(activeZones);
+        }
+        if ( isFunction(self.visHistogram.signal) ) 
+            self.visHistogram.signal('histogram-update', "refresh");
     }
     this.getZoneAreaName = function () {
         return self.name + "Zone";
@@ -125,7 +135,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowWiZone = !self.isShowWiZone;
     }
 
-    this.CloseZone = function(){
+    this.CloseZone = function () {
         self.isShowWiZone = false;
     }
 
@@ -133,7 +143,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowReferenceWindow = !self.isShowReferenceWindow;
     }
 
-    this.CloseReferenceWindow = function(){
+    this.CloseReferenceWindow = function () {
         self.isShowReferenceWindow = false;
     }
 
@@ -229,9 +239,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Frequency Infor",
             icon: "ti-info-alt",
             handler: function () {
-                DialogUtils.histogramFrequencyInfoDialog(ModalService, function () {
-                    console.log('Frequency Info!!!!!');
-                })
+                if (self.visHistogram) {
+                    DialogUtils.histogramFrequencyInfoDialog(ModalService, self.visHistogram, function () {
+                        console.log('Frequency Info!!!!!');
+                    })
+                }
             }
         }];
         event.stopPropagation();
@@ -289,6 +301,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 parseFloat(well.properties.bottomDepth), elem);
         //self.visHistogram.zoneSetModel = self.zoneSetModel;
         //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
+        
+        // trap load-statistic event to process
+        self.visHistogram.trap('data-processing-done', function(arg) {
+            console.log("data processing ready: we load statistics:", arg);
+            loadStatistics();
+        });
 
         if (self.visHistogram.idCurve) {
             loadCurve(self.visHistogram.idCurve);
@@ -304,7 +322,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.visHistogram.setCurve(data);
                 curveLoading = false;
                 self.refreshHistogram();
-                loadStatistics();
             }
         });
     }

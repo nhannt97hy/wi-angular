@@ -42,7 +42,7 @@
                                                         ng-disabled="wiModal.depthType=='intervalDepth'" 
                                                         ng-model="wiModal.selectedZoneSet"
                                                         ng-change="wiModal.onZoneSetChange()" 
-                                                        ng-options="ZoneSet as ZoneSet.name for ZoneSet in wiModal.zoneSetList track by ZoneSet.id">
+                                                        ng-options="ZoneSet as ZoneSet.properties.name for ZoneSet in wiModal.zoneSetList track by ZoneSet.id">
                                                     </select>
                                                 </div>
                                                 <label class="col-sm-3">Active Zones</label>
@@ -50,9 +50,9 @@
                                                     <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'" ng-model="wiModal.SelectedActiveZone"
                                                         ng-change="wiModal.onActiveZoneChange()">
                                                         <option value="All" ng-selected="wiModal.histogramProps.activeZone=='All'">All</option>
-                                                        <option value="{{Zone.idZone}}" ng-repeat="Zone in wiModal.zoneSetList[wiModal.selectedZoneSet.id].zones"
-                                                        ng-selected="wiModal.histogramProps.activeZone==Zone.idZone">
-                                                            {{Zone.name}}
+                                                        <option value="{{Zone.id}}" ng-repeat="Zone in wiModal.zoneSetList[wiModal.selectedZoneSet.idx].children"
+                                                        ng-selected="wiModal.histogramProps.activeZone==Zone.id">
+                                                            {{Zone.properties.name}}
                                                         </option>
                                                     </select>
                                                 </div>

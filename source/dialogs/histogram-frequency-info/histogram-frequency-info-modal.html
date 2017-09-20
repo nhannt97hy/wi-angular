@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="wiModal.onCloseButtonClicked();" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;Histogram Frequency Info</h4>
             </div>
             <div class="modal-body">
@@ -11,8 +11,8 @@
                         <form class="col-sm-12 form-horizontal form-condensed">
                             <div id="frequency">
                                 <h5>Frequency Info</h5>
-                                <div>
-                                    <table class="table form-group">
+                                <div style="height: 35%;overflow: overlay;padding-left: 15px;margin-bottom:20px">
+                                    <table class="table form-group table-striped table-bordered">
                                         <thead>
                                             <tr>
                                                 <th>Value</th>
@@ -20,14 +20,9 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- mock -->
-                                            <tr>
-                                                <td>75&lt;&#45;&#45;&gt;76</td>
-                                                <td>2</td>
-                                            </tr>
-                                            <tr>
-                                                <td>76&lt;&#45;&#45;&gt;77</td>
-                                                <td>3</td>
+                                            <tr ng-repeat="bin in wiModal.bins">
+                                                <td>{{bin.x0}}&lt;&#45;&#45;&gt;{{bin.x1}}</td>
+                                                <td>{{bin.length > 2? bin.length-2 : 0}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
