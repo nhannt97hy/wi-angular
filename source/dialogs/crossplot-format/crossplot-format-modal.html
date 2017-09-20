@@ -150,7 +150,7 @@
                                             </label>
                                             <div class="col-sm-9">
                                                 <div class="float-left">
-                                                    <button ng-click="wiModal.colorCurve();"
+                                                    <button ng-click="wiModal.colorCurve(wiModal.pointSet.pointColor);"
                                                             ng-style="{'background-color':wiModal.pointSet.pointColor}"
                                                             class="form-control wi-form-control width-80px thick-border">
                                                     </button>
@@ -446,10 +446,10 @@
                                                 </label>
                                                 <div class="col-sm-9">
                                                     <div class="float-left">
-                                                        <button ng-click="wiModal.colorCrossplot();"
+                                                        <!-- <button ng-click="wiModal.colorCrossplot();"
                                                                 ng-style="{'background-color':wiModal.props.general.color}"
                                                                 class="form-control wi-form-control width-80px thick-border">
-                                                        </button>
+                                                        </button> -->
                                                     </div>
                                                 </div>
                                             </div>

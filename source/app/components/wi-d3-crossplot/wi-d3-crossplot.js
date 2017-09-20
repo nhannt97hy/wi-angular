@@ -54,6 +54,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
+                console.log("9990", viCrossplot);
                 self.propertiesDialog();
             }
         }, {

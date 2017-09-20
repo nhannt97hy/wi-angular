@@ -2201,8 +2201,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         // TO CHANGE: set this.displayType = false
         this.setCustomFillsIfNull = function(){
             self.displayType = false;
-            self.isNegPosFill = true;
-            self.shadingOptions.name = self.variableShadingOptions.fill.varShading.customFills.name;
+            self.isNegPosFill = false;
             if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.customFills) {
                 self.variableShadingOptions.fill.varShading.customFills = {
                     name:null,
@@ -2218,6 +2217,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     ]
                 }
             }
+            self.shadingOptions.name = self.variableShadingOptions.fill.varShading.customFills.name;
            
         }
         function isValid() {
@@ -3902,10 +3902,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         this.datasetsInWell = new Array();
         this.curvesInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
+
         console.log("viCrossplot", viCrossplot);
         console.log("Crossplot", wiCrossplotCtrl);
-        this.cross = viCrossplot.getProperties();
-        console.log("Cross", this.cross);
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.well.children.forEach(function (child) {
             if (child.type == 'dataset') self.datasetsInWell.push(child);
@@ -3922,24 +3921,25 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         });
         console.log("curve", this.curvesOnDataset);
         let props = viCrossplot.getProperties();
+        console.log("props", props);
         this.pointSet = props.pointSet;
-        this.pointSet.idCurveX = props.pointSet.curveX.idCurve;
-        this.pointSet.idCurveY = props.pointSet.curveY.idCurve;
+        this.pointSet.idCurveX = props.pointSet.curveX ? props.pointSet.curveX.idCurve:props.pointSet.idCurveX;
+        this.pointSet.idCurveY = props.pointSet.curveY ? props.pointSet.curveY.idCurve:props.pointSet.idCurveY;
         console.log("pointSet", this.pointSet);
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
 
         // modal button
         this.colorCurve = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.props.pointSet.pointColor, function (colorStr) {
-                self.props.pointSet.pointColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.pointSet.pointColor, function (colorStr) {
+                self.pointSet.pointColor = colorStr;
             });
         };
-        this.colorCrossplot = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                self.props.general.color = colorStr;
-            });
-        }
+        // this.colorCrossplot = function () {
+        //     DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+        //         self.props.general.color = colorStr;
+        //     });
+        // }
         this.removeRow = function () {
             console.log("removeRowClicked");
         };
@@ -3949,35 +3949,38 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
 
         function updateScalesTab() {
             let crossplotObj = {};
-            let scalesObj = angular.copy(self.props.scales);
-            let pointsets = angular.copy(self.props.scales);
-            wiApiService.dataCurve(scalesObj.idCurveX, function (xCurveData) {
-                wiApiService.dataCurve(scalesObj.idCurveY, function (yCurveData) {
-                    if (scalesObj.idCurveZ) {
-                        wiApiService.dataCurve(scalesObj.idCurveZ, function (zCurveData) {
-                            scalesObj.curveZ = graph.buildCurve({ idCurve: scalesObj.idCurveZ }, zCurveData);
+            let scalesObj = angular.copy(self.pointSet);
+            let pointSet = angular.copy(self.pointSet);
+            wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
+                wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
+                    if (pointSet.idCurveZ) {
+                        wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
+                            pointSet.curveZ = graph.buildCurve({ idCurve: pointSet.idCurveZ }, zCurveData);
                         })
                     }
-                    scalesObj.curveX = graph.buildCurve({ idCurve: scalesObj.idCurveX }, xCurveData);
-                    scalesObj.curveY = graph.buildCurve({ idCurve: scalesObj.idCurveY }, yCurveData);
-                    scalesObj.idCrossPlot = wiCrossplotCtrl.id;
+                    pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
+                    pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
+                    pointSet.idCrossPlot = wiCrossplotCtrl.id;
 
-                    pointsets.curveX = undefined;
-                    pointsets.curveY = undefined;
-                    pointsets.idCrossPlot = wiCrossplotCtrl.id;
-                    console.log(scalesObj);
-                    viCrossplot.setProperties(scalesObj);
+                    scalesObj.curveX = undefined;
+                    scalesObj.curveY = undefined;
+                    pointSet.idCrossPlot = wiCrossplotCtrl.id;
+                    console.log(pointSet);
+                    props.pointSet = pointSet;
+                    viCrossplot.setProperties(props);
+                    viCrossplot.doPlot();
 
-                    /*wiApiService.editPointSet(pointsets, function(res){
-                        console.log("OK:", res);
-                        viCrossplot.setProperties(scalesObj);
-                    });*/
+                    // wiApiService.editPointSet(scalesObj, function(res){
+                    //     console.log("OK:", res);
+                    //     viCrossplot.setProperties(props);
+                    // });
                 });
             });
 
         };
 
         this.onOkButtonClicked = function () {
+            updateScalesTab();
             close(self);
         };
         this.onApplyButtonClicked = function () {
