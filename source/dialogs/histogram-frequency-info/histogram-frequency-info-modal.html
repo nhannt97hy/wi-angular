@@ -21,10 +21,10 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-repeat="bin in wiModal.bins">
-                                                <td class="col-sm-3 text-right"  ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">{{$index}}</td>
-                                                <td class="col-sm-4" ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">{{wiModal.getValueRange(bin)}}</td>
-                                                <td class="col-sm-5" ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">{{wiModal.getLength(bin)}}</td>
+                                            <tr ng-repeat="bin in wiModal.bins"  ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">
+                                                <td class="col-sm-3 text-right">{{$index}}</td>
+                                                <td class="col-sm-4">{{wiModal.getValueRange(bin)}}</td>
+                                                <td class="col-sm-5">{{wiModal.getLength(bin)}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
