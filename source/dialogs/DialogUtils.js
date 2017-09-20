@@ -3898,7 +3898,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
+        let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+        window.crossplotDialog = this;
+        this.viCrossplot = viCrossplot;
 
+        this.isZonalDepths = wiD3CrossplotCtrl.isShowWiZone;
         this.datasetsInWell = new Array();
         this.curvesInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
@@ -3930,7 +3934,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
 
         // modal button
-        this.colorCurve = function () {
+        this.colorSymbol = function () {
             DialogUtils.colorPickerDialog(ModalService, self.pointSet.pointColor, function (colorStr) {
                 self.pointSet.pointColor = colorStr;
             });
@@ -3947,44 +3951,49 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
             console.log("addRowClicked");
         };
 
-        function updateScalesTab() {
+        function updateScalesTab(callback) {
             let crossplotObj = {};
-            let scalesObj = angular.copy(self.pointSet);
             let pointSet = angular.copy(self.pointSet);
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
                 wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
                     if (pointSet.idCurveZ) {
                         wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
                             pointSet.curveZ = graph.buildCurve({ idCurve: pointSet.idCurveZ }, zCurveData);
+                            // TODO
                         })
+                    } else {
+                        pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
+                        pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
+                        pointSet.idCrossPlot = wiCrossplotCtrl.id;
+                        console.log(pointSet);
+                        props.pointSet = pointSet;
+                        let scalesObj = angular.copy(self.pointSet);                        
+                        scalesObj.curveX = undefined;
+                        scalesObj.curveY = undefined;
+                        wiApiService.getCrossplot(pointSet.idCrossPlot, function (crossplot) {
+                            if (crossplot.pointsets && crossplot.pointsets.length) {
+                                scalesObj.idPointSet = crossplot.pointsets[0].idPointSet;
+                                wiApiService.editPointSet(scalesObj, function(res){
+                                    viCrossplot.setProperties(props);
+                                    viCrossplot.doPlot();
+                                });
+                            }
+                        });
                     }
-                    pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
-                    pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
-                    pointSet.idCrossPlot = wiCrossplotCtrl.id;
-
-                    scalesObj.curveX = undefined;
-                    scalesObj.curveY = undefined;
-                    pointSet.idCrossPlot = wiCrossplotCtrl.id;
-                    console.log(pointSet);
-                    props.pointSet = pointSet;
-                    viCrossplot.setProperties(props);
-                    viCrossplot.doPlot();
-
-                    // wiApiService.editPointSet(scalesObj, function(res){
-                    //     console.log("OK:", res);
-                    //     viCrossplot.setProperties(props);
-                    // });
+                    if (callback) {
+                        callback();
+                    }
                 });
             });
-
+            wiD3CrossplotCtrl.isShowWiZone = self.isZonalDepths;
         };
 
         this.onOkButtonClicked = function () {
-            updateScalesTab();
-            close(self);
+            updateScalesTab(function () {
+                close(self);
+            });
         };
         this.onApplyButtonClicked = function () {
-            console.log("onApplyButtonClicked");
             updateScalesTab();
         };
         this.onCancelButtonClicked = function () {

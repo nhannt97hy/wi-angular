@@ -210,7 +210,7 @@ Crossplot.prototype.init = function(domElem) {
 Crossplot.prototype.createContainer = function() {
     this.container = this.root.append('div')
         .attr('class', 'vi-crossplot-container');
-
+/* 
     this.headerContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-header-container');
 
@@ -221,7 +221,7 @@ Crossplot.prototype.createContainer = function() {
         .append('div')
             .attr('class', function(d) { return 'vi-crossplot-header-row ' + d; })
             .text('-');
-
+ */
     this.bodyContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-body-container');
 }
@@ -247,7 +247,7 @@ Crossplot.prototype.doPlot = function() {
     this.rectZWidth = this.pointSet.curveZ ? 20 : 0;
 
     this.adjustSize();
-    this.updateHeader();
+    // this.updateHeader();
     this.updateAxises();
     this.plotSymbols();
 
@@ -265,12 +265,12 @@ Crossplot.prototype.doPlot = function() {
     this.plotPolygons();
 }
 
-Crossplot.prototype.updateHeader = function() {
-    this.headerContainer
-        .selectAll('div.vi-crossplot-header-row')
-        .data([this.name, 'Reference: [' + this.pointSet.topDepth + ' - ' + this.pointSet.bottomDepth + ']'])
-        .text(function(d) { return d; });
-}
+// Crossplot.prototype.updateHeader = function() {
+//     this.headerContainer
+//         .selectAll('div.vi-crossplot-header-row')
+//         .data([this.name, 'Reference: [' + this.pointSet.topDepth + ' - ' + this.pointSet.bottomDepth + ']'])
+//         .text(function(d) { return d; });
+// }
 
 Crossplot.prototype.updateAxises = function() {
     this.updateAxisTicks();

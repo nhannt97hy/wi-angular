@@ -5,16 +5,9 @@
         all-zone-handler="wiD3Crossplot.AllZoneClick" active-zone-handler="wiD3Crossplot.ActiveZoneClick"></wi-zone>
     </wi-container>
   </div>
-  <div wi-right-click='wiD3Crossplot.showContextMenu($event)' class='d3-crossplot-region' style="flex:1;display:flex;flex-direction:column;">
-    <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.crossplotTitle}}</h4>
-
-    <h5 ng-show="!wiD3Crossplot.crossplotModel.properties.idZoneSet">
-      Reference({{wiD3Crossplot.curveModel.properties.unit}}): [{{wiD3Crossplot.crossplotModel.properties.intervalDepthTop}} -
-      {{wiD3Crossplot.crossplotModel.properties.intervalDepthBottom}}]
-    </h5>
-    <h5 ng-show="wiD3Crossplot.crossplotModel.properties.idZoneSet">
-      Filter: [{{wiD3Crossplot.zoneSetModel.properties.name}} - Zonation]
-    </h5>
+  <div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;">
+    <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
+    <h5>Reference: [{{wiD3Crossplot.crossplotModel.properties.intervalDepthTop}} - {{wiD3Crossplot.crossplotModel.properties.intervalDepthBottom}}]</h5>
     <div class='crossplot-container'>
       <div style='padding-left:2em;'>{{wiD3Crossplot.crossplotModel.properties.plotType}}</div>
       <div wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}' wi-element-ready='wiD3Crossplot.onReady()'

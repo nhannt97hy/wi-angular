@@ -1660,3 +1660,10 @@ function getValPalette(palName, paletteList){
     return paletteList.palName;
 }
 exports.getValPalette = getValPalette;
+
+function triggerWindowResize() {
+    __GLOBAL.$timeout(function () {
+        window.dispatchEvent(new Event('resize'));
+    })
+}
+exports.triggerWindowResize = triggerWindowResize;
