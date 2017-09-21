@@ -10,7 +10,7 @@ function ZoneController(wiComponentService, $timeout){
 
     this.$onInit = function(){
         if (self.name) wiComponentService.putComponent(self.name, self);
-        if (self.onZoneDataReady) self.onZoneDataReady(self);
+        if (self.onZoneCtrlReady) self.onZoneCtrlReady(self);
         self.zoneUpdate();
     }
 
@@ -95,7 +95,7 @@ app.component(wiZoneName, {
         activeZone: '<',
         allZoneHandler: '<',
         activeZoneHandler: '<',
-        onZoneDataReady: '<'
+        onZoneCtrlReady: '<'
     }
 });
 
