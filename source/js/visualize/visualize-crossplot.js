@@ -75,6 +75,33 @@ Crossplot.prototype.PROPERTIES = {
             }
         },
         default: []
+    },
+    regressionLines: {
+        type: 'Array',
+        item: {
+            type: 'Object',
+            properties: {
+                idRegressionLine: { type: 'Integer' },
+                lineStyle: { type: 'String', default: 'Blue' },
+                displayLine: { type: 'Boolean', default: true },
+                displayEquation: { type: 'Boolean', default: true },
+                regType: {
+                    type: 'Enum',
+                    values: ['Linear', 'Exponent', 'Power'],
+                    default: 'Linear'
+                },
+                inverseReg: { type: 'Boolean', default: false },
+                exclude: { type: 'Boolean', default: false },
+                polygonIndices: {
+                    type: 'Array',
+                    item: { type: 'Integer' },
+                    default: []
+                },
+                fitX: { type: 'Float' },
+                fitY: { type: 'Float' }
+            }
+        },
+        default: []
     }
 };
 
@@ -194,7 +221,10 @@ Crossplot.prototype.init = function(domElem) {
         .append('rect');
 
     this.svgContainer.append('g')
-        .attr('class', 'vi-crossplot-polygons')
+        .attr('class', 'vi-crossplot-polygons');
+
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-regression-lines');
 
     d3.select(window)
         .on('resize', function() {
@@ -210,7 +240,7 @@ Crossplot.prototype.init = function(domElem) {
 Crossplot.prototype.createContainer = function() {
     this.container = this.root.append('div')
         .attr('class', 'vi-crossplot-container');
-/* 
+/*
     this.headerContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-header-container');
 
@@ -263,6 +293,7 @@ Crossplot.prototype.doPlot = function() {
         .attr('height', Math.abs(vpY[0] - vpY[1]));
 
     this.plotPolygons();
+    this.plotRegressionLines();
 }
 
 // Crossplot.prototype.updateHeader = function() {
@@ -425,6 +456,92 @@ Crossplot.prototype.updateAxisLabels = function() {
         );
 }
 
+Crossplot.prototype.filterByPolygons = function(polygons, data, exclude) {
+    let ppoints = polygons.map(function(p) {
+        return p.points.map(function(point) {
+            return [point.x, point.y];
+        });
+    });
+
+    return data.filter(function(d) {
+        let pass = exclude ? false : true;
+        for (let p of ppoints)
+            if (d3.polygonContains(p, [d.x, d.y]))
+                return pass;
+        return !pass;
+    });
+}
+
+Crossplot.prototype.plotRegressionLines = function() {
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    this.prepareRegressionLines();
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let regLineContainer = this.svgContainer.select('g.vi-crossplot-regression-lines')
+        .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
+
+    let regLines = regLineContainer.selectAll('path')
+        .data(this.regressionLines);
+
+    let self = this;
+    regLines.enter().append('path')
+        .merge(regLines)
+        .attr('d', function(d) {
+            return line(d.data);
+        })
+        .attr('stroke', function(d) { return d.lineStyle; })
+        .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
+    regLines.exit().remove();
+}
+
+Crossplot.prototype.prepareRegressionLines = function() {
+    let regLines = this.regressionLines;
+
+    let self = this;
+    regLines.forEach(function(l) {
+        let polygons = self.polygons.filter(function(p, i) {
+            return l.polygonIndices.indexOf(i) > -1;
+        });
+        let data = self.filterByPolygons(polygons, self.data, l.exclude);
+        let regFunc = self.getRegressionFunc(data);
+        l.data = [self.pointSet.scaleLeft, self.pointSet.scaleRight].map(function(d) {
+            return {
+                x: d,
+                y: regFunc(d)
+            }
+        });
+        l.regFunc = regFunc;
+    });
+}
+
+Crossplot.prototype.getRegressionFunc = function(data) {
+    let reducer = function(sum, current) { return sum + current; };
+
+    let dataX = data.map(function(d) { return d.x; });
+    let dataY = data.map(function(d) { return d.y; });
+
+    let meanX = dataX.reduce(reducer) * 1.0 / dataX.length;
+    let meanY = dataY.reduce(reducer) * 1.0 / dataY.length;
+
+    let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer);
+    let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer);
+
+    let slope = XY / XX;
+    let intercept = meanY - (meanX * slope);
+
+    let regFunc = function(x) {
+        return x*slope + intercept;
+    };
+    regFunc.slope = slope;
+    regFunc.intercept = intercept;
+
+    return regFunc;
+}
+
 Crossplot.prototype.plotPolygons = function() {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
@@ -514,7 +631,7 @@ Crossplot.prototype.prepareData = function() {
     let self = this;
     this.pointSet.curveY.data.forEach(function(d) {
         if (self.pointSet.topDepth != null && d.y < self.pointSet.topDepth) return;
-        if (self.pointSet.bottomDepth != null & d.y > self.pointSet.bottomDepth) return;
+        if (self.pointSet.bottomDepth != null && d.y > self.pointSet.bottomDepth) return;
         if (d.y != null && mapX[d.y] != null) {
             self.data.push({
                 x: mapX[d.y],

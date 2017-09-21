@@ -88,7 +88,10 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
 
         let dataX = genSamples([0,10], [0,1000]);
         let dataY = genSamples([0,5], [0,1000]);
-        let viCrossplot = wiD3CrossplotCtrl.createVisualizeCrossplot(dataX, dataY, {
+        let viCurveX = graph.buildCurve({}, dataX);
+        let viCurveY = graph.buildCurve({}, dataY);
+
+        let viCrossplot = wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, {
             pointSet: {
                 curveZ: graph.buildCurve({}, dataX),
                 numColor: 10,
@@ -115,8 +118,35 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                         { x: 2, y: 2 }
                     ]
                 }
+            ],
+            regressionLines: [
+                {
+                    exclude: true
+                },
+                {
+                    lineStyle: 'red',
+                    polygonIndices: [0]
+                },
+                {
+                    lineStyle: 'yellow',
+                    polygonIndices: [0,1]
+                },
+
+                {
+                    lineStyle: 'black',
+                    exclude: true,
+                    polygonIndices: [0,1]
+                },
             ]
         });
-        viCrossplot.startAddPolygon();
+
+        console.log(viCrossplot.getProperties());
+        viCrossplot.setProperties({
+            pointSet: {
+                pointSymbol: 'Cross'
+            }
+        });
+        console.log(viCrossplot.getProperties());
+        viCrossplot.doPlot();
     });
 });
