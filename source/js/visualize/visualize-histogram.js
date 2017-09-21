@@ -148,7 +148,7 @@ Histogram.prototype.doPlot = function() {
         .attr('height', self.container.node().clientHeight);
 
     // remove previously render histograms
-    this.svgContainer.selectAll('.bars').remove();
+    this.svgContainer.selectAll('.bars, path').remove();
 
     // Sanity checking
     if (!this.data) {
@@ -214,7 +214,13 @@ Histogram.prototype.doPlot = function() {
         this.intervalBins = histogramGenerator(this.intervalData);
         if (step < 0) __reverseBins(this.intervalBins);
     }
+    
+
+    // Calculate average and standardDeviation
     self.unsetJoinedZoneData(); // IMPORTANT ! Clear joinZoneData for calculate statistics
+    this.mean = this._getAverage();
+    this.standardDeviation =  this._getStandardDeviation();
+
     self.signal('data-processing-done', 'linhtinh');
 
     // After having data, we can setup vertical transformation and Y axis 
@@ -224,8 +230,15 @@ Histogram.prototype.doPlot = function() {
     this.axisY = d3.axisLeft(transformY)
         .ticks(Math.floor(vpY[1]/40), ',.0f');
 
-    
     // Generate X and Y axes
+    this.axisX = this.axisX.tickSize(-this.svgContainer.node().clientHeight);
+    this.axisY = this.axisY.tickSize(-this.svgContainer.node().clientWidth);
+    if (this.histogramModel.properties.showGrid) {
+        this.svgContainer.selectAll('.tick line').classed('hidden', false);
+    }
+    else {
+        this.svgContainer.selectAll('.tick line').classed('hidden', true);
+    }
     this.svgContainer.select('g.vi-histogram-axis-x-ticks')
         .call(this.axisX)
         .style('transform', 'translateY(' + vpY[1] + 'px)');
@@ -233,77 +246,148 @@ Histogram.prototype.doPlot = function() {
         .call(this.axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
 
-    // Generate column groups
-    let bars = this.svgContainer.selectAll('.bars').data(this.fullBins).enter()
-        .append('g').attr('class', 'bars')
-        .attr('transform', function(d) {
-            if (self.histogramModel.properties.plotType != 'Frequency') {
-                return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.fullData.length) + ')';
-                //return 'translate(' + transformX(d.x0) + ', 0)';
-            }
-            return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length) + ')';
-            //return 'translate(' + transformX(d.x0) + ', 0)';
-        });
+    drawBarHistogram();
 
-    // Column width and gap setups
-    var gap = 4;
-    let colWidth = Math.abs(transformX(self.fullBins[0].x1) - transformX(self.fullBins[0].x0));
-    gap = Math.min(gap, Math.floor(colWidth/5));
-    
-    // Generate histogram segments
-    if (this.intervalBins) {
-        // For intervalDepth case
-        bars.append('rect')
-            .attr('x', gap/2)
-            .attr('width', colWidth - gap)
-            .attr('y', function(d, i) {
-                if (self.histogramModel.properties.plotType != 'Frequency') {
-                    return (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
-                }
-                return (transformY(self.intervalBins[i].length) - transformY(self.fullBins[i].length ));
-            })
-            .attr('height', function(d, i) {
-                if (self.histogramModel.properties.plotType != 'Frequency') {
-                    return transformY(wdY[0]) 
-                        - transformY(self.intervalBins[i].length * 100 / self.fullData.length);
-                }
-                return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
-            })
-            .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
+    if (self.histogramModel.properties.showGaussian) {
+        drawGaussianCurve();
     }
-    else {
-        // For zonalDepth case
-        for (let j in self.zoneBins) {
+
+    function drawBarHistogram() {
+        // Generate column groups
+        let bars = self.svgContainer.selectAll('.bars').data(self.fullBins).enter()
+            .append('g').attr('class', 'bars')
+            .attr('transform', function(d) {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.fullData.length) + ')';
+                    //return 'translate(' + transformX(d.x0) + ', 0)';
+                }
+                return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length) + ')';
+                //return 'translate(' + transformX(d.x0) + ', 0)';
+            });
+
+        // Column width and gap setups
+        var gap = 4;
+        let colWidth = Math.abs(transformX(self.fullBins[0].x1) - transformX(self.fullBins[0].x0));
+        gap = Math.min(gap, Math.floor(colWidth/5));
+        
+        // Generate histogram segments
+        if (self.intervalBins) {
+            // For intervalDepth case
             bars.append('rect')
                 .attr('x', gap/2)
                 .attr('width', colWidth - gap)
                 .attr('y', function(d, i) {
-                    var fullBinHeight, cumHeight;
                     if (self.histogramModel.properties.plotType != 'Frequency') {
-                        fullBinHeight = ( transformY(wdY[0]) - transformY(self.fullBins[i].length * 100/self.fullData.length) );
-                        cumHeight = fullBinHeight;
-                        for (let k = 0; k <= j; k++) {
-                            cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length * 100 / self.fullData.length));
-                        }
-                        return cumHeight;
-                        //return (transformY(self.zoneBins[j][i].length * 100 / self.zoneBins[j].length) 
-                        //        - transformY(self.fullBins[i].length * 100 / self.fullData.length));
+                        return (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                     }
-                    fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length ));
-                    cumHeight = fullBinHeight;
-                    for (let k = 0; k <= j; k++) {
-                        cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length));
-                    }
-                    return cumHeight;
+                    return (transformY(self.intervalBins[i].length) - transformY(self.fullBins[i].length ));
                 })
                 .attr('height', function(d, i) {
                     if (self.histogramModel.properties.plotType != 'Frequency') {
                         return transformY(wdY[0]) 
-                            - transformY(self.zoneBins[j][i].length*100/self.fullData.length);
+                            - transformY(self.intervalBins[i].length * 100 / self.fullData.length);
                     }
-                    return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
+                    return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
                 })
-                .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue');
+                .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
+        }
+        else {
+            // For zonalDepth case
+            for (let j in self.zoneBins) {
+                bars.append('rect')
+                    .attr('x', gap/2)
+                    .attr('width', colWidth - gap)
+                    .attr('y', function(d, i) {
+                        var fullBinHeight, cumHeight;
+                        if (self.histogramModel.properties.plotType != 'Frequency') {
+                            fullBinHeight = ( transformY(wdY[0]) - transformY(self.fullBins[i].length * 100/self.fullData.length) );
+                            cumHeight = fullBinHeight;
+                            for (let k = 0; k <= j; k++) {
+                                cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length * 100 / self.fullData.length));
+                            }
+                            return cumHeight;
+                            //return (transformY(self.zoneBins[j][i].length * 100 / self.zoneBins[j].length) 
+                            //        - transformY(self.fullBins[i].length * 100 / self.fullData.length));
+                        }
+                        fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length ));
+                        cumHeight = fullBinHeight;
+                        for (let k = 0; k <= j; k++) {
+                            cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length));
+                        }
+                        return cumHeight;
+                    })
+                    .attr('height', function(d, i) {
+                        if (self.histogramModel.properties.plotType != 'Frequency') {
+                            return transformY(wdY[0]) 
+                                - transformY(self.zoneBins[j][i].length*100/self.fullData.length);
+                        }
+                        return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
+                    })
+                    .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue');
+            }
+        }
+    }
+
+    function drawGaussianCurve() {
+        var squaredSigma = self.standardDeviation * self.standardDeviation;
+        console.log(self.standardDeviation, self.mean, squaredSigma);
+        var gaussianPoints = getData(4000);
+        var gaussianTransformY = d3.scaleLinear()
+            .domain(d3.extent(gaussianPoints, function(d) {return d.y;}))
+            .range([vpY[1], vpY[0]]);
+
+        var line = d3.line()
+            .x(function(d) {
+                return transformX(d.x);
+            })
+            .y(function(d) {
+                return gaussianTransformY(d.y);
+            });
+        self.svgContainer.append('path').datum(gaussianPoints)
+                .attr('class', 'line').attr('d', line);
+        
+        function normal() {
+            var x = 0,
+            y = 0,
+            rds, c;
+            do {
+                x = (Math.random() * 2 - 1);
+                y = (Math.random() * 2 - 1);
+                rds = x * x + y * y;
+            } while (rds == 0 || rds > 1);
+            c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
+            return self.mean + self.standardDeviation * x * c; // throw away extra sample y * c
+        }
+
+        //taken from Jason Davies science library
+        // https://github.com/jasondavies/science.js/
+        function gaussian(x) {
+            var gaussianConstant = 1 / Math.sqrt(2 * Math.PI),
+            mean = self.mean,
+            sigma = self.standardDeviation;
+
+            x = (x - mean) / sigma;
+            return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
+        };
+        function getData(numSamples) {
+            var data = new Array();
+            // loop to populate data array with 
+            // probabily - quantile pairs
+            for (var i = 0; i < numSamples; i++) {
+                x = normal(); // calc random draw from normal dist
+                y = gaussian(x) // calc prob of rand draw
+                point = {
+                    x: x,
+                    y: y
+                }
+                data.push(point);
+            };
+            // need to sort for plotting
+            //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+            data.sort(function(x, y) {
+                return x.x - y.x;
+            });
+            return data;
         }
     }
 }
@@ -442,15 +526,18 @@ Histogram.prototype.unsetJoinedZoneData = function() {
     delete this.joinedZoneData;
 }
 
-Histogram.prototype.getAverage = function () {
+Histogram.prototype.getAverage = function() {
+    return this.mean.toFixed(__DECIMAL_LEN);
+}
+Histogram.prototype._getAverage = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData) return null;
-        return d3.mean(this.intervalData).toFixed(__DECIMAL_LEN);
+        return d3.mean(this.intervalData);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
-    return d3.mean(this.joinZoneData()).toFixed(__DECIMAL_LEN);
+    return d3.mean(this.joinZoneData());
 }
 
 function calAverageDeviation(data) {
@@ -474,16 +561,19 @@ Histogram.prototype.getAverageDeviation = function () {
     return calAverageDeviation(newArray);
 }
 
-Histogram.prototype.getStandardDeviation = function () {
+Histogram.prototype.getStandardDeviation = function() {
+    return this.standardDeviation.toFixed(__DECIMAL_LEN);
+}
+Histogram.prototype._getStandardDeviation = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData) return null;
-        return d3.deviation(this.intervalData).toFixed(__DECIMAL_LEN);
+        return d3.deviation(this.intervalData);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
     var newArray = this.joinZoneData();
-    return d3.deviation(newArray).toFixed(__DECIMAL_LEN);
+    return d3.deviation(newArray);
 }
 
 Histogram.prototype.getVariance = function () {

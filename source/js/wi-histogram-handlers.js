@@ -48,6 +48,7 @@ exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.histogramModel.properties.showGaussian = !wiHistogramCtrl.histogramModel.properties.showGaussian;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Gaussian');
 }
 
 exports.CumulativeButtonClicked = function() {
@@ -68,6 +69,7 @@ function PlotBarsButtonClicked() {
     default:
         wiHistogramCtrl.histogramModel.properties.plot = "Curve";
     }
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
 }
 
 exports.PlotCurvesButtonClicked = function() {

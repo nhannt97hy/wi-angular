@@ -182,8 +182,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
                 self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
-                //
-                //TODO
+                self.visHistogram.signal('histogram-update', 'show/hide grid');
             }
         }, {
             name: "ShowGaussian",
@@ -193,6 +192,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
                 self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
+                self.visHistogram.signal('histogram-update', 'show/hide gaussian');
             }
         }, {
             name: "ShowAxisYAsPercent",
