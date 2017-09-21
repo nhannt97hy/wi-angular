@@ -4370,7 +4370,7 @@ exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
         this.SelectedBinNum = null;
 
         this.getLength = function(b){
-            return b.length > 2 ? b.length - 2 : 0;
+            return b.length;
         }
 
         this.getValueRange = function(b){
@@ -4398,8 +4398,8 @@ exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
         };
 
         this.onSearchButtonClick = function () {
-            self.Point_Num = self.getLength(self.bins[self.SelectedBinNum]);
-            self.Max_Value = self.bins[self.SelectedBinNum][self.Point_Num - 4];
+            self.Point_Num = self.getLength(self.bins[self.SelectedBinNum - 1]);
+            self.Max_Value = self.bins[self.SelectedBinNum - 1][self.Point_Num - 1];
         }
 
         this.onCloseButtonClicked = function () {

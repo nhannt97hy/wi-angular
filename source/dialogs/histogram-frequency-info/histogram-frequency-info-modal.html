@@ -22,7 +22,7 @@
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="bin in wiModal.bins"  ng-class="{'background-color-steelblue': $index == wiModal.maxValueRange.id}">
-                                                <td class="col-sm-3 text-right">{{$index}}</td>
+                                                <td class="col-sm-3 text-right">{{$index + 1}}</td>
                                                 <td class="col-sm-4">{{wiModal.getValueRange(bin)}}</td>
                                                 <td class="col-sm-5">{{wiModal.getLength(bin)}}</td>
                                             </tr>
@@ -43,7 +43,7 @@
                                     <div class="form-group">
                                         <label class="col-sm-4">Bin Number:</label>
                                         <div class="col-sm-4">
-                                            <input type="number" class="form-control wi-form-control" min='0' max='{{wiModal.bins.length - 1}}' ng-model='wiModal.SelectedBinNum'>
+                                            <input type="number" class="form-control wi-form-control" min='1' max='{{wiModal.bins.length}}' ng-model='wiModal.SelectedBinNum'>
                                         </div>
                                         <div class="col-sm-4">
                                             <button class="btn btn-default" ng-click='wiModal.onSearchButtonClick()' ng-disabled="wiModal.SelectedBinNum == null">
