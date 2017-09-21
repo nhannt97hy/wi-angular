@@ -1,13 +1,15 @@
 exports.SaveFormatButtonClicked = function() {
     console.log('SaveFormatButton is clicked', this.wiHistogram);
     var wiComponentService = this.wiComponentService;
-    
+    let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let ModalService = this.ModalService;
     let idHistogram = this.wiHistogram.id;
     let wiApiService = this.wiApiService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let histogramModel = utils.getModel("histogram", idHistogram);
     wiApiService.editHistogram(histogramModel.properties, function(){
         console.log('Saving Histogram......');
+        dialogUtils.warningMessageDialog(ModalService, 'Histogram plot is saved');
     })
 
 }

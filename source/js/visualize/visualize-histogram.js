@@ -45,11 +45,11 @@ Histogram.prototype.signal = function (eventName, data) {
 
 Histogram.prototype.setZoneSet = function(zoneSet) {
     this.zoneSet = zoneSet;
-    if (this.drawPending) this.doPlot();
+    //if (this.drawPending) this.doPlot();
 }
 Histogram.prototype.setCurve = function(data) {
     this.data = data.filter(function(d) {return !isNaN(d.x);}); // ? clone
-    if (this.drawPending) this.doPlot();
+    //if (this.drawPending) this.doPlot();
 }
 
 Histogram.prototype.getTickValuesY = function() {
@@ -147,6 +147,9 @@ Histogram.prototype.doPlot = function() {
     self.svgContainer.attr('width',self.container.node().clientWidth)
         .attr('height', self.container.node().clientHeight);
 
+    // remove previously render histograms
+    this.svgContainer.selectAll('.bars').remove();
+
     // Sanity checking
     if (!this.data) {
         console.error('No curve data');
@@ -192,9 +195,14 @@ Histogram.prototype.doPlot = function() {
     // We may reverse bins if necessary
     this.fullData = this.getFullData();
     this.fullBins = histogramGenerator(this.fullData);
+    if (step < 0) __reverseBins(this.fullBins);
+
+    this.zoneData.length = 0;
+    this.zoneBins.length = 0;
+    delete this.intervalData;
+    delete this.intervalBins;
+
     if (this.histogramModel.properties.idZoneSet) {
-        delete this.intervalData;
-        delete this.intervalBins;
         for (let i in this.zoneSet) {
             this.zoneData[i] = this.getZoneData(i);
             this.zoneBins[i] = histogramGenerator(this.zoneData[i]);
@@ -202,25 +210,20 @@ Histogram.prototype.doPlot = function() {
         }
     }
     else {
-        this.zoneData.length = 0;
-        this.zoneBins.length = 0;
         this.intervalData = this.getIntervalData();
         this.intervalBins = histogramGenerator(this.intervalData);
         if (step < 0) __reverseBins(this.intervalBins);
     }
-    self.unsetJoinedZoneData();
+    self.unsetJoinedZoneData(); // IMPORTANT ! Clear joinZoneData for calculate statistics
     self.signal('data-processing-done', 'linhtinh');
 
-
-    // After having data, we can setup vertical transformation and Y axis (Y axis) 
+    // After having data, we can setup vertical transformation and Y axis 
     let wdY = this.getWindowY();
     transformY = this.getTransformY();
 
     this.axisY = d3.axisLeft(transformY)
         .ticks(Math.floor(vpY[1]/40), ',.0f');
 
-    // remove previously render histograms
-    this.svgContainer.selectAll('.bars').remove();
     
     // Generate X and Y axes
     this.svgContainer.select('g.vi-histogram-axis-x-ticks')
@@ -235,7 +238,7 @@ Histogram.prototype.doPlot = function() {
         .append('g').attr('class', 'bars')
         .attr('transform', function(d) {
             if (self.histogramModel.properties.plotType != 'Frequency') {
-                return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.data.length) + ')';
+                return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.fullData.length) + ')';
                 //return 'translate(' + transformX(d.x0) + ', 0)';
             }
             return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length) + ')';
@@ -255,13 +258,14 @@ Histogram.prototype.doPlot = function() {
             .attr('width', colWidth - gap)
             .attr('y', function(d, i) {
                 if (self.histogramModel.properties.plotType != 'Frequency') {
-                    return (transformY(self.intervalBins[i].length * 100 / self.intervalData.length) - transformY(self.fullBins[i].length * 100 / self.data.length));
+                    return (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                 }
                 return (transformY(self.intervalBins[i].length) - transformY(self.fullBins[i].length ));
             })
             .attr('height', function(d, i) {
                 if (self.histogramModel.properties.plotType != 'Frequency') {
-                    return transformY(wdY[0]) - transformY(self.intervalBins[i].length * 100 / self.intervalData.length);
+                    return transformY(wdY[0]) 
+                        - transformY(self.intervalBins[i].length * 100 / self.fullData.length);
                 }
                 return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
             })
@@ -269,23 +273,38 @@ Histogram.prototype.doPlot = function() {
     }
     else {
         // For zonalDepth case
-        bars.append('rect')
-            .attr('x', gap/2)
-            .attr('width', colWidth - gap)
-            .attr('y', function(d, i) {
-                if (self.histogramModel.properties.plotType != 'Frequency') {
-                    return (transformY(self.zoneBins[0][i].length * 100 / self.zoneBins[0].length) 
-                            - transformY(self.fullBins[i].length * 100 / self.data.length));
-                }
-                return (transformY(self.zoneBins[0][i].length) - transformY(self.fullBins[i].length ));
-            })
-            .attr('height', function(d, i) {
-                if (self.histogramModel.properties.plotType != 'Frequency') {
-                    return transformY(wdY[0]) - transformY(self.zoneBins[0][i].length*100/self.data.length);
-                }
-                return transformY(wdY[0]) - transformY(self.zoneBins[0][i].length);
-            })
-            .attr('fill', self.zoneSet[0].properties.background?self.zoneSet[0].properties.background:'steelblue');
+        for (let j in self.zoneBins) {
+            bars.append('rect')
+                .attr('x', gap/2)
+                .attr('width', colWidth - gap)
+                .attr('y', function(d, i) {
+                    var fullBinHeight, cumHeight;
+                    if (self.histogramModel.properties.plotType != 'Frequency') {
+                        fullBinHeight = ( transformY(wdY[0]) - transformY(self.fullBins[i].length * 100/self.fullData.length) );
+                        cumHeight = fullBinHeight;
+                        for (let k = 0; k <= j; k++) {
+                            cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length * 100 / self.fullData.length));
+                        }
+                        return cumHeight;
+                        //return (transformY(self.zoneBins[j][i].length * 100 / self.zoneBins[j].length) 
+                        //        - transformY(self.fullBins[i].length * 100 / self.fullData.length));
+                    }
+                    fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length ));
+                    cumHeight = fullBinHeight;
+                    for (let k = 0; k <= j; k++) {
+                        cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length));
+                    }
+                    return cumHeight;
+                })
+                .attr('height', function(d, i) {
+                    if (self.histogramModel.properties.plotType != 'Frequency') {
+                        return transformY(wdY[0]) 
+                            - transformY(self.zoneBins[j][i].length*100/self.fullData.length);
+                    }
+                    return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
+                })
+                .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue');
+        }
     }
 }
 
@@ -298,10 +317,10 @@ Histogram.prototype.init = function(domElem) {
         .attr('width',this.container.node().clientWidth)
         .attr('height', this.container.node().clientHeight);
 
-    new ResizeSensor($(this.container.node()), function(param) {
+    new ResizeSensor( $(this.container.node()), function(param) {
         console.log("On resize", param, this);
         self.doPlot();
-    });
+    } );
 
     this.svgContainer
         .selectAll('g.vi-histogram-axis-group')
@@ -335,7 +354,7 @@ Histogram.prototype.getViewportX = function() {
 }
 Histogram.prototype.getWindowY = function() {
     if (this.histogramModel.properties.plotType != 'Frequency') {
-        let total = this.data.length;
+        let total = this.fullData.length;
         console.log('getWindowY: Percent');
         return [0, d3.max(this.fullBins, function(d) { return d.length*100/total;})];
     }

@@ -66,9 +66,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.zoneArr = null;
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
-            //if (self.visHistogram) self.visHistogram.zoneSetModel = self.zoneSetModel;
-            //if (self.visHistogram) self.visHistogram.zoneSet = self.zoneSetModel.children;
-            //if (self.visHistogram) self.visHistogram.zoneSet = self.getZoneCtrl().getActiveZones();
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {
@@ -78,12 +75,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.getZoneCtrl().zones = self.zoneArr;
 
             self.histogramModel.properties.histogramTitle = getHistogramTitle();
-            self.histogramModel.properties.xLabel = getXLabel();
         }
         else {
             self.zoneSetModel = null;
-            //if (self.visHistogram) self.visHistogram.zoneSetModel = self.zoneSetModel;
-            //if (self.visHistogram) self.visHistogram.zoneSet = null;
         }
         if (self.histogramModel.properties.idCurve) {
             self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
@@ -96,6 +90,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         }
+        self.histogramModel.properties.xLabel = getXLabel();
     }
     this.refreshHistogram = function() {
         if (self.visHistogram) {
@@ -106,6 +101,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         if ( isFunction(self.visHistogram.signal) ) 
             self.visHistogram.signal('histogram-update', "refresh");
+    }
+    this.onZoneCtrlReady = function(zoneCtrl) {
+        console.log(zoneCtrl);
+        zoneCtrl.trap('zone-data', function() {
+            self.refreshHistogram();
+        });
     }
     this.getZoneAreaName = function () {
         return self.name + "Zone";
