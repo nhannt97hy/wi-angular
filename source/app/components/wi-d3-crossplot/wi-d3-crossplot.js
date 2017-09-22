@@ -18,12 +18,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
     };
-
+    this.onReady = function () {
+        self.linkModels();
+    }
     this.CloseZone = function () {
         self.isShowWiZone = false;
         utils.triggerWindowResize();
     }
+    this.getZoneName = function () {
+        return self.name + "Zone";
+    }
+    this.linkModels = function () {
+        self.zoneArr = null;
+        if (self.crossplotModel.properties.idZoneSet) {
+            self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.idZoneSet);
+            self.zoneArr = self.zoneSetModel.children;
+            self.zoneArr.forEach(function (zone) {
+                zone.handler = function () {}
+            })
 
+            self.crossplotModel.properties.crossplotTitle = getHistogramTitle();
+            self.crossplotModel.properties.xLabel = getXLabel();
+        }
+        if (self.crossplotModel.properties.idCurve) {
+            self.curveModel = utils.getCurveFromId(self.crossplotModel.properties.idCurve);
+            if (self.viCrossplot) {
+                if (self.viCrossplot.idCurve != self.crossplotModel.properties.idCurve) {
+                    self.viCrossplot.idCurve = self.crossplotModel.properties.idCurve;
+                    loadCurve(self.viCrossplot.idCurve);
+                }
+                else {
+                    self.viCrossplot.signal('crossplot-update', "no load curve");
+                }
+            }
+        }
+    }
     this.CloseReferenceWindow = function () {
         self.isShowReferenceWindow = false;
         utils.triggerWindowResize();
