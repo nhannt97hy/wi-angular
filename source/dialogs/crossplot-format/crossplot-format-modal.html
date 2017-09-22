@@ -229,9 +229,9 @@
                                                 Active Zone
                                             </label>
                                             <div class="col-sm-8">
-                                                <select class="form-control wi-form-control"
-                                                        ng-model="wiModal.selectedZone"
-                                                        ng-options="zone as zone.properties.name for zone in wiModal.zones">
+                                                <select class="form-control wi-form-control" ng-model="wiModal.selectedZone" ng-change="wiModal.onActiveZoneChange()">
+                                                    <option value="All" ng-selected="wiModal.props.pointSet.activeZone=='All'">All</option>
+                                                    <option value="{{zone.id}}" ng-repeat="zone in wiModal.zoneSets[wiModal.selectedZoneSet.idx].children" ng-selected="wiModal.props.pointSet.activeZone==zone.id">{{zone.properties.name}}</option>
                                                 </select>
                                             </div>
                                         </div>

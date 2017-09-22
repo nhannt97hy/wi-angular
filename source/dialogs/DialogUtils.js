@@ -3910,19 +3910,45 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         // DEBUG
         window.crossplotDialog = this;
         this.viCrossplot = viCrossplot;
-
         let props = viCrossplot.getProperties();
+        this.selectedZoneSet = null;
+        this.selectedZone = props.pointSet.activeZone != null ? props.pointSet.activeZone : 'All';
 
         let wellModel = utils.getModel('well', props.idWell);
         this.zoneSets = wellModel.children.find(function (node) {
             return node.type == 'zonesets';
         }).children;
-        this.selectedZoneSet = this.zoneSets.find(function (zoneSet) {
-            return zoneSet.properties.idZoneSet == props.pointSet.idZoneSet;
-        })
-        this.selectedZone = this.selectedZoneSet.children.find(function (zone) {
-            return zone.properties.idZone == props.pointSet.activeZone;
-        })
+
+        if (self.zoneSets && self.zoneSets.length > 0) {
+            if (!props.pointSet.idZoneSet) {
+                this.selectedZoneSet = this.zoneSets[0];
+                // this.selectedZoneSet = this.zoneSets.find(function (zoneSet) {
+                //     return zoneSet.properties.idZoneSet == props.pointSet.idZoneSet;
+                // });
+
+
+            }
+            for (let i = self.zoneSets.length - 1; i >= 0; i--) {
+                self.zoneSets[i].idx = i;
+                if (self.zoneSets[i].properties.idZoneSet == props.pointSet.idZoneSet) {
+                    self.selectedZoneSet = self.zoneSets[i];
+                }
+                if (!self.zoneSets[i].children || !self.zoneSets[i].children.length) {
+                    self.zoneSets.splice(i, 1);
+                }
+            }
+        }
+
+        if(props.pointSet.idZoneSet){
+            this.selectedZoneSet = this.zoneSets.find(function (zoneSet) {
+                return zoneSet.properties.idZoneSet == props.pointSet.idZoneSet;
+            });
+        }else{
+            this.selectedZoneSet = this.zoneSets[0];
+        }
+        // this.selectedZone = this.selectedZoneSet.children.find(function (zone) {
+        //     return zone.properties.idZone == props.pointSet.activeZone;
+        // })
 
         this.isZonalDepths = wiD3CrossplotCtrl.isShowWiZone;
         this.datasetsInWell = new Array();
@@ -3950,17 +3976,25 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         this.pointSet = props.pointSet;
         this.pointSet.idCurveX = props.pointSet.curveX ? props.pointSet.curveX.idCurve:props.pointSet.idCurveX;
         this.pointSet.idCurveY = props.pointSet.curveY ? props.pointSet.curveY.idCurve:props.pointSet.idCurveY;
-        this.pointSet.idZoneSet = this.pointSet.idZoneSet || this.zoneSets[0].properties.idZoneSet;
+        // this.pointSet.idZoneSet = this.pointSet.idZoneSet || this.zoneSets[0].properties.idZoneSet;
         console.log("pointSet", this.pointSet);
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
         this.onZoneSetChange = function () {
-            self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
-            let zoneSet = self.zoneSets.find(function (zoneset) {
-                return zoneset.properties.idZoneSet == self.pointSet.idZoneSet;
-            })
-            console.log('zoneSet', zoneSet);
-            self.zones = zoneSet.children;
+            if(self.selectedZoneSet){
+                self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+            }
+            // let zoneSet = self.zoneSets.find(function (zoneset) {
+            //     return zoneset.properties.idZoneSet == self.pointSet.idZoneSet;
+            // })
+            // console.log('zoneSet', zoneSet);
+            // self.zones = zoneSet.children;
+        }
+
+        this.onActiveZoneChange = function(){
+            if (self.selectedZone) {
+                props.pointSet.activeZone = self.selectedZone;
+            }
         }
 
         // modal button
