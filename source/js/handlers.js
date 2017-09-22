@@ -81,6 +81,7 @@ exports.ExitButtonClicked = function () {
             window.localStorage.removeItem('token');
             window.localStorage.removeItem('username');
             window.localStorage.removeItem('password');
+            window.localStorage.removeItem('rememberAuth');
             location.reload();
         }
     })
