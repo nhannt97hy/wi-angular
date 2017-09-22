@@ -1101,6 +1101,7 @@ function findWellById(idWell) {
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
     visit(rootNodes[0], function (node) {
+ 
         if (node.type == 'well' && node.id == idWell) {
             well = node;
         }
@@ -1539,8 +1540,7 @@ function openCrossplotTab(crossplotModel, callback) {
                                     idPointSet: pointSet.idPointSet,
                                     idCrossPlot: wiCrossplotCtrl.id,
                                     idWell: wellProps.id,
-                                    topDepth: wellProps.topDepth,
-                                    bottomDepth: wellProps.bottomDepth
+                                    pointSet: pointSet
                                 });
                                 if (crossplot.polygons && crossplot.polygons.length) {
                                     for (let polygon of crossplot.polygons) {
