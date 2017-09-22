@@ -32,7 +32,7 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <input class="col-sm-1" type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType">
+                                                <input class="col-sm-1" type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType" ng-disabled="!wiModal.zoneSetList.length">
                                                 <label><span>Zone Depths</span></label>
                                             </div>
                                             <div class="form-group">
