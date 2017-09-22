@@ -15,7 +15,7 @@ let app = angular.module(moduleName, []);
 
 // const BASE_URL = 'http://54.169.109.34';
 const BASE_URL = 'http://sflow.me:3000';
-// const BASE_URL = 'http://localhost:3000';
+//const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -518,7 +518,8 @@ Service.prototype.exportCurve = function (idCurve, callback) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Referrer-Policy': 'no-referrer'
+            'Referrer-Policy': 'no-referrer',
+			'Authorization' : __USERINFO.token
         },
         responseType: "arraybuffer",
         data: dataRequest
