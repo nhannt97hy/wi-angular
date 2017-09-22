@@ -945,6 +945,11 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.markers.forEach(function (marker) {
                             wiD3Ctrl.addMarkerToTrack(trackObj, marker);
                         });
+                        aTrack.images.forEach(function (image) {
+                            image.src = image.location;
+                            wiD3Ctrl.addImageToTrack(trackObj, image);
+                            
+                        })
                         if (!aTrack.lines || aTrack.lines.length == 0) {
                             aTrack = tracks.shift();
                             continue;

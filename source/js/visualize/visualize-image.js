@@ -18,7 +18,7 @@ Utils.extend(Drawing, ViImage);
  */
 function ViImage(config) {
     Drawing.call(this, config);
-
+    console.log('ViImage', config);
     this.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSarZEJPiMYzVmU_95UQAahZB2Fi6hH24UstuGJC-23Qzsvoktr';
     this.top = null;
     this.bottom = null;

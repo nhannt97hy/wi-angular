@@ -63,8 +63,7 @@
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;Apply</button>
-                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done"><span class="ok-16x16"></span>&nbsp;OK</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

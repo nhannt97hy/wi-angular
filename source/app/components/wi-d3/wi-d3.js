@@ -327,8 +327,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addImageToTrack = function(track, config) {
         if (!track || !track.addImage) return;
         let image = track.addImage(config);
-        console.log('image', image);
         track.plotDrawing(image);
+    }
+    this.editImage = function (track, newConfig) {
+        track.removeDrawing(track.getImages()[0]);
+        let image = track.addImage(newConfig);
+        track.plotDrawing(image);
+    }
+    this.removeImage = function (track) {
+        track.removeDrawing(track.getImages()[0]);
     }
 
     this.addLeftShadingToTrack = function (track, curve, config) {
@@ -1407,6 +1414,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: 'image-add-16x16',
             handler: function () {
                 logplotHandlers.AddImageButtonClicked();
+            }
+        },
+        {
+            name: "RemoveImage",
+            label: "Remove Image",
+            icon: 'image-delete-16x16',
+            handler: function () {
+                logplotHandlers.RemoveImageButtonClicked();
             }
         },
         {
