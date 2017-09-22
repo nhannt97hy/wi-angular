@@ -3899,8 +3899,22 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+        // DEBUG
         window.crossplotDialog = this;
         this.viCrossplot = viCrossplot;
+
+        let props = viCrossplot.getProperties();
+
+        let wellModel = utils.getModel('well', props.idWell);
+        this.zoneSets = wellModel.children.find(function (node) {
+            return node.type == 'zonesets';
+        }).children;
+        this.selectedZoneSet = this.zoneSets.find(function (zoneSet) {
+            return zoneSet.properties.idZoneSet == props.pointSet.idZoneSet;
+        })
+        this.selectedZone = this.selectedZoneSet.children.find(function (zone) {
+            return zone.properties.idZone == props.pointSet.activeZone;
+        })
 
         this.isZonalDepths = wiD3CrossplotCtrl.isShowWiZone;
         this.datasetsInWell = new Array();
@@ -3924,14 +3938,22 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
             self.curvesOnDataset.push(curvesOnDatasetItem);
         });
         console.log("curve", this.curvesOnDataset);
-        let props = viCrossplot.getProperties();
         console.log("props", props);
         this.pointSet = props.pointSet;
         this.pointSet.idCurveX = props.pointSet.curveX ? props.pointSet.curveX.idCurve:props.pointSet.idCurveX;
         this.pointSet.idCurveY = props.pointSet.curveY ? props.pointSet.curveY.idCurve:props.pointSet.idCurveY;
+        this.pointSet.idZoneSet = this.pointSet.idZoneSet || this.zoneSets[0].properties.idZoneSet;
         console.log("pointSet", this.pointSet);
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.onZoneSetChange = function () {
+            self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+            let zoneSet = self.zoneSets.find(function (zoneset) {
+                return zoneset.properties.idZoneSet == self.pointSet.idZoneSet;
+            })
+            console.log('zoneSet', zoneSet);
+            self.zones = zoneSet.children;
+        }
 
         // modal button
         this.colorSymbol = function () {
@@ -3965,6 +3987,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
                         pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
                         pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
                         pointSet.idCrossPlot = wiCrossplotCtrl.id;
+                        pointSet.activeZone = self.selectedZone.idZone;
                         console.log(pointSet);
                         props.pointSet = pointSet;
                         let scalesObj = angular.copy(self.pointSet);                        

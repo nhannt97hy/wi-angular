@@ -209,7 +209,10 @@
                                                 Zone set
                                             </label>
                                             <div class="col-sm-8">
-                                                <select class="form-control wi-form-control">
+                                                <select class="form-control wi-form-control"
+                                                        ng-model="wiModal.selectedZoneSet"
+                                                        ng-change="wiModal.onZoneSetChange()"
+                                                        ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zoneSets">
                                                 </select>
                                             </div>
                                         </div>
@@ -226,7 +229,9 @@
                                                 Active Zone
                                             </label>
                                             <div class="col-sm-8">
-                                                <select class="form-control wi-form-control">
+                                                <select class="form-control wi-form-control"
+                                                        ng-model="wiModal.selectedZone"
+                                                        ng-options="zone as zone.properties.name for zone in wiModal.zones">
                                                 </select>
                                             </div>
                                         </div>
