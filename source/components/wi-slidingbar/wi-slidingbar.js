@@ -19,7 +19,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     function createPreview(idCurve) {
         console.log(idCurve);
-        if ( !idCurve ) {
+        if (!idCurve) {
             createPreviewWithDefault();
             return;
         }
@@ -35,17 +35,17 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let stepY = parseFloat(well.properties.step);
         wiApiService.infoCurve(idCurve, function (infoCurve) {
             let config = {
-                minX: infoCurve.LineProperty.minScale,
-                maxX: infoCurve.LineProperty.maxScale,
+                minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
+                maxX: infoCurve.LineProperty ? infoCurve.LineProperty.maxScale : 200,
                 minY: minY,
                 maxY: maxY,
                 yStep: stepY,
                 offsetY: minY,
                 line: {
-                    color: infoCurve.LineProperty.lineColor
+                    color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
                 }
             };
-            utils.getCurveData(wiApiService, idCurve, function(err, dataCurve) {
+            utils.getCurveData(wiApiService, idCurve, function (err, dataCurve) {
                 if (err) {
                     utils.error(err);
                     return;
@@ -56,7 +56,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             });
         })
     }
+
     this.createPreview = createPreview;
+
     function createPreviewWithDefault() {
         let logPlotName = self.name.replace('Slidingbar', '');
         let logPlotCtrl = wiComponentService.getComponent(logPlotName);
@@ -68,7 +70,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         createPreview1(firstCurve.properties.idCurve);
 
-        utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function(err, data) {
+        utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function (err, data) {
             let config = {
                 minY: parseFloat(well.properties.topDepth),
                 maxY: parseFloat(well.properties.bottomDepth),
@@ -151,7 +153,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             update(ui);
         });
 
-        new ResizeSensor($(self.contentId), function() {
+        new ResizeSensor($(self.contentId), function () {
             let currentParentHeight = parseInt($(self.contentId).height());
 
             if (currentParentHeight !== parentHeight) self.refreshHandler();
@@ -161,11 +163,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).on("mousewheel", onMouseWheel);
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        $(self.contentId).on('mouseover', function() {
+        $(self.contentId).on('mouseover', function () {
             dragMan.wiSlidingBarCtrl = self;
         });
 
-        $(self.contentId).on('mouseleave', function() {
+        $(self.contentId).on('mouseleave', function () {
             dragMan.wiSlidingBarCtrl = null;
         });
 
@@ -192,7 +194,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             });
         }
 
-        this.refreshHandler = function() {
+        this.refreshHandler = function () {
             parentHeight = parseInt($(self.contentId).height());
             self.parentHeight = parentHeight;
             self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
@@ -206,7 +208,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
             if (newHeight + newTop > parentHeight && newHeight <= parentHeight) {
                 newTop = parentHeight - newHeight;
-            } else if (newHeight + newTop > parentHeight && newHeight > parentHeight){
+            } else if (newHeight + newTop > parentHeight && newHeight > parentHeight) {
                 newTop = 0;
                 newHeight = parentHeight;
             }
