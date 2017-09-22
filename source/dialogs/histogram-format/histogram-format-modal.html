@@ -172,7 +172,7 @@
                                                         <select name="" id=""></select>
                                                     </td>
                                                     <td>
-                                                        <button>
+                                                        <button class="btn btn-default">
                                                             <span class="delete-16x16"></span>
                                                         </button>
                                                     </td>
@@ -259,7 +259,8 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onCloseButtonClicked();" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;Close</button>
+                <button type="button" ng-click="wiModal.onCloseButtonClicked();" class="btn btn-default"
+                ng-disabled="wiModal.IsNotValid();"><span class="ok-16x16"></span>&nbsp;Close</button>
             </div>
         </div>
     </div>

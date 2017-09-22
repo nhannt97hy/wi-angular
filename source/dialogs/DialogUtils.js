@@ -4331,6 +4331,21 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                 self.histogramProps.color = colorStr;
             });
         }
+
+        this.IsNotValid = function () {
+            var inValid = false;
+            if (!self.histogramProps.idZoneSet) {
+                if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
+                    inValid = true;
+                }
+            }
+
+            if (self.histogramProps.leftScale == null || self.histogramProps.rightScale == null || self.histogramProps.leftScale == self.histogramProps.rightScale) {
+                inValid = true;
+            }
+
+            return inValid;
+        }
         this.onCloseButtonClicked = function () {
             console.log("on OK clicked");
             histogramModel.properties = self.histogramProps;
@@ -4338,7 +4353,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         }
         this.onCancelButtonClicked = function () {
             close(null);
-            
         }
     }
     ModalService.showModal({
