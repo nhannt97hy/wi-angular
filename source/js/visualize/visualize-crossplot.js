@@ -50,8 +50,15 @@ Crossplot.prototype.PROPERTIES = {
             },
             pointSize: { type: 'Integer', default: 2 },
             pointColor: { type: 'String', default: 'Blue' },
-            topDepth: { type: 'Float' },
-            bottomDepth: { type: 'Float' }
+            intervalDepthTop: { type: 'Float' },
+            intervalDepthBottom: { type: 'Float' },
+            idZoneSet: { type: 'Integer' },
+            activeZone: { type: 'String' },
+            lineMode: { type: 'Boolean', default: false },
+            showLine: { type: 'Boolean', default: false },
+            standalone: { type: 'Boolean', default: false },
+            overlayLine: { type: 'String' },
+            zoneset: { type: 'Object' }
         }
     },
     polygons: {
@@ -316,7 +323,7 @@ Crossplot.prototype.doPlot = function() {
 // Crossplot.prototype.updateHeader = function() {
 //     this.headerContainer
 //         .selectAll('div.vi-crossplot-header-row')
-//         .data([this.name, 'Reference: [' + this.pointSet.topDepth + ' - ' + this.pointSet.bottomDepth + ']'])
+//         .data([this.name, 'Reference: [' + this.pointSet.intervalDepthTop + ' - ' + this.pointSet.intervalDepthBottom + ']'])
 //         .text(function(d) { return d; });
 // }
 
@@ -669,8 +676,8 @@ Crossplot.prototype.prepareData = function() {
 
     let self = this;
     this.pointSet.curveY.data.forEach(function(d) {
-        if (self.pointSet.topDepth != null && d.y < self.pointSet.topDepth) return;
-        if (self.pointSet.bottomDepth != null && d.y > self.pointSet.bottomDepth) return;
+        if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) return;
+        if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) return;
         if (d.y != null && mapX[d.y] != null) {
             self.data.push({
                 x: mapX[d.y],

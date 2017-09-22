@@ -40,7 +40,8 @@ exports.authenticationDialog = function (ModalService, callback) {
                 let userInfo = {
                     username: self.username,
                     password: self.password,
-                    token: token
+                    token: token,
+                    remember: self.remember
                 };
                 wiApiService.setAuthenticationInfo(userInfo);
                 close(userInfo);
@@ -4090,6 +4091,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         this.bottom = config.bottom;
         this.left = config.left;
         this.width = config.width;
+        this.done = false;        
 
         this.onUploadButtonClicked = function () {
             wiApiService.uploadImage({
@@ -4110,6 +4112,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         let [trackTop, trackBottom] = wiD3Ctrl.getDepthRangeFromSlidingBar(); // top & bottom track in meter
         let mPerPx = (trackBottom - trackTop) / trackHeight;
         this.onImageUrlChange = utils.debounce(function () {
+            self.done = false;
             let img = new Image();
             img.onload = function () {
                 let imageWidth = this.width;
@@ -4121,13 +4124,16 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
                     let imageScaleHeight = imageHeight * imageScaleRatio * (self.width / 100); // image height in pixel
                     console.log(mPerPx, imageScaleRatio, imageScaleHeight);
                     self.bottom = (mPerPx * imageScaleHeight) + self.top;
+                    self.done = true;                    
                 });
             };
             img.src = self.src;
         }, 500)
 
         function getConfig() {
+            console.log(config);
             return {
+                idImage: config.id || null,
                 src: self.src,
                 top: self.top,
                 bottom: self.bottom,
@@ -4135,10 +4141,8 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
                 width: self.width
             }
         }
-        this.onApplyButtonClicked = function () {
-            callback(getConfig());
-        }
         this.onOkButtonClicked = function () {
+            if (!self.done) return;
             close(getConfig(), 200);
         }
         this.onCancelButtonClicked = function () {

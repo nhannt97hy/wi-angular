@@ -55,6 +55,11 @@ const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
 const GET_LOG_TRACK = '/project/well/plot/track/info';
 const EDIT_TRACK = '/project/well/plot/track/edit';
 
+const CREATE_IMAGE  = '/project/well/plot/track/image/new';
+const EDIT_IMAGE = '/project/well/plot/track/image/edit';
+const GET_IMAGE = '/project/well/plot/track/image/info';
+const DELETE_IMAGE = '/project/well/plot/track/image/delete';
+
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
 const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
@@ -623,6 +628,46 @@ Service.prototype.editTrack = function (trackObj, callback) {
         .then(function (track) {
             if (!callback) return;
             callback(track);
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
+
+Service.prototype.createImage = function (imageObj, callback) {
+    var self = this;
+    this.post(CREATE_IMAGE, imageObj)
+        .then(function (image) {
+            callback(image);
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.removeImage = function (idImage, callback) {
+    var self = this;
+    let dataRequest = {
+        idImage: idImage
+    };
+    this.delete(DELETE_IMAGE, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.editImage = function (imageObj, callback) {
+    var self = this;
+    let dataRequest = imageObj;
+    this.post(EDIT_IMAGE, dataRequest)
+        .then(function (image) {
+            if (!callback) return;
+            callback(image);
         })
         .catch(function (err) {
             console.error(err);
