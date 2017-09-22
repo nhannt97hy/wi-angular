@@ -160,8 +160,6 @@ function shadingToTreeConfig(shading, paletteList) {
         refX: shading.refX,
         leftX: shading.leftFixedValue,
         rightX: shading.rightFixedValue,
-        // minY: shading.minY,
-        // maxY: shading.maxY,
         fill: shading.fill ? JSON.parse(shading.fill) : null,
         isNegPosFill: shading.isNegPosFill,
         positiveFill: shading.positiveFill ? JSON.parse(shading.positiveFill) : null,

@@ -1813,10 +1813,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             self.paletteList = pals;
             self.paletteName = Object.keys(self.paletteList);
         });
-        // this.paletteList = utils.getAllPalettes(wiApiService);
-        // this.paletteList = palettes;
-        // this.namePals = Object.keys(self.paletteList);
-        // console.log("paletteList", this.namePals);
         if (!fillPatternOptions) {  
             fillPatternOptions = {
                 fill: {
@@ -1850,11 +1846,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
         this.checkboxVal = !this.fillPatternOptions.fill.display;
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
-
-        // this.getShadingStyles = function() {
-        //     return SHADING_STYLES;
-        // }
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
         this.enableFill = function (idEnable, value) {
             $('#' + idEnable + ":button").attr("disabled", value);
@@ -1945,8 +1937,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             };
         }
         this.variableShadingOptions = variableShadingOptions;
-        console.log("varShading", this.variableShadingOptions);
-        // this.displayType = !this.variableShadingOptions.fill.display?"posNegSides":"bothSides";
+
         this.displayType = this.shadingOptions.isNegPosFill;
         this.selectedControlCurve = function(idCurve){
             self.selectCurve.forEach(function(item, index) {
@@ -1960,7 +1951,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     self.variableShadingOptions.fill.varShading.endX = item.maxX;    
                 }
             })
-        }
+        };
+        this.selectedControlCurve(self.shadingOptions.idControlCurve);
 
         this.fillStartColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.gradient.startColor, function (colorStr) {
@@ -2022,6 +2014,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         wiApiService.getPalettes(function(paletteList){
             let paletteNameArr = Object.keys(paletteList);
             let paletteValArr = JSON.stringify(Object.values(paletteList));
+            console.log("getPalettes");
             function getPaletteNameByValue(palVal) {
                 let idx = paletteValArr.indexOf(JSON.stringify(palVal));
                 return paletteNameArr[idx];
@@ -2185,7 +2178,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         });
         this.setCustomFills = function(){
             self.variableShadingOptions.fill.varShading.customFills = self.customFillsCurrent;
-            console.log("CF", self.variableShadingOptions.fill.varShading.customFills, self.customFillsCurrent);
+            self.shadingOptions.name = self.customFillsCurrent.name;
         };
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
@@ -2201,8 +2194,10 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         // TO CHANGE: set this.displayType = false
         this.setCustomFillsIfNull = function(){
             self.displayType = false;
-            self.isNegPosFill = false;
-            if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.customFills) {
+            self.shadingOptions.isNegPosFill = false;
+            self.variableShadingOptions.fill.display = true;
+
+            if(!self.variableShadingOptions.fill.varShading.customFills) {
                 self.variableShadingOptions.fill.varShading.customFills = {
                     name:null,
                     content: [
@@ -2217,6 +2212,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     ]
                 }
             }
+
             self.shadingOptions.name = self.variableShadingOptions.fill.varShading.customFills.name;
            
         }
@@ -2881,8 +2877,20 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
                                                      self.fillPatternOptions[index], 
                                                      self.variableShadingOptions[index]);
-                    if(shadingObj.idLeftLine < 0) shadingObj.idLeftLine = null;
+                    if(shadingObj.idLeftLine == -3) {
+                        shadingObj.type = 'custom';
+                        shadingObj.idLeftLine = null;
+                    };
+                    if(shadingObj.idLeftLine == -2) {
+                        shadingObj.type = 'right';
+                        shadingObj.idLeftLine = null;
+                    };
+                    if(shadingObj.idLeftLine == -1) {
+                        shadingObj.type = 'left';
+                        shadingObj.idLeftLine = null;
+                    };
                     if(shadingObj.idLeftLine > 0) {
+                        shadingObj.type = 'pair';
                         shadingObj.leftFixedValue = null;
                         shadingObj.idLeftLine = parseInt(shadingObj.idLeftLine);
                     }

@@ -124,18 +124,23 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                     exclude: true
                 },
                 {
-                    lineStyle: 'red',
+                    lineStyle: {
+                        width: 2,
+                        style: [1, 2],
+                        color: 'red'
+                    },
                     polygonIndices: [0]
                 },
                 {
-                    lineStyle: 'yellow',
+                    lineStyle: { color: 'yellow' },
                     polygonIndices: [0,1]
                 },
 
                 {
-                    lineStyle: 'black',
+                    lineStyle: { color: 'black'},
                     exclude: true,
-                    polygonIndices: [0,1]
+                    polygonIndices: [0,1],
+                    displayEquation: false
                 },
             ]
         });

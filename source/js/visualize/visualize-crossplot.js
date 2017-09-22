@@ -82,12 +82,23 @@ Crossplot.prototype.PROPERTIES = {
             type: 'Object',
             properties: {
                 idRegressionLine: { type: 'Integer' },
-                lineStyle: { type: 'String', default: 'Blue' },
+                lineStyle: {
+                    type: 'Object',
+                    properties: {
+                        color: { type: 'String', default: 'Blue' },
+                        width: { type: 'Integer', default: 1 },
+                        style: {
+                            type: 'Array',
+                            item: { type: 'Integer' },
+                            default: []
+                        },
+                    }
+                },
                 displayLine: { type: 'Boolean', default: true },
                 displayEquation: { type: 'Boolean', default: true },
                 regType: {
                     type: 'Enum',
-                    values: ['Linear', 'Exponent', 'Power'],
+                    values: ['Linear', 'Exponent', 'Powerwer'],
                     default: 'Linear'
                 },
                 inverseReg: { type: 'Boolean', default: false },
@@ -226,6 +237,9 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-regression-lines');
 
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-equations');
+
     d3.select(window)
         .on('resize', function() {
             self.doPlot();
@@ -293,7 +307,10 @@ Crossplot.prototype.doPlot = function() {
         .attr('height', Math.abs(vpY[0] - vpY[1]));
 
     this.plotPolygons();
+
+    this.prepareRegressionLines();
     this.plotRegressionLines();
+    this.plotEquations();
 }
 
 // Crossplot.prototype.updateHeader = function() {
@@ -472,11 +489,30 @@ Crossplot.prototype.filterByPolygons = function(polygons, data, exclude) {
     });
 }
 
+Crossplot.prototype.plotEquations = function() {
+    let self = this;
+
+    let equationContainer = this.svgContainer.select('g.vi-crossplot-equations');
+    let eqData = this.regressionLines.filter(function(r) { return r.displayEquation; })
+    let equations = equationContainer.selectAll('text').data(eqData);
+
+    const HEIGHT = 14;
+    equations.enter().append('text')
+        .merge(equations)
+        .attr('x', 0)
+        .attr('y', function(d, i) { return (i+1)*HEIGHT; })
+        .attr('fill', function(d) { return d.lineStyle.color; })
+        .text(function(d) { return d.regFunc.equation; });
+    equations.exit().remove();
+
+    let gWidth = equationContainer.node().getBoundingClientRect().width;
+    equationContainer.attr('transform', 'translate(' + (this.getViewportX()[1] - gWidth) + ',' + this.getViewportY()[1] + ')' );
+}
+
 Crossplot.prototype.plotRegressionLines = function() {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
 
-    this.prepareRegressionLines();
     let line = d3.line()
         .x(function(d) { return transformX(d.x); })
         .y(function(d) { return transformY(d.y); });
@@ -493,7 +529,9 @@ Crossplot.prototype.plotRegressionLines = function() {
         .attr('d', function(d) {
             return line(d.data);
         })
-        .attr('stroke', function(d) { return d.lineStyle; })
+        .attr('stroke', function(d) { return d.lineStyle.color; })
+        .attr('stroke-dasharray', function(d) { return d.lineStyle.style; })
+        .attr('stroke-width', function(d) { return d.lineStyle.width; })
         .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
     regLines.exit().remove();
 }
@@ -536,8 +574,9 @@ Crossplot.prototype.getRegressionFunc = function(data) {
     let regFunc = function(x) {
         return x*slope + intercept;
     };
-    regFunc.slope = slope;
-    regFunc.intercept = intercept;
+    let a = +slope.toFixed(6);
+    let b = +intercept.toFixed(6);
+    regFunc.equation = 'y=' + a + '*x' + (b < 0 ? b : ('+' + b));
 
     return regFunc;
 }
