@@ -304,7 +304,7 @@ Histogram.prototype.doPlot = function() {
                 })
                 .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue')
                 .on('mousemove', showTooltip)
-                //.on('mouseout', hideTooltip);
+                .on('mouseout', hideTooltip);
         }
         else {
             // For zonalDepth case
@@ -442,7 +442,7 @@ Histogram.prototype.init = function(domElem) {
         .attr('width',this.container.node().clientWidth)
         .attr('height', this.container.node().clientHeight);
 
-    this.container.append('div').attr('class', 'vi-histogram-tooltip');
+    this.container.append('div').attr('class', 'vi-histogram-tooltip').style('opacity', 0);
 
     new ResizeSensor( $(this.container.node()), function(param) {
         console.log("On resize", param, this);
