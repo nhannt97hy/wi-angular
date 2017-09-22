@@ -228,11 +228,16 @@ Service.prototype.delete = function (route, payload) {
     });
 }
 
-Service.prototype.login = function(data, callback) {
+Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
-    this.post(LOGIN, data).then(function(ret) { callback(ret); })
-        .catch(function(err) { console.error(err); alert("Login error", err); });
+    this.post(LOGIN, data).then(function (ret) {
+            callback(ret);
+        })
+        .catch(function (err) {
+            console.error(err);
+            alert("Login error: " + err);
+        });
 }
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
