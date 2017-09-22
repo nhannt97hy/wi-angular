@@ -720,12 +720,12 @@
                                 </div>
                             </div>
 
-                            
+                            {{wiModal.varShadingType}}
                             <div class="row padding-left-2em" >
                                 <label>
                                     <input type="radio" value="customFills" ng-model="wiModal.varShadingType"
                                             ng-change="wiModal.setCustomFillsIfNull()">
-                                    Values
+                                    Custom Fills
                                 </label>
                             </div>
                             <div class="row" ng-show="wiModal.varShadingType == 'customFills'">
@@ -761,6 +761,7 @@
                                     <div class="col-sm-5 padding-0">
                                         <input type="text" 
                                                 ng-model="wiModal.variableShadingOptions.fill.varShading.customFills.name"
+                                                ng-change="wiModal.shadingOptions.name = wiModal.variableShadingOptions.fill.varShading.customFills.name"
                                                 class="form-control wi-form-control normal-text">
                                     </div>
                                 </div>
