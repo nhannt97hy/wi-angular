@@ -123,36 +123,41 @@ Shading.prototype.getProperties = function() {
 }
 
 Shading.prototype.setProperties = function(props) {
-    Utils.setIfNotNull(this,'idTrack', props.idTrack);
-    Utils.setIfNotNull(this, 'id', props.idShading);
-    Utils.setIfNotNull(this, 'name', props.name);
-    Utils.setIfNotNull(this, 'isNegPosFill', props.isNegPosFill);
+    Utils.setIfNotUndefined(this,'idTrack', props.idTrack);
+    Utils.setIfNotUndefined(this, 'id', props.idShading);
+    Utils.setIfNotUndefined(this, 'name', props.name);
+    Utils.setIfNotUndefined(this, 'isNegPosFill', props.isNegPosFill);
     if (props.isNegPosFill) {
-        Utils.setIfNotNull(this, 'positiveFill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
-        Utils.setIfNotNull(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
+        Utils.setIfNotUndefined(this, 'positiveFill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
+        Utils.setIfNotUndefined(this, 'negativeFill', Utils.isJson(props.negativeFill) ? JSON.parse(props.negativeFill) : props.negativeFill);
     }
     else {
         if (props.fill)
-            Utils.setIfNotNull(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
-        else Utils.setIfNotNull(this, 'fill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
+            Utils.setIfNotUndefined(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
+        else Utils.setIfNotUndefined(this, 'fill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
     }
 
     if (!this.rightCurve && this.leftCurve) {
         Utils.setIfNotUndefined(this, 'rightCurve', props.leftCurve);
-        Utils.setIfNotNull(this, 'refX', props.leftFixedValue);
-        Utils.setIfNotNull(this, 'rightX', props.leftFixedValue);
+        Utils.setIfNotUndefined(this, 'refX', props.leftFixedValue);
+        Utils.setIfNotUndefined(this, 'rightX', props.leftFixedValue);
         Utils.setIfNotUndefined(this, 'leftCurve', props.rightCurve);
-        Utils.setIfNotNull(this, 'leftX', props.rightFixedValue);
+        Utils.setIfNotUndefined(this, 'leftX', props.rightFixedValue);
     }
     else {
         Utils.setIfNotUndefined(this, 'leftCurve', props.leftCurve);
-        Utils.setIfNotNull(this, 'refX', props.leftFixedValue);
-        Utils.setIfNotNull(this, 'leftX', props.leftFixedValue);
+        Utils.setIfNotUndefined(this, 'refX', props.leftFixedValue);
+        Utils.setIfNotUndefined(this, 'leftX', props.leftFixedValue);
         Utils.setIfNotUndefined(this, 'rightCurve', props.rightCurve);
-        Utils.setIfNotNull(this, 'rightX', props.rightFixedValue);
+        Utils.setIfNotUndefined(this, 'rightX', props.rightFixedValue);
     }
 
     Utils.setIfNotUndefined(this, 'selectedCurve', props.controlCurve);
+
+    this.showRefLine = this.getType() == 'custom';
+
+    if (!this.leftCurve || !this.rightCurve)
+        this.selectedCurve = this.leftCurve || this.rightCurve;
 }
 
 /**
