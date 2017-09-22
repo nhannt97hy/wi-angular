@@ -15,7 +15,7 @@ let app = angular.module(moduleName, []);
 
 // const BASE_URL = 'http://54.169.109.34';
 const BASE_URL = 'http://sflow.me:3000';
-// const BASE_URL = 'http://localhost:3000';
+//const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -233,11 +233,16 @@ Service.prototype.delete = function (route, payload) {
     });
 }
 
-Service.prototype.login = function(data, callback) {
+Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
-    this.post(LOGIN, data).then(function(ret) { callback(ret); })
-        .catch(function(err) { console.error(err); alert("Login error", err); });
+    this.post(LOGIN, data).then(function (ret) {
+            callback(ret);
+        })
+        .catch(function (err) {
+            console.error(err);
+            alert("Login error: " + err);
+        });
 }
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
@@ -523,7 +528,8 @@ Service.prototype.exportCurve = function (idCurve, callback) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Referrer-Policy': 'no-referrer'
+            'Referrer-Policy': 'no-referrer',
+			'Authorization' : __USERINFO.token
         },
         responseType: "arraybuffer",
         data: dataRequest

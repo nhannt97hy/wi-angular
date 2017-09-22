@@ -4385,8 +4385,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     self.histogramProps.idZoneSet = null;
                     break;
                 case "zonalDepth":
-                    self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
-                   
+                    if(self.selectedZoneSet){
+                        self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                    }
                     break;
             }
         }
