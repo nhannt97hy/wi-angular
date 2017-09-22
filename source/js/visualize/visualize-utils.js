@@ -63,23 +63,29 @@ function setProperties(obj, props, forArray) {
         let schema = obj.PROPERTIES[key];
 
         if (value === undefined && schema.type != 'Object') {
-            if (schema.default !== undefined) obj[key] = schema.default;
+            if (obj[key] === undefined && schema.default !== undefined) obj[key] = schema.default;
         }
         else if (schema.type == 'Integer') obj[key] = parseInt(value);
         else if (schema.type == 'Float') obj[key] = parseFloat(value);
         else if (schema.type == 'Enum') {
             if (schema.values.indexOf(value) == -1) obj[key] = schema.default;
+            else obj[key] = value;
         }
         else if (schema.type == 'Object' && schema.properties !== undefined) {
             let tmpObj = { PROPERTIES: schema.properties };
             setProperties(tmpObj, props[key]);
             delete tmpObj.PROPERTIES;
-            obj[key] = tmpObj;
+            if (obj[key] === undefined) obj[key] = tmpObj;
+            else merge(obj[key], tmpObj);
         }
         else if (schema.type == 'Array' && schema.item !== undefined) {
             obj[key] = getArrayFromSchema(value, schema.item);
         }
-        else obj[key] = value;
+        else {
+            if (value !== undefined) {
+                obj[key] = value;
+            }
+        }
     });
 }
 
@@ -364,7 +370,7 @@ function createFillStyles(ctx, fills, callback) {
         fills.length,
         function(loop) {
             let fill = fills[loop.iteration()];
-            if (!fill) {
+            if (!fill || fill.display === false) {
                 fillStyles.push('transparent');
                 loop.next();
             }
@@ -463,7 +469,7 @@ function createFillStyles(ctx, fills, callback) {
                         let startColor = fill.varShading.gradient.startColor;
                         let endColor = fill.varShading.gradient.endColor;
                         transform = d3.scaleLinear()
-                            .domain([startX, endX].sort())
+                            .domain(sort([startX, endX]))
                             .range(reverse ? [startColor, endColor].reverse() : [startColor, endColor] )
                             .clamp(true);
 
@@ -473,7 +479,7 @@ function createFillStyles(ctx, fills, callback) {
                             return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
                         });
                         transform = d3.scaleQuantize()
-                            .domain([startX, endX].sort())
+                            .domain(sort([startX, endX]))
                             .range(reverse ? palette.reverse() : palette);
                     }
 
@@ -563,5 +569,11 @@ function sortByKey(array, key) {
         let x = a[key];
         let y = b[key];
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
+
+function sort(array) {
+    return array.sort(function(a, b) {
+        return a - b;
     });
 }

@@ -33,6 +33,7 @@
                                             </div>
                                             <div class="padding-tb-small">
                                                 <select ng-model="wiModal.pointSet.idCurveZ"
+                                                        ng-change="wiModal.changeCurveZ()"
                                                         class="form-control wi-form-control padding-tb-small"
                                                         ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"></select>
                                             </div>
@@ -54,7 +55,8 @@
                                             <label class="control-label col-sm-4 padding-tb-small">Min</label>
                                             <div class="col-sm-8 padding-tb-small">
                                                 <input type="number" class="form-control wi-form-control"
-                                                        ng-model="wiModal.pointSet.scaleMin">
+                                                       ng-model="wiModal.pointSet.scaleMin"
+                                                       ng-disabled="!wiModal.pointSet.idCurveZ">
                                             </div>
                                         </div>
                                         <div class="col-sm-5 padding-tb-small margin-right-0_5em">
@@ -71,7 +73,8 @@
                                             <label class="control-label col-sm-4 padding-tb-small">Max</label>
                                             <div class="col-sm-8 padding-tb-small">
                                                 <input type="number" class="form-control wi-form-control"
-                                                        ng-model="wiModal.pointSet.scaleMax">
+                                                       ng-model="wiModal.pointSet.scaleMax"
+                                                       ng-disabled="!wiModal.pointSet.idCurveZ">
                                             </div>
                                         </div>
                                         <div class="col-sm-1 padding-tb-small padding-left-20px">
@@ -150,7 +153,7 @@
                                             </label>
                                             <div class="col-sm-9">
                                                 <div class="float-left">
-                                                    <button ng-click="wiModal.colorCurve();"
+                                                    <button ng-click="wiModal.colorSymbol();"
                                                             ng-style="{'background-color':wiModal.pointSet.pointColor}"
                                                             class="form-control wi-form-control width-80px thick-border">
                                                     </button>
@@ -185,13 +188,13 @@
                                 <br>
                                 <div class="row">
                                     <div class="col-sm-2 padding-left-3em">
-                                        <label>
-                                            <input type="radio" value="">
+                                        <label for="isIntervalDepths">
+                                            <input type="radio" id="isIntervalDepths" ng-model="wiModal.isZonalDepths" ng-value="false">
                                             Interval Depths
                                         </label>
-                                        <label>
-                                            <input type="radio" value="">
-                                            Zonal Depth
+                                        <label for="isZonalDepths">
+                                            <input type="radio" id="isZonalDepths" ng-model="wiModal.isZonalDepths" ng-value="true">
+                                            Zonal Depths
                                         </label>
                                     </div>
                                     <div class="col-sm-5">
@@ -275,8 +278,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr 
-                                                ng-class="{selected:$index == selectedRow}"
+                                            <tr ng-class="{selected:$index == selectedRow}"
                                                 ng-click="wiModal.setClickedRow($index)">
                                                 <td>{{$index + 1}}</td>
                                                 <td>
@@ -284,8 +286,8 @@
                                                             >
                                                 </td> 
                                                 <td>
-                                                    <select 
-                                                            class="form-control wi-form-control"
+                                                    <select class="form-control wi-form-control"
+                                                            ng-model="temp"
                                                             ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"></select>
                                                 </td>
                                                 <td>
@@ -299,8 +301,8 @@
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <select 
-                                                            class="form-control wi-form-control"
+                                                    <select class="form-control wi-form-control"
+                                                            ng-model="temp"                                                    
                                                             ng-options="item.datasetCurve for item in wiModal.curvesOnDataset"
                                                             ng-disabled="wiModal.compare"></select>
                                                 </td>
@@ -446,10 +448,10 @@
                                                 </label>
                                                 <div class="col-sm-9">
                                                     <div class="float-left">
-                                                        <button ng-click="wiModal.colorCrossplot();"
+                                                        <!-- <button ng-click="wiModal.colorCrossplot();"
                                                                 ng-style="{'background-color':wiModal.props.general.color}"
                                                                 class="form-control wi-form-control width-80px thick-border">
-                                                        </button>
+                                                        </button> -->
                                                     </div>
                                                 </div>
                                             </div>

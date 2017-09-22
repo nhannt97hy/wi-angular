@@ -686,7 +686,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                     track.setCurrentDrawing(zone);
                 }
-
+                if (!zone) {
+                    track.setMode(null);
+                    return;
+                }
                 let transformY = zone.getTransformY();
                 let startDepth = transformY.invert(minY);
                 let endDepth = transformY.invert(maxY);
@@ -1055,44 +1058,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "CrossPlot",
             label: "Cross plot",
             icon: "crossplot-blank-16x16",
-            handler: function () {
-                let curve1 = _currentTrack.getCurrentCurve();
-                let curve2 = _currentTrack.getTmpCurve();
-                if (!curve1 || !curve2) {
-                    console.log('Two curves are needed');
-                }
-                else {
-                    console.log('Create crossplot', curve1, curve2);
-                    let promptConfig = {
-                        title: 'Create New Crossplot',
-                        inputName: 'Crossplot Name',
-                        input: curve1.name + '_' + curve2.name
-                    }
-                    DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-                        let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
-                        Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
-                            console.log("wiCrossplotCtrl", wiCrossplotCtrl);
-                            let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                            let dataPointSet = {
-                                idCrossPlot: wiCrossplotCtrl.id,
-                                idWell: idWell,
-                                idCurveX: curve1.idCurve,
-                                idCurveY: curve2.idCurve,
-                            }
-                            let wellProps = _getWellProps();
-                            Utils.createPointSet(dataPointSet, function (pointSet) {
-                                wiD3CrossplotCtrl.createVisualizeCrossplot(curve1, curve2, {
-                                    name: crossplotName,
-                                    idCrossPlot: wiCrossplotCtrl.id,
-                                    idWell: idWell,
-                                    topDepth: wellProps.topDepth,
-                                    bottomDepth: wellProps.bottomDepth
-                                });
-                            })
-                        });
-                    })
-                }
-            }
+            handler: self.createCrossplot
         }, {
             name: "Histogram",
             label: "Histogram",
@@ -1109,69 +1075,110 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let curve2 = _currentTrack.getTmpCurve();
                 console.log("create shading!!", curve1);
                 if (!curve1) return;
-                if (!curve2) {
-                    // This should open dialog
-
-                    var config = {
-                        //isNegPosFilling : false,
+                var config = {
                         isNegPosFill : false,
                         fill: {
+                            display: true,
                             pattern: {
-                                name: "chert",
-                                foreground: "blue",
-                                background: "pink"
+                                name: "none",
+                                foreground: "transparent",
+                                background: "blue"
                             }
                         },
                         positiveFill: {
-                            gradient: {
-                                startX:0,
-                                endX: 200,
-                                startColor: 'yellow',
-                                endColor: 'blue'
+                            display: false,
+                            pattern: {
+                                name: "none",
+                                foreground: "transparent",
+                                background: "blue"
                             }
                         },
                         negativeFill: {
-                            gradient: {
-                                startX:0,
-                                endX: 200,
-                                startColor: 'red',
-                                endColor: 'cyan'
+                            display: false,
+                            pattern: {
+                                name: "none",
+                                foreground: "transparent",
+                                background: "blue"
                             }
                         },
-                        showRefLine: true
+                        showRefLine: false
                     };
-                    // var config = {
-                    //     type: 'custom',
-                    //     isNegPosFill : true,
-                    //     positiveFill: {
-                    //         gradient: {
-                    //             startX:0,
-                    //             endX: 200,
-                    //             startColor: 'yellow',
-                    //             endColor: 'blue'
-                    //         }
-                    //     },
-                    //     negativeFill: {
-                    //         gradient: {
-                    //             startX:0,
-                    //             endX: 200,
-                    //             startColor: 'blue',
-                    //             endColor: 'yellow'
-                    //         }
-                    //     },
-                    //     showRefLine: true
-                    // };
+                    
                     console.log("curve1", _currentTrack, curve1);
-                    self.addCustomShadingToTrack(_currentTrack, curve1, 100, config);
-                }
-                else {
-                    self.addPairShadingToTrack(_currentTrack, curve1, curve2, {});
-                }
+                    let shadingObj = {
+                        idTrack: _currentTrack.id,
+                        name: 'Default shading',
+                        negativeFill: config.negativeFill,
+                        positiveFill: config.positiveFill,
+                        fill: config.fill,
+                        isNegPosFill: config.isNegPosFill,
+                        idLeftLine: curve2?curve2.id:null,
+                        idRightLine: curve1.id,
+                        leftFixedValue: curve2?null:curve1.minX,
+                        rightFixedValue: null,
+                        idControlCurve: null
+                    }
+                    wiApiService.createShading(shadingObj, function(shading){
+                        console.log("createShading", shading);
+                        let shadingModel = Utils.shadingToTreeConfig(shading);
+                        if (!curve2) {
+                            // This should open dialog
+                            self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);
+                        }
+                        else {
+                            self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
+                        }
+                        DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                            if (props) {
+                                console.log('logTrackPropertiesData', props);
+                            }
+                        }, {
+                            tabs:['false', 'false', 'true'],
+                            shadingOnly: true
+                        });
+                    })
             }
         }
         ]);
     }
-
+    this.createCrossplot = function () {
+        let curve1 = _currentTrack.getCurrentCurve();
+        let curve2 = _currentTrack.getTmpCurve();
+        if (!curve1 || !curve2) {
+            console.log('Two curves are needed');
+        }
+        else {
+            console.log('Create crossplot', curve1, curve2);
+            let promptConfig = {
+                title: 'Create New Crossplot',
+                inputName: 'Crossplot Name',
+                input: curve1.name + '_' + curve2.name
+            }
+            DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+                let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
+                Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
+                    console.log("wiCrossplotCtrl", wiCrossplotCtrl);
+                    let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+                    let dataPointSet = {
+                        idCrossPlot: wiCrossplotCtrl.id,
+                        idWell: idWell,
+                        idCurveX: curve1.idCurve,
+                        idCurveY: curve2.idCurve,
+                    }
+                    let wellProps = _getWellProps();
+                    Utils.createPointSet(dataPointSet, function (pointSet) {
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(curve1, curve2, {
+                            name: crossplotName,
+                            idCrossPlot: wiCrossplotCtrl.id,
+                            idWell: idWell,
+                            topDepth: wellProps.topDepth,
+                            bottomDepth: wellProps.bottomDepth
+                        });
+                    })
+                });
+            })
+        }
+    }
     function _trackOnRightClick(track) {
         if (track.isZoneTrack()) {
             self.setContextMenu([
@@ -1210,6 +1217,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: "Add Zone",
                     icon: "zone-edit-16x16",
                     handler: function () {
+                        if (!track.idZoneSet) {
+                            Utils.error('Zone Set is required');
+                            return;
+                        }
                         track.setMode('AddZone');
                     }
                 }, {
@@ -1273,6 +1284,31 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    this.openProptertiesDialog = function () {
+        if (_currentTrack.isDepthTrack()) {
+            openTrackPropertiesDialog();
+            return;
+        }
+        let currentDrawing = _currentTrack.getCurrentDrawing();
+        if (!currentDrawing) openTrackPropertiesDialog();
+        else switch (currentDrawing.type) {
+            case 'curve':
+                _curveOnDoubleClick();
+                break;
+            case 'shading':
+                _shadingOnDoubleClick();
+                break;
+            case 'marker':
+                _markerOnDoubleClick();
+                break;
+            case 'zone':
+                _zoneOnDoubleClick();
+                break;
+            default:
+                break;
+        }
+    }
+
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -1311,7 +1347,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Switch To Logarithmic",
             icon: 'logarithmic-switch-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                let scale = _currentTrack.scale;
+                if (scale.toLowerCase() == 'linear')
+                    _currentTrack.scale = 'logarithmic';
+                else if (scale.toLowerCase() == 'logarithmic')
+                    _currentTrack.scale = 'linear';
+                _currentTrack.doPlot(true);
             }
         },
         {
@@ -1345,8 +1386,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             separator: '1'
         },
         {
-            name: "AddMaker",
-            label: "Add Maker",
+            name: "AddMarker",
+            label: "Add Marker",
             icon: 'marker-add-16x16',
             handler: function () {
                 self.addMarker();

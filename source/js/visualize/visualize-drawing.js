@@ -10,6 +10,7 @@ function Drawing(config) {
     if (typeof config != 'object') config = {};
     this.minY = config.minY;
     this.maxY = config.maxY;
+    this.type = Utils.pascalCaseToLowerDash(this.constructor.name);
 }
 
 /**

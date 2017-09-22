@@ -173,7 +173,7 @@
                         </div>
                     </wi-tab>
                     <wi-tab heading="Curve" enabled="wiModal.tabFlags[1]">
-                        <div ng-show="wiModal.tabFlags[1] == 'true'" class="container-fluid">
+                        <div ng-show="wiModal.tabFlags[1] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="width-95-percent float-left">
                                     <table class="font-size-10px table table-bordered curveTable">
@@ -270,30 +270,28 @@
                     <wi-tab heading="Shading" active="wiModal.shadingOnly;" enabled="wiModal.tabFlags[2]">
                         <div ng-show="wiModal.tabFlags[2] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
-                                <div class="col-sm-11">
-                                    <table style="border-collapse: collapse;" class="font-size-10px shadingTable col-sm-12">
+                                <div class="col-sm-11 padding-0">
+                                    <table style="border-collapse: collapse;" class="font-size-10px table table-bordered shadingTable col-sm-12">
                                         <thead>
                                             <tr>
-                                                <td class="text-center border border-style1-left border-style1-top border-style1-right"><strong>Limit 1</strong></td>
-                                                <td colspan="2" class="text-center border border-style1-top border-style1-right"><strong>Limit 2</strong></td>
-                                                <td colspan="3" class="text-center border border-style1-top border-style1-right"><strong>Parameters</strong></td>
+                                                <td class="text-center"><strong>Limit 1</strong></td>
+                                                <td colspan="2" class="text-center"><strong>Limit 2</strong></td>
+                                                <td colspan="3" class="text-center"><strong>Parameters</strong></td>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td class="text-center border border-style1-left border-style1-right"><strong>Curve 1</strong></td>
-                                                <!-- <td class="text-center border border-style1-right"><strong>Fixed Value</strong></td> -->
-                                                <!-- <td class="text-center border"><strong>Limit</strong></td> -->
-                                                <td class="text-center border"><strong>Curve 2</strong></td>
-                                                <td class="text-center border border-style1-right"><strong>Fixed Value</strong></td>
-                                                <td class="text-center border"><strong>Shading Name</strong></td>
-                                                <td class="text-center border"><strong>Shading Style</strong></td>
-                                                <td class="text-center border border-style1-right"><strong>Shading Options</strong></td>
+                                                <td class="text-center"><strong>Curve 1</strong></td>
+                                                <td class="text-center"><strong>Curve 2</strong></td>
+                                                <td class="text-center"><strong>Fixed Value</strong></td>
+                                                <td class="text-center"><strong>Shading Name</strong></td>
+                                                <td class="text-center"><strong>Shading Style</strong></td>
+                                                <td class="text-center"><strong>Shading Options</strong></td>
                                             </tr>
                                             <tr ng-repeat="shading in wiModal.getShadings()" 
                                                 ng-class="{'selected':$index == selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
-                                                <td class="border border-style1-left border-style1-right">
+                                                <td>
                                                     <select ng-model="shading.idRightLine" name="curveName"
                                                             class="form-control wi-form-control" 
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
@@ -312,7 +310,7 @@
                                                     </select>
                                                     {{shading.limit2}}
                                                 </td> -->
-                                                <td class="border">
+                                                <td>
                                                     <select ng-model="shading.idLeftLine"
                                                             class="form-control wi-form-control" 
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.leftLimit"
@@ -326,7 +324,7 @@
                                                         <!-- <option value="{{item.id}}" ng-repeat="item in wiModal.curvesOnDataset">{{item.datasetCurve}}</option> -->
                                                     </select>
                                                 </td>
-                                                <td class="border border-style1-right">
+                                                <td>
                                                     <input type="number" ng-model="shading.leftFixedValue" 
                                                             class="form-control wi-form-control" id="fixedVal" 
                                                             ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, false); shading.idLeftLine = '-3'"
@@ -339,12 +337,12 @@
                                                             ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, true);" size="6"
                                                             disabled>
                                                 </td> -->
-                                                <td class="border">
+                                                <td>
                                                     <input type="text" ng-model="shading.name" 
                                                     class="form-control wi-form-control"
                                                     ng-change="wiModal.onChangeShading($index)">
                                                 </td>
-                                                <td class="border">
+                                                <td>
                                                     <select ng-model="shading.shadingStyle" 
                                                             class="form-control wi-form-control"
                                                             ng-change="wiModal.onChangeShading($index)">
@@ -352,7 +350,7 @@
                                                         <option value="variableShading">Variable Shading</option>
                                                     </select>
                                                 </td>
-                                                <td class="border border-style1-right">
+                                                <td>
                                                     <input type="button" value="Define" 
                                                             ng-model="shading.fillPattern" 
                                                             class="form-control wi-form-control"

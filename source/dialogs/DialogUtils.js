@@ -1,7 +1,3 @@
-//const SHADING_STYLES = [{value:"fillPattern", name:"Fill Pattern"}, {value:"variableShading", name:"Variable Shading"}];
-
-
-
 exports.authenticationDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
@@ -21,7 +17,7 @@ exports.authenticationDialog = function (ModalService, callback) {
             self.checkPasswords();
             if (self.error) return;
             let dataRequest = {
-                    userName: self.usernameReg,
+                    username: self.usernameReg,
                     password: self.passwordReg
             }
             wiApiService.register(dataRequest, function (token) {
@@ -30,17 +26,26 @@ exports.authenticationDialog = function (ModalService, callback) {
                     password: self.passwordReg,
                     token: token
                 }
+                wiApiService.setAuthenticationInfo(userInfo);
                 close(userInfo);
-            })
+            });
         }
         this.onLoginButtonClicked = function () {
             self.error = null;
-            
-            if (self.error) return;           
+            let dataRequest = {
+                username: self.username,
+                password: self.password
+            }
+            wiApiService.login(dataRequest, function(token) {
+                let userInfo = {
+                    username: self.username,
+                    password: self.password,
+                    token: token
+                };
+                wiApiService.setAuthenticationInfo(userInfo);
+                close(userInfo);
+            });
 
-        }
-        this.onCancelButtonClicked = function () {
-            close(null);
         }
     }
 
@@ -1784,7 +1789,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
         });
     });
 }
-exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, fillPatternOptions, variableShadingOptions, shadingOptions, selectCurve, curvesOnDataset){
+exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, fillPatternOptions, variableShadingOptions, shadingOptions, selectCurve, curvesOnDataset, leftLimit){
     let thisModal = null;
 
     function ModalController($scope, close, wiComponentService, $timeout) {
@@ -1800,6 +1805,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         //fillPatternOptions
         this.shadingOptions = shadingOptions;
+        this.leftLimit = leftLimit;
         this.curvesOnDataset = curvesOnDataset;
 
         this.namePals = new Array();
@@ -1941,7 +1947,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.variableShadingOptions = variableShadingOptions;
         console.log("varShading", this.variableShadingOptions);
         // this.displayType = !this.variableShadingOptions.fill.display?"posNegSides":"bothSides";
-        this.displayType = !this.variableShadingOptions.fill.display;
+        this.displayType = this.shadingOptions.isNegPosFill;
         this.selectedControlCurve = function(idCurve){
             self.selectCurve.forEach(function(item, index) {
                 if(item.idCurve == idCurve) {
@@ -1987,16 +1993,32 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             });
         }
         this.correctFillingStyleVarShading = function() {
-            self.shadingOptions.isNegPosFill = !self.variableShadingOptions.fill.display;
-            self.variableShadingOptions.positiveFill.display = !self.variableShadingOptions.fill.display;
-            self.variableShadingOptions.negativeFill.display = self.variableShadingOptions.positiveFill.display;
+            console.log("DISPLAYTYPE", self.displayType);
+            self.shadingOptions.isNegPosFill = self.displayType;
+            self.variableShadingOptions.fill.display = !self.displayType;
+            self.variableShadingOptions.positiveFill.display = self.displayType;
+            self.variableShadingOptions.negativeFill.display = self.displayType;
+            console.log("fill", self.variableShadingOptions.fill.display, self.variableShadingOptions.positiveFill.display);
+            if(self.displayType) {
+                if(self.varShadingType == 'gradient') {
+                    if(!self.variableShadingOptions.positiveFill.varShading.gradient) 
+                        self.variableShadingOptions.positiveFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+                    if(!self.variableShadingOptions.negativeFill.varShading.gradient) 
+                        self.variableShadingOptions.negativeFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+                }
+            }else{
+                if(self.varShadingType == 'gradient') {
+                    if(!self.variableShadingOptions.fill.varShading.gradient) 
+                        self.variableShadingOptions.fill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+                    
+                }
+            }
         }
-        if(this.shadingOptions.idLeftLine) {
+        /*if(this.shadingOptions.idLeftLine) {
             this.shadingOptions.isNegPosFill = false;
             this.fillPatternOptions.fill.display = true;
             this.variableShadingOptions.fill.display = true;
-            // this.displayType = 'bothSides';
-        }
+        }*/
         wiApiService.getPalettes(function(paletteList){
             let paletteNameArr = Object.keys(paletteList);
             let paletteValArr = JSON.stringify(Object.values(paletteList));
@@ -2004,16 +2026,14 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 let idx = paletteValArr.indexOf(JSON.stringify(palVal));
                 return paletteNameArr[idx];
             }
-
             if(self.variableShadingOptions.fill && self.variableShadingOptions.fill.display == true) {
                 if(self.variableShadingOptions.fill.varShading.gradient) self.varShadingType = "gradient";
                 else if (self.variableShadingOptions.fill.varShading.palette) {
                     self.varShadingType = "palette";
                     if(Array.isArray(self.variableShadingOptions.fill.varShading.palette)) 
                         self.variableShadingOptions.fill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.fill.varShading.palette);
-                    
                 }
-                else self.varShadingType = "customFills";
+                else if(self.variableShadingOptions.fill.varShading.customFills) self.varShadingType = "customFills";
             }
             if(self.variableShadingOptions.positiveFill && self.variableShadingOptions.positiveFill.display == true){
                 if(self.variableShadingOptions.positiveFill.varShading.gradient) self.varShadingType = "gradient";
@@ -2022,7 +2042,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     if(Array.isArray(self.variableShadingOptions.positiveFill.varShading.palette)) 
                         self.variableShadingOptions.positiveFill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.positiveFill.varShading.palette);
                 }
-                else self.varShadingType = "customFills";
+                else if(self.variableShadingOptions.positiveFill.varShading.customFills) self.varShadingType = "customFills";
             }
             if(self.variableShadingOptions.negativeFill && self.variableShadingOptions.negativeFill.display == true){
                 if(self.variableShadingOptions.negativeFill.varShading.gradient) self.varShadingType = "gradient";
@@ -2031,13 +2051,31 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     if(Array.isArray(self.variableShadingOptions.negativeFill.varShading.palette)) 
                         self.variableShadingOptions.negativeFill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.negativeFill.varShading.palette);
                 }
-                else self.varShadingType = "customFills";
+                else if(self.variableShadingOptions.negativeFill.varShading.customFills) self.varShadingType = "customFills";
             }
         })
         this.setGradientIfNull = function(){
-            if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.gradient) self.variableShadingOptions.fill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
-            if(self.variableShadingOptions.positiveFill.display && !self.variableShadingOptions.positiveFill.varShading.gradient) self.variableShadingOptions.positiveFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
-            if(self.variableShadingOptions.positiveFill.display && !self.variableShadingOptions.negativeFill.varShading.gradient) self.variableShadingOptions.negativeFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+            if(self.displayType) {
+                self.variableShadingOptions.positiveFill.display = true;
+                self.variableShadingOptions.negativeFill.display = true;
+                self.variableShadingOptions.fill.display = false;
+                self.shadingOptions.isNegPosFill = true;
+                if(!self.variableShadingOptions.positiveFill.varShading.gradient) 
+                    self.variableShadingOptions.positiveFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+                if(!self.variableShadingOptions.negativeFill.varShading.gradient) 
+                    self.variableShadingOptions.negativeFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+
+            }
+            else {
+                self.variableShadingOptions.positiveFill.display = false;
+                self.variableShadingOptions.negativeFill.display = false;
+                self.variableShadingOptions.fill.display = true;
+                self.shadingOptions.isNegPosFill = false;
+                if(!self.variableShadingOptions.fill.varShading.gradient) 
+                    self.variableShadingOptions.fill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
+            }
+            
+            
             
         }
         // function isValid() {
@@ -2116,41 +2154,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         }
         //customFills
 
-        // this.customFillsCurrent = {
-        //     name: "customFills1",
-        //     content: [
-        //         {
-        //             lowVal: 40, 
-        //             highVal: 50, 
-        //             pattern: "chert", 
-        //             foreground: "black", 
-        //             background: "blue", 
-        //             description: ""
-        //         },{
-        //             lowVal: 50, 
-        //             highVal: 70, 
-        //             pattern: "chert", 
-        //             foreground: "yellow", 
-        //             background: "blue", 
-        //             description: ""
-        //         }, {
-        //             lowVal: 70, 
-        //             highVal: 90, 
-        //             pattern: "chert", 
-        //             foreground: "white", 
-        //             background: "red", 
-        //             description: ""
-        //         },{
-        //             lowVal: 90, 
-        //             highVal: 140, 
-        //             pattern: "chert", 
-        //             foreground: "green", 
-        //             background: "orange", 
-        //             description: "9879707"
-        //         }
-        //     ]
-        // }
-        // this.customFillsCurrent = angular.copy(self.variableShadingOptions.fill.varShading.customFills);
         if(this.variableShadingOptions.fill.varShading.customFills){
             this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills;
         };
@@ -2191,11 +2194,14 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             }
             else {
                 wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
-                    DialogUtils.errorMessageDialog(ModalService, "CustomFills: " + customFills.name + " saved successfully!");
+                    DialogUtils.confirmDialog(ModalService, "Save CustomFills", "CustomFills: " + customFills.name + " saved successfully!", function(){});
                 });
             }
         };
+        // TO CHANGE: set this.displayType = false
         this.setCustomFillsIfNull = function(){
+            self.displayType = false;
+            self.isNegPosFill = false;
             if(self.variableShadingOptions.fill.display && !self.variableShadingOptions.fill.varShading.customFills) {
                 self.variableShadingOptions.fill.varShading.customFills = {
                     name:null,
@@ -2211,6 +2217,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     ]
                 }
             }
+            self.shadingOptions.name = self.variableShadingOptions.fill.varShading.customFills.name;
            
         }
         function isValid() {
@@ -2236,33 +2243,33 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 case "gradient":
                     self.variableShadingOptions.fill.varShading.palette = null;
                     self.variableShadingOptions.positiveFill.varShading.palette = null;
-                    self.variableShadingOptions.positiveFill.varShading.palette = null;
-                    self.variableShadingOptions.fill.varShading.value = null;
+                    self.variableShadingOptions.negativeFill.varShading.palette = null;
+                    self.variableShadingOptions.fill.varShading.customFills = null;
                     self.variableShadingOptions.positiveFill.varShading.customFills = null;
-                    self.variableShadingOptions.positiveFill.varShading.customFills = null;
+                    self.variableShadingOptions.negativeFill.varShading.customFills = null;
                     break;
                 case "palette":
                     self.variableShadingOptions.fill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
-                    self.variableShadingOptions.positiveFill.varShading.gradient = null;
+                    self.variableShadingOptions.negativeFill.varShading.gradient = null;
                     self.variableShadingOptions.fill.varShading.customFills = null;
                     self.variableShadingOptions.positiveFill.varShading.customFills = null;
-                    self.variableShadingOptions.positiveFill.varShading.customFills = null;
+                    self.variableShadingOptions.negativeFill.varShading.customFills = null;
 
                     self.variableShadingOptions.fill.varShading.palette = self.variableShadingOptions.fill.varShading.palName;
                     self.variableShadingOptions.positiveFill.varShading.palette = self.variableShadingOptions.positiveFill.varShading.palName;
-                    self.variableShadingOptions.positiveFill.varShading.palette = self.variableShadingOptions.negativeFill.varShading.palName;
+                    self.variableShadingOptions.negativeFill.varShading.palette = self.variableShadingOptions.negativeFill.varShading.palName;
                     break;
                 case "customFills":
                     self.variableShadingOptions.fill.varShading.palette = null;
                     self.variableShadingOptions.positiveFill.varShading.palette = null;
-                    self.variableShadingOptions.positiveFill.varShading.palette = null;
+                    self.variableShadingOptions.negativeFill.varShading.palette = null;
                     self.variableShadingOptions.fill.varShading.palName = null;
                     self.variableShadingOptions.positiveFill.varShading.palName = null;
-                    self.variableShadingOptions.positiveFill.varShading.palName = null;
+                    self.variableShadingOptions.negativeFill.varShading.palName = null;
                     self.variableShadingOptions.fill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
-                    self.variableShadingOptions.positiveFill.varShading.gradient = null;
+                    self.variableShadingOptions.negativeFill.varShading.gradient = null;
                     break;
             }
             console.log("onOkShadingAttribute", self.fillPatternOptions, self.variableShadingOptions, self.shadingOptions);
@@ -2385,23 +2392,23 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         
         shadingList.forEach(function(shading, index){
             var shadingItem = new Object();
-            var shadingProp = shading.getProperties();
+            var shadingProps = shading.getProperties();
             var fillPatternItem = new Object();
             var variableShadingItem = new Object();
             var shadingChangedItem = new Object();
 
-            console.log("shadingProp", shadingProp);
-            shadingItem.idTrack = shadingProp.idTrack;
-            shadingItem.idShading = shadingProp.idShading;
-            shadingItem.idLeftLine = shadingProp.idLeftLine;
-            shadingItem.leftFixedValue = shadingProp.leftFixedValue;
-            shadingItem.idRightLine = shadingProp.idRightLine;
-            shadingItem.rightFixedValue = shadingProp.rightFixedValue;
-            shadingItem.name = shadingProp.name;
-            shadingItem.shadingStyle = getShadingStyle(shadingProp.isNegPosFill ? shading.positiveFill : shading.fill);
-            shadingItem.idControlCurve = shadingProp.idControlCurve;
-            shadingItem.isNegPosFill = shadingProp.isNegPosFill;
-            shadingItem.type = shadingProp.type;
+            console.log("shadingProps", shadingProps);
+            shadingItem.idTrack = shadingProps.idTrack;
+            shadingItem.idShading = shadingProps.idShading;
+            shadingItem.idLeftLine = shadingProps.idLeftLine?shadingProps.idLeftLine:setIdLeftLineIfNull(shadingProps.type);
+            shadingItem.leftFixedValue = shadingProps.leftFixedValue;
+            shadingItem.idRightLine = shadingProps.idRightLine;
+            shadingItem.rightFixedValue = shadingProps.rightFixedValue;
+            shadingItem.name = shadingProps.name;
+            shadingItem.shadingStyle = getShadingStyle(shadingProps.isNegPosFill ? shading.positiveFill : shading.fill);
+            shadingItem.idControlCurve = shadingProps.idControlCurve;
+            shadingItem.isNegPosFill = shadingProps.isNegPosFill;
+            shadingItem.type = shadingProps.type;
             shadingItem._index = index;
 
             var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFill);
@@ -2409,95 +2416,95 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var condition3 = (shadingItem.shadingStyle == "variableShading" && !shadingItem.isNegPosFill);
             var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFill);
 
-            var condition3gradient = condition3 && shadingProp.fill.varShading.gradient;
-            var condition4gradient = condition4 && shadingProp.positiveFill.varShading.gradient;
+            var condition3gradient = condition3 && shadingProps.fill.varShading.gradient;
+            var condition4gradient = condition4 && shadingProps.positiveFill.varShading.gradient;
 
-            var condition3palette = condition3 && shadingProp.fill.varShading.palette;
-            var condition4palette = condition4 && shadingProp.positiveFill.varShading.palette;
+            var condition3palette = condition3 && shadingProps.fill.varShading.palette;
+            var condition4palette = condition4 && shadingProps.positiveFill.varShading.palette;
 
-            var condition3customFills = condition3 && shadingProp.fill.varShading.customFills;
-            var condition4customFills = condition4 && shadingProp.positiveFill.varShading.customFills;
+            var condition3customFills = condition3 && shadingProps.fill.varShading.customFills;
+            var condition4customFills = condition4 && shadingProps.positiveFill.varShading.customFills;
 
             fillPatternItem.fill = {
-                display: condition1,
+                display: (shadingProps.fill && shadingProps.fill.display != null)?shadingProps.fill.display:condition1,
                 pattern: {
-                    name: (condition1 ? shadingProp.fill.pattern.name : "none"),
-                    foreground: (condition1 ? shadingProp.fill.pattern.foreground : null),
-                    background: (condition1 ? shadingProp.fill.pattern.background : null)
+                    name: (condition1 ? shadingProps.fill.pattern.name : "none"),
+                    foreground: (condition1 ? shadingProps.fill.pattern.foreground : null),
+                    background: (condition1 ? shadingProps.fill.pattern.background : null)
                 }
             };
             fillPatternItem.positiveFill = {
-                display: condition2,
+                display: (shadingProps.positiveFill && shadingProps.positiveFill.display != null)?shadingProps.positiveFill.display:condition2,
                 pattern: {
-                    name: (condition2 ? shadingProp.positiveFill.pattern.name : "none"),
-                    foreground: (condition2 ? shadingProp.positiveFill.pattern.foreground : null),
-                    background: (condition2 ? shadingProp.positiveFill.pattern.background : null)
+                    name: (condition2 ? shadingProps.positiveFill.pattern.name : "none"),
+                    foreground: (condition2 ? shadingProps.positiveFill.pattern.foreground : null),
+                    background: (condition2 ? shadingProps.positiveFill.pattern.background : null)
                 }
             };
 
             fillPatternItem.negativeFill = {
-                display: condition2,
+                display: (shadingProps.negativeFill && shadingProps.negativeFill.display != null)?shadingProps.negativeFill.display:condition2,
                 pattern: {
-                    name: (condition2 ? shadingProp.negativeFill.pattern.name : "none"),
-                    foreground: (condition2 ? shadingProp.negativeFill.pattern.foreground : null),
-                    background: (condition2 ? shadingProp.negativeFill.pattern.background : null)
+                    name: (condition2 ? shadingProps.negativeFill.pattern.name : "none"),
+                    foreground: (condition2 ? shadingProps.negativeFill.pattern.foreground : null),
+                    background: (condition2 ? shadingProps.negativeFill.pattern.background : null)
                 }
             }
 
             fillPatternItem._index = index;
             // variableShadingItem = {
             //     display: condition3,
-            //     idControlCurve: shadingProp.idControlCurve,
+            //     idControlCurve: shadingProps.idControlCurve,
             //     gradient: {
-            //         startX: condition3?shadingProp.fill.gradient.startX:null,
-            //         endX: condition3?shadingProp.fill.gradient.endX:null,
-            //         startColor: condition3?shadingProp.fill.gradient.startColor:null,
-            //         endColor: condition3?shadingProp.fill.gradient.endColor:null
+            //         startX: condition3?shadingProps.fill.gradient.startX:null,
+            //         endX: condition3?shadingProps.fill.gradient.endX:null,
+            //         startColor: condition3?shadingProps.fill.gradient.startColor:null,
+            //         endColor: condition3?shadingProps.fill.gradient.endColor:null
             //     }
 
             // }
-            variableShadingItem.idControlCurve = shadingProp.idControlCurve;
+            variableShadingItem.idControlCurve = shadingProps.idControlCurve;
 
             variableShadingItem.fill = {
-                display: condition3,
+                display: (shadingProps.fill && shadingProps.fill.display != null)?shadingProps.fill.display:condition3,
                 varShading: {
-                    startX: condition3?shadingProp.fill.varShading.startX:null,
-                    endX: condition3?shadingProp.fill.varShading.endX:null,
+                    startX: condition3?shadingProps.fill.varShading.startX:null,
+                    endX: condition3?shadingProps.fill.varShading.endX:null,
                     gradient: condition3gradient?{
-                        startColor: condition3?shadingProp.fill.varShading.gradient.startColor:null,
-                        endColor: condition3?shadingProp.fill.varShading.gradient.endColor:null
+                        startColor: condition3?shadingProps.fill.varShading.gradient.startColor:null,
+                        endColor: condition3?shadingProps.fill.varShading.gradient.endColor:null
                     }:null,
-                    palette: condition3palette?(condition3?shadingProp.fill.varShading.palette:null):null,
-                    palName: condition3palette?(condition3?shadingProp.fill.varShading.palName:null):null,
-                    customFills: condition3customFills?(condition3?shadingProp.fill.varShading.customFills:null):null
+                    palette: condition3palette?(condition3?shadingProps.fill.varShading.palette:null):null,
+                    palName: condition3palette?(condition3?shadingProps.fill.varShading.palName:null):null,
+                    customFills: condition3customFills?(condition3?shadingProps.fill.varShading.customFills:null):null
                 }
             };
             variableShadingItem.positiveFill = {
-                display: condition4,
+                display: (shadingProps.positiveFill && shadingProps.positiveFill.display != null)?shadingProps.positiveFill.display:condition4,
                 varShading: {
-                    startX: condition4?shadingProp.positiveFill.varShading.startX:null,
-                    endX: condition4?shadingProp.positiveFill.varShading.endX:null,
+                    startX: condition4?shadingProps.positiveFill.varShading.startX:null,
+                    endX: condition4?shadingProps.positiveFill.varShading.endX:null,
                     gradient: condition4gradient?{
-                        startColor: condition4?shadingProp.positiveFill.varShading.gradient.startColor:null,
-                        endColor: condition4?shadingProp.positiveFill.varShading.gradient.endColor:null
+                        startColor: condition4?shadingProps.positiveFill.varShading.gradient.startColor:null,
+                        endColor: condition4?shadingProps.positiveFill.varShading.gradient.endColor:null
                     }:null,
-                    palette: condition4palette?( condition4?shadingProp.positiveFill.varShading.palette:null):null,
-                    palName: condition4palette?(condition3?shadingProp.positiveFill.varShading.palName:null):null,
-                    customFills: condition4customFills?( condition4?shadingProp.positiveFill.varShading.customFills:null):null
+                    palette: condition4palette?( condition4?shadingProps.positiveFill.varShading.palette:null):null,
+                    palName: condition4palette?(condition4?shadingProps.positiveFill.varShading.palName:null):null,
+                    customFills: condition4customFills?( condition4?shadingProps.positiveFill.varShading.customFills:null):null
                 }
             };
             variableShadingItem.negativeFill = {
-                display: condition4,
+                display: (shadingProps.negativeFill && shadingProps.negativeFill.display != null)?shadingProps.negativeFill.display:condition4,
                 varShading: {
-                    startX: condition4?shadingProp.negativeFill.varShading.startX:null,
-                    endX: condition4?shadingProp.negativeFill.varShading.endX:null,
+                    startX: condition4?shadingProps.negativeFill.varShading.startX:null,
+                    endX: condition4?shadingProps.negativeFill.varShading.endX:null,
                     gradient: condition4gradient?{
-                        startColor: condition4?shadingProp.negativeFill.varShading.gradient.startColor:null,
-                        endColor: condition4?shadingProp.negativeFill.varShading.gradient.endColor:null
+                        startColor: condition4?shadingProps.negativeFill.varShading.gradient.startColor:null,
+                        endColor: condition4?shadingProps.negativeFill.varShading.gradient.endColor:null
                     }:null,
-                    palette: condition4palette?( condition4?shadingProp.negativeFill.varShading.palette:null):null,
-                    palName: condition4palette?(condition3?shadingProp.negativeFill.varShading.palName:null):null,
-                    customFills: condition4customFills?( condition4?shadingProp.negativeFill.varShading.customFills:null):null
+                    palette: condition4palette?( condition4?shadingProps.negativeFill.varShading.palette:null):null,
+                    palName: condition4palette?(condition4?shadingProps.negativeFill.varShading.palName:null):null,
+                    customFills: condition4customFills?( condition4?shadingProps.negativeFill.varShading.customFills:null):null
                 }
             }
             variableShadingItem._index = index;
@@ -2510,8 +2517,22 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
             self.shadingChanged.push(shadingChangedItem);
-            console.log("variableShadingOptions", self.variableShadingOptions);
+            console.log("variableShadingOptions", self.variableShadingOptions, self.shadingArr);
         });
+            /*this.shadingArr.forEach(function(index, item){
+                if(!item.idLeftLine){
+                    if(item.type == 'left') item.idLeftLine = -1;
+                    if(item.type == 'right') item.idLeftLine = -2;
+                    if(item.type == 'custom') item.idLeftLine = -3;
+                }
+            })*/
+        function setIdLeftLineIfNull(type) {
+            var temp = null;
+            if (type == 'left') temp = -1;
+            if(type == 'right') temp = -2;
+            if(type == 'custom') temp = -3;
+            return temp;
+        }
         this.curveList.forEach(function (curve, index) {
             let curveOptions = {};
             let lineOptions = {};
@@ -2585,7 +2606,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         });
         console.log("LINECURVE", this.lineCurve);
         console.log("RRRR", this.selectCurveArr, this.arr);
-        this.setFillDisplay = function (index) {
+        /*this.setFillDisplay = function (index) {
             if (self.shadingArr[index].idLeftLine) {
                 self.shadingArr[index].isNegPosFill = false;
                 self.fillPatternOptions[index].fill.display = true;
@@ -2594,7 +2615,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             }
 
-        };
+        };*/
         this.well.children.forEach(function (child) {
             if (child.type == 'dataset') self.datasets.push(child);
         });
@@ -2757,24 +2778,24 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     display: condition1,
                     pattern: {
                         name: "none",
-                        foreground: "#fff",
-                        background: "#000"
+                        foreground: "transparent",
+                        background: "transparent"
                     }
                 },
                 positiveFill: {
                     display: condition2,
                     pattern: {
                         name: "none",
-                        foreground: "#fff",
-                        background: "000"
+                        foreground: "transparent",
+                        background: "transparent"
                     }
                 },
                 negativeFill: {
                     display: condition2,
                     pattern: {
                         name: "none",
-                        foreground: "#fff",
-                        background: "#000"
+                        foreground: "transparent",
+                        background: "transparent"
                     }
                 },
                 _index: self.fillPatternOptions.length
@@ -2786,8 +2807,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         startX: null,
                         endX: null,
                         gradient: {
-                            startColor: "#fff",
-                            endColor: "#000"
+                            startColor: "transparent",
+                            endColor: "transparent"
                         },
                         palette: null,
                         palName: null,
@@ -2800,8 +2821,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         startX: null,
                         endX: null,
                         gradient: {
-                            startColor: "#fff",
-                            endColor: "#000"
+                            startColor: "transparent",
+                            endColor: "transparent"
                         },
                         palette: null,
                         palName: null,
@@ -2814,8 +2835,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         startX: null,
                         endX: null,
                         gradient: {
-                            startColor: "#fff",
-                            endColor: "#000"
+                            startColor: "transparent",
+                            endColor: "transparent"
                         },
                         palette: null,
                         palName: null,
@@ -2835,13 +2856,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.shadingChanged.push(shadingChangedItem);
             console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions, self.shadingChanged);
         }
-        this.shadingArr.forEach(function(index, item){
+        /*this.shadingArr.forEach(function(index, item){
             if(!item.idLeftLine){
                 if(item.type == 'left') item.idLeftLine = -1;
                 if(item.type == 'right') item.idLeftLine = -2;
                 if(item.type == 'custom') item.idLeftLine = -3;
             }
-        })
+        })*/
         this.validate = function(index) {
             if(self.shadingArr[index].idLeftLine == self.shadingArr[index].idRightLine) {
                 DialogUtils.errorMessageDialog(ModalService, "leftCurve and rightCurve cannot be the same!");
@@ -2924,7 +2945,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     if(shadingObj.idLeftLine > 0) shadingObj.leftFixedValue = null;
                     wiApiService.createShading(shadingObj, function(shading) {
                         wiApiService.getPalettes(function(paletteList){
-
                             let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
                             let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
                             let lineObj1 = null;
@@ -2952,14 +2972,14 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var shading = self.shadingArr[index];
             console.log("shadingAttributeOri88888", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
 
-            DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(fillPatternOptions, variableShadingOptions, shadingOptions, curvesOnDataset){
+            DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(fillPatternOptions, variableShadingOptions, shadingOptions, curvesOnDataset, leftLimit){
                 console.log("shadingAttribute", fillPatternOptions, variableShadingOptions, shadingOptions);
                 // console.log("shadingAttributeOri", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
                 if(fillPatternOptions) self.fillPatternOptions[index] = fillPatternOptions;
                 if(variableShadingOptions) self.variableShadingOptions[index] = variableShadingOptions;
                 if(shadingOptions) self.shadingArr[index] = shadingOptions;
 
-            }, self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index], self.curveList, self.curvesOnDataset);
+            }, self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index], self.curveList, self.curvesOnDataset, self.leftLimit);
 
         }
         this.lineStyleButtonClicked = function (index, $event) {
@@ -3277,19 +3297,12 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 self.trackColor = colorStr;
             });
         }
-        this.onApplyButtonClicked = function () {
-            bindProps();
-            callback(props);
-        };
         this.onOkButtonClicked = function () {
-            bindProps();
-            close(props, 100);
-        };
-        this.onCancelButtonClicked = function () {
-            close(null, 100);
-        };
-
-        function bindProps() {
+            self.error = null;
+            if (!self.idZoneSet) {
+                self.error = "Zone Set is required";
+                return;
+            }
             props = {
                 showTitle: self.isShowTitle,
                 title: self.title,
@@ -3300,7 +3313,12 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 parameterSet: self.parameterSet,
                 idZoneSet: self.idZoneSet
             }
-        }
+            if (self.error) return;
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
     }
     ModalService.showModal({
         templateUrl: "zone-track-properties/zone-track-properties-modal.html",
@@ -3880,14 +3898,17 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
+        let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+        window.crossplotDialog = this;
+        this.viCrossplot = viCrossplot;
 
+        this.isZonalDepths = wiD3CrossplotCtrl.isShowWiZone;
         this.datasetsInWell = new Array();
         this.curvesInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
+
         console.log("viCrossplot", viCrossplot);
         console.log("Crossplot", wiCrossplotCtrl);
-        this.cross = viCrossplot.getProperties();
-        console.log("Cross", this.cross);
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.well.children.forEach(function (child) {
             if (child.type == 'dataset') self.datasetsInWell.push(child);
@@ -3904,24 +3925,25 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
         });
         console.log("curve", this.curvesOnDataset);
         let props = viCrossplot.getProperties();
+        console.log("props", props);
         this.pointSet = props.pointSet;
-        this.pointSet.idCurveX = props.pointSet.curveX.idCurve;
-        this.pointSet.idCurveY = props.pointSet.curveY.idCurve;
+        this.pointSet.idCurveX = props.pointSet.curveX ? props.pointSet.curveX.idCurve:props.pointSet.idCurveX;
+        this.pointSet.idCurveY = props.pointSet.curveY ? props.pointSet.curveY.idCurve:props.pointSet.idCurveY;
         console.log("pointSet", this.pointSet);
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
 
         // modal button
-        this.colorCurve = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.props.pointSet.pointColor, function (colorStr) {
-                self.props.pointSet.pointColor = colorStr;
+        this.colorSymbol = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.pointSet.pointColor, function (colorStr) {
+                self.pointSet.pointColor = colorStr;
             });
         };
-        this.colorCrossplot = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                self.props.general.color = colorStr;
-            });
-        }
+        // this.colorCrossplot = function () {
+        //     DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+        //         self.props.general.color = colorStr;
+        //     });
+        // }
         this.removeRow = function () {
             console.log("removeRowClicked");
         };
@@ -3929,41 +3951,49 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
             console.log("addRowClicked");
         };
 
-        function updateScalesTab() {
+        function updateScalesTab(callback) {
             let crossplotObj = {};
-            let scalesObj = angular.copy(self.props.scales);
-            let pointsets = angular.copy(self.props.scales);
-            wiApiService.dataCurve(scalesObj.idCurveX, function (xCurveData) {
-                wiApiService.dataCurve(scalesObj.idCurveY, function (yCurveData) {
-                    if (scalesObj.idCurveZ) {
-                        wiApiService.dataCurve(scalesObj.idCurveZ, function (zCurveData) {
-                            scalesObj.curveZ = graph.buildCurve({ idCurve: scalesObj.idCurveZ }, zCurveData);
+            let pointSet = angular.copy(self.pointSet);
+            wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
+                wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
+                    if (pointSet.idCurveZ) {
+                        wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
+                            pointSet.curveZ = graph.buildCurve({ idCurve: pointSet.idCurveZ }, zCurveData);
+                            // TODO
                         })
+                    } else {
+                        pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
+                        pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
+                        pointSet.idCrossPlot = wiCrossplotCtrl.id;
+                        console.log(pointSet);
+                        props.pointSet = pointSet;
+                        let scalesObj = angular.copy(self.pointSet);                        
+                        scalesObj.curveX = undefined;
+                        scalesObj.curveY = undefined;
+                        wiApiService.getCrossplot(pointSet.idCrossPlot, function (crossplot) {
+                            if (crossplot.pointsets && crossplot.pointsets.length) {
+                                scalesObj.idPointSet = crossplot.pointsets[0].idPointSet;
+                                wiApiService.editPointSet(scalesObj, function(res){
+                                    viCrossplot.setProperties(props);
+                                    viCrossplot.doPlot();
+                                });
+                            }
+                        });
                     }
-                    scalesObj.curveX = graph.buildCurve({ idCurve: scalesObj.idCurveX }, xCurveData);
-                    scalesObj.curveY = graph.buildCurve({ idCurve: scalesObj.idCurveY }, yCurveData);
-                    scalesObj.idCrossPlot = wiCrossplotCtrl.id;
-
-                    pointsets.curveX = undefined;
-                    pointsets.curveY = undefined;
-                    pointsets.idCrossPlot = wiCrossplotCtrl.id;
-                    console.log(scalesObj);
-                    viCrossplot.setProperties(scalesObj);
-
-                    /*wiApiService.editPointSet(pointsets, function(res){
-                        console.log("OK:", res);
-                        viCrossplot.setProperties(scalesObj);
-                    });*/
+                    if (callback) {
+                        callback();
+                    }
                 });
             });
-
+            wiD3CrossplotCtrl.isShowWiZone = self.isZonalDepths;
         };
 
         this.onOkButtonClicked = function () {
-            close(self);
+            updateScalesTab(function () {
+                close(self);
+            });
         };
         this.onApplyButtonClicked = function () {
-            console.log("onApplyButtonClicked");
             updateScalesTab();
         };
         this.onCancelButtonClicked = function () {

@@ -7,9 +7,7 @@ function genSamples(nSamples) {
 }
 
 exports.EditFormatButtonClicked = function() {
-    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
-    console.error('This function is not implemented');
-    utils.error('This function is not implemented');
+    this.wiLogplot.getwiD3Ctrl().openProptertiesDialog();
 };
 
 exports.SaveAsLogplotButtonClicked = function() {
@@ -191,17 +189,6 @@ exports.RangeSpecificButtonClicked = function() {
        console.log("RangeFrom");
     });
 }
-// exports.RangeFromButtonClicked = function() {
-//     console.log('RangeFromButton is clicked');
-// };
-
-// exports.RangeToButtonClicked = function() {
-//     console.log('RangeToButton is clicked');
-// };
-
-// exports.RangeOkButtonClicked = function() {
-//     console.log('RangeOkButton is clicked');
-// };
 
 exports.ViewWholeWellButtonClicked = function() {
     console.log('ViewWholeWellButton is clicked');
@@ -274,11 +261,14 @@ exports.DeleteTrackButtonClicked = function() {
 };
 
 exports.AddMarkerButtonClicked = function() {
-    this.wiD3Ctrl.addMarker();
+    this.wiLogplot.getwiD3Ctrl().addMarker();
 };
 
 exports.AddZoneButtonClicked = function() {
-    console.log('AddZoneButton is clicked');
+    const currentTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (currentTrack.isZoneTrack()) {
+        currentTrack.setMode('AddZone');
+    }
 };
 
 exports.AnnotationsButtonClicked = function() {
@@ -305,12 +295,8 @@ exports.AddShadingButtonClicked = function() {
     console.log('AddShadingButton is clicked');
 };
 
-exports.RemoveVisualButtonClicked = function() {
-    console.log('RemoveVisualButton is clicked');
-};
-
 exports.CrossPlotButtonClicked = function() {
-    console.log('CrossPlotButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().createCrossplot();
 };
 
 exports.HistogramButtonClicked = function() {

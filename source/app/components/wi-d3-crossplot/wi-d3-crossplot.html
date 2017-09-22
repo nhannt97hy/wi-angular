@@ -1,2 +1,21 @@
-<div wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}' class='d3-crossplot-region'>
+<div style="display:flex; flex-direction:row">
+  <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Crossplot.isShowWiZone" style="min-width:10%;max-width:20%">
+    <wi-container name='ZoneCrossplotContainer' title='Zone' close-handler='wiD3Crossplot.CloseZone'>
+      <wi-zone name="{{wiD3Crossplot.getZoneName();}}" zones="wiD3Crossplot.zoneArr" active-zone="wiD3Crossplot.crossplotModel.properties.activeZone"
+        all-zone-handler="wiD3Crossplot.AllZoneClick" active-zone-handler="wiD3Crossplot.ActiveZoneClick"></wi-zone>
+    </wi-container>
+  </div>
+  <div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;">
+    <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
+    <h5>Reference: [{{wiD3Crossplot.crossplotModel.properties.intervalDepthTop}} - {{wiD3Crossplot.crossplotModel.properties.intervalDepthBottom}}]</h5>
+    <div class='crossplot-container'>
+      <div style='padding-left:2em;'>{{wiD3Crossplot.crossplotModel.properties.plotType}}</div>
+      <div wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}' wi-element-ready='wiD3Crossplot.onReady()'
+        class='d3-crossplot-region' style="flex:1"></div>
+      <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Crossplot.crossplotModel.properties.xLabel}}</div>
+    </div>
+  </div>
+  <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.isShowReferenceWindow" style="min-width:20%;max-width:30%">
+    <wi-container name='RefCrossplotContainer' title='Reference Curve' close-handler='wiD3Crossplot.CloseReferenceWindowZz'></wi-container>
+  </div>
 </div>

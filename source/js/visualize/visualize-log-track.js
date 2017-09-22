@@ -121,6 +121,10 @@ LogTrack.prototype.getWindowX = function() {
         : [this.minX, this.maxX];
 }
 
+LogTrack.prototype.getCurrentDrawing = function() {
+    return this.currentDrawing;
+}
+
 /**
  * Get current curve object
  * @returns {Object}

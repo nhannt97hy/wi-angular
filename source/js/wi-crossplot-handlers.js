@@ -7,7 +7,7 @@ exports.PrintButtonClicked = function() {
 }
 
 exports.EditFormatButtonClicked = function() {
-    console.log('EditFormatButton is clicked');
+    this.wiCrossplot.getWiD3CrossplotCtrl().propertiesDialog();
 }
 
 exports.ActiveZoneButtonClicked = function() {
