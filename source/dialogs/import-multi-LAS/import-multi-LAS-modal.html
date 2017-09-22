@@ -106,16 +106,18 @@
                                                         <input type="text" ng-value="lasInfo.originalname" class="form-control wi-form-control" disabled>
                                                     </td>
                                                     <td>
-                                                        <select name="selectWell" class="form-control wi-form-control"
+                                                        <!-- <select name="selectWell" class="form-control wi-form-control"
                                                             ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
                                                             ng-model="lasInfo.selectedWell">
-                                                        </select>
+                                                        </select> -->
+                                                        <input type="text" ng-value="lasInfo.wellInfo.name" class="form-control wi-form-control" disabled>
                                                     </td>
                                                     <td>
-                                                        <select name="datasetName" class="form-control wi-form-control"
+                                                        <input type="text" ng-value="lasInfo.datasetName" class="form-control wi-form-control" disabled>
+                                                        <!-- <select name="datasetName" class="form-control wi-form-control"
                                                             ng-options="datasetOption.name for datasetOption in lasInfo.selectedWell.datasets"
                                                             ng-model="lasInfo.selectedDataset">
-                                                        </select>
+                                                        </select> -->
                                                         <!-- <input list=datasets name="datasetName" class="form-control wi-form-control" ng-model="wiModal.selectedDatasets[fileIndex]">
                                                         <datalist id=datasets>
                                                             <option ng-repeat="datasetOption in wiModal.selectedWells[fileIndex].datasets" ng-value="datasetOption">{{datasetOption.name}}</option>
