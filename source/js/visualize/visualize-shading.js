@@ -65,9 +65,6 @@ function Shading(config) {
 
     this.refLineWidth = config.refLineWidth || 2;
     this.refLineColor = config.refLineColor || '#3e3e3e';
-    this.showRefLine = config.showRefLine == null
-        ? ( this.leftCurve && this.rightCurve ? false : true )
-        : config.showRefLine;
 
     this.vpX = {
         left: null,
@@ -84,6 +81,11 @@ function Shading(config) {
             ? this.selectedCurve.maxX
             : this.selectedCurve.minX;
     }
+
+    // this.showRefLine = config.showRefLine == null
+    //     ? ( this.leftCurve && this.rightCurve ? false : true )
+    //     : config.showRefLine;
+    this.showRefLine = this.getType() === 'custom' ? true:false;
 
 }
 

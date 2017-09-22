@@ -87,7 +87,7 @@ Crossplot.prototype.PROPERTIES = {
                 displayEquation: { type: 'Boolean', default: true },
                 regType: {
                     type: 'Enum',
-                    values: ['Linear', 'Exponent', 'Power'],
+                    values: ['Linear', 'Exponent', 'Powerwer'],
                     default: 'Linear'
                 },
                 inverseReg: { type: 'Boolean', default: false },
