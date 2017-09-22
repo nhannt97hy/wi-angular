@@ -36,25 +36,25 @@
                             <div class="col-sm-6">
                                 <label for="top" class="control-label col-sm-4 normal-text">Top</label>
                                 <div class="col-sm-8">
-                                    <input type="number" id="top" step="0.01" class="form-control" ng-model="wiModal.top">
+                                    <input type="number" id="top" step="0.01" class="form-control" ng-model="wiModal.top" ng-change="wiModal.done = true">
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <label for="bottom" class="control-label col-sm-4 normal-text">Bottom</label>
                                 <div class="col-sm-8">
-                                    <input type="number" id="bottom" step="0.01" class="col-sm-8 form-control" ng-model="wiModal.bottom">
+                                    <input type="number" id="bottom" step="0.01" class="col-sm-8 form-control" ng-model="wiModal.bottom" ng-change="wiModal.done = true">
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <label for="left" class="control-label col-sm-4 normal-text">Left(%)</label>
                                 <div class="col-sm-8">
-                                    <input type="number" id="left" step="0.01" class="col-sm-8 form-control" ng-model="wiModal.left">
+                                    <input type="number" id="left" step="0.01" class="col-sm-8 form-control" ng-model="wiModal.left" ng-change="wiModal.done = true">
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <label for="width" class="control-label col-sm-4 normal-text">Width(%)</label>
                                 <div class="col-sm-8">
-                                    <input type="number" id="width" step="0.01" min="1" class="col-sm-8 form-control" ng-model="wiModal.width">
+                                    <input type="number" id="width" step="0.01" min="1" class="col-sm-8 form-control" ng-model="wiModal.width" ng-change="wiModal.done = true">
                                 </div>
                             </div>
                         </div>
