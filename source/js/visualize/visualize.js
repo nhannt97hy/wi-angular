@@ -198,8 +198,11 @@ exports.createCrossplot = function(curveX, curveY, config, domElem) {
  * @param {HtmlDomElem} domElem - The DOM element that contains the Histogram
  * @returns {Object} The newly created histogram
  */
-exports.createHistogram = function(config, domElem) {
+exports.createHistogram = function(config, depthStep, startDepth, endDepth, domElem) {
     let histogram = new Histogram(config);
+    histogram.depthStep = depthStep;
+    histogram.startDepth = startDepth;
+    histogram.endDepth = endDepth;
     console.log('---', config, domElem);
     histogram.init(domElem);
     return histogram;

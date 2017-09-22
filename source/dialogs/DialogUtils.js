@@ -4271,58 +4271,65 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
-        console.log(this.histogramProps);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
-        this.zoneSetList = [];
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
         this.datasets = [];
+        this.zoneSetList = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
 
-        this.well.children.forEach(function (child) {
-            if (child.type == 'dataset') self.datasets.push(child);
-        });
-        this.datasets.forEach(function (child) {
-            child.children.forEach(function (item) {
-                if (item.type == 'curve') {
-                    var d = item;
-                    d.datasetCurve = child.properties.name + "." + item.properties.name;
-                    self.curvesArr.push(d);
-                    if (d.id == self.histogramProps.idCurve) {
-                        self.SelectedCurve = d;
-                    }
-                }
-            })
-        });
+        this.well.children.forEach(function(child, i){
+            switch (child.type){
+            case 'dataset':
+                self.datasets.push(child);
+                break;
 
-        wiApiService.listZoneSet(this.histogramProps.idWell, function (ZoneSets) {
-            self.zoneSetList = ZoneSets;
-            if (self.zoneSetList.length > 0 && !self.histogramProps.idZoneSet) {
-                self.selectedZoneSet = self.zoneSetList[0];
-                self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
+            case 'zonesets':
+                self.zoneSetList = angular.copy(child.children);
+                break;
             }
 
-            self.zoneSetList.forEach(function (z, i) {
-                z.id = i;
-                wiApiService.getZoneSet(z.idZoneSet, function (ret) {
-                    z.zones = ret.zones;
-                    if (z.idZoneSet == self.histogramProps.idZoneSet) {
-                        $timeout(function() {
-                            self.selectedZoneSet = z;
-                            self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
-                        },0);
+            if (i == self.well.children.length - 1) {
+                // set default curve
+                self.datasets.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            var d = item;
+                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                            self.curvesArr.push(d);
+                            if (d.id == self.histogramProps.idCurve) {
+                                self.SelectedCurve = d;
+                            }
+                        }
+                    })
+                });
+                
+                // set default zone && activezone
+                if (self.zoneSetList && self.zoneSetList.length > 0) {
+                    if (!self.histogramProps.idZoneSet) {
+                        self.selectedZoneSet = self.zoneSetList[0];
                     }
-                })
-            })
+                    
+                    for (let i = self.zoneSetList.length - 1; i >= 0; i--) {
+                        self.zoneSetList[i].idx = i;
+                        if (self.zoneSetList[i].properties.idZoneSet == self.histogramProps.idZoneSet) {
+                            self.selectedZoneSet = self.zoneSetList[i];
+                        }
+                        if ( !self.zoneSetList[i].children || !self.zoneSetList[i].children.length ) {
+                            self.zoneSetList.splice(i, 1);
+                        }
+                    }
+                }
+            }
         })
 
         this.onZoneSetChange = function () {
             if (self.selectedZoneSet) {
-                self.histogramProps.idZoneSet = self.selectedZoneSet.idZoneSet;
+                self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
             }
         }
 
@@ -4352,7 +4359,8 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     self.histogramProps.idZoneSet = null;
                     break;
                 case "zonalDepth":
-                    // DO NOTHING
+                    self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                   
                     break;
             }
         }
@@ -4361,6 +4369,21 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                 self.histogramProps.color = colorStr;
             });
         }
+
+        this.IsNotValid = function () {
+            var inValid = false;
+            if (!self.histogramProps.idZoneSet) {
+                if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
+                    inValid = true;
+                }
+            }
+
+            if (self.histogramProps.leftScale == null || self.histogramProps.rightScale == null || self.histogramProps.leftScale == self.histogramProps.rightScale) {
+                inValid = true;
+            }
+
+            return inValid;
+        }
         this.onCloseButtonClicked = function () {
             console.log("on OK clicked");
             histogramModel.properties = self.histogramProps;
@@ -4368,7 +4391,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         }
         this.onCancelButtonClicked = function () {
             close(null);
-            
         }
     }
     ModalService.showModal({
@@ -4387,17 +4409,54 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
     });
 };
 
-exports.histogramFrequencyInfoDialog = function (ModalService, callback) {
+exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
     function ModalController($scope, close) {
         var self = this;
-
-        this.onCancelButtonClicked = function () {
-            console.log("on cancel clicked");
-            close(null);
+        let visHistogram = wiD3Ctrl.visHistogram;
+        if(wiD3Ctrl.histogramModel.properties.idZoneSet){
+            this.bins = visHistogram.fullBins;
+        }else{
+            this.bins = visHistogram.intervalBins;
         }
+
+        this.SelectedBinNum = null;
+
+        this.getLength = function(b){
+            return b.length;
+        }
+
+        this.getValueRange = function(b){
+            return b.x0 + '<-->' + b.x1;
+        }
+
+        this.maxValueRange = getMaxValueRange();
+        function getMaxValueRange(){
+            var max = -99999999;
+            var max_idx = -1;
+            var val = null;
+
+            self.bins.forEach(function(b, i){
+                if(max < self.getLength(b)){
+                    max = self.getLength(b);
+                    max_idx = i;
+                    val = self.getValueRange(b);
+                }
+            })
+
+            return {
+                id: max_idx,
+                value: val
+            }
+        };
+
+        this.onSearchButtonClick = function () {
+            self.Point_Num = self.getLength(self.bins[self.SelectedBinNum - 1]);
+            self.Max_Value = self.bins[self.SelectedBinNum - 1][self.Point_Num - 1];
+        }
+
         this.onCloseButtonClicked = function () {
             console.log("on Close clicked");
-            close(null);
+            close();
         }
     }
 
@@ -4408,10 +4467,9 @@ exports.histogramFrequencyInfoDialog = function (ModalService, callback) {
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
-        modal.close.then(function (data) {
+        modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (data) callback(data);
         });
     })
 }

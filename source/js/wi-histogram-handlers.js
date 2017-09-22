@@ -1,13 +1,15 @@
 exports.SaveFormatButtonClicked = function() {
     console.log('SaveFormatButton is clicked', this.wiHistogram);
     var wiComponentService = this.wiComponentService;
-    
+    let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let ModalService = this.ModalService;
     let idHistogram = this.wiHistogram.id;
     let wiApiService = this.wiApiService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let histogramModel = utils.getModel("histogram", idHistogram);
     wiApiService.editHistogram(histogramModel.properties, function(){
         console.log('Saving Histogram......');
+        dialogUtils.warningMessageDialog(ModalService, 'Histogram plot is saved');
     })
 
 }
@@ -21,7 +23,6 @@ exports.EditFormatButtonClicked = function() {
     var ModalService = this.ModalService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiHistogramCtrl = this.wiHistogram;
-    var dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     console.log('EditFormatButton is clicked');
     utils.histogramFormat(ModalService, wiComponentService, wiHistogramCtrl);
 }
@@ -34,11 +35,12 @@ exports.ActiveZoneButtonClicked = function() {
 
 exports.FrequencyInfoButtonClicked = function() {
     var ModalService = this.ModalService;
-    
+    var wiD3Ctrl = this.wiHistogram.getwiD3Ctrl();
+    var visHistogram = wiD3Ctrl.visHistogram;
     var dialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    dialogUtils.histogramFrequencyInfoDialog(ModalService, function(ret){
-        console.log(ret);
-    })
+    if(visHistogram.data){
+        dialogUtils.histogramFrequencyInfoDialog(ModalService, wiD3Ctrl);
+    }
     console.log('FrequencyInfoButton is clicked');
 }
 
@@ -46,6 +48,7 @@ exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.histogramModel.properties.showGaussian = !wiHistogramCtrl.histogramModel.properties.showGaussian;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Gaussian');
 }
 
 exports.CumulativeButtonClicked = function() {
@@ -66,6 +69,7 @@ function PlotBarsButtonClicked() {
     default:
         wiHistogramCtrl.histogramModel.properties.plot = "Curve";
     }
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
 }
 
 exports.PlotCurvesButtonClicked = function() {

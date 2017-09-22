@@ -4,10 +4,13 @@ const moduleName = 'wi-zone';
 function ZoneController(wiComponentService, $timeout){
     let self = this;
 
+    this.handlers = new Object();
+    
     this.zoneArr = [];
 
     this.$onInit = function(){
         if (self.name) wiComponentService.putComponent(self.name, self);
+        if (self.onZoneCtrlReady) self.onZoneCtrlReady(self);
         self.zoneUpdate();
     }
 
@@ -18,6 +21,7 @@ function ZoneController(wiComponentService, $timeout){
         for (let idx in self.zoneArr) {
             self.zoneArr[idx] = false;
         }
+        self.signal('zone-data', 'All');
     }
 
     this.ActiveZoneButtonClick = function(){
@@ -32,11 +36,13 @@ function ZoneController(wiComponentService, $timeout){
                 self.zoneArr[idx] = (self.activeZone == "" + self.zones[idx].id)?false:true;
             }
         }
+        self.signal('zone-data', 'Active');
     }
 
     this.SelectZoneButtonClick = function(i){
         self.zoneArr[i] = !self.zoneArr[i];
         if(self.zones[i].handler) self.zones[i].handler();
+        self.signal('zone-data', i);
     }
 
     this.zoneUpdate = function() {
@@ -46,6 +52,34 @@ function ZoneController(wiComponentService, $timeout){
                 self.zoneArr.push(!(element.properties.idZone == self.activeZone || self.activeZone == "All"));
             });
         }
+        self.signal('zone-data', 'external');
+    }
+
+    this.getActiveZones = function() {
+        if (!self.zones) return null;
+        return self.zones.filter(function(zone, i) {
+            return !self.zoneArr[i];
+        });
+    }
+}
+
+ZoneController.prototype.trap = function(eventName, handlerCb) {
+    let eventHandlers = this.handlers[eventName];
+    if (!Array.isArray(eventHandlers)) {
+        this.handlers[eventName] = [];
+    }
+
+    this.handlers[eventName].push(handlerCb);
+
+    return this;
+}
+
+ZoneController.prototype.signal = function (eventName, data) {
+    let eventHandlers = this.handlers[eventName];
+    if (Array.isArray(eventHandlers)) {
+        eventHandlers.forEach(function (handler) {
+            handler(data);
+        });
     }
 }
 
@@ -60,7 +94,8 @@ app.component(wiZoneName, {
         zones: '<',
         activeZone: '<',
         allZoneHandler: '<',
-        activeZoneHandler: '<'
+        activeZoneHandler: '<',
+        onZoneCtrlReady: '<'
     }
 });
 

@@ -341,3 +341,40 @@ table.shadingTable td {
     border-right: 2px solid #eee; 
 
 }
+
+.background-color-steelblue {
+	td{
+		background-color: steelblue;
+	}
+}
+
+.table-fixed {
+	width: 100%;
+	tbody {
+		height: 200px;
+		overflow-y: overlay;
+		width: 100%;
+	}
+	thead,tbody,tr,td,th {
+		display: block;
+	}
+	tbody {
+		td {
+			float: left;
+		}
+	}
+	thead {
+		tr {
+			th {
+				float: left;
+				background-color: #f39c12;
+				border-color: #e67e22;
+			}
+		}
+	}
+}
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+}
