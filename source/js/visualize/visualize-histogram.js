@@ -71,25 +71,10 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
     tempDepth = this.startDepth + this.depthStep * parseInt(d.y);
 
     if(this.histogramModel && this.histogramModel.properties.idZoneSet) {
-        // TODO
         let zone = this.zoneSet[zoneIdx];
         return (!isNaN(d.y) && ( tempDepth >= zone.properties.startDepth ) && 
                 ( tempDepth < zone.properties.endDepth ));
     }
-
-    /*
-    let isANumber = !isNaN(d.y);
-    let gtDepthTop = ( tempDepth >= this.histogramModel.properties.intervalDepthTop );
-    let ltDepthBottom = ( tempDepth < this.histogramModel.properties.intervalDepthBottom );
-    if ( isANumber ) {
-        if ( gtDepthTop ) {
-            if (ltDepthBottom ) {
-                return true;
-            }
-        }
-    }
-    return false;
-    */
 
     return (!isNaN(d.y) && ( tempDepth >= this.histogramModel.properties.intervalDepthTop ) && 
             ( tempDepth < this.histogramModel.properties.intervalDepthBottom ));
@@ -148,7 +133,7 @@ Histogram.prototype.doPlot = function() {
         .attr('height', self.container.node().clientHeight);
 
     // remove previously render histograms
-    this.svgContainer.selectAll('.bars, path').remove();
+    this.svgContainer.selectAll('.bars, path.gaussian-line, line.mean-line, line.sigma-line').remove();
 
     // Sanity checking
     if (!this.data) {
@@ -252,17 +237,45 @@ Histogram.prototype.doPlot = function() {
         drawGaussianCurve();
     }
 
+    function showTooltip(d, i) {
+        var content = null;
+        console.log(this);
+        if (self.histogramModel.properties.plotType != 'Frequency') {
+            content = '<span>' + (d.length * 100 / self.fullData.length) + '%</span>';
+        }
+        else {
+            content = '<div>' + d.length + '</div>';
+        }
+        var pos = d3.mouse(self.container.node());
+        self.container.select('.vi-histogram-tooltip')
+            .style('opacity', 0.9)
+            .html(content)
+            .style("left", pos[0] + "px") 
+            .style("top", (pos[1]-30) + "px");
+    }
+    function hideTooltip() {
+        self.container.select('.vi-histogram-tooltip')
+            .style('opacity', 0)
+            .style("left", 0) 
+            .style("top", 0);
+    }
+
+    function getBinValue(bin) {
+        if(self.histogramModel.properties.plotType != 'Frequency') {
+            return bin.length*100/self.fullData.length;
+        }
+        return bin.length;
+    }
     function drawBarHistogram() {
         // Generate column groups
         let bars = self.svgContainer.selectAll('.bars').data(self.fullBins).enter()
             .append('g').attr('class', 'bars')
             .attr('transform', function(d) {
+                //return 'translate(' + transformX(d.x0) + ', ' + transformY(getBinValue(d)) + ')';
                 if (self.histogramModel.properties.plotType != 'Frequency') {
                     return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.fullData.length) + ')';
-                    //return 'translate(' + transformX(d.x0) + ', 0)';
                 }
                 return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length) + ')';
-                //return 'translate(' + transformX(d.x0) + ', 0)';
             });
 
         // Column width and gap setups
@@ -289,7 +302,9 @@ Histogram.prototype.doPlot = function() {
                     }
                     return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
                 })
-                .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
+                .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue')
+                .on('mousemove', showTooltip)
+                //.on('mouseout', hideTooltip);
         }
         else {
             // For zonalDepth case
@@ -323,7 +338,9 @@ Histogram.prototype.doPlot = function() {
                         }
                         return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
                     })
-                    .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue');
+                    .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue')
+                    .on('mousemove', function(d, i) { showTooltip(self.zoneBins[j][i]); })
+                    .on('mouseout', hideTooltip);
             }
         }
     }
@@ -344,19 +361,43 @@ Histogram.prototype.doPlot = function() {
                 return gaussianTransformY(d.y);
             });
         self.svgContainer.append('path').datum(gaussianPoints)
-                .attr('class', 'line').attr('d', line);
-        
+                .attr('class', 'gaussian-line').attr('d', line);
+        let meanPos = transformX(self.mean);
+        let leftSigmaPos = transformX(self.mean - self.standardDeviation);
+        let rightSigmaPos = transformX(self.mean + self.standardDeviation);
+        self.svgContainer.append('line').attr('class', 'mean-line')
+            .attr('x1', meanPos)
+            .attr('y1', 0)
+            .attr('x2', meanPos)
+            .attr('y2', vpY[1]);
+
+        self.svgContainer.append('line').attr('class', 'sigma-line')
+            .attr('x1', rightSigmaPos)
+            .attr('y1', 0)
+            .attr('x2', rightSigmaPos)
+            .attr('y2', vpY[1]);
+
+        self.svgContainer.append('line').attr('class', 'sigma-line')
+            .attr('x1', leftSigmaPos)
+            .attr('y1', 0)
+            .attr('x2', leftSigmaPos)
+            .attr('y2', vpY[1]);
         function normal() {
-            var x = 0,
-            y = 0,
-            rds, c;
+            var x = 0, y = 0, rds, c;
+            var xSample;
+            var left = Math.min(wdX[0], wdX[1]);
+            var right = Math.max(wdX[0], wdX[1]);
             do {
-                x = (Math.random() * 2 - 1);
-                y = (Math.random() * 2 - 1);
-                rds = x * x + y * y;
-            } while (rds == 0 || rds > 1);
-            c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
-            return self.mean + self.standardDeviation * x * c; // throw away extra sample y * c
+                do {
+                    x = (Math.random() * 2 - 1);
+                    y = (Math.random() * 2 - 1);
+                    rds = x * x + y * y;
+                } while (rds == 0 || rds > 1);
+                c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
+                xSample = self.mean + self.standardDeviation * x * c;
+            } while (xSample < left || xSample > right);
+
+            return xSample;
         }
 
         //taken from Jason Davies science library
@@ -400,6 +441,8 @@ Histogram.prototype.init = function(domElem) {
         .attr('class', 'vi-histogram-svg')
         .attr('width',this.container.node().clientWidth)
         .attr('height', this.container.node().clientHeight);
+
+    this.container.append('div').attr('class', 'vi-histogram-tooltip');
 
     new ResizeSensor( $(this.container.node()), function(param) {
         console.log("On resize", param, this);
