@@ -213,6 +213,8 @@ Zone.prototype.updateHeader = function() {
         .attr('width', width)
         .attr('height', height)
         .attr('fill', fill);
+
+    this.header.datum(this.startDepth);
 }
 
 Zone.prototype.lineDragCallback = function(line) {

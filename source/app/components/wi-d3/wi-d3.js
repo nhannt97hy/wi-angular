@@ -537,7 +537,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let y = d3.mouse(track.plotContainer.node())[1];
         let depth = zone.getTransformY().invert(y);
-        console.log('--------------------------', props);
         // Send api to remove zone
         wiApiService.removeZone(zone.id, function () {
             zone1.endDepth = depth;
@@ -553,6 +552,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     track.plotZone(zone1);
                     track.plotZone(zone2);
                     track.removeZone(zone);
+                    track.rearrangeHeaders();
                 })
             })
         })
@@ -714,7 +714,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     track.idZoneSet = _currentTrack.isZoneTrack() ? _currentTrack.idZoneSet : undefined;
                     if (!track.idZoneSet) return;
                 }
-                console.log(track);
                 let zoneData = {
                     idZoneSet: track.idZoneSet,
                     name: zone.name,
@@ -736,7 +735,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (updatedZones && updatedZones.length) {
                     updatedZones.forEach(function (updatingZone) {
                         updatingZone.idZone = updatingZone.id;
-                        console.log(updatingZone);
                         wiApiService.editZone(updatingZone, function () { });
                     });
                 }
@@ -746,6 +744,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
                 track.setMode(null);
+                track.rearrangeHeaders();
             })
         );
         track.on('keydown', function() {
