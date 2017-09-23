@@ -1522,13 +1522,14 @@ function openCrossplotTab(crossplotModel, callback) {
             let pointSet = crossplot.pointsets[0];
             console.log("pointsets", pointSet);
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
-                let curveX;
+                // let curveX;
                 wiApiService.infoCurve(pointSet.idCurveX, function (curveX) {
-                    curveX = curveX;
+                    // curveX = curveX;
                     wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
-                        let curveY;
+                        // let curveY;
                         wiApiService.infoCurve(pointSet.idCurveY, function (curveY) {
-                            curveY = curveY;
+                            // curveY = curveY;
+                            console.log("openDATA", curveX, curveY, xCurveData, yCurveData);
                             if (pointSet.idCurveZ) {
                                 wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
                                     // TODO

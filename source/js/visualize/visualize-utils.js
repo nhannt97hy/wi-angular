@@ -277,8 +277,8 @@ function lowercase(str) {
  */
 function capitalize(str) {
     if (typeof str != 'string') return null;
-    // return str.replace(str[0], str[0].toUpperCase());
-    return str.capitalize();
+    return str.replace(str[0], str[0].toUpperCase());
+    // return str.capitalize();
 }
 
 /**

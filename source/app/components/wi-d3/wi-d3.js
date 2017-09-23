@@ -85,12 +85,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return lines;
     }
 
-    this.addLogTrack = function(trackTitle, callback) {
+    this.addLogTrack = function(callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
             wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(ret) {
                 wiApiService.infoTrack(ret.idTrack, function(logTrack) {
-                    logTrack.title = trackTitle;
+                    logTrack.title = 'Track '+ logTrack.idTrack;
                     let viTrack = self.pushLogTrack(logTrack);
                     wiApiService.editTrack(logTrack);
                     if (!callback) return;
@@ -605,7 +605,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             marker.setProperties({
                 depth: depth
             });
-            
+
             // send api to create new marker
             wiApiService.createMarker(marker.getProperties(), function (returnMarker) {
                 marker.setProperties({ idMarker: returnMarker.idMarker });
@@ -1019,12 +1019,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let currentCurve = _currentTrack.getCurrentCurve();
                 DialogUtils.curvePropertiesDialog(
-                    ModalService, 
-                    wiComponentService, 
-                    wiApiService, 
-                    DialogUtils, 
-                    currentCurve, 
-                    _currentTrack, 
+                    ModalService,
+                    wiComponentService,
+                    wiApiService,
+                    DialogUtils,
+                    currentCurve,
+                    _currentTrack,
                     self.wiLogplotCtrl)
             }
         }, {
@@ -1110,7 +1110,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         },
                         showRefLine: false
                     };
-                    
+
                     console.log("curve1", _currentTrack, curve1);
                     let shadingObj = {
                         idTrack: _currentTrack.id,
@@ -1277,11 +1277,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         } else if (_currentTrack.isZoneTrack()) {
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {                
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
                 if (props) {
                     props.idZoneTrack = _currentTrack.id;
                     console.log(props);
-                    wiApiService.editZoneTrack(props, function () { 
+                    wiApiService.editZoneTrack(props, function () {
                         props.width = Utils.inchToPixel(props.width);
                         _currentTrack.setProperties(props);
                         _currentTrack.doPlot(true);

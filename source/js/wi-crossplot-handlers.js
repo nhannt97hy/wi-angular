@@ -70,7 +70,10 @@ exports.PolygonManagerButtonClicked = function() {
 }
 
 exports.RegressionLineButtonClicked = function() {
-    console.log('RegressionLineButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.regressionLineDialog(this.ModalService, wiD3Crossplot, function () {});
 }
 
 exports.ConfigTernaryDiagramButtonClicked = function() {

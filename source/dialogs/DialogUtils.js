@@ -2127,14 +2127,15 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             }
         }
         this.setLimit2 = function() {
-            if(self.shadingOptions.idLeftLine == '-1') {
+            if(self.shadingOptions.idLeftLine == -1) {
                 self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).minX;
             }
-            if(self.shadingOptions.idLeftLine == '-2') {
+            if(self.shadingOptions.idLeftLine == -2) {
                 self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).maxX;
             }
             if(self.shadingOptions.idLeftLine > 0) self.shadingOptions.leftFixedValue = null;
         }
+
         this.arrayPaletteToString = function(palette){
             return JSON.stringify(palette);
         }
@@ -2728,6 +2729,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var curveName = null;
             var leftPart = null;
             var rightPart = null;
+            // var rightPart = findInVisCurveListByIdLine(curveId).name;
             if (self.shadingArr[idx].name.indexOf('_') < 0) self.shadingArr[idx].name = "xx_yy";
             if (isRight) {
                 if (!curveId) {
@@ -2743,7 +2745,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/_.+/g, "_" + rightPart);
             } else {
                 if (!curveId) {
-                    leftPart = 'left';
+                    leftPart = 'custom';
                 } else {
                     for (curve of self.curvesOnDataset) {
                         if (curve.id == parseInt(curveId)) {
@@ -2755,6 +2757,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/^.+_/g, leftPart + "_");
             }
         }
+
         this.addRowShading = function() {
             var shadingItem = {
                 idTrack: currentTrack.id,
@@ -2775,7 +2778,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     display: condition1,
                     pattern: {
                         name: "none",
-                        foreground: "transparent",
+                        foreground: "black",
                         background: "transparent"
                     }
                 },
@@ -2783,7 +2786,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     display: condition2,
                     pattern: {
                         name: "none",
-                        foreground: "transparent",
+                        foreground: "black",
                         background: "transparent"
                     }
                 },
@@ -2791,7 +2794,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     display: condition2,
                     pattern: {
                         name: "none",
-                        foreground: "transparent",
+                        foreground: "black",
                         background: "transparent"
                     }
                 },
@@ -4649,3 +4652,98 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         });
     });
 }
+exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        
+        let change = {
+            unchanged: 0,
+            created: 1,
+            updated: 2,
+            deleted: 3,
+            uncreated: 4,
+        }
+        
+        let viCrossplot = wiD3Crossplot.getViCrossplot();
+        this.regressionLines = new Array();
+        let regressionLinesProps = viCrossplot.getProperties().regressionLines;
+        regressionLinesProps.forEach(function(regLineItem, index) {
+            regLineItem.change = change.unchanged;
+            regLineItem.index = index;
+            self.regressionLines.push(regLineItem);
+        })
+        this.polygonIndicesList = [0,1,2,3,4,5,6,7,8,9];
+        $scope.change = change; 
+        console.log("wiD3Crossplot", wiD3Crossplot, viCrossplot, self.regressionLines);
+        this.getRegressionLines = function () {
+            return self.regressionLines.filter(function (item, index) {
+               return (item.change != change.deleted && item.change != change.uncreated);
+           });
+        }
+        this.__idx = 0;
+        $scope.selectedRow = 0;
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+            self.__idx = self.getRegressionLines()[indexRow].index;
+        }
+        this.onChange = function(index) {
+            if(self.regressionLines[index].change == change.unchanged) self.regressionLines[index].change = change.updated;
+        }
+        // modal buttons
+        this.removeRow = function () {
+            if (!self.regressionLines[self.__idx]) return;
+            if(self.regressionLines[self.__idx].change == change.created) {
+                self.regressionLines[self.__idx].change = change.uncreated;
+            } else {
+                self.regressionLines[self.__idx].change = change.deleted;
+            }
+            if (self.getRegressionLines().length) {
+                self.setClickedRow(0);
+            }
+        };
+        this.addRow = function () {
+            self.regressionLines.push({
+                change: change.created,
+                index: self.regressionLines.length
+            });
+        };
+        this.onEditLineStyleButtonClicked = function(index) {
+            DialogUtils.lineStyleDialog(ModalService, wiComponentService,function (lineStyleObj){
+                self.regressionLines[index].lineStyle = lineStyleObj;
+            }, self.regressionLines[index].lineStyle);
+        };
+        function setRegressionLines() {
+            let props = {};
+            props.regressionLines = self.regressionLines;
+            viCrossplot.setProperties(props);
+            viCrossplot.doPlot();
+        }
+        this.onOkButtonClicked = function () {
+            close(self);
+        };
+        this.onApplyButtonClicked = function() {
+            console.log("ok", self.regressionLines);
+            setRegressionLines();
+        };
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "regression-line/regression-line-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('.modal').remove();
+            $('body').removeClass('modal-open');
+            if (ret && callback) callback(ret);
+        });
+    });
+};

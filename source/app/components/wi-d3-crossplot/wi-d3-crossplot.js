@@ -13,7 +13,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
-        self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
+        // self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
+        console.log("crossplot", self.crossplotModel, self.wellProperties);
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -156,6 +157,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getPolygons = function () {
         if (!self.viCrossplot) return [];
         return self.viCrossplot.polygons;
+    }
+    this.getRegressionLines = function () {
+        if (!viCrossplot) return [];
+        return viCrossplot.regressionLines;
+    }
+    this.getViCrossplot = function () {
+        if(!viCrossplot) return {};
+        return viCrossplot;
     }
     this.drawPolygon = function (idPolygon, callback) {
         if (idPolygon) {
