@@ -1308,40 +1308,95 @@ exports.pasteCurve = function () {
     // if copying
     let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
     if (copyingCurve) {
-        if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-        let currentDatasetName = "";
-        if (selectedNode.type == 'curve') {
-            let currentDataset = findDatasetById(selectedNode.properties.idDataset);
-            currentDatasetName = currentDataset.properties.name;
-        } else {
-            currentDatasetName = selectedNode.properties.name;
-        }
-        let curveInfo = {
-            idCurve: copyingCurve.properties.idCurve,
-            desDatasetId: selectedNode.properties.idDataset
-            // idDataset: selectedNode.properties.idDataset,
-            // dataset: currentDatasetName,
-            // name: copyingCurve.properties.name,
-            // unit: copyingCurve.properties.unit
-        }
-        wiApiService.copyCurve(curveInfo, function (curve) {
-            refreshProjectState();
+        let isCurveExist = false;
+        // console.log(copyingCurve.properties.name);
+        // console.log("===========");
+        // console.log(selectedNode.children);
+        selectedNode.children.forEach(function(c){
+            if(copyingCurve.properties.name == c.data.label) {
+                isCurveExist = true;
+            }
         });
-        wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+        if(!isCurveExist){
+            if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+            let currentDatasetName = "";
+            if (selectedNode.type == 'curve') {
+                let currentDataset = findDatasetById(selectedNode.properties.idDataset);
+                currentDatasetName = currentDataset.properties.name;
+            } else {
+                currentDatasetName = selectedNode.properties.name;
+            }
+            let curveInfo = {
+                idCurve: copyingCurve.properties.idCurve,
+                desDatasetId: selectedNode.properties.idDataset
+            }
+            wiApiService.copyCurve(curveInfo, function (curve) {
+                refreshProjectState();
+            });
+            wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+        } else {
+            //console.log("Curve exist");
+            DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", copyingCurve.properties.name +" existed! Override it ?", function(yes){
+                if(yes){
+                    if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+                    let currentDatasetName = "";
+                    if (selectedNode.type == 'curve') {
+                        let currentDataset = findDatasetById(selectedNode.properties.idDataset);
+                        currentDatasetName = currentDataset.properties.name;
+                    } else {
+                        currentDatasetName = selectedNode.properties.name;
+                    }
+                    let curveInfo = {
+                        idCurve: copyingCurve.properties.idCurve,
+                        desDatasetId: selectedNode.properties.idDataset
+                    }
+                    wiApiService.copyCurve(curveInfo, function (curve) {
+                        refreshProjectState();
+                    });
+                    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+                } else {
+                    return;
+                }
+            });
+        }
         return;
     }
     // if cutting
     let cuttingCurve = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
     if (cuttingCurve) {
-        if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-        let curveInfo = {
-            idCurve: cuttingCurve.properties.idCurve,
-            desDatasetId: selectedNode.properties.idDataset,
-        }
-        wiApiService.cutCurve(curveInfo, function () {
-            refreshProjectState();
+        let isCurveExist = false;
+        selectedNode.children.forEach(function(c){
+            if(cuttingCurve.properties.name == c.data.label) {
+                isCurveExist = true;
+            }
         });
-        wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+        if(!isCurveExist){
+            if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+            let curveInfo = {
+                idCurve: cuttingCurve.properties.idCurve,
+                desDatasetId: selectedNode.properties.idDataset,
+            }
+            wiApiService.cutCurve(curveInfo, function () {
+                refreshProjectState();
+            });
+            wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+        } else {
+            DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", cuttingCurve.properties.name +" existed! Override it ?",function(yes){
+                if(yes){
+                    if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+                    let curveInfo = {
+                        idCurve: cuttingCurve.properties.idCurve,
+                        desDatasetId: selectedNode.properties.idDataset,
+                    }
+                    wiApiService.cutCurve(curveInfo, function () {
+                        refreshProjectState();
+                    });
+                    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+                } else {
+                    return;
+                }
+            });
+        }
         return;
     }
 }
