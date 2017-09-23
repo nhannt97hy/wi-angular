@@ -1434,6 +1434,8 @@ exports.importLASDialog1 = function (ModalService, callback) {
         this.selectedWell = null;
         this.selectedDataset = null;
         this.isDisabled = false;
+        this.wellName = null;
+        this.datasetName = null;
 
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -1441,6 +1443,8 @@ exports.importLASDialog1 = function (ModalService, callback) {
             console.log('las file: ', self.lasFile);
             console.log('selectedWell: ', self.selectedWell);
             console.log('selectedDataset: ', self.selectedDataset);
+            console.log('wellName: ', self.wellName);
+            console.log('datasetName: ', self.datasetName);
 
             if (!self.lasFile) return;
 
@@ -1457,7 +1461,12 @@ exports.importLASDialog1 = function (ModalService, callback) {
             if (self.selectedDataset) {
                 payloadParams.id_dataset = self.selectedDataset.idDataset;
             }
-
+            if (self.wellName) {
+                payloadParams.well_name = self.wellName;
+            }
+            if (self.datasetName) {
+                payloadParams.dataset_name = self.datasetName;
+            }
             payloadParams.file = self.lasFile;
 
             wiApiService.postWithFile('/file', payloadParams)
