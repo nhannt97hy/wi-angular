@@ -136,7 +136,7 @@ Zone.prototype.updateText = function() {
 
     if (y < rect.y || y + textRect.height + paddingBottom > rect.y + rect.height) {
         this.text.style('display', 'none');
-        this.textRect.style('display', 'none')
+        this.textRect.style('display', 'none');
     }
 
     this.text

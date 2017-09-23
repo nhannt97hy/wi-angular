@@ -297,7 +297,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             for (let deletedZone of deletedZones) {
                 wiApiService.removeZone(deletedZone.id, function () { })
             }
-        })
+        });
+        track.rearrangeHeaders();
         return zone;
     }
 
@@ -933,7 +934,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             {
                 name: "AutoZoneNamed",
                 label: "Auto Zone Named",
-                handler: function () {}
+                handler: function () {
+                    let updatedZones = _currentTrack.autoName();
+                    for (let updatedZone of updatedZones) {
+                        wiApiService.editZone(updatedZone.getProperties(), function () {
+                            _currentTrack.plotZone(updatedZone);
+                        });
+                    }
+                }
             }, {
                 name: "ZoneProperties",
                 label: "Zone Properties",

@@ -253,12 +253,16 @@ ZoneTrack.prototype.adjustZonesOnZoneChange = function(zone) {
  */
 ZoneTrack.prototype.autoName = function() {
     let zones = [];
-    this.getZones().forEach(function(zone, i) {
-        if (zone.name != (i + 1) && zone.name != (i + 1).toString()) {
-            zone.name = (i + 1).toString();
-            zones.push(zone);
-        }
-    });
+    this.getZones()
+        .sort(function(a, b){
+            return a.startDepth - b.startDepth;
+        })
+        .forEach(function(zone, i) {
+            if (zone.name != (i + 1) && zone.name != (i + 1).toString()) {
+                zone.name = (i + 1).toString();
+                zones.push(zone);
+            }
+        });
     return zones;
 }
 
