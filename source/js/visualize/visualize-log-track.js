@@ -33,6 +33,7 @@ Utils.extend(Track, LogTrack);
  * @param {Number} [config.yDecimal] - Precision of float number in y axis. Default: 2
  * @param {Boolean} [config.showLabels] - Indicate whether to show labels
  * @param {Boolean} [config.showEndLabels] - Indicate whether to show labels at two ends
+ * @param {Boolean} [config.labelFormat]
  */
 function LogTrack(config) {
     Track.call(this, config);
@@ -61,6 +62,7 @@ function LogTrack(config) {
 
     this.showLabels = config.showLabels == null ? false : config.showLabels;
     this.showEndLabels = config.showEndLabels == null ? true : config.showEndLabels;
+    this.labelFormat = config.labelFormat;
     this.gridColor = 'gray';
 
     this.curvesRemoved = 0;
@@ -84,7 +86,8 @@ LogTrack.prototype.getProperties = function() {
         width: this.width,
         color: this.bgColor,
         showEndLabels: this.showEndLabels,
-        displayType: Utils.capitalize(this.scale)
+        displayType: Utils.capitalize(this.scale),
+        labelFormat: this.labelFormat
     }
 }
 
@@ -104,6 +107,7 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'width', parseInt(props.width));
     Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.color));
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
+    Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
 }
 
 LogTrack.prototype.setMode = function(newMode) {
@@ -729,6 +733,9 @@ LogTrack.prototype.updateAxis = function() {
 
     this.xAxisGroup
         .style('display', this.showXGrids ? 'block' : 'none');
+
+    if (this.showLabels && this.labelFormat)
+        this.yAxisGroup.selectAll('.tick text').text(this.labelFormat);
 
     this.yAxisGroup
         .style('display', this.showYGrids ? 'block' : 'none')
