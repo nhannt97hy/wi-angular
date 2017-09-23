@@ -157,6 +157,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!viCrossplot) return [];
         return viCrossplot.polygons;
     }
+    this.getRegressionLines = function () {
+        if (!viCrossplot) return [];
+        return viCrossplot.regressionLines;
+    }
+    this.getViCrossplot = function () {
+        if(!viCrossplot) return {};
+        return viCrossplot;
+    }
     this.drawPolygon = function (idPolygon, callback) {
         if (idPolygon) {
             viCrossplot.startEditPolygon(idPolygon);

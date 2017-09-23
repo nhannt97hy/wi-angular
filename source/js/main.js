@@ -121,7 +121,8 @@ let app = angular.module('wiapp',
         'ngFileUpload',
         'kendo.directives',
         'ngSanitize',
-        'ui.select'
+        'ui.select',
+        'multipleSelect'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
