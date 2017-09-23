@@ -85,12 +85,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return lines;
     }
 
-    this.addLogTrack = function(trackTitle, callback) {
+    this.addLogTrack = function(callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
             wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(ret) {
                 wiApiService.infoTrack(ret.idTrack, function(logTrack) {
-                    logTrack.title = trackTitle;
+                    logTrack.title = 'Track '+ logTrack.idTrack;
                     let viTrack = self.pushLogTrack(logTrack);
                     wiApiService.editTrack(logTrack);
                     if (!callback) return;
