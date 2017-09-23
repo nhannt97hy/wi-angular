@@ -6,13 +6,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent('GRAPH');
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let viCrossplot;
+    this.viCrossplot = {};
     this.isShowWiZone = true;
     this.isShowReferenceWindow = false;
 
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
+        self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -58,7 +59,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         utils.triggerWindowResize();
     }
     this.propertiesDialog = function () {
-        DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, viCrossplot, function () {
+        DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function () {
             
         })
     }
@@ -74,7 +75,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                console.log("9990", viCrossplot);
                 self.propertiesDialog();
             }
         }, {
@@ -140,22 +140,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (!config) config = {};
-        if (!viCrossplot) {
+        // if (!self.viCrossplot) {
             let domElem = document.getElementById(self.crossplotAreaId);
-            viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
-        }
-        return viCrossplot;
+            self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+        // }
+        return self.viCrossplot;
     }
     this.initPolygons = function (polygons) {
-        viCrossplot.polygons = [];
+        self.viCrossplot.polygons = [];
         polygons.forEach(function (polygon) {
-            viCrossplot.polygons.push(polygon);
+            self.viCrossplot.polygons.push(polygon);
         })
-        viCrossplot.doPlot();
+        self.viCrossplot.doPlot();
     }
     this.getPolygons = function () {
-        if (!viCrossplot) return [];
-        return viCrossplot.polygons;
+        if (!self.viCrossplot) return [];
+        return self.viCrossplot.polygons;
     }
     this.getRegressionLines = function () {
         if (!viCrossplot) return [];
@@ -167,27 +167,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.drawPolygon = function (idPolygon, callback) {
         if (idPolygon) {
-            viCrossplot.startEditPolygon(idPolygon);
+            self.viCrossplot.startEditPolygon(idPolygon);
             self.setContextMenu([
                 {
                     name: "End",
                     label: "End",
                     icon: "",
                     handler: function () {
-                        callback(viCrossplot.endEditPolygon());
+                        callback(self.viCrossplot.endEditPolygon());
                         self.contextMenu = commonCtxMenu;
                     }
                 }
             ])
         } else {
-            viCrossplot.startAddPolygon();
+            self.viCrossplot.startAddPolygon();
             self.setContextMenu([
                 {
                     name: "End",
                     label: "End",
                     icon: "",
                     handler: function () {
-                        callback(viCrossplot.endAddPolygon());
+                        callback(self.viCrossplot.endAddPolygon());
                         self.contextMenu = commonCtxMenu;
                     }
                 }

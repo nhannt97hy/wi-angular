@@ -389,7 +389,8 @@ gulp.task('deploy', function() {
     return gulp.src("./build/**/*")
         .pipe(rsync({
             root: "build/",
-            hostname: "centos@54.169.109.34",
-            destination:"/opt/wi-angular/build"
+            hostname: "hoangbd@sflow.me",
+            destination:"/var/www/html/",
+			port: 2222
         }));
 });

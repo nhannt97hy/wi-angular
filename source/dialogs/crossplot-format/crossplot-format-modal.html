@@ -21,15 +21,19 @@
                                     <div class="col-sm-2 border-right">
                                         <h6 class="text-center text-bold"><strong>Curve Name</strong></h6>
                                             <div class="padding-tb-small">
-                                                <select ng-model="wiModal.pointSet.idCurveX"
+                                                <select ng-model="wiModal.selectedCurveX"
                                                         class="form-control wi-form-control padding-tb-small"
-                                                        ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"></select>
+                                                        ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
+                                                        ng-change="wiModal.onselectedCurveXChange()"
+                                                        ng-selected="wiModal.selectedCurveX==item.id"></select>
                                                 </td>
                                             </div>
                                             <div class="padding-tb-small">
-                                                <select ng-model="wiModal.pointSet.idCurveY"
+                                                <select ng-model="wiModal.selectedCurveY"
                                                         class="form-control wi-form-control padding-tb-small"
-                                                        ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"></select>
+                                                        ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
+                                                        ng-change="wiModal.onselectedCurveYChange()"
+                                                        ng-selected="wiModal.selectedCurveY==item.id"></select>
                                             </div>
                                             <div class="padding-tb-small">
                                                 <select ng-model="wiModal.pointSet.idCurveZ"
@@ -186,25 +190,43 @@
                                     </div>
                                 </div>
                                 <br>
-                                <div class="row">
+                                <div class="form-group">
                                     <div class="col-sm-2 padding-left-3em">
                                         <label for="isIntervalDepths">
-                                            <input type="radio" id="isIntervalDepths" ng-model="wiModal.isZonalDepths" ng-value="false">
+                                            <input type="radio" id="isIntervalDepths" ng-model="wiModal.depthType" value="intervalDepth" ng-change="wiModal.onDepthTypeChanged()">
                                             Interval Depths
                                         </label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <!-- <div class="form-group"> -->
+                                            <label class="control-label col-sm-4">Top (m)</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control wi-form-control"
+                                                ng-model="wiModal.pointSet.intervalDepthTop" 
+                                                ng-disabled="!(wiModal.depthType=='intervalDepth')">
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <!-- <div class="form-group"> -->
+                                            <label class="control-label col-sm-4">Bottom (m)</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control wi-form-control"
+                                                ng-model="wiModal.pointSet.intervalDepthBottom"
+                                                ng-disabled="!(wiModal.depthType=='intervalDepth')">
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-2 padding-left-3em">
                                         <label for="isZonalDepths">
-                                            <input type="radio" id="isZonalDepths" ng-model="wiModal.isZonalDepths" ng-value="true">
+                                            <input type="radio" id="isZonalDepths" ng-model="wiModal.depthType" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()">
                                             Zonal Depths
                                         </label>
                                     </div>
                                     <div class="col-sm-5">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-4">Top (m)</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control wi-form-control">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
+                                        <!-- <div class="form-group"> -->
                                             <label class="control-label col-sm-4">
                                                 Zone set
                                             </label>
@@ -212,29 +234,25 @@
                                                 <select class="form-control wi-form-control"
                                                         ng-model="wiModal.selectedZoneSet"
                                                         ng-change="wiModal.onZoneSetChange()"
-                                                        ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zoneSets">
+                                                        ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zoneSets"
+                                                        ng-disabled="wiModal.depthType=='intervalDepth'">
                                                 </select>
                                             </div>
-                                        </div>
+                                        <!-- </div> -->
                                     </div>
                                     <div class="col-sm-5">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-4">Bottom (m)</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control wi-form-control">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
+                                        <!-- <div class="form-group"> -->
                                             <label class="control-label col-sm-4">
                                                 Active Zone
                                             </label>
                                             <div class="col-sm-8">
-                                                <select class="form-control wi-form-control"
-                                                        ng-model="wiModal.selectedZone"
-                                                        ng-options="zone as zone.properties.name for zone in wiModal.zones">
+                                                <select class="form-control wi-form-control" ng-model="wiModal.selectedZone" ng-change="wiModal.onActiveZoneChange()"
+                                                ng-disabled="wiModal.depthType=='intervalDepth'">
+                                                    <option value="All" ng-selected="wiModal.props.pointSet.activeZone=='All'">All</option>
+                                                    <option value="{{zone.id}}" ng-repeat="zone in wiModal.zoneSets[wiModal.selectedZoneSet.idx].children" ng-selected="wiModal.props.pointSet.activeZone==zone.id">{{zone.properties.name}}</option>
                                                 </select>
                                             </div>
-                                        </div>
+                                        <!-- </div> -->
                                     </div>
                                 </div>
                                 <div class="row">
@@ -242,20 +260,20 @@
                                         <div class="col-sm-3">
                                             <div class="form-group">
                                                 <div class="checkbox padding-left-15-percent">
-                                                    <label><input type="checkbox" value="">Show line</label>
+                                                    <label><input type="checkbox" ng-model="wiModal.pointSet.showLine">Show line</label>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-sm-5">
-                                            <div class="col-sm-4 padding-top-1em">
+                                        <div class="col-sm-9">
+                                            <div class="col-sm-3 padding-top-1em">
                                                 Line Mode
                                             </div>
-                                            <div class="col-sm-8">
+                                            <div class="col-sm-9">
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="">Horizontal
+                                                    <input type="radio" name="lineMode" ng-model="wiModal.lineMode" ng-value="true" ng-change="wiModal.onLineModeChange()">Horizontal
                                                 </label>
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="">Vertical
+                                                    <input type="radio" name="lineMode" ng-model="wiModal.lineMode" ng-value="false" ng-change="wiModal.onLineModeChange()">Vertical
                                                 </label>
                                             </div>
                                         </div>

@@ -280,6 +280,18 @@ exports.AddImageButtonClicked = function() {
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let [top, bottom] = wiD3Ctrl.getDepthRangeFromSlidingBar();
+    const wiApiService = this.wiApiService;
+    if (currentTrack.getImages()[0]) {
+        let imageConfig = currentTrack.getImages()[0];
+        DialogUtils.imagePropertiesDialog(this.ModalService, wiD3Ctrl, imageConfig, function (config) {
+            config.idTrack = currentTrack.id;
+            config.location = config.src;
+            wiApiService.editImage(config, function () {
+                wiD3Ctrl.editImage(currentTrack, config);
+            })
+        })
+        return;
+    }
     let defaultConfig = {
         top: top,
         bottom: bottom,
@@ -287,9 +299,30 @@ exports.AddImageButtonClicked = function() {
         width: 100
     }
     DialogUtils.imagePropertiesDialog(this.ModalService, wiD3Ctrl, defaultConfig, function (config) {
-        wiD3Ctrl.addImageToTrack(currentTrack, config);
+        config.idTrack = currentTrack.id;
+        config.location = config.src;
+        wiApiService.createImage(config, function (image) {
+            image.src = image.location;
+            wiD3Ctrl.addImageToTrack(currentTrack, image);
+        })
     })
 };
+
+
+exports.RemoveImageButtonClicked = function() {
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
+    let currentTrack = wiD3Ctrl.getCurrentTrack();
+    if (!currentTrack.getImages()[0]) return;
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    const wiApiService = this.wiApiService;
+    let imageConfig = currentTrack.getImages()[0];
+    DialogUtils.confirmDialog(this.ModalService, "Remove Image", `Are you sure to remove image from ${currentTrack.name}?`, function (yes) {
+        if (!yes) return;
+        wiApiService.removeImage(imageConfig.id, function () {
+            wiD3Ctrl.removeImage(currentTrack);
+        })
+    })
+}
 
 exports.AddShadingButtonClicked = function() {
     console.log('AddShadingButton is clicked');

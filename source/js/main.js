@@ -66,6 +66,7 @@ let wiWell = require('./wi-well.model');
 let wiLogplotsModel = require('./wi-logplots.model');
 let wiLogplotModel = require('./wi-logplot.model');
 let wiZone = require('./wi-zone');
+let wiUser = require('./wi-user');
 
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
@@ -112,7 +113,8 @@ let app = angular.module('wiapp',
 
         wiCanvasRect.name,
         wiZone.name,
-        wiContainer.name, 
+        wiContainer.name,
+        wiUser.name, 
         
         'angularModalService',
         'angularResizable',
@@ -212,12 +214,18 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
-    DialogUtils.authenticationDialog(ModalService, function (userInfo) {
-        console.log(userInfo);
-        window.localStorage.setItem('username', userInfo.username);
-        window.localStorage.setItem('password', userInfo.password);
-        window.localStorage.setItem('token', userInfo.token);
+    if(!window.localStorage.getItem('rememberAuth')) {
+        DialogUtils.authenticationDialog(ModalService, function (userInfo) {
+            if (userInfo.remember) {
+                window.localStorage.setItem('rememberAuth', true);
+            }
+            window.localStorage.setItem('username', userInfo.username);
+            window.localStorage.setItem('password', userInfo.password);
+            window.localStorage.setItem('token', userInfo.token);
+            wiComponentService.getComponent('user').userUpdate();
+            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+        });
+    }else{
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-    });
-    // appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    }
 });

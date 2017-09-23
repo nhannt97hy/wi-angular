@@ -78,7 +78,11 @@ exports.ExitButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (isExit) {
         if (isExit) {
-            utils.projectClose(wiComponentService);
+            window.localStorage.removeItem('token');
+            window.localStorage.removeItem('username');
+            window.localStorage.removeItem('password');
+            window.localStorage.removeItem('rememberAuth');
+            location.reload();
         }
     })
 };

@@ -40,7 +40,8 @@ exports.authenticationDialog = function (ModalService, callback) {
                 let userInfo = {
                     username: self.username,
                     password: self.password,
-                    token: token
+                    token: token,
+                    remember: self.remember
                 };
                 wiApiService.setAuthenticationInfo(userInfo);
                 close(userInfo);
@@ -3903,67 +3904,123 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
     });
 }
 */
-exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCrossplot, callback){
+exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback){
     function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+        let props = null;
+        this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
-        this.viCrossplot = viCrossplot;
 
-        let props = viCrossplot.getProperties();
-
-        let wellModel = utils.getModel('well', props.idWell);
-        this.zoneSets = wellModel.children.find(function (node) {
-            return node.type == 'zonesets';
-        }).children;
-        this.selectedZoneSet = this.zoneSets.find(function (zoneSet) {
-            return zoneSet.properties.idZoneSet == props.pointSet.idZoneSet;
-        })
-        this.selectedZone = this.selectedZoneSet.children.find(function (zone) {
-            return zone.properties.idZone == props.pointSet.activeZone;
-        })
-
-        this.isZonalDepths = wiD3CrossplotCtrl.isShowWiZone;
+        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
+        if(self.viCrossplot){
+            props = self.viCrossplot.getProperties();
+            this.pointSet = props.pointSet;
+            console.log("pointSet", this.pointSet);        
+        }
+        this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
+        this.depthType = self.pointSet.idZoneSet != null ? "zonalDepth" : "intervalDepth";
+        this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true; 
+        this.zoneSets - new Array();
         this.datasetsInWell = new Array();
-        this.curvesInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
 
-        console.log("viCrossplot", viCrossplot);
-        console.log("Crossplot", wiCrossplotCtrl);
-        this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
-        this.well.children.forEach(function (child) {
+        this.selectedZoneSet = null;
+        this.selectedZone = (props && props.pointSet && props.pointSet.activeZone != null) ? props.pointSet.activeZone : 'All';
+        this.selectedCurveX = null;
+        this.selectedCurveY = null;
+
+        this.well.children.forEach(function (child, i) {
             if (child.type == 'dataset') self.datasetsInWell.push(child);
+            if (child.type == 'zonesets') self.zoneSets = angular.copy(child.children);
+
+            if( i == self.well.children.length - 1){
+
+                self.datasetsInWell.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            let d = item;
+                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                            self.curvesOnDataset.push(d);
+                            if(d.id == self.pointSet.curveX.idCurve){
+                                self.selectedCurveX = self.pointSet.curveX.idCurve;
+                            }
+                            if(d.id == self.pointSet.curveY.idCurve){
+                                self.selectedCurveY = self.pointSet.curveY.idCurve;
+                            }
+                        }
+                    })
+                });
+
+                if (self.zoneSets && self.zoneSets.length > 0) {
+                    if (!self.pointSet.idZoneSet) {
+                        self.selectedZoneSet = self.zoneSets[0];
+                    }
+        
+                    for (let i = self.zoneSets.length - 1; i >= 0; i--) {
+                        self.zoneSets[i].idx = i;
+                        if (self.zoneSets[i].properties.idZoneSet == self.pointSet.idZoneSet) {
+                            self.selectedZoneSet = self.zoneSets[i];
+                        }
+                        if (!self.zoneSets[i].children || !self.zoneSets[i].children.length) {
+                            self.zoneSets.splice(i, 1);
+                        }
+                    }
+                }
+            }
         });
-        this.datasetsInWell.forEach(function (child) {
-            child.children.forEach(function (item) {
-                if (item.type == 'curve') self.curvesInWell.push(item);
-            })
-        });
-        this.curvesInWell.forEach(function (item, index) {
-            let curvesOnDatasetItem = item;
-            curvesOnDatasetItem.datasetCurve = utils.findDatasetById(item.properties.idDataset).properties.name + '.' + item.properties.name;
-            self.curvesOnDataset.push(curvesOnDatasetItem);
-        });
-        console.log("curve", this.curvesOnDataset);
-        console.log("props", props);
-        this.pointSet = props.pointSet;
-        this.pointSet.idCurveX = props.pointSet.curveX ? props.pointSet.curveX.idCurve:props.pointSet.idCurveX;
-        this.pointSet.idCurveY = props.pointSet.curveY ? props.pointSet.curveY.idCurve:props.pointSet.idCurveY;
-        this.pointSet.idZoneSet = this.pointSet.idZoneSet || this.zoneSets[0].properties.idZoneSet;
-        console.log("pointSet", this.pointSet);
+
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+
+        function getTopFromWell() {
+            return parseFloat(self.well.properties.topDepth);
+        }
+        function getBottomFromWell() {
+            return parseFloat(self.well.properties.bottomDepth);
+        }
+
+        this.onDepthTypeChanged = function(){
+            switch (self.depthType) {
+                case "intervalDepth":
+                    self.pointSet.intervalDepthTop = self.pointSet.intervalDepthTop ? self.pointSet.intervalDepthTop: getTopFromWell();
+                    self.pointSet.intervalDepthBottom = self.pointSet.intervalDepthBottom ? self.pointSet.intervalDepthBottom : getBottomFromWell();
+                    self.pointSet.idZoneSet = null;
+                    break;
+                case "zonalDepth":
+                    if(self.selectedZoneSet){
+                        self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                    }
+                    break;
+            }
+        }
+
+        this.onselectedCurveXChange = function(){
+            if(self.selectedCurveX) self.pointSet.idCurveX == self.selectedCurveX;
+        }
+
+        this.onselectedCurveYChange = function(){
+            if(self.selectedCurveY) self.pointSet.idCurveY == self.selectedCurveY;
+        }
+
         this.onZoneSetChange = function () {
-            self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
-            let zoneSet = self.zoneSets.find(function (zoneset) {
-                return zoneset.properties.idZoneSet == self.pointSet.idZoneSet;
-            })
-            console.log('zoneSet', zoneSet);
-            self.zones = zoneSet.children;
+            if(self.selectedZoneSet){
+                self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+            }
+        }
+
+        this.onActiveZoneChange = function(){
+            if (self.selectedZone) {
+                self.pointSet.activeZone = self.selectedZone;
+            }
+        }
+
+        this.onLineModeChange = function(){
+            self.pointSet.lineMode = self.lineMode;
         }
 
         // modal button
@@ -3998,7 +4055,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
                         pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
                         pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
                         pointSet.idCrossPlot = wiCrossplotCtrl.id;
-                        pointSet.activeZone = self.selectedZone.idZone;
+                        pointSet.activeZone = self.selectedZone;
                         console.log(pointSet);
                         props.pointSet = pointSet;
                         let scalesObj = angular.copy(self.pointSet);                        
@@ -4008,8 +4065,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
                             if (crossplot.pointsets && crossplot.pointsets.length) {
                                 scalesObj.idPointSet = crossplot.pointsets[0].idPointSet;
                                 wiApiService.editPointSet(scalesObj, function(res){
-                                    viCrossplot.setProperties(props);
-                                    viCrossplot.doPlot();
+                                    self.viCrossplot.setProperties(props);
+                                    self.viCrossplot.doPlot();
                                 });
                             }
                         });
@@ -4019,7 +4076,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, viCross
                     }
                 });
             });
-            wiD3CrossplotCtrl.isShowWiZone = self.isZonalDepths;
+            // wiD3CrossplotCtrl.isShowWiZone = self.isZonalDepths;
         };
 
         this.onOkButtonClicked = function () {
@@ -4059,6 +4116,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         this.bottom = config.bottom;
         this.left = config.left;
         this.width = config.width;
+        this.done = false;        
 
         this.onUploadButtonClicked = function () {
             wiApiService.uploadImage({
@@ -4079,6 +4137,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         let [trackTop, trackBottom] = wiD3Ctrl.getDepthRangeFromSlidingBar(); // top & bottom track in meter
         let mPerPx = (trackBottom - trackTop) / trackHeight;
         this.onImageUrlChange = utils.debounce(function () {
+            self.done = false;
             let img = new Image();
             img.onload = function () {
                 let imageWidth = this.width;
@@ -4090,13 +4149,16 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
                     let imageScaleHeight = imageHeight * imageScaleRatio * (self.width / 100); // image height in pixel
                     console.log(mPerPx, imageScaleRatio, imageScaleHeight);
                     self.bottom = (mPerPx * imageScaleHeight) + self.top;
+                    self.done = true;                    
                 });
             };
             img.src = self.src;
         }, 500)
 
         function getConfig() {
+            console.log(config);
             return {
+                idImage: config.id || null,
                 src: self.src,
                 top: self.top,
                 bottom: self.bottom,
@@ -4104,10 +4166,8 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
                 width: self.width
             }
         }
-        this.onApplyButtonClicked = function () {
-            callback(getConfig());
-        }
         this.onOkButtonClicked = function () {
+            if (!self.done) return;
             close(getConfig(), 200);
         }
         this.onCancelButtonClicked = function () {
@@ -4385,8 +4445,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     self.histogramProps.idZoneSet = null;
                     break;
                 case "zonalDepth":
-                    self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
-                   
+                    if(self.selectedZoneSet){
+                        self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                    }
                     break;
             }
         }

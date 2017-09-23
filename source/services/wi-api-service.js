@@ -15,7 +15,7 @@ let app = angular.module(moduleName, []);
 
 // const BASE_URL = 'http://54.169.109.34';
 const BASE_URL = 'http://sflow.me:3000';
-// const BASE_URL = 'http://localhost:3000';
+//const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -54,6 +54,11 @@ const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
 const GET_LOG_TRACK = '/project/well/plot/track/info';
 const EDIT_TRACK = '/project/well/plot/track/edit';
+
+const CREATE_IMAGE  = '/project/well/plot/track/image/new';
+const EDIT_IMAGE = '/project/well/plot/track/image/edit';
+const GET_IMAGE = '/project/well/plot/track/image/info';
+const DELETE_IMAGE = '/project/well/plot/track/image/delete';
 
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
@@ -228,11 +233,16 @@ Service.prototype.delete = function (route, payload) {
     });
 }
 
-Service.prototype.login = function(data, callback) {
+Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
-    this.post(LOGIN, data).then(function(ret) { callback(ret); })
-        .catch(function(err) { console.error(err); alert("Login error", err); });
+    this.post(LOGIN, data).then(function (ret) {
+            callback(ret);
+        })
+        .catch(function (err) {
+            console.error(err);
+            alert("Login error: " + err);
+        });
 }
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
@@ -518,7 +528,8 @@ Service.prototype.exportCurve = function (idCurve, callback) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Referrer-Policy': 'no-referrer'
+            'Referrer-Policy': 'no-referrer',
+			'Authorization' : __USERINFO.token
         },
         responseType: "arraybuffer",
         data: dataRequest
@@ -617,6 +628,46 @@ Service.prototype.editTrack = function (trackObj, callback) {
         .then(function (track) {
             if (!callback) return;
             callback(track);
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
+
+Service.prototype.createImage = function (imageObj, callback) {
+    var self = this;
+    this.post(CREATE_IMAGE, imageObj)
+        .then(function (image) {
+            callback(image);
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.removeImage = function (idImage, callback) {
+    var self = this;
+    let dataRequest = {
+        idImage: idImage
+    };
+    this.delete(DELETE_IMAGE, dataRequest)
+        .then(callback)
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.editImage = function (imageObj, callback) {
+    var self = this;
+    let dataRequest = imageObj;
+    this.post(EDIT_IMAGE, dataRequest)
+        .then(function (image) {
+            if (!callback) return;
+            callback(image);
         })
         .catch(function (err) {
             console.error(err);

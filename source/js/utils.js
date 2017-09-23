@@ -945,6 +945,11 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.markers.forEach(function (marker) {
                             wiD3Ctrl.addMarkerToTrack(trackObj, marker);
                         });
+                        aTrack.images.forEach(function (image) {
+                            image.src = image.location;
+                            wiD3Ctrl.addImageToTrack(trackObj, image);
+                            
+                        })
                         if (!aTrack.lines || aTrack.lines.length == 0) {
                             aTrack = tracks.shift();
                             continue;
@@ -1096,6 +1101,7 @@ function findWellById(idWell) {
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
     visit(rootNodes[0], function (node) {
+ 
         if (node.type == 'well' && node.id == idWell) {
             well = node;
         }
@@ -1515,32 +1521,39 @@ function openCrossplotTab(crossplotModel, callback) {
             let pointSet = crossplot.pointsets[0];
             console.log("pointsets", pointSet);
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
-                wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
-                    if (pointSet.idCurveZ) {
-                        wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
-                            // TODO
-                        })
-                    } else {
-                        let curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
-                        let curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(curveX, curveY, {
-                            name: crossplotName,
-                            idPointSet: pointSet.idPointSet,
-                            idCrossPlot: wiCrossplotCtrl.id,
-                            idWell: wellProps.id,
-                            topDepth: wellProps.topDepth,
-                            bottomDepth: wellProps.bottomDepth
-                        });
-                        if (crossplot.polygons && crossplot.polygons.length) {
-                            for (let polygon of crossplot.polygons) {
-                                try {
-                                    polygon.points = JSON.parse(polygon.points);
-                                } catch (error) {}
+                let curveX;
+                wiApiService.infoCurve(pointSet.idCurveX, function (curveX) {
+                    curveX = curveX;
+                    wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
+                        let curveY;
+                        wiApiService.infoCurve(pointSet.idCurveY, function (curveY) {
+                            curveY = curveY;
+                            if (pointSet.idCurveZ) {
+                                wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
+                                    // TODO
+                                })
+                            } else {
+                                let viCurveX = graph.buildCurve( curveX, xCurveData);
+                                let viCurveY = graph.buildCurve( curveY, yCurveData);
+                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, {
+                                    name: crossplotName,
+                                    idPointSet: pointSet.idPointSet,
+                                    idCrossPlot: wiCrossplotCtrl.id,
+                                    idWell: wellProps.id,
+                                    pointSet: pointSet
+                                });
+                                if (crossplot.polygons && crossplot.polygons.length) {
+                                    for (let polygon of crossplot.polygons) {
+                                        try {
+                                            polygon.points = JSON.parse(polygon.points);
+                                        } catch (error) {}
+                                    }
+                                    wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
+                                }
+                                
                             }
-                            wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
-                        }
-                        
-                    }
+                        })
+                    })
                 })
             })
         }
