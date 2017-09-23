@@ -61,7 +61,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.propertiesDialog = function () {
         DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function () {
-            
+
         })
     }
     let commonCtxMenu = [
@@ -103,7 +103,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.isShowReferenceWindow = !self.isShowReferenceWindow
                 self.contextMenu[index].checked = self.isShowReferenceWindow;
-                utils.triggerWindowResize();        
+                utils.triggerWindowResize();
             }
         }, {
             name: "ShowTooltip",
@@ -159,12 +159,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return self.viCrossplot.polygons;
     }
     this.getRegressionLines = function () {
-        if (!viCrossplot) return [];
-        return viCrossplot.regressionLines;
+        if (!self.viCrossplot) return [];
+        return self.viCrossplot.regressionLines;
     }
     this.getViCrossplot = function () {
-        if(!viCrossplot) return {};
-        return viCrossplot;
+        if (!self.viCrossplot) return {};
+        return self.viCrossplot;
     }
     this.drawPolygon = function (idPolygon, callback) {
         if (idPolygon) {

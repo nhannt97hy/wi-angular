@@ -153,7 +153,7 @@ function shadingToTreeConfig(shading, paletteList) {
     };
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
-    shadingModel.idRightLine = shading.idRightLine; 
+    shadingModel.idRightLine = shading.idRightLine;
     shadingModel.data = {
         id: shading.idShading,
         name: shading.name,
@@ -933,7 +933,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             }
                             wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
                         }
-                        
+
                     });
                 };
                 let aTrack = tracks.shift();
@@ -949,7 +949,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.images.forEach(function (image) {
                             image.src = image.location;
                             wiD3Ctrl.addImageToTrack(trackObj, image);
-                            
+
                         })
                         if (!aTrack.lines || aTrack.lines.length == 0) {
                             aTrack = tracks.shift();
@@ -1102,7 +1102,7 @@ function findWellById(idWell) {
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
     visit(rootNodes[0], function (node) {
- 
+
         if (node.type == 'well' && node.id == idWell) {
             well = node;
         }
@@ -1552,7 +1552,7 @@ function openCrossplotTab(crossplotModel, callback) {
                                     }
                                     wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
                                 }
-                                
+
                             }
                         })
                     })

@@ -65,8 +65,15 @@ function setProperties(obj, props, forArray) {
         if (value === undefined && schema.type != 'Object') {
             if (obj[key] === undefined && schema.default !== undefined) obj[key] = schema.default;
         }
-        else if (schema.type == 'Integer') obj[key] = parseInt(value);
-        else if (schema.type == 'Float') obj[key] = parseFloat(value);
+        else if (value === null) {
+            if (obj[key] === undefined && schema.null === false && schema.default !== undefined) obj[key] = schema.default;
+        }
+        else if (schema.type == 'Integer') {
+            obj[key] = value == null ? null : parseInt(value);
+        }
+        else if (schema.type == 'Float') {
+            obj[key] = value == null ? null : parseFloat(value);
+        }
         else if (schema.type == 'Enum') {
             if (schema.values.indexOf(value) == -1) obj[key] = schema.default;
             else obj[key] = value;
