@@ -65,8 +65,15 @@ function setProperties(obj, props, forArray) {
         if (value === undefined && schema.type != 'Object') {
             if (obj[key] === undefined && schema.default !== undefined) obj[key] = schema.default;
         }
-        else if (schema.type == 'Integer') obj[key] = parseInt(value);
-        else if (schema.type == 'Float') obj[key] = parseFloat(value);
+        else if (value === null) {
+            if (obj[key] === undefined && schema.null === false && schema.default !== undefined) obj[key] = schema.default;
+        }
+        else if (schema.type == 'Integer') {
+            obj[key] = value == null ? null : parseInt(value);
+        }
+        else if (schema.type == 'Float') {
+            obj[key] = value == null ? null : parseFloat(value);
+        }
         else if (schema.type == 'Enum') {
             if (schema.values.indexOf(value) == -1) obj[key] = schema.default;
             else obj[key] = value;
@@ -277,8 +284,8 @@ function lowercase(str) {
  */
 function capitalize(str) {
     if (typeof str != 'string') return null;
-    // return str.replace(str[0], str[0].toUpperCase());
-    return str.capitalize();
+    return str.replace(str[0], str[0].toUpperCase());
+    // return str.capitalize();
 }
 
 /**

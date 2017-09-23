@@ -15,7 +15,7 @@ function Crossplot(config) {
 }
 
 Crossplot.prototype.PROPERTIES = {
-    idCrossplot: { type: 'Integer' },
+    idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
     name: { type: 'String', default: 'Noname' },
     pointSet: {
@@ -24,16 +24,16 @@ Crossplot.prototype.PROPERTIES = {
             idPointSet: { type: 'Integer' },
             curveX: { type: 'Object' },
             logX: { type: 'Boolean', default: false },
-            majorX: { type: 'Integer', default: 5 },
-            minorX : { type: 'Integer', default: 1 },
+            majorX: { type: 'Integer', default: 5, null: false },
+            minorX : { type: 'Integer', default: 1, null: false },
             scaleLeft: { type: 'Float' },
             scaleRight: { type: 'Float' },
             labelX: { type: 'String' },
             decimalsX: { type: 'Integer', default: 2 },
             curveY: { type: 'Object' },
             logY: { type: 'Boolean', default: false },
-            majorY: { type: 'Integer', default: 5 },
-            minorY: { type: 'Integer', default: 1 },
+            majorY: { type: 'Integer', default: 5, null: false },
+            minorY: { type: 'Integer', default: 1, null: false },
             scaleBottom: { type: 'Float' },
             scaleTop: { type: 'Float' },
             labelY: { type: 'String' },
@@ -314,10 +314,7 @@ Crossplot.prototype.doPlot = function() {
         .attr('height', Math.abs(vpY[0] - vpY[1]));
 
     this.plotPolygons();
-
-    this.prepareRegressionLines();
     this.plotRegressionLines();
-    this.plotEquations();
 }
 
 // Crossplot.prototype.updateHeader = function() {
@@ -517,6 +514,9 @@ Crossplot.prototype.plotEquations = function() {
 }
 
 Crossplot.prototype.plotRegressionLines = function() {
+    if (this.data.length == 0) return;
+    this.prepareRegressionLines();
+
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
 
@@ -541,6 +541,8 @@ Crossplot.prototype.plotRegressionLines = function() {
         .attr('stroke-width', function(d) { return d.lineStyle.width; })
         .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
     regLines.exit().remove();
+
+    this.plotEquations();
 }
 
 Crossplot.prototype.prepareRegressionLines = function() {
@@ -623,9 +625,12 @@ Crossplot.prototype.plotPolygons = function() {
 }
 
 Crossplot.prototype.plotSymbols = function() {
+    let self = this;
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
-    let transformZ = this.getTransformZ();
+    if (self.pointSet.curveZ) {
+        let transformZ = this.getTransformZ();
+    }
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
     let rect = this.getPlotRect();
@@ -646,7 +651,6 @@ Crossplot.prototype.plotSymbols = function() {
     let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
     if (typeof plotFunc != 'function') return;
 
-    let self = this;
     this.data.forEach(function(d) {
         if (self.pointSet.curveZ) {
             helper.strokeStyle = transformZ(d.z);
@@ -678,7 +682,8 @@ Crossplot.prototype.prepareData = function() {
     this.pointSet.curveY.data.forEach(function(d) {
         if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) return;
         if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) return;
-        if (d.y != null && mapX[d.y] != null) {
+
+        if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
             self.data.push({
                 x: mapX[d.y],
                 y: d.x,

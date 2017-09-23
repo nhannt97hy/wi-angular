@@ -1,0 +1,166 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class=""></span>&nbsp;RegressionLines</h4>
+            </div>
+            <div class="modal-body text-center">
+                <div class="container-fluid padding-0">
+                    <div class="col-sm-11 padding-right-0">
+                        <form class="form-horizontal">
+                            <table class="font-size-10px table table-bordered regressionLineTable">
+                                <thead>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td colspan="10">Areas to select data</td>
+                                        <td colspan="2">Force Fit</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td style="widows: 7%">Display Line</td>
+                                        <td style="widows: 7%">Display Equation</td>
+                                        <td>Line Style</td>
+                                        <td>Reg type</td>
+                                        <td style="widows: 7%">Inverse Reg</td>
+                                        <td>Include/Exclude</td>
+                                        <td style="widows: 3%">1</td>
+                                        <td style="widows: 3%">2</td>
+                                        <td style="widows: 3%">3</td>
+                                        <td style="widows: 3%">4</td>
+                                        <td style="widows: 3%">5</td>
+                                        <td style="widows: 3%">6</td>
+                                        <td style="widows: 3%">7</td>
+                                        <td style="widows: 3%">8</td>
+                                        <td style="widows: 3%">9</td>
+                                        <td style="widows: 3%">10</td>
+                                        <td>X</td>
+                                        <td>Y</td>
+                                    </tr>
+                            </thead>
+                                <tbody>
+                                    <tr ng-repeat="regLine in wiModal.getRegressionLines()"
+                                    ng-class="{'selected':$index == selectedRow}"
+                                    ng-click="wiModal.setClickedRow($index)">
+                                        <td>{{$index+1}}</td>
+                                        <td style="width: 7%">
+                                            <input type="checkbox"
+                                                    ng-model="regLine.displayLine"
+                                                    ng-change="wiModal.onChange(regLine.index)">
+                                        </td>
+                                        <td style="width: 7%">
+                                            <input type="checkbox"
+                                                    ng-model="regLine.displayEquation"
+                                                    ng-change="wiModal.onChange(regLine.index)">
+                                        </td>
+                                        <td>
+                                            <button type="button" id="lineStyleBtn" 
+                                                    ng-model="regLine.lineStyle"
+                                                    ng-change="wiModal.onChange(regLine.index)"
+                                                    ng-click="wiModal.onEditLineStyleButtonClicked(regLine.index)"
+                                                    class="btn btn-default">Edit</button>
+                                                
+                                        </td>
+                                        <td>
+                                            <select ng-model="regLine.regType"
+                                                    class="form-control wi-form-control"
+                                                    ng-change="wiModal.onChange(regLine.index)">
+                                                <option value="linear">Linear</option>
+                                                <option value="exponent">Exponent</option>
+                                                <option value="power">Power</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input ng-model="regLine.inverseReg"
+                                                    type="checkbox"
+                                                    ng-change="wiModal.onChange(regLine.index)">
+                                        </td>
+                                        <td>
+                                            <select ng-model="regLine.exclude"
+                                                class="form-control wi-form-control"
+                                                ng-change="wiModal.onChange(regLine.index)">
+                                                <option value="false">Include</option>
+                                                <option value="true">Exclude</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox">
+                                        </td>
+                                        <!-- <td>
+                                            <multiple-autocomplete ng-model="regLine.polygonIndices"
+                                                 suggestions-arr="wiModal.polygonIndicesList">
+                                            </multiple-autocomplete>
+                                            {{regLine.polygonIndices}}
+                                        </td> -->
+                                        <td style="width: 7%">
+                                            <input type="number" ng-model="regLine.fitX"
+                                                    class="form-control wi-form-control"
+                                                    ng-change="wiModal.onChange(regLine.index)">
+                                        </td>
+                                        <td style="width: 7%">
+                                            <input type="number" ng-model="regLine.fitY"
+                                                    class="form-control wi-form-control"
+                                                    ng-change="wiModal.onChange(regLine.index)">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="col-sm-1">
+                        <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                            <span class="delete-16x16"></span>
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.addRow();">
+                            <span class="ok-16x16"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                 <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;Apply
+                </button>
+                <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
