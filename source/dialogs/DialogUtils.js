@@ -2410,7 +2410,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             shadingItem.idLeftLine = shadingProps.idLeftLine?shadingProps.idLeftLine:setIdLeftLineIfNull(shadingProps.type);
             shadingItem.leftFixedValue = shadingProps.leftFixedValue;
             shadingItem.idRightLine = shadingProps.idRightLine;
-            shadingItem.rightFixedValue = shadingProps.rightFixedValue;
+            // shadingItem.rightFixedValue = shadingProps.rightFixedValue;
+            shadingItem.rightFixedValue = null;
+
             shadingItem.name = shadingProps.name;
             shadingItem.shadingStyle = getShadingStyle(shadingProps.isNegPosFill ? shading.positiveFill : shading.fill);
             shadingItem.idControlCurve = shadingProps.idControlCurve;
@@ -3920,26 +3922,26 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-        let props = null;
-        this.pointSet = new Object();
+        let props = wiD3CrossplotCtrl.crossplotModel.properties;
+        this.pointSet = props.pointSet;
+        // this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
 
         this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
-        if(self.viCrossplot){
-            props = self.viCrossplot.getProperties();
-            this.pointSet = props.pointSet;
-            console.log("pointSet", this.pointSet);        
-        }
+        // if(self.viCrossplot){
+        //     props = self.viCrossplot.getProperties();
+        //     console.log("pointSet", this.pointSet);        
+        // }
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
-        this.depthType = self.pointSet.idZoneSet != null ? "zonalDepth" : "intervalDepth";
+        this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
         this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true; 
         this.zoneSets - new Array();
         this.datasetsInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
 
         this.selectedZoneSet = null;
-        this.selectedZone = (props && props.pointSet && props.pointSet.activeZone != null) ? props.pointSet.activeZone : 'All';
+        this.selectedZone = props.pointSet.activeZone != null ? props.pointSet.activeZone : 'All';
         this.selectedCurveX = null;
         this.selectedCurveY = null;
 
@@ -3955,11 +3957,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             let d = item;
                             d.datasetCurve = child.properties.name + "." + item.properties.name;
                             self.curvesOnDataset.push(d);
-                            if(d.id == self.pointSet.curveX.idCurve){
-                                self.selectedCurveX = self.pointSet.curveX.idCurve;
+                            if(d.id == self.pointSet.idCurveX){
+                                self.selectedCurveX = self.pointSet.idCurveX;
+                                // self.pointSet.idCurveX = self.selectedCurveX;
                             }
-                            if(d.id == self.pointSet.curveY.idCurve){
-                                self.selectedCurveY = self.pointSet.curveY.idCurve;
+                            if(d.id == self.pointSet.idCurveY){
+                                self.selectedCurveY = self.pointSet.idCurveY;
+                                // self.pointSet.idCurveY = self.selectedCurveY;
                             }
                         }
                     })
@@ -4009,11 +4013,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         }
 
         this.onselectedCurveXChange = function(){
-            if(self.selectedCurveX) self.pointSet.idCurveX == self.selectedCurveX;
+            if(self.selectedCurveX) self.pointSet.idCurveX = self.selectedCurveX;
         }
 
         this.onselectedCurveYChange = function(){
-            if(self.selectedCurveY) self.pointSet.idCurveY == self.selectedCurveY;
+            if(self.selectedCurveY) self.pointSet.idCurveY = self.selectedCurveY;
         }
 
         this.onZoneSetChange = function () {
@@ -4038,11 +4042,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.pointSet.pointColor = colorStr;
             });
         };
-        // this.colorCrossplot = function () {
-        //     DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-        //         self.props.general.color = colorStr;
-        //     });
-        // }
+        
         this.removeRow = function () {
             console.log("removeRowClicked");
         };
@@ -4085,12 +4085,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     }
                 });
             });
-            // wiD3CrossplotCtrl.isShowWiZone = self.isZonalDepths;
         };
 
         this.onOkButtonClicked = function () {
             updateScalesTab(function () {
-                close(self);
+                close(self.pointSet);
             });
         };
         this.onApplyButtonClicked = function () {
@@ -4719,11 +4718,19 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             self.regressionLines.push({
                 change: change.created,
                 index: self.regressionLines.length,
+                lineStyle: {
+                    color: "blue",
+                    width: 1,
+                    style: [10]
+                },
                 fitX: 0,
                 fitY: 0
             });
+            console.log("addRow", self.regressionLines);
         };
         this.onEditLineStyleButtonClicked = function(index) {
+            console.log("onEditLineStyleButtonClicked", self.regressionLines);
+
             DialogUtils.lineStyleDialog(ModalService, wiComponentService,function (lineStyleObj){
                 self.regressionLines[index].lineStyle = lineStyleObj;
             }, self.regressionLines[index].lineStyle);

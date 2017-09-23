@@ -60,9 +60,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         utils.triggerWindowResize();
     }
     this.propertiesDialog = function () {
-        DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function () {
-
-        })
+        if(Object.keys(self.viCrossplot).length !== 0){
+            DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
+                console.log(ret);
+            })
+        }
     }
     let commonCtxMenu = [
         {

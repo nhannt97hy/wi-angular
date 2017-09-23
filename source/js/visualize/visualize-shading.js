@@ -116,8 +116,8 @@ Shading.prototype.getProperties = function() {
         isNegPosFill: this.isNegPosFill,
         idLeftLine: (leftCurve || {}).id,
         idRightLine: (rightCurve || {}).id,
-        leftFixedValue: parseFloat(formatter(leftX)),
-        rightFixedValue: parseFloat(formatter(rightX)),
+        leftFixedValue: leftX == null ? null: parseFloat(formatter(leftX)),
+        rightFixedValue: rightX == null ? null: parseFloat(formatter(rightX)),
         idControlCurve: (this.selectedCurve || {}).idCurve,
         type: this.getType()
     }

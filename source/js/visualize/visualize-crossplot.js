@@ -92,9 +92,9 @@ Crossplot.prototype.PROPERTIES = {
                 lineStyle: {
                     type: 'Object',
                     properties: {
-                        color: { type: 'String', default: 'Blue' },
-                        width: { type: 'Integer', default: 1 },
-                        style: {
+                        lineColor: { type: 'String', default: 'Blue' },
+                        lineWidth: { type: 'Integer', default: 1 },
+                        lineStyle: {
                             type: 'Array',
                             item: { type: 'Integer' },
                             default: []
@@ -497,7 +497,9 @@ Crossplot.prototype.plotEquations = function() {
     let self = this;
 
     let equationContainer = this.svgContainer.select('g.vi-crossplot-equations');
-    let eqData = this.regressionLines.filter(function(r) { return r.displayEquation; })
+    let eqData = this.regressionLines.filter(function(r) { 
+        return r.displayEquation && r.regFunc != null; 
+    });
     let equations = equationContainer.selectAll('text').data(eqData);
 
     const HEIGHT = 14;
@@ -505,7 +507,7 @@ Crossplot.prototype.plotEquations = function() {
         .merge(equations)
         .attr('x', 0)
         .attr('y', function(d, i) { return (i+1)*HEIGHT; })
-        .attr('fill', function(d) { return d.lineStyle.color; })
+        .attr('fill', function(d) { return d.lineStyle.lineColor; })
         .text(function(d) { return d.regFunc.equation; });
     equations.exit().remove();
 
@@ -528,7 +530,9 @@ Crossplot.prototype.plotRegressionLines = function() {
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
 
     let regLines = regLineContainer.selectAll('path')
-        .data(this.regressionLines);
+        .data(this.regressionLines.filter(function(r) {
+            return r.regFunc != null;
+        }));
 
     let self = this;
     regLines.enter().append('path')
@@ -536,9 +540,9 @@ Crossplot.prototype.plotRegressionLines = function() {
         .attr('d', function(d) {
             return line(d.data);
         })
-        .attr('stroke', function(d) { return d.lineStyle.color; })
-        .attr('stroke-dasharray', function(d) { return d.lineStyle.style; })
-        .attr('stroke-width', function(d) { return d.lineStyle.width; })
+        .attr('stroke', function(d) { return d.lineStyle.lineColor; })
+        .attr('stroke-dasharray', function(d) { return d.lineStyle.lineStyle; })
+        .attr('stroke-width', function(d) { return d.lineStyle.lineWidth; })
         .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
     regLines.exit().remove();
 
@@ -554,6 +558,10 @@ Crossplot.prototype.prepareRegressionLines = function() {
             return l.polygonIndices.indexOf(i) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
+        if (data.length == 0) {
+            l.regFunc = null;
+            return;
+        }
         let regFunc = self.getRegressionFunc(data);
         l.data = [self.pointSet.scaleLeft, self.pointSet.scaleRight].map(function(d) {
             return {
