@@ -47,7 +47,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="form-group">
+                                        <!-- <div class="form-group">
                                             <label for="bottomJust" class="control-label col-sm-5 normal-text">
                                                 Bottom Justification
                                             </label>
@@ -61,7 +61,7 @@
                                                     <option value="Right">Right</option>
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                                 <div id="label">
@@ -91,7 +91,7 @@
                                             <div class="col-sm-7">
                                                 <input type="text" class="form-control wi-form-control"
                                                        value="" name="format" id="format"
-                                                        ng-model="wiModal.props.general.format" ng-disabled="!wiModal.props.general.showLabels">
+                                                        ng-model="wiModal.props.general.labelFormat" ng-disabled="!wiModal.props.general.showLabels">
                                             </div>
                                         </div>
                                     </div>
@@ -137,14 +137,14 @@
                                     </div>
                                 </div>
                                 <div id="geometry">
-                                    <h5>Geomatry</h5>
+                                    <h5>Geometry</h5>
                                     <div class="padding-left-20-percent">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 normal-text" for="width">
                                                 Width (inchs)
                                             </label>
                                             <div class="col-sm-7">
-                                                <input type="number" step="0.001" min="1"
+                                                <input type="number" step="1.0" min="1"
                                                        class="form-control wi-form-control" name="width"
                                                         ng-model="wiModal.props.general.width">
                                             </div>

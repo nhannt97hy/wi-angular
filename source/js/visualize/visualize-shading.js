@@ -102,9 +102,10 @@ Shading.prototype.getProperties = function() {
         leftX = this.rightX;
     }
     if (!leftCurve && rightCurve) {
-        leftX = leftX == null ? this.refX : leftX;
+        leftX = this.refX;
     }
 
+    let formatter = Utils.getDecimalFormatter(4);
     return {
         idShading: this.id,
         idTrack: this.idTrack,
@@ -115,8 +116,8 @@ Shading.prototype.getProperties = function() {
         isNegPosFill: this.isNegPosFill,
         idLeftLine: (leftCurve || {}).id,
         idRightLine: (rightCurve || {}).id,
-        leftFixedValue: leftX,
-        rightFixedValue: rightX,
+        leftFixedValue: parseFloat(formatter(leftX)),
+        rightFixedValue: parseFloat(formatter(rightX)),
         idControlCurve: (this.selectedCurve || {}).idCurve,
         type: this.getType()
     }

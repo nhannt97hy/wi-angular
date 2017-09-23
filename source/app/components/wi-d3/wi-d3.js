@@ -93,8 +93,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     logTrack.title = 'Track '+ logTrack.idTrack;
                     let viTrack = self.pushLogTrack(logTrack);
                     wiApiService.editTrack(logTrack);
-                    if (!callback) return;
-                    callback(viTrack);
+                    // if (!callback) return;
+                    // callback(viTrack);
                 });
             });
         }
@@ -1114,7 +1114,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     console.log("curve1", _currentTrack, curve1);
                     let shadingObj = {
                         idTrack: _currentTrack.id,
-                        name: 'Default shading',
+                        name: 'Default_shading',
                         negativeFill: config.negativeFill,
                         positiveFill: config.positiveFill,
                         fill: config.fill,

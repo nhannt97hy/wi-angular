@@ -4669,7 +4669,9 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.regressionLines = new Array();
-        let regressionLinesProps = viCrossplot.getProperties().regressionLines;
+        this.viCross = viCrossplot.getProperties()
+        console.log("vi111", this.viCross);
+        let regressionLinesProps = this.viCross.regressionLines;
         regressionLinesProps.forEach(function(regLineItem, index) {
             regLineItem.change = change.unchanged;
             regLineItem.index = index;
@@ -4707,7 +4709,9 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         this.addRow = function () {
             self.regressionLines.push({
                 change: change.created,
-                index: self.regressionLines.length
+                index: self.regressionLines.length,
+                fitX: 0,
+                fitY: 0
             });
         };
         this.onEditLineStyleButtonClicked = function(index) {
@@ -4716,9 +4720,10 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             }, self.regressionLines[index].lineStyle);
         };
         function setRegressionLines() {
-            let props = {};
-            props.regressionLines = self.regressionLines;
-            viCrossplot.setProperties(props);
+            // let props = {};
+            console.log('vi222', self.viCross);
+            self.viCross.regressionLines = self.regressionLines;
+            viCrossplot.setProperties(self.viCross);
             viCrossplot.doPlot();
         }
         this.onOkButtonClicked = function () {
