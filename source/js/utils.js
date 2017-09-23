@@ -326,7 +326,8 @@ function crossplotToTreeConfig(crossplot) {
     crossplotModel.properties = {
         idWell: crossplot.idWell,
         idCrossplot: crossplot.idCrossPlot,
-        name: crossplot.name
+        name: crossplot.name,
+        pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
     };
     crossplotModel.data = {
         childExpanded: false,
