@@ -153,6 +153,11 @@ ZoneTrack.prototype.init = function(baseElement) {
 ZoneTrack.prototype.doPlot = function(highlight) {
     Track.prototype.doPlot.call(this, highlight);
     this.plotAllDrawings();
+    this.rearrangeHeaders();
+}
+
+ZoneTrack.prototype.rearrangeHeaders = function() {
+    this.trackContainer.selectAll('.vi-zone-header').sort();
 }
 
 /**
