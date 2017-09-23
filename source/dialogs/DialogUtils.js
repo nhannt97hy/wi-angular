@@ -3997,11 +3997,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         }
 
         this.onselectedCurveXChange = function(){
-            if(self.selectedCurveX) self.pointSet.curveX.idCurve == self.selectedCurveX;
+            if(self.selectedCurveX) self.pointSet.idCurveX == self.selectedCurveX;
         }
 
         this.onselectedCurveYChange = function(){
-            if(self.selectedCurveY) self.pointSet.curveY.idCurve == self.selectedCurveY;
+            if(self.selectedCurveY) self.pointSet.idCurveY == self.selectedCurveY;
         }
 
         this.onZoneSetChange = function () {
@@ -4041,16 +4041,16 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         function updateScalesTab(callback) {
             let crossplotObj = {};
             let pointSet = angular.copy(self.pointSet);
-            wiApiService.dataCurve(pointSet.curveX.idCurve, function (xCurveData) {
-                wiApiService.dataCurve(pointSet.curveY.idCurve, function (yCurveData) {
+            wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
+                wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
                     if (pointSet.idCurveZ) {
                         wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
                             pointSet.curveZ = graph.buildCurve({ idCurve: pointSet.idCurveZ }, zCurveData);
                             // TODO
                         })
                     } else {
-                        pointSet.curveX = graph.buildCurve({ idCurve: pointSet.curveX.idCurve }, xCurveData);
-                        pointSet.curveY = graph.buildCurve({ idCurve: pointSet.curveY.idCurve }, yCurveData);
+                        pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
+                        pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
                         pointSet.idCrossPlot = wiCrossplotCtrl.id;
                         pointSet.activeZone = self.selectedZone;
                         console.log(pointSet);
