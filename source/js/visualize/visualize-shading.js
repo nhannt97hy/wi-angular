@@ -393,6 +393,11 @@ Shading.prototype.prepareData = function(curve) {
 }
 
 Shading.prototype.getTransformX = function(curve) {
+    if (!curve.root) {
+        return d3.scaleLinear()
+            .domain(curve.getWindowX())
+            .range([0, this.root.node().clientWidth]);
+    }
     return curve.getTransformX();
 }
 
