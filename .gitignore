@@ -19,6 +19,7 @@ source/js/handlers.js.tmpl
 source/js/wi-logplot-handlers.js.tmpl
 source/js/wi-explorer-handlers.js.tmpl
 source/js/wi-histogram-handlers.js.tmpl
+source/js/wi-crossplot-handlers.js.tmpl
 wi-logplot.json
 wi-crossplot.json
 wi-histogram.json
