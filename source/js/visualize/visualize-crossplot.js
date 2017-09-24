@@ -129,17 +129,6 @@ Crossplot.prototype.getProperties = function() {
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
-
-    Utils.setIfSelfNull(this.pointSet, 'scaleLeft', (this.pointSet.curveX || {}).minX);
-    Utils.setIfSelfNull(this.pointSet, 'scaleRight', (this.pointSet.curveX || {}).maxX);
-    Utils.setIfSelfNull(this.pointSet, 'labelX', (this.pointSet.curveX || {}).name);
-
-    Utils.setIfSelfNull(this.pointSet, 'scaleBottom', (this.pointSet.curveY || {}).minX);
-    Utils.setIfSelfNull(this.pointSet, 'scaleTop', (this.pointSet.curveY || {}).maxX);
-    Utils.setIfSelfNull(this.pointSet, 'labelY', (this.pointSet.curveY || {}).name);
-
-    Utils.setIfSelfNull(this.pointSet, 'scaleMin', (this.pointSet.curveZ || {}).minX);
-    Utils.setIfSelfNull(this.pointSet, 'scaleMax', (this.pointSet.curveZ || {}).maxX);
 }
 
 Crossplot.prototype.getViewportX = function() {
@@ -261,10 +250,10 @@ Crossplot.prototype.init = function(domElem) {
 Crossplot.prototype.createContainer = function() {
     this.container = this.root.append('div')
         .attr('class', 'vi-crossplot-container');
-/*
+
     this.headerContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-header-container');
-
+/*
     this.headerContainer
         .selectAll('div.vi-crossplot-header-row')
         .data(['vi-crossplot-header-name', 'vi-crossplot-header-reference'])
@@ -293,6 +282,8 @@ Crossplot.prototype.adjustSize = function() {
 }
 
 Crossplot.prototype.doPlot = function() {
+    if (!this.pointSet || !this.pointSet.curveX || !this.pointSet.curveY) return;
+
     this.prepareData();
     this.genColorList();
     this.rectZWidth = this.pointSet.curveZ ? 20 : 0;
@@ -301,7 +292,13 @@ Crossplot.prototype.doPlot = function() {
     // this.updateHeader();
     this.updateAxises();
     this.plotSymbols();
+    this.updateClipPath();
 
+    this.plotPolygons();
+    this.plotRegressionLines();
+}
+
+Crossplot.prototype.updateClipPath = function() {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
 
@@ -312,9 +309,6 @@ Crossplot.prototype.doPlot = function() {
         .attr('y', d3.min(vpY))
         .attr('width', Math.abs(vpX[0] - vpX[1]))
         .attr('height', Math.abs(vpY[0] - vpY[1]));
-
-    this.plotPolygons();
-    this.plotRegressionLines();
 }
 
 // Crossplot.prototype.updateHeader = function() {
@@ -497,8 +491,8 @@ Crossplot.prototype.plotEquations = function() {
     let self = this;
 
     let equationContainer = this.svgContainer.select('g.vi-crossplot-equations');
-    let eqData = this.regressionLines.filter(function(r) { 
-        return r.displayEquation && r.regFunc != null; 
+    let eqData = this.regressionLines.filter(function(r) {
+        return r.displayEquation && r.regFunc != null;
     });
     let equations = equationContainer.selectAll('text').data(eqData);
 
@@ -670,24 +664,36 @@ Crossplot.prototype.plotSymbols = function() {
 }
 
 Crossplot.prototype.prepareData = function() {
-    this.data = [];
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
+    Utils.setIfSelfNull(this.pointSet, 'scaleLeft', (this.pointSet.curveX || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleRight', (this.pointSet.curveX || {}).maxX);
+    Utils.setIfSelfNull(this.pointSet, 'labelX', (this.pointSet.curveX || {}).name);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleBottom', (this.pointSet.curveY || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleTop', (this.pointSet.curveY || {}).maxX);
+    Utils.setIfSelfNull(this.pointSet, 'labelY', (this.pointSet.curveY || {}).name);
+
+    Utils.setIfSelfNull(this.pointSet, 'scaleMin', (this.pointSet.curveZ || {}).minX);
+    Utils.setIfSelfNull(this.pointSet, 'scaleMax', (this.pointSet.curveZ || {}).maxX);
+
+    this.data = [];
+
     let mapX = {};
-    this.pointSet.curveX.data.forEach(function(d) {
+    Utils.parseData(this.pointSet.curveX.data).forEach(function(d) {
         mapX[d.y] = d.x;
     });
 
     let mapZ = {};
     if (this.pointSet.curveZ && this.pointSet.curveZ.data) {
-        this.pointSet.curveZ.data.forEach(function(d) {
+        Utils.parseData(this.pointSet.curveZ.data).forEach(function(d) {
             mapZ[d.y] = d.x;
         })
     }
 
     let self = this;
-    this.pointSet.curveY.data.forEach(function(d) {
+    Utils.parseData(this.pointSet.curveY.data).forEach(function(d) {
         if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) return;
         if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) return;
 
