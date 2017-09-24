@@ -297,8 +297,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             for (let deletedZone of deletedZones) {
                 wiApiService.removeZone(deletedZone.id, function () { })
             }
-        });
-        track.rearrangeHeaders();
+        })
         return zone;
     }
 
@@ -934,14 +933,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             {
                 name: "AutoZoneNamed",
                 label: "Auto Zone Named",
-                handler: function () {
-                    let updatedZones = _currentTrack.autoName();
-                    for (let updatedZone of updatedZones) {
-                        wiApiService.editZone(updatedZone.getProperties(), function () {
-                            _currentTrack.plotZone(updatedZone);
-                        });
-                    }
-                }
+                handler: function () {}
             }, {
                 name: "ZoneProperties",
                 label: "Zone Properties",
@@ -1087,7 +1079,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 let curve1 = _currentTrack.getCurrentCurve();
                 let curve2 = _currentTrack.getTmpCurve();
-                console.log("create shading!!", curve1);
                 if (!curve1) return;
                 var config = {
                         isNegPosFill : false,
@@ -1095,7 +1086,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             display: true,
                             pattern: {
                                 name: "none",
-                                foreground: "transparent",
                                 background: "blue"
                             }
                         },
@@ -1103,7 +1093,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             display: false,
                             pattern: {
                                 name: "none",
-                                foreground: "transparent",
                                 background: "blue"
                             }
                         },
@@ -1111,17 +1100,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             display: false,
                             pattern: {
                                 name: "none",
-                                foreground: "transparent",
                                 background: "blue"
                             }
                         },
                         showRefLine: false
                     };
 
-                    console.log("curve1", _currentTrack, curve1);
                     let shadingObj = {
                         idTrack: _currentTrack.id,
-                        name: 'Default_shading',
+                        name: curve2?( curve2.name + '_' + curve1.name):('left_' + curve1.name),
                         negativeFill: config.negativeFill,
                         positiveFill: config.positiveFill,
                         fill: config.fill,
@@ -1133,7 +1120,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         idControlCurve: null
                     }
                     wiApiService.createShading(shadingObj, function(shading){
-                        console.log("createShading", shading);
                         let shadingModel = Utils.shadingToTreeConfig(shading);
                         if (!curve2) {
                             // This should open dialog
@@ -1436,7 +1422,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Create Shading",
             icon: 'shading-add-16x16',
             handler: function () {
-                console.log('Create Shading');
+                DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                    if (props) {
+                        console.log('logTrackPropertiesData', props);
+                    }
+                }, {
+                    tabs:['false', 'false', 'true'],
+                    shadingOnly: true
+                });
             }
         },
         {

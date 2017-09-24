@@ -8,35 +8,33 @@
             <div class="modal-body padding-0">
                 <wi-tabset>
                     <wi-tab heading="General" enabled="wiModal.tabFlags[0]">
-                        <div ng-show="wiModal.tabFlags[0] == 'true'" class="container-fluid">
+                        <div ng-show="wiModal.tabFlags[0] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em padding-left-4em generalTab">
                             <form action="" class="form-horizontal form-condensed">
                                 <div id="header">
-                                    <h5>Header</h5>
-                                    <div class="padding-left-20-percent">
+                                    <h5 class="normal-text">Header</h5>
+                                    <div class="padding-left-10-percent">
                                         <div class="form-group">
-                                            <div class="col-sm-7">
-                                                <label for="isShowTitle" class="normal-text">
+                                            <div class="col-sm-8">
+                                                <label for="isShowTitle">
                                                     <input type="checkbox" id="isShowTitle"
-                                                           value="" name=""
                                                            ng-model="wiModal.props.general.showTitle">
                                                     Show title
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 normal-text" for="title">Title</label>
-                                            <div class="col-sm-7">
-                                                <input type="text" class="form-control wi-form-control"
-                                                       value="" name="title" id="title"
+                                            <label class="control-label col-sm-3" for="title">Title</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control" id="title"
                                                         ng-model="wiModal.props.general.title"
                                                        ng-disabled="!wiModal.props.general.showTitle">
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="topJust" class="control-label col-sm-5 normal-text">
+                                            <label for="topJust" class="control-label col-sm-3">
                                                 Top Justification
                                             </label>
-                                            <div class="col-sm-7">
+                                            <div class="col-sm-8">
                                                 <select ng-model="wiModal.props.general.topJustification"
                                                         name="topJust" id="topJust"
                                                         class="form-control wi-form-control"
@@ -48,10 +46,10 @@
                                             </div>
                                         </div>
                                         <!-- <div class="form-group">
-                                            <label for="bottomJust" class="control-label col-sm-5 normal-text">
+                                            <label for="bottomJust" class="control-label col-sm-3">
                                                 Bottom Justification
                                             </label>
-                                            <div class="col-sm-7">
+                                            <div class="col-sm-8">
                                                 <select ng-model="wiModal.props.general.bottomJustification"
                                                         name="bottomJust"
                                                         class="form-control wi-form-control" id="bottomJust"
@@ -65,18 +63,18 @@
                                     </div>
                                 </div>
                                 <div id="label">
-                                    <h5>Label</h5>
-                                    <div class="padding-left-20-percent">
+                                    <h5 class="normal-text">Label</h5>
+                                    <div class="padding-left-10-percent">
                                         <div class="form-group">
-                                            <div class="col-sm-5">
-                                                <label for="isShowLabels" class="normal-text">
+                                            <div class="col-sm-3">
+                                                <label for="isShowLabels">
                                                     <input type="checkbox" id="isShowLabels" value=""
                                                            ng-model="wiModal.props.general.showLabels">
                                                     Show labels
                                                 </label>
                                             </div>
-                                            <div class="col-sm-7">
-                                                <label for="isShowEndLabels" class="normal-text">
+                                            <div class="col-sm-8">
+                                                <label for="isShowEndLabels">
                                                     <input type="checkbox" id="isShowEndLabels" value=""
                                                            ng-model="wiModal.props.general.showEndLabels"
                                                             ng-disabled="!wiModal.props.general.showLabels">
@@ -85,10 +83,10 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 normal-text" for="format">
+                                            <label class="control-label col-sm-3" for="format">
                                                 Format
                                             </label>
-                                            <div class="col-sm-7">
+                                            <div class="col-sm-8">
                                                 <input type="text" class="form-control wi-form-control"
                                                        value="" name="format" id="format"
                                                         ng-model="wiModal.props.general.labelFormat" ng-disabled="!wiModal.props.general.showLabels">
@@ -97,11 +95,11 @@
                                     </div>
                                 </div>
                                 <div id="grid">
-                                    <h5>Grid</h5>
-                                    <div class="padding-left-20-percent">
+                                    <h5 class="normal-text">Grid</h5>
+                                    <div class="padding-left-10-percent">
                                         <div class="form-group">
-                                            <div class="col-sm-7">
-                                                <label for="isShowValueGrid" class="normal-text">
+                                            <div class="col-sm-8">
+                                                <label for="isShowValueGrid>
                                                     <input type="checkbox" id="isShowValueGrid" value=""
                                                            ng-model="wiModal.props.general.showValueGrid">
                                                     Show Value Grid
@@ -109,16 +107,16 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 normal-text" for="majorTicks">Major ticks</label>
-                                            <div class="col-sm-7">
+                                            <label class="control-label col-sm-3" for="majorTicks">Major ticks</label>
+                                            <div class="col-sm-8">
                                                 <input type="number" class="form-control wi-form-control"
                                                        value="" name="majorTicks" id="majorTicks"
                                                         ng-model="wiModal.props.general.majorTicks" ng-disabled="!wiModal.props.general.showValueGrid">
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 normal-text" for="minorTicks">Minor ticks</label>
-                                            <div class="col-sm-7">
+                                            <label class="control-label col-sm-3" for="minorTicks">Minor ticks</label>
+                                            <div class="col-sm-8">
                                                 <input type="number" class="form-control wi-form-control"
                                                        value="" name="minorTicks" id="minorTicks"
                                                         ng-model="wiModal.props.general.minorTicks"
@@ -126,8 +124,8 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <div class="col-sm-7">
-                                                <label for="isShowDepthGrid" class="normal-text">
+                                            <div class="col-sm-8">
+                                                <label for="isShowDepthGrid">
                                                     <input type="checkbox" id="showDepthGrid" value=""
                                                            ng-model="wiModal.props.general.showDepthGrid">
                                                     Show Depth Grid
@@ -137,13 +135,13 @@
                                     </div>
                                 </div>
                                 <div id="geometry">
-                                    <h5>Geometry</h5>
-                                    <div class="padding-left-20-percent">
+                                    <h5 class="normal-text">Geometry</h5>
+                                    <div class="padding-left-10-percent">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 normal-text" for="width">
+                                            <label class="control-label col-sm-3" for="width">
                                                 Width (inchs)
                                             </label>
-                                            <div class="col-sm-7">
+                                            <div class="col-sm-8">
                                                 <input type="number" step="1.0" min="1"
                                                        class="form-control wi-form-control" name="width"
                                                         ng-model="wiModal.props.general.width">
@@ -152,13 +150,13 @@
                                     </div>
                                 </div>
                                 <div id="color">
-                                    <h5>Color</h5>
-                                    <div class="padding-left-20-percent">
+                                    <h5 class="normal-text">Color</h5>
+                                    <div class="padding-left-10-percent">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 normal-text" for="track">
+                                            <label class="control-label col-sm-3" for="track">
                                                 Track
                                             </label>
-                                            <div class="col-sm-7">
+                                            <div class="col-sm-8">
                                                 <div class="float-left">
                                                     <button ng-click="wiModal.colorTrack();"
                                                             ng-style="{'background-color':wiModal.props.general.color}"
@@ -176,18 +174,18 @@
                         <div ng-show="wiModal.tabFlags[1] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="width-95-percent float-left">
-                                    <table class="font-size-10px table table-bordered curveTable">
+                                    <table class="text-on-table table table-bordered curveTable">
                                         <thead>
                                             <tr>
-                                                <td>Curve</td>
-                                                <td>Alias</td>
-                                                <td>Left Scale</td>
-                                                <td>Right Scale</td>
-                                                <td>Log/Linear</td>
-                                                <td>Display Mode</td>
-                                                <td>Line Style</td>
-                                                <td>Symbol Style</td>
-                                                <td>Display As</td>
+                                                <td><strong>Curve</strong></td>
+                                                <td><strong>Alias</strong></td>
+                                                <td style="width: 10%"><strong>Left Scale</strong></td>
+                                                <td style="width: 10%"><strong>Right Scale</strong></td>
+                                                <td><strong>Log/Linear</strong></td>
+                                                <td><strong>Display Mode</strong></td>
+                                                <td><strong>Line Style</strong></td>
+                                                <td><strong>Symbol Style</strong></td>
+                                                <td><strong>Display As</strong></td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -261,7 +259,7 @@
                                         <span class="delete-16x16"></span>
                                     </button>
                                     <button class="btn btn-default" ng-click="wiModal.addRowCurve();">
-                                        <span class="ok-16x16"></span>
+                                        <span class="plus-16x16"></span>
                                     </button>
                                 </div>
                             </form>
@@ -271,7 +269,7 @@
                         <div ng-show="wiModal.tabFlags[2] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="col-sm-11 padding-0">
-                                    <table style="border-collapse: collapse;" class="font-size-10px table table-bordered shadingTable col-sm-12">
+                                    <table style="border-collapse: collapse;" class="text-on-table table table-bordered shadingTable col-sm-12">
                                         <thead>
                                             <tr>
                                                 <td class="text-center"><strong>Limit 1</strong></td>
@@ -283,7 +281,7 @@
                                             <tr>
                                                 <td class="text-center"><strong>Curve 1</strong></td>
                                                 <td class="text-center"><strong>Curve 2</strong></td>
-                                                <td class="text-center"><strong>Fixed Value</strong></td>
+                                                <td class="text-center" style="width: 15%"><strong>Fixed Value</strong></td>
                                                 <td class="text-center"><strong>Shading Name</strong></td>
                                                 <td class="text-center"><strong>Shading Style</strong></td>
                                                 <td class="text-center"><strong>Shading Options</strong></td>
@@ -369,7 +367,7 @@
                                 </div>
                                 <div class="col-sm-1">
                                     <button type="button" class="btn btn-default" ng-click="wiModal.removeRowShading()"><span class="delete-16x16"></span></button>
-                                    <button type="button" class="btn btn-default" ng-click="wiModal.addRowShading()"><span class="ok-16x16"></span></button>
+                                    <button type="button" class="btn btn-default" ng-click="wiModal.addRowShading()"><span class="plus-16x16"></span></button>
                                 </div>
                             </form>
                         </div>

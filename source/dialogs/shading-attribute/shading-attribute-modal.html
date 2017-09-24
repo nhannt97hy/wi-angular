@@ -1,5 +1,5 @@
 <div class="modal fade" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="width: 750px">
         <div class="modal-content">
             <div class="modal-header">
                 <!-- <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()"
@@ -34,55 +34,6 @@
                         <div class="col-sm-12">
                             <h5 class="normal-text">Shading Settings</h5>
                             <div class="row text-center">
-                                <!-- <div class="col-sm-6">
-                                    <div class="form-group padding-bottom-2em">
-                                        <label class='col-sm-5'>Left Curve</label>
-                                        <div class="col-sm-7">
-                                            <select ng-model="wiModal.shadingOptions.idLeftLine" name="curveName"
-                                                class="form-control wi-form-control" 
-                                                ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
-                                                ng-change="wiModal.shadingOptions.leftFixedValue = null; wiModal.setShadingName(wiModal.shadingOptions.idLeftLine, false);"
-                                                ng-disabled="!wiModal.shadingOptions.idRightLine">
-                                                    <option></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-group padding-bottom-1em">
-                                        <label class='col-sm-5'>Right Curve</label>
-                                        <div class="col-sm-7">
-                                            <select ng-model="wiModal.shadingOptions.idRightLine" name="curveName"
-                                                    class="form-control wi-form-control" 
-                                                    ng-change="wiModal.shadingOptions.rightFixedValue = null;
-                                                    wiModal.setShadingName(wiModal.shadingOptions.idRightLine, true);"
-                                                    ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset">
-                                                        <option></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group padding-bottom-2em">
-                                        <label class='col-sm-5'>Left Value</label>
-                                        <div class="col-sm-7">
-                                            <input type="number" ng-model="wiModal.shadingOptions.leftFixedValue" 
-                                                    class="form-control wi-form-control"
-                                                    ng-change="wiModal.shadingOptions.idLeftLine = null;
-                                                    wiModal.setShadingName(null, false)"
-                                                    size="6"
-                                                    ng-disabled="!wiModal.shadingOptions.idRightLine">
-                                        </div>
-                                    </div>
-                                    <div class="form-group padding-bottom-1em">
-                                        <label class='col-sm-5'>Right Value</label>
-                                        <div class="col-sm-7">
-                                            <input type="number" ng-model="wiModal.shadingOptions.rightFixedValue" 
-                                                    class="form-control wi-form-control"
-                                                    ng-change="wiModal.shadingOptions.idRightLine = null;
-                                                    wiModal.setShadingName(null, true);"
-                                                    size="6" disabled>
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <div class="col-sm-4">
                                     <label>Curve 1</label>
                                 </div>
@@ -354,7 +305,7 @@
                                         <div class="col-sm-5">
                                             <select class="form-control wi-form-control normal-text"
                                                     ng-model="wiModal.variableShadingOptions.idControlCurve"
-                                                    ng-options="item.idCurve as item.datasetCurve for item in wiModal.selectCurve"
+                                                    ng-options="item.id as item.datasetCurve for item in wiModal.selectCurve"
                                                     ng-change="wiModal.selectedControlCurve(wiModal.variableShadingOptions.idControlCurve)"></select>
                                         </div>
                                     </div>
@@ -409,7 +360,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -438,7 +389,7 @@
                                     </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <button ng-click="wiModal.fillEndColor()"
                                                         ng-style="{'background-color':wiModal.variableShadingOptions.fill.varShading.gradient.endColor}"
@@ -480,7 +431,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -505,7 +456,7 @@
                                     </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <button ng-click="wiModal.positiveFillEndColor()"
                                                         ng-style="{'background-color':wiModal.variableShadingOptions.positiveFill.varShading.gradient.endColor}"
@@ -543,7 +494,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -568,7 +519,7 @@
                                     </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <button ng-click="wiModal.negativeFillEndColor()"
                                                         ng-style="{'background-color':wiModal.variableShadingOptions.negativeFill.varShading.gradient.endColor}"
@@ -602,7 +553,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -651,7 +602,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -697,7 +648,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -720,7 +671,6 @@
                                 </div>
                             </div>
 
-                            {{wiModal.varShadingType}}
                             <div class="row padding-left-2em" >
                                 <label>
                                     <input type="radio" value="customFills" ng-model="wiModal.varShadingType"
@@ -745,7 +695,7 @@
                                     </div>  
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 padding-right-0">High</label>
+                                            <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
                                             <div class="col-sm-7">
                                                 <input type="number" name=""
                                                         class="form-control wi-form-control"
@@ -755,28 +705,28 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-2">
-                                        Name
+                                    <label class="control-label col-sm-3 padding-left-3em">
+                                        Custom Name
                                     </label>
-                                    <div class="col-sm-5 padding-0">
+                                    <div class="col-sm-4 padding-0">
                                         <input type="text" 
                                                 ng-model="wiModal.variableShadingOptions.fill.varShading.customFills.name"
-                                                ng-change="wiModal.shadingOptions.name = wiModal.variableShadingOptions.fill.varShading.customFills.name"
                                                 class="form-control wi-form-control normal-text">
                                     </div>
+                                    
                                 </div>
                                 <br><br>
                                 <form action="" class="form-horizontal">
                                     <div class="width-85-percent float-left padding-left-1em">
-                                        <table style="border-collapse: collapse;" class="font-size-10px table-bordered customFillsTable col-sm-12">
+                                        <table style="border-collapse: collapse;" class="text-on-table table-bordered customFillsTable col-sm-12">
                                             <thead>
                                                 <tr class="text-center">
-                                                    <td class="padding-tb-small"><strong>Low Value</strong></td>
-                                                    <td class="padding-tb-small"><strong>High Value</strong></td>
-                                                    <td class="padding-tb-small"><strong>Fill Pattern</strong></td>
-                                                    <td class="padding-tb-small"><strong>Foreground</strong></td>
-                                                    <td class="padding-tb-small"><strong>Background</strong></td>
-                                                    <td class="padding-tb-small"><strong>Description</strong></td>
+                                                    <td class="padding-tb-small">Low Value</td>
+                                                    <td class="padding-tb-small">High Value</td>
+                                                    <td class="padding-tb-small">Fill Pattern</td>
+                                                    <td class="padding-tb-small">Foreground</td>
+                                                    <td class="padding-tb-small">Background</td>
+                                                    <td class="padding-tb-small">Description</td>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -834,18 +784,21 @@
                                         </table>
                                         <p></p>
                                     </div>
-                                    <div class="width-15-percent float-left padding-left-5px">
+                                    <div class="width-15-percent float-left padding-left-5px text-center">
+                                        <button class="btn btn-default" ng-click="wiModal.addRow()"><span class="plus-16x16"></span></button>
                                         <button class="btn btn-default" ng-click="wiModal.removeRow()"><span class="delete-16x16"></span></button>
-                                        <button class="btn btn-default" ng-click="wiModal.addRow()"><span class="ok-16x16"></span></button>
-                                        <br><br>
-                                        <button ng-click="wiModal.saveCustomFills()" style="font-size: 9px">Save custom</button>
-                                        <br><br>
+                                        <br><br><br>
+                                        <button ng-click="wiModal.saveCustomFills()" style="font-size: 11px"
+                                                class="form-control wi-form-control">Save custom</button>
+                                        <br>
                                         <select ng-model="wiModal.customFillsCurrent"
                                                 class="form-control wi-form-control normal-text"
                                                 ng-options="customFills as customFills.name for customFills in wiModal.customFillsList"
-                                                ng-change="wiModal.setCustomFills()"></select> 
+                                                ng-change="wiModal.setCustomFills()">
+                                                <option value="">--------</option>
+                                        </select>
+                                    </div> 
 
-                                    </div>
                                 </form>
                             </div>
 
