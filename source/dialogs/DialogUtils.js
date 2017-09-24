@@ -4479,10 +4479,21 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
             return inValid;
         }
-        this.onCloseButtonClicked = function () {
+
+        this.onApplyButtonClicked = function(){
+            console.log("on Apply clicked");
+            histogramModel.properties = self.histogramProps;            
+            let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+            wiD3Ctrl.linkModels();
+            wiD3Ctrl.getZoneCtrl().zoneUpdate();
+        }
+
+        this.onOKButtonClicked = function () {
             console.log("on OK clicked");
-            histogramModel.properties = self.histogramProps;
-            close(histogramModel.properties);
+            self.onApplyButtonClicked();
+            $timeout(function(){
+                close(histogramModel.properties);
+            },500);
         }
         this.onCancelButtonClicked = function () {
             close(null);
@@ -4499,7 +4510,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
-            callback(ret);
         })
     });
 };

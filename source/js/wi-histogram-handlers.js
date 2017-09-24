@@ -19,12 +19,14 @@ exports.PrintButtonClicked = function() {
 }
 
 exports.EditFormatButtonClicked = function() {
-    var wiComponentService = this.wiComponentService;
-    var ModalService = this.ModalService;
-    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    // var wiComponentService = this.wiComponentService;
+    // var ModalService = this.ModalService;
+    // let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiHistogramCtrl = this.wiHistogram;
+    let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
     console.log('EditFormatButton is clicked');
-    utils.histogramFormat(ModalService, wiComponentService, wiHistogramCtrl);
+    // utils.histogramFormat(ModalService, wiComponentService, wiHistogramCtrl);
+    wiD3Ctrl.histogramFormat();
 }
 
 exports.ActiveZoneButtonClicked = function() {

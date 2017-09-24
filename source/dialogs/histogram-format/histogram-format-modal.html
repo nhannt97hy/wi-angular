@@ -32,17 +32,15 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <input class="col-sm-1" type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType" ng-disabled="!wiModal.zoneSetList.length">
+                                                <input class="col-sm-1" type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType"
+                                                    ng-disabled="!wiModal.zoneSetList.length">
                                                 <label><span>Zone Depths</span></label>
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-sm-3">Zones</label>
                                                 <div class="col-sm-3">
-                                                    <select class="form-control wi-form-control" 
-                                                        ng-disabled="wiModal.depthType=='intervalDepth'" 
-                                                        ng-model="wiModal.selectedZoneSet"
-                                                        ng-change="wiModal.onZoneSetChange()" 
-                                                        ng-options="ZoneSet as ZoneSet.properties.name for ZoneSet in wiModal.zoneSetList track by ZoneSet.id">
+                                                    <select class="form-control wi-form-control" ng-disabled="wiModal.depthType=='intervalDepth'" ng-model="wiModal.selectedZoneSet"
+                                                        ng-change="wiModal.onZoneSetChange()" ng-options="ZoneSet as ZoneSet.properties.name for ZoneSet in wiModal.zoneSetList track by ZoneSet.id">
                                                     </select>
                                                 </div>
                                                 <label class="col-sm-3">Active Zones</label>
@@ -259,8 +257,15 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onCloseButtonClicked();" class="btn btn-default"
-                ng-disabled="wiModal.IsNotValid();"><span class="ok-16x16"></span>&nbsp;Close</button>
+                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="wiModal.IsNotValid();">
+                    <span class="apply-16x16"></span>&nbsp;Apply
+                </button>
+                <button type="button" ng-click="wiModal.onOKButtonClicked();" class="btn btn-default" ng-disabled="wiModal.IsNotValid();">
+                    <span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
+                    <span class="close-16x16"></span>&nbsp;Close
+                </button>
             </div>
         </div>
     </div>

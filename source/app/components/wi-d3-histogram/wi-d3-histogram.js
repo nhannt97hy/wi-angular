@@ -148,6 +148,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowReferenceWindow = false;
     }
 
+    this.histogramFormat = function(){
+        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl);
+    }
+
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         self.contextMenu = [{
@@ -162,7 +166,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Properties",
             icon: "properties2-16x16",
             handler: function () {
-                utils.histogramFormat(ModalService, wiComponentService, self.wiHistogramCtrl);
+                self.histogramFormat();
             }
         }, {
             name: "FlipHorizontalAxis",

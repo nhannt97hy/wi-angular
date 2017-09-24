@@ -1715,14 +1715,6 @@ exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
 }
 
-exports.histogramFormat = function (ModalService, wiComponentService, wiHistogramCtrl) {
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.histogramFormatDialog(ModalService, wiHistogramCtrl, function(ret) {
-        let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-        wiD3Ctrl.linkModels();
-        wiD3Ctrl.getZoneCtrl().zoneUpdate();
-    })
-}
 function getValPalette(palName, paletteList){
     console.log("NAME", paletteList.palName);
     return paletteList.palName;
