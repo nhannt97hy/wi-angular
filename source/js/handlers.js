@@ -76,7 +76,7 @@ exports.ExitButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (isExit) {
+    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you sure to exit program?", function (isExit) {
         if (isExit) {
             window.localStorage.removeItem('token');
             window.localStorage.removeItem('username');
@@ -622,7 +622,11 @@ exports.BlankCrossPlotButtonClicked = function () {
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        utils.createCrossplot(selectedNode.properties.idWell, crossplotName);
+        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function (crossplot) {
+            
+            utils.createPointSet({ idCrossPlot: crossplot.idCrossPlot, idWell: crossplot.idWell }, function (pointSet) {
+            })
+        });
     });
 };
 

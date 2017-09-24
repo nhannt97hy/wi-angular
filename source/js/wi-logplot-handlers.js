@@ -1,20 +1,23 @@
 function genSamples(nSamples) {
     let samples = [];
-    for( let i = 0; i < nSamples; i++ ) {
-        samples.push({y:i, x: Math.random()});
+    for (let i = 0; i < nSamples; i++) {
+        samples.push({
+            y: i,
+            x: Math.random()
+        });
     }
     return samples;
 }
 
-exports.EditFormatButtonClicked = function() {
+exports.EditFormatButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().openProptertiesDialog();
 };
 
-exports.SaveAsLogplotButtonClicked = function() {
+exports.SaveAsLogplotButtonClicked = function () {
     console.log('SaveAsLogplotButton is clicked');
 };
 
-exports.SaveAsButtonClicked = function() {
+exports.SaveAsButtonClicked = function () {
     console.log('SaveAsButton is clicked');
 };
 
@@ -86,7 +89,7 @@ exports.PrintButtonClicked = function () {
     })
 };
 
-exports.PrintToImageButtonClicked = function() {
+exports.PrintToImageButtonClicked = function () {
     console.log('PrintToImageButton is clicked');
 };
 
@@ -99,9 +102,9 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     let realLengthCm = (maxDepth - minDepth) * 100;
     let dpCm = utils.getDpcm();
     let trackHeight = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`).height();
-    let trackHeightCm = trackHeight/dpCm;
-    let trackRealLengthCm = trackHeightCm*rangeUnit;
-    let rangeHandlerByPercent = (trackRealLengthCm/realLengthCm) * 100;
+    let trackHeightCm = trackHeight / dpCm;
+    let trackRealLengthCm = trackHeightCm * rangeUnit;
+    let rangeHandlerByPercent = (trackRealLengthCm / realLengthCm) * 100;
     // console.log('scale handler', rangeHandlerByPercent, trackRealLengthCm, realLengthCm);
     if (rangeHandlerByPercent > 100) {
         rangeHandlerByPercent = 100;
@@ -110,99 +113,99 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     wiSlidingbarCtrl.updateRangeSlidingHandler(rangeHandlerByPercent);
 }
 
-exports.Scale20ButtonClicked = function() {
+exports.Scale20ButtonClicked = function () {
     let rangeUnit = 20;
     console.log(this);
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale50ButtonClicked = function() {
+exports.Scale50ButtonClicked = function () {
     let rangeUnit = 50;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale100ButtonClicked = function() {
+exports.Scale100ButtonClicked = function () {
     let rangeUnit = 100;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale200ButtonClicked = function() {
+exports.Scale200ButtonClicked = function () {
     let rangeUnit = 200;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale300ButtonClicked = function() {
+exports.Scale300ButtonClicked = function () {
     let rangeUnit = 300;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale500ButtonClicked = function() {
+exports.Scale500ButtonClicked = function () {
     let rangeUnit = 500;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale1000ButtonClicked = function() {
+exports.Scale1000ButtonClicked = function () {
     let rangeUnit = 1000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale2000ButtonClicked = function() {
+exports.Scale2000ButtonClicked = function () {
     let rangeUnit = 2000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale2500ButtonClicked = function() {
+exports.Scale2500ButtonClicked = function () {
     let rangeUnit = 2500;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale3000ButtonClicked = function() {
+exports.Scale3000ButtonClicked = function () {
     let rangeUnit = 3000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.Scale5000ButtonClicked = function() {
+exports.Scale5000ButtonClicked = function () {
     let rangeUnit = 5000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.ScaleFullButtonClicked = function() {
-    let rangeUnit = this.wiLogplot.getwiD3Ctrl().getMaxDepth()*100;
+exports.ScaleFullButtonClicked = function () {
+    let rangeUnit = this.wiLogplot.getwiD3Ctrl().getMaxDepth() * 100;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.ZoomInButtonClicked = function() {
+exports.ZoomInButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().zoom(false);
 };
 
-exports.ZoomOutButtonClicked = function() {
+exports.ZoomOutButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().zoom(true);
 };
 
-exports.CropDisplayButtonClicked = function() {
+exports.CropDisplayButtonClicked = function () {
     console.log('CropDisplayButton is clicked');
 };
-exports.RangeSpecificButtonClicked = function() {
+exports.RangeSpecificButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     DialogUtils.rangeSpecificDialog(this.ModalService, this.wiLogplot, function () {
-       console.log("RangeFrom");
+        console.log("RangeFrom");
     });
 }
 
-exports.ViewWholeWellButtonClicked = function() {
+exports.ViewWholeWellButtonClicked = function () {
     console.log('ViewWholeWellButton is clicked');
 };
 
-exports.AddDepthAxisButtonClicked = function() {
+exports.AddDepthAxisButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().addDepthTrack();
 };
 
 exports.NewTrackButtonClicked = function() {
-    this.wiLogplot.getwiD3Ctrl().addLogTrack('New Track');
+    this.wiLogplot.getwiD3Ctrl().addLogTrack();
 };
 
-exports.DuplicateTrackButtonClicked = function() {
+exports.DuplicateTrackButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
@@ -212,22 +215,25 @@ exports.DuplicateTrackButtonClicked = function() {
     }
     let wiApiService = this.wiApiService;
     let props = currentTrack.getProperties();
-    wiD3Ctrl.addLogTrack(props.title, function(newTrack) {
+    wiD3Ctrl.addLogTrack(props.title, function (newTrack) {
         props.orderNum = newTrack.orderNum;
         props.idTrack = newTrack.id;
         props.width = utils.pixelToInch(props.width);
-        wiApiService.editTrack(props, function(ret) {
+        wiApiService.editTrack(props, function (ret) {
             props.width = utils.inchToPixel(props.width);
             newTrack.setProperties(props);
             let curves = currentTrack.getCurves();
             if (!curves.length) return;
-            curves.forEach(function(curve) {
-                wiApiService.createLine({ idTrack: newTrack.id, idCurve: curve.idCurve }, function (line) {
+            curves.forEach(function (curve) {
+                wiApiService.createLine({
+                    idTrack: newTrack.id,
+                    idCurve: curve.idCurve
+                }, function (line) {
                     let newCurveProps = curve.getProperties();
                     newCurveProps.idLine = line.idLine;
                     newCurveProps.idTrack = newTrack.id;
                     newCurveProps.lineStyle = JSON.stringify(newCurveProps.lineStyle);
-                    wiApiService.editLine(newCurveProps, function() {
+                    wiApiService.editLine(newCurveProps, function () {
                         let newCurve = wiD3Ctrl.addCurveToTrack(newTrack, curve.rawData, {});
                         newCurve.setProperties(newCurveProps);
                         newTrack.plotCurve(newCurve);
@@ -238,44 +244,43 @@ exports.DuplicateTrackButtonClicked = function() {
     })
 };
 
-exports.AddZonationTrackButtonClicked = function() {
+exports.AddZonationTrackButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().addZoneTrack();
 }
 
-exports.DeleteTrackButtonClicked = function() {
+exports.DeleteTrackButtonClicked = function () {
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let wiApiService = this.wiApiService;
     const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete this track?", function (yes) {
-            if (!yes) return;
-            if (currentTrack.type == 'log-track') {
-                wiApiService.removeLogTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-            } else if (currentTrack.type == 'depth-track') {
-                wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-            } else if (currentTrack.type == 'zone-track') {
-                wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-            }
+    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete " + currentTrack.name + "?", function (yes) {
+        if (!yes) return;
+        if (currentTrack.type == 'log-track') {
+            wiApiService.removeLogTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.type == 'depth-track') {
+            wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.type == 'zone-track') {
+            wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
         }
-    );
+    });
 };
 
-exports.AddMarkerButtonClicked = function() {
+exports.AddMarkerButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().addMarker();
 };
 
-exports.AddZoneButtonClicked = function() {
+exports.AddZoneButtonClicked = function () {
     const currentTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
     if (currentTrack.isZoneTrack()) {
         currentTrack.setMode('AddZone');
     }
 };
 
-exports.AnnotationsButtonClicked = function() {
+exports.AnnotationsButtonClicked = function () {
     console.log('AnnotationsButton is clicked');
 };
 
-exports.AddImageButtonClicked = function() {
+exports.AddImageButtonClicked = function () {
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
@@ -309,7 +314,7 @@ exports.AddImageButtonClicked = function() {
 };
 
 
-exports.RemoveImageButtonClicked = function() {
+exports.RemoveImageButtonClicked = function () {
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     if (!currentTrack.getImages()[0]) return;
@@ -324,15 +329,14 @@ exports.RemoveImageButtonClicked = function() {
     })
 }
 
-exports.AddShadingButtonClicked = function() {
+exports.AddShadingButtonClicked = function () {
     console.log('AddShadingButton is clicked');
 };
 
-exports.CrossPlotButtonClicked = function() {
+exports.CrossPlotButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().createCrossplot();
 };
 
-exports.HistogramButtonClicked = function() {
+exports.HistogramButtonClicked = function () {
     console.log('HistogramButton is clicked');
 };
-

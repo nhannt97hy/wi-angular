@@ -3,6 +3,7 @@ let Curve = require('./visualize-curve');
 let Shading = require('./visualize-shading');
 let ViImage = require('./visualize-image');
 let Marker = require('./visualize-marker');
+let Annotation = require('./visualize-annotation');
 let Utils = require('./visualize-utils');
 
 module.exports = LogTrack;
@@ -202,7 +203,8 @@ LogTrack.prototype.getExtentY = function() {
     if (this.drawings.length == 0) return [-1, -1];
     let ys = [];
     this.drawings.forEach(function(d) {
-        ys = ys.concat(d.getExtentY());
+        if (d.getExtentY)
+            ys = ys.concat(d.getExtentY());
     })
     let minY = Utils.roundDown(d3.min(ys), 100 * this.yStep);
     let maxY = Utils.roundUp(d3.max(ys), 100 * this.yStep);
@@ -227,6 +229,7 @@ LogTrack.prototype.setTmpCurve = function(curve) {
  * @param {Object} drawing - The drawing to be current
  */
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
+    if (drawing == this.currentDrawing) return;
     this.currentDrawing = drawing;
     this.tmpCurve = null;
     this.plotAllDrawings();
@@ -241,6 +244,9 @@ LogTrack.prototype.init = function(baseElement) {
     Track.prototype.init.call(this, baseElement);
 
     let self = this;
+    this.trackContainer
+        .classed('vi-log-track-container', true)
+
     this.plotContainer
         .on('mousedown', function(){
             self.plotMouseDownCallback();
@@ -377,6 +383,13 @@ LogTrack.prototype.addMarker = function(config) {
     return marker;
 }
 
+LogTrack.prototype.addAnnotation= function(config) {
+    let ann = new Annotation(config);
+    ann.init(this.plotContainer);
+    this.drawings.push(ann);
+    return ann;
+}
+
 /**
  * Remove a drawing from track
  * @param {Object} drawing - The curve or shading object to remove
@@ -406,7 +419,6 @@ LogTrack.prototype.removeCurve = function(curve) {
  * @param {Object} shading - The shading object to remove
  */
 LogTrack.prototype.removeShading = function(shading) {
-    console.log("shading", shading);
     if (shading && shading.isShading())
 
         this.removeDrawing(shading);
@@ -536,6 +548,7 @@ LogTrack.prototype.removeAllDrawings = function() {
  * @param {Object} drawing - The drawing to plot
  */
 LogTrack.prototype.plotDrawing = function(drawing) {
+    // console.log('PLOT DRAWING')
     if (!drawing || !drawing.doPlot) return;
     let windowY = this.getWindowY();
     drawing.minY = windowY[0];
@@ -642,6 +655,14 @@ LogTrack.prototype.onMarkerMouseDown = function(marker, cb) {
     });
 }
 
+LogTrack.prototype.onDrawingMouseDown = function(drawing, cb) {
+    let self = this;
+    drawing.on('mousedown', function() {
+        self.drawingMouseDownCallback(drawing);
+        cb();
+    })
+}
+
 /**
  * Register event when mouse down the header area
  */
@@ -724,7 +745,7 @@ LogTrack.prototype.updateAxis = function() {
     let step = (end - start) / this.yTicks;
 
     let yAxis = d3.axisLeft(this.getTransformY())
-        .tickValues(d3.range(start, end + step / 2, step))
+        .tickValues(d3.range(start, end, step))
         .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
         .tickSize(-rect.width);
 
@@ -898,8 +919,10 @@ LogTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
 
 LogTrack.prototype.markerMouseDownCallback = function(marker) {
     this.setCurrentDrawing(marker);
-    // d3.event.stopPropagation();
-    // this.trackContainer.node().focus();
+}
+
+LogTrack.prototype.drawingMouseDownCallback = function(drawing) {
+    this.setCurrentDrawing(drawing);
 }
 
 LogTrack.prototype.plotMouseDownCallback = function() {

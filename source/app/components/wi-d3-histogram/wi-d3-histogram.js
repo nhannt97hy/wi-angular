@@ -74,7 +74,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
             self.getZoneCtrl().zones = self.zoneArr;
 
-            self.histogramModel.properties.histogramTitle = getHistogramTitle();
         }
         else {
             self.zoneSetModel = null;
@@ -90,6 +89,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         }
+        self.histogramModel.properties.histogramTitle = getHistogramTitle();
         self.histogramModel.properties.xLabel = getXLabel();
     }
     this.refreshHistogram = function() {

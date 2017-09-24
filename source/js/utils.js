@@ -1058,6 +1058,7 @@ function getModel(type, id) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let model = null;
+    console.log(rootNodes[0], type);
     visit(rootNodes[0], function (node) {
         if (node.type == type && node.id == id) {
             model = node;
@@ -1156,7 +1157,7 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
-let refreshProjectState = debounce(function () {
+let refreshProjectState =function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -1180,7 +1181,7 @@ let refreshProjectState = debounce(function () {
                 reject();
             });
     });
-}, 500);
+}
 exports.refreshProjectState = refreshProjectState;
 
 exports.renameDataset = function () {
@@ -1553,8 +1554,9 @@ exports.createCrossplot = function (idWell, crossplotName, callback) {
     }, function (crossplot) {
         console.log("Created new crossplot", crossplot);
         let crossplotModel = crossplotToTreeConfig(crossplot);
-        refreshProjectState();
-        openCrossplotTab(crossplotModel, callback);
+        refreshProjectState().then(function () {
+            openCrossplotTab(crossplotModel, callback(crossplot));
+        })
     })
 }
 
@@ -1575,7 +1577,7 @@ function openCrossplotTab(crossplotModel, callback) {
     wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
-            console.log("pointsets", pointSet);
+            if (!pointSet.idCurveX || !pointSet.idCurveY) return;
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
                 // let curveX;
                 wiApiService.infoCurve(pointSet.idCurveX, function (curveX) {
@@ -1593,7 +1595,7 @@ function openCrossplotTab(crossplotModel, callback) {
                                 let viCurveX = graph.buildCurve( curveX, xCurveData);
                                 let viCurveY = graph.buildCurve( curveY, yCurveData);
                                 wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, {
-                                    name: crossplotName,
+                                    name: crossplot.name,
                                     idPointSet: pointSet.idPointSet,
                                     idCrossPlot: wiCrossplotCtrl.id,
                                     idWell: wellProps.id,

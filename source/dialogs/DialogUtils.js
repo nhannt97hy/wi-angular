@@ -673,7 +673,9 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
         this.onOkButtonClicked = function () {
             close(self.name);
         }
-
+        this.onCancelButtonClicked = function () {
+            close();
+        }
     }
 
     ModalService.showModal({
@@ -687,7 +689,7 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
 
-            if (callback) callback(newPlot);
+            if (callback && newPlot) callback(newPlot);
         });
     });
 }
@@ -701,7 +703,9 @@ exports.tripleComboDialog = function (ModalService, callback) {
         this.onOkButtonClicked = function () {
             self.name = $scope.name;
             console.log(self.name);
-
+        }
+        this.onCancelButtonClicked = function () {
+            close();
         }
     }
 
@@ -1429,6 +1433,8 @@ exports.importLASDialog = function (ModalService, callback) {
 exports.importLASDialog1 = function (ModalService, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
+        this.error = null;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
         this.lasFile = null;
         this.selectedWell = null;
@@ -1439,12 +1445,28 @@ exports.importLASDialog1 = function (ModalService, callback) {
 
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
+        this.onWellNameChange = function () {
+            self.error = null;
+            if (self.wellName != null) {
+                self.projectLoaded.wells.forEach(function (well) {
+                    if (well.name.toLowerCase() == self.wellName.toLowerCase()) {
+                        self.error = 'Well name already existed!';
+                    }
+                });
+            }
+        }
+        this.onDatasetNameChange = function() {
+            self.error = null;
+            if (self.datasetName != null) {
+                self.selectedWell.datasets.forEach(function (dataset) {
+                    if (dataset.name.toLowerCase() == self.datasetName.toLowerCase()) {
+                        self.error = 'Dataset name already existed';
+                    }
+                })
+            }
+        }
         this.onLoadButtonClicked = function () {
-            console.log('las file: ', self.lasFile);
-            console.log('selectedWell: ', self.selectedWell);
-            console.log('selectedDataset: ', self.selectedDataset);
-            console.log('wellName: ', self.wellName);
-            console.log('datasetName: ', self.datasetName);
+            if (self.error) return;
 
             if (!self.lasFile) return;
 
@@ -1469,16 +1491,51 @@ exports.importLASDialog1 = function (ModalService, callback) {
             }
             payloadParams.file = self.lasFile;
 
-            wiApiService.postWithFile('/file', payloadParams)
-                .then(function (well) {
-                    console.log('well response', well);
-
-                    return close(well, 500);
-                })
-                .catch(function (err) {
-                    console.log('err', err);
-                    self.isDisabled = false;
-                })
+            if(self.selectedDataset){
+                DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
+                    if(!yes){
+                        self.isDisabled = false;
+                    } else {
+                        wiApiService.postWithFile('/file', payloadParams)
+                        .then(function (well) {
+                            console.log('well response', well);
+                            return close(well, 500);
+                        })
+                        .catch(function (err) {
+                            console.log('err', err);
+                            self.isDisabled = false;
+                        })
+                    }
+                });
+            } else {
+                if(self.selectedWell){
+                    DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to well existed! Do you want to continue?", function(yes){
+                        if(!yes){
+                            self.isDisabled = false;
+                        } else {
+                            wiApiService.postWithFile('/file', payloadParams)
+                            .then(function (well) {
+                                console.log('well response', well);
+                                return close(well, 500);
+                            })
+                            .catch(function (err) {
+                                console.log('err', err);
+                                self.isDisabled = false;
+                            })
+                        }
+                    });
+                } else {
+                    wiApiService.postWithFile('/file', payloadParams)
+                    .then(function (well) {
+                        console.log('well response', well);
+                        return close(well, 500);
+                    })
+                    .catch(function (err) {
+                        console.log('err', err);
+                        self.isDisabled = false;
+                    })
+                }
+            }
         };
 
         this.onCancelButtonClicked = function () {
@@ -3925,7 +3982,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         let props = wiD3CrossplotCtrl.crossplotModel.properties;
-        this.pointSet = props.pointSet;
+        this.pointSet = wiD3CrossplotCtrl.pointSet;
         // this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
@@ -3938,12 +3995,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
         this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true; 
-        this.zoneSets - new Array();
+        this.zoneSets = new Array();
         this.datasetsInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
 
         this.selectedZoneSet = null;
-        this.selectedZone = props.pointSet.activeZone != null ? props.pointSet.activeZone : 'All';
+        this.selectedZone = self.pointSet.activeZone ? self.pointSet.activeZone : 'All';
         this.selectedCurveX = null;
         this.selectedCurveY = null;
 
@@ -3953,11 +4010,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
             if( i == self.well.children.length - 1){
 
-                self.datasetsInWell.forEach(function (child) {
-                    child.children.forEach(function (item) {
-                        if (item.type == 'curve') {
-                            let d = item;
-                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                self.datasetsInWell.forEach(function (dataset) {
+                    dataset.children.forEach(function (curve) {
+                        if (curve.type == 'curve') {
+                            let d = curve;
+                            d.datasetCurve = dataset.properties.name + "." + curve.properties.name;
                             self.curvesOnDataset.push(d);
                             if(d.id == self.pointSet.idCurveX){
                                 self.selectedCurveX = self.pointSet.idCurveX;

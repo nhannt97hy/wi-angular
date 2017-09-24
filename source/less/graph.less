@@ -36,6 +36,25 @@
     }
 }
 
+.vi-log-track-container {
+    .vi-track-svg-container {
+        border: 1px solid black;
+    }
+
+    .vi-track-drawing {
+        pointer-events: none;
+
+        >g {
+            pointer-events: all;
+        }
+    }
+    .vi-track-axis {
+        .domain {
+            display: none;
+        }
+    }
+}
+
 .vi-marker-svg-group {
     cursor: row-resize;
 }
@@ -49,6 +68,12 @@
     .vi-crossplot-header-container {
         flex: 0 1 auto;
         text-align: center;
+        .vi-crossplot-header-name {
+            font-size: 20px;
+        }
+        .vi-crossplot-header-reference {
+
+        }
     }
 
     .vi-crossplot-body-container {

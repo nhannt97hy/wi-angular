@@ -94,7 +94,9 @@ Marker.prototype.setProperties = function(props) {
 
 Marker.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
-    this.svgContainer = plotContainer.select('.vi-track-svg-container');
+
+    this.svgContainer = plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing vi-marker-container');
     this.svgGroup = this.svgContainer.append('g')
         .classed('vi-marker-svg-group', true);
 

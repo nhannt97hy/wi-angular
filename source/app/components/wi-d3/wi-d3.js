@@ -85,16 +85,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return lines;
     }
 
-    this.addLogTrack = function(callback) {
+    this.addLogTrack = function(trackTitle, callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
             wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(ret) {
                 wiApiService.infoTrack(ret.idTrack, function(logTrack) {
-                    logTrack.title = 'Track '+ logTrack.idTrack;
+                    logTrack.title = trackTitle || 'Track ' + logTrack.idTrack;
                     let viTrack = self.pushLogTrack(logTrack);
                     wiApiService.editTrack(logTrack);
-                    // if (!callback) return;
-                    // callback(viTrack);
+                    if (!callback) return;
+                    callback(viTrack);
                 });
             });
         }
@@ -305,6 +305,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
             _currentTrack.setMode('AddMarker');
         }
+    }
+
+    this.addAnnotationToTrack = function(track, config) {
+        if (!track || !track.addAnnotation) return;
+        let ann = track.addAnnotation(config);
+        track.plotDrawing(ann);
+        track.onDrawingMouseDown(ann, function() {
+            if (d3.event.button == 2) {
+                _annotationOnRightClick();
+            }
+        });
+        ann.on('dblclick', _annotationOnDoubleClick);
+        ann.onRectDragEnd(function() {
+            // TODO: Send api to update annotation
+        });
+        return ann;
     }
 
     this.addMarkerToTrack = function(track, config) {
@@ -835,6 +851,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    function _annotationOnDoubleClick() {
+        console.log('ANNOTATION DOUBLE CLICK');
+        d3.event.stopPropagation();
+    }
+
     function _markerOnDoubleClick() {
         console.log('Marker double clicked');
         markerProperties();
@@ -900,6 +921,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 marker.doPlot();
             })
         })
+    }
+
+    function _annotationOnRightClick() {
+        console.log('ANNOTATION RIGHT CLICK');
     }
 
     function _markerOnRightClick() {

@@ -128,6 +128,7 @@ exports.DeleteItemButtonClicked = function () {
                     break;
                 default: return;
             }
+            utils.refreshProjectState();
         }
     });
 }
