@@ -308,6 +308,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    this.addAnnotationToTrack = function(track, config) {
+        if (!track || !track.addAnnotation) return;
+        let ann = track.addAnnotation(config);
+        track.plotDrawing(ann);
+        track.onDrawingMouseDown(ann, function() {
+            if (d3.event.button == 2) {
+                _annotationOnRightClick();
+            }
+        });
+        ann.on('dblclick', _annotationOnDoubleClick);
+        ann.onRectDragEnd(function() {
+            // TODO: Send api to update annotation
+        });
+        return ann;
+    }
+
     this.addMarkerToTrack = function(track, config) {
         if (!track || !track.addMarker) return;
         let marker = track.addMarker(config);
@@ -836,6 +852,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    function _annotationOnDoubleClick() {
+        console.log('ANNOTATION DOUBLE CLICK');
+        d3.event.stopPropagation();
+    }
+
     function _markerOnDoubleClick() {
         console.log('Marker double clicked');
         markerProperties();
@@ -901,6 +922,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 marker.doPlot();
             })
         })
+    }
+
+    function _annotationOnRightClick() {
+        console.log('ANNOTATION RIGHT CLICK');
     }
 
     function _markerOnRightClick() {

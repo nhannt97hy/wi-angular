@@ -225,7 +225,7 @@ Curve.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
 
     this.canvas = plotContainer.append('canvas')
-        .attr('class', 'vi-track-drawing')
+        .attr('class', 'vi-track-drawing vi-track-curve')
         .attr('id', this.id)
         .style('cursor', 'crosshair');
 

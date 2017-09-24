@@ -66,7 +66,7 @@ let app = angular.module('helloapp', [
     wiLogplotsModel.name
 ]);
 
-app.controller('WiDummy', function ($scope, wiComponentService) {
+app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
     wiComponentService.putComponent("GRAPH", graph);
     wiComponentService.putComponent("UTILS", utils);
     wiComponentService.putComponent('DRAG_MAN', dragMan);
@@ -80,6 +80,23 @@ app.controller('WiDummy', function ($scope, wiComponentService) {
     wiComponentService.on('myPlotD3Area', function(param) {
         wiD3Ctrl = wiComponentService.getComponent('myPlotD3Area');
     });
+
+    $timeout(function() {
+        $scope.depthTrackButtonClick();
+        $scope.trackButtonClick();
+        $scope.addData1ButtonClick();
+        // $scope.addData2ButtonClick();
+
+        let track = wiD3Ctrl.getCurrentTrack();
+        wiD3Ctrl.addAnnotationToTrack(track, {
+            text: 'Canh',
+            top: 4,
+            bottom: 8
+        });
+        wiD3Ctrl.addMarkerToTrack(track, {
+            depth: 12
+        })
+    })
 
     $scope.depthTrackButtonClick = function() {
         wiD3Ctrl.pushDepthTrack({

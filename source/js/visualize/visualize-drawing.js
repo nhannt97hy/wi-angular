@@ -53,6 +53,10 @@ Drawing.prototype.isMarker = function() {
     return this.constructor.name == 'Marker';
 }
 
+Drawing.prototype.isAnnotation = function(){
+    return this.constructor.name == 'Annotation';
+}
+
 /**
  * Check if the drawing near a point
  * @param {Number} x - x coordinate of the point
@@ -83,7 +87,7 @@ Drawing.prototype.nearPoint = function(x, y, e) {
  */
 Drawing.prototype.raise = function() {
     if (this.canvas) this.canvas.raise();
-    if (this.svgGroup) this.svgGroup.raise();
+    if (this.svgContainer) this.svgContainer.raise();
 }
 
 /**
@@ -101,6 +105,12 @@ Drawing.prototype.adjustSize = function() {
     let rect = this.root.node().getBoundingClientRect();
     if (this.canvas) {
         this.canvas
+            .attr('width', rect.width)
+            .attr('height', rect.height);
+    }
+
+    if (this.svgContainer) {
+        this.svgContainer
             .attr('width', rect.width)
             .attr('height', rect.height);
     }
@@ -166,4 +176,12 @@ Drawing.prototype.updateHeader = function() {
     if (!this.header) return;
     this.header.select('.vi-drawing-header-name')
         .text(this.name);
+}
+
+Drawing.prototype.getProperties = function() {
+    return Utils.getProperties(this);
+}
+
+Drawing.prototype.setProperties = function(props) {
+    Utils.setProperties(this, props);
 }
