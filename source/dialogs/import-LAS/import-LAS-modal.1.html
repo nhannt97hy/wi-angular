@@ -94,8 +94,8 @@
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default'
-                        ng-disabled='!wiModal.lasFile'
-                        ng-click='wiModal.onLoadButtonClicked()' ng-disabled="wiModal.error"><span class="ok-16x16"></span>&nbsp;Load</button>
+                        ng-disabled='!wiModal.lasFile || wiModal.isDisabled || wiModal.error'
+                        ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

@@ -1494,7 +1494,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
             if(self.selectedDataset){
                 DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
                     if(!yes){
-                        
+                        self.isDisabled = false;
                     } else {
                         wiApiService.postWithFile('/file', payloadParams)
                         .then(function (well) {
@@ -1511,7 +1511,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                 if(self.selectedWell){
                     DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to well existed! Do you want to continue?", function(yes){
                         if(!yes){
-                            
+                            self.isDisabled = false;
                         } else {
                             wiApiService.postWithFile('/file', payloadParams)
                             .then(function (well) {
@@ -1525,7 +1525,15 @@ exports.importLASDialog1 = function (ModalService, callback) {
                         }
                     });
                 } else {
-
+                    wiApiService.postWithFile('/file', payloadParams)
+                    .then(function (well) {
+                        console.log('well response', well);
+                        return close(well, 500);
+                    })
+                    .catch(function (err) {
+                        console.log('err', err);
+                        self.isDisabled = false;
+                    })
                 }
             }
         };
