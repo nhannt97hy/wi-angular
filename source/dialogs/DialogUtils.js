@@ -1434,6 +1434,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
         this.error = null;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
         this.lasFile = null;
         this.selectedWell = null;
@@ -1446,20 +1447,26 @@ exports.importLASDialog1 = function (ModalService, callback) {
 
         this.onWellNameChange = function () {
             self.error = null;
-            self.projectLoaded.wells.forEach(function (well) {
-                if (well.name.toLowerCase() == self.wellName.toLowerCase()) {
-                    self.error = 'Well name existed!';
-                }
-            })
+            if (self.wellName != null) {
+                self.projectLoaded.wells.forEach(function (well) {
+                    if (well.name.toLowerCase() == self.wellName.toLowerCase()) {
+                        self.error = 'Well name already existed!';
+                    }
+                });
+            }
         }
-
+        this.onDatasetNameChange = function() {
+            self.error = null;
+            if (self.datasetName != null) {
+                self.selectedWell.datasets.forEach(function (dataset) {
+                    if (dataset.name.toLowerCase() == self.datasetName.toLowerCase()) {
+                        self.error = 'Dataset name already existed';
+                    }
+                })
+            }
+        }
         this.onLoadButtonClicked = function () {
             if (self.error) return;
-            console.log('las file: ', self.lasFile);
-            console.log('selectedWell: ', self.selectedWell);
-            console.log('selectedDataset: ', self.selectedDataset);
-            console.log('wellName: ', self.wellName);
-            console.log('datasetName: ', self.datasetName);
 
             if (!self.lasFile) return;
 
@@ -1484,16 +1491,43 @@ exports.importLASDialog1 = function (ModalService, callback) {
             }
             payloadParams.file = self.lasFile;
 
-            wiApiService.postWithFile('/file', payloadParams)
-                .then(function (well) {
-                    console.log('well response', well);
+            if(self.selectedDataset){
+                DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
+                    if(!yes){
+                        
+                    } else {
+                        wiApiService.postWithFile('/file', payloadParams)
+                        .then(function (well) {
+                            console.log('well response', well);
+                            return close(well, 500);
+                        })
+                        .catch(function (err) {
+                            console.log('err', err);
+                            self.isDisabled = false;
+                        })
+                    }
+                });
+            } else {
+                if(self.selectedWell){
+                    DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to well existed! Do you want to continue?", function(yes){
+                        if(!yes){
+                            
+                        } else {
+                            wiApiService.postWithFile('/file', payloadParams)
+                            .then(function (well) {
+                                console.log('well response', well);
+                                return close(well, 500);
+                            })
+                            .catch(function (err) {
+                                console.log('err', err);
+                                self.isDisabled = false;
+                            })
+                        }
+                    });
+                } else {
 
-                    return close(well, 500);
-                })
-                .catch(function (err) {
-                    console.log('err', err);
-                    self.isDisabled = false;
-                })
+                }
+            }
         };
 
         this.onCancelButtonClicked = function () {

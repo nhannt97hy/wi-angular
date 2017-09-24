@@ -35,7 +35,7 @@
                         <div class="form-group">
                             <label class="control-label col-sm-4 normal-text" for="selectWell">Select Well Exist</label>
                             <div class="col-sm-8">
-                                <select ng-change="wiModal.wellName=null" name="selectWell" class="form-control wi-form-control"
+                                <select ng-change="wiModal.wellName=null; wiModal.onWellNameChange()" name="selectWell" class="form-control wi-form-control"
                                         ng-options="wellOption.name for wellOption in wiModal.projectLoaded.wells"
                                         ng-model="wiModal.selectedWell">
                                     <option value="">Well Name From LAS File</option>
@@ -74,13 +74,13 @@
                             <label class="control-label col-sm-4 normal-text" for="datasetName">Define new Dataset</label>
                             <div class="col-sm-8">
                                 <input type="text" id="datasetName" class="form-control wi-form-control" name="datasetName" 
-                                ng-model="wiModal.datasetName" ng-change="wiModal.selectedDataset=null"/>
+                                ng-model="wiModal.datasetName" ng-change="wiModal.selectedDataset=null; wiModal.onDatasetNameChange()"/>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-4 normal-text" for="datasetName">Dataset Name</label>
                             <div class="col-sm-8">
-                                <select ng-change="wiModal.datasetName=null" name="datasetName" class="form-control wi-form-control"
+                                <select ng-change="wiModal.datasetName=null; wiModal.onDatasetNameChange()" name="datasetName" class="form-control wi-form-control"
                                         ng-options="datasetOption.name for datasetOption in wiModal.selectedWell.datasets"
                                         ng-model="wiModal.selectedDataset">
                                     <option value="">Dataset Name From LAS File</option>
@@ -94,7 +94,7 @@
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default'
-                        ng-disabled='!wiModal.lasFile || wiModal.isDisabled'
+                        ng-disabled='!wiModal.lasFile'
                         ng-click='wiModal.onLoadButtonClicked()' ng-disabled="wiModal.error"><span class="ok-16x16"></span>&nbsp;Load</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
