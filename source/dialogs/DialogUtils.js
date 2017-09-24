@@ -673,7 +673,9 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
         this.onOkButtonClicked = function () {
             close(self.name);
         }
-
+        this.onCancelButtonClicked = function () {
+            close();
+        }
     }
 
     ModalService.showModal({
@@ -687,7 +689,7 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
 
-            if (callback) callback(newPlot);
+            if (callback && newPlot) callback(newPlot);
         });
     });
 }
@@ -701,7 +703,9 @@ exports.tripleComboDialog = function (ModalService, callback) {
         this.onOkButtonClicked = function () {
             self.name = $scope.name;
             console.log(self.name);
-
+        }
+        this.onCancelButtonClicked = function () {
+            close();
         }
     }
 
@@ -1429,6 +1433,7 @@ exports.importLASDialog = function (ModalService, callback) {
 exports.importLASDialog1 = function (ModalService, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
+        this.error = null;
 
         this.lasFile = null;
         this.selectedWell = null;
@@ -1439,7 +1444,17 @@ exports.importLASDialog1 = function (ModalService, callback) {
 
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
+        this.onWellNameChange = function () {
+            self.error = null;
+            self.projectLoaded.wells.forEach(function (well) {
+                if (well.name.toLowerCase() == self.wellName.toLowerCase()) {
+                    self.error = 'Well name existed!';
+                }
+            })
+        }
+
         this.onLoadButtonClicked = function () {
+            if (self.error) return;
             console.log('las file: ', self.lasFile);
             console.log('selectedWell: ', self.selectedWell);
             console.log('selectedDataset: ', self.selectedDataset);
