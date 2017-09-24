@@ -6,12 +6,12 @@
     </wi-container>
   </div>
   <div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;">
-    <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
-    <h5>Reference: [{{wiD3Crossplot.wellProperties.topDepth}} - {{wiD3Crossplot.wellProperties.bottomDepth}}]</h5>
+    <!-- <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
+    <h5>Reference: [{{wiD3Crossplot.wellProperties.topDepth}} - {{wiD3Crossplot.wellProperties.bottomDepth}}]</h5> -->
     <div class='crossplot-container'>
       <div style='padding-left:2em;'>{{wiD3Crossplot.crossplotModel.properties.plotType}}</div>
-      <div wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}' wi-element-ready='wiD3Histogram.onReady()'
-        wi-element-ready='wiD3Crossplot.onReady()' class='d3-crossplot-region' style="flex:1"></div>
+      <div wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}' wi-element-ready='wiD3Crossplot.onReady()'
+        class='d3-crossplot-region' style="flex:1"></div>
       <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Crossplot.crossplotModel.properties.xLabel}}</div>
     </div>
   </div>

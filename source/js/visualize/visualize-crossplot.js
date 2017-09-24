@@ -253,7 +253,7 @@ Crossplot.prototype.createContainer = function() {
 
     this.headerContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-header-container');
-/*
+
     this.headerContainer
         .selectAll('div.vi-crossplot-header-row')
         .data(['vi-crossplot-header-name', 'vi-crossplot-header-reference'])
@@ -261,7 +261,7 @@ Crossplot.prototype.createContainer = function() {
         .append('div')
             .attr('class', function(d) { return 'vi-crossplot-header-row ' + d; })
             .text('-');
- */
+
     this.bodyContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-body-container');
 }
@@ -289,7 +289,7 @@ Crossplot.prototype.doPlot = function() {
     this.rectZWidth = this.pointSet.curveZ ? 20 : 0;
 
     this.adjustSize();
-    // this.updateHeader();
+    this.updateHeader();
     this.updateAxises();
     this.plotSymbols();
     this.updateClipPath();
@@ -311,12 +311,12 @@ Crossplot.prototype.updateClipPath = function() {
         .attr('height', Math.abs(vpY[0] - vpY[1]));
 }
 
-// Crossplot.prototype.updateHeader = function() {
-//     this.headerContainer
-//         .selectAll('div.vi-crossplot-header-row')
-//         .data([this.name, 'Reference: [' + this.pointSet.intervalDepthTop + ' - ' + this.pointSet.intervalDepthBottom + ']'])
-//         .text(function(d) { return d; });
-// }
+Crossplot.prototype.updateHeader = function() {
+    this.headerContainer
+        .selectAll('div.vi-crossplot-header-row')
+        .data(['Crossplot: ' + this.name, 'Reference: [' + this.pointSet.intervalDepthTop + ' - ' + this.pointSet.intervalDepthBottom + ']'])
+        .text(function(d) { return d; });
+}
 
 Crossplot.prototype.updateAxises = function() {
     this.updateAxisTicks();

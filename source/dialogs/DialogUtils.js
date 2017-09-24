@@ -3938,7 +3938,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         let props = wiD3CrossplotCtrl.crossplotModel.properties;
-        this.pointSet = props.pointSet;
+        this.pointSet = wiD3CrossplotCtrl.pointSet;
         // this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
@@ -3951,12 +3951,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
         this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true; 
-        this.zoneSets - new Array();
+        this.zoneSets = new Array();
         this.datasetsInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
 
         this.selectedZoneSet = null;
-        this.selectedZone = props.pointSet.activeZone != null ? props.pointSet.activeZone : 'All';
+        this.selectedZone = self.pointSet.activeZone ? self.pointSet.activeZone : 'All';
         this.selectedCurveX = null;
         this.selectedCurveY = null;
 
@@ -3966,11 +3966,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
             if( i == self.well.children.length - 1){
 
-                self.datasetsInWell.forEach(function (child) {
-                    child.children.forEach(function (item) {
-                        if (item.type == 'curve') {
-                            let d = item;
-                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                self.datasetsInWell.forEach(function (dataset) {
+                    dataset.children.forEach(function (curve) {
+                        if (curve.type == 'curve') {
+                            let d = curve;
+                            d.datasetCurve = dataset.properties.name + "." + curve.properties.name;
                             self.curvesOnDataset.push(d);
                             if(d.id == self.pointSet.idCurveX){
                                 self.selectedCurveX = self.pointSet.idCurveX;

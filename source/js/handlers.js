@@ -622,7 +622,11 @@ exports.BlankCrossPlotButtonClicked = function () {
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        utils.createCrossplot(selectedNode.properties.idWell, crossplotName);
+        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function (crossplot) {
+            
+            utils.createPointSet({ idCrossPlot: crossplot.idCrossPlot, idWell: crossplot.idWell }, function (pointSet) {
+            })
+        });
     });
 };
 

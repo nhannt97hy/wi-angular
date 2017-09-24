@@ -13,6 +13,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
+        self.pointSet = self.crossplotModel.properties.pointSet;
+        if (!self.pointSet) {
+            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+                self.pointSet = crossplot.pointsets[0];
+            });
+        }
         // self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
         console.log("crossplot", self.crossplotModel, self.wellProperties);
         if (self.name) {
@@ -22,6 +28,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
     this.onReady = function () {
         self.linkModels();
+        
+        self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
@@ -42,17 +50,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.crossplotTitle = getHistogramTitle();
             self.crossplotModel.properties.xLabel = getXLabel();
         }
-        if (self.crossplotModel.properties.idCurve) {
-            self.curveModel = utils.getCurveFromId(self.crossplotModel.properties.idCurve);
-            if (self.viCrossplot) {
-                if (self.viCrossplot.idCurve != self.crossplotModel.properties.idCurve) {
-                    self.viCrossplot.idCurve = self.crossplotModel.properties.idCurve;
-                    loadCurve(self.viCrossplot.idCurve);
-                }
-                else {
-                    self.viCrossplot.signal('crossplot-update', "no load curve");
-                }
-            }
+        if (self.pointSet && self.pointSet.idCurveX && self.pointSet.idCurveY) {
+            self.curveXModel = utils.getModel('curve', self.crossplotModel.properties.idCurveX);
+            self.curveYModel = utils.getModel('curve', self.crossplotModel.properties.idCurveY);
         }
     }
     this.CloseReferenceWindow = function () {

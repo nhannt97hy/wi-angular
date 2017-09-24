@@ -199,7 +199,7 @@ exports.AddDepthAxisButtonClicked = function() {
 };
 
 exports.NewTrackButtonClicked = function() {
-    this.wiLogplot.getwiD3Ctrl().addLogTrack('New Track');
+    this.wiLogplot.getwiD3Ctrl().addLogTrack();
 };
 
 exports.DuplicateTrackButtonClicked = function() {
