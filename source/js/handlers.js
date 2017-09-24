@@ -76,7 +76,7 @@ exports.ExitButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you exit program?", function (isExit) {
+    DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you sure to exit program?", function (isExit) {
         if (isExit) {
             window.localStorage.removeItem('token');
             window.localStorage.removeItem('username');
