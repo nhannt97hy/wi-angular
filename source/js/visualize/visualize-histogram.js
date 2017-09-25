@@ -133,7 +133,7 @@ Histogram.prototype.doPlot = function() {
         .attr('height', self.container.node().clientHeight);
 
     // remove previously render histograms
-    this.svgContainer.selectAll('.bars, path.gaussian-line, line.mean-line, line.sigma-line, .mean-label, .sigma-label').remove();
+    this.svgContainer.selectAll('.bars, path.gaussian-line, path.cumulative-line, line.mean-line, line.sigma-line, .mean-label, .sigma-label').remove();
 
     // Sanity checking
     if (!this.data) {
@@ -237,11 +237,14 @@ Histogram.prototype.doPlot = function() {
         drawGaussianCurve();
     }
 
+    if (self.histogramModel.properties.showCumulative) {
+        drawCumulativeCurve();
+    }
+
     function showTooltip(d, i) {
         var content = null;
-        console.log(this);
         if (self.histogramModel.properties.plotType != 'Frequency') {
-            content = '<span>' + (d.length * 100 / self.fullData.length) + '%</span>';
+            content = '<span>' + (d.length * 100 / self.fullData.length).toFixed(2) + '%</span>';
         }
         else {
             content = '<div>' + d.length + '</div>';
@@ -346,8 +349,6 @@ Histogram.prototype.doPlot = function() {
     }
 
     function drawGaussianCurve() {
-        var squaredSigma = self.standardDeviation * self.standardDeviation;
-        console.log(self.standardDeviation, self.mean, squaredSigma);
         var gaussianPoints = getData(4000);
         var gaussianTransformY = d3.scaleLinear()
             .domain(d3.extent(gaussianPoints, function(d) {return d.y;}))
@@ -451,6 +452,84 @@ Histogram.prototype.doPlot = function() {
                 return x.x - y.x;
             });
             return data;
+        }
+    }
+    function drawCumulativeCurve() {
+        var cumulativePoints = getCumulativeData();
+        console.log(cumulativePoints);
+        var cumulativeTransformY = d3.scaleLinear()
+            .domain(d3.extent(cumulativePoints, function(d) {return d.y;}))
+            .range([vpY[1], vpY[0]]);
+
+        var line = d3.line()
+            .x(function(d) {
+                return transformX(d.x);
+            })
+            .y(function(d) {
+                return cumulativeTransformY(d.y);
+            });
+
+        self.svgContainer.append('path').datum(cumulativePoints)
+                .attr('class', 'cumulative-line').attr('d', line);
+
+        function getCumulativeData() {
+            var cumulativeVal = 0;
+            var points = new Array();
+            if (self.intervalBins) {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    for (let i in self.intervalBins) {
+                        cumulativeVal += self.intervalBins[i].length * 100 / self.fullData.length;
+                        points.push({
+                            x: (self.intervalBins[i].x0 + self.intervalBins[i].x1)/2,
+                            y: cumulativeVal
+                        });
+                    }
+                } 
+                else {
+                    for (let i in self.intervalBins) {
+                        cumulativeVal += self.intervalBins[i].length;
+                        points.push({
+                            x: (self.intervalBins[i].x0 + self.intervalBins[i].x1)/2,
+                            y: cumulativeVal
+                        });
+                    }
+                }
+            }
+            else {
+                if (self.histogramModel.properties.plotType != 'Frequency') {
+                    let fullData = 0;
+
+                    for (let i in self.zoneBins) 
+                        fullData += d3.sum(self.zoneBins[i], function(d) {return d.length;});
+
+                    for (let i in self.fullBins) {
+                        let tempVal = 0;
+                        for (let j in self.zoneBins) {
+                            tempVal += self.zoneBins[j][i].length;
+                        }
+                        tempVal = tempVal * 100 / fullData;
+                        cumulativeVal += tempVal;
+                        points.push({
+                            x: (self.fullBins[i].x0 + self.fullBins[i].x1)/2,
+                            y: cumulativeVal
+                        });
+                    }
+                }
+                else {
+                    for (let i in self.fullBins) {
+                        let tempVal = 0;
+                        for (let j in self.zoneBins) {
+                            tempVal += self.zoneBins[j][i].length;
+                        }
+                        cumulativeVal += tempVal;
+                        points.push({
+                            x: (self.fullBins[i].x0 + self.fullBins[i].x1)/2,
+                            y: cumulativeVal
+                        });
+                    }
+                }
+            }
+            return points;
         }
     }
 }
