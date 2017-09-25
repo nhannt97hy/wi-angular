@@ -1,13 +1,6 @@
 <div style="display:flex; flex-direction:row">
     <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Histogram.isShowWiZone" style="min-width:10%;max-width:20%">
         <wi-container name='ZoneHistogramContainer' title='Zone' close-handler='wiD3Histogram.CloseZone'>
-<!--
-            <wi-zone name="{{wiD3Histogram.getZoneAreaName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
-                all-zone-handler="wiD3Histogram.AllZoneClick" 
-                active-zone-handler="wiD3Histogram.ActiveZoneClick"
-                on-zone-data-ready="wiD3Histogram.refreshHistogram">
-            </wi-zone>
--->
             <wi-zone name="{{wiD3Histogram.getZoneAreaName();}}" zones="wiD3Histogram.zoneArr" active-zone="wiD3Histogram.histogramModel.properties.activeZone"
                 on-zone-ctrl-ready="wiD3Histogram.onZoneCtrlReady">
             </wi-zone>
@@ -27,7 +20,7 @@
                 Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
             </h5>
             <div class='histogram-container'>
-                <div style='padding-left:2em;'>{{wiD3Histogram.histogramModel.properties.plotType}}</div>
+                <div style='padding-left:2em;' ng-show="wiD3Histogram.histogramModel.properties.idCurve">{{wiD3Histogram.histogramModel.properties.plotType}}</div>
                 <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' style="flex:1"></div>
                 <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Histogram.histogramModel.properties.xLabel}}</div>
             </div>
