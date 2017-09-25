@@ -15,7 +15,7 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 const BASE_URL = 'http://sflow.me';
-// const BASE_URL = 'http://sflow.me:3000';
+// const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -193,7 +193,13 @@ Service.prototype.post = function (route, payload) {
             function (response) {
                 if (response.data && response.data.code === 200) {
                     return resolve(response.data.content);
-                } else if (response.data) {
+                }else if (response.data && response.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
+                }else if (response.data) {
                     return reject(response.data.reason);
                 } else {
                     return reject('Something went wrong!');
@@ -222,6 +228,12 @@ Service.prototype.delete = function (route, payload) {
             function (response) {
                 if (response.data && response.data.code === 200) {
                     return resolve(response.data.content);
+                }else if (response.data && response.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
                 } else if (response.data) {
                     return reject(response.data.reason);
                 } else {
@@ -274,6 +286,12 @@ Service.prototype.postWithFile = function (route, dataPayload) {
             function (responseSuccess) {
                 if (responseSuccess.data && responseSuccess.data.content) {
                     return resolve(responseSuccess.data.content);
+                }else if (responseSuccess.data && responseSuccess.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
                 } else {
                     return reject('Response is invalid!');
                 }
@@ -311,6 +329,12 @@ Service.prototype.uploadMultiFiles = function (dataPayload) {
                 //console.log('response', responseSuccess);
                 if (responseSuccess.data && responseSuccess.data.content) {
                     return resolve(responseSuccess.data.content);
+                }else if (responseSuccess.data && responseSuccess.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
                 } else {
                     return reject('Response is invalid!');
                 }
@@ -342,7 +366,17 @@ Service.prototype.uploadMultiFilesPrepare = function (dataPayLoad, callback) {
         data: dataPayLoad
     };
     self.Upload.upload(configUpload).then(function (response) {
-        callback(response.data.content);
+        if (response.data && response.data.content){
+            callback(response.data.content);
+        }else if (response.data && response.data.code === 401) {
+            window.localStorage.removeItem('token');
+            window.localStorage.removeItem('username');
+            window.localStorage.removeItem('password');
+            window.localStorage.removeItem('rememberAuth');
+            location.reload();
+        }else {
+            callback(null);
+        }
     }).catch(function (err) {
         console.log(err);
         self.getUtils().error(err);
