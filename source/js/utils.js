@@ -396,6 +396,27 @@ function histogramToTreeConfig(histogram) {
 
 exports.histogramToTreeConfig = histogramToTreeConfig;
 
+function getScalesFromCurve(curveModel, curve){
+    if(curve.LineProperty){
+        curveModel.properties.minScale =  curve.LineProperty.minScale;
+        curveModel.properties.maxScale =  curve.LineProperty.maxScale;
+    }else{
+        const wiApiService = __GLOBAL.wiApiService;        
+        getCurveData(wiApiService, curve.idCurve, function(err, data){
+            if(err){
+                curveModel.properties.minScale =  0;
+                curveModel.properties.maxScale = 200;
+            }else{
+                var d = data.map(function(d){
+                    return parseFloat(d.x);
+                });
+                curveModel.properties.minScale =  d3.min(d);
+                curveModel.properties.maxScale =  d3.max(d);
+            }
+        })
+    }
+}
+
 function curveToTreeConfig(curve) {
     var curveModel = new Object();
     curveModel.name = 'curve';
@@ -408,10 +429,9 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name, // TODO
-        minScale: curve.LineProperty ? curve.LineProperty.minScale : 0,
-        maxScale: curve.LineProperty ? curve.LineProperty.maxScale : 200
+        alias: curve.name // TODO
     };
+    getScalesFromCurve(curveModel, curve);
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
