@@ -622,9 +622,25 @@ exports.BlankCrossPlotButtonClicked = function () {
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function (crossplot) {
-            
-            utils.createPointSet({ idCrossPlot: crossplot.idCrossPlot, idWell: crossplot.idWell }, function (pointSet) {
+        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function (wiCrossplotCtrl) {
+            const crossPlotModel = wiCrossplotCtrl.crossplotModel;
+            const pointSetProps = {
+                idCrossPlot: wiCrossplotCtrl.id,
+                idWell: selectedNode.properties.idWell,
+                majorX: 5,
+                minorX: 5,
+                majorY: 5,
+                minorY: 5,
+            }
+            utils.createPointSet(pointSetProps, function (pointSet) {
+                let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+                wiD3CrossplotCtrl.createVisualizeCrossplot(null, null, {
+                    name: crossplotName,
+                    idPointSet: pointSet.idPointSet,
+                    idCrossPlot: wiCrossplotCtrl.id,
+                    idWell: selectedNode.properties.idWell,
+                    pointSet: pointSet
+                })
             })
         });
     });

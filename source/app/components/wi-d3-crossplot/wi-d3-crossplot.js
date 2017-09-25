@@ -14,11 +14,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
         self.pointSet = self.crossplotModel.properties.pointSet;
-        if (!self.pointSet) {
-            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
-                self.pointSet = crossplot.pointsets[0];
-            });
-        }
         // self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
         console.log("crossplot", self.crossplotModel, self.wellProperties);
         if (self.name) {
@@ -29,7 +24,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.onReady = function () {
         self.linkModels();
         
-        self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
+        // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
@@ -50,21 +45,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.crossplotTitle = getHistogramTitle();
             self.crossplotModel.properties.xLabel = getXLabel();
         }
-        if (self.pointSet && self.pointSet.idCurveX && self.pointSet.idCurveY) {
-            self.curveXModel = utils.getModel('curve', self.crossplotModel.properties.idCurveX);
-            self.curveYModel = utils.getModel('curve', self.crossplotModel.properties.idCurveY);
-        }
     }
     this.CloseReferenceWindow = function () {
         self.isShowReferenceWindow = false;
         utils.triggerWindowResize();
     }
     this.propertiesDialog = function () {
-        if(Object.keys(self.viCrossplot).length !== 0){
-            DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
-                console.log(ret);
+        if (!self.viCrossplot) {
+            self.createVisualizeCrossplot(null, null, {
+                name: self.crossplotModel.properties.name,
+                idPointSet: self.pointSet.idPointSet,
+                idCrossPlot: self.crossplotModel.properties.idCrossPlot,
+                idWell: self.crossplotModel.properties.idWell,
+                pointSet: self.pointSet
             })
         }
+        wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+            self.pointSet = crossplot.pointsets[0];
+            if(Object.keys(self.viCrossplot).length !== 0){
+                DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
+                    console.log(ret);
+                })
+            }
+        });
     }
     let commonCtxMenu = [
         {
