@@ -67,11 +67,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
-            self.zoneArr.forEach(function (zone) {
-                zone.handler = function () {
-                    console.log("----", zone.properties.idZone);
-                }
-            });
+            // self.zoneArr.forEach(function (zone) {
+            //     zone.handler = function () {
+            //         console.log("----", zone.properties.idZone);
+            //     }
+            // });
             self.getZoneCtrl().zones = self.zoneArr;
 
         }

@@ -221,7 +221,7 @@
                                 <div class="form-group">
                                     <div class="col-sm-2 padding-left-3em">
                                         <label for="isZonalDepths">
-                                            <input type="radio" id="isZonalDepths" ng-model="wiModal.depthType" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()">
+                                            <input type="radio" id="isZonalDepths" ng-model="wiModal.depthType" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-disabled="!wiModal.zoneSets.length">
                                             Zonal Depths
                                         </label>
                                     </div>

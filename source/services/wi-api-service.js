@@ -15,7 +15,7 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 const BASE_URL = 'http://sflow.me';
-//const BASE_URL = 'http://localhost:3000';
+// const BASE_URL = 'http://sflow.me:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';

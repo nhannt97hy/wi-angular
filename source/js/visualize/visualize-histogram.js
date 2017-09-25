@@ -133,7 +133,7 @@ Histogram.prototype.doPlot = function() {
         .attr('height', self.container.node().clientHeight);
 
     // remove previously render histograms
-    this.svgContainer.selectAll('.bars, path.gaussian-line, line.mean-line, line.sigma-line').remove();
+    this.svgContainer.selectAll('.bars, path.gaussian-line, line.mean-line, line.sigma-line, .mean-label, .sigma-label').remove();
 
     // Sanity checking
     if (!this.data) {
@@ -371,17 +371,39 @@ Histogram.prototype.doPlot = function() {
             .attr('x2', meanPos)
             .attr('y2', vpY[1]);
 
+        self.svgContainer.append("text")
+            .attr("y", 10)
+            .attr("x", meanPos)
+            .attr('text-anchor', 'start')
+            .attr("class", "mean-label")
+            .text("Avg");
+
         self.svgContainer.append('line').attr('class', 'sigma-line')
             .attr('x1', rightSigmaPos)
             .attr('y1', 0)
             .attr('x2', rightSigmaPos)
             .attr('y2', vpY[1]);
+        
+        self.svgContainer.append("text")
+            .attr("y", 10)
+            .attr("x", rightSigmaPos)
+            .attr('text-anchor', 'start')
+            .attr("class", "sigma-label")
+            .text("Std Dev");
 
         self.svgContainer.append('line').attr('class', 'sigma-line')
             .attr('x1', leftSigmaPos)
             .attr('y1', 0)
             .attr('x2', leftSigmaPos)
             .attr('y2', vpY[1]);
+
+        self.svgContainer.append("text")
+            .attr("y", 10)
+            .attr("x", leftSigmaPos)
+            .attr('text-anchor', 'start')
+            .attr("class", "sigma-label")
+            .text("Std Dev");
+
         function normal() {
             var x = 0, y = 0, rds, c;
             var xSample;

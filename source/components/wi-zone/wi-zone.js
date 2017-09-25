@@ -15,9 +15,6 @@ function ZoneController(wiComponentService, $timeout){
     }
 
     this.AllZoneButtonClick = function(){
-        if(self.allZoneHandler){
-            self.allZoneHandler();
-        }
         for (let idx in self.zoneArr) {
             self.zoneArr[idx] = false;
         }
@@ -25,9 +22,6 @@ function ZoneController(wiComponentService, $timeout){
     }
 
     this.ActiveZoneButtonClick = function(){
-        if(self.activeZoneHandler){
-            self.activeZoneHandler();
-        }
         for (let idx in self.zoneArr) {
             if (self.activeZone == "All") {
                 self.zoneArr[idx] = false;
@@ -93,8 +87,6 @@ app.component(wiZoneName, {
         name: '@',
         zones: '<',
         activeZone: '<',
-        allZoneHandler: '<',
-        activeZoneHandler: '<',
         onZoneCtrlReady: '<'
     }
 });
