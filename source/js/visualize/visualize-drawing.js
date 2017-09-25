@@ -185,3 +185,16 @@ Drawing.prototype.getProperties = function() {
 Drawing.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
 }
+
+Drawing.prototype.drawRootTooltip = function() {
+    let rect = this.root.node().getBoundingClientRect();
+    let mouse = d3.mouse(this.root.node());
+    if (mouse[0] < 0 || mouse[0] > rect.width || mouse[1] < 0 || mouse[1] > rect.height) {
+        if (typeof this.root.on('mouseleave') == 'function')
+            this.root.on('mouseleave')();
+    }
+    else {
+        if (typeof this.root.on('mousemove') == 'function')
+            this.root.on('mousemove')();
+    }
+}

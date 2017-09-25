@@ -91,7 +91,11 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
         wiD3Ctrl.addAnnotationToTrack(track, {
             text: 'Canh',
             top: 4,
-            bottom: 8
+            bottom: 8,
+            vAlign: 'Center',
+            hAlign: 'Center',
+            textStyle: 'Red',
+            // fitBounds: true
         });
         wiD3Ctrl.addMarkerToTrack(track, {
             depth: 12

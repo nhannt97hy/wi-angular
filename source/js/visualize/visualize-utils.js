@@ -1,4 +1,5 @@
 let CanvasHelper = require('./visualize-canvas-helper');
+let SvgHelper = require('./visualize-svg-helper');
 
 exports.round = round;
 exports.roundUp = roundUp;
@@ -31,12 +32,15 @@ exports.getDecimalFormatter = getDecimalFormatter;
 exports.setProperties = setProperties;
 exports.getProperties = getProperties;
 exports.sortByKey = sortByKey;
+exports.getMiddlePoint = getMiddlePoint;
+exports.isMouseInside = isMouseInside;
 
 function getProperties(obj) {
     let props = {};
     Object.keys(obj.PROPERTIES).forEach(function(key) {
         let value = obj[key];
         let schema = obj.PROPERTIES[key];
+        if (value === undefined) return;
 
         if (schema.type == 'Object' && schema.properties !== undefined) {
             let tmpObj = obj[key];
@@ -583,4 +587,20 @@ function sort(array) {
     return array.sort(function(a, b) {
         return a - b;
     });
+}
+
+function getMiddlePoint(point1, point2) {
+    return {
+        x: point1.x + (point2.x - point1.x) / 2,
+        y: point1.y + (point2.y - point1.y) / 2
+    }
+}
+
+function isMouseInside(element) {
+    let mouse = d3.mouse(element);
+    let x = mouse[0];
+    let y = mouse[1];
+    let r = element.getBBox();
+
+    return x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height;
 }

@@ -320,6 +320,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         ann.onRectDragEnd(function() {
             // TODO: Send api to update annotation
         });
+        ann.onLineDragEnd(function() {
+            // TODO: Send api to update annotation
+        })
         return ann;
     }
 
@@ -852,6 +855,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _annotationOnDoubleClick() {
+        // TODO: open dialog
         console.log('ANNOTATION DOUBLE CLICK');
         d3.event.stopPropagation();
     }
@@ -924,6 +928,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _annotationOnRightClick() {
+        // TODO: open dialog
         console.log('ANNOTATION RIGHT CLICK');
     }
 

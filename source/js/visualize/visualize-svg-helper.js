@@ -9,6 +9,14 @@ function SvgHelper(svgGroup, config) {
     this.size = config.size || 4;
 }
 
+SvgHelper.prototype.line = function(x1, y1, x2, y2) {
+    let line = this.svgGroup.append('path')
+        .attr('d', 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2)
+
+    this.draw(line);
+    return line;
+}
+
 SvgHelper.prototype.circle = function(x, y) {
     let circle = this.svgGroup.append('circle')
         .attr('cx', x)
@@ -30,7 +38,7 @@ SvgHelper.prototype.square = function(x, y) {
 }
 
 SvgHelper.prototype.draw = function(element) {
-    element
+    return element
         .attr('fill', this.fillStyle)
         .attr('stroke', this.strokeStyle)
         .attr('stroke-width', this.lineWidth)
