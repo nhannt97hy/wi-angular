@@ -4494,8 +4494,13 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
-            self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+            wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
+                console.log('scale curve');
+                $timeout(function(){
+                    self.histogramProps.leftScale = scale.minScale;
+                    self.histogramProps.rightScale = scale.maxScale;
+                });
+            })        
         }
 
         function getTopFromWell() {

@@ -44,6 +44,7 @@ const EDIT_CURVE = '/project/well/dataset/curve/edit';
 const DELETE_CURVE = '/project/well/dataset/curve/delete';
 const COPY_CURVE = '/project/well/dataset/curve/copy';
 const CUT_CURVE = '/project/well/dataset/curve/move';
+const SCALE_CURVE = '/project/well/dataset/curve/scale';
 
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
@@ -577,10 +578,22 @@ Service.prototype.exportCurve = function (idCurve, callback) {
 
 Service.prototype.removeCurve = function (idCurve, callback) {
     let self = this;
+    this.post(SCALE_CURVE, {idCurve: idCurve})
+        .then(function (res) {
+            callback(res)
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        })
+}
+
+Service.prototype.scaleCurve = function (idCurve, callback) {
+    let self = this;
     let dataRequest = {
         idCurve: idCurve
     }
-    this.delete(DELETE_CURVE, dataRequest)
+    this.post(SCALE_CURVE, dataRequest)
         .then(callback)
         .catch(function (err) {
             console.error(err);

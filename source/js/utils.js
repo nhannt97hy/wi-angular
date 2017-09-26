@@ -396,27 +396,6 @@ function histogramToTreeConfig(histogram) {
 
 exports.histogramToTreeConfig = histogramToTreeConfig;
 
-function getScalesFromCurve(curveModel, curve){
-    if(curve.LineProperty){
-        curveModel.properties.minScale =  curve.LineProperty.minScale;
-        curveModel.properties.maxScale =  curve.LineProperty.maxScale;
-    }else{
-        const wiApiService = __GLOBAL.wiApiService;        
-        getCurveData(wiApiService, curve.idCurve, function(err, data){
-            if(err){
-                curveModel.properties.minScale =  0;
-                curveModel.properties.maxScale = 200;
-            }else{
-                var d = data.map(function(d){
-                    return parseFloat(d.x);
-                });
-                curveModel.properties.minScale =  d3.min(d);
-                curveModel.properties.maxScale =  d3.max(d);
-            }
-        })
-    }
-}
-
 function curveToTreeConfig(curve) {
     var curveModel = new Object();
     curveModel.name = 'curve';
@@ -431,7 +410,6 @@ function curveToTreeConfig(curve) {
         dataset: curve.dataset,
         alias: curve.name // TODO
     };
-    getScalesFromCurve(curveModel, curve);
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
@@ -548,43 +526,6 @@ function createHistogramNode(well) {
     histogramModel.properties = {
         idWell: well.idWell
     };
-    // mock
-    // well.histograms = [{
-    //     idHistogram: 2810,
-    //     histogramTitle: 'CuongHistogram',
-    //     hardCopyWidth: null,
-    //     hardCopyHeight: null,
-    //     intervalDepthTop: 1200,
-    //     intervalDepthBottom: 1900,
-    //     divisions: 50,
-    //     leftScale: 0,
-    //     rightScale: 0,
-    //     showGaussian: false,
-    //     loga: false,
-    //     showGrid: false,
-    //     flipHorizontal: false,
-    //     lineStyle: "Custom",
-    //     lineColor: "Blue",
-    //     plotType: "Frequency",
-    //     color: "Blue",
-    //     discriminators: null,
-    //     createdAt: "2017-09-06T07:44:10.000Z",
-    //     updatedAt: "2017-09-06T07:44:10.000Z",
-    //     idWell: well.idWell,
-    //     idCurve: 1,
-    //     idZoneSet: 1,
-    //     zones: [{
-    //         "idZone": 2,
-    //         "startDepth": 1144.03,
-    //         "endDepth": 1175.72,
-    //         "fill": "{\"pattern\":{\"name\":\"none\",\"background\":\"rgb(0, 0, 255)\",\"foreground\":\"white\"}}",
-    //         "showName": true,
-    //         "name": "1144",
-    //         "createdAt": "2017-09-07T10:32:17.000Z",
-    //         "updatedAt": "2017-09-07T10:32:17.000Z",
-    //         "idZoneSet": 1
-    //     }]
-    // }];
 
     if (!well.histograms) return histogramModel;
     histogramModel.children = new Array();
