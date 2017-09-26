@@ -14,6 +14,25 @@ function Crossplot(config) {
     this.rectZWidth = 0;
 }
 
+const POLYGON_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idPolygon: { type: 'Integer' },
+        lineStyle: { type: 'String', default: 'Blue' },
+        display: { type: 'Boolean', default: true },
+        points: {
+            type: 'Array',
+            item: {
+                type: 'Object',
+                properties: {
+                    x: { type: 'Float' },
+                    y: { type: 'Float' }
+                }
+            }
+        }
+    }
+}
+
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
@@ -63,24 +82,7 @@ Crossplot.prototype.PROPERTIES = {
     },
     polygons: {
         type: 'Array',
-        item: {
-            type: 'Object',
-            properties: {
-                idPolygon: { type: 'Integer' },
-                lineStyle: { type: 'String', default: 'Blue' },
-                display: { type: 'Boolean', default: true },
-                points: {
-                    type: 'Array',
-                    item: {
-                        type: 'Object',
-                        properties: {
-                            x: { type: 'Float' },
-                            y: { type: 'Float' }
-                        }
-                    }
-                }
-            }
-        },
+        item: POLYGON_SCHEMA,
         default: []
     },
     regressionLines: {
@@ -112,12 +114,7 @@ Crossplot.prototype.PROPERTIES = {
                 exclude: { type: 'Boolean', default: false },
                 polygons: {
                     type: 'Array',
-                    item: {
-                        type: 'Object',
-                        properties: {
-                            idPolygon: { type: 'Integer' }
-                        }
-                    },
+                    item: POLYGON_SCHEMA,
                     default: []
                 },
                 fitX: { type: 'Float' },
