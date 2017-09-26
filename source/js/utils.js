@@ -387,7 +387,7 @@ function histogramToTreeConfig(histogram) {
     histogramModel.handler = function () {
         let selectedNode = getSelectedNode();
         if (selectedNode && selectedNode.type == 'histogram') {
-            openHistogramTab(__GLOBAL.wiComponentService, selectedNode);
+            openHistogramTab(selectedNode);
         }
     }
 
@@ -1616,7 +1616,8 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
     return wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest);
 };
 
-function openHistogramTab(wiComponentService, histogramModel, callback) {
+function openHistogramTab(histogramModel, callback) {
+    let wiComponentService = __GLOBAL.wiComponentService;    
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
