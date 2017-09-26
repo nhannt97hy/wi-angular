@@ -1,16 +1,34 @@
 wi-user {
     &>div {
-        background-color: transparent;
-        margin: auto 10px;
+        //background-color: transparent;
+        //background-color: rgba(255,255,255,0.7);
+        background-color: rgba(128,128,128,0.7);
+        margin: auto;
+        border: 1px solid #888;
+        padding: 2px;
+        box-shadow: 5px 5px 5px #888;
+        border-radius: 5px;
+    }
+    .user-img-holder {
+        margin: auto;
+        width: 100%;
+        background-color: rgba(255,255,255,0.7);
+        padding: 2px;
     }
     .user-img {
-        margin-right: 10px;
-        height: 25px;
-        width: 25px;
-        border-radius: 50%;
+        margin: auto;
+        height: 50px;
+        width: 50px;
+        //border-radius: 30%;
     }
     .user-name {
-        font-size: 16px;
-        vertical-align: middle;
+        color: white;
+        width: 50px;
+        height: 1.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 10px;
+        text-align:center;
+        margin-bottom: 5px;
     }
 }

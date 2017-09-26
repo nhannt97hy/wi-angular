@@ -14,6 +14,25 @@ function Crossplot(config) {
     this.rectZWidth = 0;
 }
 
+const POLYGON_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idPolygon: { type: 'Integer' },
+        lineStyle: { type: 'String', default: 'Blue' },
+        display: { type: 'Boolean', default: true },
+        points: {
+            type: 'Array',
+            item: {
+                type: 'Object',
+                properties: {
+                    x: { type: 'Float' },
+                    y: { type: 'Float' }
+                }
+            }
+        }
+    }
+}
+
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
@@ -63,24 +82,7 @@ Crossplot.prototype.PROPERTIES = {
     },
     polygons: {
         type: 'Array',
-        item: {
-            type: 'Object',
-            properties: {
-                idPolygon: { type: 'Integer' },
-                lineStyle: { type: 'String', default: 'Blue' },
-                display: { type: 'Boolean', default: true },
-                points: {
-                    type: 'Array',
-                    item: {
-                        type: 'Object',
-                        properties: {
-                            x: { type: 'Float' },
-                            y: { type: 'Float' }
-                        }
-                    }
-                }
-            }
-        },
+        item: POLYGON_SCHEMA,
         default: []
     },
     regressionLines: {
@@ -110,9 +112,9 @@ Crossplot.prototype.PROPERTIES = {
                 },
                 inverseReg: { type: 'Boolean', default: false },
                 exclude: { type: 'Boolean', default: false },
-                polygonIndices: {
+                polygons: {
                     type: 'Array',
-                    item: { type: 'Integer' },
+                    item: { type: 'Object' },
                     default: []
                 },
                 fitX: { type: 'Float' },
@@ -548,8 +550,10 @@ Crossplot.prototype.prepareRegressionLines = function() {
 
     let self = this;
     regLines.forEach(function(l) {
-        let polygons = self.polygons.filter(function(p, i) {
-            return l.polygonIndices.indexOf(i) > -1;
+        let polygons = self.polygons.filter(function(p) {
+            return l.polygons.map(function(lp){
+                return lp.idPolygon;
+            }).indexOf(p.idPolygon) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {
@@ -630,8 +634,9 @@ Crossplot.prototype.plotSymbols = function() {
     let self = this;
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
+    let transformZ;
     if (self.pointSet.curveZ) {
-        let transformZ = this.getTransformZ();
+        transformZ = this.getTransformZ();
     }
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();

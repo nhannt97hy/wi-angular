@@ -121,9 +121,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(self.histogramAreaId, domElem);
         self.createVisualizeHistogram(self.histogramModel, domElem);
         self.histogramModel.properties.histogramTitle = getHistogramTitle();
-
     }
-    this.$onInit = function () {
+    this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         if (self.name) {
@@ -224,14 +223,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
                 self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
-            }
-        }, {
-            name: "ShowCumulativeCurve",
-            label: "Show Cumulative Curve",
-            "isCheckType": "true",
-            checked: false, // TODO
-            handler: function () {
-
+                self.visHistogram.signal('histogram-update', "show/hide Cumulative curve");
             }
         }, {
             name: "ShowTooltip",

@@ -57,6 +57,7 @@ exports.CumulativeButtonClicked = function() {
     console.log('CumulativeButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.histogramModel.properties.showCumulative = !wiHistogramCtrl.histogramModel.properties.showCumulative;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Cumulative');
 }
 
 exports.PlotBarsButtonClicked = PlotBarsButtonClicked;

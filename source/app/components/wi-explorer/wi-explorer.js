@@ -761,6 +761,34 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: "1"
                     }
                 ]
+            case 'histogram':
+                return [
+                    {
+                        name: "Open",
+                        label: "Open",
+                        icon: "play-16x16",
+                        handler: function() {
+                            let histogramModel = utils.getSelectedNode();
+                            utils.openHistogramTab(histogramModel);
+                        }
+                    }, {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16-edit",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            self.handlers.DeleteItemButtonClicked();
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ];
             default:
                 return [];
         }

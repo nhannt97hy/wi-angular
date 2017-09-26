@@ -580,10 +580,22 @@ Service.prototype.exportCurve = function (idCurve, callback) {
 
 Service.prototype.removeCurve = function (idCurve, callback) {
     let self = this;
+    this.post(SCALE_CURVE, {idCurve: idCurve})
+        .then(function (res) {
+            callback(res)
+        })
+        .catch(function (err) {
+            console.error(err);
+            self.getUtils().error(err);
+        })
+}
+
+Service.prototype.scaleCurve = function (idCurve, callback) {
+    let self = this;
     let dataRequest = {
         idCurve: idCurve
     }
-    this.delete(DELETE_CURVE, dataRequest)
+    this.post(SCALE_CURVE, dataRequest)
         .then(callback)
         .catch(function (err) {
             console.error(err);

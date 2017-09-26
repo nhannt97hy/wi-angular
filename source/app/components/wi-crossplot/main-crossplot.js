@@ -100,6 +100,7 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
             },
             polygons: [
                 {
+                    idPolygon: 1,
                     lineStyle: 'red',
                     points: [
                         { x: -6, y: 4 },
@@ -109,7 +110,7 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                     ]
                 },
                 {
-                    idPolygon: '1',
+                    idPolygon: 2,
                     lineStyle: 'gray',
                     points: [
                         { x: 2, y: 1 },
@@ -125,21 +126,21 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                 },
                 {
                     lineStyle: {
-                        width: 2,
-                        style: [1, 2],
-                        color: 'red'
+                        lineWidth: 5,
+                        lineStyle: [1, 2],
+                        lineColor: 'red'
                     },
-                    polygonIndices: [0]
+                    polygons: [{idPolygon: 1}]
                 },
                 {
-                    lineStyle: { color: 'yellow' },
-                    polygonIndices: [0,1]
+                    lineStyle: { lineColor: 'yellow' },
+                    polygons: [{idPolygon: 1}, {idPolygon: 2}]
                 },
 
                 {
-                    lineStyle: { color: 'black'},
+                    lineStyle: { lineColor: 'black'},
                     exclude: true,
-                    polygonIndices: [0,1],
+                    polygons: [{idPolygon: 1}, {idPolygon:2}],
                     displayEquation: false
                 },
             ]
