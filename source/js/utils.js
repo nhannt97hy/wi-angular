@@ -1546,6 +1546,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback) {
 }
 
 function openCrossplotTab(crossplotModel, callback) {
+
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiApiService = __GLOBAL.wiApiService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
@@ -1563,6 +1564,7 @@ function openCrossplotTab(crossplotModel, callback) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
             if (!pointSet.idCurveX || !pointSet.idCurveY) return;
+
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
                 // let curveX;
                 wiApiService.infoCurve(pointSet.idCurveX, function (curveX) {
@@ -1571,30 +1573,36 @@ function openCrossplotTab(crossplotModel, callback) {
                         // let curveY;
                         wiApiService.infoCurve(pointSet.idCurveY, function (curveY) {
                             // curveY = curveY;
-                            console.log("openDATA", curveX, curveY, xCurveData, yCurveData);
-                            if (pointSet.idCurveZ) {
-                                wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
-                                    // TODO
-                                })
-                            } else {
-                                let viCurveX = graph.buildCurve( curveX, xCurveData);
-                                let viCurveY = graph.buildCurve( curveY, yCurveData);
-                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, {
-                                    name: crossplot.name,
-                                    idPointSet: pointSet.idPointSet,
-                                    idCrossPlot: wiCrossplotCtrl.id,
-                                    idWell: wellProps.id,
-                                    pointSet: pointSet
-                                });
+
+                            function createViCrossplot() {
+                                wiD3CrossplotCtrl.pointSet = pointSet;
+                                wiD3CrossplotCtrl.linkModels();
+                                crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
+
                                 if (crossplot.polygons && crossplot.polygons.length) {
                                     for (let polygon of crossplot.polygons) {
                                         try {
                                             polygon.points = JSON.parse(polygon.points);
                                         } catch (error) {}
                                     }
-                                    wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
                                 }
 
+                                let viCurveX = graph.buildCurve( curveX, xCurveData, wellProps.properties);
+                                let viCurveY = graph.buildCurve( curveY, yCurveData, wellProps.properties);
+
+                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                            }
+
+                            if (pointSet.idCurveZ) {
+                                wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
+                                    wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
+                                        let viCurveZ = graph.buildCurve( curveZ, zCurveData, wellProps.properties);
+                                        pointSet.curveZ = viCurveZ;
+                                        createViCrossplot();
+                                    })
+                                })
+                            } else {
+                                createViCrossplot();
                             }
                         })
                     })
@@ -1617,7 +1625,7 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
 };
 
 function openHistogramTab(histogramModel, callback) {
-    let wiComponentService = __GLOBAL.wiComponentService;    
+    let wiComponentService = __GLOBAL.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
