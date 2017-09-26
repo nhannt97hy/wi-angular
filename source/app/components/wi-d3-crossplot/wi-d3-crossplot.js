@@ -13,7 +13,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
-        self.pointSet = self.crossplotModel.properties.pointSet;
+        if (self.crossplotModel)
+            self.pointSet = self.crossplotModel.properties.pointSet;
         // self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
         console.log("crossplot", self.crossplotModel, self.wellProperties);
         if (self.name) {
@@ -23,7 +24,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
     this.onReady = function () {
         self.linkModels();
-        
+
         // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
     }
     this.CloseZone = function () {
