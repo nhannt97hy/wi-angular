@@ -21,8 +21,8 @@
             </h5>
             <div class='histogram-container'>
                 <div style='padding-left:2em;' ng-show="wiD3Histogram.histogramModel.properties.idCurve">{{wiD3Histogram.histogramModel.properties.plotType}}</div>
-                <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region {{wiD3Histogram.histogramModel.properties.showGrid?"show-grid":"hide-grid"}}' style="flex:1"></div>
-                <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Histogram.histogramModel.properties.xLabel}} - {{wiD3Histogram.histogramModel.properties.showGrid}}</div>
+                <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' style="flex:1"></div>
+                <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Histogram.histogramModel.properties.xLabel}}</div>
             </div>
         </div>
         <div resizable r-directions="['top']" r-flex="true" class="statistic-pane">

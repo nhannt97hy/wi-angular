@@ -80,8 +80,6 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
             ( tempDepth < this.histogramModel.properties.intervalDepthBottom ));
 }
 
-
-
 Histogram.prototype.getZoneData = function(idx) {
     var self = this;
     return this.data.filter(function(d) {
@@ -235,6 +233,14 @@ Histogram.prototype.doPlot = function() {
         drawCumulativeCurve();
     }
 
+    if (self.histogramModel.properties.showGrid) {
+        console.log('Show grid');
+        self.container.classed('show-grid', true).classed('hide-grid', false);
+    }
+    else {
+        console.log('Hide grid');
+        self.container.classed('show-grid', false).classed('hide-grid', true);
+    }
     function showTooltip(d, i) {
         var content = null;
         if (self.histogramModel.properties.plotType != 'Frequency') {
