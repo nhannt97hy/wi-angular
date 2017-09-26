@@ -15,6 +15,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             let projectModel = utils.projectToTreeConfig(projectLoaded);
             self.treeConfig = [projectModel];
+            utils.putListFamily();
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -31,6 +32,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             $timeout(function() {
                 self.backupConfig(backupConfig, self.treeConfig);
             });
+            utils.putListFamily();            
         });
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT1, function () {
             let backupConfig = self.treeConfig;

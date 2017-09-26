@@ -44,6 +44,9 @@ const EDIT_CURVE = '/project/well/dataset/curve/edit';
 const DELETE_CURVE = '/project/well/dataset/curve/delete';
 const COPY_CURVE = '/project/well/dataset/curve/copy';
 const CUT_CURVE = '/project/well/dataset/curve/move';
+const SCALE_CURVE = '/project/well/dataset/curve/scale';
+
+const FAMILY_LIST = '/family/list';
 
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
@@ -586,6 +589,26 @@ Service.prototype.removeCurve = function (idCurve, callback) {
             console.error(err);
             self.getUtils().error(err);
         });
+}
+
+Service.prototype.scaleCurve = async function (idCurve) {
+    const self = this;
+    try {
+        return await this.post(SCALE_CURVE, {idCurve: idCurve});
+    } catch (err) {
+        self.getUtils().error(err);        
+    }
+ }
+
+Service.prototype.listFamily = async function (callback) {
+    const self = this;
+    this.post(FAMILY_LIST)
+        .then(function (res) {
+            if (callback) callback(res);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        })
 }
 
 Service.prototype.editLogplot = function (infoLogplot, callback) {

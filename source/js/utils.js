@@ -1773,3 +1773,15 @@ function triggerWindowResize() {
     })
 }
 exports.triggerWindowResize = triggerWindowResize;
+
+function putListFamily() {
+    __GLOBAL.wiApiService.listFamily(function (families) {
+        __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.LIST_FAMILY, families);
+    })
+}
+exports.putListFamily = putListFamily;
+
+function getListFamily() {
+    return __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.LIST_FAMILY);
+}
+exports.getListFamily = getListFamily;
