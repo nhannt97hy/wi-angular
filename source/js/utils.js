@@ -1599,7 +1599,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback) {
         console.log("Created new crossplot", crossplot);
         let crossplotModel = crossplotToTreeConfig(crossplot);
         refreshProjectState().then(function () {
-            openCrossplotTab(crossplotModel, callback(crossplot));
+            openCrossplotTab(crossplotModel, callback);
         })
     })
 }

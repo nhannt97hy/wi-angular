@@ -1194,6 +1194,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         idWell: idWell,
                         idCurveX: curve1.idCurve,
                         idCurveY: curve2.idCurve,
+                        majorX: 5,
+                        minorX: 5,
+                        majorY: 5,
+                        minorY: 5,
                     }
                     let wellProps = _getWellProps();
                     Utils.createPointSet(dataPointSet, function (pointSet) {
