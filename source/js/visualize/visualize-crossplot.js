@@ -114,7 +114,7 @@ Crossplot.prototype.PROPERTIES = {
                 exclude: { type: 'Boolean', default: false },
                 polygons: {
                     type: 'Array',
-                    item: POLYGON_SCHEMA,
+                    item: { type: 'Object' },
                     default: []
                 },
                 fitX: { type: 'Float' },
