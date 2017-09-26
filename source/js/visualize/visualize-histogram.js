@@ -200,7 +200,6 @@ Histogram.prototype.doPlot = function() {
         if (step < 0) __reverseBins(this.intervalBins);
     }
     
-
     // Calculate average and standardDeviation
     self.unsetJoinedZoneData(); // IMPORTANT ! Clear joinZoneData for calculate statistics
     this.mean = this._getAverage();
@@ -218,12 +217,7 @@ Histogram.prototype.doPlot = function() {
     // Generate X and Y axes
     this.axisX = this.axisX.tickSize(-this.svgContainer.node().clientHeight);
     this.axisY = this.axisY.tickSize(-this.svgContainer.node().clientWidth);
-    if (this.histogramModel.properties.showGrid) {
-        this.svgContainer.selectAll('.tick line').classed('hidden', false);
-    }
-    else {
-        this.svgContainer.selectAll('.tick line').classed('hidden', true);
-    }
+
     this.svgContainer.select('g.vi-histogram-axis-x-ticks')
         .call(this.axisX)
         .style('transform', 'translateY(' + vpY[1] + 'px)');

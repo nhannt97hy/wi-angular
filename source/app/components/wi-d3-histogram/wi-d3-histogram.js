@@ -121,9 +121,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(self.histogramAreaId, domElem);
         self.createVisualizeHistogram(self.histogramModel, domElem);
         self.histogramModel.properties.histogramTitle = getHistogramTitle();
-
     }
-    this.$onInit = function () {
+    this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         if (self.name) {
