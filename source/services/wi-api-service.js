@@ -14,8 +14,8 @@ __USERINFO.token = window.localStorage.getItem('token');
 let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
-const BASE_URL = 'http://sflow.me';
-// const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://dev.sflow.me:3000';
+//const BASE_URL = 'http://localhost:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -580,7 +580,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
 
 Service.prototype.removeCurve = function (idCurve, callback) {
     let self = this;
-    this.post(SCALE_CURVE, {idCurve: idCurve})
+    this.delete(DELETE_CURVE, {idCurve: idCurve})
         .then(function (res) {
             callback(res)
         })
