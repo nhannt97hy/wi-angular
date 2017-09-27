@@ -6,6 +6,7 @@
   "dependencies": {
     "angular-bootstrap-colorpicker": "^3.0.31",
     "angular-multiple-select": "^1.1.2",
+    "angularjs-dropdown-multiselect": "^2.0.0-beta.10",
     "bootstrap-colorpicker": "^2.5.1",
     "del": "^2.2.2",
     "glob": "^7.1.2",

@@ -1562,6 +1562,7 @@ function openCrossplotTab(crossplotModel, callback) {
     wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
+            console.log("crosplot", crossplot);
             if (!pointSet.idCurveX || !pointSet.idCurveY) return;
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
                 // let curveX;
@@ -1594,7 +1595,17 @@ function openCrossplotTab(crossplotModel, callback) {
                                     }
                                     wiD3CrossplotCtrl.initPolygons(crossplot.polygons);
                                 }
+                                if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
+                                    for (let regLine of crossplot.regressionlines) {
+                                        try {
+                                            regLine.lineStyle = JSON.parse(regLine.lineStyle);
+                                        } catch(e) {
+                                            console.log(e);
+                                        }
+                                    }
 
+                                    wiD3CrossplotCtrl.initRegressionLines(crossplot.regressionlines);
+                                }
                             }
                         })
                     })

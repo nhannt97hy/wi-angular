@@ -5,10 +5,10 @@
                 <button type="button" class="close" ng-click="wiModal.onOkButtonClicked()" aria-hidden="true">&times;</button>
                 <h4>Line Style</h4>
             </div>
-            <div class="modal-body text-center">
+            <div class="modal-body text-center small-text">
                 <form class="form-horizontal" action="" name="modalLineStyle">
                     <div class="row">
-                        <div class="col-sm-12">
+                        <!-- <div class="col-sm-12">
                             <div class="form-group">
                                 <label class="control-label col-sm-4 normal-text" for="style">Line Width</label>
                                 <div class="col-sm-8">
@@ -30,11 +30,11 @@
                                     </ui-select>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-sm-12">
+                        </div> -->
+                        <div class="col-sm-8">
                             <div class="form-group">
-                                <label class="control-label col-sm-4 normal-text" for="style">Line Style</label>
-                                <div class="col-sm-8">
+                                <label class="control-label col-sm-3 normal-text" for="style">Line Style</label>
+                                <div class="col-sm-9">
                                     <ui-select theme="bootstrap" ng-model="wiModal.options.lineStyle.lineStyle">
                                         <ui-select-match>
                                             <svg height="10" width="100%" class="col-sm-12">
@@ -56,13 +56,26 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label col-sm-6" for="line-width">Line Width</label>
+                                <div class="col-sm-6">
+                                    <input type="number" id="line-width"
+                                        min="1" max="10"
+                                        class="form-control wi-form-control"
+                                        ng-model="wiModal.options.lineStyle.lineWidth">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <label class="control-label col-sm-4 normal-text" for="color">Line Color</label>
-                                <div class="col-sm-8 text-left">
-                                    <button ng-click="wiModal.lineColor();"
-                                            ng-style="{'background-color':wiModal.options.lineStyle.lineColor}"
-                                            class="form-control wi-form-control width-80px">Change</button>
+                                <label class="control-label col-sm-2">Line Color</label>
+                                <div class="col-sm-9">
+                                    <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.options.lineStyle.lineColor}"></div>
+                                    <button ng-click="wiModal.lineColor();" class="wi-form-control">...</button>
                                 </div>
                             </div>
                         </div>
