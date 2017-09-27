@@ -586,7 +586,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
 
 Service.prototype.removeCurve = function (idCurve, callback) {
     let self = this;
-    this.post(SCALE_CURVE, {idCurve: idCurve})
+    this.delete(DELETE_CURVE, {idCurve: idCurve})
         .then(function (res) {
             callback(res)
         })
