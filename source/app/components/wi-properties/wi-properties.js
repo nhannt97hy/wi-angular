@@ -1,21 +1,28 @@
 const componentName = 'wiProperties';
 const moduleName = 'wi-properties';
 
-function Controller(wiComponentService) {
+function Controller(wiComponentService, wiApiService, $timeout) {
     let self = this;
-
+    window.wiProp = this;
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
 
         wiComponentService.on('update-properties', function doUpdateListConfig(currentItem) {
-            self.listConfig = toListConfig(currentItem);
+            toListConfig(currentItem).then(function (listConfig) {
+                $timeout(function () {
+                    self.listConfig = listConfig;
+                })
+            });
         });
         wiComponentService.on('project-unloaded-event', function cleanList() {
             self.listConfig = null;
         });
     };
-
-    function toListConfig(currentItem) {
+    const type = {
+        checkbox: 'checkbox',
+        select: 'select'
+    }
+    async function toListConfig(currentItem) {
         let listConfig = [];
         let config = {};
         let itemProperties = currentItem.properties;
@@ -84,11 +91,11 @@ function Controller(wiComponentService) {
                     data: [{
                         key: 'endDepth',
                         label: 'End Depth',
-                        value: ''
+                        value: well.bottomDepth
                     }, {
                         key: 'startDepth',
                         label: 'Start Depth',
-                        value: ''
+                        value: well.topDepth
                     }]
                 }
                 listConfig.push(config);
@@ -98,25 +105,32 @@ function Controller(wiComponentService) {
                     data: [{
                         key: 'alias',
                         label: 'Alias',
-                        value: ''
+                        value: itemProperties.alias
                     }, {
                         key: 'dataset',
                         label: 'Curve Set Name',
                         value: dataset.properties.name
                     }, {
-                        key: 'dataType',
+                        key: '',
                         label: 'DataType',
                         value: '',
                         editable: true
                     }, {
-                        key: 'exportName',
+                        key: '',
                         label: 'Export Name',
-                        value: itemProperties.name,
+                        value: '',
                         editable: true
                     }, {
-                        key: 'family',
+                        key: 'idFamily',
                         label: 'Family',
-                        value: '',
+                        type: type.select,
+                        options: utils.getListFamily().map(function (family) {
+                            return {
+                                value: family.idFamily,
+                                label: family.name
+                            }
+                        }),
+                        value: itemProperties.idFamily,
                         editable: true
                     }, {
                         key: 'name',
@@ -135,21 +149,22 @@ function Controller(wiComponentService) {
                     }]
                 }
                 listConfig.push(config);
+                const scale = await wiApiService.asyncScaleCurve(itemProperties.idCurve);
                 config = {
                     name: currentItem.name,
                     heading: 'Values',
                     data: [{
                         key: 'maxValue',
                         label: 'Max Value',
-                        value: ''
+                        value: scale.maxScale
                     }, {
                         key: 'meanValue',
                         label: 'Mean Value',
-                        value: ''
+                        value: 0
                     }, {
                         key: 'minValue',
                         label: 'Min Value',
-                        value: ''
+                        value: scale.minScale
                     }]
                 }
                 listConfig.push(config);
@@ -163,7 +178,7 @@ function Controller(wiComponentService) {
                         {
                             key: 'isDefault',
                             label: 'Is Default',
-                            type: 'checkbox'
+                            type: type.checkbox
                         }, {
                             key: 'name',
                             label: 'Name',
@@ -226,7 +241,7 @@ function Controller(wiComponentService) {
                     data: [{
                         key: 'isDefault',
                         label: 'Is Default',
-                        type: 'checkbox'
+                        type: type.checkbox
                     }, {
                         key: 'name',
                         label: 'Name',
@@ -300,19 +315,19 @@ function Controller(wiComponentService) {
                     data: [{
                         key: 'invert',
                         label: 'Invert',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'horizontalDisplay',
                         label: 'Horizontal Display',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showTooltip',
                         label: 'Show Tooltip',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }]
@@ -368,7 +383,7 @@ function Controller(wiComponentService) {
                     }, {
                         key: 'activeColorAxisColor',
                         label: 'Active Color Axis Color',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
@@ -379,7 +394,7 @@ function Controller(wiComponentService) {
                     }, {
                         key: 'useActiveZonesColor',
                         label: 'Use Active Zone Color',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }]
@@ -391,37 +406,37 @@ function Controller(wiComponentService) {
                     data: [{
                         key: 'invert',
                         label: 'Invert',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'horizontalDisplay',
                         label: 'Horizontal Display',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showGrid',
                         label: 'Show Grid',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showOverlay',
                         label: 'Show Overlay',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showTooltip',
                         label: 'Show Tooltip',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showYAxisAsPercent',
                         label: 'Show Y Axis As Percent',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }]
@@ -508,7 +523,7 @@ function Controller(wiComponentService) {
                     }, {
                         key: 'useActiveZonesColor',
                         label: 'Use Active Zone Color',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }]
@@ -520,43 +535,43 @@ function Controller(wiComponentService) {
                     data: [{
                         key: 'cumulate',
                         label: 'Cumulate',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'displayAsCurve',
                         label: 'Display As Curve',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'invert',
                         label: 'Invert',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'horizontalDisplay',
                         label: 'Horizontal Display',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showOverlay',
                         label: 'Show Overlay',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showTooltip',
                         label: 'Show Tooltip',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }, {
                         key: 'showYAxisAsPercent',
                         label: 'Show Y Axis As Percent',
-                        type: 'checkbox',
+                        type: type.checkbox,
                         value: false,
                         editable: true
                     }]

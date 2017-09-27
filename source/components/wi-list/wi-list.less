@@ -31,13 +31,16 @@ wi-list {
 				border-bottom: 1px solid #cacbd3; 
 		 		border-right: 1px solid #cacbd3; 
 				text-indent: 8px;
-				input{
+				> * {
 					background: transparent;
 					border-width: 0;
 					font-weight: bold;
 				  &[disabled="disabled"]{
 						color: #aaaaaa;
 					}
+				}
+				select {
+					margin-left: -4px;
 				}
 			}
 			td:first-child {

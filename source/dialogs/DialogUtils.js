@@ -4499,13 +4499,19 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
-                console.log('scale curve');
-                $timeout(function(){
-                    self.histogramProps.leftScale = scale.minScale;
-                    self.histogramProps.rightScale = scale.maxScale;
-                });
-            })        
+            console.log(self.SelectedCurve);
+            if(self.SelectedCurve.properties.minScale != null && self.SelectedCurve.properties.maxScale != null){
+                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+            }else{
+                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
+                    console.log('scale curve');
+                    $timeout(function(){
+                        self.histogramProps.leftScale = scale.minScale;
+                        self.histogramProps.rightScale = scale.maxScale;
+                    });
+                })        
+            }
         }
 
         function getTopFromWell() {
@@ -4917,3 +4923,35 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         });
     });
 };
+
+exports.zoneManagerDialog = function(ModalService, callback){
+    function ModalController(close){
+        let self = this;
+
+        this.onApplyButtonClicked = function(){
+            close(null);
+        }
+
+        this.onOkButtonClicked = function(){
+            close(null);
+        }
+        
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'zone-manager/zone-manager-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function(modal){
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    })
+}

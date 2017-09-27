@@ -713,7 +713,7 @@ exports.BlankHistogramButtonClicked = function () {
                 let histogramModel = utils.histogramToTreeConfig(histogram);
                 let selectedHistogram = utils.getSelectedNode();
                 selectedHistogram.children.push(histogramModel);
-                utils.openHistogramTab(wiComponentService, histogramModel, function() {
+                utils.openHistogramTab(histogramModel, function() {
                     let histogramName = 'histogram' + histogramModel.properties.idHistogram;
                     let wiD3Ctrl = wiComponentService.getComponent(histogramName).getwiD3Ctrl();
                     // TODO

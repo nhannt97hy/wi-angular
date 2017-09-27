@@ -70,6 +70,7 @@ app.factory(wiServiceName, function () {
         // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
         ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
+        LIST_FAMILY: 'list-family',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',

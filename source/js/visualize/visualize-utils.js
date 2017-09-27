@@ -83,7 +83,8 @@ function setProperties(obj, props, forArray) {
             else obj[key] = value;
         }
         else if (schema.type == 'Object' && schema.properties !== undefined) {
-            let tmpObj = { PROPERTIES: schema.properties };
+            let tmpObj = obj[key] === undefined ? {} : obj[key];
+            tmpObj.PROPERTIES = schema.properties;
             setProperties(tmpObj, props[key]);
             delete tmpObj.PROPERTIES;
             if (obj[key] === undefined) obj[key] = tmpObj;

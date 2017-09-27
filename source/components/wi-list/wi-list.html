@@ -12,6 +12,11 @@
             <input class="width-95-percent" ng-if="!item.type" type="text" ng-model="item.value" ng-disabled="!item.editable"
             wi-enter="$event.currentTarget.blur();" ng-blur="wiList.onChange(item)">
             <input class="width-95-percent" ng-if="item.type == 'checkbox'" type="checkbox" ng-model="item.value" ng-disabled="!item.editable" ng-change="wiList.onChange(item)">
+            <select class="width-95-percent" ng-if="item.type == 'select'" ng-model="item.value"
+                    ng-disabled="!item.editable" ng-change="wiList.onChange(item)">
+                <option value="undefined">---------</option>
+                <option ng-repeat="option in item.options" ng-value="option.value">{{option.label}}</option>
+            </select>
         </td>
     </tr>
 </table>
