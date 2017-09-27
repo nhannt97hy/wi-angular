@@ -12,9 +12,12 @@
                             <div class="form-group">
                                 <div class="col-sm-6">
                                     <label class="col-sm-3">Well</label>
-                                    <select class="col-sm-9">
-                                        <option value="">Well Name</option>
-                                        <option value="">Well Name2</option>
+                                    <select class="col-sm-9"
+                                    ng-model="wiModal.SelectedWell"
+                                    ng-change="wiModal.onChangeWell()"
+                                    ng-options="well as well.properties.name for well in wiModal.wellArr track by well.id">
+                                        <!-- <option value="">Well Name</option>
+                                        <option value="">Well Name2</option> -->
                                     </select>
                                 </div>
                                 <div class="col-sm-6">
@@ -32,9 +35,12 @@
                                 <h5>User Defined</h5>
                                 <div>
                                     <label class="col-sm-2">Zone Set</label>
-                                    <select class="col-sm-8">
-                                        <option value="">Zone Set 1</option>
-                                        <option value="">Zone Set 2</option>
+                                    <select class="col-sm-8"
+                                    ng-model="wiModal.SelectedZoneSet"
+                                    ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zonesetsArr"
+                                    ng-change="wiModal.onChangeZoneSet()">
+                                        <!-- <option value="">Zone Set 1</option>
+                                        <option value="">Zone Set 2</option> -->
                                     </select>
                                     <div class="col-sm-2">
                                         <button class="btn btn-default">Edit</button>
@@ -68,11 +74,11 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <td>1</td>
-                                                        <td>1146</td>
-                                                        <td>1146</td>
-                                                        <td>1199</td>
+                                                    <tr ng-repeat="zone in wiModal.zoneArr">
+                                                        <td>{{$index}}</td>
+                                                        <td>{{zone.properties.name}}</td>
+                                                        <td>{{zone.properties.startDepth}}</td>
+                                                        <td>{{zone.properties.endDepth}}</td>
                                                         <td>
                                                             <wi-button></wi-button>
                                                         </td>

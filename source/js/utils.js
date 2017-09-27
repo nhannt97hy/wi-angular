@@ -1739,10 +1739,8 @@ function getListFamily() {
 }
 exports.getListFamily = getListFamily;
 
-exports.openZonemanager = function(){
+exports.openZonemanager = function(item){
     let wiComponentService = __GLOBAL.wiComponentService;        
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);    
-    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, function(ret){
-        console.log(ret);
-    })
+    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
 }

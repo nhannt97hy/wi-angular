@@ -4849,9 +4849,48 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-exports.zoneManagerDialog = function(ModalService, callback){
-    function ModalController(close){
+exports.zoneManagerDialog = function(ModalService, item){
+    function ModalController(close, wiComponentService, wiApiService, $timeout){
         let self = this;
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        var project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = project.children;
+        
+        this.SelectedWell = this.wellArr[0];
+        this.zonesetsArr = self.SelectedWell.children.find(function(child){
+            return child.name == 'zonesets';
+        }).children;
+        this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+        this.zoneArr = this.SelectedZoneSet.children.length ? this.SelectedZoneSet.children : null;
+        console.log(this.zoneArr);
+
+        // switch (item.name) {
+        //     case 'well':
+        //     break;
+
+        //     case 'zonesets':
+        //     break;
+
+        //     case 'zoneset':
+        //     break;
+
+        //     case 'zone':
+        //     break;
+        // }
+
+        this.onChangeWell = function(){
+            self.zonesetsArr = self.SelectedWell.children.find(function(child){
+                return child.name == 'zonesets';
+            }).children;
+
+            self.SelectedZoneSet = self.zonesetsArr[0];
+        }
+
+        this.onChangeZoneSet = function(){
+            self.zoneArr = self.SelectedZoneSet.children.length ? selfSelectedZoneSet.children : null;
+            console.log(self.zoneArr);        
+        }
 
         this.onApplyButtonClicked = function(){
             close(null);
