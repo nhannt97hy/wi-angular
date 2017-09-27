@@ -1118,7 +1118,7 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
-let refreshProjectState =function () {
+let refreshProjectState = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
@@ -1131,14 +1131,34 @@ let refreshProjectState =function () {
         let wiApiService = __GLOBAL.wiApiService;
         wiApiService.post(wiApiService.GET_PROJECT, payload)
             .then(function (projectRefresh) {
+                console.log("Refresh");
+                console.log(projectRefresh);
+                projectRefresh.wells.sort((a,b)=>{
+                    let nameA = a.name.toUpperCase();
+                    let nameB = b.name.toUpperCase();
+                    return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+                });
+                projectRefresh.wells.forEach(well=>{
+                    well.datasets.sort((a,b)=>{
+                        let nameA = a.name.toUpperCase();
+                        let nameB = b.name.toUpperCase();
+                        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+                    });
+                    well.datasets.forEach(dataset=>{
+                        dataset.curves.sort((a,b)=>{
+                            let nameA = a.name.toUpperCase();
+                            let nameB = b.name.toUpperCase();
+                            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+                        });
+                    });
+                });
+
                 wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
                 wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
-
                 resolve();
             })
             .catch(function (err) {
                 console.error('refreshProjectState', err);
-
                 reject();
             });
     });

@@ -71,6 +71,7 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeWell(selectedNode.properties.idWell, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -78,6 +79,7 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeDataset(selectedNode.properties.idDataset, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -85,6 +87,7 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeCurve(selectedNode.properties.idCurve, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -92,6 +95,7 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeZoneSet(selectedNode.properties.idZoneSet, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -99,6 +103,7 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeZone(selectedNode.properties.idZone, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -107,6 +112,7 @@ exports.DeleteItemButtonClicked = function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                             wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -115,6 +121,7 @@ exports.DeleteItemButtonClicked = function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                             wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
+                            utils.refreshProjectState();
                         });
                     });
                     break;
@@ -123,6 +130,7 @@ exports.DeleteItemButtonClicked = function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
                             wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
+                            utils.refreshProjectState();
                         });
                     });
                     break;
