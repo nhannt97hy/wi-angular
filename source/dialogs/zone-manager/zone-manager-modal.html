@@ -7,120 +7,160 @@
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
-                    <div class="row">
-                        <form class='col-sm-12 form-horizontal form-condensed'>
-                            <div class="form-group">
-                                <div class="col-sm-6">
-                                    <label class="col-sm-3">Well</label>
-                                    <select class="col-sm-9"
-                                    ng-model="wiModal.SelectedWell"
-                                    ng-change="wiModal.onChangeWell()"
-                                    ng-options="well as well.properties.name for well in wiModal.wellArr track by well.id">
-                                        <!-- <option value="">Well Name</option>
-                                        <option value="">Well Name2</option> -->
-                                    </select>
+                    <div class="row dialog-style">
+                        <form class='form-horizontal form-condensed zoneForm'>
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label class="col-sm-3 padding-left-3em">Well</label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control wi-form-control"
+                                                    ng-model="wiModal.SelectedWell"
+                                                    ng-change="wiModal.onChangeWell()"
+                                                    ng-options="well as well.properties.name for well in wiModal.wellArr track by well.id">
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="col-sm-6">
+                                <div class="col-sm-2">
+                                    <div class="form-group">
                                         <input type="radio" name="type">
                                         <label>Parameter</label>
                                     </div>
-                                    <div class="col-sm-6">
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
                                         <input type="radio" name="type">
                                         <label>User Defined</label>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <h5>User Defined</h5>
-                                <div>
-                                    <label class="col-sm-2">Zone Set</label>
-                                    <select class="col-sm-8"
-                                    ng-model="wiModal.SelectedZoneSet"
-                                    ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zonesetsArr"
-                                    ng-change="wiModal.onChangeZoneSet()">
-                                        <!-- <option value="">Zone Set 1</option>
-                                        <option value="">Zone Set 2</option> -->
-                                    </select>
+                            <h5>User Defined</h5>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-2 padding-left-4em">Zone Set</label>
+                                    <div class="col-sm-6">
+                                        <select class="form-control wi-form-control"
+                                                ng-model="wiModal.SelectedZoneSet"
+                                                ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zonesetsArr"
+                                                ng-change="wiModal.onChangeZoneSet()">
+                                        </select>
+                                    </div>
                                     <div class="col-sm-2">
-                                        <button class="btn btn-default">Edit</button>
+                                        <button class="btn btn-default normal-text">Edit</button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <h5>Zones</h5>
-                                <div>
-                                    <div class="form-group">
-                                        <label class="col-sm-3">Reference Depth</label>
-                                        <select class="col-sm-3">
+                            <h5>Zones</h5>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-2 padding-left-4em padding-right-0">Reference Depth</label>
+                                    <div class="col-sm-3">
+                                        <select class="form-control wi-form-control">
                                             <option value="MD">MD</option>
                                             <option value="TVD" disabled>TVD</option>
                                             <option value="TVDSS" disabled>TVDSS</option>
                                         </select>
-                                        <div class="col-sm-6"></div>
-                                    </div>
-                                    <div class="form-group" style="height:45%;display:flex;flex-direction:row">
-                                        <div style="height:100%;border:1px solid #999;width:100%">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>No</th>
-                                                        <th>Name</th>
-                                                        <th>Top Depth</th>
-                                                        <th>Bottom Depth</th>
-                                                        <th>Line Colour</th>
-                                                        <th>Text Colour</th>
-                                                        <th>Background Colour</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr ng-repeat="zone in wiModal.zoneArr">
-                                                        <td>{{$index}}</td>
-                                                        <td>{{zone.properties.name}}</td>
-                                                        <td>{{zone.properties.startDepth}}</td>
-                                                        <td>{{zone.properties.endDepth}}</td>
-                                                        <td>
-                                                            <wi-button></wi-button>
-                                                        </td>
-                                                        <td>
-                                                            <wi-button></wi-button>
-                                                        </td>
-                                                        <td>
-                                                            <wi-button></wi-button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div style="width:200px;position:relative;padding:0px 10px">
-                                            <div style="display: flex; flex-direction: column;">
-                                                <button class="btn btn-default" style="margin-bottom:5px">Browse</button>
-                                                <button class="btn btn-default" style="margin-bottom:5px">Paste</button>
-                                                <button class="btn btn-default" style="margin-bottom:5px">Export</button>
-                                            </div>
-                                            <div style="position:absolute;bottom:0px;display: flex; flex-direction: column;">
-                                                <button class="btn btn-default" style="margin-top:5px">
-                                                    <i class="plus-16x16"></i>
-                                                    <span>Add Row Above</span>
-                                                </button>
-                                                <button class="btn btn-default" style="margin-top:5px">
-                                                    <i class="plus-16x16"></i>                                                    
-                                                    <span>Add Row Below</span>
-                                                </button>
-                                                <button class="btn btn-default" style="margin-top:5px">
-                                                    <i class="delete-16x16"></i>                                                    
-                                                    <span>Delete Rows</span>
-                                                </button>
-                                                <button class="btn btn-default" style="margin-top:5px">
-                                                    <i class="delete-16x16"></i>
-                                                    <span>Clear All</span>
-                                                </button>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-
+                            <hr>
+                            <div class="row" style="height:45%;display:flex;flex-direction:row">
+                                <div style="width:100%">
+                                    <table class="table table-bordered zonesTable">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 5%">No</th>
+                                                <th style="width: 15%">Name</th>
+                                                <th style="width: 15%">Top Depth</th>
+                                                <th style="width: 15%">Bottom Depth</th>
+                                                <th style="width: 12%">Foreground</th>
+                                                <th style="width: 12%">Background</th>
+                                                <th>Pattern</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="zone in wiModal.zoneArr"
+                                                ng-class="{selected:$index == selectedRow}"
+                                                ng-click="wiModal.setClickedRow($index)">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <input type="text" 
+                                                            ng-model="zone.properties.name"
+                                                            class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="number" 
+                                                            ng-model="zone.properties.startDepth"
+                                                            class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="number" 
+                                                            ng-model="zone.properties.endDepth"
+                                                            class="form-control wi-form-control">
+                                                </td>
+                                                <td>
+                                                    <button ng-click="wiModal.foregroundZone($index);"
+                                                            ng-style="{'background-color':zone.properties.foreground}"
+                                                            class="form-control wi-form-control width-80px height-20px thick-border">
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button ng-click="wiModal.backgroundZone($index);"
+                                                            ng-style="{'background-color':zone.properties.background}"
+                                                            class="form-control wi-form-control width-80px height-20px thick-border">
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <ui-select theme="bootstrap" 
+                                                                ng-model="zone.properties.fill.pattern.name">
+                                                        <ui-select-match>
+                                                            <wi-canvas-rect name="row_{{$index}}" 
+                                                                            pattern="{{zone.properties.fill.pattern.name}}" 
+                                                                            width="40" height="20" 
+                                                                            foreground="{{zone.properties.foreground}}" 
+                                                                            background='{{zone.properties.background}}'>
+                                                            </wi-canvas-rect>
+                                                        </ui-select-match>
+                                                        <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
+                                                                            width="40" height="20" 
+                                                                            foreground="{{zone.properties.foreground}}" 
+                                                                            background="{{zone.properties.background}}">
+                                                            </wi-canvas-rect>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="width:200px;position:relative;padding:0px 10px">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <button class="btn btn-default" style="margin-bottom:5px">Browse</button>
+                                        <button class="btn btn-default" style="margin-bottom:5px">Paste</button>
+                                        <button class="btn btn-default" style="margin-bottom:5px">Export</button>
+                                    </div>
+                                    <div style="position:absolute;bottom:0px;display: flex; flex-direction: column;">
+                                        <button class="btn btn-default" style="margin-top:5px">
+                                            <i class="plus-16x16"></i>
+                                            <span>Add Row Above</span>
+                                        </button>
+                                        <button class="btn btn-default" style="margin-top:5px">
+                                            <i class="plus-16x16"></i>                                                    
+                                            <span>Add Row Below</span>
+                                        </button>
+                                        <button class="btn btn-default" style="margin-top:5px">
+                                            <i class="delete-16x16"></i>                                                    
+                                            <span>Delete Rows</span>
+                                        </button>
+                                        <button class="btn btn-default" style="margin-top:5px">
+                                            <i class="delete-16x16"></i>
+                                            <span>Clear All</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>

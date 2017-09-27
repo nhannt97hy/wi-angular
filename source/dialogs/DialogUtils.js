@@ -948,7 +948,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         this.options = options;
         console.log(this.options);
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.styles = [
             [10, 0],
             [0, 10],
@@ -1732,7 +1732,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
 
         this.checkboxVal = !this.options.fill.display;
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.enableFill = function (idEnable, value) {
             $('#' + idEnable + ":button").attr("disabled", value);
         }
@@ -3930,7 +3930,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
                 type: "left"
             }
         }
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foreground = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.foreground, function (colorStr) {
                 self.props.positiveFill.foreground = colorStr;
@@ -4925,7 +4925,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
 };
 
 exports.zoneManagerDialog = function(ModalService, item){
-    function ModalController(close, wiComponentService, wiApiService, $timeout){
+    function ModalController(close, wiComponentService, wiApiService, $timeout, $scope){
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -4953,7 +4953,21 @@ exports.zoneManagerDialog = function(ModalService, item){
         //     case 'zone':
         //     break;
         // }
-
+        $scope.selectedRow = 0;
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+        }
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.foregroundZone = function (index) {
+            DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
+                self.zoneArr[index].properties.foreground = colorStr;
+            });
+        };
+        this.backgroundZone = function (index) {
+            DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.background, function (colorStr) {
+                self.zoneArr[index].properties.background = colorStr;
+            });
+        };
         this.onChangeWell = function(){
             self.zonesetsArr = self.SelectedWell.children.find(function(child){
                 return child.name == 'zonesets';

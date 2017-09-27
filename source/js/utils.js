@@ -1582,7 +1582,7 @@ function openCrossplotTab(crossplotModel, callback) {
                                 wiD3CrossplotCtrl.linkModels();
                                 crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
 
-                                if (crossplot.polygons && crossplot.polygons.length) {
+                                if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
                                     for (let polygon of crossplot.polygons) {
                                         try {
                                             polygon.points = JSON.parse(polygon.points);
@@ -1597,7 +1597,6 @@ function openCrossplotTab(crossplotModel, callback) {
                                             console.log(e);
                                         }
                                     }
-                                    wiD3CrossplotCtrl.initRegressionLines(crossplot.regressionlines);
                                 }
                                 let viCurveX = graph.buildCurve( curveX, xCurveData, wellProps.properties);
                                 let viCurveY = graph.buildCurve( curveY, yCurveData, wellProps.properties);
