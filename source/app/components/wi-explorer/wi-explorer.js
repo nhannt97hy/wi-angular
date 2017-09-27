@@ -381,17 +381,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     {
                         name: "NewZoneSet",
                         label: "New Zone Set",
-                        icon: "",
+                        icon: "mineral-zone-add-16x16",
                         handler: function () {
                             utils.createZoneSet();
                         }
-                    }/* , {
+                    }, {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
+                            let zonesetsModel = utils.getSelectedNode();
+                            console.log(zonesetsModel);
+                            utils.openZonemanager();
                         }
-                    } */, {
+                    }, {
                         separator: '1'
                     }
                 ];

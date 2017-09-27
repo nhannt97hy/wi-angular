@@ -1722,6 +1722,7 @@ function triggerWindowResize() {
         window.dispatchEvent(new Event('resize'));
     })
 }
+
 exports.triggerWindowResize = triggerWindowResize;
 
 function putListFamily() {
@@ -1735,3 +1736,11 @@ function getListFamily() {
     return __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.LIST_FAMILY);
 }
 exports.getListFamily = getListFamily;
+
+exports.openZonemanager = function(){
+    let wiComponentService = __GLOBAL.wiComponentService;        
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);    
+    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, function(ret){
+        console.log(ret);
+    })
+}
