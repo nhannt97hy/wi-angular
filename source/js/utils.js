@@ -408,7 +408,9 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name // TODO
+        alias: curve.name, // TODO
+        minScale: curve.LineProperty ? curve.LineProperty.minScale : null,
+        maxScale: curve.LineProperty ? curve.LineProperty.maxScale : null
     };
     curveModel.data = {
         childExpanded: false,

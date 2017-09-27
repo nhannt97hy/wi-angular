@@ -603,7 +603,7 @@ Service.prototype.scaleCurve = function (idCurve, callback) {
         });
 }
 
-Service.prototype.scaleCurve = async function (idCurve) {
+Service.prototype.asyncScaleCurve = async function (idCurve) {
     const self = this;
     try {
         return await this.post(SCALE_CURVE, {idCurve: idCurve});
