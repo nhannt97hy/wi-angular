@@ -1565,6 +1565,7 @@ function openCrossplotTab(crossplotModel, callback) {
     wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
+            console.log("crosplot", crossplot);
             if (!pointSet.idCurveX || !pointSet.idCurveY) return;
 
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
@@ -1588,7 +1589,16 @@ function openCrossplotTab(crossplotModel, callback) {
                                         } catch (error) {}
                                     }
                                 }
-
+                                if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
+                                    for (let regLine of crossplot.regressionlines) {
+                                        try {
+                                            regLine.lineStyle = JSON.parse(regLine.lineStyle);
+                                        } catch(e) {
+                                            console.log(e);
+                                        }
+                                    }
+                                    wiD3CrossplotCtrl.initRegressionLines(crossplot.regressionlines);
+                                }
                                 let viCurveX = graph.buildCurve( curveX, xCurveData, wellProps.properties);
                                 let viCurveY = graph.buildCurve( curveY, yCurveData, wellProps.properties);
 

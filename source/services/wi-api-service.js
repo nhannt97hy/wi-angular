@@ -14,8 +14,9 @@ __USERINFO.token = window.localStorage.getItem('token');
 let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
-const BASE_URL = 'http://sflow.me';
+// const BASE_URL = 'http://sflow.me';
 // const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://dev.sflow.me';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -113,6 +114,11 @@ const CREATE_POLYGON = '/project/well/cross-plot/polygon/new';
 const EDIT_POLYGON = '/project/well/cross-plot/polygon/edit';
 const GET_POLYGON = '/project/well/cross-plot/polygon/info';
 const DELETE_POLYGON = '/project/well/cross-plot/polygon/delete';
+
+const CREATE_REGRESSIONLINES = '/project/well/cross-plot/regression-line/new';
+const EDIT_REGRESSIONLINES = '/project/well/cross-plot/regression-line/edit';
+const GET_REGRESSIONLINES = '/project/well/cross-plot/regression-line/info';
+const DELETE_REGRESSIONLINES = '/project/well/cross-plot/regression-line/delete';
 
 const CREATE_DISCRIM = '/project/well/cross-plot/discrim/new';
 const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
@@ -1204,6 +1210,55 @@ Service.prototype.getPolygon = function (idPolygon, callback) {
 Service.prototype.removePolygon = function (idPolygon, callback) {
     let self = this;
     this.delete(DELETE_POLYGON, { idPolygon: idPolygon })
+        .then(function (returnData) {
+            if (callback) {
+                callback(returnData);
+            }
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+
+Service.prototype.createRegressionLines = function (data, callback) {
+    let self = this;
+    this.post(CREATE_REGRESSIONLINES, data)
+        .then(function (returnData) {
+            if (callback) {
+                callback(returnData);
+            }
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.editRegressionLines = function (data, callback) {
+    let self = this;
+    this.post(EDIT_REGRESSIONLINES, data)
+        .then(function (returnData) {
+            if (callback) {
+                callback(returnData);
+            }
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.getRegressionLines = function (idRegressionLine, callback) {
+    let self = this;
+    this.post(GET_REGRESSIONLINES, { idRegressionLine: idRegressionLine })
+        .then(function (returnData) {
+            if (callback) {
+                callback(returnData);
+            }
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
+}
+Service.prototype.removeRegressionLines = function (idRegressionLine, callback) {
+    let self = this;
+    this.delete(DELETE_REGRESSIONLINES, { idRegressionLine: idRegressionLine })
         .then(function (returnData) {
             if (callback) {
                 callback(returnData);
