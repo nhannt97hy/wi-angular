@@ -4937,7 +4937,7 @@ exports.zoneManagerDialog = function(ModalService, item){
             return child.name == 'zonesets';
         }).children;
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
-        this.zoneArr = this.SelectedZoneSet.children.length ? this.SelectedZoneSet.children : null;
+        this.zoneArr = this.SelectedZoneSet ? this.SelectedZoneSet.children : null;
         console.log(this.zoneArr);
 
         // switch (item.name) {
@@ -5008,3 +5008,4 @@ exports.zoneManagerDialog = function(ModalService, item){
         })
     })
 }
+

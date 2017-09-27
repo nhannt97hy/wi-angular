@@ -65,9 +65,9 @@
                                 </div>
                             </div>
                             <hr>
-                            <div class="row" style="height:45%;display:flex;flex-direction:row">
-                                <div style="width:100%">
-                                    <table class="table table-bordered zonesTable">
+                            <div class="row" style="height:40%">
+                                <div class='col-sm-9 col-xs-12' style='overflow-x:hidden; overflow-y:auto;'>
+                                    <table class="table table-bordered zonesTable width-100-percent">
                                         <thead>
                                             <tr>
                                                 <th style="width: 5%">No</th>
@@ -90,12 +90,12 @@
                                                             class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
+                                                    <input type="number" step="0.01"
                                                             ng-model="zone.properties.startDepth"
                                                             class="form-control wi-form-control">
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
+                                                    <input type="number" step="0.01" 
                                                             ng-model="zone.properties.endDepth"
                                                             class="form-control wi-form-control">
                                                 </td>
@@ -135,26 +135,26 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div style="width:200px;position:relative;padding:0px 10px">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <button class="btn btn-default" style="margin-bottom:5px">Browse</button>
-                                        <button class="btn btn-default" style="margin-bottom:5px">Paste</button>
-                                        <button class="btn btn-default" style="margin-bottom:5px">Export</button>
+                                <div class='col-sm-3 col-xs-12' style='position:relative;'>
+                                    <div>
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Browse</button>
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Paste</button>
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Export</button>
                                     </div>
-                                    <div style="position:absolute;bottom:0px;display: flex; flex-direction: column;">
-                                        <button class="btn btn-default" style="margin-top:5px">
+                                    <div style='margin-top:5em;'>
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">
                                             <i class="plus-16x16"></i>
                                             <span>Add Row Above</span>
                                         </button>
-                                        <button class="btn btn-default" style="margin-top:5px">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">
                                             <i class="plus-16x16"></i>                                                    
                                             <span>Add Row Below</span>
                                         </button>
-                                        <button class="btn btn-default" style="margin-top:5px">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">
                                             <i class="delete-16x16"></i>                                                    
                                             <span>Delete Rows</span>
                                         </button>
-                                        <button class="btn btn-default" style="margin-top:5px">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">
                                             <i class="delete-16x16"></i>
                                             <span>Clear All</span>
                                         </button>
