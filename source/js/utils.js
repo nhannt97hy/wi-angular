@@ -408,7 +408,9 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name // TODO
+        alias: curve.name, // TODO
+        minScale: curve.LineProperty ? curve.LineProperty.minScale : null,
+        maxScale: curve.LineProperty ? curve.LineProperty.maxScale : null
     };
     curveModel.data = {
         childExpanded: false,
@@ -1583,6 +1585,7 @@ function openCrossplotTab(crossplotModel, callback) {
     wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
+            console.log("crosplot", crossplot);
             if (!pointSet.idCurveX || !pointSet.idCurveY) return;
 
             wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
@@ -1606,7 +1609,16 @@ function openCrossplotTab(crossplotModel, callback) {
                                         } catch (error) {}
                                     }
                                 }
-
+                                if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
+                                    for (let regLine of crossplot.regressionlines) {
+                                        try {
+                                            regLine.lineStyle = JSON.parse(regLine.lineStyle);
+                                        } catch(e) {
+                                            console.log(e);
+                                        }
+                                    }
+                                    wiD3CrossplotCtrl.initRegressionLines(crossplot.regressionlines);
+                                }
                                 let viCurveX = graph.buildCurve( curveX, xCurveData, wellProps.properties);
                                 let viCurveY = graph.buildCurve( curveY, yCurveData, wellProps.properties);
 
@@ -1757,10 +1769,8 @@ function getListFamily() {
 }
 exports.getListFamily = getListFamily;
 
-exports.openZonemanager = function(){
+exports.openZonemanager = function(item){
     let wiComponentService = __GLOBAL.wiComponentService;        
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);    
-    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, function(ret){
-        console.log(ret);
-    })
+    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
 }

@@ -904,8 +904,8 @@ exports.lineStyleDialog = function (ModalService, wiComponentService, callback, 
 
         console.log("Op", this.options);
         this.styles = [
-            [10, 0],
             [0, 10],
+            [10, 0],
             [2, 2],
             [8, 2],
             [10, 4, 2, 4],
@@ -998,22 +998,27 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
     function ModalController($scope, close) {
         var self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
         console.log("options", lineOptions, symbolOptions);
 
         this.lineOptions = lineOptions;
         this.symbolOptions = symbolOptions;
         console.log("options", this)
         this.lineStyles = [
+            [0, 1],
             [8, 2, 2, 2, 2, 2],
             [8, 2, 2, 2],
             [2, 2],
             [8, 2],
-            [1, 0],
-            [0, 1]
+            [1, 0]
         ];
+
+        this.symbolOptions.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.symbolOptions.symbolStyle.symbolName);
+        
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
-        this.symbolType = ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"];
+        this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
+        this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];
         this.symbolWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         this.lineColor = function () {
@@ -1039,6 +1044,7 @@ exports.curveAttributeDialog = function (ModalService, wiComponentService, lineO
             });*/
         }
         this.onOkButtonClicked = function () {
+            self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
             close(self.lineOptions, self.symbolOptions);
         };
         this.onCancelButtonClicked = function () {
@@ -2246,7 +2252,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             self.customFillsList = customFillsList;
         });
         this.setCustomFills = function(){
-            self.variableShadingOptions.fill.varShading.customFills = self.customFillsCurrent;
+            self.variableShadingOptions.fill.varShading.customFills = angular.copy(self.customFillsCurrent);
         };
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
@@ -2333,7 +2339,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     self.variableShadingOptions.fill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
                     self.variableShadingOptions.negativeFill.varShading.gradient = null;
-                    // self.shadingOptions.name = self.variableShadingOptions.fill.varShading.customFills.name;
                     break;
             }
             console.log("onOkShadingAttribute", self.fillPatternOptions, self.variableShadingOptions, self.shadingOptions);
@@ -4494,13 +4499,19 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
-                console.log('scale curve');
-                $timeout(function(){
-                    self.histogramProps.leftScale = scale.minScale;
-                    self.histogramProps.rightScale = scale.maxScale;
-                });
-            })        
+            console.log(self.SelectedCurve);
+            if(self.SelectedCurve.properties.minScale != null && self.SelectedCurve.properties.maxScale != null){
+                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+            }else{
+                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
+                    console.log('scale curve');
+                    $timeout(function(){
+                        self.histogramProps.leftScale = scale.minScale;
+                        self.histogramProps.rightScale = scale.maxScale;
+                    });
+                })        
+            }
         }
 
         function getTopFromWell() {
@@ -4746,20 +4757,35 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             created: 1,
             updated: 2,
             deleted: 3,
-            uncreated: 4,
+            uncreated: 4
         }
-        
+        $scope.selectDataSetting = {
+            showCheckAll: false,
+            showUncheckAll: false,
+            displayProp: 'id',
+            checkBoxes: true
+        };
+        // this.example13model=[{id: 2}];
+        let polygons = angular.copy(wiD3Crossplot.getPolygons());
+        console.log("polygons", polygons);
+        this.polygonList = new Array();
+        polygons.forEach(function(polygonItem, index) {
+            polygonItem.id = index;
+            polygonItem.label = index;
+            self.polygonList.push(polygonItem);
+        });
         let viCrossplot = wiD3Crossplot.getViCrossplot();
-        this.regressionLines = new Array();
+        this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
-        console.log("vi111", this.viCross);
+        console.log("vi111", this.viCross, this.polygonList);
         let regressionLinesProps = this.viCross.regressionLines;
+        
         regressionLinesProps.forEach(function(regLineItem, index) {
             regLineItem.change = change.unchanged;
             regLineItem.index = index;
             self.regressionLines.push(regLineItem);
-        })
-        this.polygonIndicesList = [0,1,2,3,4,5,6,7,8,9];
+        });
+
         $scope.change = change; 
         console.log("wiD3Crossplot", wiD3Crossplot, viCrossplot, self.regressionLines);
         this.getRegressionLines = function () {
@@ -4793,37 +4819,92 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                 change: change.created,
                 index: self.regressionLines.length,
                 lineStyle: {
-                    color: "blue",
-                    width: 1,
-                    style: [10]
+                    lineColor: "blue",
+                    lineWidth: 1,
+                    lineStyle: [10, 0]
                 },
+                exclude: true,
+                polygons: [],
                 fitX: 0,
                 fitY: 0
             });
             console.log("addRow", self.regressionLines);
         };
+        console.log("regressionLines", this.regressionLines);
+        this.onselectedPolygonsChange = function(){
+            if(self.selectedCurveX) self.pointSet.idCurveX = self.selectedCurveX;
+        }
         this.onEditLineStyleButtonClicked = function(index) {
             console.log("onEditLineStyleButtonClicked", self.regressionLines);
 
             DialogUtils.lineStyleDialog(ModalService, wiComponentService,function (lineStyleObj){
-                self.regressionLines[index].lineStyle = lineStyleObj;
-            }, self.regressionLines[index].lineStyle);
+                self.regressionLines[index].lineStyle = lineStyleObj.lineStyle;
+            }, self.regressionLines[index]);
         };
-        function setRegressionLines() {
-            // let props = {};
-            console.log('vi222', self.viCross);
-            self.viCross.regressionLines = self.regressionLines;
-            viCrossplot.setProperties(self.viCross);
-            viCrossplot.doPlot();
+        function setRegressionLines(callback) {
+            let regressionLinesIdx = [];
+            self.regressionLines.forEach(function(item, index){
+                item.idCrossPlot = self.viCross.idCrossPlot;
+                switch (item.change) {
+                    case 0:
+                        console.log("unchange:", item);
+                        break;
+                    case 1:
+                        wiApiService.createRegressionLines(item, function(res) {
+                            console.log("create", item);
+                            item.change = 0;
+                        });
+                        break;
+                    case 2:
+                        wiApiService.editRegressionLines(item, function(res) {
+                            console.log("edit", res);
+                            item.change = 0;
+                        });
+                        break;
+                    case 3:
+                        wiApiService.removeRegressionLines(item.idRegressionLine, function(res){
+                            console.log("remove", res);
+                            // self.regressionLines.splice(item, 1);
+                            regressionLinesIdx.push(index);
+                        });
+                        break;
+                    case 4:
+                        console.log("uncreated", item);
+                        // self.regressionLines.splice(item, 1);
+                        regressionLinesIdx.push(index);
+                        break;
+                    default:
+                        console.log('Something went wrong!');
+                        break;
+                }
+            });
+            console.log('regressionLinesObj', self.regressionLines, regressionLinesIdx);
+            regressionLinesIdx.forEach(function(item) {
+                self.regressionLines.splice(item, 1);
+            })
+            if (callback) {
+                callback();
+            }
         }
         this.onOkButtonClicked = function () {
-            close(self);
+            setRegressionLines(function() {
+                self.viCross.regressionLines = self.regressionLines;
+                viCrossplot.setProperties(self.viCross);
+                viCrossplot.doPlot();
+                close();
+            });
         };
         this.onApplyButtonClicked = function() {
-            console.log("ok", self.regressionLines);
-            setRegressionLines();
+            setRegressionLines(function() {
+                console.log("okii", self.viCross);
+                self.viCross.regressionLines = self.regressionLines;
+                viCrossplot.setProperties(self.viCross);
+                viCrossplot.doPlot();
+            });
         };
         this.onCancelButtonClicked = function () {
+            console.log("cancel", self.regressionLines);
+
             close(null);
         }
     }
@@ -4843,9 +4924,48 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-exports.zoneManagerDialog = function(ModalService, callback){
-    function ModalController(close){
+exports.zoneManagerDialog = function(ModalService, item){
+    function ModalController(close, wiComponentService, wiApiService, $timeout){
         let self = this;
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        var project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = project.children;
+        
+        this.SelectedWell = this.wellArr[0];
+        this.zonesetsArr = self.SelectedWell.children.find(function(child){
+            return child.name == 'zonesets';
+        }).children;
+        this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+        this.zoneArr = this.SelectedZoneSet.children.length ? this.SelectedZoneSet.children : null;
+        console.log(this.zoneArr);
+
+        // switch (item.name) {
+        //     case 'well':
+        //     break;
+
+        //     case 'zonesets':
+        //     break;
+
+        //     case 'zoneset':
+        //     break;
+
+        //     case 'zone':
+        //     break;
+        // }
+
+        this.onChangeWell = function(){
+            self.zonesetsArr = self.SelectedWell.children.find(function(child){
+                return child.name == 'zonesets';
+            }).children;
+
+            self.SelectedZoneSet = self.zonesetsArr[0];
+        }
+
+        this.onChangeZoneSet = function(){
+            self.zoneArr = self.SelectedZoneSet.children.length ? selfSelectedZoneSet.children : null;
+            console.log(self.zoneArr);        
+        }
 
         this.onApplyButtonClicked = function(){
             close(null);

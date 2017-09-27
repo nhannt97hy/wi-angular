@@ -8,7 +8,7 @@
             </div>
             <div class="modal-body" style="padding-bottom:0;">
                 <div class="">
-                    <form class="form-horizontal form-condensed" action="" name="modalAddNew">
+                    <form class="form-horizontal form-condensed dialog-style" action="" name="modalAddNew">
                         <div class="row">
                             <div class="col-sm-7">
                                 <div class="form-group">
@@ -21,16 +21,16 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-6">
-                                <h5>Header</h5>
+                                <h5 class="normal-text">Header</h5>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-3 small-text" for="curveName"><span class=""></span>Name</label>
+                                    <label class="control-label col-sm-3 padding-left-2em" for="curveName"><span class=""></span>Name</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control wi-form-control"
                                                 value="" id="curveName" name="curveName" ng-model="wiModal.lineObjTemplate.name" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-3 small-text" for="alias"><span class=""></span>Alias</label>
+                                    <label class="control-label col-sm-3 padding-left-2em" for="alias"><span class=""></span>Alias</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control wi-form-control"
                                                 value="" id="alias" name="alias"
@@ -39,13 +39,13 @@
                                 </div>
                                 <div class="checkShow">
                                     <div class="col-sm-6 padding-left-0">
-                                        <label class="small-text">
+                                        <label>
                                             <input type="checkbox"
                                                    ng-model="wiModal.curveOptions.showHeader" checked>Show header
                                         </label>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label class="small-text">
+                                        <label>
                                             <input type="checkbox"
                                                    ng-model="wiModal.curveOptions.showDataset" 
                                                    ng-change="wiModal.onToggleShowDataset()">Show Dataset
@@ -53,9 +53,9 @@
                                     </div>
                                 </div>
                                 <br><br>
-                                <h5>Scales</h5>
+                                <h5 class="normal-text">Scales</h5>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-5 small-text" for="minValue">Left value</label>
+                                    <label class="control-label col-sm-5 padding-left-2em" for="minValue">Left value</label>
                                     <div class="col-sm-7">
                                         <input type="number" class="form-control wi-form-control"
                                                 value="" id="minValue" name="minValue"
@@ -63,26 +63,26 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-5 small-text" for="maxValue">Right value</label>
+                                    <label class="control-label col-sm-5 padding-left-2em" for="maxValue">Right value</label>
                                     <div class="col-sm-7">
                                         <input type="number" class="form-control wi-form-control"
                                                 value="" id="maxValue" name="maxValue"
                                                 ng-model="wiModal.curveOptions.maxValue">
                                     </div>
                                 </div>
-                                <label class="small-text">
+                                <label>
                                     <input type="checkbox"
                                            ng-model="wiModal.curveOptions.autoValueScale">
                                            Auto value scales
                                 </label>
                                 <div class="form-group">
-                                    <label class="col-sm-5 small-text">Min Depth: </label>
+                                    <label class="col-sm-5 padding-left-2em">Min Depth: </label>
                                     <div class="col-sm-7">
                                         {{wiModal.lineObjTemplate.minDepth}}
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-5 small-text">Max Depth: </label>
+                                    <label class="col-sm-5 padding-left-2em">Max Depth: </label>
                                     <div class="col-sm-7">
                                         {{wiModal.lineObjTemplate.maxDepth}}
                                     </div>
@@ -90,7 +90,7 @@
                             </div>
                             <br><br>
                             <div class="col-sm-6">
-                                <h5>Sample</h5>
+                                <h5 class="normal-text">Sample</h5>
                                 <canvas id="sample" width="200" height="200" style="border:1px solid blue"
                                         ng-click="wiModal.canvasClicked();">
                                 </canvas>
@@ -98,10 +98,10 @@
                             <div class="col-sm-12">
                                 <br>
                                 <div class="dislayType">
-                                    <h5>Display Type</h5>
+                                    <h5 class="normal-text">Display Type</h5>
                                     <div class="col-sm-6 padding-left-0 ">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Display As</label>
+                                            <label class="control-label col-sm-5 padding-left-2em">Display As</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.curveOptions.displayAs" 
                                                         name="displayAs" value="" 
@@ -110,7 +110,7 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Wrap mode</label>
+                                            <label class="control-label col-sm-5 padding-left-2em">Wrap mode</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.curveOptions.wrapMode"
                                                         name="wrapMode" id="wrapMode" value=""
@@ -119,7 +119,7 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Display mode</label>
+                                            <label class="control-label col-sm-5 padding-left-2em">Display mode</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.curveOptions.displayMode"
                                                         name="displayMode" id="displayMode" value=""
@@ -129,17 +129,17 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text"></label>                                        
+                                            <label class="control-label col-sm-5"></label>                                        
                                             <div class="col-sm-7 text-right">
                                                 <button type="button" ng-click="wiModal.onEditAttributeButtonClicked()"
                                                         ng-disabled="wiModal.curveOptions.displayMode=='None'"
-                                                        id="editAttribute" class="btn btn-default">Edit</button>
+                                                        id="editAttribute" class="btn btn-default" style="font-size: 11px">Edit</button>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Log/Linear</label>
+                                            <label class="control-label col-sm-5">Log/Linear</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.curveOptions.displayType"
                                                         name="logLinear" value="" class="form-control wi-form-control"
@@ -148,7 +148,7 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Block Position</label>
+                                            <label class="control-label col-sm-5" style="letter-spacing: -0.4px">Block Position</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.curveOptions.blockPosition"
                                                         name="blockPosition" value="" id="blockPosition"
@@ -158,7 +158,7 @@
                                             </div>
                                         </div>
                                         <!-- <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Symbol Type</label>
+                                            <label class="control-label col-sm-5">Symbol Type</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.symbolOptions.symbolStyle.symbolName"
                                                         name="symbolType" id="symbolType" value=""
@@ -170,7 +170,7 @@
                                         <!-- <input type="checkbox" ng-model="wiModal.curveOptions.ignoreMissingValue" id="ignore" disabled>Ignore Missing Values
                                         <br> -->
                                         <!-- <div class="form-group">
-                                            <label class="control-label col-sm-5 small-text">Symbol Size</label>
+                                            <label class="control-label col-sm-5">Symbol Size</label>
                                             <div class="col-sm-5">
                                                 <input type="number" name="symbolSize" id="symbolSize"
                                                        min="1" max="50"
@@ -192,7 +192,7 @@
                                 </div>
                             </div>
                             <!-- <div>
-                                <h5>Display type</h5>
+                                <h5 class="normal-text">Display type</h5>
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <div class="col-sm-5">Line Stype</div>

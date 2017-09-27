@@ -170,6 +170,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
         self.viCrossplot.doPlot();
     }
+    this.initRegressionLines = function(regressionLines) {
+        self.viCrossplot.regressionLines = [];
+        regressionLines.forEach(function (regressionLines) {
+            self.viCrossplot.regressionLines.push(regressionLines);
+        })
+        self.viCrossplot.doPlot();
+    }
     this.getPolygons = function () {
         if (!self.viCrossplot) return [];
         return self.viCrossplot.polygons;
