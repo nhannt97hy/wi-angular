@@ -4347,7 +4347,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             });
         };
         this.onApplyButtonClicked = function () {
-            updateScalesTab();
+            updateScalesTab(function () {
+                if (callback) callback(self.pointSet);
+            });
         };
         this.onCancelButtonClicked = function () {
             close(null);
