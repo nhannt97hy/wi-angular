@@ -5243,7 +5243,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
 
             } else {
                 var top = parseFloat(self.SelectedWell.properties.topDepth);
-                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) < top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
                 self.addZone(0, top, bottom);
             }
 
@@ -5269,7 +5269,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
 
             } else {
                 var top = parseFloat(self.SelectedWell.properties.topDepth);
-                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) < top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
                 self.addZone(0, top, bottom);
             }
         }
