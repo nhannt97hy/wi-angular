@@ -141,7 +141,8 @@ const USER_DEFINE_LINE_SCHEMA = {
         function: { type: 'String' },
         lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
         displayLine: { type: 'Boolean', default: true },
-        displayEquation: { type: 'Boolean', default: true }
+        displayEquation: { type: 'Boolean', default: true },
+        invalid: { type: 'Boolean', default: false }
     }
 };
 
@@ -371,7 +372,7 @@ Crossplot.prototype.doPlot = function() {
 
     this.prepareData();
     this.genColorList();
-    this.rectZWidth = (this.pointSet.curveZ && this.zAxes == 'Curve') ? 20 : 0;
+    this.rectZWidth = this.shouldPlotZAxis() ? 20 : 0;
 
     this.adjustSize();
     this.updateHeader();
@@ -381,6 +382,7 @@ Crossplot.prototype.doPlot = function() {
 
     this.plotPolygons();
     this.plotRegressionLines();
+    this.plotUserDefineLines();
     this.plotArea();
     this.plotUserLine();
 }
@@ -452,7 +454,8 @@ Crossplot.prototype.updateAxisTicks = function() {
 
     this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
         .call(axisZ)
-        .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)');
+        .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)')
+        .style('display', this.shouldPlotZAxis() ? 'block' : 'none');
 }
 
 Crossplot.prototype.updateAxisGrids = function() {
@@ -495,7 +498,7 @@ Crossplot.prototype.updateAxisGrids = function() {
 
 Crossplot.prototype.updateAxisZRects = function() {
     let rectGroup = this.axisContainer.select('.vi-crossplot-axis-z-rects');
-    if (!this.pointSet.curveZ) {
+    if (!this.shouldPlotZAxis()) {
         rectGroup.style('display', 'none');
         return;
     }
@@ -586,8 +589,8 @@ Crossplot.prototype.plotEquations = function() {
     let self = this;
 
     let equationContainer = this.svgContainer.select('g.vi-crossplot-equations');
-    let eqData = this.regressionLines.filter(function(r) {
-        return r.displayEquation && r.regFunc != null;
+    let eqData = this.regressionLines.concat(this.userDefineLines).filter(function(r) {
+        return r.displayEquation && r.func != null;
     });
     let equations = equationContainer.selectAll('text').data(eqData);
 
@@ -597,11 +600,44 @@ Crossplot.prototype.plotEquations = function() {
         .attr('x', 0)
         .attr('y', function(d, i) { return (i+1)*HEIGHT; })
         .attr('fill', function(d) { return d.lineStyle.lineColor; })
-        .text(function(d) { return d.regFunc.equation; });
+        .text(function(d) { return d.func.equation; });
     equations.exit().remove();
 
     let gWidth = equationContainer.node().getBoundingClientRect().width;
     equationContainer.attr('transform', 'translate(' + (this.getViewportX()[1] - gWidth) + ',' + this.getViewportY()[1] + ')' );
+}
+
+Crossplot.prototype.plotUserDefineLines = function() {
+    this.prepareUserDefineLines();
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let userDefineLineContainer = this.svgContainer.select('g.vi-crossplot-user-define-lines')
+        .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
+
+    let userDefineLines = userDefineLineContainer.selectAll('path')
+        .data(this.userDefineLines.filter(function(r) {
+            return r.func != null;
+        }));
+    let self = this;
+    userDefineLines.enter().append('path')
+        .merge(userDefineLines)
+        .attr('d', function(d) {
+            return line(d.data);
+        })
+        .attr('stroke', function(d) { return d.lineStyle.lineColor; })
+        .attr('stroke-dasharray', function(d) { return d.lineStyle.lineStyle; })
+        .attr('stroke-width', function(d) { return d.lineStyle.lineWidth; })
+        .attr('fill', 'none')
+        .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
+    userDefineLines.exit().remove();
+
+    this.plotEquations();
 }
 
 Crossplot.prototype.plotRegressionLines = function() {
@@ -620,7 +656,7 @@ Crossplot.prototype.plotRegressionLines = function() {
 
     let regLines = regLineContainer.selectAll('path')
         .data(this.regressionLines.filter(function(r) {
-            return r.regFunc != null;
+            return r.func != null;
         }));
 
     let self = this;
@@ -632,10 +668,37 @@ Crossplot.prototype.plotRegressionLines = function() {
         .attr('stroke', function(d) { return d.lineStyle.lineColor; })
         .attr('stroke-dasharray', function(d) { return d.lineStyle.lineStyle; })
         .attr('stroke-width', function(d) { return d.lineStyle.lineWidth; })
+        .attr('fill', 'none')
         .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
     regLines.exit().remove();
 
     this.plotEquations();
+}
+
+Crossplot.prototype.prepareUserDefineLines = function() {
+    let lines = this.userDefineLines;
+
+    let self = this;
+    lines.forEach(function(l) {
+        let func = self.getUserDefineFunc(l.function);
+        if (!func) {
+            l.invalid = true;
+            return;
+        }
+        l.invalid = false;
+        l.func = func;
+
+        let start = self.pointSet.scaleLeft;
+        let end = self.pointSet.scaleRight;
+        let step = (end - start) / 100;
+
+        l.data = Utils.range(start, end, step).map(function(d) {
+            return {
+                x: d,
+                y: func(d)
+            };
+        });
+    });
 }
 
 Crossplot.prototype.prepareRegressionLines = function() {
@@ -650,18 +713,29 @@ Crossplot.prototype.prepareRegressionLines = function() {
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {
-            l.regFunc = null;
+            l.func = null;
             return;
         }
-        let regFunc = self.getRegressionFunc(data);
+        let func = self.getRegressionFunc(data);
         l.data = [self.pointSet.scaleLeft, self.pointSet.scaleRight].map(function(d) {
             return {
                 x: d,
-                y: regFunc(d)
+                y: func(d)
             }
         });
-        l.regFunc = regFunc;
+        l.func = func;
     });
+}
+
+Crossplot.prototype.getUserDefineFunc = function(funcStr) {
+    let func = new Function('x', 'return ' + funcStr);
+    try {
+        let y = func(0.5);
+        if (y === undefined) return null;
+        func.equation = 'y=' + funcStr;
+        return func;
+    }
+    catch (e) { return null; }
 }
 
 Crossplot.prototype.getRegressionFunc = function(data) {
@@ -679,14 +753,14 @@ Crossplot.prototype.getRegressionFunc = function(data) {
     let slope = XY / XX;
     let intercept = meanY - (meanX * slope);
 
-    let regFunc = function(x) {
+    let func = function(x) {
         return x*slope + intercept;
     };
     let a = +slope.toFixed(6);
     let b = +intercept.toFixed(6);
-    regFunc.equation = 'y=' + a + '*x' + (b < 0 ? b : ('+' + b));
+    func.equation = 'y=' + a + '*x' + (b < 0 ? b : ('+' + b));
 
-    return regFunc;
+    return func;
 }
 
 Crossplot.prototype.plotUserLine = function() {
@@ -774,6 +848,10 @@ Crossplot.prototype.plotPolygons = function() {
         })
         .style('display', function(d) { return d.display ? 'block' : 'none'; });
     polygons.exit().remove();
+}
+
+Crossplot.prototype.shouldPlotZAxis = function() {
+    return this.pointSet.curveZ && this.pointSet.zAxes == 'Curve';
 }
 
 Crossplot.prototype.plotSymbols = function() {

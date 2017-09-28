@@ -146,6 +146,17 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                     polygons: [{idPolygon: 1}, {idPolygon:2}],
                     displayEquation: false
                 },
+            ],
+            userDefineLines: [
+                {
+                    idUserDefineLine: 1,
+                    function: 'x',
+                    lineStyle: { lineColor: 'green'}
+                }, {
+                    idUserDefineLine: 2,
+                    function: 'Math.sin(x)',
+                    lineStyle: { lineColor: 'Brown'}
+                }
             ]
         });
 
