@@ -515,6 +515,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return parseFloat(wellProps.topDepth) || 0;
     }
 
+    this.scroll = function() {
+        let low = _depthRange[0]
+        let high = _depthRange[1];
+        let maxDepth = self.getMaxDepth();
+        let minDepth = self.getMinDepth();
+        let wd = _currentTrack.getWindowY();
+        let yStep = parseFloat(_getWellProps().step) || 1;
+
+        let num = Math.round((wd[1] - wd[0]) / yStep / 10);
+        if (num < 1) num = 1;
+
+        let dy = d3.event.deltaY < 0 ? -yStep*num : yStep*num;
+
+        if (dy + low < minDepth) {
+            dy = minDepth - low;
+        }
+        else if (dy + high > maxDepth) {
+            dy = maxDepth - high;
+        }
+
+        low += dy;
+        high += dy;
+        self.setDepthRange([low, high]);
+        self.adjustSlidingBarFromDepthRange([low, high]);
+    }
+
     this.zoom = function(zoomOut) {
         let range = _depthRange[1] - _depthRange[0];
         let low, high;
@@ -809,7 +835,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _onPlotMouseWheelCallback(track) {
-        self.zoom(d3.event.deltaY < 0)
+        if (d3.event.ctrlKey) {
+            self.zoom(d3.event.deltaY < 0);
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+        }
+        else
+            self.scroll();
     }
 
     function _onHeaderMouseDownCallback(track) {
