@@ -42,7 +42,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.linkModels = function () {
         self.zoneArr = null;
-        if (self.crossplotModel.properties.pointSet.idZoneSet) {
+        if (self.crossplotModel && self.crossplotModel.properties.pointSet.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointSet.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
