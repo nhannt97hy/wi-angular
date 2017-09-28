@@ -1,4 +1,5 @@
 let Utils = require('./visualize-utils');
+let CommonSchema = require('./visualize-common-schema');
 let CanvasHelper = require('./visualize-canvas-helper');
 
 module.exports = Crossplot;
@@ -14,91 +15,141 @@ function Crossplot(config) {
     this.rectZWidth = 0;
 }
 
+Crossplot.prototype.AREA_LINE_COLOR = 'DarkCyan';
+Crossplot.prototype.AREA_LINE_WIDTH = 4;
+Crossplot.prototype.AREA_BACKGROUND = 'rgba(255, 255, 0, 0.5)';
+
 const POLYGON_SCHEMA = {
     type: 'Object',
     properties: {
         idPolygon: { type: 'Integer' },
         lineStyle: { type: 'String', default: 'Blue' },
         display: { type: 'Boolean', default: true },
-        points: {
+        points: CommonSchema.POINT_ARRAY_SCHEMA
+    }
+};
+
+const REGRESSION_LINE_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idRegressionLine: { type: 'Integer' },
+        lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
+        displayLine: { type: 'Boolean', default: true },
+        displayEquation: { type: 'Boolean', default: true },
+        regType: {
+            type: 'Enum',
+            values: ['Linear', 'Exponent', 'Powerwer'],
+            default: 'Linear'
+        },
+        inverseReg: { type: 'Boolean', default: false },
+        exclude: { type: 'Boolean', default: false },
+        polygons: {
             type: 'Array',
-            item: {
-                type: 'Object',
-                properties: {
-                    x: { type: 'Float' },
-                    y: { type: 'Float' }
-                }
-            }
+            item: { type: 'Object' },
+            default: []
+        },
+        fitX: { type: 'Float' },
+        fitY: { type: 'Float' }
+    }
+};
+
+const ZONE_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idZone: { type: 'Integer' },
+        name: { type: 'String' },
+        startDepth: { type: 'Float' },
+        endDepth: { type: 'Float' },
+        fill: { type: 'Object' }
+    }
+};
+
+const POINTSET_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idPointSet: { type: 'Integer' },
+        curveX: { type: 'Object' },
+        logX: { type: 'Boolean', default: false },
+        majorX: { type: 'Integer', default: 5, null: false },
+        minorX : { type: 'Integer', default: 1, null: false },
+        scaleLeft: { type: 'Float' },
+        scaleRight: { type: 'Float' },
+        labelX: { type: 'String' },
+        decimalsX: { type: 'Integer', default: 2 },
+        curveY: { type: 'Object' },
+        logY: { type: 'Boolean', default: false },
+        majorY: { type: 'Integer', default: 5, null: false },
+        minorY: { type: 'Integer', default: 1, null: false },
+        scaleBottom: { type: 'Float' },
+        scaleTop: { type: 'Float' },
+        labelY: { type: 'String' },
+        decimalsY: { type: 'Integer', default: 2 },
+        curveZ: { type: 'Object' },
+        scaleMin: { type: 'Float' },
+        scaleMax: { type: 'Float' },
+        numColor: { type: 'Integer', default: 5 },
+        decimalsZ: { type: 'Float', default: 2 },
+        pointSymbol: {
+            type: 'Enum',
+            values: ['Circle', 'Square', 'Cross', 'Diamond', 'Plus', 'Star'],
+            default: 'Circle'
+        },
+        pointSize: { type: 'Integer', default: 2 },
+        pointColor: { type: 'String', default: 'Blue' },
+        intervalDepthTop: { type: 'Float' },
+        intervalDepthBottom: { type: 'Float' },
+        idZoneSet: { type: 'Integer' },
+        zoneset: { type: 'Object' },
+        lineMode: { type: 'Boolean', default: false },
+        showLine: { type: 'Boolean', default: false },
+        standalone: { type: 'Boolean', default: false },
+        overlayLine: { type: 'String' },
+        activeZone: { type: 'String' },
+        zones: {
+            type: 'Array',
+            item: ZONE_SCHEMA,
+            default: []
+        },
+        zAxes: {
+            type: 'Enum',
+            values: ['Zone', 'Curve'],
+            default: 'Curve'
         }
     }
-}
+};
+
+const AREA_SCHEMA = {
+    type: 'Object',
+    properties: {
+        lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
+        points: CommonSchema.POINT_ARRAY_SCHEMA
+    }
+};
+
+const USER_LINE_SCHEMA = {
+    type: 'Object',
+    properties: {
+        lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
+        points: CommonSchema.POINT_ARRAY_SCHEMA
+    }
+};
+
+const USER_DEFINE_LINE_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idUserDefineLine: { type: 'Integer' },
+        function: { type: 'String' },
+        lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
+        displayLine: { type: 'Boolean', default: true },
+        displayEquation: { type: 'Boolean', default: true }
+    }
+};
 
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
     name: { type: 'String', default: 'Noname' },
-    pointSet: {
-        type: 'Object',
-        properties: {
-            idPointSet: { type: 'Integer' },
-            curveX: { type: 'Object' },
-            logX: { type: 'Boolean', default: false },
-            majorX: { type: 'Integer', default: 5, null: false },
-            minorX : { type: 'Integer', default: 1, null: false },
-            scaleLeft: { type: 'Float' },
-            scaleRight: { type: 'Float' },
-            labelX: { type: 'String' },
-            decimalsX: { type: 'Integer', default: 2 },
-            curveY: { type: 'Object' },
-            logY: { type: 'Boolean', default: false },
-            majorY: { type: 'Integer', default: 5, null: false },
-            minorY: { type: 'Integer', default: 1, null: false },
-            scaleBottom: { type: 'Float' },
-            scaleTop: { type: 'Float' },
-            labelY: { type: 'String' },
-            decimalsY: { type: 'Integer', default: 2 },
-            curveZ: { type: 'Object' },
-            scaleMin: { type: 'Float' },
-            scaleMax: { type: 'Float' },
-            numColor: { type: 'Integer', default: 5 },
-            decimalsZ: { type: 'Float', default: 2 },
-            pointSymbol: {
-                type: 'Enum',
-                values: ['Circle', 'Square', 'Cross', 'Diamond', 'Plus', 'Star'],
-                default: 'Circle'
-            },
-            pointSize: { type: 'Integer', default: 2 },
-            pointColor: { type: 'String', default: 'Blue' },
-            intervalDepthTop: { type: 'Float' },
-            intervalDepthBottom: { type: 'Float' },
-            idZoneSet: { type: 'Integer' },
-            zoneset: { type: 'Object' },
-            lineMode: { type: 'Boolean', default: false },
-            showLine: { type: 'Boolean', default: false },
-            standalone: { type: 'Boolean', default: false },
-            overlayLine: { type: 'String' },
-            activeZone: { type: 'String' },
-            zones: {
-                type: 'Array',
-                item: {
-                    type: 'Object',
-                    properties: {
-                        idZone: { type: 'Integer' },
-                        name: { type: 'String' },
-                        startDepth: { type: 'Float' },
-                        endDepth: { type: 'Float' },
-                        fill: { type: 'Object' }
-                    }
-                },
-                default: []
-            },
-            zAxes: {
-                type: 'Enum',
-                values: ['Zone', 'Curve'],
-                default: 'Curve'
-            }
-        }
-    },
+    pointSet: POINTSET_SCHEMA,
     polygons: {
         type: 'Array',
         item: POLYGON_SCHEMA,
@@ -106,40 +157,14 @@ Crossplot.prototype.PROPERTIES = {
     },
     regressionLines: {
         type: 'Array',
-        item: {
-            type: 'Object',
-            properties: {
-                idRegressionLine: { type: 'Integer' },
-                lineStyle: {
-                    type: 'Object',
-                    properties: {
-                        lineColor: { type: 'String', default: 'Blue' },
-                        lineWidth: { type: 'Integer', default: 1 },
-                        lineStyle: {
-                            type: 'Array',
-                            item: { type: 'Integer' },
-                            default: []
-                        },
-                    }
-                },
-                displayLine: { type: 'Boolean', default: true },
-                displayEquation: { type: 'Boolean', default: true },
-                regType: {
-                    type: 'Enum',
-                    values: ['Linear', 'Exponent', 'Powerwer'],
-                    default: 'Linear'
-                },
-                inverseReg: { type: 'Boolean', default: false },
-                exclude: { type: 'Boolean', default: false },
-                polygons: {
-                    type: 'Array',
-                    item: { type: 'Object' },
-                    default: []
-                },
-                fitX: { type: 'Float' },
-                fitY: { type: 'Float' }
-            }
-        },
+        item: REGRESSION_LINE_SCHEMA,
+        default: []
+    },
+    area: AREA_SCHEMA,
+    userLine: USER_LINE_SCHEMA,
+    userDefineLines: {
+        type: 'Array',
+        item: USER_DEFINE_LINE_SCHEMA,
         default: []
     }
 };
@@ -284,6 +309,9 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-equations');
 
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-area');
+
     d3.select(window)
         .on('resize', function() {
             self.doPlot();
@@ -344,6 +372,7 @@ Crossplot.prototype.doPlot = function() {
 
     this.plotPolygons();
     this.plotRegressionLines();
+    this.plotArea();
 }
 
 Crossplot.prototype.updateClipPath = function() {
@@ -650,6 +679,33 @@ Crossplot.prototype.getRegressionFunc = function(data) {
     return regFunc;
 }
 
+Crossplot.prototype.plotArea = function() {
+    let areaContainer = this.svgContainer.select('g.vi-crossplot-area');
+    areaContainer.selectAll('.vi-crossplot-area-item').remove();
+    if (!this.area || !this.area.points || this.area.points.length < 2) return;
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let area = areaContainer.append('path')
+        .datum(this.area)
+        .attr('d', function(d) {
+            if (d === self.tmpPolygon)
+                return line(d.points);
+            else
+                return line(d.points.concat([d.points[0]]));
+        })
+        .classed('vi-crossplot-area-item', true)
+        .attr('stroke', this.AREA_LINE_COLOR)
+        .attr('stroke-width', this.AREA_LINE_WIDTH)
+        .attr('fill-rule', 'evenodd')
+        .attr('fill', this.AREA_BACKGROUND);
+}
+
 Crossplot.prototype.plotPolygons = function() {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
@@ -790,7 +846,8 @@ Crossplot.prototype.prepareData = function() {
             self.data.push({
                 x: mapX[d.y],
                 y: d.x,
-                z: mapZ[d.y]
+                z: mapZ[d.y],
+                depth: d.y
             });
         }
     });
@@ -880,6 +937,40 @@ Crossplot.prototype.mouseMoveCallback = function() {
         }
         this.plotPolygons();
     }
+    else if (this.mode == 'PlotAreaPolygon') {
+        if (!this.tmpPolygon) return;
+        if (!this.tmpPolygonPoint) {
+            this.tmpPolygonPoint = {x: x, y: y};
+            this.tmpPolygon.points.push(this.tmpPolygonPoint);
+        }
+        else {
+            this.tmpPolygonPoint.x = x;
+            this.tmpPolygonPoint.y = y;
+        }
+        this.plotArea();
+    }
+    else if (this.mode == 'PlotAreaRectangle') {
+        if (!this.area) return;
+        else {
+            this.area = {
+                points: [
+                    this.area.points[0],
+                    { x: this.area.points[0].x, y: y },
+                    { x: x, y: y },
+                    { x: x, y: this.area.points[0].y }
+                ]
+            }
+            this.plotArea();
+        }
+    }
+}
+
+Crossplot.prototype.onMouseDown = function(callback) {
+    let self = this;
+    this.on('mousedown', function() {
+        self.mouseDownCallback();
+        callback();
+    })
 }
 
 Crossplot.prototype.mouseDownCallback = function() {
@@ -893,8 +984,8 @@ Crossplot.prototype.mouseDownCallback = function() {
     let x = this.getTransformX().invert(mouse[0]);
     let y = this.getTransformY().invert(mouse[1]);
 
+    if (d3.event.button == 2) return;
     if (this.mode == 'PlotPolygon') {
-        if (d3.event.button == 2) return;
         if (!this.tmpPolygon) {
             this.tmpPolygon = {
                 lineStyle: this.genColor(),
@@ -906,6 +997,55 @@ Crossplot.prototype.mouseDownCallback = function() {
         this.tmpPolygonPoint = null;
         this.plotPolygons();
     }
+    else if (this.mode == 'PlotAreaPolygon') {
+        if (!this.tmpPolygon) {
+            this.tmpPolygon = { points: [{x: x, y: y}] };
+            this.area = this.tmpPolygon;
+        }
+        this.tmpPolygonPoint = null;
+        this.plotArea();
+    }
+    else if (this.mode == 'PlotAreaRectangle') {
+        if (!this.area) {
+            this.area = { points: [{x: x, y: y}] };
+        }
+        else {
+            this.area = {
+                points: [
+                    this.area.points[0],
+                    { x: this.area.points[0].x, y: y },
+                    { x: x, y: y },
+                    { x: x, y: this.area.points[0].y }
+                ]
+            }
+            this.plotArea();
+        }
+    }
+}
+
+Crossplot.prototype.startAddAreaPolygon = function() {
+    this.setMode('PlotAreaPolygon');
+}
+
+Crossplot.prototype.endAddAreaPolygon = function() {
+    this.setMode(null);
+    if (this.tmpPolygonPoint) {
+        this.tmpPolygon.points.pop();
+    }
+    this.tmpPolygon = null;
+    this.plotArea();
+    return this.area;
+}
+
+
+Crossplot.prototype.startAddAreaRectangle = function() {
+    this.setMode('PlotAreaRectangle');
+    this.area = null;
+}
+
+Crossplot.prototype.endAddAreaRectangle = function() {
+    this.setMode(null);
+    return this.area;
 }
 
 Crossplot.prototype.startAddPolygon = function() {

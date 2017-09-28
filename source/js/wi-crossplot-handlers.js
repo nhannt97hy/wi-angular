@@ -39,15 +39,21 @@ exports.OverlayButtonClicked = function() {
 }
 
 exports.CreatePolygonButtonClicked = function() {
-    console.log('CreatePolygonButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    wiD3Crossplot.drawAreaPolygon();
 }
 
 exports.CreateRectangleButtonClicked = function() {
-    console.log('CreateRectangleButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    wiD3Crossplot.drawAreaRectangle();
 }
 
 exports.DeleteAreaButtonClicked = function() {
-    console.log('DeleteAreaButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    wiD3Crossplot.deleteArea();
 }
 
 exports.CreateUserLineButtonClicked = function() {
