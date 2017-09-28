@@ -49,7 +49,7 @@
                                     <select ng-model="wiModal.shadingOptions.idRightLine" name="curveName"
                                             class="form-control wi-form-control normal-text" 
                                             ng-change="wiModal.shadingOptions.rightFixedValue = null;
-                                            wiModal.setShadingName(wiModal.shadingOptions.idRightLine, true);"
+                                            wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine);"
                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset">
                                         <option></option>
                                     </select>
@@ -58,7 +58,7 @@
                                     <select ng-model="wiModal.shadingOptions.idLeftLine" name="curveName"
                                             class="form-control wi-form-control normal-text" 
                                             ng-options="item.id as item.datasetCurve for item in wiModal.leftLimit"
-                                            ng-change="wiModal.shadingOptions.leftFixedValue = null; wiModal.setLimit2(); wiModal.setShadingName(wiModal.shadingOptions.idLeftLine, false)"
+                                            ng-change="wiModal.shadingOptions.leftFixedValue = null; wiModal.setLimit2(); wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine);"
                                             ng-disabled="!wiModal.shadingOptions.idRightLine">
                                     </select>
                                 </div>
@@ -66,7 +66,7 @@
                                     <input type="number" ng-model="wiModal.shadingOptions.leftFixedValue" 
                                             class="form-control wi-form-control normal-text"
                                             ng-change="wiModal.shadingOptions.idLeftLine = null;
-                                            wiModal.setShadingName(null, false); wiModal.shadingOptions.idLeftLine = -3"
+                                            wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine); wiModal.shadingOptions.idLeftLine = -3"
                                             size="6"
                                             ng-disabled="!wiModal.shadingOptions.idRightLine">
                                 </div>

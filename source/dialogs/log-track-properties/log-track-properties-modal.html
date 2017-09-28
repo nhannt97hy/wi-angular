@@ -293,46 +293,31 @@
                                                     <select ng-model="shading.idRightLine" name="curveName"
                                                             class="form-control wi-form-control" 
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading._index, true);">
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);">
                                                         <option></option>
                                                     </select>
                                                 </td>
-                                                <!-- <td class="border">
-                                                    <select ng-model="shading.limit2"
-                                                            class="form-control wi-form-control"
-                                                            ng-change="wiModal.setLimit2(shading._index);">
-                                                        <option value="left">Left</option>
-                                                        <option value="right">Right</option>
-                                                        <option value="custom">Custom</option>
-                                                        <option value="curve">Curve</option>
-                                                    </select>
-                                                    {{shading.limit2}}
-                                                </td> -->
                                                 <td>
                                                     <select ng-model="shading.idLeftLine"
                                                             class="form-control wi-form-control" 
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.leftLimit"
                                                             ng-change="wiModal.onChangeShading($index);
-                                                             shading.leftFixedValue = null; wiModal.validate(shading._index); wiModal.setFillDisplay(shading._index); wiModal.setLimit2(shading._index);wiModal.setShadingName(shading.idLeftLine, shading._index, true)" 
+                                                             shading.leftFixedValue = null; wiModal.validate(shading._index); wiModal.setFillDisplay(shading._index); wiModal.setLimit2(shading._index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);" 
                                                             ng-disabled="!shading.idRightLine">
-                                                        <!-- <option></option> -->
-                                                        <!-- <option value="-1">Left</option>
-                                                        <option value="-2">Right</option>
-                                                        <option value="-3">Custom</option> -->
                                                         <!-- <option value="{{item.id}}" ng-repeat="item in wiModal.curvesOnDataset">{{item.datasetCurve}}</option> -->
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="shading.leftFixedValue" 
                                                             class="form-control wi-form-control" id="fixedVal" 
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, true); shading.idLeftLine = -3"
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index); shading.idLeftLine = -3"
                                                             ng-disabled="!shading.idRightLine"
                                                             size="6">
                                                 </td>
                                                 <!-- <td class="border border-style1-right">
                                                     <input type="number" ng-model="shading.rightFixedValue" 
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(null, shading._index, true);" size="6"
+                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName();" size="6"
                                                             disabled>
                                                 </td> -->
                                                 <td>

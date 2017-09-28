@@ -10,10 +10,11 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="name">Name:</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control"
+                            <input type="text" class="form-control" id="focusF"
                                    ng-model="wiModal.name"
                                    ng-click="wiModal.error = null"
                                    wi-enter="wiModal.onOkButtonClicked()"
+                                   tabindex="-1"
                                    required>
                         </div>
                     </div>

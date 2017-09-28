@@ -669,7 +669,7 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
         self.name = "BlankLogPlot";
         self.error = null;
         self.disabled = false;
-
+        $('#focusF').focus();
         this.onOkButtonClicked = function () {
             close(self.name);
         }
@@ -948,7 +948,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         this.options = options;
         console.log(this.options);
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.styles = [
             [10, 0],
             [0, 10],
@@ -1923,7 +1923,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
 
         this.checkboxVal = !this.options.fill.display;
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.enableFill = function (idEnable, value) {
             $('#' + idEnable + ":button").attr("disabled", value);
         }
@@ -2110,7 +2110,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
         this.checkboxVal = !this.fillPatternOptions.fill.display;
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
         this.enableFill = function (idEnable, value) {
             $('#' + idEnable + ":button").attr("disabled", value);
@@ -2356,38 +2356,31 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         //     }
         //     return true;
         // }
-        this.setShadingName = function(curveId, isRight) {
-            var curveName = null;
-            var leftPart = null;
-            var rightPart = null;
-            if( self.shadingOptions.name.indexOf('_') < 0 ) self.shadingOptions.name = "xx_yy";
-            if (isRight) {
-                if (!curveId) {
-                    rightPart = 'right';
-                }
-                else {
-                    for (curve of self.curvesOnDataset) {
-                        if (curve.id == parseInt(curveId)) {
-                            rightPart = curve.name;
-                            break;
-                        }
-                    }
-                }
-                self.shadingOptions.name = self.shadingOptions.name.replace(/_.+/g, "_" + rightPart);
-            }
+        this.setShadingName = function(leftPart, rightPart) {
+            let left = null;
+            let right = 'left';
+            if(!leftPart) return;
             else {
-                if (!curveId) {
-                    leftPart = 'left';
+                for (curve of self.curvesOnDataset) {
+                    if (curve.id == parseInt(leftPart)) {
+                        left = curve.name;
+                        break;
+                    }
                 }
-                else {
+                if (rightPart == -1) right = 'left';
+                else if (rightPart == -2) right = 'right';
+                else if (rightPart == -3) {
+                    right = self.shadingOptions.leftFixedValue;
+                }
+                else if(rightPart > 0) {
                     for (curve of self.curvesOnDataset) {
-                        if (curve.id == parseInt(curveId)) {
-                            leftPart = curve.name;
+                        if (curve.id == parseInt(rightPart)) {
+                            right = curve.name;
                             break;
                         }
                     }
                 }
-                self.shadingOptions.name = self.shadingOptions.name.replace(/^.+_/g, leftPart + "_");
+                self.shadingOptions.name = left + '-' + right;
             }
         }
         this.setLimit2 = function() {
@@ -2582,7 +2575,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
-
         this.tabFlags = options.tabs;
         this.datasets = new Array();
 
@@ -2989,36 +2981,32 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             else self.shadingChanged[self.__idx].change = '3';
             console.log("removeRowShading", self.shadingChanged[self.__idx], self.__idx);
         }
-        this.setShadingName = function (curveId, idx, isRight) {
-            var curveName = null;
-            var leftPart = null;
-            var rightPart = null;
-            // var rightPart = findInVisCurveListByIdLine(curveId).name;
-            if (self.shadingArr[idx].name.indexOf('_') < 0) self.shadingArr[idx].name = "xx_yy";
-            if (isRight) {
-                if (!curveId) {
-                    rightPart = 'right';
-                } else {
+        this.setShadingName = function(leftPart, rightPart, idx) {
+            let left = null;
+            let right = 'left';
+            console.log("shading name", leftPart, rightPart, idx);
+            if(!leftPart) return;
+            else {
+                for (curve of self.curvesOnDataset) {
+                    if (curve.id == parseInt(leftPart)) {
+                        left = curve.name;
+                        break;
+                    }
+                }
+                if (rightPart == -1) right = 'left';
+                else if (rightPart == -2) right = 'right';
+                else if (rightPart == -3) {
+                    right = self.shadingArr[idx].leftFixedValue;
+                }
+                else if(rightPart > 0) {
                     for (curve of self.curvesOnDataset) {
-                        if (curve.id == parseInt(curveId)) {
-                            rightPart = curve.name;
+                        if (curve.id == parseInt(rightPart)) {
+                            right = curve.name;
                             break;
                         }
                     }
                 }
-                self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/_.+/g, "_" + rightPart);
-            } else {
-                if (!curveId) {
-                    leftPart = 'custom';
-                } else {
-                    for (curve of self.curvesOnDataset) {
-                        if (curve.id == parseInt(curveId)) {
-                            leftPart = curve.name;
-                            break;
-                        }
-                    }
-                }
-                self.shadingArr[idx].name = self.shadingArr[idx].name.replace(/^.+_/g, leftPart + "_");
+                self.shadingArr[idx].name = left + '-' + right;
             }
         }
 
@@ -3171,7 +3159,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             wiApiService.dataCurve(shadingObj.idControlCurve, function (curveData) {
                                 shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
                                 shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
-                                shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData);
+                                shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData, self.well.properties);
                                 if(!shadingObj.isNegPosFill) {
                                     if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette) 
                                         shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
@@ -3626,7 +3614,7 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
         this.showName = props.showName;
         this.name = props.name;
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foreground = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill.pattern.foreground, function (colorStr) {
                 self.fill.pattern.foreground = colorStr;
@@ -4121,7 +4109,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
                 type: "left"
             }
         }
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foreground = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.foreground, function (colorStr) {
                 self.props.positiveFill.foreground = colorStr;
@@ -5193,7 +5181,7 @@ exports.zoneManagerDialog = function(ModalService, item){
         this.setClickedRow = function (indexRow) {
             $scope.selectedRow = indexRow;
         }
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foregroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
                 self.zoneArr[index].properties.foreground = colorStr;

@@ -193,6 +193,7 @@ Shading.prototype.init = function(plotContainer) {
         .attr('y1', 0)
         .attr('y2', 0)
         .style('cursor', 'col-resize')
+        .style('pointer-events', 'all')
         .style('z-index', 2);
 
     return this;
