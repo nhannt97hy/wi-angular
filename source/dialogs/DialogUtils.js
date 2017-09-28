@@ -1602,6 +1602,8 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         this.onUploadButtonClicked = function () {
             let payloadParams = {
                 file: self.lasFiles,
+                families: self.selectedFamilies,
+                isLoadAllCurves : self.settings.isLoadAllCurves,
                 transactionId: self.transactionId
             };
             //console.log(payloadParams);
@@ -1753,7 +1755,6 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-
 // exports.importMultiLASDialog = function (ModalService, callback) {
     // function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         // let self = this;
@@ -4386,7 +4387,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             });
         };
         this.onApplyButtonClicked = function () {
-            updateScalesTab();
+            updateScalesTab(function () {
+                if (callback) callback(self.pointSet);
+            });
         };
         this.onCancelButtonClicked = function () {
             close(null);
