@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent('GRAPH');
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let zoneCtrl = null;
     this.viCrossplot = {};
     this.isShowWiZone = true;
     this.isShowReferenceWindow = false;
@@ -31,20 +32,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowWiZone = false;
         utils.triggerWindowResize();
     }
+
+    this.getZoneCtrl = function () {
+        if (!zoneCtrl) zoneCtrl =  wiComponentService.getComponent(self.getZoneName());
+        return zoneCtrl;
+    }
+
     this.getZoneName = function () {
         return self.name + "Zone";
     }
     this.linkModels = function () {
         self.zoneArr = null;
-        if (self.crossplotModel.properties.idZoneSet) {
-            self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.idZoneSet);
+        if (self.crossplotModel.properties.pointSet.idZoneSet) {
+            self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointSet.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {}
-            })
-
-            self.crossplotModel.properties.crossplotTitle = getHistogramTitle();
-            self.crossplotModel.properties.xLabel = getXLabel();
+            });
+            self.getZoneCtrl().zones = self.zoneArr;
+            self.pointSet.zones = self.zoneArr.map(function(zone) {
+                return zone.properties;
+            });
+            // self.crossplotModel.properties.crossplotTitle = getHistogramTitle();
+            // self.crossplotModel.properties.xLabel = getXLabel();
         }
     }
     this.CloseReferenceWindow = function () {
@@ -160,6 +170,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
         self.viCrossplot.doPlot();
     }
+    this.initRegressionLines = function(regressionLines) {
+        self.viCrossplot.regressionLines = [];
+        regressionLines.forEach(function (regressionLines) {
+            self.viCrossplot.regressionLines.push(regressionLines);
+        })
+        self.viCrossplot.doPlot();
+    }
     this.getPolygons = function () {
         if (!self.viCrossplot) return [];
         return self.viCrossplot.polygons;
@@ -172,6 +189,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!self.viCrossplot) return {};
         return self.viCrossplot;
     }
+
+    this.updateActiveZone = function (activeZone) {
+        if (!self.viCrossplot) return {};
+        viCrossplot.setProperties({
+            pointSet: {
+                activeZone: activeZone
+            }
+        });
+        viCrossplot.doPlot();
+    }
+
     this.drawPolygon = function (idPolygon, callback) {
         if (idPolygon) {
             self.viCrossplot.startEditPolygon(idPolygon);

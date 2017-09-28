@@ -74,7 +74,6 @@ function Curve(config) {
             y: d.y * self.yStep + self.offsetY
         };
     });
-
     let dataMap = {};
     this.data.forEach(function(d) {
         dataMap[d.y] = d.x;

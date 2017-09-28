@@ -124,7 +124,7 @@ let app = angular.module('wiapp',
         'kendo.directives',
         'ngSanitize',
         'ui.select',
-        'multipleSelect'
+        'angularjs-dropdown-multiselect'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {

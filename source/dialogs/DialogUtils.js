@@ -904,8 +904,8 @@ exports.lineStyleDialog = function (ModalService, wiComponentService, callback, 
 
         console.log("Op", this.options);
         this.styles = [
-            [10, 0],
             [0, 10],
+            [10, 0],
             [2, 2],
             [8, 2],
             [10, 4, 2, 4],
@@ -948,7 +948,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         this.options = options;
         console.log(this.options);
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.styles = [
             [10, 0],
             [0, 10],
@@ -998,22 +998,27 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
     function ModalController($scope, close) {
         var self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
         console.log("options", lineOptions, symbolOptions);
 
         this.lineOptions = lineOptions;
         this.symbolOptions = symbolOptions;
         console.log("options", this)
         this.lineStyles = [
+            [0, 1],
             [8, 2, 2, 2, 2, 2],
             [8, 2, 2, 2],
             [2, 2],
             [8, 2],
-            [1, 0],
-            [0, 1]
+            [1, 0]
         ];
+
+        this.symbolOptions.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.symbolOptions.symbolStyle.symbolName);
+        
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
-        this.symbolType = ["circle", "cross", "diamond", "dot", "plus", "square", "star", "triangle"];
+        this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
+        this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];
         this.symbolWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         this.lineColor = function () {
@@ -1039,6 +1044,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
             });*/
         }
         this.onOkButtonClicked = function () {
+            self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
             close(self.lineOptions, self.symbolOptions);
         };
         this.onCancelButtonClicked = function () {
@@ -1563,13 +1569,15 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         let self = this;
         this.lasInfos = null;
         this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        this.wells = this.projectLoaded.wells
         this.isDisabled = true;
         this.lasFiles = null;
         this.selectedWells = [];
         this.selectedDatasets = [];
+        this.selectedCurves = [];
         this.transactionId = Date.now();
-
-
+        window.iml = this;
         this.settings = {
             isOverwriteWellHeader: false,
             isCreateNewWellIfDupe: false,
@@ -1604,8 +1612,21 @@ exports.importMultiLASDialog = function (ModalService, callback) {
                     lasInfo.isLoad = true;
                     lasInfo.LASName = lasInfo.originalname;
                     lasInfo.wellInfo.depthUnit = 'M';
+                    lasInfo.curves.forEach(function (curve) {
+                        curve.isLoad = true;
+                    });
                 });
                 self.isDisabled = false;
+                self.lasInfos.sort(function (a,b){
+                    let originalnameA = a.originalname.toUpperCase();
+                    let originalnameB = b.originalname.toUpperCase();
+                    return (originalnameA == originalnameB ? 0 : originalnameA > originalnameB ? 1 : -1);
+                });
+                self.lasFiles.sort(function (a,b){
+                    let nameA = a.name.toUpperCase();
+                    let nameB = b.name.toUpperCase();
+                    return (nameA == nameB ? 0 : nameA > nameB ? 1 : -1);
+                });
             });
         }
         $scope.fileIndex = 0;
@@ -1626,31 +1647,85 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             self.curves = [];
             self.isDisabled = true;
         }
-
+        this.updateLasFiles = function () {
+            // self.lasInfos.forEach(function(lasInfo, i){
+            //     self.lasFiles[i].isLoad = lasInfo.isLoad;
+            // });
+        }
+        this.updateWells = function () {
+            self.selectedWells = [];
+            self.lasInfos.forEach(function (lasInfo) {
+                let well = self.wells.find(well => well.name == lasInfo.selectedWellName) || lasInfo.selectedWellName;
+                if(well){
+                    self.selectedWells.push(well);
+                } else {
+                    self.selectedWells.push("");
+                }
+                lasInfo.selectedWell = well ? well : {datasets: []};
+                console.log(lasInfo.selectedWell);
+            });
+        }
+        this.updateDatasets = function () {
+            self.selectedDatasets = [];
+            self.lasInfos.forEach(function (lasInfo) {
+                let dataset = lasInfo.selectedDatasetName;
+                if(dataset){
+                    self.selectedDatasets.push(dataset);
+                } else {
+                    self.selectedDatasets.push("");
+                }
+            });
+        }
         this.onLoadButtonClicked = function () {
+            let selectedWellNames = [];
+            let selectedDatasetNames = [];
+            let selectedCurves = [];
+            let wellHeaders = [];
+            let isLoadFile = [];
+            //console.log(self.selectedWells);
+            self.selectedWells.forEach(function (well) {
+                selectedWellNames.push(well.idWell ? well.name : well);
+            })
+            self.selectedDatasets.forEach(function (dataset) {    
+                selectedDatasetNames.push(dataset.idDataset ? dataset.name : dataset);
+            })
+            self.lasInfos.forEach(function (each, i) {
+                isLoadFile.push(each.isLoad);
+                wellHeaders.push(each.wellInfo);
+                let curveIsLoaded = {
+                    data : [],
+                    length : 0
+                }
+                each.curves.forEach(function (c,i) {
+                    if (c.isLoad) {
+                        curveIsLoaded.data.push(c.name);
+                        curveIsLoaded.length ++;
+                    }
+
+                });
+                selectedCurves.push(curveIsLoaded);
+                curveIsLoaded = {
+                    data : [],
+                    length : 0
+                };
+
+            });
             let payloadParams = {
                 id_project: self.projectLoaded.idProject,
-                id_wells: [],
-                id_datasets: []
+                settings: self.settings,
+                families: self.selectedFamilies,
+                file: self.lasFiles,
+                id_wells: selectedWellNames,
+                id_datasets: selectedDatasetNames,
+                curves : selectedCurves,
+                wellHeaders: wellHeaders,
+                isLoad : isLoadFile
             };
-            payloadParams.file = self.lasFiles;
-            console.log(self.selectedWell);
-            for (let i = 0; i < self.lasFiles.length; i++) {
-                if (self.selectedWells[i]) {
-                    payloadParams.id_wells[i] = self.selectedWell[i];
-                } else {
-                    payloadParams.id_wells[i] = "None";
-                }
-                if (self.selectedDatasets[i]) {
-                    payloadParams.id_datasets[i] = self.selectedDatasets[i];
-                } else {
-                    payloadParams.id_datasets[i] = "None";
-                }
-            }
             console.log('payloadParams', payloadParams);
             wiApiService.uploadMultiFiles(payloadParams)
                 .then(function (wells) {
                     console.log('wells response', wells);
+                    utils.refreshProjectState();
                     return close(wells, 500);
                 })
                 .catch(function (err) {
@@ -1666,7 +1741,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: "import-multi-LAS/import-multi-LAS-modal.html",
+        templateUrl: 'import-multi-LAS/import-multi-LAS-modal.html',
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
@@ -1678,6 +1753,127 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
+
+// exports.importMultiLASDialog = function (ModalService, callback) {
+    // function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
+        // let self = this;
+        // this.lasInfos = null;
+        // this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+        // this.isDisabled = true;
+        // this.lasFiles = null;
+        // this.selectedWells = [];
+        // this.selectedDatasets = [];
+        // this.transactionId = Date.now();
+
+
+        // this.settings = {
+            // isOverwriteWellHeader: false,
+            // isCreateNewWellIfDupe: false,
+            // isCreateNewDatasetIfDupe: false,
+            // isUseUwiAsWellName: false,
+            // isLoadAllCurves: true
+        // };
+        // this.families = [
+            // 'Gamma Ray',
+            // 'Porosity',
+            // 'Density',
+            // 'Acoustic',
+            // 'Resistivity',
+            // 'Permeability',
+            // 'Saturation',
+            // 'Volume'
+        // ];
+        // this.selectedFamilies = {};
+        // this.families.forEach(function (family) {
+            // self.selectedFamilies[family] = true;
+        // });
+        // this.onUploadButtonClicked = function () {
+            // let payloadParams = {
+                // file: self.lasFiles,
+                // transactionId: self.transactionId
+            // };
+            // console.log(payloadParams);
+            // wiApiService.uploadMultiFilesPrepare(payloadParams, function (lasInfos) {
+                // self.lasInfos = lasInfos;
+                // self.curves = lasInfos[0].curves;
+                // self.lasInfos.forEach(function (lasInfo) {
+                    // lasInfo.isLoad = true;
+                    // lasInfo.LASName = lasInfo.originalname;
+                    // lasInfo.wellInfo.depthUnit = 'M';
+                // });
+                // self.isDisabled = false;
+            // });
+        // }
+        // $scope.fileIndex = 0;
+        // this.onLasClick = function ($index) {
+            // $scope.fileIndex = $index;
+            // self.curves = self.lasInfos[$index].curves;
+        // }
+
+        // this.onRemoveFileClick = function () {
+            // self.lasInfos.splice($scope.fileIndex, 1);
+            // if (!self.lasInfos.length) {
+                // self.isDisabled = true;
+            // }
+        // }
+
+        // this.onRemoveAllFilesClick = function () {
+            // self.lasInfos = [];
+            // self.curves = [];
+            // self.isDisabled = true;
+        // }
+
+        // this.onLoadButtonClicked = function () {
+            // let payloadParams = {
+                // id_project: self.projectLoaded.idProject,
+                // id_wells: [],
+                // id_datasets: []
+            // };
+            // payloadParams.file = self.lasFiles;
+            // console.log(self.selectedWell);
+            // for (let i = 0; i < self.lasFiles.length; i++) {
+                // if (self.selectedWells[i]) {
+                    // payloadParams.id_wells[i] = self.selectedWell[i];
+                // } else {
+                    // payloadParams.id_wells[i] = "None";
+                // }
+                // if (self.selectedDatasets[i]) {
+                    // payloadParams.id_datasets[i] = self.selectedDatasets[i];
+                // } else {
+                    // payloadParams.id_datasets[i] = "None";
+                // }
+            // }
+            // console.log('payloadParams', payloadParams);
+            // wiApiService.uploadMultiFiles(payloadParams)
+                // .then(function (wells) {
+                    // console.log('wells response', wells);
+                    // return close(wells, 500);
+                // })
+                // .catch(function (err) {
+                    // console.log('err', err);
+                // });
+
+        // };
+
+        // this.onCancelButtonClicked = function () {
+            // console.log("onCancelButtonClicked");
+            // close(null, 100);
+        // };
+    // }
+
+    // ModalService.showModal({
+        // templateUrl: "import-multi-LAS/import-multi-LAS-modal.html",
+        // controller: ModalController,
+        // controllerAs: "wiModal"
+    // }).then(function (modal) {
+        // modal.element.modal();
+        // modal.close.then(function (data) {
+            // $('.modal-backdrop').remove();
+            // $('body').removeClass('modal-open');
+            // if (data) callback(data);
+        // });
+    // });
+// };
 exports.fillPatternSettingDialog = function (ModalService, callback, options, shadingOptions) {
     let thisModal = null;
 
@@ -1726,7 +1922,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
 
         this.checkboxVal = !this.options.fill.display;
 
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.enableFill = function (idEnable, value) {
             $('#' + idEnable + ":button").attr("disabled", value);
         }
@@ -2246,7 +2442,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             self.customFillsList = customFillsList;
         });
         this.setCustomFills = function(){
-            self.variableShadingOptions.fill.varShading.customFills = self.customFillsCurrent;
+            self.variableShadingOptions.fill.varShading.customFills = angular.copy(self.customFillsCurrent);
         };
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
@@ -2333,7 +2529,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     self.variableShadingOptions.fill.varShading.gradient = null;
                     self.variableShadingOptions.positiveFill.varShading.gradient = null;
                     self.variableShadingOptions.negativeFill.varShading.gradient = null;
-                    // self.shadingOptions.name = self.variableShadingOptions.fill.varShading.customFills.name;
                     break;
             }
             console.log("onOkShadingAttribute", self.fillPatternOptions, self.variableShadingOptions, self.shadingOptions);
@@ -3925,7 +4120,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
                 type: "left"
             }
         }
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone'];
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foreground = function(){
             DialogUtils.colorPickerDialog(ModalService, self.props.positiveFill.foreground, function (colorStr) {
                 self.props.positiveFill.foreground = colorStr;
@@ -4494,13 +4689,19 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
-                console.log('scale curve');
-                $timeout(function(){
-                    self.histogramProps.leftScale = scale.minScale;
-                    self.histogramProps.rightScale = scale.maxScale;
-                });
-            })        
+            console.log(self.SelectedCurve);
+            if(self.SelectedCurve.properties.minScale != null && self.SelectedCurve.properties.maxScale != null){
+                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+            }else{
+                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
+                    console.log('scale curve');
+                    $timeout(function(){
+                        self.histogramProps.leftScale = scale.minScale;
+                        self.histogramProps.rightScale = scale.maxScale;
+                    });
+                })        
+            }
         }
 
         function getTopFromWell() {
@@ -4750,20 +4951,35 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             created: 1,
             updated: 2,
             deleted: 3,
-            uncreated: 4,
+            uncreated: 4
         }
-        
+        $scope.selectDataSetting = {
+            showCheckAll: false,
+            showUncheckAll: false,
+            displayProp: 'id',
+            checkBoxes: true
+        };
+        // this.example13model=[{id: 2}];
+        let polygons = angular.copy(wiD3Crossplot.getPolygons());
+        console.log("polygons", polygons);
+        this.polygonList = new Array();
+        polygons.forEach(function(polygonItem, index) {
+            polygonItem.id = index;
+            polygonItem.label = index;
+            self.polygonList.push(polygonItem);
+        });
         let viCrossplot = wiD3Crossplot.getViCrossplot();
-        this.regressionLines = new Array();
+        this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
-        console.log("vi111", this.viCross);
+        console.log("vi111", this.viCross, this.polygonList);
         let regressionLinesProps = this.viCross.regressionLines;
+        
         regressionLinesProps.forEach(function(regLineItem, index) {
             regLineItem.change = change.unchanged;
             regLineItem.index = index;
             self.regressionLines.push(regLineItem);
-        })
-        this.polygonIndicesList = [0,1,2,3,4,5,6,7,8,9];
+        });
+
         $scope.change = change; 
         console.log("wiD3Crossplot", wiD3Crossplot, viCrossplot, self.regressionLines);
         this.getRegressionLines = function () {
@@ -4797,37 +5013,92 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                 change: change.created,
                 index: self.regressionLines.length,
                 lineStyle: {
-                    color: "blue",
-                    width: 1,
-                    style: [10]
+                    lineColor: "blue",
+                    lineWidth: 1,
+                    lineStyle: [10, 0]
                 },
+                exclude: true,
+                polygons: [],
                 fitX: 0,
                 fitY: 0
             });
             console.log("addRow", self.regressionLines);
         };
+        console.log("regressionLines", this.regressionLines);
+        this.onselectedPolygonsChange = function(){
+            if(self.selectedCurveX) self.pointSet.idCurveX = self.selectedCurveX;
+        }
         this.onEditLineStyleButtonClicked = function(index) {
             console.log("onEditLineStyleButtonClicked", self.regressionLines);
 
             DialogUtils.lineStyleDialog(ModalService, wiComponentService,function (lineStyleObj){
-                self.regressionLines[index].lineStyle = lineStyleObj;
-            }, self.regressionLines[index].lineStyle);
+                self.regressionLines[index].lineStyle = lineStyleObj.lineStyle;
+            }, self.regressionLines[index]);
         };
-        function setRegressionLines() {
-            // let props = {};
-            console.log('vi222', self.viCross);
-            self.viCross.regressionLines = self.regressionLines;
-            viCrossplot.setProperties(self.viCross);
-            viCrossplot.doPlot();
+        function setRegressionLines(callback) {
+            let regressionLinesIdx = [];
+            self.regressionLines.forEach(function(item, index){
+                item.idCrossPlot = self.viCross.idCrossPlot;
+                switch (item.change) {
+                    case 0:
+                        console.log("unchange:", item);
+                        break;
+                    case 1:
+                        wiApiService.createRegressionLines(item, function(res) {
+                            console.log("create", item);
+                            item.change = 0;
+                        });
+                        break;
+                    case 2:
+                        wiApiService.editRegressionLines(item, function(res) {
+                            console.log("edit", res);
+                            item.change = 0;
+                        });
+                        break;
+                    case 3:
+                        wiApiService.removeRegressionLines(item.idRegressionLine, function(res){
+                            console.log("remove", res);
+                            // self.regressionLines.splice(item, 1);
+                            regressionLinesIdx.push(index);
+                        });
+                        break;
+                    case 4:
+                        console.log("uncreated", item);
+                        // self.regressionLines.splice(item, 1);
+                        regressionLinesIdx.push(index);
+                        break;
+                    default:
+                        console.log('Something went wrong!');
+                        break;
+                }
+            });
+            console.log('regressionLinesObj', self.regressionLines, regressionLinesIdx);
+            regressionLinesIdx.forEach(function(item) {
+                self.regressionLines.splice(item, 1);
+            })
+            if (callback) {
+                callback();
+            }
         }
         this.onOkButtonClicked = function () {
-            close(self);
+            setRegressionLines(function() {
+                self.viCross.regressionLines = self.regressionLines;
+                viCrossplot.setProperties(self.viCross);
+                viCrossplot.doPlot();
+                close();
+            });
         };
         this.onApplyButtonClicked = function() {
-            console.log("ok", self.regressionLines);
-            setRegressionLines();
+            setRegressionLines(function() {
+                console.log("okii", self.viCross);
+                self.viCross.regressionLines = self.regressionLines;
+                viCrossplot.setProperties(self.viCross);
+                viCrossplot.doPlot();
+            });
         };
         this.onCancelButtonClicked = function () {
+            console.log("cancel", self.regressionLines);
+
             close(null);
         }
     }
@@ -4846,3 +5117,89 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         });
     });
 };
+
+exports.zoneManagerDialog = function(ModalService, item){
+    function ModalController(close, wiComponentService, wiApiService, $timeout, $scope){
+        let self = this;
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        var project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = project.children;
+        
+        this.SelectedWell = this.wellArr[0];
+        this.zonesetsArr = self.SelectedWell.children.find(function(child){
+            return child.name == 'zonesets';
+        }).children;
+        this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+        this.zoneArr = this.SelectedZoneSet ? this.SelectedZoneSet.children : null;
+        console.log(this.zoneArr);
+
+        // switch (item.name) {
+        //     case 'well':
+        //     break;
+
+        //     case 'zonesets':
+        //     break;
+
+        //     case 'zoneset':
+        //     break;
+
+        //     case 'zone':
+        //     break;
+        // }
+        $scope.selectedRow = 0;
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+        }
+        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.foregroundZone = function (index) {
+            DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
+                self.zoneArr[index].properties.foreground = colorStr;
+            });
+        };
+        this.backgroundZone = function (index) {
+            DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.background, function (colorStr) {
+                self.zoneArr[index].properties.background = colorStr;
+            });
+        };
+        this.onChangeWell = function(){
+            self.zonesetsArr = self.SelectedWell.children.find(function(child){
+                return child.name == 'zonesets';
+            }).children;
+
+            self.SelectedZoneSet = self.zonesetsArr[0];
+        }
+
+        this.onChangeZoneSet = function(){
+            self.zoneArr = self.SelectedZoneSet.children.length ? selfSelectedZoneSet.children : null;
+            console.log(self.zoneArr);        
+        }
+
+        this.onApplyButtonClicked = function(){
+            close(null);
+        }
+
+        this.onOkButtonClicked = function(){
+            close(null);
+        }
+        
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'zone-manager/zone-manager-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function(modal){
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    })
+}
+

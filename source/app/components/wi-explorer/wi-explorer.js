@@ -245,13 +245,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function () {
                             utils.createDataset();
                         }
-                    }/* , {
+                    }, {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
+                            let wellModel = utils.getSelectedNode();
+                            console.log(wellModel);
+                            utils.openZonemanager(wellModel);
                         }
-                    } */, {
+                    }, {
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16",
@@ -381,17 +384,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     {
                         name: "NewZoneSet",
                         label: "New Zone Set",
-                        icon: "",
+                        icon: "mineral-zone-add-16x16",
                         handler: function () {
                             utils.createZoneSet();
                         }
-                    }/* , {
+                    }, {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
+                            let zonesetsModel = utils.getSelectedNode();
+                            console.log(zonesetsModel);
+                            utils.openZonemanager(zonesetsModel);
                         }
-                    } */, {
+                    }, {
                         separator: '1'
                     }
                 ];
@@ -402,7 +408,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Rename",
                         icon: "annotation-16x16-edit",
                         handler: function() {
-
+                            let zonesetsModel = utils.getSelectedNode();
+                            console.log(zonesetsModel);
+                            utils.openZonemanager(zonesetsModel);
                         }
                     }, {
                         name: "Delete",
@@ -411,13 +419,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function() {
                             self.handlers.DeleteItemButtonClicked();
                         }
-                    }/* , {
+                    }, {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
+                            let zonesetModel = utils.getSelectedNode();
+                            console.log(zonesetModel);
+                            utils.openZonemanager(zonesetModel);
                         }
-                    } */, {
+                    }, {
                         separator: '1'
                     }
                 ]
@@ -430,13 +441,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function() {
                             self.handlers.DeleteItemButtonClicked();
                         }
-                    }/* , {
+                    }, {
                         name: "ZoneManager",
                         label: "Zone Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
+                            let zoneModel = utils.getSelectedNode();
+                            console.log(zoneModel);
+                            utils.openZonemanager(zoneModel);
                         }
-                    } */, {
+                    }, {
                         separator: '1'
                     }
                 ]

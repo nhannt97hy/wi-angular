@@ -96,7 +96,10 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                 curveZ: graph.buildCurve({}, dataX),
                 numColor: 10,
                 scaleLeft: -10,
-                minorX: 3
+                minorX: 3,
+                zones: [{
+                    idZone: 1
+                }]
             },
             polygons: [
                 {
@@ -146,13 +149,13 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
             ]
         });
 
-        console.log(viCrossplot.getProperties());
+        console.log('GG1',viCrossplot.getProperties());
         viCrossplot.setProperties({
             pointSet: {
                 pointSymbol: 'Cross'
             }
         });
-        console.log(viCrossplot.getProperties());
+        console.log('GG2', viCrossplot.getProperties());
         viCrossplot.doPlot();
     });
 });

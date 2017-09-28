@@ -95,7 +95,11 @@ exports.buildLogTrack = function(config) {
  * @param {Array} data - Array containing x, y coordinates
  * @returns {Object} The built curve
  */
-exports.buildCurve = function(config, data) {
+exports.buildCurve = function(config, data, well) {
+    if (well) {
+        config.offsetY = parseFloat(well.topDepth);
+        config.yStep = parseFloat(well.step);
+    }
     config.data = data;
     return new Curve(config);
 }
