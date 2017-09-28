@@ -4170,7 +4170,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
 }
 */
 exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback){
-    function ModalController(wiComponentService, wiApiService, close) {
+    function ModalController(wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -4189,19 +4189,15 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
            });
             return curveObjs[0];
         }
-        // wiApiService.scaleCurve(idCurveX, function(scaleX) {
-        //     wiApiService.scaleCurve(idCurveY, function(scaleY) {
-        //         self.pointSet.scaleLeft = (self.pointSet.scaleLeft == null)? self.pointSet.scaleLeft:scaleX.minScale;
-        //         self.pointSet.scaleRight = (self.pointSet.scaleRight == null)? self.pointSet.scaleRight:scaleX.maxScale;
-        //         self.pointSet.scaleBottom = (self.pointSet.scaleBottom == null)? self.pointSet.scaleBottom:scaleY.minScale;
-        //         self.pointSet.scaleTop = (self.pointSet.scaleTop == null)? self.pointSet.scaleTop:scaleY.minScale;
-        //     })
-        // });
+        wiApiService.scaleCurve(this.pointSet.idCurveX, function(scaleX) {
+            wiApiService.scaleCurve(self.pointSet.idCurveX, function(scaleY) {
+                self.pointSet.scaleLeft = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.minScale:self.pointSet.scaleLeft;
+                self.pointSet.scaleRight = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.maxScale:self.pointSet.scaleRight;
+                self.pointSet.scaleBottom = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.minScale:self.pointSet.scaleBottom;
+                self.pointSet.scaleTop = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.maxScale:self.pointSet.scaleTop;
+            })
+        });     
         this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
-        // if(self.viCrossplot){
-        //     props = self.viCrossplot.getProperties();
-        //     console.log("pointSet", this.pointSet);        
-        // }
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
         this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true; 
@@ -4281,13 +4277,40 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             }
         }
 
-        this.onselectedCurveXChange = function(){
-            if(self.selectedCurveX) self.pointSet.idCurveX = self.selectedCurveX;
-            console.log("CurveX selected", self.selectedCurveX);
+        this.onselectedCurveXChange = function () {
+            if (self.selectedCurveX) {
+                self.pointSet.idCurveX = self.selectedCurveX;
+            }
+            wiApiService.scaleCurve(self.selectedCurveX, function (scaleObj) {
+                $timeout(function () {
+                    let curveX = findCurveById(self.selectedCurveX);
+                    if (curveX.properties.idFamily == null) {
+                        self.pointSet.scaleLeft = scaleObj.minScale;
+                        self.pointSet.scaleRight = scaleObj.maxScale;
+                    } else {
+                        self.pointSet.scaleLeft = curveX.properties.minScale;
+                        self.pointSet.scaleRight = curveX.properties.maxScale;
+                    }
+                })
+            });
         }
 
-        this.onselectedCurveYChange = function(){
-            if(self.selectedCurveY) self.pointSet.idCurveY = self.selectedCurveY;
+        this.onselectedCurveYChange = function () {
+            if (self.selectedCurveY) {
+                self.pointSet.idCurveY = self.selectedCurveY;
+            }
+            wiApiService.scaleCurve(self.selectedCurveY, function (scaleObj) {
+                $timeout(function () {
+                    let curveY = findCurveById(self.selectedCurveY);
+                    if (curveY.properties.idFamily == null) {
+                        self.pointSet.scaleBottom = scaleObj.minScale;
+                        self.pointSet.scaleTop = scaleObj.maxScale;
+                    } else {
+                        self.pointSet.scaleBottom = curveY.properties.minScale;
+                        self.pointSet.scaleTop = curveY.properties.maxScale;
+                    }
+                })
+            });
         }
 
         this.onZoneSetChange = function () {
