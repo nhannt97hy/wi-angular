@@ -994,7 +994,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
     });
 }
 
-exports.curveAttributeDialog = function (ModalService, wiComponentService, lineOptions, symbolOptions, callback) {
+exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, lineOptions, symbolOptions, callback) {
     function ModalController($scope, close) {
         var self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -1310,7 +1310,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 default:
                     break;
             }
-            DialogUtils.curveAttributeDialog(ModalService, wiComponentService, self.lineOptions, self.symbolOptions, function (lineOptions, symbolOptions) {
+            DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, self.lineOptions, self.symbolOptions, function (lineOptions, symbolOptions) {
                 if (lineOptions) self.lineOptions = lineOptions;
                 if (symbolOptions) self.symbolOptions = symbolOptions;
                 self.drawSample();
@@ -4661,8 +4661,6 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         this.depthHAlign = props.depthHAlign.toLowerCase();
         this.depthVAlign = props.depthVAlign.toLowerCase();
         this.showSymbol = props.showSymbol;
-        this.symbolSize = props.symbolSize;
-        this.symbolType = props.symbolName.toLowerCase(); // TODO: refactor
         this.styles = {
             lineStyle: {
                 lineWidth: props.lineWidth,
@@ -4670,6 +4668,8 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
                 lineColor: props.lineColor
             },
             symbolStyle: {
+                symbolName: props.symbolName.toLowerCase(), // TODO: refactor
+                symbolSize: props.symbolSize,
                 symbolStrokeStyle: props.symbolStrokeStyle,
                 symbolFillStyle: props.symbolFillStyle,
                 symbolLineWidth: props.symbolLineWidth,
@@ -4683,9 +4683,13 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
             }, self.styles);
         }
         this.onSymbolStyleButtonClicked = function () {
-            dialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (styles) {
-                self.styles = styles || self.styles;
-            }, self.styles);
+            // dialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, function (styles) {
+            //     self.styles = styles || self.styles;
+            // }, self.styles);
+            self.styles.display = true;
+            dialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, null, self.styles, function (lineStyle, symbolStyle) {
+                if (symbolStyle) self.styles = symbolStyle;
+            });
         }
 
         this.onApplyButtonClicked = function () {
