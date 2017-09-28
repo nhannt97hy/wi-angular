@@ -1602,6 +1602,8 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         this.onUploadButtonClicked = function () {
             let payloadParams = {
                 file: self.lasFiles,
+                families: self.selectedFamilies,
+                isLoadAllCurves : self.settings.isLoadAllCurves,
                 transactionId: self.transactionId
             };
             //console.log(payloadParams);
@@ -1753,7 +1755,6 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-
 // exports.importMultiLASDialog = function (ModalService, callback) {
     // function ModalController($scope, close, Upload, wiComponentService, wiApiService) {
         // let self = this;
@@ -4181,7 +4182,22 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         // this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
+        console.log("pointSet", this.pointSet);
 
+        function findCurveById (idCurve) {
+            curveObjs = self.curvesOnDataset.filter(function (item, index) {
+               return (item.id == idCurve);
+           });
+            return curveObjs[0];
+        }
+        // wiApiService.scaleCurve(idCurveX, function(scaleX) {
+        //     wiApiService.scaleCurve(idCurveY, function(scaleY) {
+        //         self.pointSet.scaleLeft = (self.pointSet.scaleLeft == null)? self.pointSet.scaleLeft:scaleX.minScale;
+        //         self.pointSet.scaleRight = (self.pointSet.scaleRight == null)? self.pointSet.scaleRight:scaleX.maxScale;
+        //         self.pointSet.scaleBottom = (self.pointSet.scaleBottom == null)? self.pointSet.scaleBottom:scaleY.minScale;
+        //         self.pointSet.scaleTop = (self.pointSet.scaleTop == null)? self.pointSet.scaleTop:scaleY.minScale;
+        //     })
+        // });
         this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
         // if(self.viCrossplot){
         //     props = self.viCrossplot.getProperties();
@@ -4243,7 +4259,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-
+        console.log("curvesOnDataset", this.curvesOnDataset);
         function getTopFromWell() {
             return parseFloat(self.well.properties.topDepth);
         }
@@ -4268,6 +4284,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.onselectedCurveXChange = function(){
             if(self.selectedCurveX) self.pointSet.idCurveX = self.selectedCurveX;
+            console.log("CurveX selected", self.selectedCurveX);
         }
 
         this.onselectedCurveYChange = function(){
