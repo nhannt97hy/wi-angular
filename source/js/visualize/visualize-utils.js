@@ -34,6 +34,7 @@ exports.getProperties = getProperties;
 exports.sortByKey = sortByKey;
 exports.getMiddlePoint = getMiddlePoint;
 exports.isMouseInside = isMouseInside;
+exports.getLinearEquation = getLinearEquation;
 
 function getProperties(obj) {
     let props = {};
@@ -604,4 +605,18 @@ function isMouseInside(element) {
     let r = element.getBBox();
 
     return x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height;
+}
+
+function getLinearEquation(point1, point2) {
+    if (point2.x == point1.x) {
+        let x = +point1.x.toFixed(6);
+        return 'x=' + x;
+    }
+    else {
+        let slope = (point2.y - point1.y) / (point2.x - point1.x);
+        let intercept = -slope * point1.x + point1.y;
+        let a = +slope.toFixed(6);
+        let b = +intercept.toFixed(6);
+        return 'y=' + (a == 0 ? '' : (a + '*x')) + (b < 0 || a == 0 ? b : ('+' + b));
+    }
 }

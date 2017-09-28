@@ -14,8 +14,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
-        if (self.crossplotModel)
-            self.pointSet = self.crossplotModel.properties.pointSet;
+        if (self.crossplotModel) self.pointSet = self.crossplotModel.properties.pointSet;
         // self.wellProperties = utils.getModel('well', self.crossplotModel.properties.idWell).properties;
         console.log("crossplot", self.crossplotModel, self.wellProperties);
         if (self.name) {
@@ -34,7 +33,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.getZoneCtrl = function () {
-        if (!zoneCtrl) zoneCtrl =  wiComponentService.getComponent(self.getZoneName());
+        if (!zoneCtrl) zoneCtrl = wiComponentService.getComponent(self.getZoneName());
         return zoneCtrl;
     }
 
@@ -43,7 +42,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.linkModels = function () {
         self.zoneArr = null;
-        if (self.crossplotModel.properties.pointSet.idZoneSet) {
+        if (self.crossplotModel && self.crossplotModel.properties.pointSet.idZoneSet) {
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointSet.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
@@ -75,7 +74,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.pointSet = crossplot.pointsets[0];
             if(Object.keys(self.viCrossplot).length !== 0){
                 DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
-                    console.log(ret);
+                    self.linkModels();
                 })
             }
         });
@@ -160,6 +159,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // if (!self.viCrossplot) {
             let domElem = document.getElementById(self.crossplotAreaId);
             self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+
+            self.viCrossplot.onMouseDown(function() {
+                if (d3.event.button == 2) return;
+                if (self.viCrossplot.mode == 'PlotAreaRectangle') {
+                    if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
+                        self.viCrossplot.endAddAreaRectangle();
+                        self.contextMenu = commonCtxMenu;
+                    }
+                }
+                else if (self.viCrossplot.mode == 'PlotUserLine') {
+                    if (self.viCrossplot.userLine && self.viCrossplot.userLine.points.length > 1) {
+                        self.viCrossplot.endAddUserLine();
+                        self.contextMenu = commonCtxMenu;
+                    }
+                }
+            })
         // }
         return self.viCrossplot;
     }
@@ -198,6 +213,64 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         viCrossplot.doPlot();
+    }
+
+    this.drawUserLine = function(callback) {
+        self.viCrossplot.startAddUserLine();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let userLine = self.viCrossplot.endAddUserLine();
+                    if (callback) callback(userLine);
+                    self.contextMenu = commonCtxMenu;
+                }
+            }
+        ]);
+    }
+
+    this.deleteUserLine = function() {
+        self.viCrossplot.userLine = null;
+        self.viCrossplot.plotUserLine();
+    }
+
+    this.drawAreaRectangle = function (callback) {
+        self.viCrossplot.startAddAreaRectangle();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let area = self.viCrossplot.endAddAreaRectangle();
+                    if (callback) callback(area);
+                    self.contextMenu = commonCtxMenu;
+                }
+            }
+        ]);
+    }
+
+    this.drawAreaPolygon = function (callback) {
+        self.viCrossplot.startAddAreaPolygon();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let area = self.viCrossplot.endAddAreaPolygon();
+                    if (callback) callback(area);
+                    self.contextMenu = commonCtxMenu;
+                }
+            }
+        ]);
+    }
+
+    this.deleteArea = function() {
+        self.viCrossplot.area = null;
+        self.viCrossplot.plotArea();
     }
 
     this.drawPolygon = function (idPolygon, callback) {
