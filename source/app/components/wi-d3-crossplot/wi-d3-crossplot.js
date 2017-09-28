@@ -169,6 +169,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         self.contextMenu = commonCtxMenu;
                     }
                 }
+                else if (self.viCrossplot.mode == 'PlotUserLine') {
+                    if (self.viCrossplot.userLine && self.viCrossplot.userLine.points.length > 1) {
+                        self.viCrossplot.endAddUserLine();
+                        self.contextMenu = commonCtxMenu;
+                    }
+                }
             })
         // }
         return self.viCrossplot;
@@ -208,6 +214,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         viCrossplot.doPlot();
+    }
+
+    this.drawUserLine = function(callback) {
+        self.viCrossplot.startAddUserLine();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let userLine = self.viCrossplot.endAddUserLine();
+                    if (callback) callback(userLine);
+                    self.contextMenu = commonCtxMenu;
+                }
+            }
+        ]);
+    }
+
+    this.deleteUserLine = function() {
+        self.viCrossplot.userLine = null;
+        self.viCrossplot.plotUserLine();
     }
 
     this.drawAreaRectangle = function (callback) {

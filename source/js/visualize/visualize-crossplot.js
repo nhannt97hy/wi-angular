@@ -307,10 +307,16 @@ Crossplot.prototype.init = function(domElem) {
         .attr('class', 'vi-crossplot-regression-lines');
 
     this.svgContainer.append('g')
-        .attr('class', 'vi-crossplot-equations');
+        .attr('class', 'vi-crossplot-user-define-lines');
 
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-area');
+
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-user-line');
+
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-equations');
 
     d3.select(window)
         .on('resize', function() {
@@ -340,6 +346,9 @@ Crossplot.prototype.createContainer = function() {
 
     this.bodyContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-body-container');
+
+    this.footerContainer = this.container.append('div')
+        .attr('class', 'vi-crossplot-footer-container');
 }
 
 Crossplot.prototype.adjustSize = function() {
@@ -373,6 +382,7 @@ Crossplot.prototype.doPlot = function() {
     this.plotPolygons();
     this.plotRegressionLines();
     this.plotArea();
+    this.plotUserLine();
 }
 
 Crossplot.prototype.updateClipPath = function() {
@@ -679,6 +689,32 @@ Crossplot.prototype.getRegressionFunc = function(data) {
     return regFunc;
 }
 
+Crossplot.prototype.plotUserLine = function() {
+    let userLineContainer = this.svgContainer.select('g.vi-crossplot-user-line');
+    userLineContainer.selectAll('path').remove();
+    this.footerContainer.text('');
+
+    if (!this.userLine || !this.userLine.points || this.userLine.points.length < 2) return;
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let userLine = userLineContainer.append('path')
+        .datum(this.userLine)
+        .attr('d', function(d) { return line(d.points); })
+        .attr('stroke', this.AREA_LINE_COLOR)
+        .attr('stroke-width', this.AREA_LINE_WIDTH);
+
+    let equation = Utils.getLinearEquation(this.userLine.points[0], this.userLine.points[1]);
+    if (this.pointSet.labelX) equation = equation.replace('x', this.pointSet.labelX);
+    if (this.pointSet.labelY) equation = equation.replace('y', this.pointSet.labelY);
+    this.footerContainer.text(equation);
+}
+
 Crossplot.prototype.plotArea = function() {
     let areaContainer = this.svgContainer.select('g.vi-crossplot-area');
     areaContainer.selectAll('.vi-crossplot-area-item').remove();
@@ -959,8 +995,20 @@ Crossplot.prototype.mouseMoveCallback = function() {
                     { x: x, y: y },
                     { x: x, y: this.area.points[0].y }
                 ]
-            }
+            };
             this.plotArea();
+        }
+    }
+    else if (this.mode == 'PlotUserLine') {
+        if (!this.userLine) return;
+        else {
+            this.userLine = {
+                points: [
+                    this.userLine.points[0],
+                    {x: x, y: y}
+                ]
+            };
+            this.plotUserLine();
         }
     }
 }
@@ -1021,6 +1069,30 @@ Crossplot.prototype.mouseDownCallback = function() {
             this.plotArea();
         }
     }
+    else if (this.mode == 'PlotUserLine') {
+        if (!this.userLine) {
+            this.userLine = { points: [{x: x, y: y}] };
+        }
+        else {
+            this.userLine = {
+                points: [
+                    this.userLine.points[0],
+                    { x: x, y: y }
+                ]
+            }
+            this.plotUserLine();
+        }
+    }
+}
+
+Crossplot.prototype.startAddUserLine = function() {
+    this.setMode('PlotUserLine');
+    this.userLine = null;
+}
+
+Crossplot.prototype.endAddUserLine = function() {
+    this.setMode(null);
+    return this.userLine;
 }
 
 Crossplot.prototype.startAddAreaPolygon = function() {
@@ -1036,7 +1108,6 @@ Crossplot.prototype.endAddAreaPolygon = function() {
     this.plotArea();
     return this.area;
 }
-
 
 Crossplot.prototype.startAddAreaRectangle = function() {
     this.setMode('PlotAreaRectangle');

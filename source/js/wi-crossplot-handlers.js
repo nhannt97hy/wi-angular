@@ -57,11 +57,15 @@ exports.DeleteAreaButtonClicked = function() {
 }
 
 exports.CreateUserLineButtonClicked = function() {
-    console.log('CreateUserLineButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    wiD3Crossplot.drawUserLine();
 }
 
 exports.DeleteUserLineButtonClicked = function() {
-    console.log('DeleteUserLineButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    wiD3Crossplot.deleteUserLine();
 }
 
 exports.UserDefineLineButtonClicked = function() {
