@@ -21,6 +21,10 @@ app.factory(wiServiceName, function () {
             let wiLogplotName = wiD3AreaName.replace('D3Area', '');
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
+        getD3AreaForSlidingBar: function(wiSlidingbarName) {
+            let wiLogplotName = wiSlidingbarName.replace('Slidingbar', '');
+            return __Controllers[wiLogplotName + 'D3Area'];
+        },
         putComponent: function (componentName, controller) {
             // console.log('put component');
             // console.log('componentName', componentName);

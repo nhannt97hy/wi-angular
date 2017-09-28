@@ -102,6 +102,15 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         });
     }
 
+    function updateWid3() {
+        let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        let max = wiD3Controller.getMaxDepth();
+        let min = wiD3Controller.getMinDepth();
+        let low = min + (max - min) * self.slidingBarState.top / 100;
+        let high = low + (max - min) * self.slidingBarState.range / 100;
+        wiD3Controller.setDepthRange([low, high]);
+    }
+
     function updateState(top, height, parentHeight) {
         self.slidingBarState.top = top / parentHeight * 100;
         self.slidingBarState.range = height / parentHeight * 100;
@@ -146,11 +155,13 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).on("resize", function (event, ui) {
             event.stopPropagation();
             update(ui);
+            updateWid3();
         });
 
         $(self.handleId).on("drag", function (event, ui) {
             event.stopPropagation();
             update(ui);
+            updateWid3();
         });
 
         new ResizeSensor($(self.contentId), function () {
