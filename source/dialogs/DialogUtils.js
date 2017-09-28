@@ -4924,21 +4924,23 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-exports.zoneManagerDialog = function(ModalService, item){
-    function ModalController(close, wiComponentService, wiApiService, $timeout, $scope){
+exports.zoneManagerDialog = function (ModalService, item) {
+    function ModalController(close, wiComponentService, wiApiService, $timeout, $scope) {
         let self = this;
+        window.zoneMng = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         var project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
         this.wellArr = project.children;
-        
+
         this.SelectedWell = this.wellArr[0];
-        this.zonesetsArr = self.SelectedWell.children.find(function(child){
+        this.zonesetsArr = self.SelectedWell.children.find(function (child) {
             return child.name == 'zonesets';
         }).children;
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
-        this.zoneArr = this.SelectedZoneSet ? this.SelectedZoneSet.children : null;
+        this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
         console.log(this.zoneArr);
+        this.SelectedZone = 0;
 
         // switch (item.name) {
         //     case 'well':
@@ -4953,11 +4955,12 @@ exports.zoneManagerDialog = function(ModalService, item){
         //     case 'zone':
         //     break;
         // }
-        $scope.selectedRow = 0;
+
         this.setClickedRow = function (indexRow) {
-            $scope.selectedRow = indexRow;
+            self.SelectedZone = indexRow;
+            console.log(self.SelectedZone);
         }
-        this.selectPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foregroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
                 self.zoneArr[index].properties.foreground = colorStr;
@@ -4968,28 +4971,116 @@ exports.zoneManagerDialog = function(ModalService, item){
                 self.zoneArr[index].properties.background = colorStr;
             });
         };
-        this.onChangeWell = function(){
-            self.zonesetsArr = self.SelectedWell.children.find(function(child){
+        this.onChangeWell = function () {
+            self.zonesetsArr = self.SelectedWell.children.find(function (child) {
                 return child.name == 'zonesets';
             }).children;
 
             self.SelectedZoneSet = self.zonesetsArr[0];
         }
 
-        this.onChangeZoneSet = function(){
-            self.zoneArr = self.SelectedZoneSet.children.length ? selfSelectedZoneSet.children : null;
-            console.log(self.zoneArr);        
+        this.onChangeZoneSet = function () {
+            self.zoneArr = self.SelectedZoneSet ? angular.copy(selfSelectedZoneSet.children) : null;
+            console.log(self.zoneArr);
         }
 
-        this.onApplyButtonClicked = function(){
+        this.genColor = function () {
+            var rand = function () {
+                return Math.floor(Math.random() * 255);
+            }
+            return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+        }
+
+        this.addZone = function (index, top, bottom) {
+            self.zoneArr.splice(index, 0, {
+                name: 'zone',
+                properties: {
+                    fill: {
+                        pattern: {
+                            background: self.genColor(),
+                            foreground: 'white',
+                            name: 'none'
+                        }
+                    },
+                    startDepth: parseFloat(top.toFixed(2)),
+                    endDepth: parseFloat(bottom.toFixed(2)),
+                    idZoneSet: self.SelectedZoneSet.id,
+                    name: top.toFixed(2)
+                }
+            })
+        }
+
+        this.onAddAboveButtonClicked = function () {
+            if (self.zoneArr.length) {
+                var zone = self.zoneArr[self.SelectedZone];
+                var pre_zone = self.SelectedZone > 0 ? self.zoneArr[self.SelectedZone - 1] : null;
+                var free = 0;
+                if (self.SelectedZone == 0) {
+                    var free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
+                } else {
+                    var free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
+
+                }
+
+                if (parseFloat(free.toFixed(2)) > 0) {
+                    self.addZone(self.SelectedZone, zone.properties.startDepth - free, zone.properties.startDepth);
+                } else {
+                    utils.error("Can't add row above");
+                }
+
+            } else {
+                var top = parseFloat(self.SelectedWell.properties.topDepth);
+                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) < top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                self.addZone(0, top, bottom);
+            }
+
+        }
+
+        this.onAddBelowButtonClicked = function () {
+            if (self.zoneArr.length) {
+                var zone = self.zoneArr[self.SelectedZone];
+                var next_zone = self.SelectedZone < self.zoneArr.length ? self.zoneArr[self.SelectedZone + 1] : null;
+                var free = 0;
+                if (self.SelectedZone == self.zoneArr.length - 1) {
+                    var free = zone.properties.endDepth - parseFloat(self.SelectedWell.properties.bottomDepth) >= 50 ? 50 : zone.properties.endtDepth - parseFloat(self.SelectedWell.properties.bottomDepth);
+                } else {
+                    var free = zone.properties.endDepth - next_zone.properties.startDepth >= 50 ? 50 : zone.properties.endDepth - next_zone.properties.startDepth;
+
+                }
+
+                if (parseFloat(free.toFixed(2)) > 0) {
+                    self.addZone(self.SelectedZone, zone.properties.endDepth, zone.properties.endDepth + free);
+                } else {
+                    utils.error("Can't add row above");
+                }
+
+            } else {
+                var top = parseFloat(self.SelectedWell.properties.topDepth);
+                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) < top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                self.addZone(0, top, bottom);
+            }
+        }
+
+        this.onDeleteButtonClicked = function () {
+            self.zoneArr.splice(self.SelectedZone, 1);
+            self.SelectedZone = self.SelectedZone > 0 ? self.SelectedZone - 1 : 0;
+        }
+
+        this.onClearAllButtonClicked = function () {
+            self.zoneArr.length = 0;
+            self.SelectedZone = 0;
+        }
+
+        this.onApplyButtonClicked = function () {
+            //TODO
+        }
+
+        this.onOkButtonClicked = function () {
+            //TODO
             close(null);
         }
 
-        this.onOkButtonClicked = function(){
-            close(null);
-        }
-        
-        this.onCancelButtonClicked = function(){
+        this.onCancelButtonClicked = function () {
             close(null);
         }
     }
@@ -4998,7 +5089,7 @@ exports.zoneManagerDialog = function(ModalService, item){
         templateUrl: 'zone-manager/zone-manager-modal.html',
         controller: ModalController,
         controllerAs: 'wiModal'
-    }).then(function(modal){
+    }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
