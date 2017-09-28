@@ -394,3 +394,12 @@ gulp.task('deploy', function() {
 			port: 22
         }));
 });
+gulp.task('deploy-dev', function() {
+	return gulp.src("./build/**/*")
+        .pipe(rsync({
+            root: "build/",
+            hostname: "hoangbd@dev.sflow.me",
+            destination:"/opt/wi-build",
+			port: 22
+    }));
+});

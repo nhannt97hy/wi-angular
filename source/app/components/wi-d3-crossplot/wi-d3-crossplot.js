@@ -160,6 +160,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // if (!self.viCrossplot) {
             let domElem = document.getElementById(self.crossplotAreaId);
             self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+
+            self.viCrossplot.onMouseDown(function() {
+                if (d3.event.button == 2) return;
+                if (self.viCrossplot.mode == 'PlotAreaRectangle') {
+                    if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
+                        self.viCrossplot.endAddAreaRectangle();
+                        self.contextMenu = commonCtxMenu;
+                    }
+                }
+            })
         // }
         return self.viCrossplot;
     }
@@ -198,6 +208,43 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         viCrossplot.doPlot();
+    }
+
+    this.drawAreaRectangle = function (callback) {
+        self.viCrossplot.startAddAreaRectangle();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let area = self.viCrossplot.endAddAreaRectangle();
+                    if (callback) callback(area);
+                    self.contextMenu = commonCtxMenu;
+                }
+            }
+        ]);
+    }
+
+    this.drawAreaPolygon = function (callback) {
+        self.viCrossplot.startAddAreaPolygon();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let area = self.viCrossplot.endAddAreaPolygon();
+                    if (callback) callback(area);
+                    self.contextMenu = commonCtxMenu;
+                }
+            }
+        ]);
+    }
+
+    this.deleteArea = function() {
+        self.viCrossplot.area = null;
+        self.viCrossplot.plotArea();
     }
 
     this.drawPolygon = function (idPolygon, callback) {
