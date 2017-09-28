@@ -2117,9 +2117,13 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         }
         //button
         this.foreground = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.fill.pattern.foreground, function (colorStr) {
-                self.fillPatternOptions.fill.pattern.foreground = colorStr;
-            });
+            if(!self.fillPatternOptions.fill.pattern.foreground) self.fillPatternOptions.fill.pattern.name = 'basement';
+            $timeout(function() {
+                DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.fill.pattern.foreground, function (colorStr) {
+                    self.fillPatternOptions.fill.pattern.foreground = colorStr;
+                });
+                    
+            })
         }
         this.background = function () {
             DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.fill.pattern.background, function (colorStr) {
@@ -2127,9 +2131,12 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             });
         }
         this.posPositiveForeground = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.positiveFill.pattern.foreground, function (colorStr) {
-                self.fillPatternOptions.positiveFill.pattern.foreground = colorStr;
-            });
+            if(!self.fillPatternOptions.positiveFill.pattern.foreground) self.fillPatternOptions.positiveFill.pattern.name = 'basement';
+            $timeout(function() {
+                DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.positiveFill.pattern.foreground, function (colorStr) {
+                    self.fillPatternOptions.positiveFill.pattern.foreground = colorStr;
+                });
+            })
         }
         this.posPositiveBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.positiveFill.pattern.background, function (colorStr) {
@@ -2137,8 +2144,11 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             });
         }
         this.negPositiveForeground = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.negativeFill.pattern.foreground, function (colorStr) {
-                self.fillPatternOptions.negativeFill.pattern.foreground = colorStr;
+            if(!self.fillPatternOptions.negativeFill.pattern.foreground) self.fillPatternOptions.negativeFill.pattern.name = 'basement';
+            $timeout(function() {
+                DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.negativeFill.pattern.foreground, function (colorStr) {
+                    self.fillPatternOptions.negativeFill.pattern.foreground = colorStr;
+                });
             });
         }
         this.negPositiveBackground = function () {
@@ -2410,8 +2420,11 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills;
         };
         this.foregroundCustomFills = function(index){
-            DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].foreground, function (colorStr) {
-                self.variableShadingOptions.fill.varShading.customFills.content[index].foreground = colorStr;
+            if(!self.variableShadingOptions.fill.varShading.customFills.content[index].foreground) self.variableShadingOptions.fill.varShading.customFills.content[index].pattern = 'basement';
+            $timeout(function() {
+                DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].foreground, function (colorStr) {
+                    self.variableShadingOptions.fill.varShading.customFills.content[index].foreground = colorStr;
+                });
             });
         }
         this.backgroundCustomFills = function(index){
@@ -2464,7 +2477,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                             highVal: null,
                             pattern: "none",
                             // foreground: "transparent",
-                            background: "transparent",
+                            background: "blue",
                             description: ""
                         }
                     ]
