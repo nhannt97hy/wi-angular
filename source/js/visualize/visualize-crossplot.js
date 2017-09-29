@@ -242,6 +242,14 @@ Crossplot.prototype.getTransformZ = function() {
     return null;
 }
 
+Crossplot.prototype.getLabelX = function() {
+    return this.pointSet.labelX || (this.pointSet.curveX || {}).name;
+}
+
+Crossplot.prototype.getLabelY = function() {
+    return this.pointSet.labelY || (this.pointSet.curveY || {}).name;
+}
+
 Crossplot.prototype.getPlotRect = function() {
     return this.bodyContainer.node().getBoundingClientRect();
 }
@@ -539,7 +547,7 @@ Crossplot.prototype.updateAxisLabels = function() {
     let PADDING_LEFT = 10;
 
     let labelXElem = this.axisContainer.select('text.vi-crossplot-axis-x-label')
-        .text(this.pointSet.labelX);
+        .text(this.getLabelX());
     let bbX = labelXElem.node().getBBox();
     labelXElem
         .attr('transform',
@@ -551,7 +559,7 @@ Crossplot.prototype.updateAxisLabels = function() {
         );
 
     let labelYElem = this.axisContainer.select('text.vi-crossplot-axis-y-label')
-        .text(this.pointSet.labelY);
+        .text(this.getLabelY());
     let bbY = labelYElem.node().getBBox();
     labelYElem
         .attr('text-anchor', 'middle')
@@ -836,8 +844,8 @@ Crossplot.prototype.plotUserLine = function() {
         .attr('stroke-width', this.AREA_LINE_WIDTH);
 
     let equation = Utils.getLinearEquation(this.userLine.points[0], this.userLine.points[1]);
-    if (this.pointSet.labelX) equation = equation.replace('x', this.pointSet.labelX);
-    if (this.pointSet.labelY) equation = equation.replace('y', this.pointSet.labelY);
+    equation = equation.replace('x', this.getLabelX());
+    equation = equation.replace('y', this.getLabelY());
     this.footerContainer.text(equation);
 }
 
@@ -1229,6 +1237,7 @@ Crossplot.prototype.startAddAreaPolygon = function() {
 
 Crossplot.prototype.endAddAreaPolygon = function() {
     this.setMode(null);
+    if (!this.tmpPolygon) return null;
     if (this.tmpPolygonPoint) {
         this.tmpPolygon.points.pop();
     }
@@ -1253,6 +1262,7 @@ Crossplot.prototype.startAddPolygon = function() {
 
 Crossplot.prototype.endAddPolygon = function() {
     this.setMode(null);
+    if (!this.tmpPolygon) return null;
     if (this.tmpPolygonPoint) {
         this.tmpPolygon.points.pop();
     }
@@ -1276,6 +1286,7 @@ Crossplot.prototype.startEditPolygon = function(id) {
 
 Crossplot.prototype.endEditPolygon = function() {
     this.setMode(null);
+    if (!this.tmpPolygon) return null;
     if (this.tmpPolygonPoint) {
         this.tmpPolygon.points.pop();
     }

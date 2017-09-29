@@ -1591,55 +1591,47 @@ function openCrossplotTab(crossplotModel, callback) {
             console.log("crosplot", crossplot);
             if (!pointSet.idCurveX || !pointSet.idCurveY) return;
 
-            wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
-                // let curveX;
-                wiApiService.infoCurve(pointSet.idCurveX, function (curveX) {
-                    // curveX = curveX;
-                    wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
-                        // let curveY;
-                        wiApiService.infoCurve(pointSet.idCurveY, function (curveY) {
-                            // curveY = curveY;
+            wiApiService.dataCurve(pointSet.idCurveX, function (dataX) {
+                wiApiService.dataCurve(pointSet.idCurveY, function (dataY) {
+                    function createViCrossplot() {
+                        let curveX = getModel('curve', pointSet.idCurveX);
+                        let curveY = getModel('curve', pointSet.idCurveY);
 
-                            function createViCrossplot() {
-                                wiD3CrossplotCtrl.pointSet = pointSet;
-                                wiD3CrossplotCtrl.linkModels();
-                                crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
+                        wiD3CrossplotCtrl.pointSet = pointSet;
+                        wiD3CrossplotCtrl.linkModels();
+                        crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
 
-                                if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
-                                    for (let polygon of crossplot.polygons) {
-                                        try {
-                                            polygon.points = JSON.parse(polygon.points);
-                                        } catch (error) {}
-                                    }
-                                }
-                                if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
-                                    for (let regLine of crossplot.regressionlines) {
-                                        try {
-                                            regLine.lineStyle = JSON.parse(regLine.lineStyle);
-                                        } catch(e) {
-                                            console.log(e);
-                                        }
-                                    }
-                                }
-                                let viCurveX = graph.buildCurve( curveX, xCurveData, wellProps.properties);
-                                let viCurveY = graph.buildCurve( curveY, yCurveData, wellProps.properties);
-
-                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                        if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
+                            for (let polygon of crossplot.polygons) {
+                                try {
+                                    polygon.points = JSON.parse(polygon.points);
+                                } catch (error) {}
                             }
-
-                            if (pointSet.idCurveZ) {
-                                wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
-                                    wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
-                                        let viCurveZ = graph.buildCurve( curveZ, zCurveData, wellProps.properties);
-                                        pointSet.curveZ = viCurveZ;
-                                        createViCrossplot();
-                                    })
-                                })
-                            } else {
-                                createViCrossplot();
+                        }
+                        if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
+                            for (let regLine of crossplot.regressionlines) {
+                                try {
+                                    regLine.lineStyle = JSON.parse(regLine.lineStyle);
+                                } catch(e) {
+                                    console.log(e);
+                                }
                             }
-                        })
-                    })
+                        }
+                        let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
+                        let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
+
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                    }
+
+                    if (pointSet.idCurveZ) {
+                        wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
+                            let viCurveZ = graph.buildCurve( curveZ, curveZ.data, wellProps.properties);
+                            pointSet.curveZ = viCurveZ;
+                            createViCrossplot();
+                        });
+                    } else {
+                        createViCrossplot();
+                    }
                 })
             })
         }
@@ -1772,8 +1764,8 @@ function getListFamily() {
 exports.getListFamily = getListFamily;
 
 exports.openZonemanager = function(item){
-    let wiComponentService = __GLOBAL.wiComponentService;        
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);    
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
 }
 exports.getScaleCurveIfNotFamily = function(idCurve) {
