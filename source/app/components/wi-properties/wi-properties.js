@@ -91,11 +91,11 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     data: [{
                         key: 'endDepth',
                         label: 'End Depth',
-                        value: well.bottomDepth
+                        value: well.properties.bottomDepth
                     }, {
                         key: 'startDepth',
                         label: 'Start Depth',
-                        value: well.topDepth
+                        value: well.properties.topDepth
                     }]
                 }
                 listConfig.push(config);
@@ -111,15 +111,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         label: 'Curve Set Name',
                         value: dataset.properties.name
                     }, {
-                        key: '',
+                        key: 'datatype',
                         label: 'DataType',
                         value: '',
-                        editable: true
+                        editable: false
                     }, {
                         key: '',
                         label: 'Export Name',
-                        value: '',
-                        editable: true
+                        value: itemProperties.name,
+                        editable: false
                     }, {
                         key: 'idFamily',
                         label: 'Family',
@@ -141,7 +141,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         key: 'unit',
                         label: 'Unit',
                         value: itemProperties.unit,
-                        editable: true
+                        editable: false
                     }, {
                         key: 'wellName',
                         label: 'Well Name',
@@ -583,7 +583,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         }
         // for development process
         // TODO: remove
-        config = {
+        /* config = {
             name: currentItem.name,
             heading: "---" + currentItem.name + " properties---",
             data: []
@@ -597,7 +597,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 });
             }
         }
-        listConfig.push(config);
+        listConfig.push(config); */
         return listConfig;
     }
 
