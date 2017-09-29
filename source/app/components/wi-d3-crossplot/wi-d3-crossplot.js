@@ -63,7 +63,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.onZoneCtrlReady = function(zoneCtrl) {
         zoneCtrl.trap('zone-data', function() {
-            self.refreshCrossplot();
+            // self.refreshCrossplot();
         });
     }
 
