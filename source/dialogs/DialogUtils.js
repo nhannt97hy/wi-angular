@@ -4148,14 +4148,16 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
            });
             return curveObjs[0];
         }
-        wiApiService.scaleCurve(this.pointSet.idCurveX, function(scaleX) {
-            wiApiService.scaleCurve(self.pointSet.idCurveX, function(scaleY) {
-                self.pointSet.scaleLeft = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.minScale:self.pointSet.scaleLeft;
-                self.pointSet.scaleRight = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.maxScale:self.pointSet.scaleRight;
-                self.pointSet.scaleBottom = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.minScale:self.pointSet.scaleBottom;
-                self.pointSet.scaleTop = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.maxScale:self.pointSet.scaleTop;
-            })
-        });     
+        if (this.pointSet.idCurveX && this.pointSet.idCurveY) {
+            wiApiService.scaleCurve(this.pointSet.idCurveX, function(scaleX) {
+                wiApiService.scaleCurve(self.pointSet.idCurveX, function(scaleY) {
+                    self.pointSet.scaleLeft = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.minScale:self.pointSet.scaleLeft;
+                    self.pointSet.scaleRight = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.maxScale:self.pointSet.scaleRight;
+                    self.pointSet.scaleBottom = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.minScale:self.pointSet.scaleBottom;
+                    self.pointSet.scaleTop = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.maxScale:self.pointSet.scaleTop;
+                })
+            });     
+        }
         this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";

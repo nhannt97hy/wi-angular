@@ -1249,7 +1249,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             idCrossPlot: wiCrossplotCtrl.id,
                             idWell: idWell,
                             topDepth: wellProps.topDepth,
-                            bottomDepth: wellProps.bottomDepth
+                            bottomDepth: wellProps.bottomDepth,
+                            pointSet: pointSet                            
                         });
                     })
                 });
