@@ -494,6 +494,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let top = (vY[0] - minDepth) * 100 / (maxDepth - minDepth);
         let range = (vY[1] - minDepth) * 100 / (maxDepth - minDepth) - top;
+        slidingBar.resetView();
         slidingBar.updateSlidingHandlerByPercent(top, range);
     }
 
@@ -516,6 +517,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.scroll = function() {
+        /*
         let low = _depthRange[0]
         let high = _depthRange[1];
         let maxDepth = self.getMaxDepth();
@@ -539,6 +541,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         high += dy;
         self.setDepthRange([low, high]);
         self.adjustSlidingBarFromDepthRange([low, high]);
+        */
+
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        slidingBar.scroll(d3.event.deltaY);
     }
 
     this.zoom = function(zoomOut) {

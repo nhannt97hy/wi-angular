@@ -183,6 +183,7 @@ exports.ZoomOutButtonClicked = function () {
 };
 
 exports.CropDisplayButtonClicked = function () {
+    this.wiLogplot.getSlidingbarCtrl().scaleView();
     console.log('CropDisplayButton is clicked');
 };
 exports.RangeSpecificButtonClicked = function () {
@@ -194,6 +195,7 @@ exports.RangeSpecificButtonClicked = function () {
 }
 
 exports.ViewWholeWellButtonClicked = function () {
+    this.wiLogplot.getSlidingbarCtrl().resetView();
     console.log('ViewWholeWellButton is clicked');
 };
 

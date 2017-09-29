@@ -3754,10 +3754,11 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
 
         this.onOkButtonClicked = function () {
             wiD3Ctr.setDepthRange(self.depthRange);
+            wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
             close(self);
         }
         this.onCancelButtonClicked = function () {
-            wiD3Ctr.setDepthRange(self.depthRange);
+            //wiD3Ctr.setDepthRange(self.depthRange);
             close(null);
         }
     }

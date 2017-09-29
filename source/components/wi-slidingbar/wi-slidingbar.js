@@ -5,6 +5,7 @@ const MIN_RANGE = 1;
 
 function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
+    let _offsetTop = 0;
     let _viCurve = null;
     let parentHeight = 0;
     this.tinyWindow = {
@@ -80,8 +81,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                     color: 'blue'
                 }
             }
-            let viCurve = graph.createCurve(config, data, d3.select(self.contentId));
-            viCurve.doPlot();
+            //let viCurve = graph.createCurve(config, data, d3.select(self.contentId));
+            if (_viCurve) _viCurve.destroy();
+            _viCurve = graph.createCurve(config, data, d3.select(self.contentId));
+            _viCurve.doPlot();
         });
     }
 
@@ -94,7 +97,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             tempTinyWindowsHeight = (ui.size.height > parentHeight) ? parentHeight : ui.size.height;
         }
         if (ui.position) {
-            tempTinyWindowsTop = (ui.position.top > 0) ? ui.position.top : 0;
+            tempTinyWindowsTop = ((ui.position.top > 0) ? ui.position.top : 0) + _offsetTop;
         }
 
         $timeout(function () {
@@ -111,9 +114,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         wiD3Controller.setDepthRange([low, high]);
     }
 
-    function updateState(top, height, parentHeight) {
-        self.slidingBarState.top = top / parentHeight * 100;
-        self.slidingBarState.range = height / parentHeight * 100;
+    function updateState(top, height, pHeight) {
+        self.slidingBarState.top = top / pHeight * 100;
+        self.slidingBarState.range = height / pHeight * 100;
 
         self.tinyWindow.height = height;
         self.tinyWindow.top = top;
@@ -128,7 +131,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.onReady = function () {
         parentHeight = parseInt($(self.contentId).height());
-        self.parentHeight = parentHeight;
+        //self.parentHeight = parentHeight;
         let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
 
         self.tinyWindow = {
@@ -166,7 +169,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         new ResizeSensor($(self.contentId), function () {
             let currentParentHeight = parseInt($(self.contentId).height());
-
             if (currentParentHeight !== parentHeight) self.refreshHandler();
         });
 
@@ -181,73 +183,102 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.contentId).on('mouseleave', function () {
             dragMan.wiSlidingBarCtrl = null;
         });
-
-        function onMouseWheel(event) {
-            let tempTopHandler = self.tinyWindow.top - event.deltaY;
-
-            if (tempTopHandler < 0) {
-                tempTopHandler = 0;
-            } else if (tempTopHandler + self.tinyWindow.height > parentHeight) {
-                tempTopHandler = parentHeight - self.tinyWindow.height;
-            }
-
-            let newTop = Math.round(tempTopHandler);
-            let newHeight = Math.ceil(self.tinyWindow.height);
-            updateSlidingHandler(newTop, newHeight);
-        }
-
-        function updateSlidingHandler(top, height) {
-            $(self.handleId).css('top', top + 'px');
-            $(self.handleId).css('height', height + 'px');
-
-            $timeout(function () {
-                updateState(top, height, parentHeight);
-            });
-        }
-
-        this.refreshHandler = function () {
-            parentHeight = parseInt($(self.contentId).height());
-            self.parentHeight = parentHeight;
-            self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
-        }
-
-        this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
-            let newTop = Math.round((topPercent * parentHeight) / 100);
-            let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
-
-            if (newTop < 0) newTop = 0;
-
-            if (newHeight + newTop > parentHeight && newHeight <= parentHeight) {
-                newTop = parentHeight - newHeight;
-            } else if (newHeight + newTop > parentHeight && newHeight > parentHeight) {
-                newTop = 0;
-                newHeight = parentHeight;
-            }
-            updateSlidingHandler(newTop, newHeight);
-        };
-
-        this.updateRangeSlidingHandler = function (rangePercent) {
-            self.updateSlidingHandlerByPercent(self.slidingBarState.top, rangePercent);
-        };
-
-        this.zoomIn = function () {
-            let deltaRange = 4;
-            let newRange = self.slidingBarState.range - (deltaRange * 2);
-            let newTop = self.slidingBarState.top + deltaRange;
-
-            if (newRange <= 0) return;
-
-            self.updateSlidingHandlerByPercent(newTop, newRange);
-        };
-
-        this.zoomOut = function () {
-            let deltaRange = 4;
-            let newRange = self.slidingBarState.range + (deltaRange * 2);
-            let newTop = self.slidingBarState.top - deltaRange;
-            self.updateSlidingHandlerByPercent(newTop, newRange);
-        };
-
     };
+
+    this.scroll = scroll;
+
+    function scroll(deltaY) {
+        let pHeight = $(self.contentId).parent().parent().height();
+        let tempTopHandler = self.tinyWindow.top - deltaY;
+
+        if (tempTopHandler < 0 + _offsetTop) {
+            tempTopHandler = 0 + _offsetTop;
+        }
+        else if (tempTopHandler + self.tinyWindow.height > pHeight + _offsetTop ) {
+            tempTopHandler = pHeight + _offsetTop - self.tinyWindow.height;
+        }
+
+        let newTop = Math.round(tempTopHandler);
+        let newHeight = Math.ceil(self.tinyWindow.height);
+        updateSlidingHandler(newTop, newHeight);
+
+        updateWid3();
+    }
+
+    function onMouseWheel(event) {
+        scroll(event.deltaY);
+    }
+
+    function updateSlidingHandler(top, height) {
+        $(self.handleId).css('top', (top - _offsetTop) + 'px');
+        $(self.handleId).css('height', height + 'px');
+
+        $timeout(function () {
+            updateState(top, height, parentHeight);
+        });
+    }
+
+    this.refreshHandler = function () {
+        parentHeight = parseInt($(self.contentId).height());
+        //self.parentHeight = parentHeight;
+        self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
+    }
+
+    this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
+        let newTop = Math.round((topPercent * parentHeight) / 100);
+        let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
+
+        if (newTop < 0) newTop = 0;
+
+        if (newHeight + newTop > parentHeight && newHeight <= parentHeight) {
+            newTop = parentHeight - newHeight;
+        } else if (newHeight + newTop > parentHeight && newHeight > parentHeight) {
+            newTop = 0;
+            newHeight = parentHeight;
+        }
+        updateSlidingHandler(newTop, newHeight);
+    };
+
+    this.updateRangeSlidingHandler = function (rangePercent) {
+        self.updateSlidingHandlerByPercent(self.slidingBarState.top, rangePercent);
+    };
+
+    this.zoomIn = function () {
+        let deltaRange = 4;
+        let newRange = self.slidingBarState.range - (deltaRange * 2);
+        let newTop = self.slidingBarState.top + deltaRange;
+
+        if (newRange <= 0) return;
+
+        self.updateSlidingHandlerByPercent(newTop, newRange);
+    };
+
+    this.zoomOut = function () {
+        let deltaRange = 4;
+        let newRange = self.slidingBarState.range + (deltaRange * 2);
+        let newTop = self.slidingBarState.top - deltaRange;
+        self.updateSlidingHandlerByPercent(newTop, newRange);
+    };
+
+    this.scaleView = function() {
+        if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
+        let currentParentHeight = $(self.contentId).height();
+        let scale = currentParentHeight / self.tinyWindow.height;
+        let newParentHeight = Math.round(currentParentHeight * scale);
+        let newTop = Math.round((self.slidingBarState.top * newParentHeight) / 100);
+        
+        $(self.contentId).height(newParentHeight);
+        _offsetTop = newTop;
+        $(self.contentId).css('top', '-' + newTop + 'px');
+        _viCurve.doPlot();
+    }
+
+    this.resetView = function() {
+        let defaultParentHeight = $(self.contentId).parent().parent().height();
+        _offsetTop = 0;
+        $(self.contentId).height('auto').css('top', 0);
+        _viCurve.doPlot();
+    }
 }
 
 let app = angular.module(moduleName, []);
