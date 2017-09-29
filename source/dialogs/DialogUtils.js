@@ -1026,9 +1026,9 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
                 self.lineOptions.lineStyle.lineColor = colorStr;
             });
         };
-        this.borderColor = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.symbolStyle.symbolStrokeStyle, function (colorStr) {
-                self.symbolOptions.symbolStyle.symbolStrokeStyle = colorStr;
+        this.fillColor = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.symbolOptions.symbolStyle.symbolFillStyle, function (colorStr) {
+                self.symbolOptions.symbolStyle.symbolFillStyle = colorStr;
             });
         };
         this.foregroundColor = function () {
@@ -1073,7 +1073,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
 exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, currentTrack, wiLogplotCtrl, callback) {
     let thisModalController = null;
 
-    function ModalController($scope, close) {
+    function ModalController($scope, close, $timeout) {
         let error = null;
         let self = this;
         console.log("currentCurve", currentCurve);
@@ -1273,7 +1273,24 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             }
             self.drawSample();
         };
-
+        this.setValueScale = function() {
+            if(!self.curveOptions.autoValueScale) return;
+            else {
+                let curveInTree = utils.getCurveFromId(currentCurve.idCurve);
+                console.log('curveInTree', curveInTree);
+                wiApiService.scaleCurve(curveInTree.id, function (scaleObj) {
+                    $timeout(function () {
+                        if (curveInTree.properties.idFamily == null) {
+                            self.curveOptions.minValue = scaleObj.minScale;
+                            self.curveOptions.maxValue = scaleObj.maxScale;
+                        } else {
+                            self.curveOptions.minValue = curveInTree.properties.minScale;
+                            self.curveOptions.maxValue = curveInTree.properties.maxScale;
+                        }
+                    })
+                });
+            }
+        }
         function updateLine(callback) {
             let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
             console.log(self.curveOptions, self.lineOptions);
@@ -2368,7 +2385,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         // }
         this.setShadingName = function(leftPart, rightPart) {
             let left = null;
-            let right = 'left';
+            let right = null;
             if(!leftPart) return;
             else {
                 for (curve of self.curvesOnDataset) {
@@ -2992,12 +3009,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.removeRowShading = function () {//TODO
             if (self.shadingChanged[self.__idx].change == '2') self.shadingChanged[self.__idx] = '4';
             else self.shadingChanged[self.__idx].change = '3';
-            console.log("removeRowShading", self.shadingChanged[self.__idx], self.__idx);
         }
         this.setShadingName = function(leftPart, rightPart, idx) {
             let left = null;
-            let right = 'left';
-            console.log("shading name", leftPart, rightPart, idx);
+            let right = null;
             if(!leftPart) return;
             else {
                 for (curve of self.curvesOnDataset) {
@@ -3043,24 +3058,21 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     display: condition1,
                     pattern: {
                         name: "none",
-                        foreground: "black",
-                        background: "transparent"
+                        background: "blue"
                     }
                 },
                 positiveFill: {
                     display: condition2,
                     pattern: {
                         name: "none",
-                        foreground: "black",
-                        background: "transparent"
+                        background: "blue"
                     }
                 },
                 negativeFill: {
                     display: condition2,
                     pattern: {
                         name: "none",
-                        foreground: "black",
-                        background: "transparent"
+                        background: "blue"
                     }
                 },
                 _index: self.fillPatternOptions.length
@@ -3542,7 +3554,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
             topJustification: "center",
             bottomJustification: "center",
             trackColor: '#ffffff',
-            width: utils.inchToPixel(1),
+            width: utils.inchToPixel(2),
             parameterSet: null
         }
         props.width = utils.pixelToInch(props.width);

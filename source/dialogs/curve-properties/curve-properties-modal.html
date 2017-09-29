@@ -8,7 +8,7 @@
             </div>
             <div class="modal-body" style="padding-bottom:0;">
                 <div class="">
-                    <form class="form-horizontal form-condensed dialog-style" action="" name="modalAddNew">
+                    <form class="form-horizontal form-condensed dialog-style" action="" name="modalCurveProperties">
                         <div class="row">
                             <div class="col-sm-7">
                                 <div class="form-group">
@@ -59,7 +59,8 @@
                                     <div class="col-sm-7">
                                         <input type="number" class="form-control wi-form-control"
                                                 value="" id="minValue" name="minValue"
-                                                ng-model="wiModal.curveOptions.minValue">
+                                                ng-model="wiModal.curveOptions.minValue"
+                                                ng-change="wiModal.curveOptions.autoValueScale = false">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -67,12 +68,14 @@
                                     <div class="col-sm-7">
                                         <input type="number" class="form-control wi-form-control"
                                                 value="" id="maxValue" name="maxValue"
-                                                ng-model="wiModal.curveOptions.maxValue">
+                                                ng-model="wiModal.curveOptions.maxValue"
+                                                ng-change="wiModal.curveOptions.autoValueScale = false">
                                     </div>
                                 </div>
                                 <label>
                                     <input type="checkbox"
-                                           ng-model="wiModal.curveOptions.autoValueScale">
+                                           ng-model="wiModal.curveOptions.autoValueScale"
+                                           ng-change="wiModal.setValueScale();">
                                            Auto value scales
                                 </label>
                                 <div class="form-group">
