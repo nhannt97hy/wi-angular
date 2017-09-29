@@ -1366,7 +1366,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
     });
 };
 
-exports.importLASDialog = function (ModalService, callback) {
+exports.importLASDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
         this.error = null;
@@ -1436,7 +1436,16 @@ exports.importLASDialog = function (ModalService, callback) {
                         wiApiService.postWithFile('/file', payloadParams)
                         .then(function (well) {
                             console.log('well response', well);
-                            return close(well, 500);
+                            if (well) {
+                                utils.refreshProjectState()
+                                    .then(function () {
+                                        close(well, 500);
+                                    })
+                                    .catch(function () {
+                                        self.isDisabled = false;
+                                        utils.error(err);
+                                    });
+                            }
                         })
                         .catch(function (err) {
                             console.log('err', err);
@@ -1454,7 +1463,16 @@ exports.importLASDialog = function (ModalService, callback) {
                             wiApiService.postWithFile('/file', payloadParams)
                             .then(function (well) {
                                 console.log('well response', well);
-                                return close(well, 500);
+                                if (well) {
+                                    utils.refreshProjectState()
+                                        .then(function () {
+                                            close(well, 500);
+                                        })
+                                        .catch(function () {
+                                            self.isDisabled = false;
+                                            utils.error(err);
+                                        });
+                                }
                             })
                             .catch(function (err) {
                                 console.log('err', err);
@@ -1467,7 +1485,16 @@ exports.importLASDialog = function (ModalService, callback) {
                     wiApiService.postWithFile('/file', payloadParams)
                     .then(function (well) {
                         console.log('well response', well);
-                        return close(well, 500);
+                        if (well) {
+                            utils.refreshProjectState()
+                                .then(function () {
+                                    close(well, 500);
+                                })
+                                .catch(function () {
+                                    self.isDisabled = false;
+                                    utils.error(err);
+                                });
+                        }
                     })
                     .catch(function (err) {
                         console.log('err', err);
@@ -1493,7 +1520,7 @@ exports.importLASDialog = function (ModalService, callback) {
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (data) callback(data);
+            if (data) console.log("imported", data);
         });
     });
 };
@@ -4120,7 +4147,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
            });
             return curveObjs[0];
         }
-        if(this.pointSet.idCurveX && this.pointSet.idCurveY) {
+        if (this.pointSet.idCurveX && this.pointSet.idCurveY) {
             wiApiService.scaleCurve(this.pointSet.idCurveX, function(scaleX) {
                 wiApiService.scaleCurve(self.pointSet.idCurveX, function(scaleY) {
                     self.pointSet.scaleLeft = (findCurveById(self.pointSet.idCurveX).properties.idFamily == null)? scaleX.minScale:self.pointSet.scaleLeft;
@@ -4516,8 +4543,10 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
                 if (self.polygons[index].change == change.unchanged) {
                     self.polygons[index].change = change.updated;
                 }
-                self.polygons[index].lineStyle = drawingPolygon.lineStyle;
-                self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+                if (drawingPolygon) {
+                    self.polygons[index].lineStyle = drawingPolygon.lineStyle;
+                    self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+                }
             });
         }
         this.polygonLineColor = function (index) {
@@ -4527,18 +4556,18 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         }
         function sendPolygonsAPIs() {
             const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
-            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged).map(unchangedPolygon => {
+            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged && polygon.points).map(unchangedPolygon => {
                 unchangedPolygon.points = JSON.parse(unchangedPolygon.points);
                 return unchangedPolygon;
             });
-            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created).map(createdPolygon => {
+            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created && polygon.points).map(createdPolygon => {
                 createdPolygon.points = JSON.parse(createdPolygon.points);
                 createdPolygon.idCrossPlot = idCrossPlot;
                 createdPolygon.change = change.unchanged;
                 wiApiService.createPolygon(createdPolygon);
                 return createdPolygon;
             });
-            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated).map(updatedPolygon => {
+            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated && polygon.points).map(updatedPolygon => {
                 updatedPolygon.points = JSON.parse(updatedPolygon.points);
                 updatedPolygon.idCrossPlot = idCrossPlot;
                 updatedPolygon.change = change.unchanged;
@@ -4747,18 +4776,25 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
-            histogramModel.properties = self.histogramProps;            
-            let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-            wiD3Ctrl.linkModels();
-            wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function(){
+                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                wiD3Ctrl.linkModels();
+                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            })
         }
 
         this.onOKButtonClicked = function () {
             console.log("on OK clicked");
-            self.onApplyButtonClicked();
-            $timeout(function(){
-                close(histogramModel.properties);
-            },500);
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function(){
+                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                wiD3Ctrl.linkModels();
+                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+                $timeout(function(){
+                    close(histogramModel.properties);
+                },500);
+            })
         }
         this.onCancelButtonClicked = function () {
             close(null);

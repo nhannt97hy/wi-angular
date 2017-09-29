@@ -69,7 +69,7 @@ exports.DeleteUserLineButtonClicked = function() {
 }
 
 exports.UserDefineLineButtonClicked = function() {
-    console.log('UserDefineLineButton is clicked');
+    
 }
 
 exports.PolygonManagerButtonClicked = function() {

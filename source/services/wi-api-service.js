@@ -293,7 +293,7 @@ Service.prototype.postWithFile = function (route, dataPayload) {
 
         self.Upload.upload(configUpload).then(
             function (responseSuccess) {
-                if (responseSuccess.data && responseSuccess.data.content) {
+                if (responseSuccess.data && responseSuccess.data.code === 200 && responseSuccess.data.content) {
                     return resolve(responseSuccess.data.content);
                 }else if (responseSuccess.data && responseSuccess.data.code === 401){
                     window.localStorage.removeItem('token');
@@ -301,6 +301,8 @@ Service.prototype.postWithFile = function (route, dataPayload) {
                     window.localStorage.removeItem('password');
                     window.localStorage.removeItem('rememberAuth');
                     location.reload();
+                } else if (responseSuccess.data && responseSuccess.data.reason){
+                    return reject(responseSuccess.data.reason);
                 } else {
                     return reject('Response is invalid!');
                 }

@@ -26,6 +26,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
             let backupConfig = self.treeConfig;
             let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            let ScrollTmp = window.localStorage.getItem('scrollTmp');
             self.treeConfig = [utils.projectToTreeConfig(projectRefresh)];
             console.log('backupConfig', backupConfig);
             console.log('config', self.treeConfig);
@@ -33,6 +34,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 self.backupConfig(backupConfig, self.treeConfig);
             });
             utils.putListFamily();            
+            $timeout(function(){
+                document.getElementById('treeContent').scrollTo(0,ScrollTmp);
+            },100);
         });
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT1, function () {
             let backupConfig = self.treeConfig;
