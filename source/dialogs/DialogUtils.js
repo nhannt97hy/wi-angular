@@ -222,39 +222,19 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
     });
 }
 
-exports.promptDialog1 = function (ModalService, titleMessage, input, callback) {
-    function ModalController($scope, close) {
-        this.error = null;
-        this.title = titleMessage;
-        this.input = input;
-        this.close = function (ret) {
-            close(ret);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: "prompt/prompt-modal.html",
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
-        modal.close.then(function (ret) {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            callback(ret);
-        });
-    });
-}
-
 exports.promptDialog = function (ModalService, promptConfig, callback) {
     function ModalController($scope, close) {
-        this.error = null;
+        const self = this;
         this.title = promptConfig.title;
         this.inputName = promptConfig.inputName;
         this.input = promptConfig.input;
-        this.close = function (ret) {
-            close(ret);
+        this.type = promptConfig.type;
+        this.options = promptConfig.options;
+        this.onOkButtonClicked = function () {
+            close(self.input);            
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
         }
     }
 
@@ -1389,75 +1369,9 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
 exports.importLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
-        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        this.isDisabled = true;
-
-        this.lasFile = null;
-        this.transactionId = Date.now();
-        this.onUploadButtonClicked = function () {
-            let dataRequest = {
-                file: self.lasFile,
-                transactionId: self.transactionId
-            }
-            wiApiService.uploadFile(dataRequest, function (lasInfo) {
-                self.lasInfo = lasInfo;
-                self.lasInput = angular.copy(lasInfo);
-                self.curves = lasInfo.curves;
-                self.curves.forEach(function (curve) {
-                    curve.inputName = curve.lasName;
-                    curve.isLoad = true;
-                });
-                self.isDisabled = false;
-            });
-        }
-
-        this.isLoadAll = true;
-        this.checkAllButtonClicked = function () {
-            if (self.isLoadAll) {
-                self.curves.forEach(function (curve) {
-                    curve.isLoad = true;
-                });
-            } else {
-                self.curves.forEach(function (curve) {
-                    curve.isLoad = false;
-                });
-            }
-        }
-
-        this.invertCheckButtonClicked = function () {
-            self.curves.forEach(function (curve) {
-                curve.isLoad = !curve.isLoad;
-            });
-        }
-
-        this.onLoadButtonClicked = function () {
-            console.log(self.lasInfo);
-        }
-
-        this.onCancelButtonClicked = function () {
-            close(null);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: "import-LAS/import-LAS-modal.html",
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        modal.element.modal();
-        modal.close.then(function (data) {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            if (data) callback(data);
-        });
-    });
-};
-
-exports.importLASDialog1 = function (ModalService, callback) {
-    function ModalController($scope, close, wiComponentService, wiApiService) {
-        let self = this;
         this.error = null;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        const utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         this.lasFile = null;
         this.selectedWell = null;
@@ -1527,6 +1441,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                         .catch(function (err) {
                             console.log('err', err);
                             self.isDisabled = false;
+                            utils.error(err);
                         })
                     }
                 });
@@ -1544,6 +1459,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                             .catch(function (err) {
                                 console.log('err', err);
                                 self.isDisabled = false;
+                                utils.error(err);
                             })
                         }
                     });
@@ -1556,6 +1472,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                     .catch(function (err) {
                         console.log('err', err);
                         self.isDisabled = false;
+                        utils.error(err);
                     })
                 }
             }
@@ -5188,26 +5105,82 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }).children;
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
-        console.log(this.zoneArr);
-        this.SelectedZone = 0;
+        this.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
 
-        // switch (item.name) {
-        //     case 'well':
-        //     break;
+        switch (item.name) {
+            case 'well':
+                self.wellArr.forEach(function(well, i){
+                    if(well.id == item.id){
+                        self.SelectedWell = self.wellArr[i];
+                        self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                            return child.name == 'zonesets';
+                        }).children;
+                        self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+                        self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+                        self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
+                    }
+                })
+                break;
 
-        //     case 'zonesets':
-        //     break;
+            case 'zonesets':
+                self.wellArr.forEach(function(well, i){
+                    if(well.id == item.properties.idWell){
+                        self.SelectedWell = self.wellArr[i];
+                        self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                            return child.name == 'zonesets';
+                        }).children;
+                        self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+                        self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+                        self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
+                    }
+                })
+                break;
 
-        //     case 'zoneset':
-        //     break;
+            case 'zoneset':
+                self.wellArr.forEach(function(well, i){
+                    if(well.id == item.properties.idWell){
+                        self.SelectedWell = self.wellArr[i];
+                        self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                            return child.name == 'zonesets';
+                        }).children;
 
-        //     case 'zone':
-        //     break;
-        // }
+                        self.zonesetsArr.forEach(function(zoneset, j){
+                            if(zoneset.id == item.id){
+                                self.SelectedZoneSet = self.zonesetsArr[j];
+                                self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+                                self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
+                            }
+                        })
+                    }
+                })
+                break;
+
+            case 'zone':
+                self.wellArr.forEach(function(well, i){
+                    var zonesetsArr = well.children.find(function (child) {
+                        return child.name == 'zonesets';
+                    }).children;
+
+                    zonesetsArr.forEach(function(zoneset, j){
+                        if(zoneset.id == item.properties.idZoneSet){
+                            self.SelectedWell = self.wellArr[i];
+                            self.zonesetsArr = zonesetsArr;
+                            self.SelectedZoneSet = self.zonesetsArr[j];
+                            self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+
+                            self.zoneArr.forEach(function(zone, k){
+                                if(zone.id == item.id){
+                                    self.SelectedZone = k;
+                                }
+                            });
+                        }
+                    })
+                })
+                break;
+        }
 
         this.setClickedRow = function (indexRow) {
             self.SelectedZone = indexRow;
-            console.log(self.SelectedZone);
         }
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foregroundZone = function (index) {
@@ -5220,6 +5193,10 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 self.zoneArr[index].properties.background = colorStr;
             });
         };
+
+        this.onRenameZoneSet = function(){
+            utils.renameZoneSet(self.SelectedZoneSet);
+        }
         this.onChangeWell = function () {
             self.zonesetsArr = self.SelectedWell.children.find(function (child) {
                 return child.name == 'zonesets';
@@ -5257,6 +5234,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     name: top.toFixed(2)
                 }
             })
+
+            self.SelectedZone = self.SelectedZone + 1;
         }
 
         this.onAddAboveButtonClicked = function () {
@@ -5271,7 +5250,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
 
                 }
 
-                if (parseFloat(free.toFixed(2)) > 0) {
+                if (parseInt(free) > 0) {
                     self.addZone(self.SelectedZone, zone.properties.startDepth - free, zone.properties.startDepth);
                 } else {
                     utils.error("Can't add row above");
@@ -5291,16 +5270,16 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 var next_zone = self.SelectedZone < self.zoneArr.length ? self.zoneArr[self.SelectedZone + 1] : null;
                 var free = 0;
                 if (self.SelectedZone == self.zoneArr.length - 1) {
-                    var free = zone.properties.endDepth - parseFloat(self.SelectedWell.properties.bottomDepth) >= 50 ? 50 : zone.properties.endtDepth - parseFloat(self.SelectedWell.properties.bottomDepth);
+                    var free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
                 } else {
                     var free = zone.properties.endDepth - next_zone.properties.startDepth >= 50 ? 50 : zone.properties.endDepth - next_zone.properties.startDepth;
 
                 }
 
-                if (parseFloat(free.toFixed(2)) > 0) {
-                    self.addZone(self.SelectedZone, zone.properties.endDepth, zone.properties.endDepth + free);
+                if (parseInt(free) > 0) {
+                    self.addZone(self.SelectedZone + 1, zone.properties.endDepth, zone.properties.endDepth + free);
                 } else {
-                    utils.error("Can't add row above");
+                    utils.error("Can't add row below");
                 }
 
             } else {
@@ -5312,12 +5291,12 @@ exports.zoneManagerDialog = function (ModalService, item) {
 
         this.onDeleteButtonClicked = function () {
             self.zoneArr.splice(self.SelectedZone, 1);
-            self.SelectedZone = self.SelectedZone > 0 ? self.SelectedZone - 1 : 0;
+            self.SelectedZone = self.SelectedZone > 0 ? self.SelectedZone - 1 : -1;
         }
 
         this.onClearAllButtonClicked = function () {
             self.zoneArr.length = 0;
-            self.SelectedZone = 0;
+            self.SelectedZone = -1;
         }
 
         this.onApplyButtonClicked = function () {

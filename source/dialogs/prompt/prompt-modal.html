@@ -1,4 +1,4 @@
-<div class='modal fade' >
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
 	<div class='modal-dialog'>
 		<div class="modal-content">
 			<div class="modal-header">
@@ -10,17 +10,19 @@
 					<div class="form-group">
 						<label class="control-label col-sm-3" for="name">{{wiModal.inputName}}:</label>							
 						<div class="col-sm-9">
-							<input type="text" class="form-control"
+							<input ng-if="!wiModal.type" type="text" class="form-control"
 								ng-model="wiModal.input" ng-click="wiModal.error = null"
 								wi-enter="wiModal.close(wiModal.input)" required autofocus>
+							<select ng-if="wiModal.type == 'select'"
+											ng-model="wiModal.input"
+											ng-options="option.value as option.label for option in wiModal.options"></select>
 						</div>
 					</div>
 				</form>
-				<p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
 			</div>
 			<div class="modal-footer">
-				<button class='btn btn-default' ng-click='wiModal.close(wiModal.input)'>Ok</button>
-				<button class='btn btn-default' ng-click='wiModal.close(null)'>Cancel</button>
+				<button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'>Ok</button>
+				<button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>Cancel</button>
 			</div>
 		</div>
 	</div>
