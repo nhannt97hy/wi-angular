@@ -8,7 +8,6 @@ exports.SaveFormatButtonClicked = function() {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let histogramModel = utils.getModel("histogram", idHistogram);
     wiApiService.editHistogram(histogramModel.properties, function(){
-        console.log('Saving Histogram......');
         dialogUtils.warningMessageDialog(ModalService, 'Histogram plot is saved');
     })
 
