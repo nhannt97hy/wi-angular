@@ -1237,6 +1237,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         minorX: 5,
                         majorY: 5,
                         minorY: 5,
+                        numColor: 5,
                         scaleLeft: curve1.minX,
                         scaleRight: curve1.maxX,
                         scaleBottom: curve2.minX,
