@@ -97,9 +97,37 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                 numColor: 10,
                 scaleLeft: -10,
                 minorX: 3,
-                zones: [{
-                    idZone: 1
-                }]
+                idZoneSet: 3,
+                zones: [
+                    {
+                        idZone: 1,
+                        name: 123,
+                        startDepth: 100,
+                        endDepth: 200,
+                        fill: {
+                            pattern: { background: 'red' }
+                        }
+                    },
+                    {
+                        idZone: 2,
+                        name: 123,
+                        startDepth: 300,
+                        endDepth: 400,
+                        fill: {
+                            pattern: { background: 'navy' }
+                        }
+                    },
+                    {
+                        idZone: 3,
+                        name: 123,
+                        startDepth: 400,
+                        endDepth: 500,
+                        fill: {
+                            pattern: { background: 'yellow' }
+                        }
+                    }
+                ],
+                activeZone: [1,2]
             },
             polygons: [
                 {
@@ -129,10 +157,9 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                 },
                 {
                     lineStyle: {
-                        lineWidth: 5,
-                        lineStyle: [1, 2],
                         lineColor: 'red'
                     },
+                    regType: 'Linear',
                     polygons: [{idPolygon: 1}]
                 },
                 {

@@ -40,6 +40,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getZoneName = function () {
         return self.name + "Zone";
     }
+
     this.linkModels = function () {
         self.zoneArr = null;
         if (self.crossplotModel && self.crossplotModel.properties.pointSet.idZoneSet) {
@@ -52,10 +53,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.pointSet.zones = self.zoneArr.map(function(zone) {
                 return zone.properties;
             });
-            // self.crossplotModel.properties.crossplotTitle = getHistogramTitle();
-            // self.crossplotModel.properties.xLabel = getXLabel();
         }
     }
+
+    this.onZoneCtrlReady = function(zoneCtrl) {
+        zoneCtrl.trap('zone-data', function() {
+            self.refreshCrossplot();
+        });
+    }
+
+    this.updateViCrossplotZones = function() {
+        let activeZones = self.getZoneCtrl().getActiveZones();
+        console.log('CROSSPLOT ACTIVEZONES', activeZones);
+    }
+
     this.CloseReferenceWindow = function () {
         self.isShowReferenceWindow = false;
         utils.triggerWindowResize();
