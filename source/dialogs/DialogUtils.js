@@ -4747,18 +4747,25 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
-            histogramModel.properties = self.histogramProps;            
-            let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-            wiD3Ctrl.linkModels();
-            wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function(){
+                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                wiD3Ctrl.linkModels();
+                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            })
         }
 
         this.onOKButtonClicked = function () {
             console.log("on OK clicked");
-            self.onApplyButtonClicked();
-            $timeout(function(){
-                close(histogramModel.properties);
-            },500);
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function(){
+                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                wiD3Ctrl.linkModels();
+                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+                $timeout(function(){
+                    close(histogramModel.properties);
+                },500);
+            })
         }
         this.onCancelButtonClicked = function () {
             close(null);

@@ -6,6 +6,7 @@ const MIN_RANGE = 1;
 function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
     let _offsetTop = 0;
+    let _scaleView = false;
     let _viCurve = null;
     let parentHeight = 0;
     this.tinyWindow = {
@@ -261,7 +262,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     this.scaleView = function() {
-        if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
+        if ( _scaleView ) return;
+        _scaleView = true;
+        //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
         let scale = currentParentHeight / self.tinyWindow.height;
         let newParentHeight = Math.round(currentParentHeight * scale);
@@ -274,6 +277,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.resetView = function() {
+        _scaleView = false;
         let defaultParentHeight = $(self.contentId).parent().parent().height();
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);
