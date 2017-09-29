@@ -222,39 +222,19 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
     });
 }
 
-exports.promptDialog1 = function (ModalService, titleMessage, input, callback) {
-    function ModalController($scope, close) {
-        this.error = null;
-        this.title = titleMessage;
-        this.input = input;
-        this.close = function (ret) {
-            close(ret);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: "prompt/prompt-modal.html",
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
-        modal.close.then(function (ret) {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            callback(ret);
-        });
-    });
-}
-
 exports.promptDialog = function (ModalService, promptConfig, callback) {
     function ModalController($scope, close) {
-        this.error = null;
+        const self = this;
         this.title = promptConfig.title;
         this.inputName = promptConfig.inputName;
         this.input = promptConfig.input;
-        this.close = function (ret) {
-            close(ret);
+        this.type = promptConfig.type;
+        this.options = promptConfig.options;
+        this.onOkButtonClicked = function () {
+            close(self.input);            
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
         }
     }
 
@@ -1372,75 +1352,9 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
 exports.importLASDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
-        this.projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        this.isDisabled = true;
-
-        this.lasFile = null;
-        this.transactionId = Date.now();
-        this.onUploadButtonClicked = function () {
-            let dataRequest = {
-                file: self.lasFile,
-                transactionId: self.transactionId
-            }
-            wiApiService.uploadFile(dataRequest, function (lasInfo) {
-                self.lasInfo = lasInfo;
-                self.lasInput = angular.copy(lasInfo);
-                self.curves = lasInfo.curves;
-                self.curves.forEach(function (curve) {
-                    curve.inputName = curve.lasName;
-                    curve.isLoad = true;
-                });
-                self.isDisabled = false;
-            });
-        }
-
-        this.isLoadAll = true;
-        this.checkAllButtonClicked = function () {
-            if (self.isLoadAll) {
-                self.curves.forEach(function (curve) {
-                    curve.isLoad = true;
-                });
-            } else {
-                self.curves.forEach(function (curve) {
-                    curve.isLoad = false;
-                });
-            }
-        }
-
-        this.invertCheckButtonClicked = function () {
-            self.curves.forEach(function (curve) {
-                curve.isLoad = !curve.isLoad;
-            });
-        }
-
-        this.onLoadButtonClicked = function () {
-            console.log(self.lasInfo);
-        }
-
-        this.onCancelButtonClicked = function () {
-            close(null);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: "import-LAS/import-LAS-modal.html",
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        modal.element.modal();
-        modal.close.then(function (data) {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            if (data) callback(data);
-        });
-    });
-};
-
-exports.importLASDialog1 = function (ModalService, callback) {
-    function ModalController($scope, close, wiComponentService, wiApiService) {
-        let self = this;
         this.error = null;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        const utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         this.lasFile = null;
         this.selectedWell = null;
@@ -1510,6 +1424,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                         .catch(function (err) {
                             console.log('err', err);
                             self.isDisabled = false;
+                            utils.error(err);
                         })
                     }
                 });
@@ -1527,6 +1442,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                             .catch(function (err) {
                                 console.log('err', err);
                                 self.isDisabled = false;
+                                utils.error(err);
                             })
                         }
                     });
@@ -1539,6 +1455,7 @@ exports.importLASDialog1 = function (ModalService, callback) {
                     .catch(function (err) {
                         console.log('err', err);
                         self.isDisabled = false;
+                        utils.error(err);
                     })
                 }
             }
