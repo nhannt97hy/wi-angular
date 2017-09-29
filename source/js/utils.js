@@ -590,7 +590,7 @@ exports.projectToTreeConfig = function (project) {
     };
     projectModel.data = {
         childExpanded: false,
-        icon: 'wells-16x16',
+        icon: 'well-insight-16x16',
         label: project.name,
         selected: false
     };

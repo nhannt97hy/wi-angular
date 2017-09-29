@@ -4518,8 +4518,10 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
                 if (self.polygons[index].change == change.unchanged) {
                     self.polygons[index].change = change.updated;
                 }
-                self.polygons[index].lineStyle = drawingPolygon.lineStyle;
-                self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+                if (drawingPolygon) {
+                    self.polygons[index].lineStyle = drawingPolygon.lineStyle;
+                    self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+                }
             });
         }
         this.polygonLineColor = function (index) {
@@ -4529,18 +4531,18 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         }
         function sendPolygonsAPIs() {
             const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
-            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged).map(unchangedPolygon => {
+            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged && polygon.points).map(unchangedPolygon => {
                 unchangedPolygon.points = JSON.parse(unchangedPolygon.points);
                 return unchangedPolygon;
             });
-            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created).map(createdPolygon => {
+            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created && polygon.points).map(createdPolygon => {
                 createdPolygon.points = JSON.parse(createdPolygon.points);
                 createdPolygon.idCrossPlot = idCrossPlot;
                 createdPolygon.change = change.unchanged;
                 wiApiService.createPolygon(createdPolygon);
                 return createdPolygon;
             });
-            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated).map(updatedPolygon => {
+            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated && polygon.points).map(updatedPolygon => {
                 updatedPolygon.points = JSON.parse(updatedPolygon.points);
                 updatedPolygon.idCrossPlot = idCrossPlot;
                 updatedPolygon.change = change.unchanged;
