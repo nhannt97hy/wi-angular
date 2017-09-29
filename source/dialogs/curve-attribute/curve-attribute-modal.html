@@ -95,10 +95,10 @@
                                 <div class="row">
                                     <div class="col-sm-12">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-2">Border Color</label>
+                                            <label class="control-label col-sm-2">Fill Color</label>
                                             <div class="col-sm-9">
-                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.symbolOptions.symbolStyle.symbolStrokeStyle}"></div>
-                                                <button ng-click="wiModal.borderColor();" class="wi-form-control">...</button>
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%; border: 1px solid #000;" ng-style="{'background-color':wiModal.symbolOptions.symbolStyle.symbolFillStyle}"></div>
+                                                <button ng-click="wiModal.fillColor();" class="wi-form-control">...</button>
                                             </div>
                                         </div>
                                     </div>
@@ -144,7 +144,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div> 
                             </form>
                         </div>
                     </wi-tab>

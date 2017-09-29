@@ -140,35 +140,13 @@ exports.ImportLASButtonClicked = function () {
     let self = this;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importLASDialog1(this.ModalService, function (well) {
+    DialogUtils.importLASDialog(this.ModalService, function (well) {
         if (well) {
             utils.refreshProjectState();
         }
     })
 };
 
-exports.ImportLASButtonClicked1 = function () {
-    let self = this;
-    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
-    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importLASDialog(this.ModalService, function (well) {
-        if (well) {
-            let wellModel = utils.wellToTreeConfig(well);
-            let selectedProjectNode = utils.getSelectedProjectNode();
-            let found = false;
-            for (let i in selectedProjectNode.children) {
-                if (selectedProjectNode.children[i].id == wellModel.id) {
-                    selectedProjectNode.children[i] = wellModel;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                selectedProjectNode.children.push(wellModel);
-            }
-        }
-    })
-};
 exports.ImportMultiLASButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');

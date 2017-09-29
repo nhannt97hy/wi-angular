@@ -47,7 +47,9 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-2">
-                                        <button class="btn btn-default normal-text">Edit</button>
+                                        <button class="btn btn-default normal-text"
+                                        ng-click="wiModal.onRenameZoneSet()"
+                                        ng-disabled="!wiModal.SelectedZoneSet">Edit</button>
                                     </div>
                                 </div>
                             </div>
@@ -141,19 +143,19 @@
                                         <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Export</button>
                                     </div>
                                     <div style='margin-top:5em;'>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddAboveButtonClicked()">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddAboveButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
                                             <i class="plus-16x16"></i>
                                             <span>Add Row Above</span>
                                         </button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddBelowButtonClicked()">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddBelowButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
                                             <i class="plus-16x16"></i>                                                    
                                             <span>Add Row Below</span>
                                         </button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onDeleteButtonClicked()">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onDeleteButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
                                             <i class="delete-16x16"></i>                                                    
                                             <span>Delete Rows</span>
                                         </button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onClearAllButtonClicked()">
+                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onClearAllButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
                                             <i class="delete-16x16"></i>
                                             <span>Clear All</span>
                                         </button>

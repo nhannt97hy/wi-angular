@@ -5,77 +5,62 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">Zone Track Properties</h4>
             </div>
-            <div class="modal-body padding-0">
-                <form action="" class="form-horizontal">
+            <div class="modal-body">
+                <form action="" class="form-horizontal dialog-style">
                     <div class="container-fluid">
                         <div id="header">
-                            <h5>Header</h5>
+                            <h5 class="normal-text">Header</h5>
                             <div class="form-group">
                                 <div class="col-sm-7">
-                                    <label for="isShowTitle" class="normal-text">
+                                    <label for="isShowTitle" class="padding-left-2em">
                                         <input type="checkbox" id="isShowTitle" ng-model="wiModal.isShowTitle">Show title
                                     </label>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="title">Title</label>
+                                <label class="control-label col-sm-5 padding-left-3em" for="title">Title</label>
                                 <div class="col-sm-7">
                                     <input type="text" class="form-control wi-form-control" value="" name="title" id="title" ng-model="wiModal.title" ng-disabled="!wiModal.isShowTitle">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="topJust" class="control-label col-sm-5 normal-text">Top Justification</label>
+                                <label for="topJust" class="control-label col-sm-5 padding-left-3em">Top Justification</label>
                                 <div class="col-sm-7">
                                     <select ng-model="wiModal.topJustification" name="topJust" value="" class="form-control wi-form-control" id="topJust" ng-disabled="!wiModal.isShowTitle">
-                                            <option value="left">Left</option>
-                                            <option value="center">Center</option>
-                                            <option value="right">Right</option>
-                                        </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="bottomJust" class="control-label col-sm-5 normal-text">Bottom Justification</label>
-                                <div class="col-sm-7">
-                                    <select ng-model="wiModal.bottomJustification" name="bottomJust" value="" class="form-control wi-form-control" id="bottomJust"
-                                        ng-disabled="!wiModal.isShowTitle">
-                                            <option value="left">Left</option>
-                                            <option value="center">Center</option>
-                                            <option value="right">Right</option>
-                                        </select>
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <div id="color">
-                            <h5>Color</h5>
+                            <h5 class="normal-text">Color</h5>
                             <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="track-background">Track background</label>
+                                <label class="control-label col-sm-5 padding-left-3em" for="track-background">Track background</label>
                                 <div class="col-sm-7">
                                     <div class="float-left">
                                         <button ng-click="wiModal.trackBackground();"
                                                 ng-style="{'background-color':wiModal.trackColor}"
-                                                class="form-control wi-form-control width-80px">
-                                                    Change
+                                                class="form-control wi-form-control width-80px thick-border">
                                         </button>
-                                    </div>
-                                    <div class="float-left">
-                                        <input type="text" class="form-control wi-form-control" id="track-background" ng-model="wiModal.trackColor">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div id="geometry">
-                            <h5>Geomatry</h5>
+                            <h5 class="normal-text">Geometry</h5>
                             <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="width">Width (inchs)</label>
+                                <label class="control-label col-sm-5 padding-left-3em" for="width">Width (inchs)</label>
                                 <div class="col-sm-7">
-                                    <input type="number" min="0.5" step="0.001" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
+                                    <input type="number" min="1" step="1" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
                                 </div>
                             </div>
                         </div>
                         <div id="parameters">
-                            <h5>Parameters</h5>
+                            <h5 class="normal-text">Parameters</h5>
                             <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="parameters-set">Parameter Set</label>
+                                <label class="control-label col-sm-5 padding-left-3em" for="parameters-set">Parameter Set</label>
                                 <div class="col-sm-7">
                                     <select id="parameters-set" class="form-control wi-form-control">
                                         <option value="">User defined</option>
@@ -83,7 +68,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label col-sm-5 normal-text" for="zone-set">
+                                <label class="control-label col-sm-5 padding-left-3em" for="zone-set">
                                   Zone Set</label>
                                 <div class="col-sm-6">
                                     <select id="zone-set" class="form-control wi-form-control" ng-options="zoneSet.idZoneSet as zoneSet.name for zoneSet in wiModal.zoneSets" ng-model="wiModal.idZoneSet" ng-change="wiModal.checkZoneSet()" required>
