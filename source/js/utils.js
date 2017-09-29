@@ -1778,3 +1778,25 @@ exports.getScaleCurveIfNotFamily = function(idCurve) {
         console.log("rangeObj", rangeObj);
     })
 }
+
+exports.renameZoneSet = function(zoneSetModel){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let promptConfig = {
+        title: '<span class="user-define-16x16"></span> Rename ZoneSet',
+        inputName: 'Name',
+        input: zoneSetModel.properties.name
+    }
+    DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
+        if (!ret) return;
+        let wiApiService = __GLOBAL.wiApiService;
+        let zoneSetInfo = zoneSetModel.properties;
+        zoneSetInfo.name = ret;
+        wiApiService.editZoneSet(zoneSetInfo, function () {
+            __GLOBAL.$timeout(function () {
+                zoneSetModel.properties.name = ret;
+                zoneSetModel.data.label = ret;
+            })
+        });
+    });
+}

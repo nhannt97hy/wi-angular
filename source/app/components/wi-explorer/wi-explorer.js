@@ -410,7 +410,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function() {
                             let zonesetsModel = utils.getSelectedNode();
                             console.log(zonesetsModel);
-                            utils.openZonemanager(zonesetsModel);
+                            utils.renameZoneSet(zonesetsModel);
                         }
                     }, {
                         name: "Delete",
