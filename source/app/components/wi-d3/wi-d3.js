@@ -1170,7 +1170,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                     let shadingObj = {
                         idTrack: _currentTrack.id,
-                        name: curve2?( curve2.name + '_' + curve1.name):('left_' + curve1.name),
+                        name: curve2 ? ( curve1.name + '-' + curve2.name )
+                                    : ( curve1.name + '-left' ),
                         negativeFill: config.negativeFill,
                         positiveFill: config.positiveFill,
                         fill: config.fill,

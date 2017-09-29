@@ -359,6 +359,7 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
         vpRefX = vpRefX > rightMost ? rightMost : vpRefX;
         vpRefX = vpRefX < leftMost ? leftMost : vpRefX;
         shading.refX = shading.getTransformX(shading.selectedCurve).invert(vpRefX);
+        shading.drawRootTooltip();
         self.plotShading(shading);
     });
 
