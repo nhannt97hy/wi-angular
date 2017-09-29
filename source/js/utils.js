@@ -1123,6 +1123,7 @@ exports.trackProperties = function (ModalService, wiComponentService) {
 let refreshProjectState = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    let dom = document.getElementById('treeContent');
 
     if (!project) return;
 
@@ -1131,6 +1132,8 @@ let refreshProjectState = function () {
             idProject: project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
+        let ScrollTmp = dom.scrollTop;
+        window.localStorage.setItem('scrollTmp', ScrollTmp);
         wiApiService.post(wiApiService.GET_PROJECT, payload)
             .then(function (projectRefresh) {
                 console.log("Refresh");

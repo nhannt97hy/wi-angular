@@ -38,7 +38,7 @@ const REGRESSION_LINE_SCHEMA = {
         displayEquation: { type: 'Boolean', default: true },
         regType: {
             type: 'Enum',
-            values: ['Linear', 'Exponent', 'Powerwer'],
+            values: ['Linear', 'Exponent', 'Power'],
             default: 'Linear'
         },
         inverseReg: { type: 'Boolean', default: false },
@@ -180,6 +180,9 @@ Crossplot.prototype.getProperties = function() {
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+    if (props.pointSet && props.pointSet.idZoneSet != null) {
+        this.pointSet.zAxes = 'Zone';
+    }
 }
 
 Crossplot.prototype.getViewportX = function() {
@@ -223,7 +226,7 @@ Crossplot.prototype.getTransformZ = function() {
     else if (this.pointSet.zAxes == 'Zone') {
         let domain = [];
         let range = ['transparent']
-        let zones = this.zones.sort(function(a, b) {
+        let zones = this.pointSet.zones.sort(function(a, b) {
             return a.startDepth - b.startDepth;
         })
         zones.forEach(function(z) {
@@ -615,7 +618,10 @@ Crossplot.prototype.plotUserDefineLines = function() {
 
     let line = d3.line()
         .x(function(d) { return transformX(d.x); })
-        .y(function(d) { return transformY(d.y); });
+        .y(function(d) { return transformY(d.y); })
+        .defined(function(d) {
+            return !isNaN(d.x) && !isNaN(d.y) && d.y != Infinity && d.y != -Infinity;
+        });
 
     let userDefineLineContainer = this.svgContainer.select('g.vi-crossplot-user-define-lines')
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
@@ -649,7 +655,10 @@ Crossplot.prototype.plotRegressionLines = function() {
 
     let line = d3.line()
         .x(function(d) { return transformX(d.x); })
-        .y(function(d) { return transformY(d.y); });
+        .y(function(d) { return transformY(d.y); })
+        .defined(function(d) {
+            return !isNaN(d.x) && !isNaN(d.y) && d.y != Infinity && d.y != -Infinity;
+        });
 
     let regLineContainer = this.svgContainer.select('g.vi-crossplot-regression-lines')
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
@@ -690,7 +699,7 @@ Crossplot.prototype.prepareUserDefineLines = function() {
 
         let start = self.pointSet.scaleLeft;
         let end = self.pointSet.scaleRight;
-        let step = (end - start) / 100;
+        let step = (end - start) / 1000;
 
         l.data = Utils.range(start, end, step).map(function(d) {
             return {
@@ -716,12 +725,17 @@ Crossplot.prototype.prepareRegressionLines = function() {
             l.func = null;
             return;
         }
-        let func = self.getRegressionFunc(data);
-        l.data = [self.pointSet.scaleLeft, self.pointSet.scaleRight].map(function(d) {
+        let func = self.getRegressionFunc(data, l.regType, l.inverseReg);
+
+        let start = self.pointSet.scaleLeft;
+        let end = self.pointSet.scaleRight;
+        let step = (end - start) / 1000;
+
+        l.data = Utils.range(start, end, step).map(function(d) {
             return {
                 x: d,
                 y: func(d)
-            }
+            };
         });
         l.func = func;
     });
@@ -738,27 +752,65 @@ Crossplot.prototype.getUserDefineFunc = function(funcStr) {
     catch (e) { return null; }
 }
 
-Crossplot.prototype.getRegressionFunc = function(data) {
+Crossplot.prototype.getRegressionFunc = function(data, type, inverse) {
+    if (!type) type = 'Linear';
     let reducer = function(sum, current) { return sum + current; };
 
-    let dataX = data.map(function(d) { return d.x; });
-    let dataY = data.map(function(d) { return d.y; });
+    let getLinearArgs = function(dataX, dataY) {
+        let meanX = dataX.reduce(reducer) * 1.0 / dataX.length;
+        let meanY = dataY.reduce(reducer) * 1.0 / dataY.length;
 
-    let meanX = dataX.reduce(reducer) * 1.0 / dataX.length;
-    let meanY = dataY.reduce(reducer) * 1.0 / dataY.length;
+        let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer);
+        let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer);
 
-    let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer);
-    let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer);
+        let slope = XY / XX;
+        let intercept = meanY - meanX * slope;
+        return [slope, intercept];
+    }
 
-    let slope = XY / XX;
-    let intercept = meanY - (meanX * slope);
+    let dataX, dataY, args, slope, intercept, func;
 
-    let func = function(x) {
-        return x*slope + intercept;
-    };
-    let a = +slope.toFixed(6);
-    let b = +intercept.toFixed(6);
-    func.equation = 'y=' + a + '*x' + (b < 0 ? b : ('+' + b));
+    if (type == 'Linear') {
+        dataX = data.map(function(d) { return inverse ? 1/d.x : d.x; });
+        dataY = data.map(function(d) { return d.y; });
+        args = getLinearArgs(dataX, dataY);
+        slope = args[0];
+        intercept = args[1];
+        func = function(x) {
+            return inverse ? slope/x + intercept :  x*slope + intercept;
+        }
+        let a = +slope.toFixed(6);
+        let b = +intercept.toFixed(6);
+        func.equation = 'y=' + (a == 0 ? '' : (a + (inverse ? '/' : '*') + 'x')) + (b < 0 || a == 0 ? b : ('+' + b));
+    }
+    else if (type == 'Exponent') {
+        data = data.filter(function(d) { return d.y > 0; });
+        dataX = data.map(function(d) { return inverse ? 1/d.x : d.x; });
+        dataY = data.map(function(d) { return Math.log(d.y) });
+        args = getLinearArgs(dataX, dataY);
+        slope = Math.exp(args[0]);
+        intercept = Math.exp(args[1]);
+        func = function(x) {
+            return intercept*Math.pow(slope, inverse ? 1/x : x);
+        }
+        let a = +slope.toFixed(6);
+        let b = +intercept.toFixed(6);
+        func.equation = 'y=' + b + '*' + a + (inverse ? '^(1/x)' : '^x');
+    }
+    else if (type == 'Power') {
+        data = data.filter(function(d) { return d.x > 0 && d.y > 0; });
+        dataX = data.map(function(d) { return Math.log(inverse ? 1/d.x : d.x); });
+        dataY = data.map(function(d) { return Math.log(d.y); });
+        args = getLinearArgs(dataX, dataY);
+        slope = args[0];
+        intercept = Math.exp(args[1]);
+        func = function(x) {
+            return intercept*Math.pow(inverse ? 1/x : x, slope);
+        }
+        let a = +slope.toFixed(6);
+        let b = +intercept.toFixed(6);
+        func.equation = 'y=' + b + (inverse ? '*1/x^' : '*x^') + a;
+    }
 
     return func;
 }
@@ -884,7 +936,6 @@ Crossplot.prototype.plotSymbols = function() {
 
     let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
     if (typeof plotFunc != 'function') return;
-
     this.data.forEach(function(d) {
         if (shouldPlotZ) {
             helper.strokeStyle = transformZ(d.z);
@@ -927,11 +978,10 @@ Crossplot.prototype.prepareData = function() {
     let self = this;
     let zonalOrInterval = this.showZonalOrInterval();
     let zones = [];
-
     if (zonalOrInterval == 'Zonal') {
-        if (typeof self.pointSet.activeZone == 'array') {
+        if (self.pointSet.activeZone instanceof Array) {
             zones = self.pointSet.zones.filter(function(zone) {
-                return self.pointSet.activeZone.indexOf(zone.idZone.toString()) > -1;
+                return self.pointSet.activeZone.indexOf(zone.idZone) > -1;
             });
         }
         else if (Utils.lowercase(self.pointSet.activeZone) == 'all') {
@@ -939,7 +989,7 @@ Crossplot.prototype.prepareData = function() {
         }
         else {
             zones = self.pointSet.zones.filter(function(zone) {
-                return zone.idZone.toString() == self.pointSet.activeZone;
+                return zone.idZone == self.pointSet.activeZone;
             });
         }
     }
@@ -960,7 +1010,7 @@ Crossplot.prototype.prepareData = function() {
             self.data.push({
                 x: mapX[d.y],
                 y: d.x,
-                z: mapZ[d.y],
+                z: self.zAxes == 'Curve' ? mapZ[d.y] : d.y,
                 depth: d.y
             });
         }

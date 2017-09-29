@@ -544,7 +544,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         */
 
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
-        slidingBar.scroll(d3.event.deltaY);
+        let sign = (d3.event.deltaY<0)?"-":"";
+        let absDelta = Math.abs(d3.event.deltaY);
+        let value = ( absDelta > 4) ? (absDelta / 3) : absDelta;
+        console.log(d3.event.deltaY, sign + value);
+        slidingBar.scroll(parseInt(sign + value));
     }
 
     this.zoom = function(zoomOut) {

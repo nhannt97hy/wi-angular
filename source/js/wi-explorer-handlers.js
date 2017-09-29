@@ -38,7 +38,7 @@ exports.ImportWellTopButtonClicked = function () {
 
 exports.ReloadProjectButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
-    utils.refreshProjectState(this.wiComponentService, this.wiApiService);
+    utils.refreshProjectState();
 }
 
 exports.CollapseProjectButtonClicked = function () {
