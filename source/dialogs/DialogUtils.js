@@ -1366,7 +1366,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
     });
 };
 
-exports.importLASDialog = function (ModalService, callback) {
+exports.importLASDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
         this.error = null;
@@ -1436,7 +1436,16 @@ exports.importLASDialog = function (ModalService, callback) {
                         wiApiService.postWithFile('/file', payloadParams)
                         .then(function (well) {
                             console.log('well response', well);
-                            return close(well, 500);
+                            if (well) {
+                                utils.refreshProjectState()
+                                    .then(function () {
+                                        close(well, 500);
+                                    })
+                                    .catch(function () {
+                                        self.isDisabled = false;
+                                        utils.error(err);
+                                    });
+                            }
                         })
                         .catch(function (err) {
                             console.log('err', err);
@@ -1454,7 +1463,16 @@ exports.importLASDialog = function (ModalService, callback) {
                             wiApiService.postWithFile('/file', payloadParams)
                             .then(function (well) {
                                 console.log('well response', well);
-                                return close(well, 500);
+                                if (well) {
+                                    utils.refreshProjectState()
+                                        .then(function () {
+                                            close(well, 500);
+                                        })
+                                        .catch(function () {
+                                            self.isDisabled = false;
+                                            utils.error(err);
+                                        });
+                                }
                             })
                             .catch(function (err) {
                                 console.log('err', err);
@@ -1467,7 +1485,16 @@ exports.importLASDialog = function (ModalService, callback) {
                     wiApiService.postWithFile('/file', payloadParams)
                     .then(function (well) {
                         console.log('well response', well);
-                        return close(well, 500);
+                        if (well) {
+                            utils.refreshProjectState()
+                                .then(function () {
+                                    close(well, 500);
+                                })
+                                .catch(function () {
+                                    self.isDisabled = false;
+                                    utils.error(err);
+                                });
+                        }
                     })
                     .catch(function (err) {
                         console.log('err', err);
@@ -1493,7 +1520,7 @@ exports.importLASDialog = function (ModalService, callback) {
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (data) callback(data);
+            if (data) console.log("imported", data);
         });
     });
 };
