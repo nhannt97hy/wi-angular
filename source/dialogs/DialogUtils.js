@@ -5128,20 +5128,28 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
 };
 
 exports.zoneManagerDialog = function (ModalService, item) {
+    const _FNEW = 1;
+    const _FEDIT = 2;
+    const _FDEL = 3;
     function ModalController(close, wiComponentService, wiApiService, $timeout, $scope) {
         let self = this;
         window.zoneMng = this;
+        this._FNEW = _FNEW;
+        this._FEDIT = _FEDIT;
+        this._FDEL = _FDEL;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        var project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = project.children;
+        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = this.project.children;
 
         this.SelectedWell = this.wellArr[0];
         this.zonesetsArr = self.SelectedWell.children.find(function (child) {
             return child.name == 'zonesets';
         }).children;
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
+        
         this.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
 
         switch (item.name) {
@@ -5216,24 +5224,61 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 break;
         }
 
+        buildDisplayZoneArr();
+        
+        // METHOD Section begins
+        function buildDisplayZoneArr() {
+            self.zoneArr.sort(function(z1, z2) {
+                return z1.properties.startDepth > z2.properties.startDepth;
+            });
+        }
+
         this.setClickedRow = function (indexRow) {
             self.SelectedZone = indexRow;
+        }
+        this.onZoneChanged = function(index) {
+            if(typeof self.zoneArr[index].flag === 'undefined'){
+                self.zoneArr[index].flag = _FEDIT;
+            }
         }
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foregroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
-                self.zoneArr[index].properties.foreground = colorStr;
+                self.zoneArr[index].properties.fill.pattern.foreground = colorStr;
+                self.onZoneChanged(index);                
             });
         };
         this.backgroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.background, function (colorStr) {
-                self.zoneArr[index].properties.background = colorStr;
+                self.zoneArr[index].properties.fill.pattern.background = colorStr;
+                self.onZoneChanged(index);
             });
         };
 
         this.onRenameZoneSet = function(){
             utils.renameZoneSet(self.SelectedZoneSet);
         }
+
+        this.refreshZoneSets = function(){
+            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.wellArr = self.project.children;
+            var tmp = self.SelectedWell.id;
+            self.SelectedWell = self.wellArr.find(function(well){
+                return well.id == tmp;
+            })
+            self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                return child.name == 'zonesets';
+            }).children;
+            buildDisplayZoneArr();
+        }
+        this.onAddZoneSet = function(){
+            utils.createZoneSet(self.SelectedWell.id, function () {
+                $timeout(function(){
+                    self.refreshZoneSets();
+                }, 1000);
+            });
+        }
+
         this.onChangeWell = function () {
             self.zonesetsArr = self.SelectedWell.children.find(function (child) {
                 return child.name == 'zonesets';
@@ -5243,8 +5288,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onChangeZoneSet = function () {
-            self.zoneArr = self.SelectedZoneSet ? angular.copy(selfSelectedZoneSet.children) : null;
-            console.log(self.zoneArr);
+            self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+            buildDisplayZoneArr();
         }
 
         this.genColor = function () {
@@ -5255,7 +5300,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.addZone = function (index, top, bottom) {
-            self.zoneArr.splice(index, 0, {
+            let newZone = {
                 name: 'zone',
                 properties: {
                     fill: {
@@ -5268,23 +5313,31 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     startDepth: parseFloat(top.toFixed(2)),
                     endDepth: parseFloat(bottom.toFixed(2)),
                     idZoneSet: self.SelectedZoneSet.id,
-                    name: top.toFixed(2)
-                }
-            })
+                    name: parseInt(top)
+                },
+                flag: _FNEW
+            };
 
+            self.zoneArr.splice(index, 0, newZone);
             self.SelectedZone = self.SelectedZone + 1;
         }
 
         this.onAddAboveButtonClicked = function () {
-            if (self.zoneArr.length) {
+            if (self.zoneArr.length && self.SelectedZone >= 0) {
                 var zone = self.zoneArr[self.SelectedZone];
-                var pre_zone = self.SelectedZone > 0 ? self.zoneArr[self.SelectedZone - 1] : null;
-                var free = 0;
-                if (self.SelectedZone == 0) {
-                    var free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
-                } else {
-                    var free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
+                var pre_zone = null;
 
+                for(let i = self.SelectedZone - 1; i >=0; i--){
+                    if(self.zoneArr[i].flag != _FDEL){
+                        pre_zone = self.zoneArr[i];
+                        i = -1;
+                    }
+                }
+                var free = 0;
+                if (pre_zone) {
+                    free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
+                } else {
+                    free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
                 }
 
                 if (parseInt(free) > 0) {
@@ -5302,14 +5355,21 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onAddBelowButtonClicked = function () {
-            if (self.zoneArr.length) {
+            if (self.zoneArr.length && self.SelectedZone >= 0) {
                 var zone = self.zoneArr[self.SelectedZone];
-                var next_zone = self.SelectedZone < self.zoneArr.length ? self.zoneArr[self.SelectedZone + 1] : null;
+                var next_zone = null;
+
+                for(let i = self.SelectedZone + 1; i < self.zoneArr.length; i++){
+                    if(self.zoneArr[i].flag != _FDEL){
+                        next_zone = self.zoneArr[i];
+                        i = self.zoneArr.length;
+                    }
+                }
                 var free = 0;
-                if (self.SelectedZone == self.zoneArr.length - 1) {
-                    var free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
+                if (next_zone) {
+                    free = next_zone.properties.startDepth - zone.properties.endDepth >= 50 ? 50 : next_zone.properties.startDepth - zone.properties.endDepth;
                 } else {
-                    var free = zone.properties.endDepth - next_zone.properties.startDepth >= 50 ? 50 : zone.properties.endDepth - next_zone.properties.startDepth;
+                    free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
 
                 }
 
@@ -5327,21 +5387,44 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onDeleteButtonClicked = function () {
-            self.zoneArr.splice(self.SelectedZone, 1);
+            if(self.zoneArr[self.SelectedZone].flag != _FNEW){
+                self.zoneArr[self.SelectedZone].flag = _FDEL;
+            }else{
+                self.zoneArr.splice(self.SelectedZone, 1);
+            }
             self.SelectedZone = self.SelectedZone > 0 ? self.SelectedZone - 1 : -1;
         }
 
         this.onClearAllButtonClicked = function () {
-            self.zoneArr.length = 0;
+            self.zoneArr.map(function(z){
+                z.flag = _FDEL;
+            })
             self.SelectedZone = -1;
         }
 
         this.onApplyButtonClicked = function () {
-            //TODO
+            self.zoneArr.forEach(function(z){
+                switch (z.flag) {
+                    case _FDEL:
+                        wiApiService.removeZone(z.id);
+                        break;
+                    
+                    case _FNEW:
+                        wiApiService.createZone(z.properties);
+                        break;
+                    
+                    case _FEDIT:
+                        wiApiService.editZone(z.properties);
+                        break;
+                    
+                    default:
+                        break;
+                }
+            })
         }
 
         this.onOkButtonClicked = function () {
-            //TODO
+            self.onApplyButtonClicked();           
             close(null);
         }
 

@@ -1156,6 +1156,18 @@ let refreshProjectState = function () {
                             return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
                         });
                     });
+                    well.zonesets.sort((a,b)=>{
+                        let nameA = a.name.toUpperCase();
+                        let nameB = b.name.toUpperCase();
+                        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+                    })
+                    well.zonesets.forEach(function(zoneset){
+                        zoneset.zones.sort((a,b)=>{
+                            let nameA = parseInt(a.name);
+                            let nameB = parseInt(b.name);
+                            return nameA > nameB;
+                        })
+                    })
                 });
 
                 wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);

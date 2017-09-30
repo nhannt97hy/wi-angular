@@ -1049,7 +1049,7 @@ Service.prototype.createZone = function (data, callback) {
     let self = this;
     this.post(CREATE_ZONE, data)
         .then(function (returnData) {
-            callback(returnData);
+            if(callback) callback(returnData);
             self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
@@ -1061,7 +1061,7 @@ Service.prototype.editZone = function (data, callback) {
     let self = this;
     this.post(EDIT_ZONE, data)
         .then(function (returnData) {
-            callback();
+            if(callback) callback();
             self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
@@ -1083,7 +1083,7 @@ Service.prototype.removeZone = function (idZone, callback) {
     let self = this;
     this.delete(DELETE_ZONE, { idZone: idZone })
         .then(function (returnData) {
-            callback();
+            if(callback) callback();
             self.getUtils().refreshProjectState();
         })
         .catch(function (err) {
