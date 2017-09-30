@@ -76,6 +76,7 @@ exports.warning = function (warningMessage) {
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
@@ -1120,6 +1121,40 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
+function sortProjectData(ProjectData){
+    ProjectData.wells.sort((a,b)=>{
+        let nameA = a.name.toUpperCase();
+        let nameB = b.name.toUpperCase();
+        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+    });
+    ProjectData.wells.forEach(well=>{
+        well.datasets.sort((a,b)=>{
+            let nameA = a.name.toUpperCase();
+            let nameB = b.name.toUpperCase();
+            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+        });
+        well.datasets.forEach(dataset=>{
+            dataset.curves.sort((a,b)=>{
+                let nameA = a.name.toUpperCase();
+                let nameB = b.name.toUpperCase();
+                return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+            });
+        });
+        well.zonesets.sort((a,b)=>{
+            let nameA = a.name.toUpperCase();
+            let nameB = b.name.toUpperCase();
+            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+        })
+        well.zonesets.forEach(function(zoneset){
+            zoneset.zones.sort((a,b)=>{
+                let nameA = parseInt(a.name);
+                let nameB = parseInt(b.name);
+                return nameA > nameB;
+            })
+        })
+    });
+}
+
 let refreshProjectState = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
@@ -1138,37 +1173,7 @@ let refreshProjectState = function () {
             .then(function (projectRefresh) {
                 console.log("Refresh");
                 console.log(projectRefresh);
-                projectRefresh.wells.sort((a,b)=>{
-                    let nameA = a.name.toUpperCase();
-                    let nameB = b.name.toUpperCase();
-                    return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                });
-                projectRefresh.wells.forEach(well=>{
-                    well.datasets.sort((a,b)=>{
-                        let nameA = a.name.toUpperCase();
-                        let nameB = b.name.toUpperCase();
-                        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                    });
-                    well.datasets.forEach(dataset=>{
-                        dataset.curves.sort((a,b)=>{
-                            let nameA = a.name.toUpperCase();
-                            let nameB = b.name.toUpperCase();
-                            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                        });
-                    });
-                    well.zonesets.sort((a,b)=>{
-                        let nameA = a.name.toUpperCase();
-                        let nameB = b.name.toUpperCase();
-                        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                    })
-                    well.zonesets.forEach(function(zoneset){
-                        zoneset.zones.sort((a,b)=>{
-                            let nameA = parseInt(a.name);
-                            let nameB = parseInt(b.name);
-                            return nameA > nameB;
-                        })
-                    })
-                });
+                sortProjectData(projectRefresh);
 
                 wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
                 wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
