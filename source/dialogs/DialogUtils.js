@@ -3077,13 +3077,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.shadingChanged.push(shadingChangedItem);
             console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions, self.shadingChanged);
         }
-        /*this.shadingArr.forEach(function(index, item){
-            if(!item.idLeftLine){
-                if(item.type == 'left') item.idLeftLine = -1;
-                if(item.type == 'right') item.idLeftLine = -2;
-                if(item.type == 'custom') item.idLeftLine = -3;
-            }
-        })*/
         this.validate = function(index) {
             if(self.shadingArr[index].idLeftLine == self.shadingArr[index].idRightLine) {
                 DialogUtils.errorMessageDialog(ModalService, "leftCurve and rightCurve cannot be the same!");
@@ -4136,6 +4129,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         let props = wiD3CrossplotCtrl.crossplotModel.properties;
+
+        this.selectedCurveX = null;
+        this.selectedCurveY = null;
+        this.selectedCurveZ = null;
+        this.selectedZoneSet = null;
+
         this.pointSet = wiD3CrossplotCtrl.pointSet;
         // this.pointSet = new Object();
         // DEBUG
@@ -4158,6 +4157,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 })
             });     
         }
+        if(this.pointSet.idCurveZ) {
+            console.log("idCurveZ", this.pointSet.idCurveZ);
+            wiApiService.scaleCurve(this.pointSet.idCurveZ, function(scaleZ) {
+                self.pointSet.scaleMin = (findCurveById(self.pointSet.idCurveZ).properties.idFamily == null)? scaleX.minScale:self.pointSet.scaleMin;
+                self.pointSet.scaleMax = (findCurveById(self.pointSet.idCurveZ).properties.idFamily == null)? scaleX.maxScale:self.pointSet.scaleMax;
+            })
+        }
         this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
@@ -4166,10 +4172,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.datasetsInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
 
-        this.selectedZoneSet = null;
         this.selectedZone = self.pointSet.activeZone ? self.pointSet.activeZone : 'All';
-        this.selectedCurveX = null;
-        this.selectedCurveY = null;
+        
 
         this.well.children.forEach(function (child, i) {
             if (child.type == 'dataset') self.datasetsInWell.push(child);
@@ -4189,6 +4193,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             }
                             if(d.id == self.pointSet.idCurveY){
                                 self.selectedCurveY = self.pointSet.idCurveY;
+                                // self.pointSet.idCurveY = self.selectedCurveY;
+                            }
+                            if(d.id == self.pointSet.idCurveZ){
+                                self.selectedCurveZ = self.pointSet.idCurveZ;
                                 // self.pointSet.idCurveY = self.selectedCurveY;
                             }
                         }
@@ -4274,6 +4282,23 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             });
         }
 
+        this.onselectedCurveZChange = function () {
+            if (self.selectedCurveZ) {
+                self.pointSet.idCurveZ = self.selectedCurveZ;
+            }
+            wiApiService.scaleCurve(self.selectedCurveZ, function (scaleObj) {
+                $timeout(function () {
+                    let curveZ = findCurveById(self.selectedCurveZ);
+                    if (curveZ.properties.idFamily == null) {
+                        self.pointSet.scaleMin = scaleObj.minScale;
+                        self.pointSet.scaleMax = scaleObj.maxScale;
+                    } else {
+                        self.pointSet.scaleMin = curveZ.properties.minScale;
+                        self.pointSet.scaleMax = curveZ.properties.maxScale;
+                    }
+                })
+            });
+        }
         this.onZoneSetChange = function () {
             if(self.selectedZoneSet){
                 self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
@@ -4311,29 +4336,29 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
                     if (pointSet.idCurveZ) {
                         wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
-                            pointSet.curveZ = graph.buildCurve({ idCurve: pointSet.idCurveZ }, zCurveData);
-                            // TODO
+                            pointSet.curveZ = graph.buildCurve({ idCurve: pointSet.idCurveZ }, zCurveData, self.well.properties);
                         })
-                    } else {
-                        pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData);
-                        pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData);
-                        pointSet.idCrossPlot = wiCrossplotCtrl.id;
-                        pointSet.activeZone = self.selectedZone;
-                        console.log(pointSet);
-                        props.pointSet = pointSet;
-                        let scalesObj = angular.copy(self.pointSet);                        
-                        scalesObj.curveX = undefined;
-                        scalesObj.curveY = undefined;
-                        wiApiService.getCrossplot(pointSet.idCrossPlot, function (crossplot) {
-                            if (crossplot.pointsets && crossplot.pointsets.length) {
-                                scalesObj.idPointSet = crossplot.pointsets[0].idPointSet;
-                                wiApiService.editPointSet(scalesObj, function(res){
-                                    self.viCrossplot.setProperties(props);
-                                    self.viCrossplot.doPlot();
-                                });
-                            }
-                        });
                     }
+                    pointSet.curveX = graph.buildCurve({ idCurve: pointSet.idCurveX }, xCurveData, self.well.properties);
+                    pointSet.curveY = graph.buildCurve({ idCurve: pointSet.idCurveY }, yCurveData, self.well.properties);
+                    pointSet.idCrossPlot = wiCrossplotCtrl.id;
+                    pointSet.activeZone = self.selectedZone;
+                    console.log(pointSet);
+                    props.pointSet = pointSet;
+                    let scalesObj = angular.copy(self.pointSet);                        
+                    scalesObj.curveX = undefined;
+                    scalesObj.curveY = undefined;
+                    scalesObj.curveZ = undefined;
+                    wiApiService.getCrossplot(pointSet.idCrossPlot, function (crossplot) {
+                        if (crossplot.pointsets && crossplot.pointsets.length) {
+                            scalesObj.idPointSet = crossplot.pointsets[0].idPointSet;
+                            wiApiService.editPointSet(scalesObj, function(res){
+                                self.viCrossplot.setProperties(props);
+                                self.viCrossplot.doPlot();
+                            });
+                        }
+                    });
+                    
                     if (callback) {
                         callback();
                     }
@@ -4518,8 +4543,10 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
                 if (self.polygons[index].change == change.unchanged) {
                     self.polygons[index].change = change.updated;
                 }
-                self.polygons[index].lineStyle = drawingPolygon.lineStyle;
-                self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+                if (drawingPolygon) {
+                    self.polygons[index].lineStyle = drawingPolygon.lineStyle;
+                    self.polygons[index].points = JSON.stringify(drawingPolygon.points);
+                }
             });
         }
         this.polygonLineColor = function (index) {
@@ -4529,18 +4556,18 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         }
         function sendPolygonsAPIs() {
             const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
-            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged).map(unchangedPolygon => {
+            const unchangedPolygons = self.polygons.filter(polygon => polygon.change == change.unchanged && polygon.points).map(unchangedPolygon => {
                 unchangedPolygon.points = JSON.parse(unchangedPolygon.points);
                 return unchangedPolygon;
             });
-            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created).map(createdPolygon => {
+            const createdPolygons = self.polygons.filter((polygon) => polygon.change == change.created && polygon.points).map(createdPolygon => {
                 createdPolygon.points = JSON.parse(createdPolygon.points);
                 createdPolygon.idCrossPlot = idCrossPlot;
                 createdPolygon.change = change.unchanged;
                 wiApiService.createPolygon(createdPolygon);
                 return createdPolygon;
             });
-            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated).map(updatedPolygon => {
+            const updatedPolygons = self.polygons.filter((polygon) => polygon.change == change.updated && polygon.points).map(updatedPolygon => {
                 updatedPolygon.points = JSON.parse(updatedPolygon.points);
                 updatedPolygon.idCrossPlot = idCrossPlot;
                 updatedPolygon.change = change.unchanged;
@@ -4954,7 +4981,6 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
-        
         let change = {
             unchanged: 0,
             created: 1,
