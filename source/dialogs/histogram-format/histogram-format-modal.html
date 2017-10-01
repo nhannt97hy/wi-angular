@@ -63,8 +63,16 @@
                                             <div class='form-group'>
                                                 <label class="col-sm-3">Curve name</label>
                                                 <div class="col-sm-3">
-                                                    <select class="form-control wi-form-control" ng-model="wiModal.SelectedCurve" ng-change="wiModal.onSelectCurveChange()" ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
-                                                    </select>
+                                                    <!-- <select class="form-control wi-form-control" ng-model="wiModal.SelectedCurve" ng-change="wiModal.onSelectCurveChange()" ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
+                                                    </select> -->
+                                                    <ui-select ng-model="wiModal.SelectedCurve"
+                                                        ng-change="wiModal.onSelectCurveChange()">
+                                                        <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
+                                                        <ui-select-choices group-by="'datasetName'"
+                                                        repeat='curve in wiModal.curvesArr | filter: $select.search'>
+                                                        <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                                    </ui-select-choices>
+                                                    </ui-select>
                                                 </div>
                                                 <label class="col-sm-3">Number of Divisions</label>
                                                 <div class="col-sm-3">

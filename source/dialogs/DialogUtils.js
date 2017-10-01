@@ -4676,7 +4676,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     child.children.forEach(function (item) {
                         if (item.type == 'curve') {
                             var d = item;
-                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                            d.datasetName = child.properties.name;
                             self.curvesArr.push(d);
                             if (d.id == self.histogramProps.idCurve) {
                                 self.SelectedCurve = d;
@@ -5254,9 +5254,11 @@ exports.zoneManagerDialog = function (ModalService, item) {
         
         // METHOD Section begins
         function buildDisplayZoneArr() {
-            self.zoneArr.sort(function(z1, z2) {
-                return z1.properties.startDepth > z2.properties.startDepth;
-            });
+            if(self.zoneArr && self.zoneArr.length){
+                self.zoneArr.sort(function(z1, z2) {
+                    return z1.properties.startDepth > z2.properties.startDepth;
+                });
+            }
         }
 
         this.setClickedRow = function (indexRow) {
