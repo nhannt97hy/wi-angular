@@ -94,7 +94,7 @@ exports.newProjectDialog = function (ModalService, callback) {
                 })
                 .catch(function (err) {
                     self.disabled = false;
-                    return self.error = err;
+                    return self.error = "Connection error!";
                 })
                 .then(function () {
                     $scope.$apply();
@@ -139,7 +139,7 @@ exports.openProjectDialog = function (ModalService, callback) {
                 self.projects = projects;
             })
             .catch(function (err) {
-                return self.error = err;
+                return self.error = "Connection error!";
             })
             .then(function () {
                 $scope.$apply();
