@@ -88,9 +88,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addLogTrack = function(trackTitle, callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
+            const logTracks = self.getTracks().filter(track => track.type == 'log-track');
             wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(ret) {
                 wiApiService.infoTrack(ret.idTrack, function(logTrack) {
-                    logTrack.title = trackTitle || 'Track ' + logTrack.idTrack;
+                    logTrack.title = trackTitle || 'Track ' + (logTracks.length + 1);
                     let viTrack = self.pushLogTrack(logTrack);
                     wiApiService.editTrack(logTrack);
                     if (!callback) return;
@@ -186,7 +187,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addZoneTrack = function(callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, null, function (zoneTrackProperties) {
+            const zoneTracks = self.getTracks().filter(track => track.type == 'zone-track');
+            const defaultZoneTrackProp = {
+                showTitle: true,
+                title: "Zone Track " + (zoneTracks.length + 1),
+                topJustification: "center",
+                trackColor: '#ffffff',
+                width: Utils.inchToPixel(1),
+                parameterSet: null
+            }
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultZoneTrackProp, function (zoneTrackProperties) {
                 let dataRequest = {
                     idPlot: self.logPlotCtrl.id,
                     title: zoneTrackProperties.title,

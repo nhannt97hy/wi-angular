@@ -3489,7 +3489,6 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
             showTitle: true,
             title: "New Zone",
             topJustification: "center",
-            bottomJustification: "center",
             trackColor: '#ffffff',
             width: utils.inchToPixel(2),
             parameterSet: null
@@ -3499,7 +3498,6 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.isShowTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
-        this.bottomJustification = props.bottomJustification.toLowerCase();
         this.trackColor = props.trackColor;
         this.width = props.width;
         this.parameterSet = props.parameterSet;
@@ -3535,7 +3533,6 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 showTitle: self.isShowTitle,
                 title: self.title,
                 topJustification: self.topJustification,
-                bottomJustification: self.bottomJustification,
                 trackColor: self.trackColor,
                 width: self.width,
                 parameterSet: self.parameterSet,
