@@ -380,7 +380,13 @@ function histogramToTreeConfig(histogram) {
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,
-        // zones: histogram.zoneset != null ? histogram.zoneset.zones : null
+        referenceTopDepth: histogram.referenceTopDepth,
+        referenceBottomDepth: histogram.referenceBottomDepth,
+        referenceScale: histogram.referenceScale,
+        referenceVertLineNumber: histogram.referenceVertLineNumber,
+        referenceDisplay: histogram.referenceDisplay,
+        referenceShowDepthGrid: histogram.referenceShowDepthGrid,
+        reference_curves: histogram.reference_curves
     };
     histogramModel.data = {
         childExpanded: false,

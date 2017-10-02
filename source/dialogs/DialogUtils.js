@@ -4643,11 +4643,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
-
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.ref_Curves_Arr = angular.copy(histogramModel.properties.reference_curves);
+        this.SelectedRefCurve = 0;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
@@ -4750,6 +4751,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     break;
             }
         }
+
+        this.defaultDepthButtonClick = function(){
+            self.histogramProps.referenceTopDepth = getTopFromWell();
+            self.histogramProps.referenceBottomDepth = getBottomFromWell();
+        }
+
         this.chooseChartColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
                 self.histogramProps.color = colorStr;
@@ -5315,6 +5322,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.onChangeZoneSet = function () {
             self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
             buildDisplayZoneArr();
+            self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
         }
 
         this.genColor = function () {
@@ -5428,28 +5436,36 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onApplyButtonClicked = function () {
-            self.zoneArr.forEach(function(z){
-                switch (z.flag) {
+            console.log('Apply');
+            for (let i = self.zoneArr.length - 1; i >= 0; i--){
+                switch (self.zoneArr[i].flag) {
                     case _FDEL:
-                        wiApiService.removeZone(z.id);
+                        wiApiService.removeZone(self.zoneArr[i].id);
+                        self.zoneArr.splice(i, 1);
+                        console.log('removeZone');
                         break;
                     
                     case _FNEW:
-                        wiApiService.createZone(z.properties);
+                        delete self.zoneArr[i].flag;
+                        wiApiService.createZone(self.zoneArr[i].properties);
+                        console.log('createZone');
                         break;
                     
                     case _FEDIT:
-                        wiApiService.editZone(z.properties);
+                        delete self.zoneArr[i].flag;
+                        wiApiService.editZone(self.zoneArr[i].properties);
+                        console.log('editZone');
                         break;
                     
                     default:
                         break;
                 }
-            })
+            }
         }
 
         this.onOkButtonClicked = function () {
-            self.onApplyButtonClicked();           
+            self.onApplyButtonClicked();
+            console.log('Ok');           
             close(null);
         }
 
