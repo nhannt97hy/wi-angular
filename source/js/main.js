@@ -23,6 +23,7 @@ let wiList = require('./wi-list');
 let wiContextMenu = require('./wi-context-menu');
 let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
+let wiReferenceWindow = require('./wi-reference-window');
 
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -114,6 +115,7 @@ let app = angular.module('wiapp',
         wiCanvasRect.name,
         wiZone.name,
         wiContainer.name,
+        wiReferenceWindow.name,
         wiUser.name, 
         
         'angularModalService',

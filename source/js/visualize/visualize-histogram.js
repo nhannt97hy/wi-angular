@@ -571,7 +571,7 @@ Histogram.prototype.init = function(domElem) {
         self.drawPending = true;
         self.doPlot();
     });
-    window.VISHISTOGRAM = this;
+    //window.VISHISTOGRAM = this;
 }
 
 Histogram.prototype.getViewportY = function() {

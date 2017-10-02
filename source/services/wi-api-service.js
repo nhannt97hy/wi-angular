@@ -14,9 +14,9 @@ __USERINFO.token = window.localStorage.getItem('token');
 let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
-const BASE_URL = 'http://sflow.me';
-//const BASE_URL = 'http://localhost:3000';
-// const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://sflow.me';
+// const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://dev.sflow.me';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -680,6 +680,14 @@ Service.prototype.scaleCurve = function (idCurve, callback) {
     this.post(SCALE_CURVE, dataRequest, callback);
 }
 
+Service.prototype.scaleCurvePromise = function (idCurve) {
+    const self = this;
+    try {
+        return this.post(SCALE_CURVE, {idCurve: idCurve});
+    } catch (err) {
+        self.getUtils().error(err);        
+    }
+}
 Service.prototype.asyncScaleCurve = async function (idCurve) {
     const self = this;
     try {
@@ -694,7 +702,7 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
     } catch (err) {
         self.getUtils().error(err);        
     }
- }
+}
 
 Service.prototype.listFamily = async function (callback) {
     const self = this;

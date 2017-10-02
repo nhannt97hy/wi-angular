@@ -3,7 +3,6 @@ const moduleName = 'wi-explorer';
 
 function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
-
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);        
     this.$onInit = function () {
@@ -26,6 +25,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
             let backupConfig = self.treeConfig;
             let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            let ScrollTmp = window.localStorage.getItem('scrollTmp');
             self.treeConfig = [utils.projectToTreeConfig(projectRefresh)];
             console.log('backupConfig', backupConfig);
             console.log('config', self.treeConfig);
@@ -33,6 +33,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 self.backupConfig(backupConfig, self.treeConfig);
             });
             utils.putListFamily();            
+            $timeout(function(){
+                document.getElementById('treeContent').scrollTo(0,ScrollTmp);
+            },100);
         });
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT1, function () {
             let backupConfig = self.treeConfig;
@@ -251,7 +254,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "zone-management-16x16",
                         handler: function () {
                             let wellModel = utils.getSelectedNode();
-                            console.log(wellModel);
                             utils.openZonemanager(wellModel);
                         }
                     }, {
@@ -394,7 +396,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zonesetsModel = utils.getSelectedNode();
-                            console.log(zonesetsModel);
                             utils.openZonemanager(zonesetsModel);
                         }
                     }, {
@@ -425,7 +426,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zonesetModel = utils.getSelectedNode();
-                            console.log(zonesetModel);
                             utils.openZonemanager(zonesetModel);
                         }
                     }, {
@@ -447,7 +447,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zoneModel = utils.getSelectedNode();
-                            console.log(zoneModel);
                             utils.openZonemanager(zoneModel);
                         }
                     }, {

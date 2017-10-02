@@ -63,8 +63,16 @@
                                             <div class='form-group'>
                                                 <label class="col-sm-3">Curve name</label>
                                                 <div class="col-sm-3">
-                                                    <select class="form-control wi-form-control" ng-model="wiModal.SelectedCurve" ng-change="wiModal.onSelectCurveChange()" ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
-                                                    </select>
+                                                    <!-- <select class="form-control wi-form-control" ng-model="wiModal.SelectedCurve" ng-change="wiModal.onSelectCurveChange()" ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
+                                                    </select> -->
+                                                    <ui-select ng-model="wiModal.SelectedCurve"
+                                                        ng-change="wiModal.onSelectCurveChange()">
+                                                        <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
+                                                        <ui-select-choices group-by="'datasetName'"
+                                                        repeat='curve in wiModal.curvesArr | filter: $select.search'>
+                                                        <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                                    </ui-select-choices>
+                                                    </ui-select>
                                                 </div>
                                                 <label class="col-sm-3">Number of Divisions</label>
                                                 <div class="col-sm-3">
@@ -223,7 +231,7 @@
                                             <div class="form-group">
                                                 <label class="col-sm-3">Width(inch)</label>
                                                 <div class="col-sm-3">
-                                                    <input type="number" ng-model="wi.histogramProps.hardCopyWidth">
+                                                    <input type="number" ng-model="wi.histogramProps.hardCopyWidth" class="form-control wi-form-control">
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <input type="checkbox">
@@ -233,7 +241,7 @@
                                             <div class="form-group">
                                                 <label class="col-sm-3">Height(inch)</label>
                                                 <div class="col-sm-3">
-                                                    <input type="number" ng-model="wiModal.histogramProps.hardCopyHeight">
+                                                    <input type="number" ng-model="wiModal.histogramProps.hardCopyHeight" class="form-control wi-form-control">
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <input type="checkbox">
@@ -247,10 +255,91 @@
                         </div>
                     </wi-tab>
                     <wi-tab heading='Refrence Window'>
-                        <div class="container-fluid">
-                            <form class='form-horizontal'>
-
-                            </form>
+                        <div class="padding-1em container-fluid">
+                            <div class="row">
+                                <form class='col-sm-12 form-horizontal form-condensed'>
+                                    <div class="form-group">
+                                        <label class="col-sm-2">Top Depth (m)</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" class="form-control wi-form-control" step="0.01">
+                                        </div>
+                                        <label class="col-sm-3">Bottom Depth (m)</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" class="form-control wi-form-control" step="0.01">
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <button type="button" class="btn btn-default width-100-percent text-ellipsis">Depth Default</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2">Scale 1</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" list='scaleOpt' class="form-control wi-form-control">
+                                            <datalist id="scaleOpt">
+                                                <option value="1">1</option>
+                                                <option value="20">20</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="200">200</option>
+                                                <option value="300">300</option>
+                                                <option value="500">500</option>
+                                                <option value="1000">1000</option>
+                                                <option value="2000">2000</option>
+                                                <option value="3000">3000</option>
+                                                <option value="5000">5000</option>
+                                            </datalist>
+                                        </div>
+                                        <label class="col-sm-3">Vert. Line Number</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" class="form-control wi-form-control">
+                                        </div>
+                                        <div class="col-sm-3">
+                                                <input type="checkbox">
+                                                <label>Display</label>
+                                            </div>
+                                    </div>
+                                    <div class="form-group padding-1em">
+                                            <input type="checkbox">
+                                            <label>Show Depth Grid Line</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-11">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Curve Name</th>
+                                                        <th>Left</th>
+                                                        <th>Right</th>
+                                                        <th>Vis.</th>
+                                                        <th>Log</th>
+                                                        <th>Color</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-sm-1 padding-0">
+                                            <button type="button" class="btn btn-default">
+                                                <i class="delete-16x16"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-default">
+                                                <i class="plus-16x16"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </wi-tab>
                 </wi-tabset>

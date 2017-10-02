@@ -23,6 +23,10 @@ function debounce(func, wait, immediate) {
     };
 };
 
+function getDialogUtils() {
+    const wiComponentService = __GLOBAL.wiComponentService;
+    let w
+}
 exports.objcpy = function (destObj, sourceObj) {
     if (destObj) {
         for (let attr in sourceObj) {
@@ -61,7 +65,9 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
-exports.error = function (errorMessage) {
+exports.error = errorMsg;
+
+function errorMsg(errorMessage) {
     errorMessage = errorMessage || "Something's wrong!";
     let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
@@ -76,6 +82,9 @@ exports.warning = function (warningMessage) {
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    console.log('unsorted',projectData);
+    sortProjectData(projectData);
+    console.log('sorted',projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
@@ -590,7 +599,7 @@ exports.projectToTreeConfig = function (project) {
     };
     projectModel.data = {
         childExpanded: false,
-        icon: 'wells-16x16',
+        icon: 'well-insight-16x16',
         label: project.name,
         selected: false
     };
@@ -749,9 +758,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
-            let idCurve = ui.helper.attr('data');
+            let idCurve = parseInt(ui.helper.attr('data'));
             if (wiD3Ctrl && track) {
-                apiService.post(apiService.CREATE_LINE, {
+                if (wiD3Ctrl.verifyDroppedIdCurve(idCurve)) {
+                    apiService.post(apiService.CREATE_LINE, {
                         idTrack: track.id,
                         idCurve: idCurve
                     }, function (line) {
@@ -760,10 +770,17 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
                     });
+                }
+                else {
+                    errorMsg("Cannot drop curve from another well");
+                }
                 return;
             }
-            if (wiSlidingBarCtrl) {
+            if (wiSlidingBarCtrl && wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve)) {
                 wiSlidingBarCtrl.createPreview(idCurve);
+            }
+            else {
+                errorMsg("Cannot drop curve from another well");
             }
         },
         appendTo: 'body',
@@ -1086,6 +1103,13 @@ exports.findWellByHistogram = function (idHistogram) {
     return path[1];
 }
 
+exports.findWellByCurve = function(idCurve) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'curve' && node.id == idCurve;
+    }) || [];
+    return path[1];
+}
+
 exports.findHistogramModelById = function(idHistogram){
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
@@ -1110,9 +1134,45 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
+function sortProjectData(projectData){
+    if (!projectData.wells) return;
+    projectData.wells.sort((a,b)=>{
+        let nameA = a.name.toUpperCase();
+        let nameB = b.name.toUpperCase();
+        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+    });
+    projectData.wells.forEach(well=>{
+        well.datasets.sort((a,b)=>{
+            let nameA = a.name.toUpperCase();
+            let nameB = b.name.toUpperCase();
+            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+        });
+        well.datasets.forEach(dataset=>{
+            dataset.curves.sort((a,b)=>{
+                let nameA = a.name.toUpperCase();
+                let nameB = b.name.toUpperCase();
+                return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+            });
+        });
+        well.zonesets.sort((a,b)=>{
+            let nameA = a.name.toUpperCase();
+            let nameB = b.name.toUpperCase();
+            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+        })
+        well.zonesets.forEach(function(zoneset){
+            zoneset.zones.sort((a,b)=>{
+                let nameA = parseInt(a.name);
+                let nameB = parseInt(b.name);
+                return nameA > nameB;
+            })
+        })
+    });
+}
+
 let refreshProjectState = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    let dom = document.getElementById('treeContent');
 
     if (!project) return;
 
@@ -1121,34 +1181,17 @@ let refreshProjectState = function () {
             idProject: project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
-        wiApiService.post(wiApiService.GET_PROJECT, payload,
-            function (projectRefresh) {
-                console.log("Refresh");
-                console.log(projectRefresh);
-                projectRefresh.wells.sort((a,b)=>{
-                    let nameA = a.name.toUpperCase();
-                    let nameB = b.name.toUpperCase();
-                    return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                });
-                projectRefresh.wells.forEach(well=>{
-                    well.datasets.sort((a,b)=>{
-                        let nameA = a.name.toUpperCase();
-                        let nameB = b.name.toUpperCase();
-                        return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                    });
-                    well.datasets.forEach(dataset=>{
-                        dataset.curves.sort((a,b)=>{
-                            let nameA = a.name.toUpperCase();
-                            let nameB = b.name.toUpperCase();
-                            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-                        });
-                    });
-                });
+        let ScrollTmp = dom.scrollTop;
+        window.localStorage.setItem('scrollTmp', ScrollTmp);
+        wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
+            console.log("Refresh");
+            console.log(projectRefresh);
+            sortProjectData(projectRefresh);
 
-                wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
-                wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
-                resolve();
-            });
+            wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
+            wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
+            resolve();
+        });
     });
 }
 exports.refreshProjectState = refreshProjectState;
@@ -1578,55 +1621,47 @@ function openCrossplotTab(crossplotModel, callback) {
             console.log("crosplot", crossplot);
             if (!pointSet.idCurveX || !pointSet.idCurveY) return;
 
-            wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
-                // let curveX;
-                wiApiService.infoCurve(pointSet.idCurveX, function (curveX) {
-                    // curveX = curveX;
-                    wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
-                        // let curveY;
-                        wiApiService.infoCurve(pointSet.idCurveY, function (curveY) {
-                            // curveY = curveY;
+            wiApiService.dataCurve(pointSet.idCurveX, function (dataX) {
+                wiApiService.dataCurve(pointSet.idCurveY, function (dataY) {
+                    function createViCrossplot() {
+                        let curveX = getModel('curve', pointSet.idCurveX);
+                        let curveY = getModel('curve', pointSet.idCurveY);
 
-                            function createViCrossplot() {
-                                wiD3CrossplotCtrl.pointSet = pointSet;
-                                wiD3CrossplotCtrl.linkModels();
-                                crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
+                        wiD3CrossplotCtrl.pointSet = pointSet;
+                        wiD3CrossplotCtrl.linkModels();
+                        crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
 
-                                if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
-                                    for (let polygon of crossplot.polygons) {
-                                        try {
-                                            polygon.points = JSON.parse(polygon.points);
-                                        } catch (error) {}
-                                    }
-                                }
-                                if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
-                                    for (let regLine of crossplot.regressionlines) {
-                                        try {
-                                            regLine.lineStyle = JSON.parse(regLine.lineStyle);
-                                        } catch(e) {
-                                            console.log(e);
-                                        }
-                                    }
-                                }
-                                let viCurveX = graph.buildCurve( curveX, xCurveData, wellProps.properties);
-                                let viCurveY = graph.buildCurve( curveY, yCurveData, wellProps.properties);
-
-                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                        if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
+                            for (let polygon of crossplot.polygons) {
+                                try {
+                                    polygon.points = JSON.parse(polygon.points);
+                                } catch (error) {}
                             }
-
-                            if (pointSet.idCurveZ) {
-                                wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
-                                    wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
-                                        let viCurveZ = graph.buildCurve( curveZ, zCurveData, wellProps.properties);
-                                        pointSet.curveZ = viCurveZ;
-                                        createViCrossplot();
-                                    })
-                                })
-                            } else {
-                                createViCrossplot();
+                        }
+                        if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
+                            for (let regLine of crossplot.regressionlines) {
+                                try {
+                                    regLine.lineStyle = JSON.parse(regLine.lineStyle);
+                                } catch(e) {
+                                    console.log(e);
+                                }
                             }
-                        })
-                    })
+                        }
+                        let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
+                        let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
+
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                    }
+
+                    if (pointSet.idCurveZ) {
+                        wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
+                            let viCurveZ = graph.buildCurve( curveZ, curveZ.data, wellProps.properties);
+                            pointSet.curveZ = viCurveZ;
+                            createViCrossplot();
+                        });
+                    } else {
+                        createViCrossplot();
+                    }
                 })
             })
         }
@@ -1763,15 +1798,15 @@ function getListFamily() {
 exports.getListFamily = getListFamily;
 
 exports.openZonemanager = function(item){
-    let wiComponentService = __GLOBAL.wiComponentService;        
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);    
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
 }
-exports.getScaleCurveIfNotFamily = function(idCurve) {
+/*exports.getScaleCurveIfNotFamily = function(idCurve) {
     __GLOBAL.wiApiService.scaleCurve(idCurve, function(rangeObj) {
         console.log("rangeObj", rangeObj);
     })
-}
+}*/
 
 exports.renameZoneSet = function(zoneSetModel){
     let wiComponentService = __GLOBAL.wiComponentService;
