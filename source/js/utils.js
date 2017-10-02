@@ -1515,6 +1515,7 @@ function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
+    let wiComponentService = __GLOBAL.wiComponentService;
     let newProperties = angular.copy(properties);
     newProperties[item.key] = item.value;
     if (JSON.stringify(newProperties) === JSON.stringify(properties)) return;
@@ -1530,8 +1531,15 @@ function editProperty(item) {
             });
             break;
         case 'curve':
+            if (item.key == 'idFamily') {
+                newProperties.unit = getListFamily().find(family => family.idFamily == newProperties.idFamily).unit;
+                selectedNode.properties.idFamily = newProperties.idFamily;
+                selectedNode.properties.unit = newProperties.unit;
+            }
             wiApiService.editCurve(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    wiComponentService.emit('update-properties', selectedNode);
+                }).catch();
             });
             break;
         case 'zoneset':
