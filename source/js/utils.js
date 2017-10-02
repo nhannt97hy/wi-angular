@@ -76,7 +76,9 @@ exports.warning = function (warningMessage) {
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    console.log('unsorted',projectData);
     sortProjectData(projectData);
+    console.log('sorted',projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
@@ -1121,13 +1123,14 @@ exports.trackProperties = function (ModalService, wiComponentService) {
     DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
 };
 
-function sortProjectData(ProjectData){
-    ProjectData.wells.sort((a,b)=>{
+function sortProjectData(projectData){
+    if (!projectData.wells) return;
+    projectData.wells.sort((a,b)=>{
         let nameA = a.name.toUpperCase();
         let nameB = b.name.toUpperCase();
         return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
     });
-    ProjectData.wells.forEach(well=>{
+    projectData.wells.forEach(well=>{
         well.datasets.sort((a,b)=>{
             let nameA = a.name.toUpperCase();
             let nameB = b.name.toUpperCase();
