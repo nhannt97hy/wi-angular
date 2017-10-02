@@ -611,6 +611,14 @@ Service.prototype.scaleCurve = function (idCurve, callback) {
         });
 }
 
+Service.prototype.scaleCurvePromise = function (idCurve) {
+    const self = this;
+    try {
+        return this.post(SCALE_CURVE, {idCurve: idCurve});
+    } catch (err) {
+        self.getUtils().error(err);        
+    }
+}
 Service.prototype.asyncScaleCurve = async function (idCurve) {
     const self = this;
     try {
@@ -618,7 +626,7 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
     } catch (err) {
         self.getUtils().error(err);        
     }
- }
+}
 
 Service.prototype.listFamily = async function (callback) {
     const self = this;

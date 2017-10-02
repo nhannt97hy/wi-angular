@@ -11,8 +11,11 @@
 						<label class="control-label col-sm-3" for="name">{{wiModal.inputName}}:</label>							
 						<div class="col-sm-9">
 							<input ng-if="!wiModal.type" type="text" class="form-control"
-								ng-model="wiModal.input" ng-click="wiModal.error = null"
-								wi-enter="wiModal.close(wiModal.input)" required autofocus>
+								ng-model="wiModal.input"
+                                wi-enter="wiModal.close(wiModal.input)" 
+                                ng-click="wiModal.error = null"
+                                ng-blur="wiModal.onBlur();"
+								required autofocus>
 							<select ng-if="wiModal.type == 'select'"
 											ng-model="wiModal.input"
 											ng-options="option.value as option.label for option in wiModal.options"></select>
