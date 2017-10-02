@@ -9,12 +9,14 @@ function isFunction(functionToCheck) {
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    let _well = null;
+
     let curveLoading = false;
     this.visHistogram = {};
-    let graph = wiComponentService.getComponent('GRAPH');
+    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     self.histogramModel = null;
     self.curveModel = null;
-    let zoneCtrl = null;
+    let zoneCtrl = null, refWindCtrl;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.statistics = {
@@ -41,8 +43,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return self.name.replace('histogram', "").replace("D3Area", "");
     }
 
+    this.getWell = getWell;
+    function getWell() {
+        if (!_well) {
+            _well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
+        }
+        return _well;
+    }
     function getHistogramTitle() {
-        let well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
+        let well = getWell();
         if (!self.histogramModel.properties.idCurve) return "Empty";
         let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
         let datasetId = curve.properties.idDataset;
@@ -108,12 +117,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.refreshHistogram();
         });
     }
-    this.getZoneAreaName = function () {
+    this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
     this.getZoneCtrl = function () {
-        if (!zoneCtrl) zoneCtrl =  wiComponentService.getComponent(self.getZoneAreaName());
+        if (!zoneCtrl) zoneCtrl =  wiComponentService.getComponent(self.getWiZoneCtrlName());
         return zoneCtrl;
+    }
+    this.getWiRefWindCtrlName = function () {
+        return self.name + "RefWind";
+    }
+    this.getWiRefWindCtrl = function () {
+        if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
+        return refWindCtrl;
     }
     this.onReady = function () {
         self.linkModels();
@@ -148,7 +164,80 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl);
+        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function() {
+            self.linkModels();
+            self.getZoneCtrl().zoneUpdate();
+
+            // Update reference windows TODO !!!
+            let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
+            let well = getWell();
+            let minY = parseFloat(well.properties.topDepth);
+            let maxY = parseFloat(well.properties.bottomDepth);
+            let stepY = parseFloat(well.properties.step);
+
+            let config = {
+                //minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
+                //maxX: infoCurve.LineProperty ? infoCurve.LineProperty.maxScale : 200,
+                minY: minY,
+                maxY: maxY,
+                yStep: stepY,
+                offsetY: minY
+                //line: {
+                //    color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
+                //}
+            }
+
+            var refWindCtrl = self.getWiRefWindCtrl();
+            if (!histogramProperties.referenceCurves || !histogramProperties.referenceCurves.length) {
+                refWindCtrl.removeAllRefCurves();
+            }
+            else {
+                for (let i = refWindCtrl._viCurves.length - 1; i >= 0; i--) {
+                    if (!histogramProperties.referenceCurves.find(
+                            function(curve) { 
+                                return refWindCtrl._viCurves[i].id == curve.idCurve;
+                            }
+                        ) 
+                    ) {
+                        refWindCtrl._viCurves[i].destroy();
+                        refWindCtrl._viCurves.splice(i, 1);
+                    }
+                }
+                for (let refCurve of histogramProperties.referenceCurves) {
+                    if (!refWindCtrl._viCurves.find(function(vc) { return vc.id == refCurve.idCurve; })) {
+                        let curveModel = utils.getModel('curve', refCurve.idCurve);
+                        if (curveModel.idFamily) {
+                            let family = familyArray.find(function(f) {
+                                return f.idFamily == curveModel.idFamily;
+                            });
+                            config.minX = family.minScale;
+                            config.maxX = family.maxScale;
+                            let dash = null;
+                            try {
+                                dash = JSON.parse(family.lineStyle);
+                            }
+                            catch (err) {
+                                dash = [0];
+                            }
+                            config.line = { 
+                                color: family.lineColor,
+                                width: family.lineWidth,
+                                dash: dash
+                            }
+                        }
+                        else {
+                            config.minX = curveModel.minScale;
+                            config.maxX = curveModel.maxScale;
+                            config.line = { 
+                                color: 'black'
+                            }
+                        }
+
+                        refWindCtrl.addRefCurve(refCurve.idCurve, config);
+                    }
+                }
+            }
+        });
     }
 
     this.showContextMenu = function (event) {
@@ -290,7 +379,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.createVisualizeHistogram = function (histogramModel) {
         var elem = document.getElementById(self.histogramAreaId);
 
-        var well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
+        var well = getWell();
         self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step), 
                 parseFloat(well.properties.topDepth), 
                 parseFloat(well.properties.bottomDepth), elem);

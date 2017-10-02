@@ -230,6 +230,9 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         this.input = promptConfig.input;
         this.type = promptConfig.type;
         this.options = promptConfig.options;
+        this.onBlur = function(args) {
+            console.log('onBlur', args);
+        }
         this.onOkButtonClicked = function () {
             close(self.input);            
         }
@@ -243,8 +246,13 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
+        modal.element.modal('show');
         $(modal.element[0].children[0]).draggable();
+        window.TESTMODAL = modal.element;
+        console.log('====+++====', $(modal.element[0]), $(modal.element[0]).find('input'));
+        setTimeout(function() {
+            $(modal.element[0]).find('input').focus();
+        }, 800);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -4774,20 +4782,24 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(){
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                wiD3Ctrl.linkModels();
-                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
             })
         }
 
         this.onOKButtonClicked = function () {
             console.log("on OK clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(){
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                wiD3Ctrl.linkModels();
-                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            wiApiService.editHistogram(histogramModel.properties, function(returnData){
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
                 $timeout(function(){
                     close(histogramModel.properties);
                 },500);

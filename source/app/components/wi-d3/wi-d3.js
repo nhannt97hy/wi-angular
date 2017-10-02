@@ -277,6 +277,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!config.idZoneSet) return;
         let zone = track.addZone(config);
         track.plotZone(zone);
+        track.rearrangeHeaders();
         track.onZoneMouseDown(zone, function() {
             if (track.mode == 'SplitZone') {
                 _splitZone(track, zone);
@@ -1015,7 +1016,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             {
                 name: "AutoZoneNamed",
                 label: "Auto Zone Named",
-                handler: function () {}
+                handler: function () {
+                    _currentTrack.autoName().forEach(function(zone) {
+                        wiApiService.editZone(zone.getProperties(), function () { });
+                    });
+                    _currentTrack.doPlot(true);
+                }
             }, {
                 name: "ZoneProperties",
                 label: "Zone Properties",
@@ -1265,7 +1271,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             idWell: idWell,
                             topDepth: wellProps.topDepth,
                             bottomDepth: wellProps.bottomDepth,
-                            pointSet: pointSet                            
+                            pointSet: pointSet
                         });
                     })
                 });

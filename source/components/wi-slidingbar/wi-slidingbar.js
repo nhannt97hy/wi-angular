@@ -6,7 +6,7 @@ const MIN_RANGE = 1;
 function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
     let _offsetTop = 0;
-    let _scaleView = false;
+    //let _scaleView = false;
     let _viCurve = null;
     let parentHeight = 0;
     this.tinyWindow = {
@@ -18,6 +18,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         top: 0,
         range: MIN_RANGE
     };
+    let logPlotCtrl = null;
 
     function createPreview(idCurve) {
         console.log(idCurve);
@@ -26,7 +27,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             return;
         }
         let logPlotName = self.name.replace('Slidingbar', '');
-        let logPlotCtrl = wiComponentService.getComponent(logPlotName);
+        logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let logplotId = logPlotCtrl.id;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
@@ -63,15 +64,15 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     function createPreviewWithDefault() {
         let logPlotName = self.name.replace('Slidingbar', '');
-        let logPlotCtrl = wiComponentService.getComponent(logPlotName);
+        logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let logplotId = logPlotCtrl.id;
         let well = utils.findWellByLogplot(logplotId);
         if (!well) return;
         let firstCurve = well.children[0].children[0];
 
-        createPreview1(firstCurve.properties.idCurve);
-
+        createPreview(firstCurve.properties.idCurve);
+        /*
         utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function (err, data) {
             let config = {
                 minY: parseFloat(well.properties.topDepth),
@@ -87,6 +88,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             _viCurve = graph.createCurve(config, data, d3.select(self.contentId));
             _viCurve.doPlot();
         });
+        */
     }
 
     function update(ui) {
@@ -131,6 +133,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     this.onReady = function () {
+        let logPlotName = self.name.replace('Slidingbar', '');
+        logPlotCtrl = wiComponentService.getComponent(logPlotName);
         parentHeight = parseInt($(self.contentId).height());
         //self.parentHeight = parentHeight;
         let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
@@ -171,6 +175,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         new ResizeSensor($(self.contentId), function () {
             let currentParentHeight = parseInt($(self.contentId).height());
             if (currentParentHeight !== parentHeight) self.refreshHandler();
+            _viCurve.doPlot();
         });
 
         $(self.contentId).on("mousewheel", onMouseWheel);
@@ -265,8 +270,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     this.scaleView = function() {
-        if ( _scaleView ) return;
-        _scaleView = true;
+        if ( logPlotCtrl.cropDisplay ) return;
+        //if ( _scaleView ) return;
+        logPlotCtrl.cropDisplay = true;
         //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
         let scale = currentParentHeight / self.tinyWindow.height;
@@ -280,7 +286,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.resetView = function() {
-        _scaleView = false;
+        //_scaleView = false;
+        logPlotCtrl.cropDisplay = false;
         let defaultParentHeight = $(self.contentId).parent().parent().height();
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);

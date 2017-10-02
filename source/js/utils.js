@@ -1788,11 +1788,11 @@ exports.openZonemanager = function(item){
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
 }
-exports.getScaleCurveIfNotFamily = function(idCurve) {
+/*exports.getScaleCurveIfNotFamily = function(idCurve) {
     __GLOBAL.wiApiService.scaleCurve(idCurve, function(rangeObj) {
         console.log("rangeObj", rangeObj);
     })
-}
+}*/
 
 exports.renameZoneSet = function(zoneSetModel){
     let wiComponentService = __GLOBAL.wiComponentService;
