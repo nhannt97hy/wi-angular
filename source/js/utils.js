@@ -728,12 +728,8 @@ exports.getCurveData = getCurveData;
 function getCurveData(apiService, idCurve, callback) {
     apiService.post(apiService.DATA_CURVE, {
             idCurve
-        })
-        .then(function (curve) {
+        }, function (curve) {
             callback(null, curve);
-        })
-        .catch(function (err) {
-            callback(err, null);
         });
 }
 
@@ -758,17 +754,11 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 apiService.post(apiService.CREATE_LINE, {
                         idTrack: track.id,
                         idCurve: idCurve
-                    })
-                    .then(function (line) {
+                    }, function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
-                    })
-                    .catch(function (err) {
-                        console.error(err);
-                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                        return;
                     });
                 return;
             }
@@ -808,7 +798,11 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         option: 'blank-plot',
         referenceCurve: firstCurve.properties.idCurve
     };
-    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
+    return new Promise(function(resolve, reject){
+        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
+            resolve(response);
+        });
+    });
 };
 
 
@@ -845,8 +839,8 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.getPalettes(function(paletteList) {
-        wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
-            .then(function (plot) {
+        wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id},
+            function (plot) {
                 if (logplotModel.properties.referenceCurve) {
                     slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
                 }
@@ -959,10 +953,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     aTrack = tracks.shift();
                 }
                 if (callback) callback();
-            })
-            .catch(function (err) {
-                console.error(err);
-                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
             });
     });
 };
@@ -1131,8 +1121,8 @@ let refreshProjectState = function () {
             idProject: project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
-        wiApiService.post(wiApiService.GET_PROJECT, payload)
-            .then(function (projectRefresh) {
+        wiApiService.post(wiApiService.GET_PROJECT, payload,
+            function (projectRefresh) {
                 console.log("Refresh");
                 console.log(projectRefresh);
                 projectRefresh.wells.sort((a,b)=>{
@@ -1158,10 +1148,6 @@ let refreshProjectState = function () {
                 wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
                 wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
                 resolve();
-            })
-            .catch(function (err) {
-                console.error('refreshProjectState', err);
-                reject();
             });
     });
 }
@@ -1544,7 +1530,11 @@ exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, cr
         name: crossplotName,
         option: 'blank-plot'
     };
-    return wiApiService.post(route, dataRequest);
+    return new Promise(function(resolve, reject){
+        wiApiService.post(route, dataRequest, function(response){
+            resolve(response);
+        });
+    });
 };
 
 exports.createPointSet = function (pointSetData, callback) {
@@ -1652,7 +1642,11 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
         idWell: selectedNode.properties.idWell,
         name: histogramName
     };
-    return wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest);
+    return new Promise(function(resolve, reject){
+        wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest, function(response){
+            resolve(response);
+        });
+    });
 };
 
 function openHistogramTab(histogramModel, callback) {
