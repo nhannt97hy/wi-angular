@@ -189,8 +189,10 @@ exports.CropDisplayButtonClicked = function () {
 exports.RangeSpecificButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let wiLogplot = this.wiLogplot;
+    let timeoutFunc = this.$timeout;
     DialogUtils.rangeSpecificDialog(this.ModalService, this.wiLogplot, function () {
-        console.log("RangeFrom");
+        timeoutFunc(function() {wiLogplot.getSlidingbarCtrl().scaleView();}, 1000);
     });
 }
 

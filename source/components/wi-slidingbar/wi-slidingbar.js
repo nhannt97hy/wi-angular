@@ -6,6 +6,7 @@ const MIN_RANGE = 1;
 function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
     let _offsetTop = 0;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     //let _scaleView = false;
     let _viCurve = null;
     let parentHeight = 0;
@@ -29,7 +30,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let logPlotName = self.name.replace('Slidingbar', '');
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let logplotId = logPlotCtrl.id;
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         let well = utils.findWellByLogplot(logplotId);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
@@ -58,6 +58,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 _viCurve.doPlot();
             });
         })
+    }
+
+    this.verifyDroppedIdCurve = function(idCurve) {
+        let well1 = utils.findWellByLogplot(logPlotCtrl.id);
+        let well2 = utils.findWellByCurve(idCurve) || {};
+        return (well1.id && well2.id && (well1.id == well2.id));
     }
 
     this.createPreview = createPreview;

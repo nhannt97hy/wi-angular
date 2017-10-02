@@ -13,7 +13,7 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="from">From: </label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control"
+                            <input type="number" class="form-control" step="0.0001"
                                    ng-model="wiModal.depthRange[0]"
                                    required>
                         </div>
@@ -21,7 +21,7 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="to">To:</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control"
+                            <input type="number" class="form-control" step="0.0001"
                                    ng-model="wiModal.depthRange[1]"
                                    wi-enter="wiModal.onOkButtonClicked()"
                                    required>

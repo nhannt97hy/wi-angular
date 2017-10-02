@@ -23,6 +23,10 @@ function debounce(func, wait, immediate) {
     };
 };
 
+function getDialogUtils() {
+    const wiComponentService = __GLOBAL.wiComponentService;
+    let w
+}
 exports.objcpy = function (destObj, sourceObj) {
     if (destObj) {
         for (let attr in sourceObj) {
@@ -61,7 +65,9 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
-exports.error = function (errorMessage) {
+exports.error = errorMsg;
+
+function errorMsg(errorMessage) {
     errorMessage = errorMessage || "Something's wrong!";
     let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
@@ -756,27 +762,35 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
-            let idCurve = ui.helper.attr('data');
+            let idCurve = parseInt(ui.helper.attr('data'));
             if (wiD3Ctrl && track) {
-                apiService.post(apiService.CREATE_LINE, {
-                        idTrack: track.id,
-                        idCurve: idCurve
-                    })
-                    .then(function (line) {
-                        let lineModel = lineToTreeConfig(line);
-                        getCurveData(apiService, idCurve, function (err, data) {
-                            if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                if (wiD3Ctrl.verifyDroppedIdCurve(idCurve)) {
+                    apiService.post(apiService.CREATE_LINE, {
+                            idTrack: track.id,
+                            idCurve: idCurve
+                        })
+                        .then(function (line) {
+                            let lineModel = lineToTreeConfig(line);
+                            getCurveData(apiService, idCurve, function (err, data) {
+                                if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                            });
+                        })
+                        .catch(function (err) {
+                            console.error(err);
+                            wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                            return;
                         });
-                    })
-                    .catch(function (err) {
-                        console.error(err);
-                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                        return;
-                    });
+                }
+                else {
+                    errorMsg("Cannot drop curve from another well");
+                }
                 return;
             }
-            if (wiSlidingBarCtrl) {
+            if (wiSlidingBarCtrl && wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve)) {
                 wiSlidingBarCtrl.createPreview(idCurve);
+            }
+            else {
+                errorMsg("Cannot drop curve from another well");
             }
         },
         appendTo: 'body',
@@ -1095,6 +1109,13 @@ exports.findWellByCrossplot = function (idCrossplot) {
 exports.findWellByHistogram = function (idHistogram) {
     var path = getSelectedPath(function (node) {
         return node.type == 'histogram' && node.id == idHistogram;
+    }) || [];
+    return path[1];
+}
+
+exports.findWellByCurve = function(idCurve) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'curve' && node.id == idCurve;
     }) || [];
     return path[1];
 }

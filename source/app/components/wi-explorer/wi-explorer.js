@@ -3,7 +3,6 @@ const moduleName = 'wi-explorer';
 
 function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
-
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);        
     this.$onInit = function () {
