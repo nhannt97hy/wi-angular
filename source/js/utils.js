@@ -23,6 +23,10 @@ function debounce(func, wait, immediate) {
     };
 };
 
+function getDialogUtils() {
+    const wiComponentService = __GLOBAL.wiComponentService;
+    let w
+}
 exports.objcpy = function (destObj, sourceObj) {
     if (destObj) {
         for (let attr in sourceObj) {
@@ -61,7 +65,9 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
-exports.error = function (errorMessage) {
+exports.error = errorMsg;
+
+function errorMsg(errorMessage) {
     errorMessage = errorMessage || "Something's wrong!";
     let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
@@ -737,12 +743,8 @@ exports.getCurveData = getCurveData;
 function getCurveData(apiService, idCurve, callback) {
     apiService.post(apiService.DATA_CURVE, {
             idCurve
-        })
-        .then(function (curve) {
+        }, function (curve) {
             callback(null, curve);
-        })
-        .catch(function (err) {
-            callback(err, null);
         });
 }
 
@@ -762,27 +764,29 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
-            let idCurve = ui.helper.attr('data');
+            let idCurve = parseInt(ui.helper.attr('data'));
             if (wiD3Ctrl && track) {
-                apiService.post(apiService.CREATE_LINE, {
+                if (wiD3Ctrl.verifyDroppedIdCurve(idCurve)) {
+                    apiService.post(apiService.CREATE_LINE, {
                         idTrack: track.id,
                         idCurve: idCurve
-                    })
-                    .then(function (line) {
+                    }, function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
-                    })
-                    .catch(function (err) {
-                        console.error(err);
-                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                        return;
                     });
+                }
+                else {
+                    errorMsg("Cannot drop curve from another well");
+                }
                 return;
             }
-            if (wiSlidingBarCtrl) {
+            if (wiSlidingBarCtrl && wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve)) {
                 wiSlidingBarCtrl.createPreview(idCurve);
+            }
+            else {
+                errorMsg("Cannot drop curve from another well");
             }
         },
         appendTo: 'body',
@@ -817,7 +821,11 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         option: 'blank-plot',
         referenceCurve: firstCurve.properties.idCurve
     };
-    return wiApiService.post(wiApiService.CREATE_PLOT, dataRequest);
+    return new Promise(function(resolve, reject){
+        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
+            resolve(response);
+        });
+    });
 };
 
 
@@ -854,8 +862,8 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
     wiApiService.getPalettes(function(paletteList) {
-        wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id})
-            .then(function (plot) {
+        wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id},
+            function (plot) {
                 if (logplotModel.properties.referenceCurve) {
                     slidingBarCtrl.createPreview(logplotModel.properties.referenceCurve);
                 }
@@ -968,10 +976,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     aTrack = tracks.shift();
                 }
                 if (callback) callback();
-            })
-            .catch(function (err) {
-                console.error(err);
-                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
             });
     });
 };
@@ -1105,6 +1109,13 @@ exports.findWellByHistogram = function (idHistogram) {
     return path[1];
 }
 
+exports.findWellByCurve = function(idCurve) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'curve' && node.id == idCurve;
+    }) || [];
+    return path[1];
+}
+
 exports.findHistogramModelById = function(idHistogram){
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
@@ -1178,20 +1189,15 @@ let refreshProjectState = function () {
         let wiApiService = __GLOBAL.wiApiService;
         let ScrollTmp = dom.scrollTop;
         window.localStorage.setItem('scrollTmp', ScrollTmp);
-        wiApiService.post(wiApiService.GET_PROJECT, payload)
-            .then(function (projectRefresh) {
-                console.log("Refresh");
-                console.log(projectRefresh);
-                sortProjectData(projectRefresh);
+        wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
+            console.log("Refresh");
+            console.log(projectRefresh);
+            sortProjectData(projectRefresh);
 
-                wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
-                wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
-                resolve();
-            })
-            .catch(function (err) {
-                console.error('refreshProjectState', err);
-                reject();
-            });
+            wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
+            wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
+            resolve();
+        });
     });
 }
 exports.refreshProjectState = refreshProjectState;
@@ -1573,7 +1579,11 @@ exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, cr
         name: crossplotName,
         option: 'blank-plot'
     };
-    return wiApiService.post(route, dataRequest);
+    return new Promise(function(resolve, reject){
+        wiApiService.post(route, dataRequest, function(response){
+            resolve(response);
+        });
+    });
 };
 
 exports.createPointSet = function (pointSetData, callback) {
@@ -1673,7 +1683,11 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
         idWell: selectedNode.properties.idWell,
         name: histogramName
     };
-    return wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest);
+    return new Promise(function(resolve, reject){
+        wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest, function(response){
+            resolve(response);
+        });
+    });
 };
 
 function openHistogramTab(histogramModel, callback) {
@@ -1794,11 +1808,11 @@ exports.openZonemanager = function(item){
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
 }
-exports.getScaleCurveIfNotFamily = function(idCurve) {
+/*exports.getScaleCurveIfNotFamily = function(idCurve) {
     __GLOBAL.wiApiService.scaleCurve(idCurve, function(rangeObj) {
         console.log("rangeObj", rangeObj);
     })
-}
+}*/
 
 exports.renameZoneSet = function(zoneSetModel){
     let wiComponentService = __GLOBAL.wiComponentService;

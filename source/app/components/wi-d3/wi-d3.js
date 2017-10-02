@@ -56,7 +56,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.getDepthRange = function() {
-        return _depthRange;
+        return _depthRange.map( function(d){ return Math.round(d * 10000)/10000; } );
     }
 
     this.getMaxOrderNum = function() {
@@ -277,6 +277,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!config.idZoneSet) return;
         let zone = track.addZone(config);
         track.plotZone(zone);
+        track.rearrangeHeaders();
         track.onZoneMouseDown(zone, function() {
             if (track.mode == 'SplitZone') {
                 _splitZone(track, zone);
@@ -1015,7 +1016,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             {
                 name: "AutoZoneNamed",
                 label: "Auto Zone Named",
-                handler: function () {}
+                handler: function () {
+                    _currentTrack.autoName().forEach(function(zone) {
+                        wiApiService.editZone(zone.getProperties(), function () { });
+                    });
+                    _currentTrack.doPlot(true);
+                }
             }, {
                 name: "ZoneProperties",
                 label: "Zone Properties",
@@ -1265,7 +1271,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             idWell: idWell,
                             topDepth: wellProps.topDepth,
                             bottomDepth: wellProps.bottomDepth,
-                            pointSet: pointSet                            
+                            pointSet: pointSet
                         });
                     })
                 });
@@ -1344,7 +1350,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let logPlotName = self.name.replace("D3Area", "");
         return wiComponentService.getComponent(logPlotName);
     }
-    /* Private End */
 
     function openTrackPropertiesDialog() {
         if (!_currentTrack) return;
@@ -1376,7 +1381,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         }
     }
-
+    /* Private End */
+    this.verifyDroppedIdCurve = function(idCurve) {
+        let well1 = _getWellProps();
+        let well2 = Utils.findWellByCurve(idCurve) || {};
+        return (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell));
+    }
     this.openProptertiesDialog = function () {
         if (_currentTrack.isDepthTrack()) {
             openTrackPropertiesDialog();

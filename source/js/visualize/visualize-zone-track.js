@@ -181,7 +181,10 @@ ZoneTrack.prototype.plotDrawing = function(drawing) {
     drawing.maxY = windowY[1];
     if (drawing == this.currentDrawing) {
         drawing.doPlot(true);
-        drawing.raise();
+        if (drawing.isZone())
+            drawing.svgGroup.raise();
+        else
+            drawing.raise();
     }
     else {
         drawing.doPlot(false);
@@ -254,6 +257,9 @@ ZoneTrack.prototype.adjustZonesOnZoneChange = function(zone) {
 ZoneTrack.prototype.autoName = function() {
     let zones = [];
     this.getZones()
+        .filter(function(zone) {
+            return !isNaN(zone.name);
+        })
         .sort(function(a, b){
             return a.startDepth - b.startDepth;
         })

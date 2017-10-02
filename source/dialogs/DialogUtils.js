@@ -68,7 +68,7 @@ exports.authenticationDialog = function (ModalService, callback) {
 
 
 exports.newProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.disabled = false;
         this.error = null;
@@ -86,18 +86,13 @@ exports.newProjectDialog = function (ModalService, callback) {
             console.log("This data: ", data);
 
 
-            wiApiService.post('/project/new', data)
-                .then(function (response) {
+            wiApiService.createProject(data, function (response) {
                     console.log('response', response);
-
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    self.disabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+                    
+                    close(response, 500);
+                    /*$timeout(function(){
+                        $scope.$apply();
+                    })*/
                 });
         };
 
@@ -125,7 +120,7 @@ exports.newProjectDialog = function (ModalService, callback) {
 };
 
 exports.openProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.error = null;
         this.projects = [];
@@ -133,16 +128,11 @@ exports.openProjectDialog = function (ModalService, callback) {
         this.disabled = false;
         this.selectedProject = {};
 
-        wiApiService.post('/project/list', null)
-            .then(function (projects) {
-
+        wiApiService.getProjectList(null, function (projects) {
                 self.projects = projects;
-            })
-            .catch(function (err) {
-                return self.error = err;
-            })
-            .then(function () {
-                $scope.$apply();
+                /*$timeout(function(){
+                    $scope.$apply();
+                });*/
             });
         console.log('response', this.projects);
 
@@ -162,16 +152,11 @@ exports.openProjectDialog = function (ModalService, callback) {
                 idProject: self.idProject
             };
 
-            wiApiService.post('/project/fullinfo', data)
-                .then(function (response) {
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    self.disabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+            wiApiService.getProject(data, function (response) {
+                    close(response, 500);
+                    $timeout(function(){
+                        $scope.$apply();
+                    });
                 });
         };
 
@@ -230,6 +215,9 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         this.input = promptConfig.input;
         this.type = promptConfig.type;
         this.options = promptConfig.options;
+        this.onBlur = function(args) {
+            console.log('onBlur', args);
+        }
         this.onOkButtonClicked = function () {
             close(self.input);            
         }
@@ -243,8 +231,13 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
+        modal.element.modal('show');
         $(modal.element[0].children[0]).draggable();
+        window.TESTMODAL = modal.element;
+        console.log('====+++====', $(modal.element[0]), $(modal.element[0]).find('input'));
+        setTimeout(function() {
+            $(modal.element[0]).find('input').focus();
+        }, 800);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -466,7 +459,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
 };
 // add new well
 exports.addNewDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService, wiComponentService) {
+    function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
         this.isDisabled = false;
 
@@ -485,19 +478,13 @@ exports.addNewDialog = function (ModalService, callback) {
             };
             console.log("data new well: ", data);
 
-            wiApiService.post('/project/well/new', data)
-                .then(function (response) {
+            wiApiService.createWell(data, function (response) {
                     console.log('response', response);
+                    close(response, 500);
 
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    console.error('new well', err);
-                    self.isDisabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+                    $timeout(function(){
+                        $scope.$apply();
+                    });
                 });
         };
 
@@ -3480,7 +3467,7 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
 };
 
 exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneTrackProperties, callback) {
-    function ModalController($scope, wiComponentService, wiApiService, close) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
@@ -3505,9 +3492,11 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
 
         function refreshZoneSets() {
             wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
-                $scope.$apply(function () {
-                    self.zoneSets = zoneSets;
-                })
+                $timeout(function(){
+                    $scope.$apply(function () {
+                        self.zoneSets = zoneSets;
+                    });    
+                });
             });
         }
         refreshZoneSets();
@@ -4781,20 +4770,24 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(){
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                wiD3Ctrl.linkModels();
-                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
             })
         }
 
         this.onOKButtonClicked = function () {
             console.log("on OK clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(){
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                wiD3Ctrl.linkModels();
-                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            wiApiService.editHistogram(histogramModel.properties, function(returnData){
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
                 $timeout(function(){
                     close(histogramModel.properties);
                 },500);
