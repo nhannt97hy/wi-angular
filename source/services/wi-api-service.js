@@ -29,7 +29,10 @@ const UPLOAD_IMAGE = '/image-upload'
 
 const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
+const CREATE_PROJECT = '/project/new';
+const GET_PROJECT_LIST = '/project/list';
 
+const CREATE_WELL = '/project/well/new';
 const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
 
@@ -139,6 +142,8 @@ function Service(baseUrl, $http, wiComponentService, Upload) {
     this.$http = $http;
     this.Upload = Upload;
     this.wiComponentService = wiComponentService;
+
+    this.wiApiWorker = new wiApiWorker($http);
 }
 
 Service.prototype.GET_PROJECT = GET_PROJECT; //'/project/fullinfo';
@@ -184,6 +189,135 @@ Service.prototype.getUtils = function () {
     // console.log(utils);
     return utils;
 }
+
+/**
+* Construct wiApiWorker to handle numbers of request to server each time
+*/
+const WORKER_REQUEST_DELAY = 300; // 300ms
+const MAXIMUM_REQUEST = 4;
+var wiApiWorker = function($http){
+    var self = this;
+    this.jobQueue = [];
+    this.isFree = true;
+    this.enqueueJob = function(newJob){
+        this.jobQueue.push(newJob);
+        this.working();
+    }
+    this.currentRequestWorking = 0;
+    this.$http = $http;
+    this.dequeueJob = function(){
+        return this.jobQueue.shift();
+    }
+    this.working = function(){
+        if(self.isFree && self.jobQueue.length){
+            self.startWorking();
+            var job = self.dequeueJob();
+            var now = new Date();
+            // Uncomment this line below to debug
+            // console.log('worker is now working with: ', job, "at: " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + ":" + now.getMilliseconds());
+            // console.log('worker: current Request: ', self.currentRequestWorking);
+            self.$http(job.request)
+                .then(
+                    function (response) {
+                    if (response.data && response.data.code === 200) {
+                        if(!job.callback) {
+                            self.stopWorking();
+                            return;
+                        } 
+                        job.callback(response.data.content);
+                    }else if (response.data && response.data.code === 401){
+                        window.localStorage.removeItem('token');
+                        window.localStorage.removeItem('username');
+                        window.localStorage.removeItem('password');
+                        window.localStorage.removeItem('rememberAuth');
+                        //location.reload();
+                    }else if (response.data) {
+                        return new Promise(function(resolve, reject){
+                            reject(response.data.reason)
+                        });
+                    } else {
+                        return new Promise(function(resolve, reject){
+                            reject('Something went wrong!');
+                        });
+                    }
+                    self.stopWorking();
+                })
+                .catch(function(err){
+                    self.isFree = true;
+                    console.log(err);
+                    //self.getUtils().error(err);
+                });
+
+        } else if( self.jobQueue.length) {
+            setTimeout(function(){
+                // console.log('worker: current Queued jobs: ', self.jobQueue);
+                /*
+                let now = new Date();
+                console.log('worker continue working after ', WORKER_REQUEST_DELAY, 'ms');
+                console.log('worker now: ', now.getHours()+" : "+now.getMinutes()+" : "+now.getSeconds()+" : "+now.getMilliseconds());
+                */
+                self.working();
+            }, WORKER_REQUEST_DELAY); // delay 300ms before continue do request to server.
+        } else {
+            setTimeout(function(){
+                // console.log('worker continue working after', WORKER_REQUEST_DELAY, 'ms');
+                self.working();
+            }, WORKER_REQUEST_DELAY); 
+        }
+    }
+}
+wiApiWorker.prototype.startWorking = function(){
+    let self = this;
+    self.currentRequestWorking ++;
+    if(self.currentRequestWorking >= MAXIMUM_REQUEST){
+        self.isFree = false;
+    }
+}
+wiApiWorker.prototype.stopWorking = function(){
+    let self = this;
+    self.currentRequestWorking --;
+    if(self.currentRequestWorking < MAXIMUM_REQUEST){
+        self.isFree = true;    
+    }
+}
+
+Service.prototype.post = function (route, payload, callback) {
+    var self = this;
+    let requestObj = {
+        url: self.baseUrl + route,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
+            },
+            data: payload
+    };
+    let jobObj = {
+        request: requestObj,
+        callback: callback
+    };
+    self.wiApiWorker.enqueueJob(jobObj);
+}
+Service.prototype.delete = function(route, payload, callback){
+    var self = this;
+    let requestObj = {
+        url: self.baseUrl + route,
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer',
+            'Authorization': __USERINFO.token
+        },
+        data: payload
+    };
+    let jobObj = {
+        request: requestObj,
+        callback: callback
+    };
+    self.wiApiWorker.enqueueJob(jobObj);
+}
+/*
 Service.prototype.post = function (route, payload) {
     var self = this;
     return new Promise(function (resolve, reject) {
@@ -253,30 +387,18 @@ Service.prototype.delete = function (route, payload) {
         );
     });
 }
+*/
 
 Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
-    this.post(LOGIN, data).then(function (ret) {
-            callback(ret);
-        })
-        .catch(function (err) {
-            console.error(err);
-            alert("Login error: " + err);
-        });
+    this.post(LOGIN, data, callback);
 }
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     console.log(data);
-    this.post(REGISTER, data)
-        .then(function (ret) {
-            callback(ret);
-        })
-        .catch(function (err) {
-            console.error(err);
-            alert('Error', err);
-        })
+    this.post(REGISTER, data, callback);
 }
 
 Service.prototype.postWithFile = function (route, dataPayload) {
@@ -439,15 +561,29 @@ Service.prototype.uploadFile = function (data, callback) {
         });*/
 }
 
+Service.prototype.createProject = function(infoProject, callback){
+    console.log('infoProject', infoProject);
+    this.post(CREATE_PROJECT, infoProject, callback);
+}
+
+Service.prototype.getProject = function(infoProject, callback){
+    console.log('infoProject', infoProject);
+    this.post(GET_PROJECT, infoProject, callback);
+}
+
+Service.prototype.getProjectList = function(infoProject, callback){
+    this.post(GET_PROJECT_LIST, infoProject, callback);
+}
+
+Service.prototype.createWell = function(infoWell, callback){
+    console.log('infoWell', infoWell);
+    this.post(CREATE_WELL, infoWell, callback);
+}
+
 Service.prototype.editWell = function (infoWell, callback) {
     let self = this;
     console.log('infoWell', infoWell);
-    this.post(EDIT_WELL, infoWell)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_WELL, infoWell, callback);
 }
 
 Service.prototype.removeWell = function (idWell, callback) {
@@ -455,31 +591,16 @@ Service.prototype.removeWell = function (idWell, callback) {
     let dataRequest = {
         idWell: idWell
     }
-    this.delete(DELETE_WELL, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_WELL, dataRequest, callback);
 }
 Service.prototype.createDataset = function (infoDataset, callback) {
     let self = this;
     let dataRequest = infoDataset;
-    this.post(CREATE_DATASET, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_DATASET, dataRequest, callback);
 }
 Service.prototype.editDataset = function (infoDataset, callback) {
     let self = this;
-    this.post(EDIT_DATASET, infoDataset)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_DATASET, infoDataset, callback);
 }
 
 Service.prototype.removeDataset = function (idDataset, callback) {
@@ -487,80 +608,40 @@ Service.prototype.removeDataset = function (idDataset, callback) {
     let dataRequest = {
         idDataset: idDataset
     }
-    this.delete(DELETE_DATASET, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_DATASET, dataRequest, callback);
 }
 //hoangbd start
 Service.prototype.copyCurve = function (copyData, callback) {
     let self = this;
-    this.post(COPY_CURVE, copyData).then(function (rs) {
-        callback(rs);
-    }).catch(function (err) {
-        self.getUtils().error(err);
-    });
+    this.post(COPY_CURVE, copyData, callback);
 }
 Service.prototype.cutCurve = function (cutData, callback) {
     let self = this;
-    this.post(CUT_CURVE, cutData).then(function (rs) {
-        callback(rs);
-    }).catch(function (err) {
-        self.getUtils().error(err);
-    });
+    this.post(CUT_CURVE, cutData, callback);
 }
 //end hoangbd
 Service.prototype.createCurve = function (curveInfo, callback) {
     let self = this;
     console.log(curveInfo);
     if (!curveInfo.initValue) curveInfo.initValue = '-2810';
-    this.post(CREATE_CURVE, curveInfo)
-        .then(function (curve) {
-            console.log("curve created", curve);
-            callback(curve);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        })
+    this.post(CREATE_CURVE, curveInfo, callback);
 }
 
 Service.prototype.editCurve = function (curveInfo, callback) {
     if (!curveInfo.initValue) curveInfo.initValue = '-2810';
     let self = this;
     console.log(curveInfo);
-    this.post(EDIT_CURVE, curveInfo)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        })
+    this.post(EDIT_CURVE, curveInfo, callback);
 }
 
 Service.prototype.infoCurve = function (idCurve, callback) {
     let self = this;
-    this.post(INFO_CURVE, {idCurve: idCurve})
-        .then(function (res) {
-            callback(res)
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        })
+    this.post(INFO_CURVE, {idCurve: idCurve}, callback);
 }
 
 Service.prototype.dataCurve = function (idCurve, callback) {
     let self = this;
-    this.post(DATA_CURVE, {idCurve: idCurve})
-        .then(function (res) {
-            callback(res)
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        })
+    this.post(DATA_CURVE, {idCurve: idCurve}, callback);
 }
 
 Service.prototype.exportCurve = function (idCurve, callback) {
@@ -588,14 +669,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
 
 Service.prototype.removeCurve = function (idCurve, callback) {
     let self = this;
-    this.delete(DELETE_CURVE, {idCurve: idCurve})
-        .then(function (res) {
-            callback(res)
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        })
+    this.delete(DELETE_CURVE, {idCurve: idCurve}, callback);
 }
 
 Service.prototype.scaleCurve = function (idCurve, callback) {
@@ -603,12 +677,7 @@ Service.prototype.scaleCurve = function (idCurve, callback) {
     let dataRequest = {
         idCurve: idCurve
     }
-    this.post(SCALE_CURVE, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(SCALE_CURVE, dataRequest, callback);
 }
 
 Service.prototype.scaleCurvePromise = function (idCurve) {
@@ -622,7 +691,14 @@ Service.prototype.scaleCurvePromise = function (idCurve) {
 Service.prototype.asyncScaleCurve = async function (idCurve) {
     const self = this;
     try {
-        return await this.post(SCALE_CURVE, {idCurve: idCurve});
+        var scale = {};
+        await new Promise(function(resolve,reject){
+            self.post(SCALE_CURVE, {idCurve: idCurve}, function(response){
+                scale = response;
+                resolve(scale);                
+            }); 
+        });
+        return scale;
     } catch (err) {
         self.getUtils().error(err);        
     }
@@ -630,34 +706,17 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
 
 Service.prototype.listFamily = async function (callback) {
     const self = this;
-    this.post(FAMILY_LIST)
-        .then(function (res) {
-            if (callback) callback(res);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        })
+    this.post(FAMILY_LIST, {}, callback);
 }
 
 Service.prototype.editLogplot = function (infoLogplot, callback) {
     if (!infoLogplot.option) infoLogplot.option = '';
     let self = this;
-    this.post(EDIT_PLOT, infoLogplot)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_PLOT, infoLogplot, callback);
 }
 Service.prototype.removeLogplot = function (idLogplot, callback) {
     let self = this;
-    this.delete(DELETE_PLOT, { idPlot: idLogplot })
-        .then(function () {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_PLOT, { idPlot: idLogplot }, callback);
 }
 
 Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
@@ -666,15 +725,7 @@ Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
         idPlot: idPlot,
         orderNum: orderNum
     };
-    this.post(CREATE_LOG_TRACK, dataRequest)
-        .then(function (logTrack) {
-            console.log("Success: ", logTrack);
-            callback(logTrack);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_LOG_TRACK, dataRequest, callback);
 }
 
 Service.prototype.removeLogTrack = function (idTrack, callback) {
@@ -682,12 +733,7 @@ Service.prototype.removeLogTrack = function (idTrack, callback) {
     let dataRequest = {
         idTrack: idTrack
     };
-    this.delete(DELETE_LOG_TRACK, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_LOG_TRACK, dataRequest, callback);
 }
 
 Service.prototype.infoTrack = function (idTrack, callback) {
@@ -695,42 +741,19 @@ Service.prototype.infoTrack = function (idTrack, callback) {
     let dataRequest = {
         idTrack: idTrack
     };
-    this.post(GET_LOG_TRACK, dataRequest)
-        .then(function (infoTrack) {
-            if (!callback) return;
-            callback(infoTrack);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(GET_LOG_TRACK, dataRequest, callback);
 }
 
 Service.prototype.editTrack = function (trackObj, callback) {
     var self = this;
     let dataRequest = trackObj;
-    this.post(EDIT_TRACK, dataRequest)
-        .then(function (track) {
-            if (!callback) return;
-            callback(track);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_TRACK, dataRequest, callback);
 }
 
 
 Service.prototype.createImage = function (imageObj, callback) {
     var self = this;
-    this.post(CREATE_IMAGE, imageObj)
-        .then(function (image) {
-            callback(image);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_IMAGE, imageObj, callback);
 }
 
 Service.prototype.removeImage = function (idImage, callback) {
@@ -738,26 +761,13 @@ Service.prototype.removeImage = function (idImage, callback) {
     let dataRequest = {
         idImage: idImage
     };
-    this.delete(DELETE_IMAGE, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_IMAGE, dataRequest, callback);
 }
 
 Service.prototype.editImage = function (imageObj, callback) {
     var self = this;
     let dataRequest = imageObj;
-    this.post(EDIT_IMAGE, dataRequest)
-        .then(function (image) {
-            if (!callback) return;
-            callback(image);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_IMAGE, dataRequest, callback);
 }
 
 Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
@@ -768,37 +778,19 @@ Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
         orderNum: orderNum, 
         geogetryWidth: 1
     };
-    this.post(CREATE_DEPTH_AXIS, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_DEPTH_AXIS, dataRequest, callback);
 }
 Service.prototype.removeDepthTrack = function (idDepthAxis, callback) {
     var self = this;
     let dataRequest = {
         idDepthAxis: idDepthAxis
     };
-    this.delete(DELETE_DEPTH_AXIS, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_DEPTH_AXIS, dataRequest, callback);
 }
 Service.prototype.editDepthTrack = function (depthTrackObj, callback) {
     var self = this;
     let dataRequest = depthTrackObj;
-    this.post(EDIT_DEPTH_AXIS, dataRequest)
-        .then(function (depthTrack) {
-            if (!callback) return;
-            callback(depthTrack);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_DEPTH_AXIS, dataRequest, callback);
 }
 
 Service.prototype.removeLine = function (idLine, callback) {
@@ -806,147 +798,77 @@ Service.prototype.removeLine = function (idLine, callback) {
     let dataRequest = {
         idLine: idLine
     };
-    this.delete(DELETE_LINE, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_LINE, dataRequest, callback);
 }
 
 Service.prototype.createLine = function (lineObj, callback) {
     var self = this;
     let dataRequest = lineObj;
-    this.post(CREATE_LINE, dataRequest)
-        .then(function (line) {
-            callback(line);
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_LINE, dataRequest, callback);
 }
 
 Service.prototype.editLine = function (lineObj, callback) {
     var self = this;
     let dataRequest = lineObj;
-    this.post(EDIT_LINE, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_LINE, dataRequest, callback);
 }
 Service.prototype.infoLine = function (idLine, callback) {
     let self = this;
     let dataRequest = {
         idLine: idLine
     };
-    this.post(GET_LINE, dataRequest)
-        .then(function (infoLine) {
-            if (!callback) return;
-            callback(infoLine);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_LINE, dataRequest, callback);
 }
 Service.prototype.createShading = function (shadingObj, callback) {
     var self = this;
     let dataRequest = shadingObj;
-    this.post(CREATE_SHADING, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_SHADING, dataRequest, callback);
 }
 Service.prototype.editShading = function (shadingObj, callback) {
     let self = this;
     let dataRequest = shadingObj;
 
-    this.post(EDIT_SHADING, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_SHADING, dataRequest, callback);
 }
 Service.prototype.removeShading = function (idShading, callback) {
     var self = this;
     let dataRequest = {
         idShading: idShading
     };
-    this.delete(DELETE_SHADING, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_SHADING, dataRequest, callback);
 }
 Service.prototype.infoShading = function (idShading, callback) {
     let self = this;
     let dataRequest = {
         idShading: idShading
     };
-    this.post(GET_SHADING, dataRequest)
-        .then(function (infoShading) {
-            if (!callback) return;
-            callback(infoShading);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_SHADING, dataRequest, callback);
 }
 
 Service.prototype.createMarker = function (markerObj, callback) {
     var self = this;
     let dataRequest = markerObj;
-    this.post(CREATE_MARKER, dataRequest)
-        .then(function (marker) {
-            callback(marker)
-        })
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_MARKER, dataRequest, callback);
 }
 Service.prototype.editMarker = function (markerObj, callback) {
     let self = this;
     let dataRequest = markerObj;
 
-    this.post(EDIT_MARKER, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_MARKER, dataRequest, callback);
 }
 Service.prototype.getMarker = function (idMarker, callback) {
     let self = this;
     let dataRequest = {
         idMarker: idMarker
     };
-    this.post(GET_MARKER, dataRequest)
-        .then(function (infoMarker) {
-            if (!callback) return;
-            callback(infoMarker);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_MARKER, dataRequest, callback);
 }
 Service.prototype.removeMarker = function (idMarker, callback) {
     var self = this;
     let dataRequest = {
         idMarker: idMarker
     };
-    this.delete(DELETE_MARKER, dataRequest)
-        .then(callback)
-        .catch(function (err) {
-            console.error(err);
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_MARKER, dataRequest, callback);
 }
 
 Service.prototype.uploadImage = function (data, callback) {
@@ -962,260 +884,119 @@ Service.prototype.uploadImage = function (data, callback) {
 
 Service.prototype.createZoneTrack = function (data, callback) {
     let self = this;
-    this.post(CREATE_ZONE_TRACK, data)
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_ZONE_TRACK, data, callback);
 }
 Service.prototype.editZoneTrack = function (data, callback) {
     let self = this;
-    this.post(EDIT_ZONE_TRACK, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_ZONE_TRACK, data, callback);
 }
 Service.prototype.getZoneTrack = function (idZoneTrack, callback) {
     let self = this;
-    this.post(GET_ZONE_TRACK, { idZoneTrack: idZoneTrack })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_ZONE_TRACK, { idZoneTrack: idZoneTrack }, callback);
 }
 Service.prototype.removeZoneTrack = function (idZoneTrack, callback) {
     let self = this;
-    this.delete(DELETE_ZONE_TRACK, { idZoneTrack: idZoneTrack })
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_ZONE_TRACK, { idZoneTrack: idZoneTrack }, callback);
 }
 
 Service.prototype.createZoneSet = function (data, callback) {
     let self = this;
-    this.post(CREATE_ZONE_SET, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_ZONE_SET, data, callback);
 }
 Service.prototype.editZoneSet = function (data, callback) {
     let self = this;
-    this.post(EDIT_ZONE_SET, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_ZONE_SET, data, callback);
 }
 Service.prototype.listZoneSet = function (idWell, callback) {
     let self = this;
-    this.post(LIST_ZONE_SET, { idWell: idWell })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(LIST_ZONE_SET, { idWell: idWell }, callback);
 }
 Service.prototype.getZoneSet = function (idZoneSet, callback) {
     let self = this;
-    this.post(GET_ZONE_SET, { idZoneSet: idZoneSet })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_ZONE_SET, { idZoneSet: idZoneSet }, callback);
 }
 Service.prototype.removeZoneSet = function (idZoneSet, callback) {
     let self = this;
-    this.delete(DELETE_ZONE_SET, { idZoneSet: idZoneSet })
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_ZONE_SET, { idZoneSet: idZoneSet }, callback);
 }
 
 
 Service.prototype.createZone = function (data, callback) {
     let self = this;
-    this.post(CREATE_ZONE, data)
-        .then(function (returnData) {
-            if(callback) callback(returnData);
+    this.post(CREATE_ZONE, data, function (returnData) {
+            callback(returnData);
             self.getUtils().refreshProjectState();
-        })
-        .catch(function (err) {
-            callback(null, err);
-            self.getUtils().error(err);
         });
 }
 Service.prototype.editZone = function (data, callback) {
     let self = this;
-    this.post(EDIT_ZONE, data)
-        .then(function (returnData) {
-            if(callback) callback();
+    this.post(EDIT_ZONE, data, function (returnData) {
+            callback();
             self.getUtils().refreshProjectState();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
         });
 }
 Service.prototype.getZone = function (idZone, callback) {
     let self = this;
-    this.post(GET_ZONE, { idZone: idZone })
-        .then(function (returnData) {
+    this.post(GET_ZONE, { idZone: idZone }, function (returnData) {
             callback(returnData);
             self.getUtils().refreshProjectState();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
         });
 }
 Service.prototype.removeZone = function (idZone, callback) {
     let self = this;
-    this.delete(DELETE_ZONE, { idZone: idZone })
-        .then(function (returnData) {
-            if(callback) callback();
+    this.delete(DELETE_ZONE, { idZone: idZone }, function (returnData) {
+            callback();
             self.getUtils().refreshProjectState();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
         });
 }
 
 Service.prototype.createCrossplot = function (data, callback) {
     let self = this;
-    this.post(CREATE_CROSSPLOT, data)
-        .then(function (returnData) {
+    this.post(CREATE_CROSSPLOT, data, function (returnData) {
             callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
         });
 }
 Service.prototype.editCrossplot = function (data, callback) {
     let self = this;
-    this.post(EDIT_CROSSPLOT, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_CROSSPLOT, data, callback);
 }
 Service.prototype.getCrossplot = function (idCrossplot, callback) {
     let self = this;
-    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossplot })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossplot }, callback);
 }
 Service.prototype.removeCrossplot = function (idCrossplot, callback) {
     let self = this;
-    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossplot })
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossplot }, callback);
 }
 
 Service.prototype.createPointSet = function (data, callback) {
     let self = this;
-    this.post(CREATE_POINTSET, data)
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_POINTSET, data, callback);
 }
 Service.prototype.editPointSet = function (data, callback) {
     let self = this;
-    this.post(EDIT_POINTSET, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_POINTSET, data, callback);
 }
 Service.prototype.getPointSet = function (idPointSet, callback) {
     let self = this;
-    this.post(GET_POINTSET, { idPointSet: idPointSet })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_POINTSET, { idPointSet: idPointSet }, callback);
 }
 Service.prototype.removePointSet = function (idPointSet, callback) {
     let self = this;
-    this.delete(DELETE_POINTSET, { idPointSet: idPointSet })
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_POINTSET, { idPointSet: idPointSet }, callback);
 }
 
 Service.prototype.createPolygon = function (data, callback) {
     let self = this;
-    this.post(CREATE_POLYGON, data)
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_POLYGON, data, callback);
 }
 Service.prototype.editPolygon = function (data, callback) {
     let self = this;
-    this.post(EDIT_POLYGON, data)
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_POLYGON, data, callback);
 }
 Service.prototype.getPolygon = function (idPolygon, callback) {
     let self = this;
-    this.post(GET_POLYGON, { idPolygon: idPolygon })
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_POLYGON, { idPolygon: idPolygon }, callback);
 }
 Service.prototype.removePolygon = function (idPolygon, callback) {
     let self = this;
@@ -1232,134 +1013,54 @@ Service.prototype.removePolygon = function (idPolygon, callback) {
 
 Service.prototype.createRegressionLines = function (data, callback) {
     let self = this;
-    this.post(CREATE_REGRESSIONLINES, data)
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_REGRESSIONLINES, data, callback);
 }
 Service.prototype.editRegressionLines = function (data, callback) {
     let self = this;
-    this.post(EDIT_REGRESSIONLINES, data)
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_REGRESSIONLINES, data, callback);
 }
 Service.prototype.getRegressionLines = function (idRegressionLine, callback) {
     let self = this;
-    this.post(GET_REGRESSIONLINES, { idRegressionLine: idRegressionLine })
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_REGRESSIONLINES, { idRegressionLine: idRegressionLine }, callback);
 }
 Service.prototype.removeRegressionLines = function (idRegressionLine, callback) {
     let self = this;
-    this.delete(DELETE_REGRESSIONLINES, { idRegressionLine: idRegressionLine })
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_REGRESSIONLINES, { idRegressionLine: idRegressionLine }, callback);
 }
 
 Service.prototype.createDiscrim = function (data, callback) {
     let self = this;
-    this.post(CREATE_DISCRIM, data)
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_DISCRIM, data, callback);
 }
 Service.prototype.editDiscrim = function (data, callback) {
     let self = this;
-    this.post(EDIT_DISCRIM, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_DISCRIM, data, callback);
 }
 Service.prototype.getDiscrim = function (idDiscrim, callback) {
     let self = this;
-    this.post(GET_DISCRIM, { idDiscrim: idDiscrim })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_DISCRIM, { idDiscrim: idDiscrim }, callback);
 }
 Service.prototype.removeDiscrim = function (idDiscrim, callback) {
     let self = this;
-    this.delete(DELETE_DISCRIM, { idDiscrim: idDiscrim })
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_DISCRIM, { idDiscrim: idDiscrim }, callback);
 }
 
 // histogram apis
 Service.prototype.createHistogram = function (data, callback) {
     let self = this;
-    this.post(CREATE_HISTOGRAM, data)
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(CREATE_HISTOGRAM, data, callback);
 }
 Service.prototype.editHistogram = function (data, callback) {
     let self = this;
-    this.post(EDIT_HISTOGRAM, data)
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(EDIT_HISTOGRAM, data, callback);
 }
 Service.prototype.getHistogram = function (idHistogram, callback) {
     let self = this;
-    this.post(GET_HISTOGRAM, { idHistogram: idHistogram })
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_HISTOGRAM, { idHistogram: idHistogram }, callback);
 }
 Service.prototype.removeHistogram = function (idHistogram, callback) {
     let self = this;
-    this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram })
-        .then(function (returnData) {
-            callback();
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram }, callback);
 }
 
 
@@ -1369,33 +1070,15 @@ app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
 
 Service.prototype.getPalettes = function (callback) {
     let self = this;
-    this.post(GET_PALETTES, {})
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_PALETTES, {}, callback);
 }
 Service.prototype.getCustomFills = function (callback) {
     let self = this;
-    this.post(GET_CUSTOM_FILLS, {})
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(GET_CUSTOM_FILLS, {}, callback);
 }
 Service.prototype.saveCustomFills = function (customFills, callback) {
     let self = this;
-    this.post(SAVE_CUSTOM_FILLS, customFills)
-        .then(function (returnData) {
-            callback(returnData);
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.post(SAVE_CUSTOM_FILLS, customFills, callback);
 }
 Service.prototype.setAuthenticationInfo = function(authenInfo) {
     __USERINFO.username = authenInfo.username;

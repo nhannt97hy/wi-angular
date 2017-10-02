@@ -56,7 +56,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.getDepthRange = function() {
-        return _depthRange;
+        return _depthRange.map( function(d){ return Math.round(d * 10000)/10000; } );
     }
 
     this.getMaxOrderNum = function() {
@@ -1350,7 +1350,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let logPlotName = self.name.replace("D3Area", "");
         return wiComponentService.getComponent(logPlotName);
     }
-    /* Private End */
 
     function openTrackPropertiesDialog() {
         if (!_currentTrack) return;
@@ -1382,7 +1381,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         }
     }
-
+    /* Private End */
+    this.verifyDroppedIdCurve = function(idCurve) {
+        let well1 = _getWellProps();
+        let well2 = Utils.findWellByCurve(idCurve) || {};
+        return (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell));
+    }
     this.openProptertiesDialog = function () {
         if (_currentTrack.isDepthTrack()) {
             openTrackPropertiesDialog();

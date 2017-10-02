@@ -371,7 +371,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idCurve: histogramModel.properties.idCurve,
             idZoneSet: histogramModel.properties.idZoneSet,
             data: null,
-            zones: histogramModel.properties.zones
+            zones: histogramModel.properties.zones,
+            referenceTopDepth: histogramModel.properties.referenceTopDepth,
+            referenceBottomDepth: histogramModel.properties.referenceBottomDepth,
+            referenceScale: histogramModel.properties.referenceScale,
+            referenceVertLineNumber: histogramModel.properties.referenceVertLineNumber,
+            referenceDisplay: histogramModel.properties.referenceDisplay,
+            referenceShowDepthGrid: histogramModel.properties.referenceShowDepthGrid,
+            reference_curves: histogramModel.properties.reference_curves
         }
         return config;
     }

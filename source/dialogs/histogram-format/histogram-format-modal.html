@@ -261,20 +261,23 @@
                                     <div class="form-group">
                                         <label class="col-sm-2">Top Depth (m)</label>
                                         <div class="col-sm-2">
-                                            <input type="number" class="form-control wi-form-control" step="0.01">
+                                            <input type="number" class="form-control wi-form-control" step="0.01" ng-model="wiModal.histogramProps.referenceTopDepth">
                                         </div>
                                         <label class="col-sm-3">Bottom Depth (m)</label>
                                         <div class="col-sm-2">
-                                            <input type="number" class="form-control wi-form-control" step="0.01">
+                                            <input type="number" class="form-control wi-form-control" step="0.01"
+                                            ng-model="wiModal.histogramProps.referenceBottomDepth">
                                         </div>
                                         <div class="col-sm-3">
-                                            <button type="button" class="btn btn-default width-100-percent text-ellipsis">Depth Default</button>
+                                            <button type="button" class="btn btn-default width-100-percent text-ellipsis"
+                                            ng-click="wiModal.defaultDepthButtonClick()">Depth Default</button>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-2">Scale 1</label>
                                         <div class="col-sm-2">
-                                            <input type="number" list='scaleOpt' class="form-control wi-form-control">
+                                            <input type="number" list='scaleOpt' class="form-control wi-form-control"
+                                            ng-model="wiModal.histogramProps.referenceScale">
                                             <datalist id="scaleOpt">
                                                 <option value="1">1</option>
                                                 <option value="20">20</option>
@@ -291,15 +294,16 @@
                                         </div>
                                         <label class="col-sm-3">Vert. Line Number</label>
                                         <div class="col-sm-2">
-                                            <input type="number" class="form-control wi-form-control">
+                                            <input type="number" class="form-control wi-form-control"
+                                            ng-model="wiModal.histogramProps.referenceVertLineNumber">
                                         </div>
                                         <div class="col-sm-3">
-                                                <input type="checkbox">
+                                                <input type="checkbox" ng-model="wiModal.histogramProps.referenceDisplay">
                                                 <label>Display</label>
                                             </div>
                                     </div>
                                     <div class="form-group padding-1em">
-                                            <input type="checkbox">
+                                            <input type="checkbox" ng-model="wiModal.histogramProps.referenceShowDepthGrid">
                                             <label>Show Depth Grid Line</label>
                                     </div>
                                     <div class="form-group">
@@ -317,9 +321,22 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <td></td>
-                                                        <td></td>
+                                                    <tr ng-repeat="curve in wiModal.ref_Curves_Arr"
+                                                    ng-click="wiModal.setClickedRow($index)"
+                                                    ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': curve.flag === wiModal._FDEL}">
+                                                        <td>
+                                                            <i ng-class="{'fa fa-chevron-circle-right': $index == wiModal.SelectedRefCurve}"></i>
+                                                        </td>
+                                                        <td>
+                                                            <ui-select ng-model="wiModal.SelectedCurve"
+                                                                ng-change="wiModal.onSelectCurveChange()">
+                                                                <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
+                                                                <ui-select-choices group-by="'datasetName'"
+                                                                repeat='curve in wiModal.curvesArr | filter: $select.search'>
+                                                                <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                                            </ui-select-choices>
+                                                            </ui-select>
+                                                        </td>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>

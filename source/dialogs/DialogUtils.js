@@ -68,7 +68,7 @@ exports.authenticationDialog = function (ModalService, callback) {
 
 
 exports.newProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.disabled = false;
         this.error = null;
@@ -86,18 +86,13 @@ exports.newProjectDialog = function (ModalService, callback) {
             console.log("This data: ", data);
 
 
-            wiApiService.post('/project/new', data)
-                .then(function (response) {
+            wiApiService.createProject(data, function (response) {
                     console.log('response', response);
-
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    self.disabled = false;
-                    return self.error = "Connection error!";
-                })
-                .then(function () {
-                    $scope.$apply();
+                    
+                    close(response, 500);
+                    /*$timeout(function(){
+                        $scope.$apply();
+                    })*/
                 });
         };
 
@@ -125,7 +120,7 @@ exports.newProjectDialog = function (ModalService, callback) {
 };
 
 exports.openProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.error = null;
         this.projects = [];
@@ -133,16 +128,11 @@ exports.openProjectDialog = function (ModalService, callback) {
         this.disabled = false;
         this.selectedProject = {};
 
-        wiApiService.post('/project/list', null)
-            .then(function (projects) {
-
+        wiApiService.getProjectList(null, function (projects) {
                 self.projects = projects;
-            })
-            .catch(function (err) {
-                return self.error = "Connection error!";
-            })
-            .then(function () {
-                $scope.$apply();
+                /*$timeout(function(){
+                    $scope.$apply();
+                });*/
             });
         console.log('response', this.projects);
 
@@ -162,16 +152,11 @@ exports.openProjectDialog = function (ModalService, callback) {
                 idProject: self.idProject
             };
 
-            wiApiService.post('/project/fullinfo', data)
-                .then(function (response) {
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    self.disabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+            wiApiService.getProject(data, function (response) {
+                    close(response, 500);
+                    $timeout(function(){
+                        $scope.$apply();
+                    });
                 });
         };
 
@@ -474,7 +459,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
 };
 // add new well
 exports.addNewDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService, wiComponentService) {
+    function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
         this.isDisabled = false;
 
@@ -493,19 +478,13 @@ exports.addNewDialog = function (ModalService, callback) {
             };
             console.log("data new well: ", data);
 
-            wiApiService.post('/project/well/new', data)
-                .then(function (response) {
+            wiApiService.createWell(data, function (response) {
                     console.log('response', response);
+                    close(response, 500);
 
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    console.error('new well', err);
-                    self.isDisabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+                    $timeout(function(){
+                        $scope.$apply();
+                    });
                 });
         };
 
@@ -3488,7 +3467,7 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
 };
 
 exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneTrackProperties, callback) {
-    function ModalController($scope, wiComponentService, wiApiService, close) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
@@ -3513,9 +3492,11 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
 
         function refreshZoneSets() {
             wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
-                $scope.$apply(function () {
-                    self.zoneSets = zoneSets;
-                })
+                $timeout(function(){
+                    $scope.$apply(function () {
+                        self.zoneSets = zoneSets;
+                    });    
+                });
             });
         }
         refreshZoneSets();
@@ -4651,11 +4632,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
-
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.ref_Curves_Arr = angular.copy(histogramModel.properties.reference_curves);
+        this.SelectedRefCurve = 0;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
@@ -4758,6 +4740,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     break;
             }
         }
+
+        this.defaultDepthButtonClick = function(){
+            self.histogramProps.referenceTopDepth = getTopFromWell();
+            self.histogramProps.referenceBottomDepth = getBottomFromWell();
+        }
+
         this.chooseChartColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
                 self.histogramProps.color = colorStr;
@@ -5327,6 +5315,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.onChangeZoneSet = function () {
             self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
             buildDisplayZoneArr();
+            self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
         }
 
         this.genColor = function () {
@@ -5440,28 +5429,36 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onApplyButtonClicked = function () {
-            self.zoneArr.forEach(function(z){
-                switch (z.flag) {
+            console.log('Apply');
+            for (let i = self.zoneArr.length - 1; i >= 0; i--){
+                switch (self.zoneArr[i].flag) {
                     case _FDEL:
-                        wiApiService.removeZone(z.id);
+                        wiApiService.removeZone(self.zoneArr[i].id);
+                        self.zoneArr.splice(i, 1);
+                        console.log('removeZone');
                         break;
                     
                     case _FNEW:
-                        wiApiService.createZone(z.properties);
+                        delete self.zoneArr[i].flag;
+                        wiApiService.createZone(self.zoneArr[i].properties);
+                        console.log('createZone');
                         break;
                     
                     case _FEDIT:
-                        wiApiService.editZone(z.properties);
+                        delete self.zoneArr[i].flag;
+                        wiApiService.editZone(self.zoneArr[i].properties);
+                        console.log('editZone');
                         break;
                     
                     default:
                         break;
                 }
-            })
+            }
         }
 
         this.onOkButtonClicked = function () {
-            self.onApplyButtonClicked();           
+            self.onApplyButtonClicked();
+            console.log('Ok');           
             close(null);
         }
 
