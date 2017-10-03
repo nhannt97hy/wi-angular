@@ -5433,25 +5433,32 @@ exports.zoneManagerDialog = function (ModalService, item) {
             for (let i = self.zoneArr.length - 1; i >= 0; i--){
                 switch (self.zoneArr[i].flag) {
                     case _FDEL:
-                        wiApiService.removeZone(self.zoneArr[i].id);
-                        self.zoneArr.splice(i, 1);
-                        console.log('removeZone');
+                        wiApiService.removeZone(self.zoneArr[i].id, function(){
+                            self.zoneArr.splice(i, 1);
+                            console.log('removeZone');
+                        });
                         break;
                     
                     case _FNEW:
-                        delete self.zoneArr[i].flag;
-                        wiApiService.createZone(self.zoneArr[i].properties);
-                        console.log('createZone');
+                        wiApiService.createZone(self.zoneArr[i].properties, function(){
+                            delete self.zoneArr[i].flag;
+                            console.log('createZone');
+                        });
                         break;
                     
                     case _FEDIT:
-                        delete self.zoneArr[i].flag;
-                        wiApiService.editZone(self.zoneArr[i].properties);
-                        console.log('editZone');
+                        wiApiService.editZone(self.zoneArr[i].properties, function(){
+                            delete self.zoneArr[i].flag;
+                            console.log('editZone');
+                        });
                         break;
                     
                     default:
                         break;
+                }
+
+                if(i == 0){
+                    utils.refreshProjectState();
                 }
             }
         }

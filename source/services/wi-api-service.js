@@ -924,29 +924,29 @@ Service.prototype.removeZoneSet = function (idZoneSet, callback) {
 Service.prototype.createZone = function (data, callback) {
     let self = this;
     this.post(CREATE_ZONE, data, function (returnData) {
-            callback(returnData);
-            self.getUtils().refreshProjectState();
+            if (callback) callback(returnData);
+            // self.getUtils().refreshProjectState();
         });
 }
 Service.prototype.editZone = function (data, callback) {
     let self = this;
     this.post(EDIT_ZONE, data, function (returnData) {
-            callback();
-            self.getUtils().refreshProjectState();
+            if(callback) callback();
+            // self.getUtils().refreshProjectState();
         });
 }
 Service.prototype.getZone = function (idZone, callback) {
     let self = this;
     this.post(GET_ZONE, { idZone: idZone }, function (returnData) {
-            callback(returnData);
-            self.getUtils().refreshProjectState();
+            if(callback) callback(returnData);
+            // self.getUtils().refreshProjectState();
         });
 }
 Service.prototype.removeZone = function (idZone, callback) {
     let self = this;
     this.delete(DELETE_ZONE, { idZone: idZone }, function (returnData) {
-            callback();
-            self.getUtils().refreshProjectState();
+            if(callback) callback();
+            // self.getUtils().refreshProjectState();
         });
 }
 
