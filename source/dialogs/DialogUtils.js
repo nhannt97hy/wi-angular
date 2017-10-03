@@ -4858,7 +4858,8 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
-            for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--){
+            if(self.ref_Curves_Arr && self.ref_Curves_Arr.length){
+                for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--){
                 switch(self.ref_Curves_Arr[i].flag){
                     case self._FDEL:
                         wiApiService.removeRefCurve(self.ref_Curves_Arr[i].idReferenceCurve, function(){
@@ -4885,19 +4886,22 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         break;
                 }
 
-                if(i == 0){
-                    self.histogramProps.reference_curves = self.ref_Curves_Arr;
-
-                    histogramModel.properties = self.histogramProps;
-                    wiApiService.editHistogram(histogramModel.properties, function(returnData) {
-                        console.log('Return Data', returnData);
-                        if (callback) callback(histogramModel.properties);
-                        //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                        //wiD3Ctrl.linkModels();
-                        //wiD3Ctrl.getZoneCtrl().zoneUpdate();
-                    })
-                }
+                // if(i == 0){
+                    
+                // }
             }
+            }
+
+            self.histogramProps.reference_curves = self.ref_Curves_Arr;
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            })
+            
             
         }
 
