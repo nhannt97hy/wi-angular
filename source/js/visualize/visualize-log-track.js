@@ -307,7 +307,7 @@ LogTrack.prototype.addCurve = function(data, config) {
 
     let curve = new Curve(config);
 
-    curve.init(this.plotContainer);
+    curve.init(this.plotContainer, this);
     curve.header = this.addCurveHeader(curve);
     this.drawings.push(curve);
 

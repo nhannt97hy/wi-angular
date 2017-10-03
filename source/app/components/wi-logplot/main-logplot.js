@@ -129,6 +129,9 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
             }
         })
         wiD3Ctrl.addCurveToTrack(track, data, {
+            displayAs: 'Cumulative',
+            minX: 0,
+            maxX: 10,
             line: {
                 color: 'green'
             }
