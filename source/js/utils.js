@@ -246,7 +246,7 @@ exports.createZoneSet = function (idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
-    if (selectedNode.type == 'zonesets') {
+    if (selectedNode && selectedNode.type == 'zonesets') {
         idWell = selectedNode.properties.idWell;
     }
     if (!idWell) return;

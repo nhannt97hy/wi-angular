@@ -56,6 +56,7 @@ const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
 const DELETE_PLOT = '/project/well/plot/delete';
 const GET_PLOT = '/project/well/plot/info';
+const DUPLICATE_PLOT = '/project/well/plot/duplicate';
 
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
@@ -134,6 +135,11 @@ const CREATE_HISTOGRAM = '/project/well/histogram/new';
 const EDIT_HISTOGRAM = '/project/well/histogram/edit';
 const GET_HISTOGRAM = '/project/well/histogram/info';
 const DELETE_HISTOGRAM = '/project/well/histogram/delete';
+
+const CREATE_REF_CURVE = '/project/well/reference-curve/new';
+const EDIT_REF_CURVE = '/project/well/reference-curve/edit';
+const GET_REF_CURVE = '/project/well/reference-curve/info';
+const DELETE_REF_CURVE = '/project/well/reference-curve/delete';
 
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
@@ -1061,6 +1067,28 @@ Service.prototype.getHistogram = function (idHistogram, callback) {
 Service.prototype.removeHistogram = function (idHistogram, callback) {
     let self = this;
     this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram }, callback);
+}
+
+Service.prototype.duplicateLogplot = function (idPlot, idWell, callback) {
+    const self = this;
+    this.post(DUPLICATE_PLOT, { idPlot: idPlot, idWell: idWell }, callback);
+}
+// reference_curve apis
+Service.prototype.createRefCurve = function (data, callback) {
+    let self = this;
+    this.post(CREATE_REF_CURVE, data, callback);
+}
+Service.prototype.editRefCurve = function (data, callback) {
+    let self = this;
+    this.post(EDIT_REF_CURVE, data, callback);
+}
+Service.prototype.getRefCurve = function (idReferenceCurve, callback) {
+    let self = this;
+    this.post(GET_REF_CURVE, { idReferenceCurve: idReferenceCurve }, callback);
+}
+Service.prototype.removeRefCurve = function (idReferenceCurve, callback) {
+    let self = this;
+    this.delete(DELETE_REF_CURVE, { idReferenceCurve: idReferenceCurve }, callback);
 }
 
 

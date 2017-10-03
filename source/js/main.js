@@ -54,6 +54,7 @@ let dragMan = {
 let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 let wiEnter = require('./wi-enter');
+let wiDecimalPlaces = require('./wi-decimal-places');
 
 // models
 let wiDepth = require('./wi-depth.model');
@@ -96,6 +97,7 @@ let app = angular.module('wiapp',
         wiElementReady.name,
         wiRightClick.name,
         wiEnter.name,
+        wiDecimalPlaces.name,
 
         // models
         wiDepth.name,
