@@ -304,10 +304,10 @@ Curve.prototype.getTransformX = function() {
  * Actually draw the curve
  * @param {Boolean} highlight
  */
-Curve.prototype.doPlot = function(highlight) {
+Curve.prototype.doPlot = function(highlight, keepPrevious) {
     let self = this;
     let rect = this.root.node().getBoundingClientRect();
-    this.adjustSize();
+    if (!keepPrevious) this.adjustSize();
     this.updateHeader();
 
     let transformX = this.getTransformX();
@@ -319,7 +319,7 @@ Curve.prototype.doPlot = function(highlight) {
     });
     if (plotSamples.length == 0) return;
     let ctx = this.ctx;
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    if (!keepPrevious) ctx.clearRect(0, 0, rect.width, rect.height);
 
     Utils.clusterData(plotSamples).forEach(function(clustered) {
         let data = clustered.map(function(s) {

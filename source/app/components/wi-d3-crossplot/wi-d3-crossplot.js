@@ -55,6 +55,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 zone.handler = function () {}
             });
             self.getZoneCtrl().zones = self.zoneArr;
+            self.getZoneCtrl().zoneUpdate();
             self.pointSet.zones = self.zoneArr.map(function(zone) {
                 return zone.properties;
             });
@@ -62,14 +63,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.onZoneCtrlReady = function(zoneCtrl) {
-        zoneCtrl.trap('zone-data', function() {
-            // self.refreshCrossplot();
+        zoneCtrl.trap('zone-data', function(data) {
+            self.updateViCrossplotZones(data);
         });
     }
 
-    this.updateViCrossplotZones = function() {
+    this.updateViCrossplotZones = function(data) {
         let activeZones = self.getZoneCtrl().getActiveZones();
-        console.log('CROSSPLOT ACTIVEZONES', activeZones);
+
+        if (activeZones)
+            activeZones = activeZones.map(function(d) { return d.properties.idZone; });
+
+        if (self.viCrossplot && self.viCrossplot.setProperties) {
+            self.viCrossplot.setProperties({
+                pointSet: {
+                    activeZone: data == 'All' ? data : activeZones
+                }
+            });
+            self.viCrossplot.doPlot();
+        }
     }
 
     this.CloseReferenceWindow = function () {

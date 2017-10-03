@@ -51,6 +51,10 @@
                                         ng-click="wiModal.onRenameZoneSet()"
                                         ng-disabled="!wiModal.SelectedZoneSet">Edit</button>
                                     </div>
+                                    <div class="col-sm-2">
+                                        <button class="btn btn-default normal-text"
+                                        ng-click="wiModal.onAddZoneSet()">Add</button>
+                                    </div>
                                 </div>
                             </div>
                             <h5>Zones</h5>
@@ -68,11 +72,11 @@
                             </div>
                             <hr>
                             <div class="row" style="height:40%">
-                                <div class='col-sm-9 col-xs-12' style='overflow-x:hidden; overflow-y:auto;'>
+                                <div class='col-sm-9 col-xs-12 height-100-percent' style='overflow-x:hidden; overflow-y:auto;'>
                                     <table class="table table-bordered zonesTable width-100-percent">
                                         <thead>
                                             <tr>
-                                                <th style="width: 5%">No</th>
+                                                <th style="width: 5%"></th>
                                                 <th style="width: 15%">Name</th>
                                                 <th style="width: 15%">Top Depth</th>
                                                 <th style="width: 15%">Bottom Depth</th>
@@ -83,22 +87,25 @@
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="zone in wiModal.zoneArr"
-                                                ng-class="{selected:$index == wiModal.SelectedZone}"
+                                                ng-class="{selected:$index == wiModal.SelectedZone, 'display-none': zone.flag === wiModal._FDEL}"
                                                 ng-click="wiModal.setClickedRow($index)">
-                                                <td>{{$index+1}}</td>
+                                                <td><i ng-class="{'fa fa-chevron-circle-right': $index == wiModal.SelectedZone}"></i></td>
                                                 <td>
                                                     <input type="text" 
                                                             ng-model="zone.properties.name"
-                                                            class="form-control wi-form-control">
+                                                            class="form-control wi-form-control"
+                                                            ng-change="wiModal.onZoneChanged($index);">
                                                 </td>
                                                 <td>
                                                     <input type="number" step="0.01"
                                                             ng-model="zone.properties.startDepth"
-                                                            class="form-control wi-form-control">
+                                                            class="form-control wi-form-control"
+                                                            ng-change="wiModal.onZoneChanged($index);">
                                                 </td>
                                                 <td>
                                                     <input type="number" step="0.01" 
                                                             ng-model="zone.properties.endDepth"
+                                                            ng-change="wiModal.onZoneChanged($index);"
                                                             class="form-control wi-form-control">
                                                 </td>
                                                 <td>
@@ -115,7 +122,8 @@
                                                 </td>
                                                 <td>
                                                     <ui-select theme="bootstrap" 
-                                                                ng-model="zone.properties.fill.pattern.name">
+                                                                ng-model="zone.properties.fill.pattern.name"
+                                                                ng-change="wiModal.onZoneChanged($index);">
                                                         <ui-select-match>
                                                             <wi-canvas-rect name="row_{{$index}}" 
                                                                             pattern="{{zone.properties.fill.pattern.name}}" 
@@ -167,14 +175,14 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="wiModal.IsNotValid();">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default">
                             <span class="apply-16x16"></span>&nbsp;Apply
                         </button>
-                <button type="button" ng-click="wiModal.onOKButtonClicked();" class="btn btn-default" ng-disabled="wiModal.IsNotValid();">
+                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default">
                             <span class="ok-16x16"></span>&nbsp;Ok
                         </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
-                            <span class="close-16x16"></span>&nbsp;Close
+                            <span class="close-16x16"></span>&nbsp;Cancel
                         </button>
             </div>
         </div>

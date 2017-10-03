@@ -56,7 +56,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.getDepthRange = function() {
-        return _depthRange;
+        return _depthRange.map( function(d){ return Math.round(d * 10000)/10000; } );
     }
 
     this.getMaxOrderNum = function() {
@@ -88,9 +88,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addLogTrack = function(trackTitle, callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
+            const logTracks = self.getTracks().filter(track => track.type == 'log-track');
             wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function(ret) {
                 wiApiService.infoTrack(ret.idTrack, function(logTrack) {
-                    logTrack.title = trackTitle || 'Track ' + logTrack.idTrack;
+                    logTrack.title = trackTitle || 'Track ' + (logTracks.length + 1);
                     let viTrack = self.pushLogTrack(logTrack);
                     wiApiService.editTrack(logTrack);
                     if (!callback) return;
@@ -186,7 +187,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addZoneTrack = function(callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, null, function (zoneTrackProperties) {
+            const zoneTracks = self.getTracks().filter(track => track.type == 'zone-track');
+            const defaultZoneTrackProp = {
+                showTitle: true,
+                title: "Zone Track " + (zoneTracks.length + 1),
+                topJustification: "center",
+                trackColor: '#ffffff',
+                width: Utils.inchToPixel(1),
+                parameterSet: null
+            }
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultZoneTrackProp, function (zoneTrackProperties) {
                 let dataRequest = {
                     idPlot: self.logPlotCtrl.id,
                     title: zoneTrackProperties.title,
@@ -267,6 +277,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!config.idZoneSet) return;
         let zone = track.addZone(config);
         track.plotZone(zone);
+        track.rearrangeHeaders();
         track.onZoneMouseDown(zone, function() {
             if (track.mode == 'SplitZone') {
                 _splitZone(track, zone);
@@ -1005,7 +1016,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             {
                 name: "AutoZoneNamed",
                 label: "Auto Zone Named",
-                handler: function () {}
+                handler: function () {
+                    _currentTrack.autoName().forEach(function(zone) {
+                        wiApiService.editZone(zone.getProperties(), function () { });
+                    });
+                    _currentTrack.doPlot(true);
+                }
             }, {
                 name: "ZoneProperties",
                 label: "Zone Properties",
@@ -1255,7 +1271,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             idWell: idWell,
                             topDepth: wellProps.topDepth,
                             bottomDepth: wellProps.bottomDepth,
-                            pointSet: pointSet                            
+                            pointSet: pointSet
                         });
                     })
                 });
@@ -1334,7 +1350,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let logPlotName = self.name.replace("D3Area", "");
         return wiComponentService.getComponent(logPlotName);
     }
-    /* Private End */
 
     function openTrackPropertiesDialog() {
         if (!_currentTrack) return;
@@ -1366,7 +1381,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         }
     }
-
+    /* Private End */
+    this.verifyDroppedIdCurve = function(idCurve) {
+        let well1 = _getWellProps();
+        let well2 = Utils.findWellByCurve(idCurve) || {};
+        return (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell));
+    }
     this.openProptertiesDialog = function () {
         if (_currentTrack.isDepthTrack()) {
             openTrackPropertiesDialog();

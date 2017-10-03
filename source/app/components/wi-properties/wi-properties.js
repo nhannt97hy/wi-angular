@@ -150,6 +150,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 }
                 listConfig.push(config);
                 const scale = await wiApiService.asyncScaleCurve(itemProperties.idCurve);
+                // const scale = await wiApiService.scaleCurvePromise(itemProperties.idCurve);
                 config = {
                     name: currentItem.name,
                     heading: 'Values',

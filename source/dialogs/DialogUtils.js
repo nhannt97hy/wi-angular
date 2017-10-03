@@ -68,7 +68,7 @@ exports.authenticationDialog = function (ModalService, callback) {
 
 
 exports.newProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.disabled = false;
         this.error = null;
@@ -86,18 +86,13 @@ exports.newProjectDialog = function (ModalService, callback) {
             console.log("This data: ", data);
 
 
-            wiApiService.post('/project/new', data)
-                .then(function (response) {
+            wiApiService.createProject(data, function (response) {
                     console.log('response', response);
-
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    self.disabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+                    
+                    close(response, 500);
+                    /*$timeout(function(){
+                        $scope.$apply();
+                    })*/
                 });
         };
 
@@ -125,7 +120,7 @@ exports.newProjectDialog = function (ModalService, callback) {
 };
 
 exports.openProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService) {
+    function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.error = null;
         this.projects = [];
@@ -133,16 +128,11 @@ exports.openProjectDialog = function (ModalService, callback) {
         this.disabled = false;
         this.selectedProject = {};
 
-        wiApiService.post('/project/list', null)
-            .then(function (projects) {
-
+        wiApiService.getProjectList(null, function (projects) {
                 self.projects = projects;
-            })
-            .catch(function (err) {
-                return self.error = err;
-            })
-            .then(function () {
-                $scope.$apply();
+                /*$timeout(function(){
+                    $scope.$apply();
+                });*/
             });
         console.log('response', this.projects);
 
@@ -162,16 +152,11 @@ exports.openProjectDialog = function (ModalService, callback) {
                 idProject: self.idProject
             };
 
-            wiApiService.post('/project/fullinfo', data)
-                .then(function (response) {
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    self.disabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+            wiApiService.getProject(data, function (response) {
+                    close(response, 500);
+                    $timeout(function(){
+                        $scope.$apply();
+                    });
                 });
         };
 
@@ -230,6 +215,9 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         this.input = promptConfig.input;
         this.type = promptConfig.type;
         this.options = promptConfig.options;
+        this.onBlur = function(args) {
+            console.log('onBlur', args);
+        }
         this.onOkButtonClicked = function () {
             close(self.input);            
         }
@@ -243,8 +231,13 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
+        modal.element.modal('show');
         $(modal.element[0].children[0]).draggable();
+        window.TESTMODAL = modal.element;
+        console.log('====+++====', $(modal.element[0]), $(modal.element[0]).find('input'));
+        setTimeout(function() {
+            $(modal.element[0]).find('input').focus();
+        }, 800);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -466,7 +459,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
 };
 // add new well
 exports.addNewDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService, wiComponentService) {
+    function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
         this.isDisabled = false;
 
@@ -485,19 +478,13 @@ exports.addNewDialog = function (ModalService, callback) {
             };
             console.log("data new well: ", data);
 
-            wiApiService.post('/project/well/new', data)
-                .then(function (response) {
+            wiApiService.createWell(data, function (response) {
                     console.log('response', response);
+                    close(response, 500);
 
-                    return close(response, 500);
-                })
-                .catch(function (err) {
-                    console.error('new well', err);
-                    self.isDisabled = false;
-                    return self.error = err;
-                })
-                .then(function () {
-                    $scope.$apply();
+                    $timeout(function(){
+                        $scope.$apply();
+                    });
                 });
         };
 
@@ -3509,7 +3496,7 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
 };
 
 exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneTrackProperties, callback) {
-    function ModalController($scope, wiComponentService, wiApiService, close) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
@@ -3518,7 +3505,6 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
             showTitle: true,
             title: "New Zone",
             topJustification: "center",
-            bottomJustification: "center",
             trackColor: '#ffffff',
             width: utils.inchToPixel(2),
             parameterSet: null
@@ -3528,7 +3514,6 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.isShowTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
-        this.bottomJustification = props.bottomJustification.toLowerCase();
         this.trackColor = props.trackColor;
         this.width = props.width;
         this.parameterSet = props.parameterSet;
@@ -3536,9 +3521,11 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
 
         function refreshZoneSets() {
             wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
-                $scope.$apply(function () {
-                    self.zoneSets = zoneSets;
-                })
+                $timeout(function(){
+                    $scope.$apply(function () {
+                        self.zoneSets = zoneSets;
+                    });    
+                });
             });
         }
         refreshZoneSets();
@@ -3564,7 +3551,6 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 showTitle: self.isShowTitle,
                 title: self.title,
                 topJustification: self.topJustification,
-                bottomJustification: self.bottomJustification,
                 trackColor: self.trackColor,
                 width: self.width,
                 parameterSet: self.parameterSet,
@@ -4676,11 +4662,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
-
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.ref_Curves_Arr = angular.copy(histogramModel.properties.reference_curves);
+        this.SelectedRefCurve = 0;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
@@ -4706,7 +4693,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     child.children.forEach(function (item) {
                         if (item.type == 'curve') {
                             var d = item;
-                            d.datasetCurve = child.properties.name + "." + item.properties.name;
+                            d.datasetName = child.properties.name;
                             self.curvesArr.push(d);
                             if (d.id == self.histogramProps.idCurve) {
                                 self.SelectedCurve = d;
@@ -4783,6 +4770,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     break;
             }
         }
+
+        this.defaultDepthButtonClick = function(){
+            self.histogramProps.referenceTopDepth = getTopFromWell();
+            self.histogramProps.referenceBottomDepth = getBottomFromWell();
+        }
+
         this.chooseChartColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
                 self.histogramProps.color = colorStr;
@@ -4807,24 +4800,26 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(){
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                wiD3Ctrl.linkModels();
-                wiD3Ctrl.getZoneCtrl().zoneUpdate();
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
             })
         }
 
         this.onOKButtonClicked = function () {
             console.log("on OK clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(){
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                wiD3Ctrl.linkModels();
-                wiD3Ctrl.getZoneCtrl().zoneUpdate();
-                $timeout(function(){
-                    close(histogramModel.properties);
-                },500);
-            })
+            wiApiService.editHistogram(histogramModel.properties, function(returnData){
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                //wiD3Ctrl.linkModels();
+                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
+                close(null);
+            });
         }
         this.onCancelButtonClicked = function () {
             close(null);
@@ -5184,20 +5179,28 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
 };
 
 exports.zoneManagerDialog = function (ModalService, item) {
+    const _FNEW = 1;
+    const _FEDIT = 2;
+    const _FDEL = 3;
     function ModalController(close, wiComponentService, wiApiService, $timeout, $scope) {
         let self = this;
         window.zoneMng = this;
+        this._FNEW = _FNEW;
+        this._FEDIT = _FEDIT;
+        this._FDEL = _FDEL;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        var project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = project.children;
+        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = this.project.children;
 
         this.SelectedWell = this.wellArr[0];
         this.zonesetsArr = self.SelectedWell.children.find(function (child) {
             return child.name == 'zonesets';
         }).children;
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
+        
         this.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
 
         switch (item.name) {
@@ -5272,24 +5275,63 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 break;
         }
 
+        buildDisplayZoneArr();
+        
+        // METHOD Section begins
+        function buildDisplayZoneArr() {
+            if(self.zoneArr && self.zoneArr.length){
+                self.zoneArr.sort(function(z1, z2) {
+                    return z1.properties.startDepth > z2.properties.startDepth;
+                });
+            }
+        }
+
         this.setClickedRow = function (indexRow) {
             self.SelectedZone = indexRow;
+        }
+        this.onZoneChanged = function(index) {
+            if(typeof self.zoneArr[index].flag === 'undefined'){
+                self.zoneArr[index].flag = _FEDIT;
+            }
         }
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.foregroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
-                self.zoneArr[index].properties.foreground = colorStr;
+                self.zoneArr[index].properties.fill.pattern.foreground = colorStr;
+                self.onZoneChanged(index);                
             });
         };
         this.backgroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.background, function (colorStr) {
-                self.zoneArr[index].properties.background = colorStr;
+                self.zoneArr[index].properties.fill.pattern.background = colorStr;
+                self.onZoneChanged(index);
             });
         };
 
         this.onRenameZoneSet = function(){
             utils.renameZoneSet(self.SelectedZoneSet);
         }
+
+        this.refreshZoneSets = function(){
+            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.wellArr = self.project.children;
+            var tmp = self.SelectedWell.id;
+            self.SelectedWell = self.wellArr.find(function(well){
+                return well.id == tmp;
+            })
+            self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                return child.name == 'zonesets';
+            }).children;
+            buildDisplayZoneArr();
+        }
+        this.onAddZoneSet = function(){
+            utils.createZoneSet(self.SelectedWell.id, function () {
+                $timeout(function(){
+                    self.refreshZoneSets();
+                }, 1000);
+            });
+        }
+
         this.onChangeWell = function () {
             self.zonesetsArr = self.SelectedWell.children.find(function (child) {
                 return child.name == 'zonesets';
@@ -5299,8 +5341,9 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onChangeZoneSet = function () {
-            self.zoneArr = self.SelectedZoneSet ? angular.copy(selfSelectedZoneSet.children) : null;
-            console.log(self.zoneArr);
+            self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+            buildDisplayZoneArr();
+            self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
         }
 
         this.genColor = function () {
@@ -5311,7 +5354,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.addZone = function (index, top, bottom) {
-            self.zoneArr.splice(index, 0, {
+            let newZone = {
                 name: 'zone',
                 properties: {
                     fill: {
@@ -5324,23 +5367,31 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     startDepth: parseFloat(top.toFixed(2)),
                     endDepth: parseFloat(bottom.toFixed(2)),
                     idZoneSet: self.SelectedZoneSet.id,
-                    name: top.toFixed(2)
-                }
-            })
+                    name: parseInt(top)
+                },
+                flag: _FNEW
+            };
 
+            self.zoneArr.splice(index, 0, newZone);
             self.SelectedZone = self.SelectedZone + 1;
         }
 
         this.onAddAboveButtonClicked = function () {
-            if (self.zoneArr.length) {
+            if (self.zoneArr.length && self.SelectedZone >= 0) {
                 var zone = self.zoneArr[self.SelectedZone];
-                var pre_zone = self.SelectedZone > 0 ? self.zoneArr[self.SelectedZone - 1] : null;
-                var free = 0;
-                if (self.SelectedZone == 0) {
-                    var free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
-                } else {
-                    var free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
+                var pre_zone = null;
 
+                for(let i = self.SelectedZone - 1; i >=0; i--){
+                    if(self.zoneArr[i].flag != _FDEL){
+                        pre_zone = self.zoneArr[i];
+                        i = -1;
+                    }
+                }
+                var free = 0;
+                if (pre_zone) {
+                    free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
+                } else {
+                    free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
                 }
 
                 if (parseInt(free) > 0) {
@@ -5358,14 +5409,21 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onAddBelowButtonClicked = function () {
-            if (self.zoneArr.length) {
+            if (self.zoneArr.length && self.SelectedZone >= 0) {
                 var zone = self.zoneArr[self.SelectedZone];
-                var next_zone = self.SelectedZone < self.zoneArr.length ? self.zoneArr[self.SelectedZone + 1] : null;
+                var next_zone = null;
+
+                for(let i = self.SelectedZone + 1; i < self.zoneArr.length; i++){
+                    if(self.zoneArr[i].flag != _FDEL){
+                        next_zone = self.zoneArr[i];
+                        i = self.zoneArr.length;
+                    }
+                }
                 var free = 0;
-                if (self.SelectedZone == self.zoneArr.length - 1) {
-                    var free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
+                if (next_zone) {
+                    free = next_zone.properties.startDepth - zone.properties.endDepth >= 50 ? 50 : next_zone.properties.startDepth - zone.properties.endDepth;
                 } else {
-                    var free = zone.properties.endDepth - next_zone.properties.startDepth >= 50 ? 50 : zone.properties.endDepth - next_zone.properties.startDepth;
+                    free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
 
                 }
 
@@ -5383,21 +5441,59 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onDeleteButtonClicked = function () {
-            self.zoneArr.splice(self.SelectedZone, 1);
+            if(self.zoneArr[self.SelectedZone].flag != _FNEW){
+                self.zoneArr[self.SelectedZone].flag = _FDEL;
+            }else{
+                self.zoneArr.splice(self.SelectedZone, 1);
+            }
             self.SelectedZone = self.SelectedZone > 0 ? self.SelectedZone - 1 : -1;
         }
 
         this.onClearAllButtonClicked = function () {
-            self.zoneArr.length = 0;
+            self.zoneArr.map(function(z){
+                z.flag = _FDEL;
+            })
             self.SelectedZone = -1;
         }
 
         this.onApplyButtonClicked = function () {
-            //TODO
+            console.log('Apply');
+            for (let i = self.zoneArr.length - 1; i >= 0; i--){
+                switch (self.zoneArr[i].flag) {
+                    case _FDEL:
+                        wiApiService.removeZone(self.zoneArr[i].id, function(){
+                            self.zoneArr.splice(i, 1);
+                            console.log('removeZone');
+                        });
+                        break;
+                    
+                    case _FNEW:
+                        wiApiService.createZone(self.zoneArr[i].properties, function(){
+                            delete self.zoneArr[i].flag;
+                            console.log('createZone');
+                        });
+                        break;
+                    
+                    case _FEDIT:
+                        wiApiService.editZone(self.zoneArr[i].properties, function(){
+                            delete self.zoneArr[i].flag;
+                            console.log('editZone');
+                        });
+                        break;
+                    
+                    default:
+                        break;
+                }
+
+                if(i == 0){
+                    utils.refreshProjectState();
+                }
+            }
         }
 
         this.onOkButtonClicked = function () {
-            //TODO
+            self.onApplyButtonClicked();
+            console.log('Ok');           
             close(null);
         }
 

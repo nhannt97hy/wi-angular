@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
+    this.cropDisplay = false;
 
     this.$onInit = function () {
         self.slidingbarName = self.name + 'Slidingbar';
