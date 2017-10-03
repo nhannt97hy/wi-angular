@@ -173,6 +173,11 @@ Curve.prototype.setProperties = function(props) {
         }
         if (props.displayMode == 'Symbol') this.line = null;
     }
+
+    if (props.displayMode == 'None') {
+        this.symbol = null;
+        this.line = null;
+    }
 }
 
 /**

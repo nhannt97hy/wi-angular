@@ -924,10 +924,11 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
     function ModalController($scope, close) {
         var self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         console.log(options);
         this.options = options;
         console.log(this.options);
-
+        this.options.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.options.symbolStyle.symbolName);
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         this.styles = [
             [10, 0],
@@ -938,17 +939,19 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
             [10, 4, 2, 4, 2, 4]
         ];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];  
 
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolStrokeStyle, function (colorStr) {
                 self.options.symbolStyle.symbolStrokeStyle = colorStr;
             });
         };
-        this.solidFillColor = function () {
+        this.fillColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolFillStyle, function (colorStr) {
                 self.options.symbolStyle.symbolFillStyle = colorStr;
+                self.options.symbolStyle.symbolStrokeStyle = colorStr;
             });
-        }
+        };
         this.onOkButtonClicked = function () {
             close(self.options);
         };
@@ -1025,6 +1028,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         }
         this.onOkButtonClicked = function () {
             self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
+            self.symbolOptions.symbolStyle.symbolStrokeStyle = self.symbolOptions.symbolStyle.symbolFillStyle; 
             close(self.lineOptions, self.symbolOptions);
         };
         this.onCancelButtonClicked = function () {
@@ -1080,7 +1084,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             this.lineOptions = {
                 display: false,
                 lineStyle: {
-                    lineColor: "black",
+                    lineColor: "transparent",
                     lineWidth: 1,
                     lineStyle: [0]
                 }
@@ -1104,8 +1108,8 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 symbolStyle: {
                     symbolName: "circle", // cross, diamond, star, triangle, dot, plus
                     symbolSize: 4,
-                    symbolStrokeStyle: "black",
-                    symbolFillStyle: "transparent",
+                    symbolStrokeStyle: "blue",
+                    symbolFillStyle: "blue",
                     symbolLineWidth: 1,
                     symbolLineDash: [10, 0]
                 }
@@ -1159,7 +1163,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 switch (style.symbolStyle.symbolName) {
                     case "circle":
                         context.beginPath();
-                        context.strokeStyle = style.symbolStyle.symbolStrokeStyle;
+                        context.strokeStyle = style.symbolStyle.symbolFillStyle;
                         context.fillStyle = style.symbolStyle.symbolFillStyle;
                         context.lineWidth = style.symbolStyle.symbolLineWidth;
                         context.setLineDash(style.symbolStyle.symbolLineDash);
@@ -2597,6 +2601,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             item.datasetCurve = selectedCurve;
             self.arr.push(item);
         });
+        
         console.log("curveDataset", this.curvesOnDataset, this.arr);
         let customLimit = [{"id": -1, "datasetCurve": "left"}, {"id": -2, "datasetCurve": "right"}, {"id": -3, "datasetCurve": "custom"}];
         this.leftLimit = customLimit.concat(self.curvesOnDataset);
@@ -2772,7 +2777,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     self.lineCurve.push(item);
                 }
             })
-
+            self.curvesChanged.push({
+                _index: index,
+                change: '0'
+            });
             self.curves.push(curveOptions);
             if (curve.line) {
                 lineOptions = {
@@ -2827,12 +2835,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             }
             self.curvesSymbolOptions.push(symbolOptions);
-            self.curvesChanged.push({
-                _index: index,
-                change: '0'
-            });
+            
         });
-        console.log("LINECURVE", this.lineCurve);
+        console.log("LINECURVE", this.lineCurve, this.curves, this.curvesLineOptions, this.curvesSymbolOptions);
         console.log("RRRR", this.selectCurveArr, this.arr);
         /*this.setFillDisplay = function (index) {
             if (self.shadingArr[index].idLeftLine) {
@@ -2988,7 +2993,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 name: 'xx_yy',
                 shadingStyle: "fillPattern",
                 isNegPosFill: false,
-                //isNegPosFilling: false,
                 type: 'left',
                 _index: self.shadingArr.length
             };
@@ -3220,6 +3224,31 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesSymbolOptions[self.__idx]);
             $event.stopPropagation();
         };
+        // this.curveStyleButtonClicked = function (index, $event) {
+        //     let lineOptions = null;
+        //     let symbolOptions = null;
+        //     switch (self.curves[index].displayMode) {
+        //         case "Line":
+        //             lineOptions = self.curvesLineOptions[index];
+        //             break;
+        //         case "Symbol":
+        //             symbolOptions = self.curvesSymbolOptions[index];
+        //             break;
+        //         case "Both":
+        //             lineOptions = self.curvesLineOptions[index];
+        //             symbolOptions = self.curvesSymbolOptions[index];
+        //             break;
+        //         default:
+        //             break;
+        //     }
+        //     console.log("lineSymbol", lineOptions, symbolOptions);
+        //     self.setClickedRowCurve(index);
+        //     DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, self.curvesLineOptions[index], self.curvesSymbolOptions[index], function (lineOptions, symbolOptions) {
+        //         if (lineOptions) self.curvesLineOptions[index] = lineOptions;
+        //         if (symbolOptions) self.curvesSymbolOptions[index] = symbolOptions;
+        //         $event.stopPropagation();
+        //     });
+        // };
         this.colorTrack = function () {
             DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
                 self.props.general.color = colorStr;
@@ -4136,6 +4165,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.selectedZoneSet = null;
 
         this.pointSet = wiD3CrossplotCtrl.pointSet;
+        this.pointSet.pointSymbol = utils.upperCaseFirstLetter(this.pointSet.pointSymbol);
         // this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
