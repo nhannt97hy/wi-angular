@@ -164,7 +164,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function() {
+        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function(histogramProperties) {
             self.linkModels();
             self.getZoneCtrl().zoneUpdate();
 
@@ -188,12 +188,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
 
             var refWindCtrl = self.getWiRefWindCtrl();
-            if (!histogramProperties.referenceCurves || !histogramProperties.referenceCurves.length) {
+            if (!histogramProperties.reference_curves || !histogramProperties.reference_curves.length) {
                 refWindCtrl.removeAllRefCurves();
             }
             else {
                 for (let i = refWindCtrl._viCurves.length - 1; i >= 0; i--) {
-                    if (!histogramProperties.referenceCurves.find(
+                    if (!histogramProperties.reference_curves.find(
                             function(curve) { 
                                 return refWindCtrl._viCurves[i].id == curve.idCurve;
                             }
@@ -203,7 +203,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         refWindCtrl._viCurves.splice(i, 1);
                     }
                 }
-                for (let refCurve of histogramProperties.referenceCurves) {
+                for (let refCurve of histogramProperties.reference_curves) {
                     if (!refWindCtrl._viCurves.find(function(vc) { return vc.id == refCurve.idCurve; })) {
                         let curveModel = utils.getModel('curve', refCurve.idCurve);
                         if (curveModel.idFamily) {

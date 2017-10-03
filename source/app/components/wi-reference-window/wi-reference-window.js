@@ -4,6 +4,7 @@ const moduleName = 'wi-reference-window';
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     let _viCurves = new Array();
+    this._viCurves = _viCurves;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     
     this.$onInit = function () {
