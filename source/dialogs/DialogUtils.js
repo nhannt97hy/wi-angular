@@ -3718,6 +3718,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         this.depthRange = wiD3Ctr.getDepthRange();
 
         this.onOkButtonClicked = function () {
+            console.log(self.depthRange);
             wiD3Ctr.setDepthRange(self.depthRange);
             wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
             close(self);
