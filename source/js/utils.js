@@ -819,7 +819,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         idWell: selectedNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
-        referenceCurve: firstCurve.properties.idCurve
+        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
