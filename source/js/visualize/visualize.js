@@ -147,11 +147,12 @@ exports.removeTooltipLines = function(domSvg) {
 }
 
 exports.sheetDraggable = function(domElem) {
+    return;
     d3.select(domElem)
         .datum({baseX:0})
         .call(d3.drag()
             .on('start', function(d) {
-                console.log('drag start');
+                console.log('drag start', d3.event.wiHeaderClick, d3.event.wiHeaderDrag);
                 d.cursor = d3.select(this).style('cursor');
                 d3.select(this).classed('moving', true);
             })

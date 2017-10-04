@@ -4680,7 +4680,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
-        this.ref_Curves_Arr = angular.copy(histogramModel.properties.reference_curves);
+        this.ref_Curves_Arr = histogramModel.properties.reference_curves?angular.copy(histogramModel.properties.reference_curves):[];
         this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
@@ -4689,7 +4689,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.zoneSetList = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
-        console.log("histofram", this.histogramProps);
+        console.log("histogram", this.histogramProps);
         this.well.children.forEach(function(child, i){
             switch (child.type){
             case 'dataset':
@@ -4865,58 +4865,64 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             return inValid;
         }
 
-        this.onApplyButtonClicked = function(){
+        this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
-            if(self.ref_Curves_Arr && self.ref_Curves_Arr.length){
-                for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--){
-                switch(self.ref_Curves_Arr[i].flag){
-                    case self._FDEL:
-                        wiApiService.removeRefCurve(self.ref_Curves_Arr[i].idReferenceCurve, function(){
-                            self.ref_Curves_Arr.splice(i, 1);
-                            console.log('removeRefCurve');
-                        })
-                        break;
+            if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
+                //for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--)
+                async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
+                    switch(self.ref_Curves_Arr[idx].flag){
+                        case self._FDEL:
+                            wiApiService.removeRefCurve(self.ref_Curves_Arr[idx].idReferenceCurve, function(){
+                                console.log('removeRefCurve');
+                                self.ref_Curves_Arr.splice(idx, 1);
+                                callback();
+                            });
+                            break;
 
-                    case self._FNEW:
-                        if(typeof self.ref_Curves_Arr[i].idCurve === 'undefined'){
-                            self.ref_Curves_Arr.splice(i, 1);
-                        }else{
-                            wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(data){
-                                delete self.ref_Curves_Arr[i].flag;
-                                self.ref_Curves_Arr[i].idReferenceCurve = data.idReferenceCurve;
-                                console.log('createRefCurve');
+                        case self._FNEW:
+                            if(typeof self.ref_Curves_Arr[i].idCurve === 'undefined'){
+                                self.ref_Curves_Arr.splice(i, 1);
+                                callback();
+                            }
+                            else{
+                                wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(data){
+                                    delete self.ref_Curves_Arr[i].flag;
+                                    self.ref_Curves_Arr[i].idReferenceCurve = data.idReferenceCurve;
+                                    console.log('createRefCurve');
+                                    callback();
+                                });
+                            }
+                            break;
+
+                        case self._FEDIT:
+                            wiApiService.editRefCurve(self.ref_Curves_Arr[idx], function(){
+                                delete self.ref_Curves_Arr[idx].flag;
+                                console.log('editRefCurve');
+                                callback();
                             })
-                        }
-                        break;
+                            break;
 
-                    case self._FEDIT:
-                        wiApiService.editRefCurve(self.ref_Curves_Arr[i], function(){
-                            delete self.ref_Curves_Arr[i].flag;
-                            console.log('editRefCurve');
-                        })
-                        break;
-
-                    default:
-                        break;
-                }
-
-                // if(i == 0){
-                    
-                // }
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function(err) {
+                    self.histogramProps.reference_curves = self.ref_Curves_Arr;
+                    histogramModel.properties = self.histogramProps;
+                    wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                        console.log('Return Data', returnData);
+                        if (callback) callback(histogramModel.properties);
+                    });
+                });
             }
+            else {
+                self.histogramProps.reference_curves = self.ref_Curves_Arr;
+                histogramModel.properties = self.histogramProps;
+                wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                    console.log('Return Data', returnData);
+                    if (callback) callback(histogramModel.properties);
+                });
             }
-
-            self.histogramProps.reference_curves = self.ref_Curves_Arr;
-            histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
-                console.log('Return Data', returnData);
-                if (callback) callback(histogramModel.properties);
-                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                //wiD3Ctrl.linkModels();
-                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
-            })
-            
-            
         }
 
         this.onOKButtonClicked = function () {
@@ -5347,7 +5353,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             return child.name == 'zonesets';
                         }).children;
                         self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
-                        _currentZoneSetId = self.zonesetsArr[0].properties.idZoneSet;
+                        _currentZoneSetId = self.SelectedZoneSet?self.SelectedZoneSet.properties.idZoneSet:null;
                         self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
                         self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
                     }

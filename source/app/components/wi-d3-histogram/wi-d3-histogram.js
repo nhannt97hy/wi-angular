@@ -19,6 +19,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let zoneCtrl = null, refWindCtrl;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+    var saveHistogram= utils.debounce(function() {
+            wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
+                console.log('updated');
+            });
+        }, 3000);
+
+    this.saveHistogram = saveHistogram;
+
     this.statistics = {
         length: null,
         min: null,
@@ -117,6 +126,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.refreshHistogram();
         });
     }
+    this.onRefWindCtrlReady = function(refWindCtrl) {
+        refWindCtrl.update(getWell(), self.histogramModel.properties.reference_curves);
+    }
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
@@ -167,10 +179,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function(histogramProperties) {
             self.linkModels();
             self.getZoneCtrl().zoneUpdate();
+            self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves);
 
+            /*
             // Update reference windows TODO !!!
             let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
-            let well = getWell();
             let minY = parseFloat(well.properties.topDepth);
             let maxY = parseFloat(well.properties.bottomDepth);
             let stepY = parseFloat(well.properties.step);
@@ -206,9 +219,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 for (let refCurve of histogramProperties.reference_curves) {
                     if (!refWindCtrl._viCurves.find(function(vc) { return vc.id == refCurve.idCurve; })) {
                         let curveModel = utils.getModel('curve', refCurve.idCurve);
-                        if (curveModel.idFamily) {
+                        if (curveModel.properties.idFamily) {
                             let family = familyArray.find(function(f) {
-                                return f.idFamily == curveModel.idFamily;
+                                return f.idFamily == curveModel.properties.idFamily;
                             });
                             config.minX = family.minScale;
                             config.maxX = family.maxScale;
@@ -226,8 +239,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             }
                         }
                         else {
-                            config.minX = curveModel.minScale;
-                            config.maxX = curveModel.maxScale;
+                            config.minX = curveModel.properties.minScale;
+                            config.maxX = curveModel.properties.maxScale;
                             config.line = { 
                                 color: 'black'
                             }
@@ -237,9 +250,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     }
                 }
             }
+            */
         });
     }
-
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         self.contextMenu = [{
@@ -275,6 +288,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
                 self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
                 self.visHistogram.signal('histogram-update', 'show/hide grid');
+                saveHistogram();
             }
         }, {
             name: "ShowGaussian",
@@ -285,6 +299,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
                 self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
                 self.visHistogram.signal('histogram-update', 'show/hide gaussian');
+                saveHistogram();
             }
         }, {
             name: "ShowAxisYAsPercent",
@@ -297,6 +312,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 else self.histogramModel.properties.plotType = "Frequency";
                 self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
                 self.visHistogram.signal('histogram-update', "update frequency/percentile");
+                saveHistogram();
             }
         }, {
             name: "ShowReferenceWindow",
@@ -313,6 +329,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
                 self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
                 self.visHistogram.signal('histogram-update', "show/hide Cumulative curve");
+                saveHistogram();
             }
         }, {
             name: "ShowTooltip",
