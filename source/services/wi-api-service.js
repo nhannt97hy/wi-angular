@@ -57,6 +57,7 @@ const EDIT_PLOT = '/project/well/plot/edit';
 const DELETE_PLOT = '/project/well/plot/delete';
 const GET_PLOT = '/project/well/plot/info';
 const DUPLICATE_PLOT = '/project/well/plot/duplicate';
+const EXPORT_PLOT = '/project/well/plot/export';
 
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
@@ -231,7 +232,7 @@ var wiApiWorker = function($http, wiComponentService){
                         if(!job.callback) {
                             self.stopWorking();
                             return;
-                        } 
+                        }
                         job.callback(response.data.content);
                     }else if (response.data && response.data.code === 401){
                         window.localStorage.removeItem('token');
@@ -701,7 +702,7 @@ Service.prototype.scaleCurvePromise = function (idCurve) {
     try {
         return this.post(SCALE_CURVE, {idCurve: idCurve});
     } catch (err) {
-        self.getUtils().error(err);        
+        self.getUtils().error(err);
     }
 }
 Service.prototype.asyncScaleCurve = async function (idCurve) {
@@ -711,12 +712,12 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
         await new Promise(function(resolve,reject){
             self.post(SCALE_CURVE, {idCurve: idCurve}, function(response){
                 scale = response;
-                resolve(scale);                
-            }); 
+                resolve(scale);
+            });
         });
         return scale;
     } catch (err) {
-        self.getUtils().error(err);        
+        self.getUtils().error(err);
     }
 }
 
@@ -791,7 +792,7 @@ Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     console.log("createDepthTrack", self);
     let dataRequest = {
         idPlot: idPlot,
-        orderNum: orderNum, 
+        orderNum: orderNum,
         geogetryWidth: 1
     };
     this.post(CREATE_DEPTH_AXIS, dataRequest, callback);
@@ -1083,6 +1084,30 @@ Service.prototype.duplicateLogplot = function (idPlot, idWell, callback) {
     const self = this;
     this.post(DUPLICATE_PLOT, { idPlot: idPlot, idWell: idWell }, callback);
 }
+Service.prototype.exportLogPlot = function (idPlot, callback) {
+    //console.log("HIHIHIHIHIH");
+    let self = this;
+    let dataRequest = {
+        idPlot: idPlot
+    }
+    self.$http({
+        url: self.baseUrl + EXPORT_PLOT,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer',
+            'Authorization' : __USERINFO.token
+        },
+        responseType: "arraybuffer",
+        data: dataRequest
+    }).then(function (res) {
+        callback(res.data, res.headers('Content-Type'));
+    }, function (err) {
+        console.error(err);
+        self.getUtils().error("File not found!");
+    });
+}
+
 // reference_curve apis
 Service.prototype.createRefCurve = function (data, callback) {
     let self = this;
