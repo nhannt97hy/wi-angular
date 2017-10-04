@@ -5404,7 +5404,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.setClickedRow = function (indexRow) {
             self.SelectedZone = indexRow;
         }
-        this.onZoneChanged = function(index) {
+        this.onZoneChanged = function(index, attr) {
             if(typeof self.zoneArr[index].flag === 'undefined'){
                 self.zoneArr[index].flag = _FEDIT;
             }
@@ -5568,10 +5568,31 @@ exports.zoneManagerDialog = function (ModalService, item) {
             })
             self.SelectedZone = -1;
         }
-        
+        this.verify = function(){
+            for (let i = 0; i < self.zoneArr.length - 1; i++){
+                if(self.zoneArr[i].properties.startDepth >= self.zoneArr[i].properties.endDepth)
+                    return false;
+
+                if(self.zoneArr[i].properties.endDepth > self.zoneArr[i+1].properties.startDepth)
+                    return false;
+
+                var unique = [...new Set(self.zoneArr.map(a => a.properties.name))];
+                if(unique.length < self.zoneArr.length) return false; // check unique zone name
+
+            }
+
+            if(self.zoneArr[self.zoneArr.length - 1].properties.startDepth >= self.zoneArr[self.zoneArr.length - 1].properties.endDepth)
+                return false;
+            
+            return true;
+        }
         this.onApplyButtonClicked = function () {
             console.log('Apply');
             if (self.applyingInProgress) return;
+            if(!self.verify()) {
+                utils.error('zones invalid!');
+                return;
+            }
             self.applyingInProgress = true;
             wiComponentService.getComponent("SPINNER").show();
             for (let i = self.zoneArr.length - 1; i >= 0; i--){
