@@ -262,11 +262,11 @@ exports.createZoneSet = function (idWell, callback) {
             name: ret,
             idWell: idWell
         }
-        wiApiService.createZoneSet(zoneSetInfo, function () {
+        wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
             __GLOBAL.$timeout(function () {
                 refreshProjectState();
-                if (callback) callback();
-            })
+                if (callback) callback(dataReturn);
+            });
         });
     });
 }

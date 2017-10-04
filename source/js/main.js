@@ -21,6 +21,7 @@ let wiSlidingbar = require('./wi-slidingbar');
 let wiList = require('./wi-list');
 
 let wiContextMenu = require('./wi-context-menu');
+let wiSpinner = require('./wi-spinner');
 let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
@@ -84,6 +85,7 @@ let app = angular.module('wiapp',
         wiSlidingbar.name,
         wiList.name,
         wiContextMenu.name,
+        wiSpinner.name, 
         wiResizableX.name,
         wiD3Crossplot.name,
         wiD3Histogram.name,
