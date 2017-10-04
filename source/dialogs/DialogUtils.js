@@ -3949,11 +3949,13 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
         self.handleFocus = function (col) {
             self.currentFocus = col.id;
         };
+        let currentInvisibleCursor = -1;
         self.addToCustom = function () {
             if (self.currentFocus > 0) {
                 self.CpCustoms[self.CpCustoms.map(function (e) { return e.id; }).indexOf(self.currentFocus)].color = self.currentColor;
             } else {
-                console.log('please choose one box');
+                currentInvisibleCursor = (currentInvisibleCursor + 1) % self.CpCustoms.length;
+                self.CpCustoms[currentInvisibleCursor].color = self.currentColor;
             }
         };
         self.loadColorCustom = function () {
