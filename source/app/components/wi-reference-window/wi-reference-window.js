@@ -6,6 +6,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let _viCurves = new Array();
     this._viCurves = _viCurves;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+    
     
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);

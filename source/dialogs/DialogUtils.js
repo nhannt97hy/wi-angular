@@ -4878,11 +4878,15 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         break;
 
                     case self._FNEW:
-                        wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(data){
-                            delete self.ref_Curves_Arr[i].flag;
-                            self.ref_Curves_Arr[i].idReferenceCurve = data.idReferenceCurve;
-                            console.log('createRefCurve');
-                        })
+                        if(typeof self.ref_Curves_Arr[i].idCurve === 'undefined'){
+                            self.ref_Curves_Arr.splice(i, 1);
+                        }else{
+                            wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(data){
+                                delete self.ref_Curves_Arr[i].flag;
+                                self.ref_Curves_Arr[i].idReferenceCurve = data.idReferenceCurve;
+                                console.log('createRefCurve');
+                            })
+                        }
                         break;
 
                     case self._FEDIT:
