@@ -2410,7 +2410,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
             if(!self.customFillsCurrent.name) {
-                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
+                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");                
             }
             else {
                 wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
@@ -2503,7 +2503,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 }), 200);
             }
             else {
-                DialogUtils.errorMessageDialog(ModalService, self.errorReason);
+                DialogUtils.errorMessageDialog(ModalService, self.errorReason);                
             }
 
         };
@@ -3608,7 +3608,7 @@ exports.errorMessageDialog = function (ModalService, errorMessage) {
             close(null);
         };
     }
-
+    
     ModalService.showModal({
         templateUrl: 'error-message/error-message-modal.html',
         controller: ModalController,
@@ -5293,7 +5293,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         let self = this;
         let _currentZoneSetId = null;
         this.applyingInProgress = false;
-        
+        let errorMessage = 'Zones are invalid!';
 
         window.zoneMng = this;
         this._FNEW = _FNEW;
@@ -5464,6 +5464,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onChangeZoneSet = function () {
+            _currentZoneSetId = self.SelectedZoneSet.id;
             self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
             buildDisplayZoneArr();
             self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
@@ -5578,70 +5579,105 @@ exports.zoneManagerDialog = function (ModalService, item) {
             self.SelectedZone = -1;
         }
         this.verify = function(){
-            for (let i = 0; i < self.zoneArr.length - 1; i++){
-                if(self.zoneArr[i].properties.startDepth >= self.zoneArr[i].properties.endDepth)
-                    return false;
-
-                if(self.zoneArr[i].properties.endDepth > self.zoneArr[i+1].properties.startDepth)
-                    return false;
-
+            if(self.zoneArr && self.zoneArr.length){
                 var unique = [...new Set(self.zoneArr.map(a => a.properties.name))];
-                if(unique.length < self.zoneArr.length) return false; // check unique zone name
-
+                if(unique.length < self.zoneArr.length) {
+                    return false; // check unique zone name
+                }
+                
+                if( self.zoneArr[0].properties.startDepth < self.SelectedWell.properties.topDepth){
+                    self.zoneArr[0].err = true;
+                    return false;
+                }
+                for (let i = 0; i < self.zoneArr.length - 1; i++){
+                    self.zoneArr[i].err = false;
+                    if(self.zoneArr[i].properties.startDepth >= self.zoneArr[i].properties.endDepth){
+                        self.zoneArr[i].err = true;
+                        return false;
+                    }
+                    
+                    if(self.zoneArr[i].properties.endDepth > self.zoneArr[i+1].properties.startDepth){
+                        self.zoneArr[i].err = true;
+                        self.zoneArr[i+1].err = true;                                            
+                        return false;
+                    }
+                    let last = self.zoneArr[self.zoneArr.length - 1];
+                    if(last.properties.startDepth >= last.properties.endDepth || last.properties.endDepth > self.SelectedWell.properties.bottomDepth){
+                        self.zoneArr[self.zoneArr.length - 1].err = true;                
+                        return false;
+                    }
+                    
+                }
+                return true;
+            }else{
+                return true;
             }
+        }
 
-            if(self.zoneArr[self.zoneArr.length - 1].properties.startDepth >= self.zoneArr[self.zoneArr.length - 1].properties.endDepth)
-                return false;
+        function doApply(callback){
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            if(self.zoneArr && self.zoneArr.length){
+                wiComponentService.getComponent("SPINNER").show();
+                for (let i = self.zoneArr.length - 1; i >= 0; i--){
+                    switch (self.zoneArr[i].flag) {
+                        case _FDEL:
+                            wiApiService.removeZone(self.zoneArr[i].id, function(){
+                                self.zoneArr.splice(i, 1);
+                                console.log('removeZone');
+                            });
+                            break;
+                        
+                        case _FNEW:
+                            wiApiService.createZone(self.zoneArr[i].properties, function(data){
+                                delete self.zoneArr[i].flag;
+                                self.zoneArr[i].id = data.idZone;
+                                self.zoneArr[i].properties.idZone = data.idZone;
+                                console.log('createZone');
+                            });
+                            break;
+                        
+                        case _FEDIT:
+                            wiApiService.editZone(self.zoneArr[i].properties, function(){
+                                delete self.zoneArr[i].flag;
+                                console.log('editZone');
+                            });
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                }
+                utils.refreshProjectState().then(function(){
+                    if(callback) callback();
+                });      
+            }else{
+                if(callback) callback();                
+            }
             
-            return true;
         }
         this.onApplyButtonClicked = function () {
             console.log('Apply');
-            if (self.applyingInProgress) return;
-            if(!self.verify()) {
-                utils.error('zones invalid!');
+            if(self.verify()) {
+                doApply();
+            }else{
+                utils.error(errorMessage);
                 return;
             }
-            self.applyingInProgress = true;
-            wiComponentService.getComponent("SPINNER").show();
-            for (let i = self.zoneArr.length - 1; i >= 0; i--){
-                switch (self.zoneArr[i].flag) {
-                    case _FDEL:
-                        wiApiService.removeZone(self.zoneArr[i].id, function(){
-                            self.zoneArr.splice(i, 1);
-                            console.log('removeZone');
-                        });
-                        break;
-                    
-                    case _FNEW:
-                        wiApiService.createZone(self.zoneArr[i].properties, function(data){
-                            delete self.zoneArr[i].flag;
-                            self.zoneArr[i].id = data.idZone;
-                            self.zoneArr[i].properties.idZone = data.idZone;
-                            console.log('createZone');
-                        });
-                        break;
-                    
-                    case _FEDIT:
-                        wiApiService.editZone(self.zoneArr[i].properties, function(){
-                            delete self.zoneArr[i].flag;
-                            console.log('editZone');
-                        });
-                        break;
-                    
-                    default:
-                        break;
-                }
-            }
-            utils.refreshProjectState();            
         }
 
-        this.onOkButtonClicked = function () {
-            self.onApplyButtonClicked();
-            console.log('Ok');           
-            close(null);
+        this.onOkButtonClicked = function(){
+             console.log('Ok');
+            if(self.verify()) {
+                doApply(function(){
+                    close(null);
+                });
+            }else{
+                utils.error(errorMessage);                
+                return;
+            }   
         }
-
+                   
         this.onCancelButtonClicked = function () {
             close(null);
         }
