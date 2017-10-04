@@ -241,8 +241,9 @@ exports.BlankLogplotButtonClicked = function () {
                 });
             })
             .catch(function(err) {
-                console.error('newBlankLogplotDialog err ' + err);
-                utils.error('newBlankLogplotDialog err ' + err);
+                // console.error('newBlankLogplotDialog err ' + err);
+                // utils.error('newBlankLogplotDialog err ' + err);
+                DialogUtils.errorMessageDialog(ModalService, "Name: " + logplotName + " existed!");
             });
     });
 };
