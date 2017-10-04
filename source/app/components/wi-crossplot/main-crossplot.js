@@ -159,7 +159,10 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                     lineStyle: {
                         lineColor: 'red'
                     },
-                    regType: 'Linear',
+                    regType: 'Exponent',
+                    inverseReg: false,
+                    fitX: 2,
+                    fitY: 3,
                     polygons: [{idPolygon: 1}]
                 },
                 {

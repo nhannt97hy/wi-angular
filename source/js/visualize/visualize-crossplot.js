@@ -733,8 +733,8 @@ Crossplot.prototype.prepareRegressionLines = function() {
             l.func = null;
             return;
         }
-        let func = self.getRegressionFunc(data, l.regType, l.inverseReg);
-
+        let func = self.getRegressionFunc(data, l.regType, l.inverseReg, l.fitX, l.fitY);
+        if (!func) return;
         let start = self.pointSet.scaleLeft;
         let end = self.pointSet.scaleRight;
         let step = (end - start) / 1000;
@@ -760,44 +760,63 @@ Crossplot.prototype.getUserDefineFunc = function(funcStr) {
     catch (e) { return null; }
 }
 
-Crossplot.prototype.getRegressionFunc = function(data, type, inverse) {
+Crossplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY) {
     if (!type) type = 'Linear';
     let reducer = function(sum, current) { return sum + current; };
+    let needFit = fitX != null && fitY != null;
 
-    let getLinearArgs = function(dataX, dataY) {
+    let aWithSign = function(a) {
+        return a == 0 ? '' : (a > 0 ? '+' : '') + a;
+    }
+
+    let getLinearArgs = function(data) {
+        let dataX = data.map(function(d) { return d.x; });
+        let dataY = data.map(function(d) { return d.y; });
+
         let meanX = dataX.reduce(reducer) * 1.0 / dataX.length;
         let meanY = dataY.reduce(reducer) * 1.0 / dataY.length;
 
         let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer);
         let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer);
+        if (type == 'Exponent') console.log('GG', meanX, meanY, XX, XY);
 
         let slope = XY / XX;
         let intercept = meanY - meanX * slope;
         return [slope, intercept];
     }
 
-    let dataX, dataY, args, slope, intercept, func;
+    let args, slope, intercept, func;
 
     if (type == 'Linear') {
-        dataX = data.map(function(d) { return inverse ? 1/d.x : d.x; });
-        dataY = data.map(function(d) { return d.y; });
-        args = getLinearArgs(dataX, dataY);
+        data = data.map(function(d) {
+            return {
+                x: needFit ? (inverse ? 1/d.x - 1/fitX : d.x - fitY) : (inverse ? 1/d.x : d.x),
+                y: needFit ? d.y -fitY : d.y
+            }
+        });
+        if (!data.length) return null;
+        args = getLinearArgs(data);
         slope = args[0];
-        intercept = args[1];
+        intercept = needFit ? (-slope * (inverse ? 1/fitX : fitX) + fitY) : args[1];
         func = function(x) {
             return inverse ? slope/x + intercept :  x*slope + intercept;
         }
         let a = +slope.toFixed(6);
         let b = +intercept.toFixed(6);
-        func.equation = 'y=' + (a == 0 ? '' : (a + (inverse ? '/' : '*') + 'x')) + (b < 0 || a == 0 ? b : ('+' + b));
+        func.equation = 'y=' + (a == 0 ? '' : (a + (inverse ? '/' : '*') + 'x')) + (a == 0 ? b : aWithSign(b));
     }
     else if (type == 'Exponent') {
-        data = data.filter(function(d) { return d.y > 0; });
-        dataX = data.map(function(d) { return inverse ? 1/d.x : d.x; });
-        dataY = data.map(function(d) { return Math.log(d.y) });
-        args = getLinearArgs(dataX, dataY);
+        data = data.map(function(d) {
+            return {
+                x: needFit ? (inverse ? 1/d.x - 1/fitX : d.x - fitX) : (inverse ? 1/d.x : d.x),
+                y: needFit ? Math.log(d.y) - Math.log(fitY) : Math.log(d.y)
+            }
+        }).filter(function(d) { return d.y > 0; });
+
+        if (!data.length) return null;
+        args = getLinearArgs(data);
         slope = Math.exp(args[0]);
-        intercept = Math.exp(args[1]);
+        intercept = needFit ? fitY/Math.pow(slope, inverse ? 1/fitX : fitX) : Math.exp(args[1]);
         func = function(x) {
             return intercept*Math.pow(slope, inverse ? 1/x : x);
         }
@@ -806,12 +825,17 @@ Crossplot.prototype.getRegressionFunc = function(data, type, inverse) {
         func.equation = 'y=' + b + '*' + a + (inverse ? '^(1/x)' : '^x');
     }
     else if (type == 'Power') {
-        data = data.filter(function(d) { return d.x > 0 && d.y > 0; });
-        dataX = data.map(function(d) { return Math.log(inverse ? 1/d.x : d.x); });
-        dataY = data.map(function(d) { return Math.log(d.y); });
-        args = getLinearArgs(dataX, dataY);
+        data = data.map(function(d) {
+            return {
+                x: needFit ? Math.log(inverse ? 1/d.x : d.x) - Math.log(inverse ? 1/fitX : fitX) : Math.log(inverse ? 1/d.x : d.x),
+                y: needFit ? Math.log(d.y) - Math.log(fitY) : Math.log(d.y)
+            }
+        }).filter(function(d) { return d.x > 0 && d.y > 0; });
+
+        if (!data.length) return null;
+        args = getLinearArgs(data);
         slope = args[0];
-        intercept = Math.exp(args[1]);
+        intercept = needFit ? fitY/Math.pow(inverse ? 1/fitX : fitX, slope) : Math.exp(args[1]);
         func = function(x) {
             return intercept*Math.pow(inverse ? 1/x : x, slope);
         }
@@ -820,6 +844,7 @@ Crossplot.prototype.getRegressionFunc = function(data, type, inverse) {
         func.equation = 'y=' + b + (inverse ? '*1/x^' : '*x^') + a;
     }
 
+    if (func.equation.indexOf('NaN') > -1) return null;
     return func;
 }
 

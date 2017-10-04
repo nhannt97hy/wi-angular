@@ -36,6 +36,7 @@ Utils.extend(Drawing, Curve);
  * @param {Number} [config.symbol.lineWidth] - Symbol line width
  * @param {Array} [config.symbol.lineDash] - Symbol line dash
  * @param {Number} [config.symbol.size] - Symbol size
+ * @param {String} [config.symbol.displayAs] - Normal, Cumulative, Mirror, Pid
  */
 function Curve(config) {
     Drawing.call(this, config);
@@ -58,6 +59,7 @@ function Curve(config) {
 
     this.blockPosition = config.blockPosition || 'none';
     this.wrapMode = config.wrapMode || 'none';
+    this.displayAs = config.displayAs || 'Normal';
 
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
@@ -88,6 +90,7 @@ function Curve(config) {
         this.minY = extentY[0];
         this.maxY = extentY[1];
     }
+    this.prevProps = {};
 }
 
 /**
@@ -130,7 +133,8 @@ Curve.prototype.getProperties = function() {
         symbolStrokeStyle: symbol.strokeStyle,
         symbolFillStyle: symbol.fillStyle,
         symbolLineWidth: symbol.lineWidth,
-        symbolLineDash: symbol.lineDash
+        symbolLineDash: symbol.lineDash,
+        displayAs: this.displayAs
     }
 }
 
@@ -139,6 +143,7 @@ Curve.prototype.getProperties = function() {
  */
 Curve.prototype.setProperties = function(props) {
     let self = this;
+    this.prevProps = this.getProperties();
 
     Utils.setIfNotNull(this, 'id', props.idLine);
     Utils.setIfNotNull(this, 'idCurve', props.idCurve);
@@ -152,6 +157,7 @@ Curve.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'scale', Utils.capitalize(props.displayType));
     Utils.setIfNotNull(this, 'blockPosition', Utils.lowercase(props.blockPosition));
     Utils.setIfNotNull(this, 'wrapMode', Utils.lowercase(props.wrapMode));
+    Utils.setIfNotNull(this, 'displayAs', Utils.capitalize(props.displayAs));
 
     if (props.displayMode == 'Both' || props.displayMode == 'Line') {
         this.line = {
@@ -172,6 +178,11 @@ Curve.prototype.setProperties = function(props) {
             lineDash: eval(props.symbolLineDash)
         }
         if (props.displayMode == 'Symbol') this.line = null;
+    }
+
+    if (props.displayMode == 'None') {
+        this.symbol = null;
+        this.line = null;
     }
 }
 
@@ -220,9 +231,10 @@ Curve.prototype.autoScaleX = function(granularity) {
  * Initialize DOM elements
  * @param {Object} plotContainer - The DOM element to contain the curve
  */
-Curve.prototype.init = function(plotContainer) {
+Curve.prototype.init = function(plotContainer, track) {
     Drawing.prototype.init.call(this, plotContainer);
 
+    this.track = track;
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing vi-track-curve')
         .attr('id', this.id)
@@ -330,10 +342,22 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
                 plotLine(self, data, highlight);
             if (self.symbol)
                 plotSymbol(self, data, highlight);
+
+            if (self.displayAs == 'Pid' && (self.line || self.symbol)) {
+                plotPid(self, data, highlight);
+            }
             ctx.restore();
         });
     });
-
+    if (this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative' && this.track) {
+        let cumulativeCurves = this.track.getCurves().filter(function(curve) {
+            return curve.displayAs == 'Cumulative';
+        });
+        let index = cumulativeCurves.indexOf(this);
+        cumulativeCurves.slice(index+1).forEach(function(curve) {
+            curve.doPlot();
+        })
+    }
     return this;
 }
 
@@ -408,6 +432,55 @@ Curve.prototype.calculateDataForBlockPosition = function(originData) {
     return data;
 }
 
+Curve.prototype.calculateDataForDisplayAs = function(originData) {
+    let self = this;
+    let data = [];
+    switch (this.displayAs) {
+        case 'Mirror':
+            let vpX = this.getViewportX();
+            for (let i = originData.length -1; i >= 0; i--) {
+                data.push({
+                    x: vpX[0] - originData[i].x + vpX[1],
+                    y: originData[i].y
+                });
+            }
+            return originData.concat(data);
+        case 'Cumulative':
+            if (!this.track) return originData;
+            let cumulativeCurves = this.track.getCurves().filter(function(curve) {
+                return curve.displayAs == 'Cumulative';
+            });
+            let index = cumulativeCurves.indexOf(this);
+
+            curveDicts = [];
+            let transformX = this.getTransformX();
+            let transformY = this.getTransformY();
+
+            cumulativeCurves.slice(0, index).forEach(function(curve) {
+                let dict = {};
+                curve.data.forEach(function(d) {
+                    let y = transformY(d.y);
+                    let x = transformX(d.x);
+                    if (y != null && x != null && !isNaN(y) && !isNaN(x))
+                        dict[y] = x;
+                });
+                curveDicts.push(dict);
+            });
+
+            originData.forEach(function(d) {
+                let sumX = d.x;
+                curveDicts.forEach(function(dict) {
+                    if (dict[d.y] != null)
+                        sumX += dict[d.y];
+                });
+                data.push({ x: sumX, y: d.y });
+            });
+            return data;
+        default:
+            return originData;
+    }
+}
+
 Curve.prototype.addHighlightEffect = function() {
     let ctx = this.ctx;
     ctx.shadowColor = Utils.convertColorToRGB(ctx.strokeStyle) || 'black';
@@ -429,12 +502,22 @@ function plotLine(curve, data, highlight) {
     if (line.dash) ctx.setLineDash(line.dash);
 
     let samples = curve.calculateDataForBlockPosition(data);
+
+    if (curve.displayAs == 'Cumulative' || curve.displayAs == 'Mirror')
+        samples = curve.calculateDataForDisplayAs(samples);
+
     ctx.beginPath();
     ctx.moveTo(samples[0].x, samples[0].y);
     samples.forEach(function(d) {
         ctx.lineTo(d.x, d.y);
     });
     ctx.stroke();
+    if (curve.displayAs == 'Mirror') {
+        let color = d3.color(ctx.strokeStyle);
+        color.opacity = 0.5;
+        ctx.fillStyle = color.toString();
+        ctx.fill();
+    }
 
     ctx.restore();
 }
@@ -459,4 +542,27 @@ function plotSymbol(curve, data, highlight) {
     data.forEach(function(d) {
         plotFunc.call(helper, d.x, d.y);
     });
+}
+
+function plotPid(curve, data, highlight) {
+    let ctx = curve.ctx;
+    ctx.save();
+
+    ctx.strokeStyle = (curve.line || {}).color || (curve.symbol || {}).lineColor;
+    ctx.lineWidth = (curve.line || {}).width || (curve.symbol || {}).lineWidth;
+
+    if (highlight) curve.addHighlightEffect();
+
+    let transformX = curve.getTransformX();
+    let baseX = (Utils.capitalize(curve.scale) == 'Linear') ? transformX(0) : transformX(0.01);
+
+    ctx.beginPath();
+    data.forEach(function(d) {
+        ctx.moveTo(baseX, d.y);
+        ctx.lineTo(d.x, d.y);
+    })
+    ctx.stroke();
+
+
+    ctx.restore();
 }

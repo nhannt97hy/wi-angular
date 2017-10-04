@@ -246,7 +246,7 @@ exports.createZoneSet = function (idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
-    if (selectedNode.type == 'zonesets') {
+    if (selectedNode && selectedNode.type == 'zonesets') {
         idWell = selectedNode.properties.idWell;
     }
     if (!idWell) return;
@@ -386,7 +386,13 @@ function histogramToTreeConfig(histogram) {
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,
-        // zones: histogram.zoneset != null ? histogram.zoneset.zones : null
+        referenceTopDepth: histogram.referenceTopDepth,
+        referenceBottomDepth: histogram.referenceBottomDepth,
+        referenceScale: histogram.referenceScale,
+        referenceVertLineNumber: histogram.referenceVertLineNumber,
+        referenceDisplay: histogram.referenceDisplay,
+        referenceShowDepthGrid: histogram.referenceShowDepthGrid,
+        reference_curves: histogram.reference_curves
     };
     histogramModel.data = {
         childExpanded: false,
@@ -813,7 +819,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         idWell: selectedNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
-        referenceCurve: firstCurve.properties.idCurve
+        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
@@ -1281,7 +1287,7 @@ exports.exportCurve = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = selectedNode.properties.name;
+        let fileName = selectedNode.properties.name + '.xlsx';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';
@@ -1521,6 +1527,7 @@ function editProperty(item) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
+    let wiComponentService = __GLOBAL.wiComponentService;
     let newProperties = angular.copy(properties);
     newProperties[item.key] = item.value;
     if (JSON.stringify(newProperties) === JSON.stringify(properties)) return;
@@ -1536,8 +1543,15 @@ function editProperty(item) {
             });
             break;
         case 'curve':
+            if (item.key == 'idFamily') {
+                newProperties.unit = getListFamily().find(family => family.idFamily == newProperties.idFamily).unit;
+                selectedNode.properties.idFamily = newProperties.idFamily;
+                selectedNode.properties.unit = newProperties.unit;
+            }
             wiApiService.editCurve(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    wiComponentService.emit('update-properties', selectedNode);
+                }).catch();
             });
             break;
         case 'zoneset':
