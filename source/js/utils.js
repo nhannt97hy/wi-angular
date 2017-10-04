@@ -1287,7 +1287,7 @@ exports.exportCurve = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = selectedNode.properties.name;
+        let fileName = selectedNode.properties.name + '.xlsx';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';
