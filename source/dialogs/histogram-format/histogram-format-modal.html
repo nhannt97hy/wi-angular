@@ -312,7 +312,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th></th>
-                                                        <th>Curve Name</th>
+                                                        <th style="width:25%">Curve Name</th>
                                                         <th>Left</th>
                                                         <th>Right</th>
                                                         <th>Vis.</th>
@@ -321,36 +321,52 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr ng-repeat="curve in wiModal.ref_Curves_Arr"
+                                                    <tr ng-repeat="ref_curve in wiModal.ref_Curves_Arr"
                                                     ng-click="wiModal.setClickedRow($index)"
-                                                    ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': curve.flag === wiModal._FDEL}">
+                                                    ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}">
                                                         <td>
                                                             <i ng-class="{'fa fa-chevron-circle-right': $index == wiModal.SelectedRefCurve}"></i>
                                                         </td>
                                                         <td>
-                                                            <ui-select ng-model="wiModal.SelectedCurve"
-                                                                ng-change="wiModal.onSelectCurveChange()">
-                                                                <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
+                                                            <ui-select ng-model="ref_curve.curve"
+                                                                ng-change="wiModal.onRefCurveChange($index, 'curve')">
+                                                                <ui-select-match placeholder='Select a curve'>{{ref_curve.curve.name}}</ui-select-match>
                                                                 <ui-select-choices group-by="'datasetName'"
-                                                                repeat='curve in wiModal.curvesArr | filter: $select.search'>
+                                                                repeat='curve.properties as curve in wiModal.curvesArr | filter: $select.search'>
                                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                                             </ui-select-choices>
                                                             </ui-select>
                                                         </td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
+                                                        <td>
+                                                            <input type="number" class="form-control wi-form-control"
+                                                            ng-model="ref_curve.left" step='1'
+                                                            ng-change="wiModal.onRefCurveChange($index)">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control wi-form-control"
+                                                            ng-model="ref_curve.right" step='1'
+                                                            ng-change="wiModal.onRefCurveChange($index)">
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox" ng-model="ref_curve.visiable"
+                                                            ng-change="wiModal.onRefCurveChange($index)">
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox" ng-model="ref_curve.log"
+                                                            ng-change="wiModal.onRefCurveChange($index)">
+                                                        </td>
+                                                        <td>
+                                                            <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" class="form-control wi-form-control width-80px thick-border" type="button">
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                         <div class="col-sm-1 padding-0">
-                                            <button type="button" class="btn btn-default">
+                                            <button type="button" class="btn btn-default" ng-click="wiModal.DeleteRefCurve()">
                                                 <i class="delete-16x16"></i>
                                             </button>
-                                            <button type="button" class="btn btn-default">
+                                            <button type="button" class="btn btn-default" ng-click="wiModal.AddRefCurve()">
                                                 <i class="plus-16x16"></i>
                                             </button>
                                         </div>

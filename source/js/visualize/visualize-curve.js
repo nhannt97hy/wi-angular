@@ -90,6 +90,7 @@ function Curve(config) {
         this.minY = extentY[0];
         this.maxY = extentY[1];
     }
+    this.prevProps = {};
 }
 
 /**
@@ -142,6 +143,7 @@ Curve.prototype.getProperties = function() {
  */
 Curve.prototype.setProperties = function(props) {
     let self = this;
+    this.prevProps = this.getProperties();
 
     Utils.setIfNotNull(this, 'id', props.idLine);
     Utils.setIfNotNull(this, 'idCurve', props.idCurve);
@@ -347,7 +349,15 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
             ctx.restore();
         });
     });
-
+    if (this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative' && this.track) {
+        let cumulativeCurves = this.track.getCurves().filter(function(curve) {
+            return curve.displayAs == 'Cumulative';
+        });
+        let index = cumulativeCurves.indexOf(this);
+        cumulativeCurves.slice(index+1).forEach(function(curve) {
+            curve.doPlot();
+        })
+    }
     return this;
 }
 

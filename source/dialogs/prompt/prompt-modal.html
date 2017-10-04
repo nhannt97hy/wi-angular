@@ -8,8 +8,8 @@
 			<div class="modal-body text-center">
 				<form class="form-horizontal" action="" name="modalBlankPlot">
 					<div class="form-group">
-						<label class="control-label col-sm-3" for="name">{{wiModal.inputName}}:</label>							
-						<div class="col-sm-9">
+						<label class="control-label col-sm-4" for="name">{{wiModal.inputName}}:</label>
+						<div class="col-sm-8">
 							<input ng-if="!wiModal.type" type="text" class="form-control"
 								ng-model="wiModal.input"
                                 wi-enter="wiModal.onOkButtonClicked()" 
@@ -17,8 +17,9 @@
                                 ng-blur="wiModal.onBlur();"
 								required autofocus>
 							<select ng-if="wiModal.type == 'select'"
+											class="form-control wi-form-control"
 											ng-model="wiModal.input"
-											ng-options="option.value as option.label for option in wiModal.options"></select>
+											ng-options="option as option.label for option in wiModal.options"></select>
 						</div>
 					</div>
 				</form>

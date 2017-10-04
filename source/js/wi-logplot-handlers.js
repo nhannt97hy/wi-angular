@@ -14,11 +14,44 @@ exports.EditFormatButtonClicked = function () {
 };
 
 exports.SaveAsLogplotButtonClicked = function () {
-    console.log('SaveAsLogplotButton is clicked');
+    // console.log('SaveAsLogplotButton is clicked');
+    const wiApiService = this.wiApiService;
+    const wiLogplot = this.wiLogplot;
+    wiApiService.exportLogPlot(wiLogplot.id, function (data, type) {
+        console.log("DATA NA`" + data);
+        let blob = new Blob([data], {
+            type: type
+        });
+        let a = document.createElement('a');
+        let fileName = wiLogplot.getLogplotModel().properties.name + '.plot';
+        a.download = fileName;
+        a.href = URL.createObjectURL(blob);
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.parentNode.removeChild(a);
+    });
 };
 
-exports.SaveAsButtonClicked = function () {
-    console.log('SaveAsButton is clicked');
+exports.DuplicateButtonClicked = function () {
+    const wiComponentService = this.wiComponentService;
+    const wiApiService = this.wiApiService;
+    const wiLogplot = this.wiLogplot;
+    const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const wellOptions = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).wells.map(well => ({ value: well.idWell, label: well.name }));
+    const promptConfig = {
+        title: 'Duplicate Logplot',
+        inputName: 'Duplicate to Well',
+        type: "select",
+        options: wellOptions,
+        input: wellOptions.find(option => option.value == self.id)
+    }
+    DialogUtils.promptDialog(this.ModalService, promptConfig, function (idWell) {
+        wiApiService.duplicateLogplot(wiLogplot.id, idWell.value, function () {
+            Utils.refreshProjectState();
+        });
+    });
 };
 
 exports.PrintButtonClicked = function () {

@@ -247,7 +247,7 @@ exports.createZoneSet = function (idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
-    if (selectedNode.type == 'zonesets') {
+    if (selectedNode && selectedNode.type == 'zonesets') {
         idWell = selectedNode.properties.idWell;
     }
     if (!idWell) return;
@@ -263,11 +263,11 @@ exports.createZoneSet = function (idWell, callback) {
             name: ret,
             idWell: idWell
         }
-        wiApiService.createZoneSet(zoneSetInfo, function () {
+        wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
             __GLOBAL.$timeout(function () {
                 refreshProjectState();
-                if (callback) callback();
-            })
+                if (callback) callback(dataReturn);
+            });
         });
     });
 }
@@ -827,11 +827,10 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         idWell: selectedNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
-        referenceCurve: firstCurve.properties.idCurve
+        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
-            console.log("Res", response);
             if(!response.name){
                 reject(response);
             } else {
@@ -1301,7 +1300,7 @@ exports.exportCurve = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = selectedNode.properties.name;
+        let fileName = selectedNode.properties.name + '.xlsx';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';

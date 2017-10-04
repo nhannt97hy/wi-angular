@@ -234,7 +234,6 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         modal.element.modal('show');
         $(modal.element[0].children[0]).draggable();
         window.TESTMODAL = modal.element;
-        console.log('====+++====', $(modal.element[0]), $(modal.element[0]).find('input'));
         setTimeout(function() {
             $(modal.element[0]).find('input').focus();
         }, 500);
@@ -3682,6 +3681,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         this.depthRange = wiD3Ctr.getDepthRange();
 
         this.onOkButtonClicked = function () {
+            console.log(self.depthRange);
             wiD3Ctr.setDepthRange(self.depthRange);
             wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
             close(self);
@@ -3931,7 +3931,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             return colorToString(color);
         };
         self.CpCustoms = null;
-        self.currentFocus = 0;
+        self.currentFocus = 1;
         self.BoxBorder = function (id) {
             if (self.currentFocus === id) {
                 return '2px solid black';
@@ -3943,11 +3943,9 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             self.currentFocus = col.id;
         };
         self.addToCustom = function () {
-            if (self.currentFocus > 0) {
-                self.CpCustoms[self.CpCustoms.map(function (e) { return e.id; }).indexOf(self.currentFocus)].color = self.currentColor;
-            } else {
-                console.log('please choose one box');
-            }
+            self.CpCustoms[self.currentFocus-1].color = self.currentColor;
+            self.currentFocus = (self.currentFocus + 1);
+            if(self.currentFocus > 16) self.currentFocus = 1;
         };
         self.loadColorCustom = function () {
             let colorString = $window.localStorage.getItem('colorCustoms');
@@ -4673,13 +4671,17 @@ exports.newBlankHistogramDialog = function(ModalService, callback){
 exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
+        window.hisFormat = this;
+        this._FNEW = 1;
+        this._FEDIT = 2;
+        this._FDEL = 3;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
         this.ref_Curves_Arr = angular.copy(histogramModel.properties.reference_curves);
-        this.SelectedRefCurve = 0;
+        this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
         this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
@@ -4794,6 +4796,60 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             });
         }
 
+        this.chooseRefCurveColor = function(index){
+            DialogUtils.colorPickerDialog(ModalService, self.ref_Curves_Arr[index].color, function (colorStr) {
+                self.ref_Curves_Arr[index].color = colorStr;
+            });
+        }
+
+        this.setClickedRow = function(index){
+            self.SelectedRefCurve = index;
+        }
+
+        this.onRefCurveChange = function(index, curve){
+            self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
+            if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
+                self.ref_Curves_Arr[index].flag = self._FEDIT;
+            }
+            if(curve) {
+                if(self.ref_Curves_Arr[index].curve.minScale != null && self.ref_Curves_Arr[index].curve.maxScale != null){
+                    self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
+                    self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
+                }else{
+                    wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
+                        console.log('scale curve');
+                        $timeout(function(){
+                            self.ref_Curves_Arr[index].left = scale.minScale;
+                            self.ref_Curves_Arr[index].right = scale.maxScale;
+                        });
+                    })        
+                }
+            }
+        }
+
+        this.AddRefCurve = function(){
+            let newRefCurve = {
+                color: "rgb(0,0,0)",
+                idHistogram: self.histogramProps.idHistogram,
+                left: 0,
+                right: 0,
+                visiable: true,
+                log: true,
+                flag: self._FNEW
+            }
+
+            self.ref_Curves_Arr.push(newRefCurve);
+        }
+
+        this.DeleteRefCurve = function(){
+            if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
+                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
+            }else{
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            }
+            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
+        }
+
         this.IsNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
@@ -4811,6 +4867,42 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function(){
             console.log("on Apply clicked");
+            if(self.ref_Curves_Arr && self.ref_Curves_Arr.length){
+                for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--){
+                switch(self.ref_Curves_Arr[i].flag){
+                    case self._FDEL:
+                        wiApiService.removeRefCurve(self.ref_Curves_Arr[i].idReferenceCurve, function(){
+                            self.ref_Curves_Arr.splice(i, 1);
+                            console.log('removeRefCurve');
+                        })
+                        break;
+
+                    case self._FNEW:
+                        wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(data){
+                            delete self.ref_Curves_Arr[i].flag;
+                            self.ref_Curves_Arr[i].idReferenceCurve = data.idReferenceCurve;
+                            console.log('createRefCurve');
+                        })
+                        break;
+
+                    case self._FEDIT:
+                        wiApiService.editRefCurve(self.ref_Curves_Arr[i], function(){
+                            delete self.ref_Curves_Arr[i].flag;
+                            console.log('editRefCurve');
+                        })
+                        break;
+
+                    default:
+                        break;
+                }
+
+                // if(i == 0){
+                    
+                // }
+            }
+            }
+
+            self.histogramProps.reference_curves = self.ref_Curves_Arr;
             histogramModel.properties = self.histogramProps;
             wiApiService.editHistogram(histogramModel.properties, function(returnData) {
                 console.log('Return Data', returnData);
@@ -4819,19 +4911,22 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                 //wiD3Ctrl.linkModels();
                 //wiD3Ctrl.getZoneCtrl().zoneUpdate();
             })
+            
+            
         }
 
         this.onOKButtonClicked = function () {
+            self.onApplyButtonClicked();
             console.log("on OK clicked");
-            histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function(returnData){
-                console.log('Return Data', returnData);
-                if (callback) callback(histogramModel.properties);
+            // histogramModel.properties = self.histogramProps;
+            // wiApiService.editHistogram(histogramModel.properties, function(returnData){
+            //     console.log('Return Data', returnData);
+            //     if (callback) callback(histogramModel.properties);
                 //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
                 //wiD3Ctrl.linkModels();
                 //wiD3Ctrl.getZoneCtrl().zoneUpdate();
-                close(null);
-            });
+            // });
+            close(null);
         }
         this.onCancelButtonClicked = function () {
             close(null);
@@ -5196,6 +5291,10 @@ exports.zoneManagerDialog = function (ModalService, item) {
     const _FDEL = 3;
     function ModalController(close, wiComponentService, wiApiService, $timeout, $scope) {
         let self = this;
+        let _currentZoneSetId = null;
+        this.applyingInProgress = false;
+        
+
         window.zoneMng = this;
         this._FNEW = _FNEW;
         this._FEDIT = _FEDIT;
@@ -5214,7 +5313,13 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
         
         this.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
-
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.refreshZoneSets();
+                setSelectedZoneSet(_currentZoneSetId);
+            }, 0);
+        });
         switch (item.name) {
             case 'well':
                 self.wellArr.forEach(function(well, i){
@@ -5238,6 +5343,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             return child.name == 'zonesets';
                         }).children;
                         self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+                        _currentZoneSetId = self.zonesetsArr[0].properties.idZoneSet;
                         self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
                         self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
                     }
@@ -5252,13 +5358,9 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             return child.name == 'zonesets';
                         }).children;
 
-                        self.zonesetsArr.forEach(function(zoneset, j){
-                            if(zoneset.id == item.id){
-                                self.SelectedZoneSet = self.zonesetsArr[j];
-                                self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
-                                self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
-                            }
-                        })
+                        _currentZoneSetId = item.id;
+                        setSelectedZoneSet(_currentZoneSetId);
+                        
                     }
                 })
                 break;
@@ -5290,6 +5392,16 @@ exports.zoneManagerDialog = function (ModalService, item) {
         buildDisplayZoneArr();
         
         // METHOD Section begins
+        function setSelectedZoneSet(cZonesetId) {
+            self.SelectedZone = null;
+            self.zonesetsArr.forEach(function(zoneset, j){
+                if(zoneset.id == cZonesetId){
+                    self.SelectedZoneSet = self.zonesetsArr[j];
+                    self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+                    self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
+                }
+            });
+        }
         function buildDisplayZoneArr() {
             if(self.zoneArr && self.zoneArr.length){
                 self.zoneArr.sort(function(z1, z2) {
@@ -5337,10 +5449,9 @@ exports.zoneManagerDialog = function (ModalService, item) {
             buildDisplayZoneArr();
         }
         this.onAddZoneSet = function(){
-            utils.createZoneSet(self.SelectedWell.id, function () {
-                $timeout(function(){
-                    self.refreshZoneSets();
-                }, 1000);
+            utils.createZoneSet(self.SelectedWell.id, function (dataReturn) {
+                console.log('zoneSet created', dataReturn);
+                _currentZoneSetId = dataReturn.idZoneSet;
             });
         }
 
@@ -5417,7 +5528,6 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
                 self.addZone(0, top, bottom);
             }
-
         }
 
         this.onAddBelowButtonClicked = function () {
@@ -5467,9 +5577,12 @@ exports.zoneManagerDialog = function (ModalService, item) {
             })
             self.SelectedZone = -1;
         }
-
+        
         this.onApplyButtonClicked = function () {
             console.log('Apply');
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            wiComponentService.getComponent("SPINNER").show();
             for (let i = self.zoneArr.length - 1; i >= 0; i--){
                 switch (self.zoneArr[i].flag) {
                     case _FDEL:
@@ -5480,8 +5593,10 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         break;
                     
                     case _FNEW:
-                        wiApiService.createZone(self.zoneArr[i].properties, function(){
+                        wiApiService.createZone(self.zoneArr[i].properties, function(data){
                             delete self.zoneArr[i].flag;
+                            self.zoneArr[i].id = data.idZone;
+                            self.zoneArr[i].properties.idZone = data.idZone;
                             console.log('createZone');
                         });
                         break;
@@ -5496,11 +5611,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     default:
                         break;
                 }
-
-                if(i == 0){
-                    utils.refreshProjectState();
-                }
             }
+            utils.refreshProjectState();            
         }
 
         this.onOkButtonClicked = function () {
