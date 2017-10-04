@@ -12,6 +12,7 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control"
                                        ng-model="wiModal.name"
+                                       ng-blur="wiModal.onBlur();"
                                        ng-click="wiModal.error = null"
                                        wi-enter="wiModal.onOkButtonClicked()"
                                        required>

@@ -12,7 +12,7 @@
 						<div class="col-sm-9">
 							<input ng-if="!wiModal.type" type="text" class="form-control"
 								ng-model="wiModal.input"
-                                wi-enter="wiModal.close(wiModal.input)" 
+                                wi-enter="wiModal.onOkButtonClicked()" 
                                 ng-click="wiModal.error = null"
                                 ng-blur="wiModal.onBlur();"
 								required autofocus>
@@ -24,7 +24,8 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'>Ok</button>
+				<button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'
+						ng-disabled="!wiModal.input.length">Ok</button>
 				<button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>Cancel</button>
 			</div>
 		</div>

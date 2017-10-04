@@ -245,6 +245,7 @@ var wiApiWorker = function($http){
                 .catch(function(err){
                     self.isFree = true;
                     console.log(err);
+                    job.callback(err);
                     //self.getUtils().error(err);
                 });
 
@@ -953,7 +954,7 @@ Service.prototype.removeZone = function (idZone, callback) {
 Service.prototype.createCrossplot = function (data, callback) {
     let self = this;
     this.post(CREATE_CROSSPLOT, data, function (returnData) {
-            callback(returnData);
+        callback(returnData);
         });
 }
 Service.prototype.editCrossplot = function (data, callback) {

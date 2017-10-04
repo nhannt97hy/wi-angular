@@ -130,6 +130,7 @@ function lineToTreeConfig(line) {
         showHeader: line.showHeader,
         blockPosition: line.blockPosition,
         wrapMode: line.wrapMode,
+        displayAs: line.displayAs,
         line: null,
         symbol: null
     };
@@ -336,6 +337,13 @@ function crossplotToTreeConfig(crossplot) {
         idWell: crossplot.idWell,
         idCrossplot: crossplot.idCrossPlot,
         name: crossplot.name,
+        referenceTopDepth: crossplot.referenceTopDepth,
+        referenceBottomDepth: crossplot.referenceBottomDepth,
+        referenceScale: crossplot.referenceScale,
+        referenceVertLineNumber: crossplot.referenceVertLineNumber,
+        referenceDisplay: crossplot.referenceDisplay,
+        referenceShowDepthGrid: crossplot.referenceShowDepthGrid,
+        referenceCurves: crossplot.reference_curves,
         pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
     };
     crossplotModel.data = {
@@ -823,7 +831,13 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
-            resolve(response);
+            console.log("Res", response);
+            if(!response.name){
+                reject(response);
+            } else {
+                resolve(response);
+            }
+            
         });
     });
 };
@@ -1468,7 +1482,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         displayMode: getDisplayMode(currentCurve),
         wrapMode: currentCurve.wrapMode.capitalize(),
         blockPosition: currentCurve.blockPosition.capitalize(),
-        displayAs: "Normal" //default
+        displayAs: currentCurve.displayAs.capitalize()
     }
     return options;
 }
@@ -1589,7 +1603,11 @@ exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, cr
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(route, dataRequest, function(response){
-            resolve(response);
+            if(!response.data){
+                reject(response);
+            } else {
+                resolve(response);
+            }
         });
     });
 };
@@ -1602,15 +1620,20 @@ exports.createPointSet = function (pointSetData, callback) {
 }
 
 exports.createCrossplot = function (idWell, crossplotName, callback) {
-    __GLOBAL.wiApiService.createCrossplot({
+    let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
+    let dataRequest = {
         idWell: idWell,
         name: crossplotName
-    }, function (crossplot) {
-        console.log("Created new crossplot", crossplot);
-        let crossplotModel = crossplotToTreeConfig(crossplot);
-        refreshProjectState().then(function () {
-            openCrossplotTab(crossplotModel, callback);
-        })
+    }
+    __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
+        if(!crossplot.name){
+            DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Name: " + dataRequest.name + " existed!");
+        } else {
+            let crossplotModel = crossplotToTreeConfig(crossplot);
+            refreshProjectState().then(function () {
+                openCrossplotTab(crossplotModel, callback);
+            });
+        }
     })
 }
 
@@ -1693,7 +1716,11 @@ exports.createNewBlankHistogram = function (wiComponentService, wiApiService, hi
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest, function(response){
-            resolve(response);
+            if(!response.name){
+                reject(response);
+            } else {
+                resolve(response);
+            }
         });
     });
 };

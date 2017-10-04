@@ -10,12 +10,12 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="name">Name:</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="focusF"
+                            <input type="text" class="form-control"
                                    ng-model="wiModal.name"
                                    ng-click="wiModal.error = null"
+                                   ng-blur="wiModal.onBlur();"
                                    wi-enter="wiModal.onOkButtonClicked()"
-                                   tabindex="-1"
-                                   required>
+                                   required autofocus>
                         </div>
                     </div>
                 </form>
