@@ -149,7 +149,7 @@ function Service(baseUrl, $http, wiComponentService, Upload) {
     this.Upload = Upload;
     this.wiComponentService = wiComponentService;
 
-    this.wiApiWorker = new wiApiWorker($http);
+    this.wiApiWorker = new wiApiWorker($http, wiComponentService);
 }
 
 Service.prototype.GET_PROJECT = GET_PROJECT; //'/project/fullinfo';
@@ -201,21 +201,23 @@ Service.prototype.getUtils = function () {
 */
 const WORKER_REQUEST_DELAY = 300; // 300ms
 const MAXIMUM_REQUEST = 4;
-var wiApiWorker = function($http){
+var wiApiWorker = function($http, wiComponentService){
     var self = this;
+    var timerHandle = null;
     this.jobQueue = [];
-    this.isFree = true;
+    //this.isFree = true;
     this.enqueueJob = function(newJob){
         this.jobQueue.push(newJob);
         this.working();
     }
     this.currentRequestWorking = 0;
     this.$http = $http;
+    this.wiComponentService = wiComponentService;
     this.dequeueJob = function(){
         return this.jobQueue.shift();
     }
     this.working = function(){
-        if(self.isFree && self.jobQueue.length){
+        if(self.isAvailable() && self.jobQueue.length){
             self.startWorking();
             var job = self.dequeueJob();
             var now = new Date();
@@ -236,7 +238,7 @@ var wiApiWorker = function($http){
                         window.localStorage.removeItem('username');
                         window.localStorage.removeItem('password');
                         window.localStorage.removeItem('rememberAuth');
-                        //location.reload();
+                        location.reload();
                     }else if (response.data) {
                         return new Promise(function(resolve, reject){
                             reject(response.data.reason)
@@ -249,42 +251,50 @@ var wiApiWorker = function($http){
                     self.stopWorking();
                 })
                 .catch(function(err){
-                    self.isFree = true;
-                    console.log(err);
+                    //self.isFree = true;
+                    self.stopWorking();
+                    console.error(err);
                     //self.getUtils().error(err);
                 });
 
-        } else if( self.jobQueue.length) {
+        } 
+        /*
+        else if( self.jobQueue.length ) {
             setTimeout(function(){
                 // console.log('worker: current Queued jobs: ', self.jobQueue);
-                /*
-                let now = new Date();
-                console.log('worker continue working after ', WORKER_REQUEST_DELAY, 'ms');
-                console.log('worker now: ', now.getHours()+" : "+now.getMinutes()+" : "+now.getSeconds()+" : "+now.getMilliseconds());
-                */
                 self.working();
             }, WORKER_REQUEST_DELAY); // delay 300ms before continue do request to server.
-        } else {
-            setTimeout(function(){
-                // console.log('worker continue working after', WORKER_REQUEST_DELAY, 'ms');
-                self.working();
-            }, WORKER_REQUEST_DELAY); 
+        } */
+        else {
+            if (!timerHandle) {
+                timerHandle = setTimeout(function() {
+                    // console.log('worker continue working after', WORKER_REQUEST_DELAY, 'ms');
+                    self.working();
+                }, WORKER_REQUEST_DELAY);
+                timerHandle = null; 
+            }
         }
     }
 }
 wiApiWorker.prototype.startWorking = function(){
     let self = this;
+    self.wiComponentService.getComponent('SPINNER').show();
     self.currentRequestWorking ++;
-    if(self.currentRequestWorking >= MAXIMUM_REQUEST){
-        self.isFree = false;
-    }
+    // if(self.currentRequestWorking >= MAXIMUM_REQUEST){
+    //     self.isFree = false;
+    // }
+}
+wiApiWorker.prototype.isAvailable = function() {
+    return this.currentRequestWorking < MAXIMUM_REQUEST;
 }
 wiApiWorker.prototype.stopWorking = function(){
     let self = this;
     self.currentRequestWorking --;
-    if(self.currentRequestWorking < MAXIMUM_REQUEST){
-        self.isFree = true;    
-    }
+    self.wiComponentService.getComponent('SPINNER').hide();    
+    // if(self.currentRequestWorking < MAXIMUM_REQUEST){
+    //     self.isFree = true;    
+    // }
+    self.working();
 }
 
 Service.prototype.post = function (route, payload, callback) {

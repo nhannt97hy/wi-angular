@@ -4869,8 +4869,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         break;
 
                     case self._FNEW:
-                        wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(){
+                        wiApiService.createRefCurve(self.ref_Curves_Arr[i], function(data){
                             delete self.ref_Curves_Arr[i].flag;
+                            self.ref_Curves_Arr[i].idReferenceCurve = data.idReferenceCurve;
                             console.log('createRefCurve');
                         })
                         break;
@@ -5281,6 +5282,10 @@ exports.zoneManagerDialog = function (ModalService, item) {
     const _FDEL = 3;
     function ModalController(close, wiComponentService, wiApiService, $timeout, $scope) {
         let self = this;
+        let _currentZoneSetId = null;
+        this.applyingInProgress = false;
+        
+
         window.zoneMng = this;
         this._FNEW = _FNEW;
         this._FEDIT = _FEDIT;
@@ -5299,7 +5304,13 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
         
         this.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
-
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.refreshZoneSets();
+                setSelectedZoneSet(_currentZoneSetId);
+            }, 0);
+        });
         switch (item.name) {
             case 'well':
                 self.wellArr.forEach(function(well, i){
@@ -5323,6 +5334,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             return child.name == 'zonesets';
                         }).children;
                         self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+                        _currentZoneSetId = self.zonesetsArr[0].properties.idZoneSet;
                         self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
                         self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
                     }
@@ -5337,13 +5349,9 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             return child.name == 'zonesets';
                         }).children;
 
-                        self.zonesetsArr.forEach(function(zoneset, j){
-                            if(zoneset.id == item.id){
-                                self.SelectedZoneSet = self.zonesetsArr[j];
-                                self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
-                                self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
-                            }
-                        })
+                        _currentZoneSetId = item.id;
+                        setSelectedZoneSet(_currentZoneSetId);
+                        
                     }
                 })
                 break;
@@ -5375,6 +5383,16 @@ exports.zoneManagerDialog = function (ModalService, item) {
         buildDisplayZoneArr();
         
         // METHOD Section begins
+        function setSelectedZoneSet(cZonesetId) {
+            self.SelectedZone = null;
+            self.zonesetsArr.forEach(function(zoneset, j){
+                if(zoneset.id == cZonesetId){
+                    self.SelectedZoneSet = self.zonesetsArr[j];
+                    self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+                    self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
+                }
+            });
+        }
         function buildDisplayZoneArr() {
             if(self.zoneArr && self.zoneArr.length){
                 self.zoneArr.sort(function(z1, z2) {
@@ -5422,10 +5440,9 @@ exports.zoneManagerDialog = function (ModalService, item) {
             buildDisplayZoneArr();
         }
         this.onAddZoneSet = function(){
-            utils.createZoneSet(self.SelectedWell.id, function () {
-                $timeout(function(){
-                    self.refreshZoneSets();
-                }, 1000);
+            utils.createZoneSet(self.SelectedWell.id, function (dataReturn) {
+                console.log('zoneSet created', dataReturn);
+                _currentZoneSetId = dataReturn.idZoneSet;
             });
         }
 
@@ -5502,7 +5519,6 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
                 self.addZone(0, top, bottom);
             }
-
         }
 
         this.onAddBelowButtonClicked = function () {
@@ -5552,9 +5568,12 @@ exports.zoneManagerDialog = function (ModalService, item) {
             })
             self.SelectedZone = -1;
         }
-
+        
         this.onApplyButtonClicked = function () {
             console.log('Apply');
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            wiComponentService.getComponent("SPINNER").show();
             for (let i = self.zoneArr.length - 1; i >= 0; i--){
                 switch (self.zoneArr[i].flag) {
                     case _FDEL:
@@ -5565,8 +5584,10 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         break;
                     
                     case _FNEW:
-                        wiApiService.createZone(self.zoneArr[i].properties, function(){
+                        wiApiService.createZone(self.zoneArr[i].properties, function(data){
                             delete self.zoneArr[i].flag;
+                            self.zoneArr[i].id = data.idZone;
+                            self.zoneArr[i].properties.idZone = data.idZone;
                             console.log('createZone');
                         });
                         break;
@@ -5581,11 +5602,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     default:
                         break;
                 }
-
-                if(i == 0){
-                    utils.refreshProjectState();
-                }
             }
+            utils.refreshProjectState();            
         }
 
         this.onOkButtonClicked = function () {
