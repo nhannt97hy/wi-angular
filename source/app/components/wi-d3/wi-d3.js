@@ -232,6 +232,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         config.yStep = parseFloat(_getWellProps().step);
         config.offsetY = parseFloat(_getWellProps().topDepth);
         config.width = Utils.inchToPixel(zoneTrack.width);
+        config.wiComponentService = wiComponentService;
         console.log(config);
 
         let track = graph.createZoneTrack(config, document.getElementById(self.plotAreaId));
@@ -300,7 +301,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let deletedZones = zones[1];
             updatedZones.push(zone);
             // send api to add or delete zones
-            console.log('updated zones', updatedZones);
             for (let updatedZone of updatedZones) {
                 updatedZone.idZone = updatedZone.id;
                 wiApiService.editZone(updatedZone, function () { });
@@ -308,6 +308,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             for (let deletedZone of deletedZones) {
                 wiApiService.removeZone(deletedZone.id, function () { })
             }
+            _plotZoneSet(track);
         })
         return zone;
     }
@@ -619,6 +620,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     track.plotZone(zone2);
                     track.removeZone(zone);
                     track.rearrangeHeaders();
+                    _plotZoneSet(track);
                 })
             })
         })
@@ -736,6 +738,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackCallback(track);
     }
 
+    function _plotZoneSet(sourceZoneTrack) {
+        wiComponentService.emit('update-zoneset-' + sourceZoneTrack.idZoneSet, sourceZoneTrack);
+    }
+
     function _registerZoneTrackCallback(track) {
         let zone;
         track.plotContainer.call(d3.drag()
@@ -793,24 +799,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         return;
                     }
                     zone.setProperties(createdZone);
+                    let modifiedZones = track.adjustZonesOnZoneChange(zone);
+                    let updatedZones = modifiedZones[0];
+                    let deletedZones = modifiedZones[1];
+                    // Send api to update or delete zones
+                    if (updatedZones && updatedZones.length) {
+                        updatedZones.forEach(function (updatingZone) {
+                            updatingZone.idZone = updatingZone.id;
+                            wiApiService.editZone(updatingZone, function () { });
+                        });
+                    }
+                    if (deletedZones && deletedZones.length) {
+                        deletedZones.forEach(function (deletingZone) {
+                            wiApiService.removeZone(deletingZone.id, function () { });
+                        });
+                    }
+                    _plotZoneSet(track);
+                    track.setMode(null);
+                    track.rearrangeHeaders();
                 })
-                let modifiedZones = track.adjustZonesOnZoneChange(zone);
-                let updatedZones = modifiedZones[0];
-                let deletedZones = modifiedZones[1];
-                // Send api to update or delete zones
-                if (updatedZones && updatedZones.length) {
-                    updatedZones.forEach(function (updatingZone) {
-                        updatingZone.idZone = updatingZone.id;
-                        wiApiService.editZone(updatingZone, function () { });
-                    });
-                }
-                if (deletedZones && deletedZones.length) {
-                    deletedZones.forEach(function (deletingZone) {
-                        wiApiService.removeZone(deletingZone.id, function () { });
-                    });
-                }
-                track.setMode(null);
-                track.rearrangeHeaders();
             })
         );
         track.on('keydown', function() {
@@ -896,6 +903,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     // Send api before deleting
                     wiApiService.removeZone(drawing.id, function () {
                         track.removeDrawing(drawing);
+                        _plotZoneSet(track);
                     })
                 }
 
@@ -1011,7 +1019,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _zoneOnRightClick() {
         let zone = _currentTrack.getCurrentZone();
-
+        console.log(zone);
         self.setContextMenu([
             {
                 name: "AutoZoneNamed",
@@ -1034,6 +1042,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function () {
                     wiApiService.removeZone(zone.id, function () {
                         _currentTrack.removeZone(zone);
+                        _plotZoneSet(_currentTrack);
                     });
                 }
             }, {
@@ -1376,6 +1385,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         props.width = Utils.inchToPixel(props.width);
                         _currentTrack.setProperties(props);
                         _currentTrack.doPlot(true);
+                        //TODO: edit zoneset not update
                     });
                 }
             });

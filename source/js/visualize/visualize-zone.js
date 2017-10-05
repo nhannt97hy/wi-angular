@@ -9,7 +9,7 @@ Utils.extend(Drawing, Zone);
 function Zone(config) {
     Drawing.call(this, config);
 
-    this.id = config.idZone;
+    this.id = config.idZone || config.id;
     this.idZoneSet = config.idZoneSet;
     this.idZoneTrack = config.idZoneTrack;
     this.fill = Utils.isJson(config.fill) ? JSON.parse(config.fill) : config.fill;
