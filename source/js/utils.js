@@ -962,6 +962,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 wiD3Ctrl.addZoneToTrack(viTrack, zone);
                             }
                         })
+                        wiComponentService.on('tab-changed', function (logplotModel) {
+                            if (viTrack.idPlot != logplotModel.properties.idPlot) return;
+                            viTrack.doPlot();
+                        });
                     }
                     aTrack = tracks.shift();
                 }

@@ -48,11 +48,6 @@ function ZoneTrack(config) {
     this.mode = null;
 
     let self = this;
-    // this.wiComponentService.on('update-zoneset-' + this.idZoneSet, function (sourceZoneTrack) {
-    //     if (sourceZoneTrack.id == self.id) return;
-    //     self.setProperties({ zones: sourceZoneTrack.getZones() });
-    //     self.doPlot();
-    // });
 }
 
 /**

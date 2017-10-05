@@ -49,13 +49,18 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
-        let modelRef = componentState.model;
+        let modelRef = componentState.model
         container.on('destroy', function () {
             let model = utils.getModel(modelRef.type, modelRef.id);
             if (!model) return;
             model.data.opened = false;
         })
     });
+    layoutManager.on('stackCreated', function (stack) {
+        stack.on('activeContentItemChanged', function (activeContentItem) {
+            wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+        })
+    })
 
     layoutManager.init();
 }
@@ -98,7 +103,7 @@ module.exports.putTabRightWithModel = function (model) {
     LAYOUT = layoutManager;
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
-    var itemType, itemId, tabTitle, name, htmlTemplate;
+    let itemType, itemId, tabTitle, name, htmlTemplate;
     console.log(model);
     switch (model.type) {
         case 'logplot':

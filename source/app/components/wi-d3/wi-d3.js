@@ -741,24 +741,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _plotZoneSet(sourceZoneTrack) {
-        const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        let sourceZones = sourceZoneTrack.getZones();
         let logplotModel =  self.wiLogplotCtrl.getLogplotModel();
         let well = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).wells.find(well => well.idWell == logplotModel.properties.idWell);
-        let allLogplots = well.plots;
-        let zoneTracksToUpdate = allLogplots.forEach(function (aLogplot) {
+        well.plots.forEach(function (aLogplot) {
             aLogplot.zone_tracks.forEach(function (zoneTrack) {
                 if (zoneTrack.idZoneTrack == sourceZoneTrack.id) return;
                 if (zoneTrack.idZoneSet == sourceZoneTrack.idZoneSet) {
                     let viZoneTrack = wiComponentService.getComponent('vi-zone-track-' + zoneTrack.idZoneTrack);
                     if (!viZoneTrack) return;
                     viZoneTrack.removeAllZones();
-                    sourceZoneTrack.getZones().forEach(function (sourceZone) {
+                    sourceZones.forEach(function (sourceZone) {
+                        const zoneConfig = angular.copy(sourceZone);
+                        zoneConfig.idZoneTrack = zoneTrack.idZoneTrack
                         self.addZoneToTrack(viZoneTrack, sourceZone);
                     })
                 }
             })
         });
-        // wiComponentService.emit('update-zoneset-' + sourceZoneTrack.idZoneSet, sourceZoneTrack);
     }
 
     function _registerZoneTrackCallback(track) {
