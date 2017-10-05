@@ -3495,8 +3495,9 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.idZoneSet = props.idZoneSet;
         // Dialog buttons
         this.createZoneSet = function () {
-            utils.createZoneSet(wiLogplotModel.properties.idWell, function () {
+            utils.createZoneSet(wiLogplotModel.properties.idWell, function (zoneSetReturn) {
                 refreshZoneSets();
+                self.idZoneSet = zoneSetReturn.idZoneSet;
             });
         }
         this.trackBackground = function () {

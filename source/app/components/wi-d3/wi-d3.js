@@ -1403,6 +1403,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         } else if (_currentTrack.isZoneTrack()) {
+            const idZoneSetCurrent = _currentTrack.getProperties().idZoneSet;
             DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
                 if (props) {
                     props.idZoneTrack = _currentTrack.id;
@@ -1410,8 +1411,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     wiApiService.editZoneTrack(props, function () {
                         props.width = Utils.inchToPixel(props.width);
                         _currentTrack.setProperties(props);
+                        if (idZoneSetCurrent != _currentTrack.idZoneSet) {
+                            wiApiService.getZoneSet(_currentTrack.idZoneSet, function (zoneset) {
+                                _currentTrack.removeAllZones();
+                                for (let zone of zoneset.zones) {
+                                    self.addZoneToTrack(_currentTrack, zone);
+                                }
+                            })
+                        }
                         _currentTrack.doPlot(true);
-                        //TODO: edit zoneset not update
                     });
                 }
             });
