@@ -115,7 +115,13 @@ Track.prototype.createHeaderContainer = function() {
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('z-index', 1)
-        .text(this.name);
+        .text(this.name)
+        .on('mousedown', function(d) {
+            console.log('mouse down', d);
+        })
+        .on('mouseup', function(d) {
+            console.log('mouse up', d);
+        });
 
     this.drawingHeaderContainer = this.headerContainer.append('div')
         .attr('class', 'vi-track-drawing-header-container')
@@ -138,7 +144,6 @@ Track.prototype.createHeaderContainer = function() {
                 self.headerScrollCallback();
             })
         );
-
 }
 
 /**
@@ -256,6 +261,25 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
         cb();
         self.horizontalResizerDragCallback();
     }))
+}
+
+/**
+ * Register event when drag track. TODO !!!
+ */
+Track.prototype.onTrackDrag = function() {
+    return;
+    let self = this;
+    $(this.trackContainer.node()).draggable({
+        axis: 'x',
+        containment: 'parent',
+        helper: "clone", /*function() {
+            var elem = document.createElement('div');
+            elem.className = 'vi-track-vertical-resizer outline ui-draggable';
+            return elem;
+        },*/
+        handle: '.vi-track-header-name',
+        snap: '.vi-track-vertical-resizer'
+    });
 }
 
 /**

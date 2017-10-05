@@ -6,9 +6,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let _viCurves = new Array();
     this._viCurves = _viCurves;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    
+    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);    
+
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
+    }
+    this.onReady = function() {
+        if (self.onRefWindCtrlReady) self.onRefWindCtrlReady(self);
+        new ResizeSensor(document.getElementById(self.name), function() {
+            _viCurves.forEach(function(c) { c.doPlot(); });
+        });
     }
 
     this.doPlot = function() {
@@ -29,7 +36,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
             viCurve = graph.createCurve(config, dataCurve, d3.select("#" + self.name));
             viCurve.doPlot();
-            _viCurve.push(viCurve);
+            _viCurves.push(viCurve);
         });
     }
 
@@ -55,6 +62,53 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         return false;
     }
+    this.update = update;
+    function update(well, referenceCurves) {
+        // Update reference windows TODO !!!
+        let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
+        let minY = parseFloat(well.properties.topDepth);
+        let maxY = parseFloat(well.properties.bottomDepth);
+        let stepY = parseFloat(well.properties.step);
+
+
+        var refWindCtrl = self;
+        if (!referenceCurves || !referenceCurves.length) {
+            refWindCtrl.removeAllRefCurves();
+        }
+        else {
+            for (let i = refWindCtrl._viCurves.length - 1; i >= 0; i--) {
+                if (!referenceCurves.find(
+                        function(curve) { 
+                            return refWindCtrl._viCurves[i].id == curve.idCurve;
+                        }
+                    ) 
+                ) {
+                    refWindCtrl._viCurves[i].destroy();
+                    refWindCtrl._viCurves.splice(i, 1);
+                }
+            }
+            for (let refCurve of referenceCurves) {
+                let config = {
+                    minX: refCurve.left,
+                    maxX: refCurve.right,
+                    //minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
+                    //maxX: infoCurve.LineProperty ? infoCurve.LineProperty.maxScale : 200,
+                    minY: minY,
+                    maxY: maxY,
+                    yStep: stepY,
+                    offsetY: minY,
+                    line: { 
+                        color: refCurve.color
+                    }
+                    //line: {
+                    //    color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
+                    //}
+                }
+
+                refWindCtrl.addRefCurve(refCurve.idCurve, config);
+            }
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -63,7 +117,8 @@ app.component(componentName, {
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        name: '@'
+        name: '@',
+        onRefWindCtrlReady: "<"
     }
 });
 

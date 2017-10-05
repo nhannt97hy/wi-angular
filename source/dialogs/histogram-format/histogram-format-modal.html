@@ -324,8 +324,7 @@
                                                     <tr ng-repeat="ref_curve in wiModal.ref_Curves_Arr"
                                                     ng-click="wiModal.setClickedRow($index)"
                                                     ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}">
-                                                        <td>
-                                                            <i ng-class="{'fa fa-chevron-circle-right': $index == wiModal.SelectedRefCurve}"></i>
+                                                        <td ng-class="{'color-navy': $index == wiModal.SelectedRefCurve}">
                                                         </td>
                                                         <td>
                                                             <ui-select ng-model="ref_curve.curve"

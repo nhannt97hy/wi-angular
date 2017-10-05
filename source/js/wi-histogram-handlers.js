@@ -50,6 +50,7 @@ exports.GaussianButtonClicked = function() {
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.histogramModel.properties.showGaussian = !wiHistogramCtrl.histogramModel.properties.showGaussian;
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Gaussian');
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.CumulativeButtonClicked = function() {
@@ -57,6 +58,7 @@ exports.CumulativeButtonClicked = function() {
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.histogramModel.properties.showCumulative = !wiHistogramCtrl.histogramModel.properties.showCumulative;
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Cumulative');
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.PlotBarsButtonClicked = PlotBarsButtonClicked;
@@ -72,6 +74,7 @@ function PlotBarsButtonClicked() {
         wiHistogramCtrl.histogramModel.properties.plot = "Curve";
     }
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.PlotCurvesButtonClicked = function() {
@@ -92,6 +95,7 @@ function FrequencyButtonClicked() {
         wiHistogramCtrl.histogramModel.properties.plotType = "Percent";
     }
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update frequency/percentile");
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.PercentButtonClicked = function() {

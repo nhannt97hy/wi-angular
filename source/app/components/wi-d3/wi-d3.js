@@ -130,6 +130,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerLogTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
+        _registerTrackDragCallback();
         return track;
     };
 
@@ -844,7 +845,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
 
-    function _registerTrackHorizontalResizerDragCallback(track) {
+    function _registerTrackHorizontalResizerDragCallback() {
         _tracks.forEach(function(track) {
             track.onHorizontalResizerDrag(function() {
                 _tracks.forEach(function(t) {
@@ -853,6 +854,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 })
             });
         })
+    }
+
+    function _registerTrackDragCallback() {
+        _tracks.forEach(function(track) {
+            track.onTrackDrag();
+        });
     }
 
     function _onPlotMouseWheelCallback(track) {
