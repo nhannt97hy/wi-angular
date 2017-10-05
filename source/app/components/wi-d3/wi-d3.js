@@ -249,6 +249,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerZoneTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
+        wiComponentService.putComponent('vi-zone-track-' + config.id, track);
         return track;
     }
 
@@ -740,7 +741,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _plotZoneSet(sourceZoneTrack) {
-        wiComponentService.emit('update-zoneset-' + sourceZoneTrack.idZoneSet, sourceZoneTrack);
+        const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        let logplotModel =  self.wiLogplotCtrl.getLogplotModel();
+        let well = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).wells.find(well => well.idWell == logplotModel.properties.idWell);
+        let allLogplots = well.plots;
+        let zoneTracksToUpdate = allLogplots.forEach(function (aLogplot) {
+            aLogplot.zone_tracks.forEach(function (zoneTrack) {
+                if (zoneTrack.idZoneTrack == sourceZoneTrack.id) return;
+                if (zoneTrack.idZoneSet == sourceZoneTrack.idZoneSet) {
+                    let viZoneTrack = wiComponentService.getComponent('vi-zone-track-' + zoneTrack.idZoneTrack);
+                    if (!viZoneTrack) return;
+                    viZoneTrack.removeAllZones();
+                    sourceZoneTrack.getZones().forEach(function (sourceZone) {
+                        self.addZoneToTrack(viZoneTrack, sourceZone);
+                    })
+                }
+            })
+        });
+        // wiComponentService.emit('update-zoneset-' + sourceZoneTrack.idZoneSet, sourceZoneTrack);
     }
 
     function _registerZoneTrackCallback(track) {
@@ -977,6 +995,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         DialogUtils.zonePropertiesDialog(ModalService, zone.getProperties(), function (props) {
             wiApiService.editZone(props, function () {
                 zone.setProperties(props);
+                _plotZoneSet(_currentTrack);
                 zone.doPlot();
             })
         })

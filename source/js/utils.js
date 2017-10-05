@@ -841,29 +841,6 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     });
 };
 
-
-exports.deleteLogplot = function () {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'logplot') return;
-    const wiComponentService = __GLOBAL.wiComponentService;
-    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function (yes) {
-        if (!yes) return;
-        const wiApiService = __GLOBAL.wiApiService;
-        wiApiService.delete(wiApiService.DELETE_PLOT, {
-                idPlot: selectedNode.properties.idPlot
-            })
-            .then(function (res) {
-                __GLOBAL.$timeout(function () {
-                    selectedNode.data.deleted = true;
-                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
-                });
-            }).catch(function (err) {
-                console.error('logplot delete error', err);
-            });
-    });
-};
-
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(logplotModel);

@@ -71,6 +71,13 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeWell(selectedNode.properties.idWell, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            let modelsWithTab = [];
+                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'logplots').children);
+                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'crossplots').children);
+                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'histograms').children);
+                            modelsWithTab.forEach(function (model) {
+                                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
+                            });
                             utils.refreshProjectState();
                         });
                     });

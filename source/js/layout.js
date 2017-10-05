@@ -155,18 +155,18 @@ module.exports.putTabRightWithModel = function (model) {
 }
 
 module.exports.removeTabWithModel = function (model) {
+    let item;
     switch (model.type) {
         case 'logplot':
-            var item = layoutManager.root.getItemsById('logplot' + model.id)[0];
+            item = layoutManager.root.getItemsById('logplot' + model.id)[0];
             break;
         case 'crossplot':
-            var item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
+            item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
             break;
         case 'histogram':
-            var item = layoutManager.root.getItemsById('histogram' + model.id)[0];
+            item = layoutManager.root.getItemsById('histogram' + model.id)[0];
             break;
         default:
-            console.log('model type is not valid');
             return;
     }
     if (!item) return;
