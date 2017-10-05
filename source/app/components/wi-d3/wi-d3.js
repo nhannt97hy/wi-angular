@@ -754,7 +754,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     sourceZones.forEach(function (sourceZone) {
                         const zoneConfig = angular.copy(sourceZone);
                         zoneConfig.idZoneTrack = zoneTrack.idZoneTrack
-                        self.addZoneToTrack(viZoneTrack, sourceZone);
+                        let wiD3 = wiComponentService.getComponent('logplot' + zoneTrack.idPlot).getwiD3Ctrl();
+                        wiD3.addZoneToTrack(viZoneTrack, sourceZone);
                     })
                 }
             })
@@ -1460,8 +1461,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
         self.svgId = self.plotAreaId + 'SVG';
-
         self.logPlotCtrl = getLogplotCtrl();
+        wiComponentService.on('tab-changed', function (logplotModel) {
+            if (self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
+            self.plotAll();
+        });
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
         let handlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
         Utils.bindFunctions(logplotHandlers, handlers, {
