@@ -29,6 +29,7 @@ Utils.extend(Track, ZoneTrack);
 function ZoneTrack(config) {
     Track.call(this, config);
     this.MIN_WIDTH = 120;
+    this.wiComponentService = config.wiComponentService;
 
     this.id = config.id;
     this.name = config.name || 'Zone';
@@ -44,6 +45,14 @@ function ZoneTrack(config) {
     this.currentDrawing = null;
     this.previousDrawing = null;
     this.mode = null;
+
+    let self = this;
+    window['vizonetrack' + this.id] = this;
+    this.wiComponentService.on('update-zoneset-' + this.idZoneSet, function (sourceZoneTrack) {
+        if (sourceZoneTrack.id == self.id) return;
+        self.setProperties({ zones: sourceZoneTrack.getZones() });
+        self.doPlot();
+    });
 }
 
 /**
@@ -77,11 +86,18 @@ ZoneTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);
 
     let self = this;
-    if (!props.zones) return;
-    props.zones.forEach(function(z) {
-        self.addZone(z);
-    })
+    if (props.zones) {
+        while (self.drawings.length) { // Khong while thi khong xoa het duoc? Hoi anh Canh
+            self.drawings.forEach(function (drawing) {
+                self.removeZone(drawing);
+            })
+        }
+        props.zones.forEach(function(z) {
+            self.addZone(z);
+        })
+    }
 }
+
 
 ZoneTrack.prototype.setMode = function(newMode) {
     this.mode = newMode;
@@ -205,6 +221,7 @@ ZoneTrack.prototype.plotZone = function(zone) {
  */
 ZoneTrack.prototype.addZone = function(config) {
     let self = this;
+    config.idZoneTrack = this.id;
     if (!config.fill) {
         config.fill = {
             pattern: {
