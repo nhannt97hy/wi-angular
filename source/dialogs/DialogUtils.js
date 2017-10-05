@@ -5633,38 +5633,53 @@ exports.zoneManagerDialog = function (ModalService, item) {
             self.applyingInProgress = true;
             if(self.zoneArr && self.zoneArr.length){
                 wiComponentService.getComponent("SPINNER").show();
-                for (let i = self.zoneArr.length - 1; i >= 0; i--){
-                    switch (self.zoneArr[i].flag) {
-                        case _FDEL:
-                            wiApiService.removeZone(self.zoneArr[i].id, function(){
-                                self.zoneArr.splice(i, 1);
-                                console.log('removeZone');
-                            });
-                            break;
-                        
-                        case _FNEW:
-                            wiApiService.createZone(self.zoneArr[i].properties, function(data){
-                                delete self.zoneArr[i].flag;
-                                self.zoneArr[i].id = data.idZone;
-                                self.zoneArr[i].properties.idZone = data.idZone;
-                                console.log('createZone');
-                            });
-                            break;
-                        
-                        case _FEDIT:
-                            wiApiService.editZone(self.zoneArr[i].properties, function(){
-                                delete self.zoneArr[i].flag;
-                                console.log('editZone');
-                            });
-                            break;
-                        
-                        default:
-                            break;
-                    }
-                }
-                utils.refreshProjectState().then(function(){
-                    if(callback) callback();
-                });      
+                    async.eachOfSeries(self.zoneArr, function(zone, i, callback){
+                        switch (self.zoneArr[i].flag) {
+                            case _FDEL:
+                                wiApiService.removeZone(self.zoneArr[i].id, function(){
+                                    console.log('removeZone');
+                                    callback();
+                                });
+                                break;
+                            
+                            case _FNEW:
+                                wiApiService.createZone(self.zoneArr[i].properties, function(data){
+                                    self.zoneArr[i].id = data.idZone;
+                                    self.zoneArr[i].properties.idZone = data.idZone;
+                                    console.log('createZone');
+                                    callback();
+                                });
+                                break;
+                            
+                            case _FEDIT:
+                                wiApiService.editZone(self.zoneArr[i].properties, function(){
+                                    console.log('editZone');
+                                    callback();                                    
+                                });
+                                break;
+                            
+                            default:
+                                callback();
+                                break;
+                        }
+
+                    },function(err){
+                        for (let i = self.zoneArr.length - 1; i >= 0; i--){
+                            switch (self.zoneArr[i].flag) {
+                                case _FDEL:
+                                        self.zoneArr.splice(i, 1);
+                                    break;
+                                
+                                case _FNEW:
+                                case _FEDIT:
+                                    delete self.zoneArr[i].flag;
+                                    break;
+                            }
+                        }
+                        utils.refreshProjectState().then(function(){
+                            if(callback) callback();
+                        }); 
+                    })
             }else{
                 if(callback) callback();                
             }
