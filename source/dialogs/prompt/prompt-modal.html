@@ -18,6 +18,7 @@
 								required autofocus>
 							<select ng-if="wiModal.type == 'select'"
 											class="form-control wi-form-control"
+											wi-enter="wiModal.onOkButtonClicked()"
 											ng-model="wiModal.input"
 											ng-options="option as option.label for option in wiModal.options"></select>
 						</div>
@@ -26,7 +27,7 @@
 			</div>
 			<div class="modal-footer">
 				<button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'
-						ng-disabled="!wiModal.input.length">Ok</button>
+						ng-disabled="!wiModal.input">Ok</button>
 				<button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>Cancel</button>
 			</div>
 		</div>
