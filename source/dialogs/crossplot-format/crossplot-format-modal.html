@@ -5,11 +5,11 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">Crossplot Format</h4>
             </div>
-            <div class="modal-body padding-0">
+            <div class="modal-body padding-0 dialog-style">
                 <wi-tabset>
                     <wi-tab heading="Scales">
                         <div class="container-fluid">
-                            <form class="form-horizontal form-condensed dialog-style">
+                            <form class="form-horizontal form-condensed">
                                 <p></p>
                                 <div class="row">
                                     <div class="col-sm-1 border-right">
@@ -485,7 +485,7 @@
                             </form>
                         </div>
                     </wi-tab>
-                    <wi-tab heading="Reference Colors">
+                    <wi-tab heading="Reference Window">
                         <div class="container-fluid">
                             <form class="form-horizontal form-condensed">
                                 <br>
@@ -495,13 +495,28 @@
                                             <div class="form-group">
                                                 <label class="control-label col-sm-5">Top Depth (m)</label>
                                                 <div class="col-sm-7">
-                                                    <input type="number" class="form-control wi-form-control">
+                                                    <input ng-model="wiModal.props.referenceTopDepth" 
+                                                        type="number" class="form-control wi-form-control">
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label col-sm-5">Scale</label>
                                                 <div class="col-sm-7">
-                                                    <select class="form-control wi-form-control"></select>
+                                                    <input type="number" list='scaleOpt' class="form-control wi-form-control"
+                                                        ng-model="wiModal.props.referenceScale">
+                                                        <datalist id="scaleOpt">
+                                                            <option value="1">1</option>
+                                                            <option value="20">20</option>
+                                                            <option value="50">50</option>
+                                                            <option value="100">100</option>
+                                                            <option value="200">200</option>
+                                                            <option value="300">300</option>
+                                                            <option value="500">500</option>
+                                                            <option value="1000">1000</option>
+                                                            <option value="2000">2000</option>
+                                                            <option value="3000">3000</option>
+                                                            <option value="5000">5000</option>
+                                                        </datalist>
                                                 </div>
                                             </div>
                                         </div>
@@ -509,22 +524,26 @@
                                             <div class="form-group">
                                                 <label class="control-label col-sm-5">Bottom Depth (m)</label>
                                                 <div class="col-sm-7">
-                                                    <input type="number" class="form-control wi-form-control">
+                                                    <input ng-model="wiModal.props.referenceBottomDepth" 
+                                                        type="number" class="form-control wi-form-control">
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label col-sm-5">Vert. Line Number</label>
                                                 <div class="col-sm-7">
-                                                    <select class="form-control wi-form-control"></select>
+                                                    <input type="number" class="form-control wi-form-control"
+                                                        ng-model="wiModal.props.referenceVertLineNumber">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-sm-2">
-                                            <div class="checkbox">
-                                                <label><input type="checkbox" value="">Depth Default</label>
+                                            <div class="checkbox padding-0 style="padding-top: 0">
+                                                <button type="button" class="btn btn-default width-100-percent text-ellipsis"
+                                                        style="padding: 2px 10px"
+                                                        ng-click="wiModal.defaultDepthButtonClick()">Depth Default</button>
                                             </div>
                                             <div class="checkbox">
-                                                <label><input type="checkbox" value="">Display</label>
+                                                <label><input type="checkbox" ng-model="wiModal.props.referenceDisplay">Display</label>
                                             </div>
                                         </div>
                                     </div>
@@ -536,6 +555,73 @@
                                             <div class="checkbox padding-left-5-percent">
                                                 <label><input type="checkbox" value="">Show Depth Grid Line</label>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="width-95-percent float-left">
+                                            <table class="text-on-table table table-bordered curveTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Curve Name</th>
+                                                        <th style="width: 18%">Left</th>
+                                                        <th style="width: 18%">Right</th>
+                                                        <th>Vis.</th>
+                                                        <th>Log</th>
+                                                        <th>Color</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="curve in wiModal.getRefCurves()" 
+                                                        ng-class="{'selected':$index == selectedRow}"
+                                                        ng-click="wiModal.setClickedRow($index)">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select ng-model="curve.refCurve"
+                                                                class="form-control wi-form-control padding-tb-small"
+                                                                ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
+                                                                ng-change="wiModal.onChange(curve.index)"></select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" ng-model="curve.left" 
+                                                                class="form-control wi-form-control"  
+                                                                ng-change="wiModal.onChange(curve.index)">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" ng-model="curve.right" 
+                                                                class="form-control wi-form-control"  
+                                                                ng-change="wiModal.onChange(curve.index)">
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox" ng-model="curve.vis" 
+                                                                class="form-control wi-form-control"  
+                                                                ng-change="wiModal.onChange(curve.index)">
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox" ng-model="curve.log" 
+                                                                class="form-control wi-form-control"  
+                                                                ng-change="wiModal.onChange(curve.index)">
+                                                        </td>
+                                                        <td>
+                                                            <button ng-click="wiModal.curveColor(curve.index);"
+                                                                ng-style="{'background-color':curve.color}"
+                                                                class="form-control wi-form-control width-80px height-20px thick-border">
+                                                        </button>
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="width-5-percent float-left padding-left-5px">
+                                            <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                                                <span class="delete-16x16"></span>
+                                            </button>
+                                            <button class="btn btn-default" ng-click="wiModal.addRow();">
+                                                <span class="plus-16x16"></span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

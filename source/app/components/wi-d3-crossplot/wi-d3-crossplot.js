@@ -10,7 +10,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.viCrossplot = {};
     this.isShowWiZone = true;
     this.isShowReferenceWindow = false;
-
+    window.abc = this;
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
@@ -105,6 +105,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         if (!self.crossplotModel || !self.pointSet) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+                console.log('res', crossplot);
                 self.pointSet = crossplot.pointsets[0];
                 openDialog();
             });

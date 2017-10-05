@@ -384,13 +384,24 @@ table.shadingTable td {
 	padding: 6px 2px;
 	text-align: center;
 }
+
 #lineStyleBtn {
 	font-size: 10px;
 	padding: 2px 30px;
 }
 
-.customFillsTable tbody td {
-	text-align: center;
+.customFillsTable {
+
+	thead {
+		th {
+			text-align: center;
+		}
+	}
+	tbody { 
+		td {
+			text-align: center;
+		}
+	}
 }
 .dialog-style {
 	font-size: 12px;
@@ -433,3 +444,10 @@ input[type="checkbox"] {
     margin-right: 5px;
 }
 
+.color-red {
+	background-color: red;
+}
+
+.color-navy {
+    background-color: navy;
+}

@@ -58,6 +58,7 @@ const EDIT_PLOT = '/project/well/plot/edit';
 const DELETE_PLOT = '/project/well/plot/delete';
 const GET_PLOT = '/project/well/plot/info';
 const DUPLICATE_PLOT = '/project/well/plot/duplicate';
+const EXPORT_PLOT = '/project/well/plot/export';
 
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
@@ -150,7 +151,7 @@ function Service(baseUrl, $http, wiComponentService, Upload) {
     this.Upload = Upload;
     this.wiComponentService = wiComponentService;
 
-    this.wiApiWorker = new wiApiWorker($http);
+    this.wiApiWorker = new wiApiWorker($http, wiComponentService);
 }
 
 Service.prototype.GET_PROJECT = GET_PROJECT; //'/project/fullinfo';
@@ -202,21 +203,23 @@ Service.prototype.getUtils = function () {
 */
 const WORKER_REQUEST_DELAY = 300; // 300ms
 const MAXIMUM_REQUEST = 4;
-var wiApiWorker = function($http){
+var wiApiWorker = function($http, wiComponentService){
     var self = this;
+    var timerHandle = null;
     this.jobQueue = [];
-    this.isFree = true;
+    //this.isFree = true;
     this.enqueueJob = function(newJob){
         this.jobQueue.push(newJob);
         this.working();
     }
     this.currentRequestWorking = 0;
     this.$http = $http;
+    this.wiComponentService = wiComponentService;
     this.dequeueJob = function(){
         return this.jobQueue.shift();
     }
     this.working = function(){
-        if(self.isFree && self.jobQueue.length){
+        if(self.isAvailable() && self.jobQueue.length){
             self.startWorking();
             var job = self.dequeueJob();
             var now = new Date();
@@ -230,14 +233,14 @@ var wiApiWorker = function($http){
                         if(!job.callback) {
                             self.stopWorking();
                             return;
-                        } 
+                        }
                         job.callback(response.data.content);
                     }else if (response.data && response.data.code === 401){
                         window.localStorage.removeItem('token');
                         window.localStorage.removeItem('username');
                         window.localStorage.removeItem('password');
                         window.localStorage.removeItem('rememberAuth');
-                        //location.reload();
+                        location.reload();
                     }else if (response.data) {
                         return new Promise(function(resolve, reject){
                             reject(response.data.reason)
@@ -252,40 +255,49 @@ var wiApiWorker = function($http){
                 .catch(function(err){
                     self.isFree = true;
                     console.log(err);
-                    //self.getUtils().error(err);
+                    self.stopWorking();                    
+                    job.callback(err);
+                    // self.getUtils().error(err);
                 });
 
-        } else if( self.jobQueue.length) {
+        } 
+        /*
+        else if( self.jobQueue.length ) {
             setTimeout(function(){
                 // console.log('worker: current Queued jobs: ', self.jobQueue);
-                /*
-                let now = new Date();
-                console.log('worker continue working after ', WORKER_REQUEST_DELAY, 'ms');
-                console.log('worker now: ', now.getHours()+" : "+now.getMinutes()+" : "+now.getSeconds()+" : "+now.getMilliseconds());
-                */
                 self.working();
             }, WORKER_REQUEST_DELAY); // delay 300ms before continue do request to server.
-        } else {
-            setTimeout(function(){
-                // console.log('worker continue working after', WORKER_REQUEST_DELAY, 'ms');
-                self.working();
-            }, WORKER_REQUEST_DELAY); 
+        } */
+        else {
+            if (!timerHandle) {
+                timerHandle = setTimeout(function() {
+                    // console.log('worker continue working after', WORKER_REQUEST_DELAY, 'ms');
+                    self.working();
+                }, WORKER_REQUEST_DELAY);
+                timerHandle = null; 
+            }
         }
     }
 }
 wiApiWorker.prototype.startWorking = function(){
     let self = this;
+    self.wiComponentService.getComponent('SPINNER').show();
     self.currentRequestWorking ++;
-    if(self.currentRequestWorking >= MAXIMUM_REQUEST){
-        self.isFree = false;
-    }
+    // if(self.currentRequestWorking >= MAXIMUM_REQUEST){
+    //     self.isFree = false;
+    // }
+}
+wiApiWorker.prototype.isAvailable = function() {
+    return this.currentRequestWorking < MAXIMUM_REQUEST;
 }
 wiApiWorker.prototype.stopWorking = function(){
     let self = this;
     self.currentRequestWorking --;
-    if(self.currentRequestWorking < MAXIMUM_REQUEST){
-        self.isFree = true;    
-    }
+    self.wiComponentService.getComponent('SPINNER').hide();    
+    // if(self.currentRequestWorking < MAXIMUM_REQUEST){
+    //     self.isFree = true;    
+    // }
+    self.working();
 }
 
 Service.prototype.post = function (route, payload, callback) {
@@ -692,7 +704,7 @@ Service.prototype.scaleCurvePromise = function (idCurve) {
     try {
         return this.post(SCALE_CURVE, {idCurve: idCurve});
     } catch (err) {
-        self.getUtils().error(err);        
+        self.getUtils().error(err);
     }
 }
 Service.prototype.asyncScaleCurve = async function (idCurve) {
@@ -702,12 +714,12 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
         await new Promise(function(resolve,reject){
             self.post(SCALE_CURVE, {idCurve: idCurve}, function(response){
                 scale = response;
-                resolve(scale);                
-            }); 
+                resolve(scale);
+            });
         });
         return scale;
     } catch (err) {
-        self.getUtils().error(err);        
+        self.getUtils().error(err);
     }
 }
 
@@ -782,7 +794,7 @@ Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     console.log("createDepthTrack", self);
     let dataRequest = {
         idPlot: idPlot,
-        orderNum: orderNum, 
+        orderNum: orderNum,
         geogetryWidth: 1
     };
     this.post(CREATE_DEPTH_AXIS, dataRequest, callback);
@@ -960,7 +972,7 @@ Service.prototype.removeZone = function (idZone, callback) {
 Service.prototype.createCrossplot = function (data, callback) {
     let self = this;
     this.post(CREATE_CROSSPLOT, data, function (returnData) {
-            callback(returnData);
+        callback(returnData);
         });
 }
 Service.prototype.editCrossplot = function (data, callback) {
@@ -1074,6 +1086,30 @@ Service.prototype.duplicateLogplot = function (idPlot, idWell, callback) {
     const self = this;
     this.post(DUPLICATE_PLOT, { idPlot: idPlot, idWell: idWell }, callback);
 }
+Service.prototype.exportLogPlot = function (idPlot, callback) {
+    //console.log("HIHIHIHIHIH");
+    let self = this;
+    let dataRequest = {
+        idPlot: idPlot
+    }
+    self.$http({
+        url: self.baseUrl + EXPORT_PLOT,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer',
+            'Authorization' : __USERINFO.token
+        },
+        responseType: "arraybuffer",
+        data: dataRequest
+    }).then(function (res) {
+        callback(res.data, res.headers('Content-Type'));
+    }, function (err) {
+        console.error(err);
+        self.getUtils().error("File not found!");
+    });
+}
+
 // reference_curve apis
 Service.prototype.createRefCurve = function (data, callback) {
     let self = this;
