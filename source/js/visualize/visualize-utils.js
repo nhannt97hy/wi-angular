@@ -35,6 +35,13 @@ exports.sortByKey = sortByKey;
 exports.getMiddlePoint = getMiddlePoint;
 exports.isMouseInside = isMouseInside;
 exports.getLinearEquation = getLinearEquation;
+exports.getPointByFraction = getPointByFraction;
+exports.getLineFunc = getLineFunc;
+exports.getIntersection = getIntersection;
+exports.getLineFuncFromTwoPoints = getLineFuncFromTwoPoints;
+exports.getDistance = getDistance;
+exports.sum = sum;
+exports.mean = mean;
 
 function getProperties(obj) {
     let props = {};
@@ -591,6 +598,13 @@ function sort(array) {
     });
 }
 
+function getPointByFraction(point1, point2, fraction) {
+    return {
+        x: point1.x + (point2.x - point1.x) * fraction,
+        y: point1.y + (point2.y - point1.y) * fraction
+    }
+}
+
 function getMiddlePoint(point1, point2) {
     return {
         x: point1.x + (point2.x - point1.x) / 2,
@@ -619,4 +633,54 @@ function getLinearEquation(point1, point2) {
         let b = +intercept.toFixed(6);
         return 'y=' + (a == 0 ? '' : (a + '*x')) + (b < 0 || a == 0 ? b : ('+' + b));
     }
+}
+
+function getLineFunc(slope, point) {
+    if (slope == null) {
+        return { constant: point.x };
+    }
+
+    let intercept = point.y - slope * point.x;
+    let func = function(x) {
+        return x * slope + intercept;
+    }
+    func.slope = slope;
+    func.intercept = intercept;
+    return func;
+}
+
+function getLineFuncFromTwoPoints(p1, p2) {
+    if (p1.x == p2.x) {
+        return { constant: p1.x };
+    }
+
+    let slope = (p2.y - p1.y) / (p2.x - p1.x);
+    return getLineFunc(slope, p1);
+}
+
+function getIntersection(f1, f2) {
+    if (f1.constant != null && f2.constant != null)
+        return null;
+    else if (f1.constant != null && f2.constant == null)
+        return { x: f1.constant, y: f2(f1.constant) };
+    else if (f1.constant == null && f2.constant != null)
+        return { x: f2.constant, y: f1(f2.constant) };
+    else {
+        if (f1.slope == f2.slope) return null;
+        let x = (f2.intercept - f1.intercept) / (f1.slope - f2.slope);
+        let y = f1(x);
+        return {x: x, y: y};
+    }
+}
+
+function getDistance(p1, p2) {
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+}
+
+function sum(arr) {
+    return arr.reduce(function(sum, value) { return sum + value; }, 0);
+}
+
+function mean(arr) {
+    return sum(arr) / arr.length;
 }

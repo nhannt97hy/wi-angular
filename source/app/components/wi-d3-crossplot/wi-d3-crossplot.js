@@ -208,6 +208,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         self.contextMenu = commonCtxMenu;
                     }
                 }
+                else if (self.viCrossplot.mode == 'PlotTernaryVertex') {
+                    self.viCrossplot.endAddTernaryVertex();
+                    self.contextMenu = commonCtxMenu;
+                }
+                else if (self.viCrossplot.mode == 'PlotTernaryPoint') {
+                    self.viCrossplot.endAddTernaryPoint();
+                    self.contextMenu = commonCtxMenu;
+                }
             })
         // }
         return self.viCrossplot;
