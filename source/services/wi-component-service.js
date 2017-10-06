@@ -88,6 +88,7 @@ app.factory(wiServiceName, function () {
         UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
         UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
         UPDATE_TRACK_EVENT: 'update-track-event',
+        PALETTES: 'PALETTES'
     };
 });
 

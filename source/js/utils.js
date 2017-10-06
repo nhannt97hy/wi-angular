@@ -343,7 +343,7 @@ function crossplotToTreeConfig(crossplot) {
         referenceVertLineNumber: crossplot.referenceVertLineNumber,
         referenceDisplay: crossplot.referenceDisplay,
         referenceShowDepthGrid: crossplot.referenceShowDepthGrid,
-        referenceCurves: crossplot.reference_curves,
+        reference_curves: crossplot.reference_curves,
         pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
     };
     crossplotModel.data = {
@@ -851,7 +851,8 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.getPalettes(function(paletteList) {
+    // wiApiService.getPalettes(function(paletteList) {
+    getPalettes(function(paletteList) {
         wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id},
             function (plot) {
                 if (logplotModel.properties.referenceCurve) {
@@ -1846,3 +1847,20 @@ exports.renameZoneSet = function(zoneSetModel){
         });
     });
 }
+function getPalettes(callback) {
+    let wiApiService = __GLOBAL.wiApiService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let pals = wiComponentService.getComponent(wiComponentService.PALETTES);
+    if (pals) {
+        if (callback) callback(pals);
+        return;
+    }
+    else  {
+        wiApiService.getPalettes(function(paletteList) {
+            wiComponentService.putComponent(wiComponentService.PALETTES, paletteList);
+            if (callback) callback(paletteList);
+        });
+        return;
+    }
+}
+exports.getPalettes = getPalettes;

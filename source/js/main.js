@@ -127,7 +127,6 @@ let app = angular.module('wiapp',
 
         // 3rd lib
         'ngFileUpload',
-        'kendo.directives',
         'ngSanitize',
         'ui.select',
         'angularjs-dropdown-multiselect'

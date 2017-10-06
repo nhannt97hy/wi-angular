@@ -24,7 +24,7 @@
                             <label class="control-label col-sm-4" for="topDepth">Top Depth (m)</label>
                             <div class="col-sm-8">
                                 <input type="number" class="form-control" value="" id="topDepth" name="topDepth"
-                                       ng-model="wiModal.topDepth" currency-mask required>
+                                       ng-model="wiModal.topDepth" required>
                             </div>
                         </div>
 
@@ -48,7 +48,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
-                        ng-disabled="!wiModal.wellName || !wiModal.topDepth || !wiModal.bottomDepth || !wiModal.step || wiModal.isDisabled"
+                        ng-disabled="!wiModal.wellName || wiModal.topDepth == null || wiModal.bottomDepth == null || wiModal.step == null || wiModal.isDisabled"
                         ng-click="wiModal.onOkButtonClicked();"><span class="ok-16x16"></span>&nbsp;OK
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
