@@ -15,9 +15,9 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
-// const BASE_URL = 'http://localhost:3000';
-// const BASE_URL = 'http://dev.sflow.me';
-const BASE_URL = 'http://192.168.0.223';
+//  const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://192.168.0.223';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -229,34 +229,43 @@ var wiApiWorker = function($http, wiComponentService){
             self.$http(job.request)
                 .then(
                     function (response) {
-                    if (response.data && response.data.code === 200) {
-                        if(!job.callback) {
-                            self.stopWorking();
-                            return;
-                        }
-                        job.callback(response.data.content);
-                    }else if (response.data && response.data.code === 401){
-                        window.localStorage.removeItem('token');
-                        window.localStorage.removeItem('username');
-                        window.localStorage.removeItem('password');
-                        window.localStorage.removeItem('rememberAuth');
-                        location.reload();
-                    }else if (response.data) {
-                        return new Promise(function(resolve, reject){
-                            reject(response.data.reason)
-                        });
-                    } else {
-                        return new Promise(function(resolve, reject){
-                            reject('Something went wrong!');
-                        });
-                    }
+                    // if (response.data && response.data.code === 200) {
+                    //     if(!job.callback) {
+                    //         self.stopWorking();
+                    //         return;
+                    //     }
+                    //     job.callback(response.data.content);
+                    // }else if (response.data && response.data.code === 401){
+                    //     window.localStorage.removeItem('token');
+                    //     window.localStorage.removeItem('username');
+                    //     window.localStorage.removeItem('password');
+                    //     window.localStorage.removeItem('rememberAuth');
+                    //     location.reload();
+                    // }else if (response.data) {
+                    //     return new Promise(function(resolve, reject){
+                    //         reject(response.data.reason)
+                    //     });
+                    // } else {
+                    //     return new Promise(function(resolve, reject){
+                    //         reject('Something went wrong!');
+                    //     });
+                    // }
+                    job.callback(response.data.content);
                     self.stopWorking();
                 })
                 .catch(function(err){
                     self.isFree = true;
-                    console.log(err);
-                    self.stopWorking();                    
-                    job.callback(err);
+                    if(err.status == 401){
+                        alert(err.data.reason);
+                        window.localStorage.removeItem('token');
+                        window.localStorage.removeItem('username');
+                        window.localStorage.removeItem('password');
+                        window.localStorage.removeItem('rememberAuth');
+                        location.reload();    
+                    } else {
+                        self.stopWorking();                    
+                        job.callback(err);
+                    }
                     // self.getUtils().error(err);
                 });
 
