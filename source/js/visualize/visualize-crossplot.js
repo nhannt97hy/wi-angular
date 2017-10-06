@@ -829,7 +829,6 @@ Crossplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY
 
         let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer, 0);
         let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer, 0);
-        if (type == 'Exponent') console.log('GG', meanX, meanY, XX, XY);
 
         let slope = XY / XX;
         let intercept = meanY - meanX * slope;
@@ -1362,8 +1361,8 @@ Crossplot.prototype.mouseMoveCallback = function() {
 Crossplot.prototype.onMouseDown = function(callback) {
     let self = this;
     this.on('mousedown', function() {
-        self.mouseDownCallback();
-        callback();
+        let ret = self.mouseDownCallback();
+        callback(ret);
     })
 }
 
@@ -1431,15 +1430,17 @@ Crossplot.prototype.mouseDownCallback = function() {
     }
     else if (this.mode == 'PlotTernaryVertex') {
         let vertices = this.ternary.vertices;
-        vertices.push({
+        let vertex = {
             x: x,
             y: y,
             name: 'Material_' + (vertices.length + 1),
             style: 'Circle',
             used: false,
             showed: true
-        });
+        };
+        vertices.push(vertex);
         this.plotTernary();
+        return vertex;
     }
     else if (this.mode == 'PlotTernaryPoint') {
         this.ternary.calculate.point = {
@@ -1447,6 +1448,7 @@ Crossplot.prototype.mouseDownCallback = function() {
             y: y
         }
         this.plotTernaryPoint();
+        return this.ternary.calculate.point;
     }
 }
 

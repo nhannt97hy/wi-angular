@@ -69,7 +69,7 @@ exports.DeleteUserLineButtonClicked = function() {
 }
 
 exports.UserDefineLineButtonClicked = function() {
-    
+
 }
 
 exports.PolygonManagerButtonClicked = function() {
@@ -88,5 +88,9 @@ exports.RegressionLineButtonClicked = function() {
 
 exports.ConfigTernaryDiagramButtonClicked = function() {
     console.log('ConfigTernaryDiagramButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.ternaryDialog(this.ModalService, wiD3Crossplot, function () {});
 }
 

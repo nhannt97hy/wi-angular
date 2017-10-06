@@ -1,0 +1,100 @@
+<div id="ternary-modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class=""></span>&nbsp;Ternary diagram</h4>
+            </div>
+
+            <div class="modal-body text-center">
+                <form class="form-horizontal form-condensed dialog-style" action="" name="modalTernary">
+
+                    <h5 class="normal-text">Vertices Manager</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <td>#</td>
+                                <td>X</td>
+                                <td>Y</td>
+                                <td>Name</td>
+                                <td>Style</td>
+                                <td>Used in ternary</td>
+                                <td>Show/Hide</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="vertex in wiModal.getVertices() track by $index"
+                                ng-class="{selected:$index == selectedRow}"
+                                ng-click="wiModal.setClickedRow($index)">
+                                <td>{{$index + 1}}</td>
+                                <td>
+                                    <input ng-model="vertex.x"
+                                            type="text" class="form-control wi-form-control valign-middle pull-left"
+                                            ng-change="wiModal.onChange(vertex.index)" />
+                                </td>
+                                <td>
+                                    <input ng-model="vertex.y"
+                                            type="text" class="form-control wi-form-control valign-middle pull-left"
+                                            ng-change="wiModal.onChange(vertex.index)" />
+                                </td>
+                                <td>
+                                    <input ng-model="vertex.name"
+                                            type="text" class="form-control wi-form-control valign-middle pull-left"
+                                            ng-change="wiModal.onChange(vertex.index)" />
+                                </td>
+                                <td>
+                                    <select ng-model="vertex.style"
+                                            class="form-control wi-form-control"
+                                            ng-change="wiModal.onChange(vertex.index)"
+                                            ng-selected="vertex.style">
+                                        <option value="Circle">Circle</option>
+                                        <option value="Square">Square</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input ng-model="vertex.used"
+                                            type="checkbox"
+                                            ng-change="wiModal.onChange(vertex.index)" />
+                                </td>
+                                <td>
+                                    <input ng-model="vertex.showed"
+                                            type="checkbox"
+                                            ng-change="wiModal.onChange(vertex.index)" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-right">
+                        <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                            <span class="delete-16x16"></span>
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.addRow();">
+                            <span class="plus-16x16"></span>
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.pickVertex()" class="wi-form-control">
+                            Pick from CrossPlot
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.importVertices()" class="wi-form-control">
+                            Import
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.exportVertices()" class="wi-form-control">
+                            Export
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                 <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;Apply
+                </button>
+                <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

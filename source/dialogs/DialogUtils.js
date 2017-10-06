@@ -9,7 +9,7 @@ exports.authenticationDialog = function (ModalService, callback) {
             }
             if (self.passwordReg != self.passwordConfirm) {
                 self.error = 'Passwords do not match.'
-                
+
             }
         }
         this.onRegisterButtonClicked = function () {
@@ -88,7 +88,7 @@ exports.newProjectDialog = function (ModalService, callback) {
 
             wiApiService.createProject(data, function (response) {
                     console.log('response', response);
-                    
+
                     close(response, 500);
                     /*$timeout(function(){
                         $scope.$apply();
@@ -219,7 +219,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
             console.log('onBlur', args);
         }
         this.onOkButtonClicked = function () {
-            close(self.input);            
+            close(self.input);
         }
         this.onCancelButtonClicked = function () {
             close(null);
@@ -930,7 +930,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
             [10, 4, 2, 4, 2, 4]
         ];
         this.widthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];  
+        this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];
 
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.options.symbolStyle.symbolStrokeStyle, function (colorStr) {
@@ -989,7 +989,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         ];
 
         this.symbolOptions.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.symbolOptions.symbolStyle.symbolName);
-        
+
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
         this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];
@@ -1019,7 +1019,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         }
         this.onOkButtonClicked = function () {
             self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
-            self.symbolOptions.symbolStyle.symbolStrokeStyle = self.symbolOptions.symbolStyle.symbolFillStyle; 
+            self.symbolOptions.symbolStyle.symbolStrokeStyle = self.symbolOptions.symbolStyle.symbolFillStyle;
             close(self.lineOptions, self.symbolOptions);
         };
         this.onCancelButtonClicked = function () {
@@ -1644,7 +1644,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             self.selectedWells.forEach(function (well) {
                 selectedWellNames.push(well.idWell ? well.name : well);
             })
-            self.selectedDatasets.forEach(function (dataset) {    
+            self.selectedDatasets.forEach(function (dataset) {
                 selectedDatasetNames.push(dataset.idDataset ? dataset.name : dataset);
             })
             self.lasInfos.forEach(function (each, i) {
@@ -2033,7 +2033,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             self.paletteList = pals;
             self.paletteName = Object.keys(self.paletteList);
         });
-        if (!fillPatternOptions) {  
+        if (!fillPatternOptions) {
             fillPatternOptions = {
                 fill: {
                     display: false,
@@ -2078,7 +2078,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.fill.pattern.foreground, function (colorStr) {
                     self.fillPatternOptions.fill.pattern.foreground = colorStr;
                 });
-                    
+
             })
         }
         this.background = function () {
@@ -2174,12 +2174,12 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             self.selectCurve.forEach(function(item, index) {
                 if(item.id == idCurve) {
                     self.variableShadingOptions.positiveFill.varShading.startX = item.properties.minScale;
-                    self.variableShadingOptions.positiveFill.varShading.endX = item.properties.maxScale;    
+                    self.variableShadingOptions.positiveFill.varShading.endX = item.properties.maxScale;
                     self.variableShadingOptions.negativeFill.varShading.startX = item.properties.minScale;
                     self.variableShadingOptions.negativeFill.varShading.endX = item.properties.maxScale;
-                
+
                     self.variableShadingOptions.fill.varShading.startX = item.properties.minScale;
-                    self.variableShadingOptions.fill.varShading.endX = item.properties.maxScale;    
+                    self.variableShadingOptions.fill.varShading.endX = item.properties.maxScale;
                 }
             })
         };
@@ -2224,16 +2224,16 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             console.log("fill", self.variableShadingOptions.fill.display, self.variableShadingOptions.positiveFill.display);
             if(self.displayType) {
                 if(self.varShadingType == 'gradient') {
-                    if(!self.variableShadingOptions.positiveFill.varShading.gradient) 
+                    if(!self.variableShadingOptions.positiveFill.varShading.gradient)
                         self.variableShadingOptions.positiveFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
-                    if(!self.variableShadingOptions.negativeFill.varShading.gradient) 
+                    if(!self.variableShadingOptions.negativeFill.varShading.gradient)
                         self.variableShadingOptions.negativeFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
                 }
             }else{
                 if(self.varShadingType == 'gradient') {
-                    if(!self.variableShadingOptions.fill.varShading.gradient) 
+                    if(!self.variableShadingOptions.fill.varShading.gradient)
                         self.variableShadingOptions.fill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
-                    
+
                 }
             }
         }
@@ -2254,7 +2254,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 if(self.variableShadingOptions.fill.varShading.gradient) self.varShadingType = "gradient";
                 else if (self.variableShadingOptions.fill.varShading.palette) {
                     self.varShadingType = "palette";
-                    if(Array.isArray(self.variableShadingOptions.fill.varShading.palette)) 
+                    if(Array.isArray(self.variableShadingOptions.fill.varShading.palette))
                         self.variableShadingOptions.fill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.fill.varShading.palette);
                 }
                 else if(self.variableShadingOptions.fill.varShading.customFills) self.varShadingType = "customFills";
@@ -2263,7 +2263,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 if(self.variableShadingOptions.positiveFill.varShading.gradient) self.varShadingType = "gradient";
                 else if (self.variableShadingOptions.positiveFill.varShading.palette) {
                     self.varShadingType = "palette";
-                    if(Array.isArray(self.variableShadingOptions.positiveFill.varShading.palette)) 
+                    if(Array.isArray(self.variableShadingOptions.positiveFill.varShading.palette))
                         self.variableShadingOptions.positiveFill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.positiveFill.varShading.palette);
                 }
                 else if(self.variableShadingOptions.positiveFill.varShading.customFills) self.varShadingType = "customFills";
@@ -2272,7 +2272,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 if(self.variableShadingOptions.negativeFill.varShading.gradient) self.varShadingType = "gradient";
                 else if (self.variableShadingOptions.negativeFill.varShading.palette) {
                     self.varShadingType = "palette";
-                    if(Array.isArray(self.variableShadingOptions.negativeFill.varShading.palette)) 
+                    if(Array.isArray(self.variableShadingOptions.negativeFill.varShading.palette))
                         self.variableShadingOptions.negativeFill.varShading.palette = getPaletteNameByValue(self.variableShadingOptions.negativeFill.varShading.palette);
                 }
                 else if(self.variableShadingOptions.negativeFill.varShading.customFills) self.varShadingType = "customFills";
@@ -2284,9 +2284,9 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 self.variableShadingOptions.negativeFill.display = true;
                 self.variableShadingOptions.fill.display = false;
                 self.shadingOptions.isNegPosFill = true;
-                if(!self.variableShadingOptions.positiveFill.varShading.gradient) 
+                if(!self.variableShadingOptions.positiveFill.varShading.gradient)
                     self.variableShadingOptions.positiveFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
-                if(!self.variableShadingOptions.negativeFill.varShading.gradient) 
+                if(!self.variableShadingOptions.negativeFill.varShading.gradient)
                     self.variableShadingOptions.negativeFill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
 
             }
@@ -2295,12 +2295,12 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 self.variableShadingOptions.negativeFill.display = false;
                 self.variableShadingOptions.fill.display = true;
                 self.shadingOptions.isNegPosFill = false;
-                if(!self.variableShadingOptions.fill.varShading.gradient) 
+                if(!self.variableShadingOptions.fill.varShading.gradient)
                     self.variableShadingOptions.fill.varShading.gradient = {startColor: "transparent", endColor: "transparent"};
             }
-            
-            
-            
+
+
+
         }
         // function isValid() {
         //     self.errorReason = null;
@@ -2313,8 +2313,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         //         return false;
         //     }
 
-        //     if ( isNaN(parseInt(self.shadingOptions.leftFixedValue)) 
-        //         && isNaN(parseInt(self.shadingOptions.rightFixedValue)) 
+        //     if ( isNaN(parseInt(self.shadingOptions.leftFixedValue))
+        //         && isNaN(parseInt(self.shadingOptions.rightFixedValue))
         //         && (!self.shadingOptions.idRightLine || !self.shadingOptions.idLeftLine) ) {
 
         //         self.errorReason = "Shading properties is invalid";
@@ -2410,7 +2410,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
             if(!self.customFillsCurrent.name) {
-                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");                
+                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
             }
             else {
                 wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
@@ -2440,12 +2440,12 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 }
             }
 
-           
+
         }
         function isValid() {
             self.errorReason = null;
             if(!self.shadingOptions.idRightLine) {
-                self.errorReason = "Right curve is required"; 
+                self.errorReason = "Right curve is required";
                 return false;
             }
             if ( self.shadingOptions.idRightLine == self.shadingOptions.idLeftLine ) {
@@ -2459,7 +2459,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             return true;
 
         }
-        
+
         this.onOkButtonClicked = function () {
             switch (self.varShadingType) {
                 case "gradient":
@@ -2497,13 +2497,13 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             console.log("onOkShadingAttribute", self.fillPatternOptions, self.variableShadingOptions, self.shadingOptions);
             if (isValid()) {
                 close(JSON.stringify({
-                    fillPatternOptions:self.fillPatternOptions, 
-                    variableShadingOptions:self.variableShadingOptions, 
+                    fillPatternOptions:self.fillPatternOptions,
+                    variableShadingOptions:self.variableShadingOptions,
                     shadingOptions: self.shadingOptions
                 }), 200);
             }
             else {
-                DialogUtils.errorMessageDialog(ModalService, self.errorReason);                
+                DialogUtils.errorMessageDialog(ModalService, self.errorReason);
             }
 
         };
@@ -2586,7 +2586,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let selectedCurve = item.properties.datasetName + '.' + item.properties.name;
             item.datasetCurve = selectedCurve;
         });
-        
+
         console.log("curveDataset", this.curvesOnDataset, this.arr);
         let customLimit = [{"id": -1, "datasetCurve": "left"}, {"id": -2, "datasetCurve": "right"}, {"id": -3, "datasetCurve": "custom"}];
         this.leftLimit = customLimit.concat(self.curvesOnDataset);
@@ -2605,7 +2605,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             };
             return "fillPattern";
         }
-        
+
         shadingList.forEach(function(shading, index){
             var shadingItem = new Object();
             var shadingProps = shading.getProperties();
@@ -2802,7 +2802,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             }
             self.curvesSymbolOptions.push(symbolOptions);
-            
+
         });
         console.log("LINECURVE", this.lineCurve, this.curves, this.curvesLineOptions, this.curvesSymbolOptions);
 
@@ -2844,7 +2844,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.setDisabledCurve = function(index) {
             let temp = true;
             if(self.curvesChanged[index].change == 2) temp = false;
-            return temp; 
+            return temp;
         }
         this.onSelectCurve = function () {
             if (self.curvesChanged[self.__idx].change == 2) {
@@ -3070,10 +3070,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.shadingChanged.forEach(function(item, index){
                 if(item.change == "1") {
                     console.log("111",self.shadingArr[index],
-                                                     self.fillPatternOptions[index], 
+                                                     self.fillPatternOptions[index],
                                                      self.variableShadingOptions[index]);
-                    let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
-                                                     self.fillPatternOptions[index], 
+                    let shadingObj = utils.mergeShadingObj(self.shadingArr[index],
+                                                     self.fillPatternOptions[index],
                                                      self.variableShadingOptions[index]);
                     if(shadingObj.idLeftLine == -3) {
                         shadingObj.type = 'custom';
@@ -3103,13 +3103,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
                                 shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData, self.well.properties);
                                 if(!shadingObj.isNegPosFill) {
-                                    if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette) 
+                                    if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette)
                                         shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
                                 }
                                 else {
-                                    if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette) 
+                                    if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette)
                                         shadingObjToSet.positiveFill.varShading.palette = paletteList[shadingObjToSet.positiveFill.varShading.palName];
-                                    if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette) 
+                                    if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette)
                                         shadingObjToSet.negativeFill.varShading.palette = paletteList[shadingObjToSet.negativeFill.varShading.palName];
                                 }
                                 console.log("LEFT/RIGHT CURVE", shadingObjToSet);
@@ -3164,7 +3164,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             } else {
                                 lineObj1 = findInVisCurveListByIdLine(shading.idLeftLine);
                                 lineObj2 = findInVisCurveListByIdLine(shading.idRightLine);
-                                if (lineObj1 && lineObj2) 
+                                if (lineObj1 && lineObj2)
                                     wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
                                 else {
                                     console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
@@ -3254,7 +3254,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         self.curves.splice(idx, 1);
                         self.curvesSymbolOptions.splice(idx, 1);
                         self.curvesLineOptions.splice(idx, 1);
-                        self.lineCurve.splice(idx, 1); 
+                        self.lineCurve.splice(idx, 1);
                     }
                 }
             }
@@ -3487,7 +3487,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 $timeout(function(){
                     $scope.$apply(function () {
                         self.zoneSets = zoneSets;
-                    });    
+                    });
                 });
             });
         }
@@ -3609,7 +3609,7 @@ exports.errorMessageDialog = function (ModalService, errorMessage) {
             close(null);
         };
     }
-    
+
     ModalService.showModal({
         templateUrl: 'error-message/error-message-modal.html',
         controller: ModalController,
@@ -4134,7 +4134,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     self.pointSet.scaleBottom = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.minScale:self.pointSet.scaleBottom;
                     self.pointSet.scaleTop = (findCurveById(self.pointSet.idCurveY).properties.idFamily == null)? scaleY.maxScale:self.pointSet.scaleTop;
                 })
-            });     
+            });
         }
         if(this.pointSet.idCurveZ) {
             console.log("idCurveZ", this.pointSet.idCurveZ);
@@ -4146,13 +4146,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
-        this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true; 
+        this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true;
         this.zoneSets = new Array();
         this.datasetsInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
 
         this.selectedZone = self.pointSet.activeZone ? self.pointSet.activeZone : 'All';
-        
+
 
         this.well.children.forEach(function (child, i) {
             if (child.type == 'dataset') self.datasetsInWell.push(child);
@@ -4186,7 +4186,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     if (!self.pointSet.idZoneSet) {
                         self.selectedZoneSet = self.zoneSets[0];
                     }
-        
+
                     for (let i = self.zoneSets.length - 1; i >= 0; i--) {
                         self.zoneSets[i].idx = i;
                         if (self.zoneSets[i].properties.idZoneSet == self.pointSet.idZoneSet) {
@@ -4360,7 +4360,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     pointSet.activeZone = self.selectedZone;
                     console.log(pointSet);
                     self.props.pointSet = pointSet;
-                    let scalesObj = angular.copy(self.pointSet);                        
+                    let scalesObj = angular.copy(self.pointSet);
                     scalesObj.curveX = undefined;
                     scalesObj.curveY = undefined;
                     scalesObj.curveZ = undefined;
@@ -4373,7 +4373,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             });
                         }
                     });
-                    
+
                     if (callback) {
                         callback();
                     }
@@ -4427,7 +4427,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         this.bottom = config.bottom;
         this.left = config.left;
         this.width = config.width;
-        this.done = false;        
+        this.done = false;
 
         this.onUploadButtonClicked = function () {
             wiApiService.uploadImage({
@@ -4460,7 +4460,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
                     let imageScaleHeight = imageHeight * imageScaleRatio * (self.width / 100); // image height in pixel
                     console.log(mPerPx, imageScaleRatio, imageScaleHeight);
                     self.bottom = (mPerPx * imageScaleHeight) + self.top;
-                    self.done = true;                    
+                    self.done = true;
                 });
             };
             img.src = self.src;
@@ -4515,7 +4515,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         }
         $scope.change = change;
         function init() {
-            self.polygons = new Array();        
+            self.polygons = new Array();
             angular.copy(wiD3Crossplot.getPolygons()).forEach(function (polygonItem, index) {
                 polygonItem.points = JSON.stringify(polygonItem.points);
                 polygonItem.change = change.unchanged;
@@ -4716,13 +4716,13 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         }
                     })
                 });
-                
+
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
                         self.selectedZoneSet = self.zoneSetList[0];
                     }
-                    
+
                     for (let i = self.zoneSetList.length - 1; i >= 0; i--) {
                         self.zoneSetList[i].idx = i;
                         if (self.zoneSetList[i].properties.idZoneSet == self.histogramProps.idZoneSet) {
@@ -4761,7 +4761,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         self.histogramProps.leftScale = scale.minScale;
                         self.histogramProps.rightScale = scale.maxScale;
                     });
-                })        
+                })
             }
         }
 
@@ -4823,7 +4823,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                             self.ref_Curves_Arr[index].left = scale.minScale;
                             self.ref_Curves_Arr[index].right = scale.maxScale;
                         });
-                    })        
+                    })
                 }
             }
         }
@@ -5155,14 +5155,14 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         this.viCross = viCrossplot.getProperties()
         console.log("vi111", this.viCross, this.polygonList);
         let regressionLinesProps = this.viCross.regressionLines;
-        
+
         regressionLinesProps.forEach(function(regLineItem, index) {
             regLineItem.change = change.unchanged;
             regLineItem.index = index;
             self.regressionLines.push(regLineItem);
         });
 
-        $scope.change = change; 
+        $scope.change = change;
         console.log("wiD3Crossplot", wiD3Crossplot, viCrossplot, self.regressionLines);
         this.getRegressionLines = function () {
             return self.regressionLines.filter(function (item, index) {
@@ -5326,7 +5326,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
 
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
-        
+
         this.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
@@ -5375,7 +5375,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
 
                         _currentZoneSetId = item.id;
                         setSelectedZoneSet(_currentZoneSetId);
-                        
+
                     }
                 })
                 break;
@@ -5405,7 +5405,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         buildDisplayZoneArr();
-        
+
         // METHOD Section begins
         function setSelectedZoneSet(cZonesetId) {
             self.SelectedZone = null;
@@ -5437,7 +5437,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         this.foregroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneArr[index].properties.foreground, function (colorStr) {
                 self.zoneArr[index].properties.fill.pattern.foreground = colorStr;
-                self.onZoneChanged(index);                
+                self.onZoneChanged(index);
             });
         };
         this.backgroundZone = function (index) {
@@ -5599,7 +5599,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 if(unique.length < self.zoneArr.length) {
                     return false; // check unique zone name
                 }
-                
+
                 if( self.zoneArr[0].properties.startDepth < self.SelectedWell.properties.topDepth){
                     self.zoneArr[0].err = true;
                     return false;
@@ -5610,18 +5610,18 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         self.zoneArr[i].err = true;
                         return false;
                     }
-                    
+
                     if(self.zoneArr[i].properties.endDepth > self.zoneArr[i+1].properties.startDepth){
                         self.zoneArr[i].err = true;
-                        self.zoneArr[i+1].err = true;                                            
+                        self.zoneArr[i+1].err = true;
                         return false;
                     }
                     let last = self.zoneArr[self.zoneArr.length - 1];
                     if(last.properties.startDepth >= last.properties.endDepth || last.properties.endDepth > self.SelectedWell.properties.bottomDepth){
-                        self.zoneArr[self.zoneArr.length - 1].err = true;                
+                        self.zoneArr[self.zoneArr.length - 1].err = true;
                         return false;
                     }
-                    
+
                 }
                 return true;
             }else{
@@ -5642,7 +5642,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                                     callback();
                                 });
                                 break;
-                            
+
                             case _FNEW:
                                 wiApiService.createZone(self.zoneArr[i].properties, function(data){
                                     self.zoneArr[i].id = data.idZone;
@@ -5651,14 +5651,14 @@ exports.zoneManagerDialog = function (ModalService, item) {
                                     callback();
                                 });
                                 break;
-                            
+
                             case _FEDIT:
                                 wiApiService.editZone(self.zoneArr[i].properties, function(){
                                     console.log('editZone');
-                                    callback();                                    
+                                    callback();
                                 });
                                 break;
-                            
+
                             default:
                                 callback();
                                 break;
@@ -5670,7 +5670,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                                 case _FDEL:
                                         self.zoneArr.splice(i, 1);
                                     break;
-                                
+
                                 case _FNEW:
                                 case _FEDIT:
                                     delete self.zoneArr[i].flag;
@@ -5679,12 +5679,12 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         }
                         utils.refreshProjectState().then(function(){
                             if(callback) callback();
-                        }); 
+                        });
                     })
             }else{
-                if(callback) callback();                
+                if(callback) callback();
             }
-            
+
         }
         this.onApplyButtonClicked = function () {
             console.log('Apply');
@@ -5703,11 +5703,11 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     close(null);
                 });
             }else{
-                utils.error(errorMessage);                
+                utils.error(errorMessage);
                 return;
-            }   
+            }
         }
-                   
+
         this.onCancelButtonClicked = function () {
             close(null);
         }
@@ -5728,3 +5728,126 @@ exports.zoneManagerDialog = function (ModalService, item) {
     })
 }
 
+exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        let change = $scope.change = {
+            unchanged: 0,
+            created: 1,
+            updated: 2,
+            deleted: 3,
+            uncreated: 4
+        };
+
+        let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
+        let ternary = angular.copy(viCrossplot.getProperties().ternary);
+
+        this.vertices = ternary.vertices.map(function(vertex, index) {
+            vertex.change = change.unchanged;
+            vertex.index = index;
+            return vertex;
+        });
+
+        let savedTernary = angular.copy(ternary);
+        this.__idx = 0;
+        $scope.selectedRow = 0;
+
+        this.getVertices = function () {
+            return self.vertices.filter(function (item, index) {
+               return (item.change != change.deleted && item.change != change.uncreated);
+           });
+        };
+
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+            self.__idx = self.getVertices()[indexRow].index;
+        };
+
+        this.onChange = function (index) {
+            if(self.vertices[index].change == change.unchanged)
+                self.vertices[index].change = change.updated;
+        };
+
+        this.removeRow = function () {
+            if (!self.vertices[self.__idx]) return;
+            if (self.vertices[self.__idx].change == change.created) {
+                self.vertices[self.__idx].change = change.uncreated;
+            }
+            else {
+                self.vertices[self.__idx].change = change.deleted;
+            }
+            if (self.getVertices().length) {
+                self.setClickedRow(0);
+            }
+        };
+
+        this.addRow = function () {
+            self.vertices.push({
+                change: change.created,
+                index: self.vertices.length,
+                style: 'Circle',
+                showed: true,
+                name: 'Material_' + (self.vertices.length + 1),
+            });
+        };
+
+        this.pickVertex = function () {
+            $('#ternary-modal').modal('hide');
+            wiD3CrossplotCtrl.pickVertex(function(vertex) {
+                $('#ternary-modal').modal('show');
+                if (vertex) {
+                    vertex = angular.copy(vertex);
+                    vertex.change = change.created;
+                    vertex.index = self.vertices.length;
+
+                    let last_vertex = self.vertices[self.vertices.length-1];
+                    if (last_vertex.x != null && last_vertex.y != null)
+                        self.vertices.push(vertex);
+                    else
+                        self.vertices[self.vertices.length-1] = vertex;
+
+                    $scope.$apply();
+                }
+            });
+        };
+
+        this.importVertices = function () {
+
+        };
+
+        this.exportVertices = function () {
+
+        };
+
+        this.onOkButtonClicked = function () {
+            console.log('OK');
+        };
+        this.onApplyButtonClicked = function() {
+            savedTernary.vertices = self.getVertices();
+
+        };
+        this.onCancelButtonClicked = function () {
+            viCrossplot.setProperties({ ternary: savedTernary });
+            viCrossplot.plotTernary();
+            close(null);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "ternary/ternary-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('.modal').remove();
+            $('body').removeClass('modal-open');
+            if (ret && callback) callback(ret);
+        });
+    });
+};
