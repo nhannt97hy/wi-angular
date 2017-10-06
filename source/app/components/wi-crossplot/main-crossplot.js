@@ -187,16 +187,28 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                     function: 'Math.sin(x)',
                     lineStyle: { lineColor: 'Brown'}
                 }
-            ]
+            ],
+            ternary: {
+                vertices: [
+                    { x: 2, y: 4, used: true, name: 'ABC' },
+                    { x: 2, y: 2, used: true, name: 'DEF' },
+                    { x: 6, y: 2, used: true, name: 'GHI' }
+                ],
+                calculate: {
+                    type: 'All',
+                    point: {
+                        x: 3,
+                        y: 3
+                    }
+                }
+            }
         });
-
-        console.log('GG1',viCrossplot.getProperties());
+        console.log('TERNARY', viCrossplot.calculateTernary());
         viCrossplot.setProperties({
             pointSet: {
                 pointSymbol: 'Cross'
             }
         });
-        console.log('GG2', viCrossplot.getProperties());
         viCrossplot.doPlot();
     });
 });
