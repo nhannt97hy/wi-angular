@@ -39,18 +39,14 @@ exports.DuplicateButtonClicked = function () {
     const wiLogplot = this.wiLogplot;
     const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const wellOptions = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).wells.map(well => ({ value: well.idWell, label: well.name }));
-    const promptConfig = {
-        title: 'Duplicate Logplot',
-        inputName: 'Duplicate to Well',
-        type: "select",
-        options: wellOptions,
-        input: wellOptions.find(option => option.value == self.id)
-    }
-    DialogUtils.promptDialog(this.ModalService, promptConfig, function (idWell) {
-        wiApiService.duplicateLogplot(wiLogplot.id, idWell.value, function () {
-            Utils.refreshProjectState();
-        });
+    let idWell = Utils.getSelectedNode().properties.idWell;
+    DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this plot?", function(yes){
+        if(yes){
+            wiApiService.duplicateLogplot(wiLogplot.id, idWell, function (response) {
+            
+                Utils.refreshProjectState();
+            });
+        }
     });
 };
 
