@@ -15,14 +15,12 @@ function Controller(wiComponentService, $timeout, $scope) {
         if (self.name) wiComponentService.putComponent(self.name, self);
     }
     this.onReady = function() {
-        console.log('onReady');
         _backdrop = document.getElementById('spinnerHolder');
         //$timeout(function() {show();}, 3000);
     }
     this.show = show;
     function show() {
         self.shown = true;
-        console.log('show', _spinner);
         
         if (_backdrop) _backdrop.appendChild(_spinner.spin().el);
     }
@@ -31,7 +29,6 @@ function Controller(wiComponentService, $timeout, $scope) {
         $timeout(function(){
             self.shown = false;
             if (_spinner) _spinner.stop();
-            console.log('hide', _spinner);
         })
     }
 }

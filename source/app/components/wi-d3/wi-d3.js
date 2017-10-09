@@ -93,9 +93,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.infoTrack(ret.idTrack, function(logTrack) {
                     logTrack.title = trackTitle || 'Track ' + (logTracks.length + 1);
                     let viTrack = self.pushLogTrack(logTrack);
-                    wiApiService.editTrack(logTrack);
-                    if (!callback) return;
-                    callback(viTrack);
+                    wiApiService.editTrack(logTrack, function() {
+                        if (!callback) return;
+                        callback(viTrack);
+                    });
                 });
             });
         }
@@ -561,7 +562,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let sign = (d3.event.deltaY<0)?"-":"";
         let absDelta = Math.abs(d3.event.deltaY);
         let value = ( absDelta > 4) ? (absDelta / 3) : absDelta;
-        console.log(d3.event.deltaY, sign + value);
         slidingBar.scroll(parseInt(sign + value));
     }
 

@@ -264,7 +264,8 @@ var wiApiWorker = function($http, wiComponentService){
                         window.localStorage.removeItem('rememberAuth');
                         location.reload();    
                     } else {
-                        self.stopWorking();                    
+                        self.stopWorking();
+                        console.error(job.request);
                         job.callback(err);
                     }
                     // self.getUtils().error(err);

@@ -1739,7 +1739,7 @@ function pixelToInch(px) {
 exports.pixelToInch = pixelToInch;
 
 function getDpcm() {
-    return getDpi() * 2.54;
+    return getDpi() / 2.54;
 }
 
 exports.getDpcm = getDpcm;
