@@ -69,7 +69,10 @@ exports.DeleteUserLineButtonClicked = function() {
 }
 
 exports.UserDefineLineButtonClicked = function() {
-
+    let wiComponentService = this.wiComponentService;
+    let wiD3Crossplot = this.wiCrossplot.getWiD3CrossplotCtrl();
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.userDefineLineDialog(this.ModalService, wiD3Crossplot, function () {});
 }
 
 exports.PolygonManagerButtonClicked = function() {
