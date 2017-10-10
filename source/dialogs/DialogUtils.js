@@ -1420,7 +1420,7 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
             payloadParams.plotName = self.plotName;
             wiApiService.postWithTemplateFile(payloadParams)
                 .then(function (response) {
-                    if (response) {
+                    if (response.length == 0) {
                         utils.refreshProjectState()
                             .then(function () {
                                 close(null, 500);
@@ -1429,6 +1429,17 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
                                 utils.error(err);
                                 close(null, 500);
                             });
+                    } else {
+                        utils.refreshProjectState().then(function(){
+                            close(null, 500);
+                            let message = "";
+                            response.forEach(function(r){
+                                message += "Curve: " + r.dataset + "." + r.curve + " Not exist! <br>";
+                            });
+                            setTimeout(function(){
+                                DialogUtils.warningMessageDialog(ModalService, message);
+                            }, 1000);
+                        });
                     }
                 })
                 .catch(function (err) {
