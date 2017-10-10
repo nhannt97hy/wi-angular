@@ -76,10 +76,10 @@
                                                         class="form-control wi-form-control"
                                                         ng-options="item for item in wiModal.symbolType">
                                                 </select> -->
-                                                <ui-select theme="bootstrap" tagging
+                                                <ui-select theme="bootstrap" 
                                                             ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
                                                     <ui-select-match style="vertical-align: middle">
-                                                        <canvas id="{{wiModal.symbolOptions.symbolStyle.symbolName}} + 'Icon'" width="20" height="20"></canvas>{{wiModal.symbolOptions.symbolStyle.symbolName}}
+                                                        <canvas id="{{wiModal.symbolOptions.symbolStyle.symbolName + 'Icon'}}" width="20" height="20"></canvas>{{wiModal.symbolOptions.symbolStyle.symbolName}}
                                                     </ui-select-match>
                                                     <ui-select-choices repeat="type in wiModal.symbolType" position="down">
                                                         <canvas id="{{type}}" width="20" height="20"></canvas>{{type}}

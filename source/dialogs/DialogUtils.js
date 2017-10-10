@@ -6577,3 +6577,119 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         })
     });
 };
+exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        let change = {
+            unchanged: 0,
+            created: 1,
+            updated: 2,
+            deleted: 3,
+            uncreated: 4
+        }
+        
+        let viCrossplot = wiD3Crossplot.getViCrossplot();
+        this.userDefineLines = [];
+        this.viCross = viCrossplot.getProperties()
+        console.log("vi111", this.viCross);
+        let udLinesProps = this.viCross.userDefineLines;
+
+        udLinesProps.forEach(function(udLineItem, index) {
+            udLineItem.change = change.unchanged;
+            udLineItem.index = index;
+            self.userDefineLines.push(udLineItem);
+        });
+
+        $scope.change = change;
+        this.getUDLines = function () {
+            return self.userDefineLines.filter(function (item, index) {
+               return (item.change != change.deleted && item.change != change.uncreated);
+           });
+        }
+        this.__idx = 0;
+        $scope.selectedRow = 0;
+        this.setClickedRow = function (indexRow) {
+            $scope.selectedRow = indexRow;
+            self.__idx = self.getUDLines()[indexRow].index;
+        }
+        this.onChange = function(index) {
+            if(self.userDefineLines[index].change == change.unchanged) self.userDefineLines[index].change = change.updated;
+        }
+        // modal buttons
+        this.removeRow = function () {
+            if (!self.userDefineLines[self.__idx]) return;
+            if(self.userDefineLines[self.__idx].change == change.created) {
+                self.userDefineLines[self.__idx].change = change.uncreated;
+            } else {
+                self.userDefineLines[self.__idx].change = change.deleted;
+            }
+            if (self.getUDLines().length) {
+                self.setClickedRow(0);
+            }
+        };
+        this.addRow = function () {
+            self.userDefineLines.push({
+                change: change.created,
+                index: self.userDefineLines.length,
+                lineStyle: {
+                    lineColor: "blue",
+                    lineWidth: 1,
+                    lineStyle: [10, 0]
+                },
+                displayLine: true,
+                displayEquation: true
+            });
+            console.log("addRow", self.userDefineLines);
+        };
+        console.log("userDefineLines", this.userDefineLines);
+
+        this.onEditLineStyleButtonClicked = function(index) {
+            console.log("onEditLineStyleButtonClicked", self.userDefineLines);
+
+            DialogUtils.lineStyleDialog(ModalService, wiComponentService,function (lineStyleObj){
+                self.userDefineLines[index].lineStyle = lineStyleObj.lineStyle;
+            }, self.userDefineLines[index]);
+        };
+        function setRegressionLines(callback) {
+            
+        }
+        this.onOkButtonClicked = function () {
+            // setRegressionLines(function() {
+            //     self.viCross.regressionLines = self.regressionLines;
+            //     viCrossplot.setProperties(self.viCross);
+            //     viCrossplot.doPlot();
+            //     close();
+            // });
+        };
+        this.onApplyButtonClicked = function() {
+            // setRegressionLines(function() {
+            //     console.log("okii", self.viCross);
+            //     self.viCross.regressionLines = self.regressionLines;
+            //     viCrossplot.setProperties(self.viCross);
+            //     viCrossplot.doPlot();
+            // });
+        };
+        this.onCancelButtonClicked = function () {
+            console.log("cancel", self.regressionLines);
+
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "user-define-line/user-define-line-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('.modal').remove();
+            $('body').removeClass('modal-open');
+            if (ret && callback) callback(ret);
+        });
+    });
+};
