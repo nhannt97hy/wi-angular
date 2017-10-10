@@ -4373,24 +4373,31 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
 
-        this.pointSet = new Object();
-        let crossplotModel = utils.getModel('crossplot', wiCrossplotCtrl.id);
-        this.props = angular.copy(crossplotModel.properties);
-        console.log("thisProps", this.props);
+        // this.pointSet = new Object();
+        // let crossplotModel = utils.getModel('crossplot', wiCrossplotCtrl.id);
+        // this.props = angular.copy(crossplotModel.properties);
+        // console.log("thisProps", this.props);
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-        // this.props = wiD3CrossplotCtrl.crossplotModel.properties;
+        this.props = wiD3CrossplotCtrl.crossplotModel.properties;
         this.refCurves = [];
         this.selectedCurveX = null;
         this.selectedCurveY = null;
         this.selectedCurveZ = null;
         this.selectedZoneSet = null;
 
-        this.pointSet = this.props.pointSet;
+        this.pointSet = wiD3CrossplotCtrl.pointSet;
+        if (!this.pointSet) {
+            wiApiService.getCrossplot(wiD3CrossplotCtrl.crossplotModel.idCrossplot, function (crossplot) {
+                self.pointSet = crossplot.pointsets[0];
+            });
+        }
+        if (!this.pointSet.pointSymbol) {
+            this.pointSet.pointSymbol = 'Circle';
+        }
         this.pointSet.pointSymbol = utils.upperCaseFirstLetter(this.pointSet.pointSymbol);
         // DEBUG
         window.crossplotDialog = this;
-        console.log("pointSet", this.props);
 
         function findCurveById (idCurve) {
             curveObjs = self.curvesOnDataset.filter(function (item, index) {
@@ -4572,11 +4579,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.pointSet.pointColor = colorStr;
             });
         };
-        (this.props.reference_curves).forEach(function(curve, index){
-            curve.change = 0,
-            curve.index = index,
-            self.refCurves.push(curve);
-        });
+        // (this.props.reference_curves).forEach(function(curve, index){
+        //     curve.change = 0,
+        //     curve.index = index,
+        //     self.refCurves.push(curve);
+        // });
         this.__idx = 0;
         $scope.selectedRow = 0;
         this.setClickedRow = function (indexRow) {

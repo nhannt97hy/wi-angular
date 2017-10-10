@@ -13,7 +13,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.isShowReferenceWindow = true;
     let _well = null;
     window.abc = this;
-    
+
     var saveCrossplot= utils.debounce(function() {
         wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
             console.log('updated');
@@ -31,13 +31,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
-        if (self.crossplotModel) {
-            if (self.crossplotModel.properties.pointSet) {
-                self.pointSet = self.crossplotModel.properties.pointSet;
-            } else {
-
-            }
-        }
+        wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+            self.pointSet = crossplot.pointsets[0];
+        });
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -49,7 +45,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
     }
     // let well = utils.findWellById(self.crossplotModel.properties.idWell);
-    
+
     this.getWell = getWell;
     function getWell() {
         if (!_well) {
@@ -74,11 +70,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log('Reference window is ready to update');
         refWindCtrl.update(getWell(), self.crossplotModel.properties.reference_curves);
     }
-    
+
     this.getWiRefWindCtrlName = function () {
         return self.name + "RefWind";
     }
-    
+
     this.getWiRefWindCtrl = function () {
         if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
         return refWindCtrl;
@@ -200,7 +196,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
                     saveCrossplotNow(function() {
                         console.log("READYYYYY");
-                        self.getWiRefWindCtrl().update(_well, self.crossplotModel.properties.reference_curves);                    
+                        self.getWiRefWindCtrl().update(_well, self.crossplotModel.properties.reference_curves);
                     });
                 });
             }
