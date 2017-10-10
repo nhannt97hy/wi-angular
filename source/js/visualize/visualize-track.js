@@ -301,10 +301,11 @@ Track.prototype.highlightCallback = function() {
  * Plot the track and children elements
  */
 Track.prototype.doPlot = function(highlight) {
+    if (highlight != null) this.highlight = highlight;
     this.trackContainer.style('width', this.width + 'px');
 
     this.setBackgroundColor(this.bgColor);
-    if (highlight && (typeof this.highlightCallback == 'function'))
+    if (this.highlight && (typeof this.highlightCallback == 'function'))
         this.highlightCallback();
 
     this.updateHeader();

@@ -265,8 +265,8 @@ exports.createZoneSet = function (idWell, callback) {
         }
         wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
             __GLOBAL.$timeout(function () {
-                refreshProjectState();
                 if (callback) callback(dataReturn);
+                refreshProjectState();
             });
         });
     });
@@ -343,7 +343,7 @@ function crossplotToTreeConfig(crossplot) {
         referenceVertLineNumber: crossplot.referenceVertLineNumber,
         referenceDisplay: crossplot.referenceDisplay,
         referenceShowDepthGrid: crossplot.referenceShowDepthGrid,
-        referenceCurves: crossplot.reference_curves,
+        reference_curves: crossplot.reference_curves,
         pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
     };
     crossplotModel.data = {
@@ -841,29 +841,6 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     });
 };
 
-
-exports.deleteLogplot = function () {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'logplot') return;
-    const wiComponentService = __GLOBAL.wiComponentService;
-    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(__GLOBAL.ModalService, 'Confirm delete', 'Are you sure to delete logplot ' + selectedNode.data.label, function (yes) {
-        if (!yes) return;
-        const wiApiService = __GLOBAL.wiApiService;
-        wiApiService.delete(wiApiService.DELETE_PLOT, {
-                idPlot: selectedNode.properties.idPlot
-            })
-            .then(function (res) {
-                __GLOBAL.$timeout(function () {
-                    selectedNode.data.deleted = true;
-                    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
-                });
-            }).catch(function (err) {
-                console.error('logplot delete error', err);
-            });
-    });
-};
-
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(logplotModel);
@@ -874,7 +851,8 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    wiApiService.getPalettes(function(paletteList) {
+    // wiApiService.getPalettes(function(paletteList) {
+    getPalettes(function(paletteList) {
         wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id},
             function (plot) {
                 if (logplotModel.properties.referenceCurve) {
@@ -1122,7 +1100,8 @@ exports.findWellByHistogram = function (idHistogram) {
     return path[1];
 }
 
-exports.findWellByCurve = function(idCurve) {
+exports.findWellByCurve = findWellByCurve;
+function findWellByCurve (idCurve) {
     var path = getSelectedPath(function (node) {
         return node.type == 'curve' && node.id == idCurve;
     }) || [];
@@ -1761,7 +1740,7 @@ function pixelToInch(px) {
 exports.pixelToInch = pixelToInch;
 
 function getDpcm() {
-    return getDpi() * 2.54;
+    return getDpi() / 2.54;
 }
 
 exports.getDpcm = getDpcm;
@@ -1869,3 +1848,45 @@ exports.renameZoneSet = function(zoneSetModel){
         });
     });
 }
+
+exports.updateVisualizeOnModelDeleted = function (model) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let logplotModels = wellModel.children.find(child => child.type == 'logplots');
+            logplotModels.children.forEach(function (logplotModel) {
+                let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
+                if (!wiLogplotCtrl) return;
+                let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                let viTracks = wiD3Ctrl.getTracks();
+                viTracks.forEach(function (viTrack) {
+                    if (!viTrack.isLogTrack()) return;
+                    let curve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
+                    viTrack.removeCurve(curve);
+                })
+            });
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
+}
+function getPalettes(callback) {
+    let wiApiService = __GLOBAL.wiApiService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let pals = wiComponentService.getComponent(wiComponentService.PALETTES);
+    if (pals) {
+        if (callback) callback(pals);
+        return;
+    }
+    else  {
+        wiApiService.getPalettes(function(paletteList) {
+            wiComponentService.putComponent(wiComponentService.PALETTES, paletteList);
+            if (callback) callback(paletteList);
+        });
+        return;
+    }
+}
+exports.getPalettes = getPalettes;

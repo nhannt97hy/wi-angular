@@ -41,6 +41,11 @@ exports.ReloadProjectButtonClicked = function () {
     utils.refreshProjectState();
 }
 
+exports.OpenTemplateButtonClicked = function () {
+    let handlers = this.wiComponentService.getComponent(this.wiComponentService.GLOBAL_HANDLERS);
+    handlers.OpenTemplateButtonClicked();
+}
+
 exports.CollapseProjectButtonClicked = function () {
     let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
     let rootConfig = rootTreeviewCtrl.config;
@@ -71,6 +76,13 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeWell(selectedNode.properties.idWell, function () {
                         $timeout(function () {
                             selectedNode.data.deleted = true;
+                            let modelsWithTab = [];
+                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'logplots').children);
+                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'crossplots').children);
+                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'histograms').children);
+                            modelsWithTab.forEach(function (model) {
+                                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
+                            });
                             utils.refreshProjectState();
                         });
                     });
@@ -78,6 +90,9 @@ exports.DeleteItemButtonClicked = function () {
                 case 'dataset':
                     wiApiService.removeDataset(selectedNode.properties.idDataset, function () {
                         $timeout(function () {
+                            selectedNode.children.forEach(function (curve) {
+                                utils.updateVisualizeOnModelDeleted(curve);
+                            })
                             selectedNode.data.deleted = true;
                             utils.refreshProjectState();
                         });
@@ -86,6 +101,7 @@ exports.DeleteItemButtonClicked = function () {
                 case 'curve':
                     wiApiService.removeCurve(selectedNode.properties.idCurve, function () {
                         $timeout(function () {
+                            utils.updateVisualizeOnModelDeleted(selectedNode);
                             selectedNode.data.deleted = true;
                             utils.refreshProjectState();
                         });

@@ -1,6 +1,7 @@
 let Utils = require('./visualize-utils');
 let CommonSchema = require('./visualize-common-schema');
 let CanvasHelper = require('./visualize-canvas-helper');
+let SvgHelper = require('./visualize-svg-helper');
 
 module.exports = Crossplot;
 
@@ -18,6 +19,10 @@ function Crossplot(config) {
 Crossplot.prototype.AREA_LINE_COLOR = 'DarkCyan';
 Crossplot.prototype.AREA_LINE_WIDTH = 4;
 Crossplot.prototype.AREA_BACKGROUND = 'rgba(255, 255, 0, 0.5)';
+Crossplot.prototype.TERNARY_VERTEX_COLOR = 'Green';
+Crossplot.prototype.TERNARY_POINT_COLOR = 'Red';
+Crossplot.prototype.TERNARY_VERTEX_SIZE = 6;
+Crossplot.prototype.TERNARY_EDGE_WIDTH = 2;
 
 const POLYGON_SCHEMA = {
     type: 'Object',
@@ -146,6 +151,47 @@ const USER_DEFINE_LINE_SCHEMA = {
     }
 };
 
+const TERNARY_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idTernary: { type: 'Integer' },
+        vertices : {
+            type: 'Array',
+            item: {
+                type: 'Object',
+                properties: {
+                    idVertice: { type: 'Integer' },
+                    x: { type: 'Float' },
+                    y: { type: 'Float' },
+                    name: { type: 'String' },
+                    style: { type: 'Enum', values: ['Circle', 'Square'], default: 'Circle' },
+                    used: { type: 'Boolean', default: false },
+                    showed: { type: 'Boolean', default: true }
+                }
+            },
+            default: []
+        },
+        calculate: {
+            type: { type: 'Enum', values: ['Point', 'Area', 'All'], default: 'All' },
+            point: {
+                type: 'Object',
+                properties: {
+                    x: { type: 'Float' },
+                    y: { type: 'Float' }
+                }
+            },
+            area: {
+                polygons: {
+                    type: 'Array',
+                    item: { type: 'Object' },
+                    default: []
+                },
+                exclude: { type: 'Boolean', default: false }
+            }
+        }
+    }
+}
+
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
@@ -167,7 +213,8 @@ Crossplot.prototype.PROPERTIES = {
         type: 'Array',
         item: USER_DEFINE_LINE_SCHEMA,
         default: []
-    }
+    },
+    ternary: TERNARY_SCHEMA
 };
 
 Crossplot.prototype.getProperties = function() {
@@ -330,6 +377,9 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-equations');
 
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-ternary');
+
     d3.select(window)
         .on('resize', function() {
             self.doPlot();
@@ -394,6 +444,7 @@ Crossplot.prototype.doPlot = function() {
     this.plotPolygons();
     this.plotRegressionLines();
     this.plotUserDefineLines();
+    this.plotTernary();
     this.plotArea();
     this.plotUserLine();
 }
@@ -773,12 +824,11 @@ Crossplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY
         let dataX = data.map(function(d) { return d.x; });
         let dataY = data.map(function(d) { return d.y; });
 
-        let meanX = dataX.reduce(reducer) * 1.0 / dataX.length;
-        let meanY = dataY.reduce(reducer) * 1.0 / dataY.length;
+        let meanX = dataX.reduce(reducer, 0) * 1.0 / dataX.length;
+        let meanY = dataY.reduce(reducer, 0) * 1.0 / dataY.length;
 
-        let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer);
-        let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer);
-        if (type == 'Exponent') console.log('GG', meanX, meanY, XX, XY);
+        let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer, 0);
+        let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer, 0);
 
         let slope = XY / XX;
         let intercept = meanY - meanX * slope;
@@ -1050,6 +1100,140 @@ Crossplot.prototype.prepareData = function() {
     });
 }
 
+Crossplot.prototype.plotTernary = function() {
+    let ternaryContainer = this.svgContainer.select('g.vi-crossplot-ternary');
+    ternaryContainer.selectAll('.vi-crossplot-ternary-item').remove();
+
+    let vertices = this.ternary.vertices.filter(function(v) { return v.showed; });
+
+    let self = this;
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let helper = new SvgHelper(ternaryContainer, {
+        fillStyle: self.TERNARY_VERTEX_COLOR,
+        strokeStyle: self.TERNARY_VERTEX_COLOR,
+        size: self.TERNARY_VERTEX_SIZE,
+    });
+
+    vertices.forEach(function(v) {
+        let x = transformX(v.x);
+        let y = transformY(v.y);
+        helper[Utils.lowercase(v.style)](x, y).classed('vi-crossplot-ternary-item', true);
+        ternaryContainer.append('text')
+            .classed('vi-crossplot-ternary-item', true)
+            .attr('x', x+self.TERNARY_VERTEX_SIZE)
+            .attr('y', y-self.TERNARY_VERTEX_SIZE)
+            .text(v.name);
+    });
+
+    vertices = this.ternary.vertices.filter(function(v) { return v.used; });
+    if (vertices.length != 3) return;
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    ternaryContainer.append('path')
+        .classed('vi-crossplot-ternary-item', true)
+        .datum(vertices.concat([vertices[0]]))
+        .attr('d', line)
+        .attr('stroke', self.TERNARY_VERTEX_COLOR)
+        .attr('stroke-width', self.TERNARY_EDGE_WIDTH)
+        .attr('fill', function(d) {
+            let color = d3.color(self.TERNARY_VERTEX_COLOR);
+            color.opacity = 0.1;
+            return color.toString();
+        });
+
+    let v1, v2, v3;
+    for (let i = 0; i < 3; i ++) {
+        v1 = vertices[(i+2) % 3];
+        v2 = vertices[i];
+        v3 = vertices[(i+1) % 3];
+        Utils.range(1/5, 4/5, 1/5).forEach(function(i) {
+            ternaryContainer.append('path')
+                .classed('vi-crossplot-ternary-item', true)
+                .datum([ Utils.getPointByFraction(v2, v1, i), Utils.getPointByFraction(v2, v3, i) ])
+                .attr('d', line)
+                .attr('stroke', self.TERNARY_VERTEX_COLOR)
+                .attr('stroke-width', self.TERNARY_EDGE_WIDTH / 2)
+                .attr('fill', 'none');
+        });
+    }
+
+    this.plotTernaryPoint();
+}
+
+Crossplot.prototype.plotTernaryPoint = function() {
+    let ternaryContainer = this.svgContainer.select('g.vi-crossplot-ternary');
+    ternaryContainer.selectAll('.vi-crossplot-ternary-point').remove();
+    let point = this.ternary.calculate.point;
+
+    if (this.ternary.calculate.type != 'Point' || !point || point.x == null || point.y == null)
+        return;
+
+    let self = this;
+    let helper = new SvgHelper(ternaryContainer, {
+        fillStyle: self.TERNARY_POINT_COLOR,
+        strokeStyle: self.TERNARY_POINT_COLOR,
+        size: self.TERNARY_VERTEX_SIZE,
+    });
+    helper
+        .circle(self.getTransformX()(point.x), self.getTransformY()(point.y))
+        .classed('vi-crossplot-ternary-point', true);
+}
+
+Crossplot.prototype.calculateTernary = function() {
+    let vertices = this.ternary.vertices.filter(function(d) { return d.used; });
+    if (vertices.length != 3) return null;
+
+    let self = this;
+    let calc = this.ternary.calculate;
+    let points = [];
+
+    if (calc.type == 'Point') {
+        points = [calc.point];
+    }
+    else if (calc.type == 'Area') {
+        let idCalcPolygons = calc.area.polygons.map(function(cp){ return cp.idPolygon; });
+        let polygons = self.polygons.filter(function(p) { return idCalcPolygons.indexOf(p.idPolygon) > -1; });
+        points = self.filterByPolygons(polygons, self.data, calc.area.exclude);
+    }
+    else if (calc.type == 'All') {
+        points = self.data;
+    }
+
+    points = this.filterByPolygons([{ points: vertices }], points);
+    if (!points.length) return null;
+
+    let v1 = vertices[0], v2 = vertices[1], v3 = vertices[2];
+    let f1 = Utils.getLineFuncFromTwoPoints(v2, v3),
+        f2 = Utils.getLineFuncFromTwoPoints(v3, v1),
+        f3 = Utils.getLineFuncFromTwoPoints(v1, v2);
+
+    let curves = [[], [], []];
+
+    points.forEach(function(p) {
+        let parallelLine1 = Utils.getLineFunc(f1.slope, p);
+        let parallelLine2 = Utils.getLineFunc(f2.slope, p);
+        let i1 = Utils.getIntersection(parallelLine2, f3);
+        let i2 = Utils.getIntersection(parallelLine1, f3);
+        let d = Utils.getDistance(v1, v2);
+
+        curves[0].push({ x: Utils.getDistance(v1, i1) / d, y: p.depth });
+        curves[1].push({ x: Utils.getDistance(i1, i2) / d, y: p.depth });
+        curves[2].push({ x: Utils.getDistance(i2, v2) / d, y: p.depth });
+    });
+
+    return {
+        material: curves.map(function(c) {
+            return Utils.mean(c.map(function(p) { return p.x; }))
+        }),
+        curves: curves
+    };
+}
+
 Crossplot.prototype.genColorList = function() {
     function rand(x) {
         return Math.floor(Math.random() * x);
@@ -1177,8 +1361,8 @@ Crossplot.prototype.mouseMoveCallback = function() {
 Crossplot.prototype.onMouseDown = function(callback) {
     let self = this;
     this.on('mousedown', function() {
-        self.mouseDownCallback();
-        callback();
+        let ret = self.mouseDownCallback();
+        callback(ret);
     })
 }
 
@@ -1244,6 +1428,44 @@ Crossplot.prototype.mouseDownCallback = function() {
             this.plotUserLine();
         }
     }
+    else if (this.mode == 'PlotTernaryVertex') {
+        let vertices = this.ternary.vertices;
+        let vertex = {
+            x: x,
+            y: y,
+            name: 'Material_' + (vertices.length + 1),
+            style: 'Circle',
+            used: false,
+            showed: true
+        };
+        vertices.push(vertex);
+        this.plotTernary();
+        return vertex;
+    }
+    else if (this.mode == 'PlotTernaryPoint') {
+        this.ternary.calculate.point = {
+            x: x,
+            y: y
+        }
+        this.plotTernaryPoint();
+        return this.ternary.calculate.point;
+    }
+}
+
+Crossplot.prototype.startAddTernaryVertex = function() {
+    this.setMode('PlotTernaryVertex');
+}
+
+Crossplot.prototype.endAddTernaryVertex = function() {
+    this.setMode(null);
+}
+
+Crossplot.prototype.startAddTernaryPoint = function() {
+    this.setMode('PlotTernaryPoint');
+}
+
+Crossplot.prototype.endAddTernaryPoint = function() {
+    this.setMode(null);
 }
 
 Crossplot.prototype.startAddUserLine = function() {

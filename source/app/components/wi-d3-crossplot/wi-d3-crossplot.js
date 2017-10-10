@@ -6,11 +6,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent('GRAPH');
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let zoneCtrl = null;
+    this.crossplotModel = null;
+    let zoneCtrl = null, refWindCtrl;
     this.viCrossplot = {};
     this.isShowWiZone = true;
-    this.isShowReferenceWindow = false;
+    this.isShowReferenceWindow = true;
+    let _well = null;
     window.abc = this;
+    
+    var saveCrossplot= utils.debounce(function() {
+        wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
+            console.log('updated');
+        });
+    }, 3000);
+
+    this.saveCrossplot = saveCrossplot;
+
+    function saveCrossplotNow(callback) {
+        wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
+            console.log('updated');
+            if (callback) callback();
+        });
+    }
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
@@ -21,7 +38,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
             }
         }
-        console.log("crossplot", self.crossplotModel, self.wellProperties);
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -31,6 +47,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.linkModels();
 
         // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
+    }
+    // let well = utils.findWellById(self.crossplotModel.properties.idWell);
+    
+    this.getWell = getWell;
+    function getWell() {
+        if (!_well) {
+            _well = utils.findWellByCrossplot(self.wiCrossplotCtrl.id);
+        }
+        return _well;
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
@@ -45,7 +70,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getZoneName = function () {
         return self.name + "Zone";
     }
-
+    this.onRefWindCtrlReady = function(refWindCtrl) {
+        console.log('Reference window is ready to update');
+        refWindCtrl.update(getWell(), self.crossplotModel.properties.reference_curves);
+    }
+    
+    this.getWiRefWindCtrlName = function () {
+        return self.name + "RefWind";
+    }
+    
+    this.getWiRefWindCtrl = function () {
+        if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
+        return refWindCtrl;
+    }
     this.linkModels = function () {
         self.zoneArr = null;
         if (self.crossplotModel && self.crossplotModel.properties.pointSet && self.crossplotModel.properties.pointSet.idZoneSet) {
@@ -99,6 +136,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     pointSet: self.pointSet
                 })
             }
+            console.log("Model", self.crossplotModel);
             DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
                 self.linkModels();
             })
@@ -146,13 +184,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }, {
             name: "ShowReferenceWindow",
-            label: "Show Reference Window",
+            label: "Show/Hide Reference Window",
             isCheckType: "true",
             checked: self.isShowReferenceWindow,
             handler: function (index) {
                 self.isShowReferenceWindow = !self.isShowReferenceWindow
                 self.contextMenu[index].checked = self.isShowReferenceWindow;
                 utils.triggerWindowResize();
+            }
+        },{
+            name: "ReferenceWindow",
+            label: "Reference Window",
+            handler: function () {
+                let well = getWell();
+                DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
+                    saveCrossplotNow(function() {
+                        console.log("READYYYYY");
+                        self.getWiRefWindCtrl().update(_well, self.crossplotModel.properties.reference_curves);                    
+                    });
+                });
             }
         }, {
             name: "ShowTooltip",
@@ -194,21 +244,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let domElem = document.getElementById(self.crossplotAreaId);
             self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
 
-            self.viCrossplot.onMouseDown(function() {
-                if (d3.event.button == 2) return;
-                if (self.viCrossplot.mode == 'PlotAreaRectangle') {
-                    if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
-                        self.viCrossplot.endAddAreaRectangle();
-                        self.contextMenu = commonCtxMenu;
-                    }
-                }
-                else if (self.viCrossplot.mode == 'PlotUserLine') {
-                    if (self.viCrossplot.userLine && self.viCrossplot.userLine.points.length > 1) {
-                        self.viCrossplot.endAddUserLine();
-                        self.contextMenu = commonCtxMenu;
-                    }
-                }
-            })
+            self.viCrossplot.onMouseDown(viCrossplotMouseDownCallback)
         // }
         return self.viCrossplot;
     }
@@ -233,6 +269,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getRegressionLines = function () {
         if (!self.viCrossplot) return [];
         return self.viCrossplot.regressionLines;
+    }
+    this.getTernary = function () {
+        if (!self.viCrossplot) return {};
+        return self.viCrossplot.ternary;
     }
     this.getViCrossplot = function () {
         if (!self.viCrossplot) return {};
@@ -307,6 +347,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.viCrossplot.plotArea();
     }
 
+    this.pickVertex = function(callback) {
+        self.viCrossplot.startAddTernaryVertex();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    self.viCrossplot.endAddTernaryVertex();
+                    self.contextMenu = commonCtxMenu;
+                    if (callback) callback(null);
+                }
+            }
+        ]);
+        self.viCrossplot.onMouseDown(function(vertex) {
+            viCrossplotMouseDownCallback();
+            if (d3.event.button == 2) return;
+            if (callback) callback(vertex);
+        })
+    }
+
     this.drawPolygon = function (idPolygon, callback) {
         if (idPolygon) {
             self.viCrossplot.startEditPolygon(idPolygon);
@@ -337,6 +398,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    function viCrossplotMouseDownCallback() {
+        if (d3.event.button == 2) return;
+        if (self.viCrossplot.mode == 'PlotAreaRectangle') {
+            if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
+                self.viCrossplot.endAddAreaRectangle();
+                self.contextMenu = commonCtxMenu;
+            }
+        }
+        else if (self.viCrossplot.mode == 'PlotUserLine') {
+            if (self.viCrossplot.userLine && self.viCrossplot.userLine.points.length > 1) {
+                self.viCrossplot.endAddUserLine();
+                self.contextMenu = commonCtxMenu;
+            }
+        }
+        else if (self.viCrossplot.mode == 'PlotTernaryVertex') {
+            self.viCrossplot.endAddTernaryVertex();
+            self.contextMenu = commonCtxMenu;
+        }
+        else if (self.viCrossplot.mode == 'PlotTernaryPoint') {
+            self.viCrossplot.endAddTernaryPoint();
+            self.contextMenu = commonCtxMenu;
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);

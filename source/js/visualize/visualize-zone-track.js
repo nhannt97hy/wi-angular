@@ -31,7 +31,8 @@ function ZoneTrack(config) {
     this.MIN_WIDTH = 120;
     this.wiComponentService = config.wiComponentService;
 
-    this.id = config.id;
+    this.id = config.id || config.idZoneTrack;
+    this.idPlot = config.idPlot;
     this.name = config.name || 'Zone';
     this.width = config.width || this.MIN_WIDTH;
     this.minY = config.minY;
@@ -47,12 +48,6 @@ function ZoneTrack(config) {
     this.mode = null;
 
     let self = this;
-    window['vizonetrack' + this.id] = this;
-    this.wiComponentService.on('update-zoneset-' + this.idZoneSet, function (sourceZoneTrack) {
-        if (sourceZoneTrack.id == self.id) return;
-        self.setProperties({ zones: sourceZoneTrack.getZones() });
-        self.doPlot();
-    });
 }
 
 /**
@@ -61,6 +56,7 @@ function ZoneTrack(config) {
 ZoneTrack.prototype.getProperties = function() {
     return {
         idZoneTrack: this.id,
+        idPlot: this.idPlot,
         title: this.name,
         showTitle: this.showTitle,
         topJustification: Utils.capitalize(this.justification),
@@ -84,6 +80,7 @@ ZoneTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'width', props.width);
     Utils.setIfNotNull(this, 'nameZoneSet', props.nameZoneSet);
     Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);
+    Utils.setIfNotNull(this, 'idPlot', props.idPlot);
 
     let self = this;
     if (props.zones) {
@@ -308,6 +305,16 @@ ZoneTrack.prototype.removeDrawing = function(drawing) {
 ZoneTrack.prototype.removeZone = function(zone) {
     if (!zone || !zone.isZone || !zone.isZone()) return;
     this.removeDrawing(zone);
+}
+
+/**
+ * Remove all zones
+ */
+ZoneTrack.prototype.removeAllZones = function() {
+    let self = this;
+    this.getZones().forEach(function (zone) {
+        self.removeZone(zone);
+    })
 }
 
 /**

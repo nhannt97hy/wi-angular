@@ -15,9 +15,9 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
-// const BASE_URL = 'http://localhost:3000';
-// const BASE_URL = 'http://dev.sflow.me';
-const BASE_URL = 'http://192.168.0.223';
+//  const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://192.168.0.223';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -26,7 +26,8 @@ const LOGIN = '/login';
 const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
-const UPLOAD_IMAGE = '/image-upload'
+const UPLOAD_IMAGE = '/image-upload';
+const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import'
 
 const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
@@ -229,38 +230,48 @@ var wiApiWorker = function($http, wiComponentService){
             self.$http(job.request)
                 .then(
                     function (response) {
-                    if (response.data && response.data.code === 200) {
-                        if(!job.callback) {
-                            self.stopWorking();
-                            return;
-                        }
-                        job.callback(response.data.content);
-                    }else if (response.data && response.data.code === 401){
+                    // if (response.data && response.data.code === 200) {
+                    //     if(!job.callback) {
+                    //         self.stopWorking();
+                    //         return;
+                    //     }
+                    //     job.callback(response.data.content);
+                    // }else if (response.data && response.data.code === 401){
+                    //     window.localStorage.removeItem('token');
+                    //     window.localStorage.removeItem('username');
+                    //     window.localStorage.removeItem('password');
+                    //     window.localStorage.removeItem('rememberAuth');
+                    //     location.reload();
+                    // }else if (response.data) {
+                    //     return new Promise(function(resolve, reject){
+                    //         reject(response.data.reason)
+                    //     });
+                    // } else {
+                    //     return new Promise(function(resolve, reject){
+                    //         reject('Something went wrong!');
+                    //     });
+                    // }
+                    job.callback(response.data.content);
+                    self.stopWorking();
+                })
+                .catch(function(err){
+                    self.isFree = true;
+                    if(err.status == 401){
+                        alert(err.data.reason);
                         window.localStorage.removeItem('token');
                         window.localStorage.removeItem('username');
                         window.localStorage.removeItem('password');
                         window.localStorage.removeItem('rememberAuth');
                         location.reload();
-                    }else if (response.data) {
-                        return new Promise(function(resolve, reject){
-                            reject(response.data.reason)
-                        });
                     } else {
-                        return new Promise(function(resolve, reject){
-                            reject('Something went wrong!');
-                        });
+                        self.stopWorking();
+                        console.error(job.request);
+                        job.callback(err);
                     }
-                    self.stopWorking();
-                })
-                .catch(function(err){
-                    self.isFree = true;
-                    console.log(err);
-                    self.stopWorking();                    
-                    job.callback(err);
                     // self.getUtils().error(err);
                 });
 
-        } 
+        }
         /*
         else if( self.jobQueue.length ) {
             setTimeout(function(){
@@ -419,6 +430,49 @@ Service.prototype.register = function (data, callback) {
     console.log(data);
     this.post(REGISTER, data, callback);
 }
+Service.prototype.postWithTemplateFile = function (dataPayload) {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        let configUpload = {
+            url: self.baseUrl + UPLOAD_PLOT_TEMPLATE,
+            headers: {
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
+            },
+            data: dataPayload
+        };
+
+        self.Upload.upload(configUpload).then(
+            function (responseSuccess) {
+                if (responseSuccess.data && responseSuccess.data.code === 200 && responseSuccess.data.content) {
+                    return resolve(responseSuccess.data.content);
+                }else if (responseSuccess.data && responseSuccess.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
+                } else if (responseSuccess.data && responseSuccess.data.reason){
+                    return reject(responseSuccess.data.reason);
+                } else {
+                    return reject('Response is invalid!');
+                }
+            },
+            function (responseError) {
+                if (responseError.data && responseError.data.content) {
+                    return reject(responseError.data.reason);
+                } else {
+                    return reject(responseError);
+                }
+            },
+            function (evt) {
+                let progress = Math.round(100.0 * evt.loaded / evt.total);
+                console.log('evt upload', progress);
+            }
+        );
+    });
+}
+
 
 Service.prototype.postWithFile = function (route, dataPayload) {
     var self = this;
@@ -728,6 +782,10 @@ Service.prototype.listFamily = async function (callback) {
     this.post(FAMILY_LIST, {}, callback);
 }
 
+Service.prototype.getLogplot = function (idLogplot, callback) {
+    let self = this;
+    this.post(GET_PLOT, { idPlot: idLogplot }, callback);
+}
 Service.prototype.editLogplot = function (infoLogplot, callback) {
     if (!infoLogplot.option) infoLogplot.option = '';
     let self = this;

@@ -31,6 +31,9 @@ app.factory(wiServiceName, function () {
 
             __Controllers[componentName] = controller;
         },
+        dropComponent: function (componentName) {
+            delete __Controllers[componentName];
+        },
 
         setState: function (stateName, state) {
             _state[stateName] = state;
@@ -88,6 +91,7 @@ app.factory(wiServiceName, function () {
         UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
         UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
         UPDATE_TRACK_EVENT: 'update-track-event',
+        PALETTES: 'PALETTES'
     };
 });
 

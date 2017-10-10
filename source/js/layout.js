@@ -49,13 +49,20 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
-        let modelRef = componentState.model;
+        let modelRef = componentState.model
         container.on('destroy', function () {
             let model = utils.getModel(modelRef.type, modelRef.id);
             if (!model) return;
             model.data.opened = false;
         })
     });
+    layoutManager.on('stackCreated', function (stack) {
+        stack.on('activeContentItemChanged', function (activeContentItem) {
+            if (activeContentItem.config.componentState.model) {
+                wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+            }
+        })
+    })
 
     layoutManager.init();
 }
@@ -98,7 +105,7 @@ module.exports.putTabRightWithModel = function (model) {
     LAYOUT = layoutManager;
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
-    var itemType, itemId, tabTitle, name, htmlTemplate;
+    let itemType, itemId, tabTitle, name, htmlTemplate;
     console.log(model);
     switch (model.type) {
         case 'logplot':
@@ -155,18 +162,22 @@ module.exports.putTabRightWithModel = function (model) {
 }
 
 module.exports.removeTabWithModel = function (model) {
+    let item;
+    let wiComponentService = this.wiComponentService;
     switch (model.type) {
         case 'logplot':
-            var item = layoutManager.root.getItemsById('logplot' + model.id)[0];
+            item = layoutManager.root.getItemsById('logplot' + model.id)[0];
+            wiComponentService.dropComponent('logplot' + model.id);
             break;
         case 'crossplot':
-            var item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
+            item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
+            wiComponentService.dropComponent('crossplot' + model.id);
             break;
         case 'histogram':
-            var item = layoutManager.root.getItemsById('histogram' + model.id)[0];
+            item = layoutManager.root.getItemsById('histogram' + model.id)[0];
+            wiComponentService.dropComponent('histogram' + model.id);
             break;
         default:
-            console.log('model type is not valid');
             return;
     }
     if (!item) return;
@@ -191,4 +202,8 @@ module.exports.isComponentExist = function (id) {
 
 module.exports.updateSize = function () {
     layoutManager.updateSize();
+}
+
+module.exports.getItemById = function (itemId) {
+    return layoutManager.root.getItemsById(itemId)[0];
 }

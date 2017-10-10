@@ -39,18 +39,14 @@ exports.DuplicateButtonClicked = function () {
     const wiLogplot = this.wiLogplot;
     const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const wellOptions = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).wells.map(well => ({ value: well.idWell, label: well.name }));
-    const promptConfig = {
-        title: 'Duplicate Logplot',
-        inputName: 'Duplicate to Well',
-        type: "select",
-        options: wellOptions,
-        input: wellOptions.find(option => option.value == self.id)
-    }
-    DialogUtils.promptDialog(this.ModalService, promptConfig, function (idWell) {
-        wiApiService.duplicateLogplot(wiLogplot.id, idWell.value, function () {
-            Utils.refreshProjectState();
-        });
+    let idWell = Utils.getSelectedNode().properties.idWell;
+    DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this plot?", function(yes){
+        if(yes){
+            wiApiService.duplicateLogplot(wiLogplot.id, idWell, function (response) {
+            
+                Utils.refreshProjectState();
+            });
+        }
     });
 };
 
@@ -127,6 +123,26 @@ exports.PrintToImageButtonClicked = function () {
 };
 
 function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
+    console.log('scaleTo', wiLogplot);
+    let track = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`);
+    console.log(track);
+    if (!track.length) return false;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let dpCm = utils.getDpcm();
+    let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
+    let depthRange = wiD3Ctrl.getDepthRange();
+    console.log(depthRange);
+
+    let trackHeight = track.height();
+    let heightCm = trackHeight / dpCm;
+    let depthHeightCm = heightCm * rangeUnit;
+    let depthHeightM = depthHeightCm / 100;
+    depthRange[1] = depthRange[0] + depthHeightM;
+    console.log(depthRange, trackHeight, heightCm, depthHeightM, dpCm);
+    wiD3Ctrl.setDepthRange(depthRange);
+    wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
+}
+function scaleTo1(rangeUnit, wiLogplot, wiComponentService) {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     let wiSlidingbarCtrl = wiLogplot.getSlidingbarCtrl();
@@ -178,6 +194,7 @@ exports.Scale500ButtonClicked = function () {
 };
 
 exports.Scale1000ButtonClicked = function () {
+    console.log('scale 1:1000');
     let rangeUnit = 1000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };

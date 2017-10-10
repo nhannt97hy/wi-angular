@@ -25,6 +25,7 @@ let wiDepth = require('./wi-depth.model');
 let wiCurve = require('./wi-curve.model');
 let wiLogplotsModel = require('./wi-logplots.model');
 let wiLogplotModel = require('./wi-logplot.model');
+let DialogUtils = require('./DialogUtils');
 
 let utils = require('./utils');
 
@@ -62,7 +63,7 @@ let app = angular.module('helloapp', [
     wiLogplotsModel.name
 ]);
 
-app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
+app.controller('WiDummy', function ($scope, $timeout, wiComponentService, ModalService) {
     wiComponentService.putComponent("GRAPH", graph);
     wiComponentService.putComponent("UTILS", utils);
     wiComponentService.putComponent('DRAG_MAN', dragMan);
@@ -187,16 +188,34 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
                     function: 'Math.sin(x)',
                     lineStyle: { lineColor: 'Brown'}
                 }
-            ]
+            ],
+            ternary: {
+                vertices: [
+                    { x: 2, y: 4, used: true, name: 'ABC', style: 'Square' },
+                    { x: 2, y: 2, used: true, name: 'DEF' },
+                    { x: 6, y: 2, used: true, name: 'GHI' }
+                ],
+                calculate: {
+                    type: 'All',
+                    point: {
+                        x: 3,
+                        y: 3
+                    }
+                }
+            }
         });
-
-        console.log('GG1',viCrossplot.getProperties());
+        // console.log('TERNARY', viCrossplot.calculateTernary());
         viCrossplot.setProperties({
             pointSet: {
                 pointSymbol: 'Cross'
             }
         });
-        console.log('GG2', viCrossplot.getProperties());
         viCrossplot.doPlot();
     });
+
+    $scope.onTernaryButtonClick = function() {
+        let wiCrossplotCtrl = wiComponentService.getComponent('myCrossPlot');
+        let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+        DialogUtils.ternaryDialog(ModalService, wiD3CrossplotCtrl, function () {});
+    }
 });
