@@ -41,6 +41,11 @@ exports.ReloadProjectButtonClicked = function () {
     utils.refreshProjectState();
 }
 
+exports.OpenTemplateButtonClicked = function () {
+    let handlers = this.wiComponentService.getComponent(this.wiComponentService.GLOBAL_HANDLERS);
+    handlers.OpenTemplateButtonClicked();
+}
+
 exports.CollapseProjectButtonClicked = function () {
     let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
     let rootConfig = rootTreeviewCtrl.config;

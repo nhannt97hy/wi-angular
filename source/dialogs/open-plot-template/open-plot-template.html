@@ -1,0 +1,52 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">
+                    &times;
+                </button>
+                <h4><span class=""></span>&nbsp;Select Log Plot Template</h4>
+            </div>
+            <div class="modal-body text-center">
+                <div class="container-fluid padding-0">
+                    <div class="col-sm-11 padding-right-0">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control" value="{{wiModal.tplFile.name}}"
+                                           disabled>
+                                </div>
+                                <div class="col-sm-5">
+                                    <label for="selected" class="btn btn-default">Select</label>
+                                    <input id="selected" class="display-none" type="file"
+                                           ngf-select
+                                           ng-model="wiModal.tplFile"
+                                           ngf-max-size="100MB" required/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-4 normal-text" for="wellName">Plot Import Name
+                                    : </label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control wi-form-control"
+                                           ng-model="wiModal.plotName"/>
+                                </div>
+                            </div>
+
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -482,6 +482,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Open Template",
                                 icon: "",
                                 handler: function () {
+                                    self.handlers.OpenTemplateButtonClicked();
                                 }
                             }, {
                                 separator: '1'

@@ -1361,6 +1361,57 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
     });
 };
 
+exports.OpenTemplateDialog = function (ModalService, selectedNode) {
+    function ModalController($scope, close, wiComponentService, wiApiService) {
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let payloadParams = new Object();
+        this.plotName = "PlotTemplate";
+        payloadParams.idWell = selectedNode.properties.idWell;
+        this.error = null;
+        this.tplFile = null;
+        let self = this;
+        window.iml = this;
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+        this.onOkButtonClicked = function () {
+            payloadParams.file = self.tplFile;
+            payloadParams.plotName = self.plotName;
+            wiApiService.postWithTemplateFile(payloadParams)
+                .then(function (response) {
+                    if (response) {
+                        utils.refreshProjectState()
+                            .then(function () {
+                                close(null, 500);
+                            })
+                            .catch(function (err) {
+                                utils.error(err);
+                                close(null, 500);
+                            });
+                    }
+                })
+                .catch(function (err) {
+                    utils.error(err);
+                })
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "open-plot-template/open-plot-template.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (data) console.log("imported", data);
+        });
+    });
+}
+
+
 exports.importLASDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
