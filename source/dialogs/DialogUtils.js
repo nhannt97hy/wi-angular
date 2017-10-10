@@ -2870,48 +2870,52 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 idCurveNew = self.lineCurve[self.__idx].id;
                 console.log("idCurveNew", idCurveNew, self.__idx, self.curvesChanged, self.lineCurve[self.__idx]);
                 wiApiService.infoCurve(idCurveNew, function (curveInfo) {
-                    console.log("curveInfo", curveInfo);
                     let lineProps = curveInfo.LineProperty;
-                    $timeout(function () {
-                        self.curves[self.__idx] = {
-                            _index: self.__idx,
-                            alias: curveInfo.name,
-                            autoValueScale: false,
-                            blockPosition: lineProps.blockPosition,
-                            displayAs: 'Normal',
-                            displayMode: lineProps.displayMode,
-                            displayType: lineProps.displayType,
-                            idLine: null,
-                            idTrack: currentTrack.id,
-                            ignoreMissingValues: true,
-                            maxValue: lineProps.maxScale,
-                            minValue: lineProps.minScale,
-                            showDataset: true,
-                            showHeader: true,
-                            wrapMode: 'None'
-                        };
-                        self.curvesLineOptions[self.__idx] = {
-                            _index: self.__idx,
-                            display: true,
-                            lineStyle: {
-                                lineColor: lineProps.lineColor,
-                                lineStyle: eval(lineProps.lineStyle),
-                                lineWidth: lineProps.lineWidth
+                    console.log("curveInfo", curveInfo, lineProps);
+                    if (!lineProps) {
+                        console.log("idFamily is not detected!");
+                    } else {
+                        $timeout(function () {
+                            self.curves[self.__idx] = {
+                                _index: self.__idx,
+                                alias: curveInfo.name,
+                                autoValueScale: false,
+                                blockPosition: lineProps.blockPosition,
+                                displayAs: 'Normal',
+                                displayMode: lineProps.displayMode,
+                                displayType: lineProps.displayType,
+                                idLine: null,
+                                idTrack: currentTrack.id,
+                                ignoreMissingValues: true,
+                                maxValue: lineProps.maxScale,
+                                minValue: lineProps.minScale,
+                                showDataset: true,
+                                showHeader: true,
+                                wrapMode: 'None'
+                            };
+                            self.curvesLineOptions[self.__idx] = {
+                                _index: self.__idx,
+                                display: true,
+                                lineStyle: {
+                                    lineColor: lineProps.lineColor,
+                                    lineStyle: eval(lineProps.lineStyle),
+                                    lineWidth: lineProps.lineWidth
+                                }
+                            };
+                            self.curvesSymbolOptions[self.__idx] = {
+                                _index: self.__idx,
+                                display: false,
+                                symbolStyle: {
+                                    symbolFillStyle: "transparent",
+                                    symbolLineDash: [10, 0],
+                                    symbolLineWidth: 1,
+                                    symbolName: "circle",
+                                    symbolSize: 4,
+                                    symbolStrokeStyle: "black"
+                                }
                             }
-                        };
-                        self.curvesSymbolOptions[self.__idx] = {
-                            _index: self.__idx,
-                            display: false,
-                            symbolStyle: {
-                                symbolFillStyle: "transparent",
-                                symbolLineDash: [10, 0],
-                                symbolLineWidth: 1,
-                                symbolName: "circle",
-                                symbolSize: 4,
-                                symbolStrokeStyle: "black"
-                            }
-                        }
-                    });
+                        });
+                    }
                 });
             }
         }
@@ -3297,10 +3301,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         
                     case '2': {
                         let lineObj = {
-                            idCurve: idCurveNew,
+                            idCurve: self.lineCurve[idx].id,
                             idTrack: currentTrack.id
                         }
-                        
+                        console.log("new curves", lineObj);
                         wiApiService.createLine(lineObj, function (line) {
                             console.log("CREATE:", line);
                             utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
@@ -4275,8 +4279,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
 
+        this.pointSet = new Object();
         let crossplotModel = utils.getModel('crossplot', wiCrossplotCtrl.id);
         this.props = angular.copy(crossplotModel.properties);
+        console.log("thisProps", this.props);
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         // this.props = wiD3CrossplotCtrl.crossplotModel.properties;
@@ -4286,9 +4292,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.selectedCurveZ = null;
         this.selectedZoneSet = null;
 
-        this.pointSet = self.props.pointSet;
+        this.pointSet = this.props.pointSet;
         this.pointSet.pointSymbol = utils.upperCaseFirstLetter(this.pointSet.pointSymbol);
-        // this.pointSet = new Object();
         // DEBUG
         window.crossplotDialog = this;
         console.log("pointSet", this.props);

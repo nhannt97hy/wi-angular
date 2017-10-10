@@ -136,6 +136,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     pointSet: self.pointSet
                 })
             }
+            console.log("Model", self.crossplotModel);
             DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
                 self.linkModels();
             })
