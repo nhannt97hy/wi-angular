@@ -392,5 +392,5 @@ exports.CrossPlotButtonClicked = function () {
 };
 
 exports.HistogramButtonClicked = function () {
-    console.log('HistogramButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().createHistogram();    
 };

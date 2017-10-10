@@ -1029,9 +1029,7 @@ Service.prototype.removeZone = function (idZone, callback) {
 
 Service.prototype.createCrossplot = function (data, callback) {
     let self = this;
-    this.post(CREATE_CROSSPLOT, data, function (returnData) {
-        callback(returnData);
-        });
+    this.post(CREATE_CROSSPLOT, data, callback);
 }
 Service.prototype.editCrossplot = function (data, callback) {
     let self = this;

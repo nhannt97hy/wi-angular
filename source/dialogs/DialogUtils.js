@@ -3977,7 +3977,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         })
     });
 };
-exports.newBlankCrossplotDialog = function (ModalService, callback) {
+/* exports.newBlankCrossplotDialog = function (ModalService, callback) {
     function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
         let self = this;
         self.name = "BlankCrossPlot";
@@ -4004,7 +4004,7 @@ exports.newBlankCrossplotDialog = function (ModalService, callback) {
             if (callback && newPlot) callback(newPlot);
         });
     });
-}
+} */
 exports.colorPickerDialog1 = function (ModalService, currentColor, callback) {
     let wiModal = null;
     let thisTimeout = null;
@@ -4971,7 +4971,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-exports.newBlankHistogramDialog = function(ModalService, callback){
+/* exports.newBlankHistogramDialog = function(ModalService, callback){
     function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
         let self = this;
         self.name = "BlankHistogram";
@@ -5007,7 +5007,7 @@ exports.newBlankHistogramDialog = function(ModalService, callback){
             if (callback) callback(newPlot);
         });
     });
-}
+} */
 
 exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
