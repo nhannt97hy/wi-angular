@@ -5725,5 +5725,147 @@ exports.zoneManagerDialog = function (ModalService, item) {
             if (!ret) return;
         })
     })
-}
+};
 
+exports.discriminatorDialog = function(ModalService, type, wiCtrl, callback){
+    function ModalController(close, wiComponentService, wiApiService, $timeout){
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);        
+        window.DISC = this;
+
+        this.props = null;
+        this.well = null;
+        this.datasets = [];
+        this.curvesArr = [];
+        this.SelectedRow = 0;
+        switch(type){
+            case 'crossplot':
+            var crossplotModel = utils.getModel('crossplot', wiCtrl.id);        
+            self.props = angular.copy(crossplotModel.properties);
+            self.well = utils.findWellByCrossplot(wiCtrl.id);
+            break;
+
+            case 'histogram':
+            var histogramModel = utils.getModel('histogram', wiCtrl.id);        
+            self.props = angular.copy(histogramModel.properties);
+            self.well = utils.findWellByHistogram(wiCtrl.id);
+            break;
+        }
+
+        this.well.children.forEach(function(child, i){
+            if (child.type == 'dataset'){
+                self.datasets.push(child);
+            }
+
+            if (i == self.well.children.length - 1) {
+                self.datasets.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            var d = item;
+                            d.datasetName = child.properties.name;
+                            self.curvesArr.push(d);
+                        }
+                    })
+                });
+            }
+        })
+        this.funcChoices = ['<', '=', '>', '<=', '>='];
+
+        // mock
+        this.discrimArr = [
+            {
+                use: true,
+                curve: {
+                    "name": "curve",
+                    "type": "curve",
+                    "id": 3,
+                    "properties": {
+                      "idDataset": 2,
+                      "idCurve": 3,
+                      "idFamily": 2,
+                      "name": "ECGR",
+                      "unit": "GAPI",
+                      "alias": "ECGR",
+                      "minScale": 0,
+                      "maxScale": 200
+                    },
+                    "data": {
+                      "childExpanded": true,
+                      "icon": "curve-16x16",
+                      "label": "ECGR",
+                      "unit": "GAPI",
+                      "selected": false
+                    },
+                    "curveData": null,
+                    "datasetName": "W3"
+                  },
+                func: '<',
+                value: 100,
+                combine: 'And'
+            },
+            {
+                use: false,
+                curve: {
+                    "name": "curve",
+                    "type": "curve",
+                    "id": 3,
+                    "properties": {
+                      "idDataset": 2,
+                      "idCurve": 3,
+                      "idFamily": 2,
+                      "name": "ECGR",
+                      "unit": "GAPI",
+                      "alias": "ECGR",
+                      "minScale": 0,
+                      "maxScale": 200
+                    },
+                    "data": {
+                      "childExpanded": true,
+                      "icon": "curve-16x16",
+                      "label": "ECGR",
+                      "unit": "GAPI",
+                      "selected": false
+                    },
+                    "curveData": null,
+                    "datasetName": "W3"
+                  },
+                func: '>',
+                value: 60,
+                combine: 'Or'
+            }
+        ];
+
+        // this.setClickedRow = function(idx){
+        //     self.SelectedRow = idx;
+        // }
+
+        this.onApplyButtonClicked = function(){
+            console.log('Apply');
+            if(callback) callback();
+        }
+
+        this.onOKButtonClicked = function(){
+            console.log('OK');
+            if(callback) callback();            
+            close(null);
+        }
+
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'discriminator/discriminator-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    })
+}

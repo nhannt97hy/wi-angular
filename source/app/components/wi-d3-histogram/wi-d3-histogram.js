@@ -253,6 +253,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             */
         });
     }
+
+    this.histogramDiscriminator = function(){
+        DialogUtils.discriminatorDialog(ModalService, 'histogram', self.wiHistogramCtrl, function(){
+            console.log('Discriminator');
+        })
+    }
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         self.contextMenu = [{
@@ -268,6 +274,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "properties2-16x16",
             handler: function () {
                 self.histogramFormat();
+            }
+        }, {
+            name: "Discriminator",
+            label: "Discriminator",
+            icon: "properties2-16x16",
+            handler: function () {
+                self.histogramDiscriminator();
             }
         }, {
             name: "FlipHorizontalAxis",
