@@ -25,8 +25,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 console.log('updated');
             });
         }, 3000);
-
+    
     this.saveHistogram = saveHistogram;
+
+    function saveHistogramNow(callback) {
+        wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
+            console.log('updated');
+            if (callback) callback();
+        });
+    }
 
     this.statistics = {
         length: null,
@@ -320,7 +327,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 self.toogleShowReferenceWindow();
             }
-        }, {
+        },{
+            name: "ReferenceWindow",
+            label: "Reference Window",
+            handler: function () {
+                DialogUtils.referenceWindowsDialog(ModalService, _well, self.histogramModel, function() {
+                    saveHistogramNow(function() {
+                        self.getWiRefWindCtrl().update(getWell(), self.histogramModel.properties.reference_curves);                    
+                    });
+                });
+            }
+        },{
             name: "ShowCumulative",
             label: "Show Cumulative",
             "isCheckType": "true",

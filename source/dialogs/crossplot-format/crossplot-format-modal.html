@@ -561,7 +561,7 @@
                                 <div class="row">
                                     <div class="col-sm-12">
                                         <div class="width-95-percent float-left">
-                                            <table class="text-on-table table table-bordered curveTable">
+                                            <table class="text-on-table table table-bordered refCurveTable">
                                                 <thead>
                                                     <tr>
                                                         <th></th>
@@ -579,7 +579,7 @@
                                                         ng-click="wiModal.setClickedRow($index)">
                                                         <td>{{$index+1}}</td>
                                                         <td>
-                                                            <select ng-model="curve.refCurve"
+                                                            <select ng-model="curve.idReferenceCurve"
                                                                 class="form-control wi-form-control padding-tb-small"
                                                                 ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
                                                                 ng-change="wiModal.onChange(curve.index)"></select>
@@ -595,7 +595,7 @@
                                                                 ng-change="wiModal.onChange(curve.index)">
                                                         </td>
                                                         <td>
-                                                            <input type="checkbox" ng-model="curve.vis" 
+                                                            <input type="checkbox" ng-model="curve.visiable" 
                                                                 class="form-control wi-form-control"  
                                                                 ng-change="wiModal.onChange(curve.index)">
                                                         </td>

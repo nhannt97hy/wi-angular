@@ -15,6 +15,12 @@
     </div>
   </div>
   <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.isShowReferenceWindow" style="min-width:20%;max-width:30%">
-    <wi-container name='RefCrossplotContainer' title='Reference Curve' close-handler='wiD3Crossplot.CloseReferenceWindowZz'></wi-container>
+    <wi-container 
+      name='RefCrossplotContainer' title='Reference Curve' close-handler='wiD3Crossplot.CloseReferenceWindowZz'>
+      <wi-reference-window
+        name='{{wiD3Crossplot.getWiRefWindCtrlName()}}'
+        on-ref-wind-ctrl-ready="wiD3Crossplot.onRefWindCtrlReady">
+      </wi-reference-window>
+    </wi-container>
   </div>
 </div>
