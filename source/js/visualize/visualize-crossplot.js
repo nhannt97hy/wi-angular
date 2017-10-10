@@ -7,6 +7,7 @@ module.exports = Crossplot;
 
 function Crossplot(config) {
     this.setProperties(config);
+    console.log('abc', this.getProperties());
 
     this.paddingLeft = 100;
     this.paddingRight = 50;
@@ -172,22 +173,29 @@ const TERNARY_SCHEMA = {
             default: []
         },
         calculate: {
-            type: { type: 'Enum', values: ['Point', 'Area', 'All'], default: 'All' },
-            point: {
-                type: 'Object',
-                properties: {
-                    x: { type: 'Float' },
-                    y: { type: 'Float' }
-                }
-            },
-            area: {
-                polygons: {
-                    type: 'Array',
-                    item: { type: 'Object' },
-                    default: []
+            type: 'Object',
+            properties: {
+                type: { type: 'Enum', values: ['Point', 'Area', 'All'], default: 'All' },
+                point: {
+                    type: 'Object',
+                    properties: {
+                        x: { type: 'Float' },
+                        y: { type: 'Float' }
+                    }
                 },
-                exclude: { type: 'Boolean', default: false }
+                area: {
+                    type: 'Object',
+                    properties: {
+                        polygons: {
+                            type: 'Array',
+                            item: { type: 'Object' },
+                            default: []
+                        },
+                        exclude: { type: 'Boolean', default: false }
+                    }
+                }
             }
+
         }
     }
 }
@@ -1168,11 +1176,9 @@ Crossplot.prototype.plotTernary = function() {
 Crossplot.prototype.plotTernaryPoint = function() {
     let ternaryContainer = this.svgContainer.select('g.vi-crossplot-ternary');
     ternaryContainer.selectAll('.vi-crossplot-ternary-point').remove();
+    if (!this.ternary.calculate || this.ternary.calculate.type != 'Point') return;
     let point = this.ternary.calculate.point;
-
-    if (this.ternary.calculate.type != 'Point' || !point || point.x == null || point.y == null)
-        return;
-
+    if (!point || point.x == null || point.y == null) return;
     let self = this;
     let helper = new SvgHelper(ternaryContainer, {
         fillStyle: self.TERNARY_POINT_COLOR,
@@ -1227,7 +1233,7 @@ Crossplot.prototype.calculateTernary = function() {
     });
 
     return {
-        material: curves.map(function(c) {
+        materials: curves.map(function(c) {
             return Utils.mean(c.map(function(p) { return p.x; }))
         }),
         curves: curves
