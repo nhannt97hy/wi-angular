@@ -262,7 +262,7 @@ var wiApiWorker = function($http, wiComponentService){
                         window.localStorage.removeItem('username');
                         window.localStorage.removeItem('password');
                         window.localStorage.removeItem('rememberAuth');
-                        location.reload();    
+                        location.reload();
                     } else {
                         self.stopWorking();
                         console.error(job.request);
@@ -271,7 +271,7 @@ var wiApiWorker = function($http, wiComponentService){
                     // self.getUtils().error(err);
                 });
 
-        } 
+        }
         /*
         else if( self.jobQueue.length ) {
             setTimeout(function(){
@@ -782,6 +782,10 @@ Service.prototype.listFamily = async function (callback) {
     this.post(FAMILY_LIST, {}, callback);
 }
 
+Service.prototype.getLogplot = function (idLogplot, callback) {
+    let self = this;
+    this.post(GET_PLOT, { idPlot: idLogplot }, callback);
+}
 Service.prototype.editLogplot = function (infoLogplot, callback) {
     if (!infoLogplot.option) infoLogplot.option = '';
     let self = this;

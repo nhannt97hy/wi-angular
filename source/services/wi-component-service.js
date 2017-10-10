@@ -31,6 +31,9 @@ app.factory(wiServiceName, function () {
 
             __Controllers[componentName] = controller;
         },
+        dropComponent: function (componentName) {
+            delete __Controllers[componentName];
+        },
 
         setState: function (stateName, state) {
             _state[stateName] = state;

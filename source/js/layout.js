@@ -58,7 +58,9 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     });
     layoutManager.on('stackCreated', function (stack) {
         stack.on('activeContentItemChanged', function (activeContentItem) {
-            wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+            if (activeContentItem.config.componentState.model) {
+                wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+            }
         })
     })
 
@@ -161,15 +163,19 @@ module.exports.putTabRightWithModel = function (model) {
 
 module.exports.removeTabWithModel = function (model) {
     let item;
+    let wiComponentService = this.wiComponentService;
     switch (model.type) {
         case 'logplot':
             item = layoutManager.root.getItemsById('logplot' + model.id)[0];
+            wiComponentService.dropComponent('logplot' + model.id);
             break;
         case 'crossplot':
             item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
+            wiComponentService.dropComponent('crossplot' + model.id);
             break;
         case 'histogram':
             item = layoutManager.root.getItemsById('histogram' + model.id)[0];
+            wiComponentService.dropComponent('histogram' + model.id);
             break;
         default:
             return;
@@ -196,4 +202,8 @@ module.exports.isComponentExist = function (id) {
 
 module.exports.updateSize = function () {
     layoutManager.updateSize();
+}
+
+module.exports.getItemById = function (itemId) {
+    return layoutManager.root.getItemsById(itemId)[0];
 }

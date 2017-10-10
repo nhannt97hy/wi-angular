@@ -312,6 +312,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.removeZone(deletedZone.id, function () { })
             }
             _plotZoneSet(track);
+            Utils.refreshProjectState();
         })
         return zone;
     }
@@ -623,6 +624,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     track.removeZone(zone);
                     track.rearrangeHeaders();
                     _plotZoneSet(track);
+                    Utils.refreshProjectState();
                 })
             })
         })
@@ -740,25 +742,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackCallback(track);
     }
 
+    function _plotZoneTrack(sourceViZoneTrack, viZoneTrack) {
+        if (!viZoneTrack) return;
+        viZoneTrack.removeAllZones();
+        sourceViZoneTrack.getZones().forEach(function (sourceZone) {
+            const zoneConfig = angular.copy(sourceZone);
+            zoneConfig.idZoneTrack = viZoneTrack.id;
+            let wiD3 = wiComponentService.getComponent('logplot' + viZoneTrack.idPlot).getwiD3Ctrl();
+            wiD3.addZoneToTrack(viZoneTrack, zoneConfig);
+        })
+    }
+
     function _plotZoneSet(sourceZoneTrack) {
-        let sourceZones = sourceZoneTrack.getZones();
+        let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        // plot this logplot
+        let viZoneTracks = self.getTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
+        viZoneTracks.forEach(function (viZoneTrack) {
+            _plotZoneTrack(sourceZoneTrack, viZoneTrack);
+        })
+        // plot others logplots
         let logplotModel =  self.wiLogplotCtrl.getLogplotModel();
         let well = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).wells.find(well => well.idWell == logplotModel.properties.idWell);
         well.plots.forEach(function (aLogplot) {
-            aLogplot.zone_tracks.forEach(function (zoneTrack) {
-                if (zoneTrack.idZoneTrack == sourceZoneTrack.id) return;
-                if (zoneTrack.idZoneSet == sourceZoneTrack.idZoneSet) {
-                    let viZoneTrack = wiComponentService.getComponent('vi-zone-track-' + zoneTrack.idZoneTrack);
-                    if (!viZoneTrack) return;
-                    viZoneTrack.removeAllZones();
-                    sourceZones.forEach(function (sourceZone) {
-                        const zoneConfig = angular.copy(sourceZone);
-                        zoneConfig.idZoneTrack = zoneTrack.idZoneTrack
-                        let wiD3 = wiComponentService.getComponent('logplot' + zoneTrack.idPlot).getwiD3Ctrl();
-                        wiD3.addZoneToTrack(viZoneTrack, sourceZone);
-                    })
-                }
-            })
+            if (aLogplot.idPlot != sourceZoneTrack.idPlot) {
+                if (!layoutManager.getItemById('logplot' + aLogplot.idPlot)) return;
+                console.log(aLogplot.idPlot);
+                wiApiService.getLogplot(aLogplot.idPlot, function (logplot) {
+                    console.log('---------------',logplot);
+                    logplot.zone_tracks.forEach(function (zoneTrack) {
+                        if (zoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
+                        let viZoneTrack = wiComponentService.getComponent('vi-zone-track-' + zoneTrack.idZoneTrack);
+                        if (!viZoneTrack) return;
+                        _plotZoneTrack(sourceZoneTrack, viZoneTrack);
+                    });
+                })
+            }
         });
     }
 
@@ -835,6 +853,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         });
                     }
                     _plotZoneSet(track);
+                    Utils.refreshProjectState();
                     track.setMode(null);
                     track.rearrangeHeaders();
                 })
@@ -930,6 +949,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     wiApiService.removeZone(drawing.id, function () {
                         track.removeDrawing(drawing);
                         _plotZoneSet(track);
+                        Utils.refreshProjectState();
                     })
                 }
 
@@ -998,6 +1018,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 zone.setProperties(props);
                 _plotZoneSet(_currentTrack);
                 zone.doPlot();
+                Utils.refreshProjectState();
             })
         })
     }
@@ -1070,6 +1091,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     wiApiService.removeZone(zone.id, function () {
                         _currentTrack.removeZone(zone);
                         _plotZoneSet(_currentTrack);
+                        Utils.refreshProjectState();
                     });
                 }
             }, {
@@ -1463,7 +1485,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
         wiComponentService.on('tab-changed', function (logplotModel) {
-            if (self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
+            if (!logplotModel || logplotModel.type != 'logplot' || self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
             self.plotAll();
         });
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();

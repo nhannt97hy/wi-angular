@@ -90,6 +90,9 @@ exports.DeleteItemButtonClicked = function () {
                 case 'dataset':
                     wiApiService.removeDataset(selectedNode.properties.idDataset, function () {
                         $timeout(function () {
+                            selectedNode.children.forEach(function (curve) {
+                                utils.updateVisualizeOnModelDeleted(curve);
+                            })
                             selectedNode.data.deleted = true;
                             utils.refreshProjectState();
                         });
@@ -98,6 +101,7 @@ exports.DeleteItemButtonClicked = function () {
                 case 'curve':
                     wiApiService.removeCurve(selectedNode.properties.idCurve, function () {
                         $timeout(function () {
+                            utils.updateVisualizeOnModelDeleted(selectedNode);
                             selectedNode.data.deleted = true;
                             utils.refreshProjectState();
                         });
