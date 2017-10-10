@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body text-center padding-2em">
                 <span class="cancel-32x32-edit valign-middle"></span>
-                <span class="margin-left-0_5em color-error"><i>{{wiModal.error}}</i></span>
+                <span class="margin-left-0_5em color-error" ng-bind-html="wiModal.error"></span>
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default' ng-click='wiModal.onCloseButtonClicked()'>Close</button>
