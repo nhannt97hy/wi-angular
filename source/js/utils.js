@@ -82,9 +82,7 @@ exports.warning = function (warningMessage) {
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {
-    console.log('unsorted',projectData);
     sortProjectData(projectData);
-    console.log('sorted',projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
@@ -264,10 +262,14 @@ exports.createZoneSet = function (idWell, callback) {
             idWell: idWell
         }
         wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
-            __GLOBAL.$timeout(function () {
-                if (callback) callback(dataReturn);
-                refreshProjectState();
-            });
+            if(!dataReturn.name){
+                DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Zone Set: " + ret + " existed!");
+            }else{
+                __GLOBAL.$timeout(function () {
+                    if (callback) callback(dataReturn);
+                    refreshProjectState();
+                });
+            }
         });
     });
 }
@@ -1685,31 +1687,34 @@ function openCrossplotTab(crossplotModel, callback) {
 };
 exports.openCrossplotTab = openCrossplotTab;
 
-exports.createNewBlankHistogram = function (wiComponentService, wiApiService, histogramName) {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'histograms') return;
+exports.createHistogram = function (idWell, curve, histogramName) {
+    let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);    
     let dataRequest = {
-        idWell: selectedNode.properties.idWell,
+        idWell: idWell,
+        idCurve: curve ? curve.idCurve : null,
+        leftScale: curve ? curve.minX: 0,
+        rightScale: curve ? curve.maxX: 0,
         name: histogramName
     };
-    return new Promise(function(resolve, reject){
-        wiApiService.post(wiApiService.CREATE_HISTOGRAM, dataRequest, function(response){
-            if(!response.name){
-                reject(response);
-            } else {
-                resolve(response);
-            }
-        });
-    });
+    __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
+        if(!histogram.name){
+            DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Name: " + dataRequest.name + " existed!");
+        } else {
+            let histogramModel = histogramToTreeConfig(histogram);
+            refreshProjectState().then(function () {
+                openHistogramTab(histogramModel);
+            });
+        }
+    })
 };
 
-function openHistogramTab(histogramModel, callback) {
+function openHistogramTab(histogramModel) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(histogramModel);
     if (histogramModel.data.opened) return;
     histogramModel.data.opened = true;
-    if (callback) callback();
+    // if (callback) callback();
 };
 exports.openHistogramTab = openHistogramTab;
 

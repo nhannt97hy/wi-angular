@@ -15,7 +15,7 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
-//  const BASE_URL = 'http://localhost:3000';
+//   const BASE_URL = 'http://localhost:3000';
 const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://192.168.0.223';
 
@@ -1029,9 +1029,7 @@ Service.prototype.removeZone = function (idZone, callback) {
 
 Service.prototype.createCrossplot = function (data, callback) {
     let self = this;
-    this.post(CREATE_CROSSPLOT, data, function (returnData) {
-        callback(returnData);
-        });
+    this.post(CREATE_CROSSPLOT, data, callback);
 }
 Service.prototype.editCrossplot = function (data, callback) {
     let self = this;

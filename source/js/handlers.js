@@ -1,10 +1,17 @@
 exports.NewProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
+    let ModalService = this.ModalService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.ModalService, function (data) {
-        let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, data);
+    DialogUtils.newProjectDialog(ModalService, function (data) {
+        self.wiApiService.createProject(data, function (response) {
+            if(!response.name){
+                DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!"); 
+            }else{
+                let utils = self.wiComponentService.getComponent('UTILS');
+                utils.projectOpen(self.wiComponentService, data);
+            }
+        });
     });
 };
 
@@ -689,25 +696,18 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    DialogUtils.newBlankHistogramDialog(ModalService, function (histogramtName) {
-        console.log(histogramtName);
-        utils.createNewBlankHistogram(wiComponentService, wiApiService, histogramtName)
-            .then(function(histogram) {
-                console.log("Created new histogram", histogram);
-                let histogramModel = utils.histogramToTreeConfig(histogram);
-                let selectedHistogram = utils.getSelectedNode();
-                selectedHistogram.children.push(histogramModel);
-                utils.openHistogramTab(histogramModel, function() {
-                    let histogramName = 'histogram' + histogramModel.properties.idHistogram;
-                    let wiD3Ctrl = wiComponentService.getComponent(histogramName).getwiD3Ctrl();
-                    // TODO
-                });
-            })
-            .catch(function(err) {
-                console.error('newBlankHistogramDialog err ' + err);
-                utils.error('newBlankHistogramDialog err ' + err);
-            });
-    });};
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'histograms') return;
+    let promptConfig = {
+        title: 'Create New Histogram',
+        inputName: 'Histogram Name',
+        input: 'BlankHistogram'
+    }
+
+    DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+        utils.createHistogram(selectedNode.properties.idWell, null, histogramName)
+    });
+};
 
 exports.PHI_TOTALButtonClicked = function () {
     console.log('PHI_TOTALButton is clicked');

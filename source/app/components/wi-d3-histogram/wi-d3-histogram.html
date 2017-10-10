@@ -11,11 +11,11 @@
         <div wi-right-click='wiD3Histogram.showContextMenu($event)' style="flex:1;display:flex;flex-direction:column;">
             <h4>Histogram: {{wiD3Histogram.histogramModel.properties.histogramTitle}}</h4>
             
-            <h5 ng-show="!wiD3Histogram.histogramModel.properties.idZoneSet">
+            <h5 ng-show="!wiD3Histogram.histogramModel.properties.idZoneSet && wiD3Histogram.histogramModel.properties.idCurve">
                 Reference({{wiD3Histogram.curveModel.properties.unit}}): [{{wiD3Histogram.histogramModel.properties.intervalDepthTop}} -
                 {{wiD3Histogram.histogramModel.properties.intervalDepthBottom}}]
             </h5>
-            <h5 ng-show="wiD3Histogram.histogramModel.properties.idZoneSet">
+            <h5 ng-show="wiD3Histogram.histogramModel.properties.idZoneSet && wiD3Histogram.histogramModel.properties.idCurve">
                 Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
             </h5>
             <div class='histogram-container'>
