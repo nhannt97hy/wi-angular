@@ -58,7 +58,9 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     });
     layoutManager.on('stackCreated', function (stack) {
         stack.on('activeContentItemChanged', function (activeContentItem) {
-            wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+            if (activeContentItem.config.componentState.model) {
+                wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+            }
         })
     })
 
@@ -200,4 +202,8 @@ module.exports.isComponentExist = function (id) {
 
 module.exports.updateSize = function () {
     layoutManager.updateSize();
+}
+
+module.exports.getItemById = function (itemId) {
+    return layoutManager.root.getItemsById(itemId)[0];
 }
