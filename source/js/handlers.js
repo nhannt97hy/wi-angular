@@ -1,10 +1,17 @@
 exports.NewProjectButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
+    let ModalService = this.ModalService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.newProjectDialog(this.ModalService, function (data) {
-        let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, data);
+    DialogUtils.newProjectDialog(ModalService, function (data) {
+        self.wiApiService.createProject(data, function (response) {
+            if(!response.name){
+                DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!"); 
+            }else{
+                let utils = self.wiComponentService.getComponent('UTILS');
+                utils.projectOpen(self.wiComponentService, data);
+            }
+        });
     });
 };
 

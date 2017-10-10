@@ -82,9 +82,7 @@ exports.warning = function (warningMessage) {
 }
 
 exports.projectOpen = function (wiComponentService, projectData) {
-    console.log('unsorted',projectData);
     sortProjectData(projectData);
-    console.log('sorted',projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };

@@ -71,10 +71,10 @@ exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
         this.disabled = false;
-        this.error = null;
+        // this.error = null;
 
         this.onOkButtonClicked = function () {
-            self.error = '';
+            // self.error = '';
             self.disabled = true;
 
             let data = {
@@ -83,17 +83,7 @@ exports.newProjectDialog = function (ModalService, callback) {
                 department: $scope.department,
                 description: $scope.description
             };
-            console.log("This data: ", data);
-
-
-            wiApiService.createProject(data, function (response) {
-                    console.log('response', response);
-
-                    close(response, 500);
-                    /*$timeout(function(){
-                        $scope.$apply();
-                    })*/
-                });
+            close(data);
         };
 
         this.onCancelButtonClicked = function () {
