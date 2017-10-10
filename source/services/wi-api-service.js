@@ -27,7 +27,8 @@ const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
 const UPLOAD_IMAGE = '/image-upload';
-const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import'
+const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import';
+const UPLOAD_PLOT_TRACK_TEMPLATE = '/project/well/plot/track/import';
 
 const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
@@ -60,6 +61,7 @@ const DELETE_PLOT = '/project/well/plot/delete';
 const GET_PLOT = '/project/well/plot/info';
 const DUPLICATE_PLOT = '/project/well/plot/duplicate';
 const EXPORT_PLOT = '/project/well/plot/export';
+const EXPORT_PLOT_TRACK = '/project/well/plot/track/export';
 
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
@@ -473,6 +475,48 @@ Service.prototype.postWithTemplateFile = function (dataPayload) {
     });
 }
 
+Service.prototype.postWithTrackTemplateFile = function (dataPayload) {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        let configUpload = {
+            url: self.baseUrl + UPLOAD_PLOT_TRACK_TEMPLATE,
+            headers: {
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
+            },
+            data: dataPayload
+        };
+
+        self.Upload.upload(configUpload).then(
+            function (responseSuccess) {
+                if (responseSuccess.data && responseSuccess.data.code === 200 && responseSuccess.data.content) {
+                    return resolve(responseSuccess.data.content);
+                }else if (responseSuccess.data && responseSuccess.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
+                } else if (responseSuccess.data && responseSuccess.data.reason){
+                    return reject(responseSuccess.data.reason);
+                } else {
+                    return reject('Response is invalid!');
+                }
+            },
+            function (responseError) {
+                if (responseError.data && responseError.data.content) {
+                    return reject(responseError.data.reason);
+                } else {
+                    return reject(responseError);
+                }
+            },
+            function (evt) {
+                let progress = Math.round(100.0 * evt.loaded / evt.total);
+                console.log('evt upload', progress);
+            }
+        );
+    });
+}
 
 Service.prototype.postWithFile = function (route, dataPayload) {
     var self = this;
@@ -1165,7 +1209,26 @@ Service.prototype.exportLogPlot = function (idPlot, callback) {
         self.getUtils().error("File not found!");
     });
 }
-
+Service.prototype.exportLogTrack = function(data, callback){
+    let self = this;
+    let dataRequest = data
+    self.$http({
+        url: self.baseUrl + EXPORT_PLOT_TRACK,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer',
+            'Authorization' : __USERINFO.token
+        },
+        responseType: "arraybuffer",
+        data: dataRequest
+    }).then(function (res) {
+        callback(res.data, res.headers('Content-Type'));
+    }, function (err) {
+        console.error(err);
+        self.getUtils().error("File not found!");
+    });
+}
 // reference_curve apis
 Service.prototype.createRefCurve = function (data, callback) {
     let self = this;

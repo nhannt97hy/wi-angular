@@ -1638,6 +1638,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 logplotHandlers.DeleteTrackButtonClicked();
             }
+        }, {
+            name: "ExportTrack",
+            label: "Export Track",
+            // icon: "track-delete-16x16",
+            handler: function () {
+                logplotHandlers.ExportTrackButtonClicked();
+            }
+        }, {
+            name: "ImportTrack",
+            label: "Import Track",
+            // icon: "track-delete-16x16",
+            handler: function () {
+                logplotHandlers.ImportTrackButtonClicked();
+            }
         },
     ];
 
