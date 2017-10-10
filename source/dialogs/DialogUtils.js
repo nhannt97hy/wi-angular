@@ -1031,14 +1031,14 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
                 break;
             }
         }
-        $timeout(function() {     
+        $timeout(function() {
             drawIcon(self.symbolOptions.symbolStyle.symbolName + 'Icon', self.symbolOptions.symbolStyle.symbolName);
             self.symbolType.forEach(function(type, index){
                 console.log("symbolType:", type);
                 drawIcon(type, type);
             })
         })
-        
+
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
@@ -2347,7 +2347,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         }*/
         // wiApiService.getPalettes(function(paletteList){
         utils.getPalettes(function(paletteList){
-                
+
             let paletteNameArr = Object.keys(paletteList);
             let paletteValArr = JSON.stringify(Object.values(paletteList));
             console.log("getPalettes");
@@ -2680,7 +2680,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             curve.properties.datasetName = dataset.properties.name;
             console.log("curveObj", curve);
         })
-        
+
         this.lineCurve = [];
         this.fillPatternOptions = new Array();
         this.variableShadingOptions = new Array();
@@ -2951,14 +2951,14 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.setDisabledCurve = function(index) {
             let temp = true;
             if(self.curvesChanged[index].change == '2') temp = false;
-            return temp; 
+            return temp;
         }
         function _removeRowFromCurvesTable(idx) {
             self.curvesChanged.splice(idx, 1);
             self.curves.splice(idx, 1);
             self.curvesSymbolOptions.splice(idx, 1);
             self.curvesLineOptions.splice(idx, 1);
-            self.lineCurve.splice(idx, 1); 
+            self.lineCurve.splice(idx, 1);
         }
         function _cleanUpCurvesTable() {
             for (let idx = self.curvesChanged.length - 1; idx >= 0; idx--) {
@@ -3207,10 +3207,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         function updateShading(idx) {
             console.log("111",self.shadingArr[index],
-                            self.fillPatternOptions[index], 
+                            self.fillPatternOptions[index],
                             self.variableShadingOptions[index]);
-            let shadingObj = utils.mergeShadingObj(self.shadingArr[index], 
-                            self.fillPatternOptions[index], 
+            let shadingObj = utils.mergeShadingObj(self.shadingArr[index],
+                            self.fillPatternOptions[index],
                             self.variableShadingOptions[index]);
             if(shadingObj.idLeftLine == -3) {
                 shadingObj.type = 'custom';
@@ -3236,19 +3236,19 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 let shadingObjToSet = angular.copy(shadingObj);
                 // wiApiService.getPalettes(function(paletteList){
                 utils.getPalettes(function(paletteList){
-                        
+
                     wiApiService.dataCurve(shadingObj.idControlCurve, function (curveData) {
                         shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
                         shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
                         shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData, self.well.properties);
                         if(!shadingObj.isNegPosFill) {
-                            if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette) 
+                            if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette)
                                 shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
                         }
                         else {
-                            if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette) 
+                            if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette)
                                 shadingObjToSet.positiveFill.varShading.palette = paletteList[shadingObjToSet.positiveFill.varShading.palName];
-                            if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette) 
+                            if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette)
                                 shadingObjToSet.negativeFill.varShading.palette = paletteList[shadingObjToSet.negativeFill.varShading.palName];
                         }
                         console.log("LEFT/RIGHT CURVE", shadingObjToSet);
@@ -3400,7 +3400,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         item.change = 0;
                         break;
                     }
-                        
+
                     case '2': {
                         let lineObj = {
                             idCurve: self.lineCurve[idx].id,
@@ -3450,7 +3450,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         this.getShadings = function () {
             return self.shadingArr.filter(function (c, index) {
-                return (self.shadingChanged[index].change == '0' || 
+                return (self.shadingChanged[index].change == '0' ||
                         self.shadingChanged[index].change == '1' ||
                         self.shadingChanged[index].change == '2');
             });
@@ -3460,7 +3460,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.shadingArr.splice(index, 1);
             self.fillPatternOptions.splice(index, 1);
             self.variableShadingOptions.splice(index, 1);
-        } 
+        }
         function removeShadings() {
             self.shadingChanged.forEach(function (item, index) {
                 if (item.change == '3') {
@@ -3513,10 +3513,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         break;
                     case '1': {
                         console.log("111",self.shadingArr[idx],
-                        self.fillPatternOptions[idx], 
+                        self.fillPatternOptions[idx],
                         self.variableShadingOptions[idx]);
-                        let shadingObj = utils.mergeShadingObj(self.shadingArr[idx], 
-                                        self.fillPatternOptions[idx], 
+                        let shadingObj = utils.mergeShadingObj(self.shadingArr[idx],
+                                        self.fillPatternOptions[idx],
                                         self.variableShadingOptions[idx]);
                         if(shadingObj.idLeftLine == -3) {
                             shadingObj.type = 'custom';
@@ -3541,19 +3541,19 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             console.log(result, shadingObj);
                             let shadingObjToSet = angular.copy(shadingObj);
                             // wiApiService.getPalettes(function(paletteList){
-                            utils.getPalettes(function(paletteList){    
+                            utils.getPalettes(function(paletteList){
                                 wiApiService.dataCurve(shadingObj.idControlCurve, function (curveData) {
                                     shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
                                     shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
                                     shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData, self.well.properties);
                                     if(!shadingObj.isNegPosFill) {
-                                        if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette) 
+                                        if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette)
                                             shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
                                     }
                                     else {
-                                        if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette) 
+                                        if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette)
                                             shadingObjToSet.positiveFill.varShading.palette = paletteList[shadingObjToSet.positiveFill.varShading.palName];
-                                        if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette) 
+                                        if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette)
                                             shadingObjToSet.negativeFill.varShading.palette = paletteList[shadingObjToSet.negativeFill.varShading.palName];
                                     }
                                     console.log("LEFT/RIGHT CURVE", shadingObjToSet);
@@ -3590,7 +3590,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 } else {
                                     lineObj1 = findInVisCurveListByIdLine(shading.idLeftLine);
                                     lineObj2 = findInVisCurveListByIdLine(shading.idRightLine);
-                                    if (lineObj1 && lineObj2) 
+                                    if (lineObj1 && lineObj2)
                                         wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
                                     else {
                                         console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
@@ -3661,7 +3661,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     close(self.props);
                 }
             });
-            
+
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -4384,24 +4384,31 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
 
-        this.pointSet = new Object();
-        let crossplotModel = utils.getModel('crossplot', wiCrossplotCtrl.id);
-        this.props = angular.copy(crossplotModel.properties);
-        console.log("thisProps", this.props);
+        // this.pointSet = new Object();
+        // let crossplotModel = utils.getModel('crossplot', wiCrossplotCtrl.id);
+        // this.props = angular.copy(crossplotModel.properties);
+        // console.log("thisProps", this.props);
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-        // this.props = wiD3CrossplotCtrl.crossplotModel.properties;
+        this.props = wiD3CrossplotCtrl.crossplotModel.properties;
         this.refCurves = [];
         this.selectedCurveX = null;
         this.selectedCurveY = null;
         this.selectedCurveZ = null;
         this.selectedZoneSet = null;
 
-        this.pointSet = this.props.pointSet;
+        this.pointSet = wiD3CrossplotCtrl.pointSet;
+        if (!this.pointSet) {
+            wiApiService.getCrossplot(wiD3CrossplotCtrl.crossplotModel.idCrossplot, function (crossplot) {
+                self.pointSet = crossplot.pointsets[0];
+            });
+        }
+        if (!this.pointSet.pointSymbol) {
+            this.pointSet.pointSymbol = 'Circle';
+        }
         this.pointSet.pointSymbol = utils.upperCaseFirstLetter(this.pointSet.pointSymbol);
         // DEBUG
         window.crossplotDialog = this;
-        console.log("pointSet", this.props);
 
         function findCurveById (idCurve) {
             curveObjs = self.curvesOnDataset.filter(function (item, index) {
@@ -4583,11 +4590,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.pointSet.pointColor = colorStr;
             });
         };
-        (this.props.reference_curves).forEach(function(curve, index){
-            curve.change = 0,
-            curve.index = index,
-            self.refCurves.push(curve);
-        });
+        // (this.props.reference_curves).forEach(function(curve, index){
+        //     curve.change = 0,
+        //     curve.index = index,
+        //     self.refCurves.push(curve);
+        // });
         this.__idx = 0;
         $scope.selectedRow = 0;
         this.setClickedRow = function (indexRow) {
@@ -4704,7 +4711,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             //         pointSet.activeZone = self.selectedZone;
             //         console.log(pointSet);
             //         self.props.pointSet = pointSet;
-            //         let scalesObj = angular.copy(self.pointSet);                        
+            //         let scalesObj = angular.copy(self.pointSet);
             //         scalesObj.curveX = undefined;
             //         scalesObj.curveY = undefined;
             //         scalesObj.curveZ = undefined;
@@ -4717,7 +4724,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             //                 });
             //             }
             //         });
-                    
+
             //         if (callback) {
             //             callback();
             //         }
@@ -6071,7 +6078,151 @@ exports.zoneManagerDialog = function (ModalService, item) {
             if (!ret) return;
         })
     })
+};
+
+exports.discriminatorDialog = function (ModalService, type, wiCtrl, callback) {
+    function ModalController(close, wiComponentService, wiApiService, $timeout) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        window.DISC = this;
+
+        this.props = null;
+        this.well = null;
+        this.datasets = [];
+        this.curvesArr = [];
+        this.SelectedRow = 0;
+        switch (type) {
+            case 'crossplot':
+                var crossplotModel = utils.getModel('crossplot', wiCtrl.id);
+                self.props = angular.copy(crossplotModel.properties);
+                self.well = utils.findWellByCrossplot(wiCtrl.id);
+                break;
+
+            case 'histogram':
+                var histogramModel = utils.getModel('histogram', wiCtrl.id);
+                self.props = angular.copy(histogramModel.properties);
+                self.well = utils.findWellByHistogram(wiCtrl.id);
+                break;
+        }
+
+        this.well.children.forEach(function (child, i) {
+            if (child.type == 'dataset') {
+                self.datasets.push(child);
+            }
+
+            if (i == self.well.children.length - 1) {
+                self.datasets.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            var d = item;
+                            d.datasetName = child.properties.name;
+                            self.curvesArr.push(d);
+                        }
+                    })
+                });
+            }
+        })
+
+        this.funcChoices = ['<', '=', '>', '<=', '>='];
+
+        // mock
+        this.discrimArr = [{
+                use: true,
+                curve: {
+                    "name": "curve",
+                    "type": "curve",
+                    "id": 3,
+                    "properties": {
+                        "idDataset": 2,
+                        "idCurve": 3,
+                        "idFamily": 2,
+                        "name": "ECGR",
+                        "unit": "GAPI",
+                        "alias": "ECGR",
+                        "minScale": 0,
+                        "maxScale": 200
+                    },
+                    "data": {
+                        "childExpanded": true,
+                        "icon": "curve-16x16",
+                        "label": "ECGR",
+                        "unit": "GAPI",
+                        "selected": false
+                    },
+                    "curveData": null,
+                    "datasetName": "W3"
+                },
+                func: '<',
+                value: 100,
+                combine: 'And'
+            },
+            {
+                use: false,
+                curve: {
+                    "name": "curve",
+                    "type": "curve",
+                    "id": 3,
+                    "properties": {
+                        "idDataset": 2,
+                        "idCurve": 3,
+                        "idFamily": 2,
+                        "name": "ECGR",
+                        "unit": "GAPI",
+                        "alias": "ECGR",
+                        "minScale": 0,
+                        "maxScale": 200
+                    },
+                    "data": {
+                        "childExpanded": true,
+                        "icon": "curve-16x16",
+                        "label": "ECGR",
+                        "unit": "GAPI",
+                        "selected": false
+                    },
+                    "curveData": null,
+                    "datasetName": "W3"
+                },
+                func: '>',
+                value: 60,
+                combine: 'Or'
+            }
+        ];
+
+        // this.setClickedRow = function(idx){
+        //     self.SelectedRow = idx;
+        // }
+
+        this.onApplyButtonClicked = function () {
+            console.log('Apply');
+            if (callback) callback();
+        }
+
+        this.onOKButtonClicked = function () {
+            console.log('OK');
+            if (callback) callback();
+            close(null);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'discriminator/discriminator-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    })
 }
+
 
 exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
     function ModalController($scope, wiComponentService, wiApiService, close) {
@@ -6087,8 +6238,17 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             uncreated: 4
         };
 
+        $scope.selectDataSetting = {
+            showCheckAll: false,
+            showUncheckAll: false,
+            displayProp: 'id',
+            checkBoxes: true
+        };
+        $scope.result = {}
+
         let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
-        let ternary = angular.copy(viCrossplot.getProperties().ternary);
+        let props = angular.copy(viCrossplot.getProperties());
+        let ternary = this.ternary = props.ternary;
 
         this.vertices = ternary.vertices.map(function(vertex, index) {
             vertex.change = change.unchanged;
@@ -6099,12 +6259,26 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         let savedTernary = angular.copy(ternary);
         this.__idx = 0;
         $scope.selectedRow = 0;
+        let calculateOptions = $scope.calculateOptions = ternary.calculate;
+
+        this.polygonList = new Array();
+        props.polygons.forEach(function(polygonItem, index) {
+            polygonItem.id = index;
+            polygonItem.label = index;
+            self.polygonList.push(polygonItem);
+        });
 
         this.getVertices = function () {
             return self.vertices.filter(function (item, index) {
                return (item.change != change.deleted && item.change != change.uncreated);
            });
         };
+
+        this.getTernaryVertices = function() {
+            return self.getVertices().filter(function(item) {
+                return item.used;
+            })
+        }
 
         this.setClickedRow = function (indexRow) {
             $scope.selectedRow = indexRow;
@@ -6144,35 +6318,48 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             wiD3CrossplotCtrl.pickVertex(function(vertex) {
                 $('#ternary-modal').modal('show');
                 if (vertex) {
+                    vertex.name = 'Material_' + (self.vertices.length + 1);
+                    viCrossplot.plotTernary();
+
                     vertex = angular.copy(vertex);
                     vertex.change = change.created;
                     vertex.index = self.vertices.length;
 
-                    let last_vertex = self.vertices[self.vertices.length-1];
-                    if (last_vertex.x != null && last_vertex.y != null)
-                        self.vertices.push(vertex);
-                    else
-                        self.vertices[self.vertices.length-1] = vertex;
-
+                    self.vertices.push(vertex);
                     $scope.$apply();
                 }
             });
         };
 
         this.importVertices = function () {
-
+            utils.error('Not yet implemented')
         };
 
         this.exportVertices = function () {
-
+            utils.error('Not yet implemented')
         };
 
+        this.onCalculateButtonClicked = function () {
+            let tmpTernary = {
+                idTernary: savedTernary.idTernary,
+                vertices: self.getVertices(),
+                calculate: calculateOptions
+            };
+            console.log('aa', tmpTernary);
+            viCrossplot.setProperties({ ternary: tmpTernary });
+            $scope.result = viCrossplot.calculateTernary();
+        }
+
         this.onOkButtonClicked = function () {
-            console.log('OK');
+            self.onApplyButtonClicked();
+            close(null);
         };
         this.onApplyButtonClicked = function() {
             savedTernary.vertices = self.getVertices();
-
+            savedTernary.calculate = calculateOptions;
+            console.log('savedTernary', savedTernary);
+            viCrossplot.setProperties({ ternary: savedTernary });
+            viCrossplot.plotTernary();
         };
         this.onCancelButtonClicked = function () {
             viCrossplot.setProperties({ ternary: savedTernary });
@@ -6267,7 +6454,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                             self.ref_Curves_Arr[index].left = scale.minScale;
                             self.ref_Curves_Arr[index].right = scale.maxScale;
                         });
-                    })        
+                    })
                 }
             }
         }
@@ -6276,7 +6463,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             let newRefCurve = {
                 color: "rgb(0,0,0)",
                 idHistogram: self.props.idHistogram ? self.props.idHistogram : null,
-                idCrossPlot: self.props.idCrossplot ? self.props.idCrossplot : null,                
+                idCrossPlot: self.props.idCrossplot ? self.props.idCrossplot : null,
                 left: 0,
                 right: 0,
                 visiable: true,
@@ -6374,7 +6561,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 //     if (callback) callback(plotModel.properties);
                 // });
             }
-            
+
         }
 
         this.onOKButtonClicked = function () {
@@ -6400,4 +6587,3 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         })
     });
 };
-
