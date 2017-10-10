@@ -1099,7 +1099,8 @@ exports.findWellByHistogram = function (idHistogram) {
     return path[1];
 }
 
-exports.findWellByCurve = function(idCurve) {
+exports.findWellByCurve = findWellByCurve;
+function findWellByCurve (idCurve) {
     var path = getSelectedPath(function (node) {
         return node.type == 'curve' && node.id == idCurve;
     }) || [];
@@ -1845,4 +1846,29 @@ exports.renameZoneSet = function(zoneSetModel){
             })
         });
     });
+}
+
+exports.updateVisualizeOnModelDeleted = function (model) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let logplotModels = wellModel.children.find(child => child.type == 'logplots');
+            logplotModels.children.forEach(function (logplotModel) {
+                let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
+                if (!wiLogplotCtrl) return;
+                let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                let viTracks = wiD3Ctrl.getTracks();
+                viTracks.forEach(function (viTrack) {
+                    if (!viTrack.isLogTrack()) return;
+                    let curve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
+                    viTrack.removeCurve(curve);
+                })
+            });
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
 }

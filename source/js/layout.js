@@ -161,15 +161,19 @@ module.exports.putTabRightWithModel = function (model) {
 
 module.exports.removeTabWithModel = function (model) {
     let item;
+    let wiComponentService = this.wiComponentService;
     switch (model.type) {
         case 'logplot':
             item = layoutManager.root.getItemsById('logplot' + model.id)[0];
+            wiComponentService.dropComponent('logplot' + model.id);
             break;
         case 'crossplot':
             item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
+            wiComponentService.dropComponent('crossplot' + model.id);
             break;
         case 'histogram':
             item = layoutManager.root.getItemsById('histogram' + model.id)[0];
+            wiComponentService.dropComponent('histogram' + model.id);
             break;
         default:
             return;
