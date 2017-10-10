@@ -72,10 +72,19 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-4">Symbol Type</label>
                                             <div class="col-sm-8">
-                                                <select ng-model="wiModal.symbolOptions.symbolStyle.symbolName"
+                                                <!-- <select ng-model="wiModal.symbolOptions.symbolStyle.symbolName"
                                                         class="form-control wi-form-control"
                                                         ng-options="item for item in wiModal.symbolType">
-                                                </select>
+                                                </select> -->
+                                                <ui-select theme="bootstrap" tagging
+                                                            ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
+                                                    <ui-select-match style="vertical-align: middle">
+                                                        <canvas id="{{wiModal.symbolOptions.symbolStyle.symbolName}} + 'Icon'" width="20" height="20"></canvas>{{wiModal.symbolOptions.symbolStyle.symbolName}}
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="type in wiModal.symbolType" position="down">
+                                                        <canvas id="{{type}}" width="20" height="20"></canvas>{{type}}
+                                                    </ui-select-choices>
+                                                </ui-select>
                                             </div>
                                         </div>
                                     </div>

@@ -969,11 +969,11 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
 }
 
 exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, lineOptions, symbolOptions, callback) {
-    function ModalController($scope, close) {
+    function ModalController($scope, close, $timeout) {
         var self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
+        let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         console.log("options", lineOptions, symbolOptions);
 
         this.lineOptions = lineOptions;
@@ -992,9 +992,53 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
 
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
-        this.symbolType = ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"];
+        this.symbolType = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
         this.symbolWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let type = 'Circle';
+        function drawIcon(idIcon, type){
+            let icon =  $('#' + idIcon)[0];
+            console.log("type", type, icon);
 
+            let ctx = icon.getContext('2d');
+            ctx.clearRect(0, 0, sample.width, sample.height);
+
+            let helper = new graph.CanvasHelper(ctx, {
+                strokeStyle: 'black',
+                fillStyle: 'black',
+                size: 30
+            });
+            let funcType = type.toLowerCase();
+            switch(funcType){
+                case 'circle':
+                    helper.circle(10, 10);
+                    break;
+                case 'cross':
+                    helper.cross(10, 10);
+                    break;
+                case 'diamond':
+                    helper.diamond(10, 10);
+                    break;
+                case 'plus':
+                    helper.plus(10, 10);
+                    break;
+                case 'square':
+                    helper.square(10, 10);
+                    break;
+                case 'star':
+                    helper.star(10, 10);
+                    break;
+                default:
+                break;
+            }
+        }
+        $timeout(function() {     
+            drawIcon(self.symbolOptions.symbolStyle.symbolName + 'Icon', self.symbolOptions.symbolStyle.symbolName);
+            self.symbolType.forEach(function(type, index){
+                console.log("symbolType:", type);
+                drawIcon(type, type);
+            })
+        })
+        
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
@@ -1124,7 +1168,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         this.selectData = {
             displayMode: ["Line", "Symbol", "Both", "None"],
             wrapMode: ["None", "Left", "Right", "Both"],
-            symbolType: ["Circle", "Cross", "Diamond", "Dot", "Plus", "Square", "Star", "Triangle"],
+            symbolType: ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"],
             blockPosition: ["Start", "Middle", "End", "None"],
             logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Cumulative", "Mirror", "Pid"]
@@ -1162,10 +1206,6 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                         context.closePath();
                         context.stroke();
                         context.fill();
-                        break;
-                    case "dot":
-                        // context.strokeStyle = style.symbolColor;
-                        // context.arc(x, y, 1, 0)
                         break;
                     case "square":
                         break;
@@ -3372,6 +3412,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 callback();
                             });
                         });
+                        item.change = '0';
                         break;
                     }
                     case '3':
@@ -3514,6 +3555,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 });
                             });
                         });
+                        item.change = '0';
                         break;
                     }
                     case '2': {
@@ -3546,6 +3588,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 callback();
                             })
                         });
+                        item.change = '0';
                         break;
                     }
                     case '3':
