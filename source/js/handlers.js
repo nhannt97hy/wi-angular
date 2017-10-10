@@ -9,7 +9,7 @@ exports.NewProjectButtonClicked = function () {
                 DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!"); 
             }else{
                 let utils = self.wiComponentService.getComponent('UTILS');
-                utils.projectOpen(self.wiComponentService, data);
+                utils.projectOpen(self.wiComponentService, response);
             }
         });
     });
