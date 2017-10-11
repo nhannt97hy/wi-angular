@@ -5061,7 +5061,34 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         }
                     })
                 });
-
+                //wi-level-menu
+                self.option=self.datasets;
+                self.testVar= {
+                  "name": "curve",
+                  "type": "curve",
+                  "id": 3,
+                  "properties": {
+                    "idDataset": 2,
+                    "idCurve": 3,
+                    "idFamily": 2,
+                    "name": "ECGR",
+                    "unit": "GAPI",
+                    "alias": "ECGR",
+                    "minScale": 0,
+                    "maxScale": 200
+                  },
+                  "data": {
+                    "childExpanded": false,
+                    "icon": "curve-16x16",
+                    "label": "ECGR",
+                    "unit": "GAPI",
+                    "selected": false
+                  },
+                  "curveData": null,
+                  "datasetName": "W3",
+                  "$$hashKey": "object:784"
+                };
+                 console.log(self.option,"option");
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -6594,7 +6621,7 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
             deleted: 3,
             uncreated: 4
         }
-        
+
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.userDefineLines = [];
         this.viCross = viCrossplot.getProperties()

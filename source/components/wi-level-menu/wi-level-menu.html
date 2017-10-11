@@ -1,0 +1,23 @@
+<script type="text/ng-template" id="a.html">
+    <li ng-class="node.children.length > 0 ? 'dropdown-submenu': ''" ng-repeat="node in node.children">
+        <a ng-show="node.children.length > 0">{{node.properties.name}}</a>
+        <a ng-show="!node.children" ng-click="select(node)">{{node.properties.name}}</a>
+        <ul ng-show="node.children.length > 0" class="dropdown-menu" ng-include="'a.html'">
+        </ul>
+    </li>
+</script>
+<div class="dropdown">
+    <a id="dLabel" role="button" data-toggle="dropdown" class="btn btn-default">
+        <span>
+            {{selected.properties.name}}
+        </span>
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+        <li ng-class="node.children.length > 0 ? 'dropdown-submenu': ''" ng-repeat="node in menuCtrl.options">
+            <a ng-show=" node.children.length > 0 ">{{node.properties.name}}</a>
+            <ul ng-show="node.children.length > 0" class="dropdown-menu" ng-include="'a.html'">
+            </ul>
+        </li>
+    </ul>
+</div>
