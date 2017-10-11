@@ -429,4 +429,14 @@ exports.ImportTrackButtonClicked = function () {
         idTrack: currentTrack.id,
         idPlot: currentTrack.idPlot
     }
+    let fileInput = document.createElement('input');
+    fileInput.style.display = 'none';
+    fileInput.type = 'file';
+    fileInput.setAttribute('ngf-select', '');
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    fileInput.addEventListener('change', function (event) {
+        document.body.removeChild(fileInput);
+        console.log(fileInput.files);
+    }, true);
 }
