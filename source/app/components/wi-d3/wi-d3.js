@@ -1450,8 +1450,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     /* Private End */
     this.verifyDroppedIdCurve = function(idCurve) {
         let well1 = _getWellProps();
-        let well2 = Utils.findWellByCurve(idCurve) || {};
-        return (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell));
+        let well2 = Utils.findWellByCurve(idCurve) || {properties:{}};
+        if (!well1.idWell || !well2.properties.idWell) return -1;
+        if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
+        return 0;
     }
     this.openProptertiesDialog = function () {
         if (_currentTrack.isDepthTrack()) {

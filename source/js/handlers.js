@@ -695,7 +695,9 @@ exports.BlankHistogramButtonClicked = function () {
             .then(function(histogram) {
                 console.log("Created new histogram", histogram);
                 let histogramModel = utils.histogramToTreeConfig(histogram);
-                let selectedHistogram = utils.getSelectedNode();
+                // let selectedHistogram = utils.getSelectedNode();
+                let selectedHistogram = utils.getHistogramsNode();
+                if (!selectedHistogram.children) selectedHistogram.children = new Array();
                 selectedHistogram.children.push(histogramModel);
                 utils.openHistogramTab(histogramModel, function() {
                     let histogramName = 'histogram' + histogramModel.properties.idHistogram;

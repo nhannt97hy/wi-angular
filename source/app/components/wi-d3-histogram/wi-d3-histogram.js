@@ -25,7 +25,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 console.log('updated');
             });
         }, 3000);
-    
+
     this.saveHistogram = saveHistogram;
 
     function saveHistogramNow(callback) {
@@ -70,6 +70,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let well = getWell();
         if (!self.histogramModel.properties.idCurve) return "Empty";
         let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+        if (!curve) return "Empty";
         let datasetId = curve.properties.idDataset;
         for (let dataset of well.children) {
             if (dataset.type == 'dataset' && dataset.id == datasetId) {
@@ -86,6 +87,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return datasetModel.properties.name + "." + self.curveModel.properties.name;
         }
         return "";
+    }
+    this.hasThisCurve = hasThisCurve;
+    function hasThisCurve(idCurve) {
+        if (!self.curveModel) return false;
+        return (idCurve == self.curveModel.properties.idCurve);
     }
     this.linkModels = function () {
         self.zoneArr = null;
@@ -426,7 +432,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 parseFloat(well.properties.bottomDepth), elem);
         //self.visHistogram.zoneSetModel = self.zoneSetModel;
         //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
-        
+
         // trap load-statistic event to process
         self.visHistogram.trap('data-processing-done', function(arg) {
             console.log("data processing ready: we load statistics:", arg);
@@ -437,7 +443,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             loadCurve(self.visHistogram.idCurve);
         }
     }
-
+    this.unloadCurve = unloadCurve;
+    function unloadCurve() {
+        curveLoading = true;
+        self.visHistogram.setCurve(null);
+        curveLoading = true;
+        self.refreshHistogram();
+        loadStatistics();
+    }
     function loadCurve(idCurve) {
         if (curveLoading) return;
         curveLoading = true;

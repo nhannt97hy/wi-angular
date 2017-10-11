@@ -48,6 +48,16 @@ Histogram.prototype.setZoneSet = function(zoneSet) {
     //if (this.drawPending) this.doPlot();
 }
 Histogram.prototype.setCurve = function(data) {
+    if (data == null) {
+        delete this.data;
+        this.zoneData.length = 0;
+        this.zoneBins.length = 0;
+        delete this.intervalData;
+        delete this.intervalBins;
+        delete this.mean;
+        delete this.standardDeviation;        
+        return;
+    }
     this.data = data.filter(function(d) {return !isNaN(d.x);}); // ? clone
     //if (this.drawPending) this.doPlot();
 }
@@ -671,7 +681,7 @@ Histogram.prototype.unsetJoinedZoneData = function() {
 }
 
 Histogram.prototype.getAverage = function() {
-    return this.mean.toFixed(__DECIMAL_LEN);
+    return this.mean?this.mean.toFixed(__DECIMAL_LEN):null;
 }
 Histogram.prototype._getAverage = function () {
     if (!this.histogramModel.properties.idZoneSet) {
@@ -706,7 +716,7 @@ Histogram.prototype.getAverageDeviation = function () {
 }
 
 Histogram.prototype.getStandardDeviation = function() {
-    return this.standardDeviation.toFixed(__DECIMAL_LEN);
+    return this.standardDeviation?this.standardDeviation.toFixed(__DECIMAL_LEN):null;
 }
 Histogram.prototype._getStandardDeviation = function () {
     if (!this.histogramModel.properties.idZoneSet) {

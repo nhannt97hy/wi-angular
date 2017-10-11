@@ -4377,9 +4377,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         // let crossplotModel = utils.getModel('crossplot', wiCrossplotCtrl.id);
         // this.props = angular.copy(crossplotModel.properties);
         // console.log("thisProps", this.props);
-
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-        this.props = wiD3CrossplotCtrl.crossplotModel.properties;
+        let crossplotModel = wiD3CrossplotCtrl.crossplotModel;
+        this.props = crossplotModel.properties;
         this.refCurves = [];
         this.selectedCurveX = null;
         this.selectedCurveY = null;
@@ -4388,7 +4388,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.pointSet = wiD3CrossplotCtrl.pointSet;
         if (!this.pointSet) {
-            wiApiService.getCrossplot(wiD3CrossplotCtrl.crossplotModel.idCrossplot, function (crossplot) {
+            wiApiService.getCrossplot(crossplotModel.idCrossplot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
             });
         }
@@ -4700,7 +4700,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             //         pointSet.activeZone = self.selectedZone;
             //         console.log(pointSet);
             //         self.props.pointSet = pointSet;
-            //         let scalesObj = angular.copy(self.pointSet);                        
+            //         let scalesObj = angular.copy(self.pointSet);
             //         scalesObj.curveX = undefined;
             //         scalesObj.curveY = undefined;
             //         scalesObj.curveZ = undefined;

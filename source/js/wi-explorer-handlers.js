@@ -91,7 +91,8 @@ exports.DeleteItemButtonClicked = function () {
                     wiApiService.removeDataset(selectedNode.properties.idDataset, function () {
                         $timeout(function () {
                             selectedNode.children.forEach(function (curve) {
-                                utils.updateVisualizeOnModelDeleted(curve);
+                                utils.updateWiLogPlotOnModelDeleted(curve);
+                                utils.updateWiHistogramOnModelDeleted(curve);
                             })
                             selectedNode.data.deleted = true;
                             utils.refreshProjectState();
@@ -101,7 +102,8 @@ exports.DeleteItemButtonClicked = function () {
                 case 'curve':
                     wiApiService.removeCurve(selectedNode.properties.idCurve, function () {
                         $timeout(function () {
-                            utils.updateVisualizeOnModelDeleted(selectedNode);
+                            utils.updateWiLogPlotOnModelDeleted(selectedNode);
+                            utils.updateWiHistogramOnModelDeleted(selectedNode);
                             selectedNode.data.deleted = true;
                             utils.refreshProjectState();
                         });

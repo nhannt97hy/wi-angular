@@ -122,7 +122,7 @@ function lineToTreeConfig(line) {
         idCurve: line.idCurve,
         idDataset: curveModel.properties.idDataset,
         name: lineModel.name,
-        unit: curveModel.properties.unit,
+        unit: line.unit,
         minX: line.minValue,
         maxX: line.maxValue,
         scale: line.displayType,
@@ -774,7 +774,8 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.track = null;
             let idCurve = parseInt(ui.helper.attr('data'));
             if (wiD3Ctrl && track) {
-                if (wiD3Ctrl.verifyDroppedIdCurve(idCurve)) {
+                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                if (errorCode > 0) {
                     apiService.post(apiService.CREATE_LINE, {
                         idTrack: track.id,
                         idCurve: idCurve
@@ -785,17 +786,20 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                         });
                     });
                 }
-                else {
+                else if (errorCode === 0) {
                     errorMsg("Cannot drop curve from another well");
                 }
                 return;
             }
-            if (wiSlidingBarCtrl && wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve)) {
-                wiSlidingBarCtrl.createPreview(idCurve);
-            }
-            else {
-                errorMsg("Cannot drop curve from another well");
-            }
+            if (wiSlidingBarCtrl) {
+                let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
+                if(errorCode > 0) {
+                    wiSlidingBarCtrl.createPreview(idCurve);
+                }
+                else if (errorCode === 0) {
+                    errorMsg("Cannot drop curve from another well");
+                }
+            } 
         },
         appendTo: 'body',
         revert: false,
@@ -1018,6 +1022,24 @@ function findWellProjectById(idWell, project) {
 
     return null;
 }*/
+function getStaticNode(type) {
+    if (!type) return;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let model = null;
+    console.log(rootNodes[0], type);
+    visit(rootNodes[0], function (node) {
+        if (node.type == type) {
+            model = node;
+        }
+    });
+    return model;
+}
+function getHistogramsNode() {
+    return getStaticNode('histograms');
+}
+exports.getHistogramsNode = getHistogramsNode;
 
 function getModel(type, id) {
     if (!type || !id) return;
@@ -1543,6 +1565,7 @@ function editProperty(item) {
             wiApiService.editCurve(newProperties, function () {
                 refreshProjectState().then(function () {
                     wiComponentService.emit('update-properties', selectedNode);
+                    
                 }).catch();
             });
             break;
@@ -1849,7 +1872,30 @@ exports.renameZoneSet = function(zoneSetModel){
     });
 }
 
-exports.updateVisualizeOnModelDeleted = function (model) {
+exports.updateWiHistogramOnModelDeleted = function (model) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    console.error("mark");
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let histogramModels = wellModel.children.find(child => child.type == 'histograms');
+            histogramModels.children.forEach(function (histogramModel) {
+                let wiHistogramCtrl = wiComponentService.getComponent('histogram' + histogramModel.properties.idHistogram);
+                if (!wiHistogramCtrl) return;
+                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+                if (histogramModel.properties.idCurve && wiD3Ctrl.hasThisCurve(histogramModel.properties.idCurve)) {
+                    wiD3Ctrl.unloadCurve();
+                }
+            });
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
+}
+
+exports.updateWiLogPlotOnModelDeleted = function (model) {
     let wiComponentService = __GLOBAL.wiComponentService;
     switch (model.type) {
         case 'curve':
