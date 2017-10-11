@@ -146,6 +146,11 @@ const EDIT_REF_CURVE = '/project/well/reference-curve/edit';
 const GET_REF_CURVE = '/project/well/reference-curve/info';
 const DELETE_REF_CURVE = '/project/well/reference-curve/delete';
 
+const CREATE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/new';
+const EDIT_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/edit';
+const GET_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/info';
+const DELETE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/delete';
+
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
 function Service(baseUrl, $http, wiComponentService, Upload) {
@@ -365,7 +370,7 @@ Service.prototype.post = function (route, payload) {
         };
 
         self.$http(request).then(
-            function (response) {
+            function (rudesponse) {
                 if (response.data && response.data.code === 200) {
                     return resolve(response.data.content);
                 }else if (response.data && response.data.code === 401){
@@ -1246,7 +1251,23 @@ Service.prototype.removeRefCurve = function (idReferenceCurve, callback) {
     let self = this;
     this.delete(DELETE_REF_CURVE, { idReferenceCurve: idReferenceCurve }, callback);
 }
-
+//user define line apis
+Service.prototype.createUserDefineLine = function (data, callback) {
+    let self = this;
+    this.post(CREATE_USER_DEFINE_LINE, data, callback);
+}
+Service.prototype.editUserDefineLine = function (data, callback) {
+    let self = this;
+    this.post(EDIT_USER_DEFINE_LINE, data, callback);
+}
+Service.prototype.getUserDefineLine = function (idUserDefineLine, callback) {
+    let self = this;
+    this.post(GET_USER_DEFINE_LINE, { idUserDefineLine: idUserDefineLine }, callback);
+}
+Service.prototype.removeUserDefineLine = function (idUserDefineLine, callback) {
+    let self = this;
+    this.delete(DELETE_USER_DEFINE_LINE, { idUserDefineLine: idUserDefineLine }, callback);
+}
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);

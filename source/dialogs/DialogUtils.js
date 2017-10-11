@@ -6476,7 +6476,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         // this.IsNotValid = function () {
         //     var inValid = false;
         //     if (self.props.leftScale == null || self.props.rightScale == null || self.props.leftScale == self.props.rightScale) {
-        //         inValid = true;
+        //         inValid = true;;
         //     }
 
         //     return inValid;
@@ -6622,7 +6622,7 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
         this.removeRow = function () {
             if (!self.userDefineLines[self.__idx]) return;
             if(self.userDefineLines[self.__idx].change == change.created) {
-                self.userDefineLines[self.__idx].change = change.uncreated;
+                self.userDefineLines.splice(self.__idx, 1);
             } else {
                 self.userDefineLines[self.__idx].change = change.deleted;
             }
@@ -6640,7 +6640,8 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                     lineStyle: [10, 0]
                 },
                 displayLine: true,
-                displayEquation: true
+                displayEquation: true,
+                idCrossPlot: self.viCross.idCrossPlot
             });
             console.log("addRow", self.userDefineLines);
         };
@@ -6653,24 +6654,64 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                 self.userDefineLines[index].lineStyle = lineStyleObj.lineStyle;
             }, self.userDefineLines[index]);
         };
-        function setRegressionLines(callback) {
-            
+        function setUDLines(callback) {
+            if(self.userDefineLines && self.userDefineLines.length) {
+                async.eachOfSeries(self.userDefineLines, function(udLine, idx, callback){
+                    switch(self.userDefineLines[idx].change) {
+                        case change.created:
+                            wiApiService.createUserDefineLine(self.userDefineLines[idx], function(){
+                                console.log("create UDL");
+                                callback();
+                            });
+                            break;
+                        case change.updated:
+                            wiApiService.editUserDefineLine(self.userDefineLines[idx], function(){
+                                console.log("update UDL");
+                                callback();
+                            });
+                            break;
+                        case change.deleted:
+                            wiApiService.removeUserDefineLine(self.userDefineLines[idx].idUserDefineLine, function(){
+                                console.log("delete UDL");
+                                callback();
+                            });
+                            break;
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function(err) {
+                    for (let i = self.userDefineLines.length - 1; i >= 0; i--){
+                        switch(self.userDefineLines[i].change) {
+                            case change.created:
+                            case change.updated:
+                                delete self.userDefineLines[i].change;
+                                delete self.userDefineLines[i].index;
+                                break;
+                            case change.deleted:
+                                self.userDefineLines.splice(i, 1);
+                                break;
+                        }
+                    }
+                    self.viCross.userDefineLines = self.userDefineLines;
+                    viCrossplot.setProperties(self.viCross)
+                    viCrossplot.doPlot();
+                    if(callback) callback();
+                });
+            } else {
+                self.viCross.userDefineLines = self.userDefineLines;
+                viCrossplot.setProperties(self.viCross)
+                viCrossplot.doPlot();
+                if(callback) callback();
+            }
         }
         this.onOkButtonClicked = function () {
-            // setRegressionLines(function() {
-            //     self.viCross.regressionLines = self.regressionLines;
-            //     viCrossplot.setProperties(self.viCross);
-            //     viCrossplot.doPlot();
-            //     close();
-            // });
+            setUDLines(function(){
+                close();
+            })
         };
         this.onApplyButtonClicked = function() {
-            // setRegressionLines(function() {
-            //     console.log("okii", self.viCross);
-            //     self.viCross.regressionLines = self.regressionLines;
-            //     viCrossplot.setProperties(self.viCross);
-            //     viCrossplot.doPlot();
-            // });
+            setUDLines();
         };
         this.onCancelButtonClicked = function () {
             console.log("cancel", self.regressionLines);

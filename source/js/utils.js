@@ -1664,6 +1664,15 @@ function openCrossplotTab(crossplotModel, callback) {
                                 }
                             }
                         }
+                        if (Array.isArray(crossplot.user_define_lines) && crossplot.user_define_lines.length > 0) {
+                            for (let udLine of crossplot.user_define_lines) {
+                                try {
+                                    udLine.lineStyle = JSON.parse(udLine.lineStyle);
+                                } catch(e) {
+                                    console.log(e);
+                                }
+                            }
+                        }
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
                         let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
 
