@@ -1,0 +1,77 @@
+<div class='modal fade' id="polygon-modal" data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class="user-define-16x16"></span>&nbsp;FRMUserDefineLineProperties</h4>
+            </div>
+            <div class="modal-body text-center" style="padding: 10 0">
+                <div class="container-fluid" style="padding: 10 0">
+
+                    <div class="col-sm-11">
+                        <form class="form-horizontal">
+                            <table class="font-size-10px table table-bordered udlinesTable">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Function</th>
+                                        <th style="width: 20%">Line Style</th>
+                                        <th style="width: 15%">Display Line</th>
+                                        <th style="width: 15%">Display Equation</th>                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="udLine in wiModal.getUDLines() track by $index"
+                                        ng-class="{selected:$index == selectedRow}"
+                                        ng-click="wiModal.setClickedRow($index)">
+                                        <td>{{$index + 1}}</td>
+                                        <td>
+                                            <input ng-model="udLine.function"
+                                            type="text" class="form-control wi-form-control"
+                                            ng-change="onChange()">
+                                        </td>
+                                        <td>
+                                            <div ng-model="udLine.lineStyle" id="lineStyleSvg" 
+                                                ng-change="wiModal.onChange(udLine.index)"
+                                                ng-click="wiModal.onEditLineStyleButtonClicked(udLine.index);
+                                                    wiModal.onChange(udLine.index)">
+                                                <svg height="20" width="120">
+                                                    <line x1="0" y1="10" x2="120" y2="10" 
+                                                            stroke-dasharray="{{udLine.lineStyle.lineStyle.join(',')}}"
+                                                            style="stroke:{{udLine.lineStyle.lineColor}}; stroke-width:{{udLine.lineStyle.lineWidth}}" />
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input ng-model="udLine.displayLine"
+                                                type="checkbox"
+                                                ng-change="wiModal.onChange(udLine.index)">
+                                        </td>
+                                        <td>
+                                            <input ng-model="udLine.displayEquation"
+                                                type="checkbox"
+                                                ng-change="wiModal.onChange(udLine.index)">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="col-sm-1">
+                        <button class="btn btn-default" ng-click="wiModal.removeRow();">
+                            <span class="delete-16x16"></span>
+                        </button>
+                        <button class="btn btn-default" ng-click="wiModal.addRow();">
+                                <span class="plus-16x16"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

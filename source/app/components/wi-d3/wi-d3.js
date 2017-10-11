@@ -1214,9 +1214,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "Histogram",
             label: "Histogram",
             icon: "histogram-new-16x16",
-            handler: function () {
-
-            }
+            handler: self.createHistogram
         }, {
             name: "CreateShading",
             label: "Create Shading",
@@ -1332,6 +1330,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         });
                     })
                 });
+            })
+        }
+    }
+    this.createHistogram = function () {
+        let curve = _currentTrack.getCurrentCurve();
+        if (!curve) {
+            console.log('Please select a curve for creating histogram!');
+        }
+        else {
+            console.log('Create histogram', curve);
+            let promptConfig = {
+                title: 'Create New Histogram',
+                inputName: 'Histogram Name',
+                input: curve.name + 'histogram'
+            }
+            DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+                let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
+                Utils.createHistogram(idWell, curve, histogramName);
             })
         }
     }
@@ -1623,6 +1639,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: 'track-delete-16x16',
             handler: function () {
                 logplotHandlers.DeleteTrackButtonClicked();
+            }
+        }, {
+            name: "ExportTrack",
+            label: "Export Track",
+            // icon: "track-delete-16x16",
+            handler: function () {
+                logplotHandlers.ExportTrackButtonClicked();
+            }
+        }, {
+            name: "ImportTrack",
+            label: "Import Track",
+            // icon: "track-delete-16x16",
+            handler: function () {
+                logplotHandlers.ImportTrackButtonClicked();
             }
         },
     ];

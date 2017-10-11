@@ -60,16 +60,19 @@ let app = angular.module('helloapp', [
     wiCurve.name,
     wiDepth.name,
     wiLogplotModel.name,
-    wiLogplotsModel.name
+    wiLogplotsModel.name,
+    'angularjs-dropdown-multiselect'
 ]);
 
 app.controller('WiDummy', function ($scope, $timeout, wiComponentService, ModalService) {
     wiComponentService.putComponent("GRAPH", graph);
     wiComponentService.putComponent("UTILS", utils);
     wiComponentService.putComponent('DRAG_MAN', dragMan);
+    wiComponentService.putComponent('DIALOG_UTILS', DialogUtils);
 
     let functionBindingProp = {
-        wiComponentService
+        wiComponentService,
+        ModalService
     };
     utils.setGlobalObj(functionBindingProp);
 
@@ -196,11 +199,7 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService, ModalS
                     { x: 6, y: 2, used: true, name: 'GHI' }
                 ],
                 calculate: {
-                    type: 'All',
-                    point: {
-                        x: 3,
-                        y: 3
-                    }
+                    type: 'All'
                 }
             }
         });

@@ -266,6 +266,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!self.viCrossplot) return [];
         return self.viCrossplot.regressionLines;
     }
+    this.getUserDefineLines = function () {
+        if (!self.viCrossplot) return [];
+        return self.viCrossplot.user_define_lines;
+    }
     this.getTernary = function () {
         if (!self.viCrossplot) return {};
         return self.viCrossplot.ternary;

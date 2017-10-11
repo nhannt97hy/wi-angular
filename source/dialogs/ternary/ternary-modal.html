@@ -7,7 +7,7 @@
                 <h4><span class=""></span>&nbsp;Ternary diagram</h4>
             </div>
 
-            <div class="modal-body text-center">
+            <div class="modal-body">
                 <form class="form-horizontal form-condensed dialog-style" action="" name="modalTernary">
 
                     <h5 class="normal-text">Vertices Manager</h5>
@@ -65,27 +65,78 @@
                             </tr>
                         </tbody>
                     </table>
-                </form>
-                <div class="text-right">
-                        <button class="btn btn-default" ng-click="wiModal.removeRow();">
+
+                    <div class="text-right">
+                        <button class="btn btn-default" type="button" ng-click="wiModal.removeRow();">
                             <span class="delete-16x16"></span>
                         </button>
-                        <button class="btn btn-default" ng-click="wiModal.addRow();">
+                        <button class="btn btn-default" type="button" ng-click="wiModal.addRow();">
                             <span class="plus-16x16"></span>
                         </button>
-                        <button class="btn btn-default" ng-click="wiModal.pickVertex()" class="wi-form-control">
+                        <button class="btn btn-default" type="button" ng-click="wiModal.pickVertex()" class="wi-form-control">
                             Pick from CrossPlot
                         </button>
-                        <button class="btn btn-default" ng-click="wiModal.importVertices()" class="wi-form-control">
+                        <button class="btn btn-default" type="button" ng-click="wiModal.importVertices()" class="wi-form-control">
                             Import
                         </button>
-                        <button class="btn btn-default" ng-click="wiModal.exportVertices()" class="wi-form-control">
+                        <button class="btn btn-default" type="button" ng-click="wiModal.exportVertices()" class="wi-form-control">
                             Export
                         </button>
                     </div>
+
+                    <h5 class="normal-tex">Calculate</h5>
+                    <div>
+                        <input id="ternary-calculate-point" type="radio" ng-model="calculateOptions.type" value="Point" />
+                        <label for="ternary-calculate-point">Point</label>
+                        <span style="margin-left: 20px;">X: </span>
+                        <input type="text" ng-model="calculateOptions.point.x"
+                                ng-disabled="calculateOptions.type != 'Point'"
+                                class="form-control wi-form-control valign-middle"
+                                style="display:inline-block; width: 60px;">
+                        <span>Y: </span>
+                        <input type="text" ng-model="calculateOptions.point.y"
+                                ng-disabled="calculateOptions.type != 'Point'"
+                                class="form-control wi-form-control valign-middle"
+                                style="display:inline-block; width: 60px;">
+                        <br />
+                        <input id="ternary-calculate-area" type="radio" ng-model="calculateOptions.type" value="Area" />
+                        <label for="ternary-calculate-area">Area</label>
+                        <span ng-dropdown-multiselect=""
+                                options="wiModal.polygonList"
+                                selected-model="calculateOptions.area.polygons"
+                                extra-settings="selectDataSetting"
+                                disabled="calculateOptions.type != 'Area'"
+                                class="normal-text"></span>
+
+                        <select ng-model="calculateOptions.area.exclude"
+                                class="form-control wi-form-control"
+                                ng-disabled="calculateOptions.type != 'Area'"
+                                style="display:inline-block; width: auto;"
+                                ng-options="(item ? 'Exclude' : 'Include') for item in [true, false]">
+                        </select>
+                        <br />
+                        <label>
+                        <input id="ternary-calculate-all" type="radio" ng-model="calculateOptions.type" value="All" />
+                        <label for="ternary-calculate-all">All points in Ternary</label>
+                        <br />
+                    </div>
+                    <h5 class="normal-text">Results</h5>
+                    <span ng-repeat="vertex in wiModal.getTernaryVertices() track by $index">
+                        <span ng-show="$index <3">
+                            {{vertex.name}}
+                            <input type="text" ng-model="result.materials[$index]"
+                                    class="form-control wi-form-control valign-middle"
+                                    style="display:inline-block; width: 60px;"/>
+                            &nbsp;
+                        </span>
+                    </span>
+                </form>
             </div>
             <div class="modal-footer">
-                 <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
+                <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3">
+                    Calculate
+                </button>
+                <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
                     <span class="ok-16x16"></span>&nbsp;Apply
                 </button>
                 <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">

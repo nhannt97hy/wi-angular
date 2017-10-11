@@ -18,7 +18,7 @@ exports.SaveAsLogplotButtonClicked = function () {
     const wiApiService = this.wiApiService;
     const wiLogplot = this.wiLogplot;
     wiApiService.exportLogPlot(wiLogplot.id, function (data, type) {
-        console.log("DATA NA`" + data);
+        // console.log("DATA NA`" + data);
         let blob = new Blob([data], {
             type: type
         });
@@ -392,5 +392,41 @@ exports.CrossPlotButtonClicked = function () {
 };
 
 exports.HistogramButtonClicked = function () {
-    console.log('HistogramButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().createHistogram();    
 };
+
+exports.ExportTrackButtonClicked = function () {
+    console.log("EXPORT TRACK");
+    const wiApiService = this.wiApiService;
+    const wiLogplot = this.wiLogplot;
+    const currentTrack = wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    let trackData = {
+        idTrack: currentTrack.id,
+        idPlot: currentTrack.idPlot
+    }
+    // wiApiService.exportLogTrack(trackData, function (data, type) {
+    //     // console.log("DATA NA`" + data);
+    //     let blob = new Blob([data], {
+    //         type: type
+    //     });
+    //     let a = document.createElement('a');
+    //     let fileName = wiLogplot.getLogplotModel().properties.name + '.plot';
+    //     a.download = fileName;
+    //     a.href = URL.createObjectURL(blob);
+    //     a.style.display = 'none';
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     a.parentNode.removeChild(a);
+    // });
+}
+
+exports.ImportTrackButtonClicked = function () {
+    console.log("IMPORT TRACK");
+    const wiApiService = this.wiApiService;
+    const wiLogplot = this.wiLogplot;
+    const currentTrack = wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    let trackData = {
+        idTrack: currentTrack.id,
+        idPlot: currentTrack.idPlot
+    }
+}

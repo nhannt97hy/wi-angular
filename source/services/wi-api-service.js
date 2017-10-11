@@ -15,9 +15,9 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
-//  const BASE_URL = 'http://localhost:3000';
-// const BASE_URL = 'http://dev.sflow.me';
-const BASE_URL = 'http://192.168.0.223';
+//   const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://192.168.0.223';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -27,7 +27,8 @@ const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
 const UPLOAD_IMAGE = '/image-upload';
-const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import'
+const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import';
+const UPLOAD_PLOT_TRACK_TEMPLATE = '/project/well/plot/track/import';
 
 const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
@@ -60,6 +61,7 @@ const DELETE_PLOT = '/project/well/plot/delete';
 const GET_PLOT = '/project/well/plot/info';
 const DUPLICATE_PLOT = '/project/well/plot/duplicate';
 const EXPORT_PLOT = '/project/well/plot/export';
+const EXPORT_PLOT_TRACK = '/project/well/plot/track/export';
 
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
@@ -143,6 +145,11 @@ const CREATE_REF_CURVE = '/project/well/reference-curve/new';
 const EDIT_REF_CURVE = '/project/well/reference-curve/edit';
 const GET_REF_CURVE = '/project/well/reference-curve/info';
 const DELETE_REF_CURVE = '/project/well/reference-curve/delete';
+
+const CREATE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/new';
+const EDIT_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/edit';
+const GET_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/info';
+const DELETE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/delete';
 
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
@@ -363,7 +370,7 @@ Service.prototype.post = function (route, payload) {
         };
 
         self.$http(request).then(
-            function (response) {
+            function (rudesponse) {
                 if (response.data && response.data.code === 200) {
                     return resolve(response.data.content);
                 }else if (response.data && response.data.code === 401){
@@ -473,6 +480,48 @@ Service.prototype.postWithTemplateFile = function (dataPayload) {
     });
 }
 
+Service.prototype.postWithTrackTemplateFile = function (dataPayload) {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        let configUpload = {
+            url: self.baseUrl + UPLOAD_PLOT_TRACK_TEMPLATE,
+            headers: {
+                'Referrer-Policy': 'no-referrer',
+                'Authorization': __USERINFO.token
+            },
+            data: dataPayload
+        };
+
+        self.Upload.upload(configUpload).then(
+            function (responseSuccess) {
+                if (responseSuccess.data && responseSuccess.data.code === 200 && responseSuccess.data.content) {
+                    return resolve(responseSuccess.data.content);
+                }else if (responseSuccess.data && responseSuccess.data.code === 401){
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('username');
+                    window.localStorage.removeItem('password');
+                    window.localStorage.removeItem('rememberAuth');
+                    location.reload();
+                } else if (responseSuccess.data && responseSuccess.data.reason){
+                    return reject(responseSuccess.data.reason);
+                } else {
+                    return reject('Response is invalid!');
+                }
+            },
+            function (responseError) {
+                if (responseError.data && responseError.data.content) {
+                    return reject(responseError.data.reason);
+                } else {
+                    return reject(responseError);
+                }
+            },
+            function (evt) {
+                let progress = Math.round(100.0 * evt.loaded / evt.total);
+                console.log('evt upload', progress);
+            }
+        );
+    });
+}
 
 Service.prototype.postWithFile = function (route, dataPayload) {
     var self = this;
@@ -1029,9 +1078,7 @@ Service.prototype.removeZone = function (idZone, callback) {
 
 Service.prototype.createCrossplot = function (data, callback) {
     let self = this;
-    this.post(CREATE_CROSSPLOT, data, function (returnData) {
-        callback(returnData);
-        });
+    this.post(CREATE_CROSSPLOT, data, callback);
 }
 Service.prototype.editCrossplot = function (data, callback) {
     let self = this;
@@ -1167,7 +1214,26 @@ Service.prototype.exportLogPlot = function (idPlot, callback) {
         self.getUtils().error("File not found!");
     });
 }
-
+Service.prototype.exportLogTrack = function(data, callback){
+    let self = this;
+    let dataRequest = data
+    self.$http({
+        url: self.baseUrl + EXPORT_PLOT_TRACK,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer',
+            'Authorization' : __USERINFO.token
+        },
+        responseType: "arraybuffer",
+        data: dataRequest
+    }).then(function (res) {
+        callback(res.data, res.headers('Content-Type'));
+    }, function (err) {
+        console.error(err);
+        self.getUtils().error("File not found!");
+    });
+}
 // reference_curve apis
 Service.prototype.createRefCurve = function (data, callback) {
     let self = this;
@@ -1185,7 +1251,23 @@ Service.prototype.removeRefCurve = function (idReferenceCurve, callback) {
     let self = this;
     this.delete(DELETE_REF_CURVE, { idReferenceCurve: idReferenceCurve }, callback);
 }
-
+//user define line apis
+Service.prototype.createUserDefineLine = function (data, callback) {
+    let self = this;
+    this.post(CREATE_USER_DEFINE_LINE, data, callback);
+}
+Service.prototype.editUserDefineLine = function (data, callback) {
+    let self = this;
+    this.post(EDIT_USER_DEFINE_LINE, data, callback);
+}
+Service.prototype.getUserDefineLine = function (idUserDefineLine, callback) {
+    let self = this;
+    this.post(GET_USER_DEFINE_LINE, { idUserDefineLine: idUserDefineLine }, callback);
+}
+Service.prototype.removeUserDefineLine = function (idUserDefineLine, callback) {
+    let self = this;
+    this.delete(DELETE_USER_DEFINE_LINE, { idUserDefineLine: idUserDefineLine }, callback);
+}
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);
