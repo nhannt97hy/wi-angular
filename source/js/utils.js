@@ -1567,7 +1567,7 @@ function editProperty(item) {
             wiApiService.editCurve(newProperties, function () {
                 refreshProjectState().then(function () {
                     wiComponentService.emit('update-properties', selectedNode);
-                    
+                    updateLinesOnCurveEdited(selectedNode);
                 }).catch();
             });
             break;
@@ -1909,7 +1909,7 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
     }
 }
 
-exports.updateWiLogPlotOnModelDeleted = function (model) {
+exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted (model) {
     let wiComponentService = __GLOBAL.wiComponentService;
     switch (model.type) {
         case 'curve':
@@ -1933,6 +1933,32 @@ exports.updateWiLogPlotOnModelDeleted = function (model) {
             return;
     }
 }
+
+function updateLinesOnCurveEdited (curveModel) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let wiApiService = __GLOBAL.wiApiService;
+    let idCurve = curveModel.properties.idCurve;
+    let wellModel = findWellByCurve(idCurve);
+    let logplotModels = wellModel.children.find(child => child.type == 'logplots');
+    logplotModels.children.forEach(function (logplotModel) {
+        let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
+        if (!wiLogplotCtrl) return;
+        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+        let viTracks = wiD3Ctrl.getTracks();
+        viTracks.forEach(function (viTrack) {
+            if (!viTrack.isLogTrack()) return;
+            let viCurve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
+            wiApiService.infoLine(viCurve.id, function (line) {
+                console.log('11111111111', line);
+                viCurve.setProperties(line);
+                viCurve.doPlot();
+                console.log('2222222222', viCurve);
+            })
+        })
+    });
+}
+exports.updateLinesOnCurveEdited = updateLinesOnCurveEdited;
+
 function getPalettes(callback) {
     let wiApiService = __GLOBAL.wiApiService;
     let wiComponentService = __GLOBAL.wiComponentService;
