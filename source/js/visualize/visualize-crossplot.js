@@ -155,13 +155,12 @@ const USER_DEFINE_LINE_SCHEMA = {
 const TERNARY_SCHEMA = {
     type: 'Object',
     properties: {
-        idTernary: { type: 'Integer' },
         vertices : {
             type: 'Array',
             item: {
                 type: 'Object',
                 properties: {
-                    idVertice: { type: 'Integer' },
+                    idVertex: { type: 'Integer' },
                     x: { type: 'Float' },
                     y: { type: 'Float' },
                     name: { type: 'String' },
@@ -1176,7 +1175,7 @@ Crossplot.prototype.plotTernary = function() {
 Crossplot.prototype.plotTernaryPoint = function() {
     let ternaryContainer = this.svgContainer.select('g.vi-crossplot-ternary');
     ternaryContainer.selectAll('.vi-crossplot-ternary-point').remove();
-    if (!this.ternary.calculate || this.ternary.calculate.type != 'Point') return;
+    if (!this.ternary.calculate) return;
     let point = this.ternary.calculate.point;
     if (!point || point.x == null || point.y == null) return;
     let self = this;
@@ -1192,7 +1191,7 @@ Crossplot.prototype.plotTernaryPoint = function() {
 
 Crossplot.prototype.calculateTernary = function() {
     let vertices = this.ternary.vertices.filter(function(d) { return d.used; });
-    if (vertices.length != 3) return null;
+    if (vertices.length != 3) return { error: 'There must be three used vertices'};
 
     let self = this;
     let calc = this.ternary.calculate;
@@ -1211,7 +1210,7 @@ Crossplot.prototype.calculateTernary = function() {
     }
 
     points = this.filterByPolygons([{ points: vertices }], points);
-    if (!points.length) return null;
+    if (!points.length) return { error: 'There is no point in ternary' };
 
     let v1 = vertices[0], v2 = vertices[1], v3 = vertices[2];
     let f1 = Utils.getLineFuncFromTwoPoints(v2, v3),

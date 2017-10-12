@@ -427,7 +427,8 @@ exports.ImportTrackButtonClicked = function () {
     console.log("IMPORT TRACK");
     const wiApiService = this.wiApiService;
     const wiLogplot = this.wiLogplot;
-    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     const currentTrack = wiLogplot.getwiD3Ctrl().getCurrentTrack();
     let trackData = {
@@ -444,49 +445,88 @@ exports.ImportTrackButtonClicked = function () {
     fileInput.addEventListener('change', function (event) {
         document.body.removeChild(fileInput);
         trackData.file = fileInput.files[0];
-        wiApiService.postWithTrackTemplateFile(trackData).then(function (aTrack) {
-            console.log("aTrack", aTrack);
-            
+        wiApiService.postWithTrackTemplateFile(trackData).then(function (response) {
+            console.log("aTrack", response);
+            let aTrack = response.content;
             let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-            /*
-            aTrack.markers.forEach(function (marker) {
-                wiD3Ctrl.addMarkerToTrack(trackObj, marker);
-            });
-            aTrack.images.forEach(function (image) {
-                image.src = image.location;
-                wiD3Ctrl.addImageToTrack(trackObj, image);
+            utils.getPalettes(function(paletteList) {
+                function drawAllShadings(someTrack, trackObj) {
+                    someTrack.shadings.forEach(function (shading) {
+                        let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
+                        let linesOfTrack = trackObj.getCurves();
+                        console.log("LinhTinh:", linesOfTrack, shading, shadingModel);
+                        let lineObj1 = null;
+                        let lineObj2 = null;
 
-            })
-            // if (!aTrack.lines || aTrack.lines.length == 0) {
-            //     aTrack = tracks.shift();
-            // }
-
-            let lineCount = 0;
-            let lineNum = aTrack.lines.length;
-            let eventEmitter = new EventEmitter();
-            eventEmitter.on('line-drawed', function (someTrack) {
-                console.log(someTrack);
-                lineCount++;
-                if (lineCount == lineNum) {
-                    drawAllShadings(someTrack, trackObj);
+                        if (!shadingModel.idRightLine) return;
+                        if (!shadingModel.idLeftLine) {
+                            for (let line of linesOfTrack) {
+                                if (line.id == shading.idRightLine) {
+                                    lineObj1 = line;
+                                }
+                            }
+                            wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                        }
+                        else {
+                            for (let line of linesOfTrack) {
+                                if (line.id == shading.idRightLine) {
+                                    lineObj1 = line;
+                                }
+                                if (line.id == shading.idLeftLine) {
+                                    lineObj2 = line;
+                                }
+                            }
+                            wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                        }
+                    });
+                };
+                if(aTrack.markers) {
+                    aTrack.markers.forEach(function (marker) {
+                        wiD3Ctrl.addMarkerToTrack(trackObj, marker);
+                    });
                 }
+                if(aTrack.images) {
+                    aTrack.images.forEach(function (image) {
+                        image.src = image.location;
+                        wiD3Ctrl.addImageToTrack(trackObj, image);
+                    });
+                }
+                let eventEmitter = new EventEmitter();
+                let lineCount = 0;
+                let lineNum = aTrack.lines ? aTrack.lines.length : 0;
+                eventEmitter.on('line-drawed', function (someTrack) {
+                    console.log(someTrack);
+                    lineCount++;
+                    if (lineCount == lineNum) {
+                        drawAllShadings(someTrack, trackObj);
+                    }
+                });
+                if(aTrack.images) {
+                    aTrack.lines.forEach(function (line) {
+                        utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
+                            let lineModel = utils.lineToTreeConfig(line);
+                            if (!err) {
+                                wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                            }
+                            else {
+                                console.error(err);
+                                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                            }
+                            eventEmitter.emitEvent('line-drawed', [aTrack]);
+                        });
+                    });
+                }
+                setTimeout(function () {
+                    if(response.reason == "CURVE_NOT_FOUND") {
+                        let message = "";
+                        aTrack.errorCurve.forEach(function(r){
+                            message += "Curve: " + r.dataset + "." + r.curve + " Not exist! <br>";
+                        });
+                        utils.warning(message);
+                    }
+                }, 1000);
             });
 
-            let someTrack = aTrack;
-            aTrack.lines.forEach(function (line) {
-                getCurveData(wiApiService, line.idCurve, function (err, data) {
-                    let lineModel = lineToTreeConfig(line);
-                    if (!err) {
-                        wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
-                    }
-                    else {
-                        console.error(err);
-                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                    }
-                    eventEmitter.emitEvent('line-drawed', [someTrack]);
-                });
-            });
-            */
         }).catch(err=>{
             console.log(err);
         });

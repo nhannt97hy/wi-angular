@@ -98,6 +98,12 @@
                                 ng-disabled="calculateOptions.type != 'Point'"
                                 class="form-control wi-form-control valign-middle"
                                 style="display:inline-block; width: 60px;">
+                        <button class="btn btn-default" type="button"
+                            ng-click="wiModal.pickPoint()"
+                            class="wi-form-control"
+                            ng-disabled="calculateOptions.type != 'Point'">
+                            Pick Point
+                        </button>
                         <br />
                         <input id="ternary-calculate-area" type="radio" ng-model="calculateOptions.type" value="Area" />
                         <label for="ternary-calculate-area">Area</label>
@@ -106,12 +112,13 @@
                                 selected-model="calculateOptions.area.polygons"
                                 extra-settings="selectDataSetting"
                                 disabled="calculateOptions.type != 'Area'"
+                                style="margin-left: 20px;"
                                 class="normal-text"></span>
 
                         <select ng-model="calculateOptions.area.exclude"
                                 class="form-control wi-form-control"
                                 ng-disabled="calculateOptions.type != 'Area'"
-                                style="display:inline-block; width: auto;"
+                                style="display:inline-block; width: auto; margin-left: 10px;"
                                 ng-options="(item ? 'Exclude' : 'Include') for item in [true, false]">
                         </select>
                         <br />

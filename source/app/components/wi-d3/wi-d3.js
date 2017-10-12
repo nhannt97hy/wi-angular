@@ -758,6 +758,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // plot this logplot
         let viZoneTracks = self.getTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
         viZoneTracks.forEach(function (viZoneTrack) {
+            if (viZoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
             _plotZoneTrack(sourceZoneTrack, viZoneTrack);
         })
         // plot others logplots
@@ -766,9 +767,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         well.plots.forEach(function (aLogplot) {
             if (aLogplot.idPlot != sourceZoneTrack.idPlot) {
                 if (!layoutManager.getItemById('logplot' + aLogplot.idPlot)) return;
-                console.log(aLogplot.idPlot);
                 wiApiService.getLogplot(aLogplot.idPlot, function (logplot) {
-                    console.log('---------------',logplot);
                     logplot.zone_tracks.forEach(function (zoneTrack) {
                         if (zoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
                         let viZoneTrack = wiComponentService.getComponent('vi-zone-track-' + zoneTrack.idZoneTrack);
@@ -1289,7 +1288,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1 || !curve2) {
-            console.log('Two curves are needed');
+            DialogUtils.errorMessageDialog(ModalService, 'You must select 2 curves to create cross plot.');
         }
         else {
             console.log('Create crossplot', curve1, curve2);
@@ -1336,7 +1335,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.createHistogram = function () {
         let curve = _currentTrack.getCurrentCurve();
         if (!curve) {
-            console.log('Please select a curve for creating histogram!');
+            DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for creating histogram!');
         }
         else {
             console.log('Create histogram', curve);
@@ -1588,7 +1587,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Annotation",
             icon: 'annotation-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                DialogUtils.annotationPropertiesDialog(ModalService, null, function () {
+
+                })
             }
         },
         {

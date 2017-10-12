@@ -161,7 +161,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }, {
                         key: 'meanValue',
                         label: 'Mean Value',
-                        value: 0
+                        value: scale.meanScale
                     }, {
                         key: 'minValue',
                         label: 'Min Value',
