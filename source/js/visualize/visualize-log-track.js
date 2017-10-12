@@ -741,12 +741,19 @@ LogTrack.prototype.updateAxis = function() {
         .tickFormat('')
         .tickSize(-rect.height);
 
-    let start = windowY[0];
-    let end = windowY[1];
-    let step = (end - start) / this.yTicks;
+    // let start = windowY[0];
+    // let end = windowY[1];
+    // let step = (end - start) / this.yTicks;
 
+    // let yAxis = d3.axisLeft(this.getTransformY())
+    //     .tickValues(d3.range(start, end, step))
+    //     .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
+    //     .tickSize(-rect.width);
+    let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
+    let start = Utils.roundUp(windowY[0], step);
+    let end = Utils.roundDown(windowY[1], step);
     let yAxis = d3.axisLeft(this.getTransformY())
-        .tickValues(d3.range(start, end, step))
+        .tickValues(d3.range(start, end + step/2, step))
         .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
         .tickSize(-rect.width);
 
