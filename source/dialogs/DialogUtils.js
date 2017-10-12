@@ -6312,7 +6312,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
 
         this.onChange = function (index) {
-            if(self.vertices[index].change == change.unchanged)
+            if(self.vertices[index] && self.vertices[index].change == change.unchanged)
                 self.vertices[index].change = change.updated;
         };
 
@@ -6365,27 +6365,73 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             utils.error('Not yet implemented')
         };
 
+        function setVertices(callback) {
+            console.log('gg', self.vertices);
+            async.eachOfSeries(self.vertices, function(vertex, idx, cb){
+                vertex = self.vertices[idx];
+                let data = {
+                    xValue: vertex.x,
+                    yValue: vertex.y,
+                    name: vertex.name,
+                    style: vertex.style,
+                    usedIn: vertex.used,
+                    show: vertex.showed,
+                    idTernary: vertex.idTertex,
+                    idCrossPlot: props.idCrossPlot
+                };
+
+                switch(self.vertices[idx].change) {
+                    case change.created:
+                        wiApiService.createTernary(data, function(response) {
+                            self.vertices[idx].change = change.unchanged;
+                            cb();
+                        });
+                        break;
+                    case change.updated:
+                        wiApiService.editTernary(data, function(response) {
+                            self.vertices[idx].change = change.unchanged;
+                            cb();
+                        });
+                        break;
+                    case change.deleted:
+                        wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
+                            cb();
+                        });
+                        break;
+                    default:
+                        cb();
+                }
+            }, function() {
+                for (let i = self.vertices.length - 1; i >= 0; i--){
+                    if (self.vertices[i].change == change.deleted) {
+                        self.vertices.splice(i, 1);
+                    }
+                }
+                savedTernary.vertices = self.getVertices();
+                savedTernary.calculate = calculateOptions;
+                viCrossplot.setProperties({ ternary: savedTernary });
+                viCrossplot.plotTernary();
+                if (callback) callback();
+            });
+        }
+
         this.onCalculateButtonClicked = function () {
             let tmpTernary = {
                 idTernary: savedTernary.idTernary,
                 vertices: self.getVertices(),
                 calculate: calculateOptions
             };
-            console.log('aa', tmpTernary);
             viCrossplot.setProperties({ ternary: tmpTernary });
             $scope.result = viCrossplot.calculateTernary();
         }
 
         this.onOkButtonClicked = function () {
-            self.onApplyButtonClicked();
-            close(null);
+            setVertices(function() {
+                close(null);
+            })
         };
-        this.onApplyButtonClicked = function() {
-            savedTernary.vertices = self.getVertices();
-            savedTernary.calculate = calculateOptions;
-            console.log('savedTernary', savedTernary);
-            viCrossplot.setProperties({ ternary: savedTernary });
-            viCrossplot.plotTernary();
+        this.onApplyButtonClicked = function(callback) {
+            setVertices();
         };
         this.onCancelButtonClicked = function () {
             viCrossplot.setProperties({ ternary: savedTernary });

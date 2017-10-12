@@ -152,6 +152,11 @@ const EDIT_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/edit';
 const GET_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/info';
 const DELETE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/delete';
 
+const CREATE_TERNARY = '/project/well/cross-plot/ternary/new';
+const EDIT_TERNARY = '/project/well/cross-plot/ternary/edit';
+const GET_TERNARY = '/project/well/cross-plot/ternary/info';
+const DELETE_TERNARY = '/project/well/cross-plot/ternary/delete';
+
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
 function Service(baseUrl, $http, wiComponentService, Upload) {
@@ -293,7 +298,7 @@ var wiApiWorker = function($http, wiComponentService){
                     // console.log('worker continue working after', WORKER_REQUEST_DELAY, 'ms');
                     self.working();
                 }, WORKER_REQUEST_DELAY);
-                timerHandle = null; 
+                timerHandle = null;
             }
         }
     }
@@ -312,9 +317,9 @@ wiApiWorker.prototype.isAvailable = function() {
 wiApiWorker.prototype.stopWorking = function(){
     let self = this;
     self.currentRequestWorking --;
-    self.wiComponentService.getComponent('SPINNER').hide();    
+    self.wiComponentService.getComponent('SPINNER').hide();
     // if(self.currentRequestWorking < MAXIMUM_REQUEST){
-    //     self.isFree = true;    
+    //     self.isFree = true;
     // }
     self.working();
 }
@@ -1268,6 +1273,24 @@ Service.prototype.getUserDefineLine = function (idUserDefineLine, callback) {
 Service.prototype.removeUserDefineLine = function (idUserDefineLine, callback) {
     let self = this;
     this.delete(DELETE_USER_DEFINE_LINE, { idUserDefineLine: idUserDefineLine }, callback);
+}
+
+//ternary apis
+Service.prototype.createTernary = function (data, callback) {
+    let self = this;
+    this.post(CREATE_TERNARY, data, callback);
+}
+Service.prototype.editTernary = function (data, callback) {
+    let self = this;
+    this.post(EDIT_TERNARY, data, callback);
+}
+Service.prototype.getTernary = function (idTernary, callback) {
+    let self = this;
+    this.post(GET_TERNARY, { idTernary: idTernary }, callback);
+}
+Service.prototype.removeTernary = function (idTernary, callback) {
+    let self = this;
+    this.delete(DELETE_TERNARY, { idTernary: idTernary }, callback)
 }
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {

@@ -799,7 +799,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 else if (errorCode === 0) {
                     errorMsg("Cannot drop curve from another well");
                 }
-            } 
+            }
         },
         appendTo: 'body',
         revert: false,
@@ -840,7 +840,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
             } else {
                 resolve(response);
             }
-            
+
         });
     });
 };
@@ -1694,12 +1694,30 @@ function openCrossplotTab(crossplotModel, callback) {
                                 }
                             }
                         }
+
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
                         let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
-                        
+
                         let crossplotConfig = angular.copy(crossplot);
                         crossplotConfig.regressionLines =crossplot.regressionlines;
                         crossplotConfig.userDefineLines =crossplot.user_define_lines;
+
+                        if (Array.isArray(crossplot.ternaries) && crossplot.ternaries.length > 0) {
+                            crossplotConfig.ternary = {
+                                vertices: crossplot.ternaries.map(function(vertex) {
+                                    return {
+                                        idVertex: vertex.idTernary,
+                                        x: vertex.xValue,
+                                        y: vertex.yValue,
+                                        showed: vertex.show,
+                                        used: vertex.usedIn,
+                                        name: vertex.name,
+                                        style: vertex.style
+                                    }
+                                })
+                            }
+                        }
+
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 
@@ -1721,7 +1739,7 @@ function openCrossplotTab(crossplotModel, callback) {
 exports.openCrossplotTab = openCrossplotTab;
 
 exports.createHistogram = function (idWell, curve, histogramName) {
-    let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);    
+    let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let dataRequest = curve ? {
         idWell: idWell,
         idCurve: curve.idCurve,
@@ -1730,7 +1748,7 @@ exports.createHistogram = function (idWell, curve, histogramName) {
         name: histogramName
     }: {
         idWell: idWell,
-        name: histogramName        
+        name: histogramName
     };
     __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
         if(!histogram.name){
