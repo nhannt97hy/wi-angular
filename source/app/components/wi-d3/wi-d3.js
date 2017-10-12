@@ -1289,7 +1289,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1 || !curve2) {
-            DialogUtils.errorMessageDialog(ModalService, 'Two curves are needed');
+            DialogUtils.errorMessageDialog(ModalService, 'You must select 2 curves to create cross plot.');
         }
         else {
             console.log('Create crossplot', curve1, curve2);
