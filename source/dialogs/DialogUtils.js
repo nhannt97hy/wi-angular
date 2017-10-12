@@ -5133,12 +5133,26 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            wiApiService.infoCurve(self.SelectedCurve.id, function(curve){
-                $timeout(function(){
-                    self.histogramProps.leftScale = curve.LineProperty.minScale;
-                    self.histogramProps.rightScale = curve.LineProperty.maxScale;
-                });
-            })
+            let family = utils.findFamilyById(self.SelectedCurve.properties.idFamily);
+            console.log(self.SelectedCurve, family);
+            if (family) {
+                self.histogramProps.leftScale = family.minScale;
+                self.histogramProps.rightScale = family.maxScale;
+            }
+            else if(self.SelectedCurve.properties.minScale != null && 
+                    self.SelectedCurve.properties.maxScale != null ) {
+                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+            }
+            else {
+                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
+                    console.log('scale curve');
+                    $timeout(function(){
+                        self.histogramProps.leftScale = scale.minScale;
+                        self.histogramProps.rightScale = scale.maxScale;
+                    });
+                })
+            }
         }
 
         function getTopFromWell() {

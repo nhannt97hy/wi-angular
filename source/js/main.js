@@ -3,6 +3,13 @@ String.prototype.capitalize = function() {
     return this.replace(this[0], this[0].toUpperCase());
 }
 
+Object.defineProperty(Array.prototype, "binarySearch", {
+    enumerable: false,
+    value: function(accessFunc, searchValue) {
+        return this.find(accessFunc, searchValue);
+    }        
+});
+
 let appConfig = require('./app.config');
 let utils = require('./utils');
 

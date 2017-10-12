@@ -153,7 +153,7 @@ Histogram.prototype.doPlot = function() {
         return;
     }
     if (this.histogramModel.properties.idZoneSet && (!this.zoneSet || !this.zoneSet.length)) {
-        console.warn('No zoneSet to draw');
+        console.error('No zoneSet to draw');
         return;
     }
     // pass checking. Set drawPending = false
@@ -165,7 +165,7 @@ Histogram.prototype.doPlot = function() {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
     let transformX = this.getTransformX();
-    let transformY = null
+    let transformY = null, transformCumulativeY = null;
 
     let nBins = this.histogramModel.properties.divisions;
     let domain = this.getNormalizedWindowX();
@@ -218,9 +218,14 @@ Histogram.prototype.doPlot = function() {
     // After having data, we can setup vertical transformation and Y axis 
     let wdY = this.getWindowY();
     transformY = this.getTransformY();
+    transformCumulativeY = this.getTransformCumulativeY();
 
+    var tickCount = Math.floor(vpY[1]/40);
     this.axisY = d3.axisLeft(transformY)
-        .ticks(Math.floor(vpY[1]/40), ',.0f');
+        .ticks(tickCount, ',.0f');
+
+//    this.axisCumulativeY = d3.axisRight(transformCumulativeY)
+//        .ticks(tickCount, ',.2f');
 
     // Generate X and Y axes
     this.axisX = this.axisX.tickSize(-this.svgContainer.node().clientHeight);
@@ -232,6 +237,9 @@ Histogram.prototype.doPlot = function() {
     this.svgContainer.select('g.vi-histogram-axis-y-ticks')
         .call(this.axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
+//    this.svgContainer.select('g.vi-histogram-axis-cumulative-y-ticks')
+//        .call(this.axisCumulativeY)
+//        .style('transform', 'translateX(' + (vpX[1] - 100) + 'px)');
 
     drawBarHistogram();
 
@@ -566,6 +574,7 @@ Histogram.prototype.init = function(domElem) {
             'vi-histogram-axis-ticks vi-histogram-axis-x-ticks',
             'vi-histogram-axis-grids vi-histogram-axis-x-grids',
             'vi-histogram-axis-ticks vi-histogram-axis-y-ticks',
+            'vi-histogram-axis-ticks vi-histogram-axis-cumulative-y-ticks',
             'vi-histogram-axis-grids vi-histogram-axis-y-grids'
         ])
         .enter()
@@ -581,7 +590,7 @@ Histogram.prototype.init = function(domElem) {
         self.drawPending = true;
         self.doPlot();
     });
-    //window.VISHISTOGRAM = this;
+    window.VISHISTOGRAM = this;
 }
 
 Histogram.prototype.getViewportY = function() {
@@ -618,6 +627,14 @@ Histogram.prototype.getTransformY = function() {
         .domain([wdY[1], wdY[0]])
         .range(this.getViewportY());
 }
+
+Histogram.prototype.getTransformCumulativeY = function() {
+    let wdY = this.getWindowY();
+    return d3.scaleLinear()
+        .domain([100, 0])
+        .range(this.getViewportY());
+}
+
 Histogram.prototype.getLength = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
