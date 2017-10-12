@@ -62,10 +62,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.verifyDroppedIdCurve = function(idCurve) {
         let well1 = utils.findWellByLogplot(logPlotCtrl.id);
-        let well2 = Utils.findWellByCurve(idCurve) || {properties:{}};
+        let well2 = utils.findWellByCurve(idCurve) || {properties:{}};
 
-        if (!well1.idWell || !well2.properties.idWell) return -1;
-        if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
+        if (!well1.properties.idWell || !well2.properties.idWell) return -1;
+        if (well1.properties.idWell && well2.properties.idWell && (well1.properties.idWell == well2.properties.idWell)) return 1;
         return 0;
     }
 
