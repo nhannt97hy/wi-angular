@@ -94,6 +94,11 @@ const EDIT_MARKER = '/project/well/plot/track/marker/edit';
 const GET_MARKER = '/project/well/plot/track/marker/info';
 const DELETE_MARKER = '/project/well/plot/track/marker/delete';
 
+const CREATE_ANNOTATION = '/project/well/plot/track/annotation/new';
+const EDIT_ANNOTATION = '/project/well/plot/track/annotation/edit';
+const GET_ANNOTATION = '/project/well/plot/track/annotation/info';
+const DELETE_ANNOTATION = '/project/well/plot/track/annotation/delete';
+
 const CREATE_ZONE_TRACK = '/project/well/plot/zone-track/new';
 const EDIT_ZONE_TRACK = '/project/well/plot/zone-track/edit';
 const GET_ZONE_TRACK = '/project/well/plot/zone-track/info';
@@ -1001,6 +1006,31 @@ Service.prototype.removeMarker = function (idMarker, callback) {
         idMarker: idMarker
     };
     this.delete(DELETE_MARKER, dataRequest, callback);
+}
+
+Service.prototype.createAnnotation = function (annotationObj, callback) {
+    var self = this;
+    let dataRequest = annotationObj;
+    this.post(CREATE_ANNOTATION, dataRequest, callback);
+}
+Service.prototype.editAnnotation = function (annotationObj, callback) {
+    let self = this;
+    let dataRequest = annotationObj;
+    this.post(EDIT_ANNOTATION, dataRequest, callback);
+}
+Service.prototype.getAnnotation = function (idAnnotation, callback) {
+    let self = this;
+    let dataRequest = {
+        idAnnotation: idAnnotation
+    };
+    this.post(GET_ANNOTATION, dataRequest, callback);
+}
+Service.prototype.removeAnnotation = function (idAnnotation, callback) {
+    var self = this;
+    let dataRequest = {
+        idAnnotation: idAnnotation
+    };
+    this.delete(DELETE_ANNOTATION, dataRequest, callback);
 }
 
 Service.prototype.uploadImage = function (data, callback) {

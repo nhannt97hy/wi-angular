@@ -6839,28 +6839,30 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
 
 exports.annotationPropertiesDialog = function (ModalService, annotationProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
+        window.ANNOTATION = this;
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let props = annotationProperties || {
-            text: "Type some text here"
-        };
-        self.text = props.text;
+        self.props = annotationProperties;
+        self.alignment = (self.props.vAlign + '.' + self.props.hAlign).toLowerCase();
+
+        this.onAlignmentChange = function () {
+            [self.props.vAlign, self.props.hAlign] = self.alignment.split('.');
+        }
 
         this.onApplyButtonClicked = function () {
-            bindProps();
-            callback(props);
+            callback(self.returnProps());
         };
         this.onOkButtonClicked = function () {
-            bindProps();
-            close(props, 100);
+            close(self.returnProps(), 100);
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
-
-        function bindProps() {
-            props.text = self.text;
+        this.returnProps = function () {
+            let props = angular.copy(self.props);
+            props.textStyle = JSON.stringify(props.textStyle);
+            return props;
         }
     }
     ModalService.showModal({
@@ -6873,7 +6875,7 @@ exports.annotationPropertiesDialog = function (ModalService, annotationPropertie
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (data) callback(data);
+            if (data && callback) callback(data);
         });
     });
 }
