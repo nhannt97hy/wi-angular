@@ -3382,7 +3382,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 console.log("temp");
                 temp = false;
                 DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 1 inch!");
-            } 
+            }
             return temp;
         }
 
@@ -6357,6 +6357,17 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             });
         };
 
+        this.pickPoint = function () {
+            $('#ternary-modal').modal('hide');
+            wiD3CrossplotCtrl.pickPoint(function(point) {
+                $('#ternary-modal').modal('show');
+                if (point) {
+                    calculateOptions.point = point;
+                    $scope.$apply();
+                }
+            });
+        };
+
         this.importVertices = function () {
             utils.error('Not yet implemented')
         };
@@ -6422,7 +6433,11 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
                 calculate: calculateOptions
             };
             viCrossplot.setProperties({ ternary: tmpTernary });
-            $scope.result = viCrossplot.calculateTernary();
+            let result = viCrossplot.calculateTernary();
+            if (result.error)
+                utils.error(result.error);
+            else
+                $scope.result = result;
         }
 
         this.onOkButtonClicked = function () {

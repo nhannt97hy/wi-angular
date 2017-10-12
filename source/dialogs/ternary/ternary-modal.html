@@ -98,6 +98,12 @@
                                 ng-disabled="calculateOptions.type != 'Point'"
                                 class="form-control wi-form-control valign-middle"
                                 style="display:inline-block; width: 60px;">
+                        <button class="btn btn-default" type="button"
+                            ng-click="wiModal.pickPoint()"
+                            class="wi-form-control"
+                            ng-disabled="calculateOptions.type != 'Point'">
+                            Pick Point
+                        </button>
                         <br />
                         <input id="ternary-calculate-area" type="radio" ng-model="calculateOptions.type" value="Area" />
                         <label for="ternary-calculate-area">Area</label>

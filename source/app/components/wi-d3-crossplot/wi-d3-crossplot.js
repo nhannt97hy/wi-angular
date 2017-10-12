@@ -31,9 +31,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
-        wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
-            self.pointSet = crossplot.pointsets[0];
-        });
+        if (self.crossplotModel) {
+            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+                self.pointSet = crossplot.pointsets[0];
+            });
+        }
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -345,6 +347,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.deleteArea = function() {
         self.viCrossplot.area = null;
         self.viCrossplot.plotArea();
+    }
+
+    this.pickPoint = function(callback) {
+        self.viCrossplot.startAddTernaryPoint();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    self.viCrossplot.endAddTernaryPoint();
+                    self.contextMenu = commonCtxMenu;
+                    if (callback) callback(null);
+                }
+            }
+        ]);
+        self.viCrossplot.onMouseDown(function(point) {
+            viCrossplotMouseDownCallback();
+            if (d3.event.button == 2) return;
+            if (callback) callback(point);
+        })
     }
 
     this.pickVertex = function(callback) {
