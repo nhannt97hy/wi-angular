@@ -6738,3 +6738,44 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
         });
     });
 };
+
+exports.annotationPropertiesDialog = function (ModalService, annotationProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = annotationProperties || {
+            text: "Type some text here"
+        };
+        self.text = props.text;
+
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+
+        function bindProps() {
+            props.text = self.text;
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "annotation-properties/annotation-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    });
+}

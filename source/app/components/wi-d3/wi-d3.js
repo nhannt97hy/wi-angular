@@ -758,6 +758,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // plot this logplot
         let viZoneTracks = self.getTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
         viZoneTracks.forEach(function (viZoneTrack) {
+            if (viZoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
             _plotZoneTrack(sourceZoneTrack, viZoneTrack);
         })
         // plot others logplots
@@ -766,9 +767,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         well.plots.forEach(function (aLogplot) {
             if (aLogplot.idPlot != sourceZoneTrack.idPlot) {
                 if (!layoutManager.getItemById('logplot' + aLogplot.idPlot)) return;
-                console.log(aLogplot.idPlot);
                 wiApiService.getLogplot(aLogplot.idPlot, function (logplot) {
-                    console.log('---------------',logplot);
                     logplot.zone_tracks.forEach(function (zoneTrack) {
                         if (zoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
                         let viZoneTrack = wiComponentService.getComponent('vi-zone-track-' + zoneTrack.idZoneTrack);
@@ -1588,7 +1587,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Annotation",
             icon: 'annotation-16x16',
             handler: function () {
-                console.log('Switch To Logarithmic');
+                DialogUtils.annotationPropertiesDialog(ModalService, null, function () {
+
+                })
             }
         },
         {

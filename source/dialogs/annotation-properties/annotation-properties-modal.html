@@ -1,0 +1,107 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><span class="annotation-16x16"></span>&nbsp;Text Field Properties</h4>
+            </div>
+            <div class="modal-body padding-0">
+                <form class="form-horizontal">
+                    <div class="container-fluid">
+                        <div>
+                            <h5>Text Attributes</h5>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <textarea rows="5" ng-model="wiModal.text" class="width-100-percent"></textarea>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-default">Text...</button>
+                            <button type="button" class="btn btn-default">Background...</button>
+                        </div>
+                        <div>
+                            <h5>Boundaries</h5>
+                            <div class="form-group">
+                                <label for="left" class="control-label col-sm-4 normal-text">Left (%)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" step="0.01" class="form-control wi-form-control" id="left" ng-model="wiModal.left">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="topDepth" class="control-label col-sm-4 normal-text">Top (depth)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control wi-form-control" id="topDepth" ng-model="wiModal.top">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bottmDepth" class="control-label col-sm-4 normal-text">Bottom (depth)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control wi-form-control" id="bottomDepth" ng-model="wiModal.bottom">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="width" class="control-label col-sm-4 normal-text">Width (%)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" step="0.01" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Options</h5>
+                            <div class="form-group">
+                                <label for="alignment" class="control-label col-sm-4 normal-text">Alignment</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="wiModal.alignment" class="form-control wi-form-control" id="alignment">
+                                        <option value="topLeft">Top Left</option>
+                                        <option value="bottomLeft">Bottom Left</option>
+                                        <option value="topRight">Top Right</option>
+                                        <option value="bottomRight">Bottom Right</option>
+                                        <option value="center">Center</option>
+                                        <option value="centerLeft">Center Left</option>
+                                        <option value="bottomCenter">Bottom Center</option>
+                                        <option value="centerRight">Center Right</option>
+                                        <option value="topCenter">Top Center</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="justification" class="control-label col-sm-4 normal-text">Justification</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="wiModal.justification" value="" class="form-control wi-form-control" id="justification">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label for="fitToBounds" class="col-sm-12 normal-text">
+                                        <input type="checkbox" id="fitToBounds" ng-model="wiModal.fitToBounds">Fit to Bounds
+                                    </label>
+                                    <label for="inDeviceSpace" class="col-sm-12 normal-text">
+                                        <input type="checkbox" id="inDeviceSpace" ng-model="wiModal.inDeviceSpace">In Device Space
+                                    </label>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="shadow" class="col-sm-12 normal-text">
+                                        <input type="checkbox" id="shadow" ng-model="wiModal.shadow">Shadow
+                                    </label>
+                                    <label for="vertical" class="col-sm-12 normal-text">
+                                        <input type="checkbox" id="vertical" ng-model="wiModal.vertical">Vertical
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
+                    <span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
+                    <span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default">
+                    <span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

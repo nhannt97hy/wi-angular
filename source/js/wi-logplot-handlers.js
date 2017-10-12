@@ -392,7 +392,7 @@ exports.CrossPlotButtonClicked = function () {
 };
 
 exports.HistogramButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().createHistogram();    
+    this.wiLogplot.getwiD3Ctrl().createHistogram();
 };
 
 exports.ExportTrackButtonClicked = function () {
