@@ -3377,11 +3377,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     newProps.general.width = utils.inchToPixel(self.props.general.width);
                     currentTrack.setProperties(newProps.general);
                     currentTrack.doPlot(true);
+                    callback();
                 })
             } else {
                 console.log("temp");
                 temp = false;
                 DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 1 inch!");
+                callback();
             }
             return temp;
         }
@@ -3627,7 +3629,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 if (updateShadingsTabCb) updateShadingsTabCb(err);
             });
         }
-        function doApply(applyFinishCb) {
+        function doApply(callback) {
             if( self.applyInProgress) return;
             self.applyInProgress = true;
 
@@ -3637,10 +3639,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             async.series([
                 function(callback) {
-                    updateGeneralTab();
-                    async.setImmediate(function() {
+                    updateGeneralTab(function (err) {
                         callback();
                     });
+                    // async.setImmediate(function() {
+                    //     callback();
+                    // });
                 },
                 function(callback) {
                     updateCurvesTab(function(err) {
@@ -3653,9 +3657,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     });
                 }
             ], function(err, results) {
-                console.log(err);
+                console.log(err, results);
                 console.log("applyInProgress", self.applyInProgress);
-                if (applyFinishCb) applyFinishCb(err);
+                if (!self.applyInProgress) callback(true);
             });
             self.applyInProgress = false;
         }
@@ -3663,8 +3667,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             doApply();
         };
         this.onOkButtonClicked = function () {
-            doApply(function(err) {
-                close(self.props);
+            doApply(function(result) {
+                if(result) {
+                    close(self.props);
+                }
             });
 
         };
