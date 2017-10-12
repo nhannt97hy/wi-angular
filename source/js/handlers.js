@@ -696,8 +696,8 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let histogramsNode = utils.getHistogramsNode();
-    if (!histogramsNode.children) histogramsNode.children = new Array();
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'histograms') return;    
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
@@ -705,7 +705,7 @@ exports.BlankHistogramButtonClicked = function () {
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(histogramsNode.properties.idWell, null, histogramName)
+        utils.createHistogram(selectedNode.properties.idWell, null, histogramName)
     });
 }
 

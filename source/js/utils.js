@@ -433,9 +433,7 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name, // TODO
-        minScale: curve.LineProperty ? curve.LineProperty.minScale : null,
-        maxScale: curve.LineProperty ? curve.LineProperty.maxScale : null
+        alias: curve.name
     };
     curveModel.data = {
         childExpanded: false,
@@ -1721,12 +1719,15 @@ exports.openCrossplotTab = openCrossplotTab;
 
 exports.createHistogram = function (idWell, curve, histogramName) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);    
-    let dataRequest = {
+    let dataRequest = curve ? {
         idWell: idWell,
-        idCurve: curve ? curve.idCurve : null,
-        leftScale: curve ? curve.minX: 0,
-        rightScale: curve ? curve.maxX: 0,
+        idCurve: curve.idCurve,
+        leftScale: curve.minX,
+        rightScale: curve.maxX,
         name: histogramName
+    }: {
+        idWell: idWell,
+        name: histogramName        
     };
     __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
         if(!histogram.name){
