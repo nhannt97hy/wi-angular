@@ -3387,6 +3387,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
 
         function updateCurvesTab(updateCurvesTabCb) {
+            console.log("updateCurvesTab");
             async.eachOfSeries(self.curvesChanged, function(item, idx, callback) {
                 switch(item.change) {
                     case '0':
@@ -3420,7 +3421,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                     wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curveList = currentTrack.getCurves();
                                     self.curves[idx].idLine = line.idLine;
-                                    item.change = '0';
+                                    item.change = '1';
                                 } else {
                                     console.error(err);
                                 }
@@ -3428,7 +3429,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 callback();
                             });
                         });
-                        item.change = '0';
                         break;
                     }
                     case '3':
@@ -3511,6 +3511,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             return true;
         }
         function updateShadingsTab(updateShadingsTabCb) {
+            console.log("updateShadingTab");
             async.eachOfSeries(self.shadingChanged, function(item, idx, callback) {
                 switch(item.change) {
                     case '0':
@@ -3604,7 +3605,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 callback();
                             })
                         });
-                        item.change = '0';
+                        item.change = '1';
                         break;
                     }
                     case '3':
@@ -3636,10 +3637,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             async.series([
                 function(callback) {
-                    updateGeneralTab(function(){
-                        async.setImmediate(function() {
-                            callback();
-                        });
+                    updateGeneralTab();
+                    async.setImmediate(function() {
+                        callback();
                     });
                 },
                 function(callback) {
@@ -3654,18 +3654,17 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
             ], function(err, results) {
                 console.log(err);
-                self.applyInProgress = false;
+                console.log("applyInProgress", self.applyInProgress);
                 if (applyFinishCb) applyFinishCb(err);
             });
+            self.applyInProgress = false;
         }
         this.onApplyButtonClicked = function () {
             doApply();
         };
         this.onOkButtonClicked = function () {
             doApply(function(err) {
-                if (!err) {
-                    close(self.props);
-                }
+                close(self.props);
             });
 
         };
