@@ -879,7 +879,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         tracks.push(zoneTrack);
                     })
                 }
-
+//
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
                         let shadingModel = shadingToTreeConfig(shading, paletteList);
@@ -1696,8 +1696,11 @@ function openCrossplotTab(crossplotModel, callback) {
                         }
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
                         let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
-
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                        
+                        let crossplotConfig = angular.copy(crossplot);
+                        crossplotConfig.regressionLines =crossplot.regressionlines;
+                        crossplotConfig.userDefineLines =crossplot.user_define_lines;
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 
                     if (pointSet.idCurveZ) {

@@ -427,6 +427,8 @@ exports.ImportTrackButtonClicked = function () {
     console.log("IMPORT TRACK");
     const wiApiService = this.wiApiService;
     const wiLogplot = this.wiLogplot;
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
+    let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     const currentTrack = wiLogplot.getwiD3Ctrl().getCurrentTrack();
     let trackData = {
         idTrack: currentTrack.id,
@@ -443,9 +445,50 @@ exports.ImportTrackButtonClicked = function () {
         document.body.removeChild(fileInput);
         trackData.file = fileInput.files[0];
         wiApiService.postWithTrackTemplateFile(trackData).then(function (aTrack) {
-            alert("DONE! Pls add this track to plot :D ");
+            console.log("aTrack", aTrack);
+            
+            let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+            /*
+            aTrack.markers.forEach(function (marker) {
+                wiD3Ctrl.addMarkerToTrack(trackObj, marker);
+            });
+            aTrack.images.forEach(function (image) {
+                image.src = image.location;
+                wiD3Ctrl.addImageToTrack(trackObj, image);
+
+            })
+            // if (!aTrack.lines || aTrack.lines.length == 0) {
+            //     aTrack = tracks.shift();
+            // }
+
+            let lineCount = 0;
+            let lineNum = aTrack.lines.length;
+            let eventEmitter = new EventEmitter();
+            eventEmitter.on('line-drawed', function (someTrack) {
+                console.log(someTrack);
+                lineCount++;
+                if (lineCount == lineNum) {
+                    drawAllShadings(someTrack, trackObj);
+                }
+            });
+
+            let someTrack = aTrack;
+            aTrack.lines.forEach(function (line) {
+                getCurveData(wiApiService, line.idCurve, function (err, data) {
+                    let lineModel = lineToTreeConfig(line);
+                    if (!err) {
+                        wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                    }
+                    else {
+                        console.error(err);
+                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                    }
+                    eventEmitter.emitEvent('line-drawed', [someTrack]);
+                });
+            });
+            */
         }).catch(err=>{
-            conosl.log(err);
+            console.log(err);
         });
     }, true);
 }
