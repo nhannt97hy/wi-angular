@@ -62,7 +62,7 @@
                                         <div class="col-sm-offset-1 col-sm-11 container-fluid">
                                             <div class='form-group'>
                                                 <label class="col-sm-3">Curve name</label>
-                                                <div class="col-sm-3">
+                                                <div class="col-sm-3"class="form-control wi-form-control">
                                                     <!-- <select class="form-control wi-form-control" ng-model="wiModal.SelectedCurve" ng-change="wiModal.onSelectCurveChange()" ng-options="curve as curve.datasetCurve for curve in wiModal.curvesArr">
                                                     </select> -->
                                                     <ui-select ng-model="wiModal.SelectedCurve"
@@ -74,6 +74,7 @@
                                                         <div class="padding-left-20px">{{curve.properties.name}}</div>
                                                     </ui-select-choices>
                                                     </ui-select>
+                                                    <!-- <wi-level-menu options="wiModal.option" my-model="wiModal.testVar"></wi-level-menu> -->
                                                 </div>
                                                 <label class="col-sm-3">Number of Divisions</label>
                                                 <div class="col-sm-3">

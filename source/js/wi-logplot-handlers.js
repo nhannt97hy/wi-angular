@@ -40,10 +40,10 @@ exports.DuplicateButtonClicked = function () {
     const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let idWell = Utils.getSelectedNode().properties.idWell;
-    DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this plot?", function(yes){
-        if(yes){
+    DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this plot?", function (yes) {
+        if (yes) {
             wiApiService.duplicateLogplot(wiLogplot.id, idWell, function (response) {
-            
+
                 Utils.refreshProjectState();
             });
         }
@@ -142,6 +142,7 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     wiD3Ctrl.setDepthRange(depthRange);
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 }
+
 function scaleTo1(rangeUnit, wiLogplot, wiComponentService) {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
@@ -242,7 +243,9 @@ exports.RangeSpecificButtonClicked = function () {
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
     DialogUtils.rangeSpecificDialog(this.ModalService, this.wiLogplot, function () {
-        timeoutFunc(function() {wiLogplot.getSlidingbarCtrl().scaleView();}, 1000);
+        timeoutFunc(function () {
+            wiLogplot.getSlidingbarCtrl().scaleView();
+        }, 1000);
     });
 }
 
@@ -255,7 +258,7 @@ exports.AddDepthAxisButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().addDepthTrack();
 };
 
-exports.NewTrackButtonClicked = function() {
+exports.NewTrackButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().addLogTrack();
 };
 
@@ -404,39 +407,88 @@ exports.ExportTrackButtonClicked = function () {
         idTrack: currentTrack.id,
         idPlot: currentTrack.idPlot
     }
-    // wiApiService.exportLogTrack(trackData, function (data, type) {
-    //     // console.log("DATA NA`" + data);
-    //     let blob = new Blob([data], {
-    //         type: type
-    //     });
-    //     let a = document.createElement('a');
-    //     let fileName = wiLogplot.getLogplotModel().properties.name + '.plot';
-    //     a.download = fileName;
-    //     a.href = URL.createObjectURL(blob);
-    //     a.style.display = 'none';
-    //     document.body.appendChild(a);
-    //     a.click();
-    //     a.parentNode.removeChild(a);
-    // });
+    wiApiService.exportLogTrack(trackData, function (data, type) {
+        // console.log("DATA NA`" + data);
+        let blob = new Blob([data], {
+            type: type
+        });
+        let a = document.createElement('a');
+        let fileName = currentTrack.name.trim().replace(/ /g,'') + '.track';
+        a.download = fileName;
+        a.href = URL.createObjectURL(blob);
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.parentNode.removeChild(a);
+    });
 }
 
 exports.ImportTrackButtonClicked = function () {
     console.log("IMPORT TRACK");
     const wiApiService = this.wiApiService;
     const wiLogplot = this.wiLogplot;
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
+    let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     const currentTrack = wiLogplot.getwiD3Ctrl().getCurrentTrack();
     let trackData = {
         idTrack: currentTrack.id,
-        idPlot: currentTrack.idPlot
+        idPlot: currentTrack.idPlot,
+        idWell: wiLogplot.getLogplotModel().properties.idWell
     }
     let fileInput = document.createElement('input');
     fileInput.style.display = 'none';
     fileInput.type = 'file';
-    fileInput.setAttribute('ngf-select', '');
+    // fileInput.setAttribute('ngf-select', '');
     document.body.appendChild(fileInput);
     fileInput.click();
     fileInput.addEventListener('change', function (event) {
         document.body.removeChild(fileInput);
-        console.log(fileInput.files);
+        trackData.file = fileInput.files[0];
+        wiApiService.postWithTrackTemplateFile(trackData).then(function (aTrack) {
+            console.log("aTrack", aTrack);
+            
+            let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+            /*
+            aTrack.markers.forEach(function (marker) {
+                wiD3Ctrl.addMarkerToTrack(trackObj, marker);
+            });
+            aTrack.images.forEach(function (image) {
+                image.src = image.location;
+                wiD3Ctrl.addImageToTrack(trackObj, image);
+
+            })
+            // if (!aTrack.lines || aTrack.lines.length == 0) {
+            //     aTrack = tracks.shift();
+            // }
+
+            let lineCount = 0;
+            let lineNum = aTrack.lines.length;
+            let eventEmitter = new EventEmitter();
+            eventEmitter.on('line-drawed', function (someTrack) {
+                console.log(someTrack);
+                lineCount++;
+                if (lineCount == lineNum) {
+                    drawAllShadings(someTrack, trackObj);
+                }
+            });
+
+            let someTrack = aTrack;
+            aTrack.lines.forEach(function (line) {
+                getCurveData(wiApiService, line.idCurve, function (err, data) {
+                    let lineModel = lineToTreeConfig(line);
+                    if (!err) {
+                        wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
+                    }
+                    else {
+                        console.error(err);
+                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                    }
+                    eventEmitter.emitEvent('line-drawed', [someTrack]);
+                });
+            });
+            */
+        }).catch(err=>{
+            console.log(err);
+        });
     }, true);
 }

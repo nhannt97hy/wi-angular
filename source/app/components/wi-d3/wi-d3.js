@@ -1288,7 +1288,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1 || !curve2) {
-            console.log('Two curves are needed');
+            DialogUtils.errorMessageDialog(ModalService, 'You must select 2 curves to create cross plot.');
         }
         else {
             console.log('Create crossplot', curve1, curve2);
@@ -1335,7 +1335,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.createHistogram = function () {
         let curve = _currentTrack.getCurrentCurve();
         if (!curve) {
-            console.log('Please select a curve for creating histogram!');
+            DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for creating histogram!');
         }
         else {
             console.log('Create histogram', curve);

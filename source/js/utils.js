@@ -433,9 +433,7 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name, // TODO
-        minScale: curve.LineProperty ? curve.LineProperty.minScale : null,
-        maxScale: curve.LineProperty ? curve.LineProperty.maxScale : null
+        alias: curve.name
     };
     curveModel.data = {
         childExpanded: false,
@@ -881,7 +879,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         tracks.push(zoneTrack);
                     })
                 }
-
+//
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
                         let shadingModel = shadingToTreeConfig(shading, paletteList);
@@ -1698,8 +1696,11 @@ function openCrossplotTab(crossplotModel, callback) {
                         }
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
                         let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
-
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplot);
+                        
+                        let crossplotConfig = angular.copy(crossplot);
+                        crossplotConfig.regressionLines =crossplot.regressionlines;
+                        crossplotConfig.userDefineLines =crossplot.user_define_lines;
+                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 
                     if (pointSet.idCurveZ) {
@@ -1721,12 +1722,15 @@ exports.openCrossplotTab = openCrossplotTab;
 
 exports.createHistogram = function (idWell, curve, histogramName) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);    
-    let dataRequest = {
+    let dataRequest = curve ? {
         idWell: idWell,
-        idCurve: curve ? curve.idCurve : null,
-        leftScale: curve ? curve.minX: 0,
-        rightScale: curve ? curve.maxX: 0,
+        idCurve: curve.idCurve,
+        leftScale: curve.minX,
+        rightScale: curve.maxX,
         name: histogramName
+    }: {
+        idWell: idWell,
+        name: histogramName        
     };
     __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
         if(!histogram.name){

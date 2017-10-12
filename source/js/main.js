@@ -13,6 +13,8 @@ let wiDropdown = require('./wi-dropdown.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiTabs = require('./wi-tabs.js');
 let wiCanvasRect = require('./wi-canvas-rect.js');
+let wiLevelMenu = require('./wi-level-menu.js');
+
 
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');
@@ -85,7 +87,7 @@ let app = angular.module('wiapp',
         wiSlidingbar.name,
         wiList.name,
         wiContextMenu.name,
-        wiSpinner.name, 
+        wiSpinner.name,
         wiResizableX.name,
         wiD3Crossplot.name,
         wiD3Histogram.name,
@@ -100,6 +102,7 @@ let app = angular.module('wiapp',
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
+        wiLevelMenu.name,
 
         // models
         wiDepth.name,
@@ -120,8 +123,8 @@ let app = angular.module('wiapp',
         wiZone.name,
         wiContainer.name,
         wiReferenceWindow.name,
-        wiUser.name, 
-        
+        wiUser.name,
+
         'angularModalService',
         'angularResizable',
 
@@ -153,7 +156,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.CROSSPLOT_HANDLERS, crossplotHanders);
     // dependency 3rd component
     // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
-    
+
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
     utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
@@ -215,7 +218,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         }
         setTimeout(function(){
             layoutManager.updateSize();
-        }, 500);               
+        }, 500);
     }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {

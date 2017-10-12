@@ -3366,13 +3366,24 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             });
         }
 
-        function updateGeneralTab() {
-            utils.changeTrack(self.props.general, wiApiService);
-            let newProps = angular.copy(self.props);
-            newProps.general.width = utils.inchToPixel(self.props.general.width);
-            currentTrack.setProperties(newProps.general);
-            currentTrack.doPlot(true);
-            return true;
+        function updateGeneralTab(callback) {
+            let temp = true;
+            // utils.changeTrack(self.props.general, wiApiService);
+            console.log('general', self.props.general);
+            if(self.props.general.width > 1) {
+                wiApiService.editTrack(self.props.general, function(res) {
+                    console.log("res", res);
+                    let newProps = angular.copy(self.props);
+                    newProps.general.width = utils.inchToPixel(self.props.general.width);
+                    currentTrack.setProperties(newProps.general);
+                    currentTrack.doPlot(true);
+                })
+            } else {
+                console.log("temp");
+                temp = false;
+                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 1 inch!");
+            } 
+            return temp;
         }
 
         function updateCurvesTab(updateCurvesTabCb) {
@@ -3625,9 +3636,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             async.series([
                 function(callback) {
-                    updateGeneralTab();
-                    async.setImmediate(function() {
-                        callback();
+                    updateGeneralTab(function(){
+                        async.setImmediate(function() {
+                            callback();
+                        });
                     });
                 },
                 function(callback) {
@@ -5061,7 +5073,34 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         }
                     })
                 });
-
+                //wi-level-menu
+                self.option=self.datasets;
+                self.testVar= {
+                  "name": "curve",
+                  "type": "curve",
+                  "id": 3,
+                  "properties": {
+                    "idDataset": 2,
+                    "idCurve": 3,
+                    "idFamily": 2,
+                    "name": "ECGR",
+                    "unit": "GAPI",
+                    "alias": "ECGR",
+                    "minScale": 0,
+                    "maxScale": 200
+                  },
+                  "data": {
+                    "childExpanded": false,
+                    "icon": "curve-16x16",
+                    "label": "ECGR",
+                    "unit": "GAPI",
+                    "selected": false
+                  },
+                  "curveData": null,
+                  "datasetName": "W3",
+                  "$$hashKey": "object:784"
+                };
+                 console.log(self.option,"option");
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -5095,19 +5134,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            console.log(self.SelectedCurve);
-            if(self.SelectedCurve.properties.minScale != null && self.SelectedCurve.properties.maxScale != null){
-                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
-                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
-            }else{
-                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
-                    console.log('scale curve');
-                    $timeout(function(){
-                        self.histogramProps.leftScale = scale.minScale;
-                        self.histogramProps.rightScale = scale.maxScale;
-                    });
-                })
-            }
+            wiApiService.infoCurve(self.SelectedCurve.id, function(curve){
+                $timeout(function(){
+                    self.histogramProps.leftScale = curve.LineProperty.minScale;
+                    self.histogramProps.rightScale = curve.LineProperty.maxScale;
+                });
+            })
         }
 
         function getTopFromWell() {
@@ -6594,7 +6626,7 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
             deleted: 3,
             uncreated: 4
         }
-        
+
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.userDefineLines = [];
         this.viCross = viCrossplot.getProperties()
