@@ -155,13 +155,12 @@ const USER_DEFINE_LINE_SCHEMA = {
 const TERNARY_SCHEMA = {
     type: 'Object',
     properties: {
-        idTernary: { type: 'Integer' },
         vertices : {
             type: 'Array',
             item: {
                 type: 'Object',
                 properties: {
-                    idVertice: { type: 'Integer' },
+                    idVertex: { type: 'Integer' },
                     x: { type: 'Float' },
                     y: { type: 'Float' },
                     name: { type: 'String' },

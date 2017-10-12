@@ -433,9 +433,7 @@ function curveToTreeConfig(curve) {
         name: curve.name,
         unit: curve.unit || "NA",
         dataset: curve.dataset,
-        alias: curve.name, // TODO
-        minScale: curve.LineProperty ? curve.LineProperty.minScale : null,
-        maxScale: curve.LineProperty ? curve.LineProperty.maxScale : null
+        alias: curve.name
     };
     curveModel.data = {
         childExpanded: false,
@@ -801,7 +799,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 else if (errorCode === 0) {
                     errorMsg("Cannot drop curve from another well");
                 }
-            } 
+            }
         },
         appendTo: 'body',
         revert: false,
@@ -842,7 +840,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
             } else {
                 resolve(response);
             }
-            
+
         });
     });
 };
@@ -1696,12 +1694,30 @@ function openCrossplotTab(crossplotModel, callback) {
                                 }
                             }
                         }
+
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
                         let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
-                        
+
                         let crossplotConfig = angular.copy(crossplot);
                         crossplotConfig.regressionLines =crossplot.regressionlines;
                         crossplotConfig.userDefineLines =crossplot.user_define_lines;
+
+                        if (Array.isArray(crossplot.ternaries) && crossplot.ternaries.length > 0) {
+                            crossplotConfig.ternary = {
+                                vertices: crossplot.ternaries.map(function(vertex) {
+                                    return {
+                                        idVertex: vertex.idTernary,
+                                        x: vertex.xValue,
+                                        y: vertex.yValue,
+                                        showed: vertex.show,
+                                        used: vertex.usedIn,
+                                        name: vertex.name,
+                                        style: vertex.style
+                                    }
+                                })
+                            }
+                        }
+
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 
@@ -1723,12 +1739,15 @@ function openCrossplotTab(crossplotModel, callback) {
 exports.openCrossplotTab = openCrossplotTab;
 
 exports.createHistogram = function (idWell, curve, histogramName) {
-    let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);    
-    let dataRequest = {
+    let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
+    let dataRequest = curve ? {
         idWell: idWell,
-        idCurve: curve ? curve.idCurve : null,
-        leftScale: curve ? curve.minX: 0,
-        rightScale: curve ? curve.maxX: 0,
+        idCurve: curve.idCurve,
+        leftScale: curve.minX,
+        rightScale: curve.maxX,
+        name: histogramName
+    }: {
+        idWell: idWell,
         name: histogramName
     };
     __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {

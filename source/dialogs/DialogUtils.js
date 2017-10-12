@@ -5134,19 +5134,12 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            console.log(self.SelectedCurve);
-            if(self.SelectedCurve.properties.minScale != null && self.SelectedCurve.properties.maxScale != null){
-                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
-                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
-            }else{
-                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
-                    console.log('scale curve');
-                    $timeout(function(){
-                        self.histogramProps.leftScale = scale.minScale;
-                        self.histogramProps.rightScale = scale.maxScale;
-                    });
-                })
-            }
+            wiApiService.infoCurve(self.SelectedCurve.id, function(curve){
+                $timeout(function(){
+                    self.histogramProps.leftScale = curve.LineProperty.minScale;
+                    self.histogramProps.rightScale = curve.LineProperty.maxScale;
+                });
+            })
         }
 
         function getTopFromWell() {
@@ -6319,7 +6312,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
 
         this.onChange = function (index) {
-            if(self.vertices[index].change == change.unchanged)
+            if(self.vertices[index] && self.vertices[index].change == change.unchanged)
                 self.vertices[index].change = change.updated;
         };
 
@@ -6372,27 +6365,73 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             utils.error('Not yet implemented')
         };
 
+        function setVertices(callback) {
+            console.log('gg', self.vertices);
+            async.eachOfSeries(self.vertices, function(vertex, idx, cb){
+                vertex = self.vertices[idx];
+                let data = {
+                    xValue: vertex.x,
+                    yValue: vertex.y,
+                    name: vertex.name,
+                    style: vertex.style,
+                    usedIn: vertex.used,
+                    show: vertex.showed,
+                    idTernary: vertex.idTertex,
+                    idCrossPlot: props.idCrossPlot
+                };
+
+                switch(self.vertices[idx].change) {
+                    case change.created:
+                        wiApiService.createTernary(data, function(response) {
+                            self.vertices[idx].change = change.unchanged;
+                            cb();
+                        });
+                        break;
+                    case change.updated:
+                        wiApiService.editTernary(data, function(response) {
+                            self.vertices[idx].change = change.unchanged;
+                            cb();
+                        });
+                        break;
+                    case change.deleted:
+                        wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
+                            cb();
+                        });
+                        break;
+                    default:
+                        cb();
+                }
+            }, function() {
+                for (let i = self.vertices.length - 1; i >= 0; i--){
+                    if (self.vertices[i].change == change.deleted) {
+                        self.vertices.splice(i, 1);
+                    }
+                }
+                savedTernary.vertices = self.getVertices();
+                savedTernary.calculate = calculateOptions;
+                viCrossplot.setProperties({ ternary: savedTernary });
+                viCrossplot.plotTernary();
+                if (callback) callback();
+            });
+        }
+
         this.onCalculateButtonClicked = function () {
             let tmpTernary = {
                 idTernary: savedTernary.idTernary,
                 vertices: self.getVertices(),
                 calculate: calculateOptions
             };
-            console.log('aa', tmpTernary);
             viCrossplot.setProperties({ ternary: tmpTernary });
             $scope.result = viCrossplot.calculateTernary();
         }
 
         this.onOkButtonClicked = function () {
-            self.onApplyButtonClicked();
-            close(null);
+            setVertices(function() {
+                close(null);
+            })
         };
-        this.onApplyButtonClicked = function() {
-            savedTernary.vertices = self.getVertices();
-            savedTernary.calculate = calculateOptions;
-            console.log('savedTernary', savedTernary);
-            viCrossplot.setProperties({ ternary: savedTernary });
-            viCrossplot.plotTernary();
+        this.onApplyButtonClicked = function(callback) {
+            setVertices();
         };
         this.onCancelButtonClicked = function () {
             viCrossplot.setProperties({ ternary: savedTernary });
@@ -6777,3 +6816,44 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
         });
     });
 };
+
+exports.annotationPropertiesDialog = function (ModalService, annotationProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = annotationProperties || {
+            text: "Type some text here"
+        };
+        self.text = props.text;
+
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+
+        function bindProps() {
+            props.text = self.text;
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "annotation-properties/annotation-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    });
+}
