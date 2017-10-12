@@ -496,7 +496,7 @@ Service.prototype.postWithTrackTemplateFile = function (dataPayload) {
         self.Upload.upload(configUpload).then(
             function (responseSuccess) {
                 if (responseSuccess.data && responseSuccess.data.code === 200 && responseSuccess.data.content) {
-                    return resolve(responseSuccess.data.content);
+                    return resolve(responseSuccess.data);
                 }else if (responseSuccess.data && responseSuccess.data.code === 401){
                     window.localStorage.removeItem('token');
                     window.localStorage.removeItem('username');
