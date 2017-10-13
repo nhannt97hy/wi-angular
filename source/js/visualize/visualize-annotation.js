@@ -98,8 +98,8 @@ Annotation.prototype.doPlot = function(highlight) {
     let vpWidth = viewportX[1] - viewportX[0];
     let top = transformY(this.top);
     let bottom = transformY(this.bottom);
-    let left = viewportX[0] + this.left * vpWidth;
-    let width = this.width * vpWidth;
+    let left = viewportX[0] + this.left * vpWidth / 100;
+    let width = this.width * vpWidth / 100;
     let right = left + width;
 
     this.updateBoundingRect(left, top, width, bottom-top);
@@ -226,8 +226,8 @@ Annotation.prototype.lineDragCallback = function(dragline, pos) {
 
     let viewportX = this.getViewportX();
     let vpWidth = viewportX[1] - viewportX[0];
-    this.left = (left - viewportX[0]) / vpWidth;
-    this.width = (right - left) / vpWidth;
+    this.left = (left - viewportX[0]) / vpWidth * 100;
+    this.width = (right - left) / vpWidth * 100;
 
     this.updateBoundingRect(left, top, right-left, bottom-top);
     this.updateText();
@@ -244,14 +244,14 @@ Annotation.prototype.lineDragCallback = function(dragline, pos) {
 
 Annotation.prototype.rectDragCallback = function() {
     let transformY = this.getTransformY();
-    let dy = transformY.invert(d3.event.dy);
+    let dy = transformY.invert(d3.event.dy) - this.getWindowY()[0];
     this.top += dy;
     this.bottom += dy;
 
     let viewportX = this.getViewportX();
     let vpWidth = viewportX[1] - viewportX[0];
 
-    this.left += d3.event.dx / vpWidth;
+    this.left += d3.event.dx / vpWidth * 100;
     this.doPlot(true);
 
     this.drawRootTooltip();

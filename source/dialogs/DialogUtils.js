@@ -6879,12 +6879,7 @@ exports.annotationPropertiesDialog = function (ModalService, annotationPropertie
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         self.props = annotationProperties;
-        self.alignment = (self.props.vAlign + '.' + self.props.hAlign).toLowerCase();
-
-        this.onAlignmentChange = function () {
-            [self.props.vAlign, self.props.hAlign] = self.alignment.split('.');
-        }
-
+        
         this.onApplyButtonClicked = function () {
             callback(self.returnProps());
         };
