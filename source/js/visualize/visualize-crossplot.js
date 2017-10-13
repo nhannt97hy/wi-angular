@@ -7,7 +7,6 @@ module.exports = Crossplot;
 
 function Crossplot(config) {
     this.setProperties(config);
-    console.log('abc', this.getProperties());
 
     this.paddingLeft = 100;
     this.paddingRight = 50;
@@ -276,9 +275,11 @@ Crossplot.prototype.getTransformY = function() {
 
 Crossplot.prototype.getTransformZ = function() {
     if (this.pointSet.zAxes == 'Curve') {
+        let wdZ = this.getWindowZ();
+        let reverse = wdZ[0] > wdZ[1];
         return d3.scaleQuantize()
-            .domain(this.getWindowZ())
-            .range(this.colors);
+            .domain(Utils.sort(wdZ))
+            .range(reverse ? Utils.clone(this.colors).reverse() : this.colors);
     }
     else if (this.pointSet.zAxes == 'Zone') {
         let domain = [];
@@ -439,7 +440,7 @@ Crossplot.prototype.adjustSize = function() {
 }
 
 Crossplot.prototype.doPlot = function() {
-    console.log('PLOT CROSSPLOT');
+    console.log('PLOT CROSSPLOT', this.getProperties());
     if (!this.pointSet || !this.pointSet.curveX || !this.pointSet.curveY) return;
 
     this.prepareData();
@@ -1104,7 +1105,7 @@ Crossplot.prototype.prepareData = function() {
             self.data.push({
                 x: mapX[d.y],
                 y: d.x,
-                z: self.zAxes == 'Curve' ? mapZ[d.y] : d.y,
+                z: self.pointSet.zAxes == 'Curve' ? mapZ[d.y] : d.y,
                 depth: d.y
             });
         }
