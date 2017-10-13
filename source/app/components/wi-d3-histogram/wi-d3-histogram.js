@@ -232,7 +232,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.flipHorizontal = !self.histogramModel.properties.flipHorizontal;
                 self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;
-                // TODO
+                self.visHistogram.signal('histogram-update', 'flip horizontally');
+                saveHistogram();
             }
         }, {
             name: "ShowGrid",
