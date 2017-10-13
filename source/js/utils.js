@@ -1653,87 +1653,87 @@ function openCrossplotTab(crossplotModel, callback) {
 
     let wellProps = findWellById(crossplotModel.properties.idWell);
 
-    wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
-        if (crossplot.pointsets && crossplot.pointsets.length) {
-            let pointSet = crossplot.pointsets[0];
-            console.log("crosplot", crossplot);
-            if (!pointSet.idCurveX || !pointSet.idCurveY) return;
+    // wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
+    //     if (crossplot.pointsets && crossplot.pointsets.length) {
+    //         let pointSet = crossplot.pointsets[0];
+    //         console.log("crosplot", crossplot);
+    //         if (!pointSet.idCurveX || !pointSet.idCurveY) return;
 
-            wiApiService.dataCurve(pointSet.idCurveX, function (dataX) {
-                wiApiService.dataCurve(pointSet.idCurveY, function (dataY) {
-                    function createViCrossplot() {
-                        let curveX = getModel('curve', pointSet.idCurveX);
-                        let curveY = getModel('curve', pointSet.idCurveY);
+    //         wiApiService.dataCurve(pointSet.idCurveX, function (dataX) {
+    //             wiApiService.dataCurve(pointSet.idCurveY, function (dataY) {
+    //                 function createViCrossplot() {
+    //                     let curveX = getModel('curve', pointSet.idCurveX);
+    //                     let curveY = getModel('curve', pointSet.idCurveY);
 
-                        wiD3CrossplotCtrl.pointSet = pointSet;
-                        wiD3CrossplotCtrl.linkModels();
-                        crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
+    //                     wiD3CrossplotCtrl.pointSet = pointSet;
+    //                     wiD3CrossplotCtrl.linkModels();
+    //                     crossplot.pointSet = wiD3CrossplotCtrl.pointSet;
 
-                        if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
-                            for (let polygon of crossplot.polygons) {
-                                try {
-                                    polygon.points = JSON.parse(polygon.points);
-                                } catch (error) {}
-                            }
-                        }
-                        if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
-                            for (let regLine of crossplot.regressionlines) {
-                                try {
-                                    regLine.lineStyle = JSON.parse(regLine.lineStyle);
-                                } catch(e) {
-                                    console.log(e);
-                                }
-                            }
-                        }
-                        if (Array.isArray(crossplot.user_define_lines) && crossplot.user_define_lines.length > 0) {
-                            for (let udLine of crossplot.user_define_lines) {
-                                try {
-                                    udLine.lineStyle = JSON.parse(udLine.lineStyle);
-                                } catch(e) {
-                                    console.log(e);
-                                }
-                            }
-                        }
+    //                     if (Array.isArray(crossplot.polygons) && crossplot.polygons.length > 0) {
+    //                         for (let polygon of crossplot.polygons) {
+    //                             try {
+    //                                 polygon.points = JSON.parse(polygon.points);
+    //                             } catch (error) {}
+    //                         }
+    //                     }
+    //                     if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
+    //                         for (let regLine of crossplot.regressionlines) {
+    //                             try {
+    //                                 regLine.lineStyle = JSON.parse(regLine.lineStyle);
+    //                             } catch(e) {
+    //                                 console.log(e);
+    //                             }
+    //                         }
+    //                     }
+    //                     if (Array.isArray(crossplot.user_define_lines) && crossplot.user_define_lines.length > 0) {
+    //                         for (let udLine of crossplot.user_define_lines) {
+    //                             try {
+    //                                 udLine.lineStyle = JSON.parse(udLine.lineStyle);
+    //                             } catch(e) {
+    //                                 console.log(e);
+    //                             }
+    //                         }
+    //                     }
 
-                        let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
-                        let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
+    //                     let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
+    //                     let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
 
-                        let crossplotConfig = angular.copy(crossplot);
-                        crossplotConfig.regressionLines =crossplot.regressionlines;
-                        crossplotConfig.userDefineLines =crossplot.user_define_lines;
+    //                     let crossplotConfig = angular.copy(crossplot);
+    //                     crossplotConfig.regressionLines =crossplot.regressionlines;
+    //                     crossplotConfig.userDefineLines =crossplot.user_define_lines;
 
-                        if (Array.isArray(crossplot.ternaries) && crossplot.ternaries.length > 0) {
-                            crossplotConfig.ternary = {
-                                vertices: crossplot.ternaries.map(function(vertex) {
-                                    return {
-                                        idVertex: vertex.idTernary,
-                                        x: vertex.xValue,
-                                        y: vertex.yValue,
-                                        showed: vertex.show,
-                                        used: vertex.usedIn,
-                                        name: vertex.name,
-                                        style: vertex.style
-                                    }
-                                })
-                            }
-                        }
+    //                     if (Array.isArray(crossplot.ternaries) && crossplot.ternaries.length > 0) {
+    //                         crossplotConfig.ternary = {
+    //                             vertices: crossplot.ternaries.map(function(vertex) {
+    //                                 return {
+    //                                     idVertex: vertex.idTernary,
+    //                                     x: vertex.xValue,
+    //                                     y: vertex.yValue,
+    //                                     showed: vertex.show,
+    //                                     used: vertex.usedIn,
+    //                                     name: vertex.name,
+    //                                     style: vertex.style
+    //                                 }
+    //                             })
+    //                         }
+    //                     }
 
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
-                    }
+    //                     wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+    //                 }
 
-                    if (pointSet.idCurveZ) {
-                        wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
-                            let viCurveZ = graph.buildCurve( curveZ, curveZ.data, wellProps.properties);
-                            pointSet.curveZ = viCurveZ;
-                            createViCrossplot();
-                        });
-                    } else {
-                        createViCrossplot();
-                    }
-                })
-            })
-        }
-    })
+    //                 if (pointSet.idCurveZ) {
+    //                     wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
+    //                         let viCurveZ = graph.buildCurve( curveZ, curveZ.data, wellProps.properties);
+    //                         pointSet.curveZ = viCurveZ;
+    //                         createViCrossplot();
+    //                     });
+    //                 } else {
+    //                     createViCrossplot();
+    //                 }
+    //             })
+    //         })
+    //     }
+    // })
     if (callback) callback(wiCrossplotCtrl);
 };
 exports.openCrossplotTab = openCrossplotTab;

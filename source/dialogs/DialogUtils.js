@@ -6915,7 +6915,7 @@ exports.annotationPropertiesDialog = function (ModalService, annotationPropertie
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         self.props = annotationProperties;
-        
+
         this.onApplyButtonClicked = function () {
             callback(self.returnProps());
         };

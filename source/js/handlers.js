@@ -6,7 +6,7 @@ exports.NewProjectButtonClicked = function () {
     DialogUtils.newProjectDialog(ModalService, function (data) {
         self.wiApiService.createProject(data, function (response) {
             if(!response.name){
-                DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!"); 
+                DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!");
             }else{
                 let utils = self.wiComponentService.getComponent('UTILS');
                 utils.projectOpen(self.wiComponentService, response);
@@ -285,7 +285,7 @@ exports.TrippleComboButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Gamma Ray', function() {
@@ -324,7 +324,7 @@ exports.DensityNeutronButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Gammaray', function() {
@@ -361,7 +361,7 @@ exports.ResistivitySonicButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Gamma Ray', function() {
@@ -400,7 +400,7 @@ exports.TriTracksBlankButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Track 1', function() {
@@ -439,7 +439,7 @@ exports.InputCurveButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Grammaray', function() {
@@ -480,7 +480,7 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -527,7 +527,7 @@ exports.Syn_CurveButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -570,7 +570,7 @@ exports.ResultButtonClicked = function () {
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -614,25 +614,25 @@ exports.BlankCrossPlotButtonClicked = function () {
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function (wiCrossplotCtrl) {
-            const crossPlotModel = wiCrossplotCtrl.crossplotModel;
-            const pointSetProps = {
-                idCrossPlot: wiCrossplotCtrl.id,
-                idWell: selectedNode.properties.idWell,
-                majorX: 5,
-                minorX: 5,
-                majorY: 5,
-                minorY: 5,
-            }
-            utils.createPointSet(pointSetProps, function (pointSet) {
-                let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                wiD3CrossplotCtrl.createVisualizeCrossplot(null, null, {
-                    name: crossplotName,
-                    idPointSet: pointSet.idPointSet,
-                    idCrossPlot: wiCrossplotCtrl.id,
-                    idWell: selectedNode.properties.idWell,
-                    pointSet: pointSet
-                })
-            })
+            // const crossPlotModel = wiCrossplotCtrl.crossplotModel;
+            // const pointSetProps = {
+            //     idCrossPlot: wiCrossplotCtrl.id,
+            //     idWell: selectedNode.properties.idWell,
+            //     majorX: 5,
+            //     minorX: 5,
+            //     majorY: 5,
+            //     minorY: 5,
+            // }
+            // utils.createPointSet(pointSetProps, function (pointSet) {
+            //     let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+            //     wiD3CrossplotCtrl.createVisualizeCrossplot(null, null, {
+            //         name: crossplotName,
+            //         idPointSet: pointSet.idPointSet,
+            //         idCrossPlot: wiCrossplotCtrl.id,
+            //         idWell: selectedNode.properties.idWell,
+            //         pointSet: pointSet
+            //     })
+            // })
         });
     });
 };
@@ -697,7 +697,7 @@ exports.BlankHistogramButtonClicked = function () {
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let selectedNode = utils.getSelectedNode();
-    if (selectedNode.type != 'histograms') return;    
+    if (selectedNode.type != 'histograms') return;
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
