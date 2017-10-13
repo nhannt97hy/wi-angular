@@ -71,10 +71,10 @@
                                                         <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
                                                         <ui-select-choices group-by="'datasetName'"
                                                         repeat='curve in wiModal.curvesArr | filter: $select.search'>
-                                                        <div class="padding-left-20px">{{curve.properties.name}}</div>
-                                                    </ui-select-choices>
+                                                            <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                                        </ui-select-choices>
                                                     </ui-select>
-                                                    <!-- <wi-level-menu options="wiModal.option" my-model="wiModal.testVar"></wi-level-menu> -->
+                                                    <!--<wi-level-menu options="wiModal.option" my-model="wiModal.testVar"></wi-level-menu>-->
                                                 </div>
                                                 <label class="col-sm-3">Number of Divisions</label>
                                                 <div class="col-sm-3">

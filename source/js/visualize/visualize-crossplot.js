@@ -74,6 +74,9 @@ const POINTSET_SCHEMA = {
     type: 'Object',
     properties: {
         idPointSet: { type: 'Integer' },
+        idCurveX: { type: 'Integer' },
+        idCurveY: { type: 'Integer' },
+        idCurveZ: { type: 'Integer' },
         curveX: { type: 'Object' },
         logX: { type: 'Boolean', default: false },
         majorX: { type: 'Integer', default: 5, null: false },
@@ -436,6 +439,7 @@ Crossplot.prototype.adjustSize = function() {
 }
 
 Crossplot.prototype.doPlot = function() {
+    console.log('PLOT CROSSPLOT');
     if (!this.pointSet || !this.pointSet.curveX || !this.pointSet.curveY) return;
 
     this.prepareData();

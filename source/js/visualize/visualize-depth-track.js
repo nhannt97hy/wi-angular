@@ -105,9 +105,18 @@ DepthTrack.prototype.doPlot = function(highlight) {
     let windowY = this.getWindowY();
     let transformY = this.getTransformY();
 
-    let start = windowY[0];
-    let end = windowY[1];
-    let step = (end - start) / this.yTicks;
+    // let start = windowY[0];
+    // let end = windowY[1];
+    // let step = (end - start) / this.yTicks;
+    // let yAxisRight = d3.axisLeft(transformY)
+    //     .tickValues(d3.range(start, end + step / 2, step))
+    //     .tickFormat(self.getDecimalFormatter(self.yDecimal))
+    //     .tickSize(5);
+
+
+    let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
+    let start = Utils.roundUp(windowY[0], step);
+    let end = Utils.roundDown(windowY[1], step);
     let yAxisRight = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end + step / 2, step))
         .tickFormat(self.getDecimalFormatter(self.yDecimal))

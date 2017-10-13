@@ -961,8 +961,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _annotationOnDoubleClick() {
-        // TODO: open dialog
-        console.log('ANNOTATION DOUBLE CLICK');
+        DialogUtils.annotationPropertiesDialog(ModalService, _currentTrack.getCurrentDrawing(), function (annotationConfig) {
+            annotationConfig.idTrack = _currentTrack.id;
+            wiApiService.editAnnotation(annotationConfig, function () {
+                
+            })
+        })
         d3.event.stopPropagation();
     }
 
@@ -1587,8 +1591,34 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Annotation",
             icon: 'annotation-16x16',
             handler: function () {
-                DialogUtils.annotationPropertiesDialog(ModalService, null, function () {
-
+                let [topDepth, bottomDepth] = self.getDepthRangeFromSlidingBar();
+                let range = bottomDepth - topDepth;
+                let top = (topDepth + bottomDepth) / 2;
+                let bottom = top + (range / 10);
+                let defaultAnn = {
+                    text: 'Type some text here',
+                    textStyle: {
+                        fontSize: '12px',
+                        fill: 'Black'
+                    },
+                    background: "Yellow",
+                    top: top,
+                    bottom: bottom,
+                    left: 0,
+                    width: 100,
+                    vAlign: 'Center',
+                    hAlign: 'Center',
+                    justification: 'Center',
+                    fitBounds: true,
+                    deviceSpace: true,
+                    shadow: false,
+                    vertical: false
+                }
+                DialogUtils.annotationPropertiesDialog(ModalService, defaultAnn, function (annotationConfig) {
+                    annotationConfig.idTrack = _currentTrack.id;
+                    wiApiService.createAnnotation(annotationConfig, function () {
+                        self.addAnnotationToTrack(_currentTrack, annotationConfig);
+                    })
                 })
             }
         },

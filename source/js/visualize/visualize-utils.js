@@ -51,7 +51,7 @@ function getProperties(obj) {
         if (value === undefined) return;
 
         if (schema.type == 'Object' && schema.properties !== undefined) {
-            let tmpObj = obj[key];
+            let tmpObj = obj[key] || {};
             tmpObj.PROPERTIES = schema.properties;
             let tmpProps = getProperties(tmpObj);
             props[key] = tmpProps;

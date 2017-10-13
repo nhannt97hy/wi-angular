@@ -3377,11 +3377,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     newProps.general.width = utils.inchToPixel(self.props.general.width);
                     currentTrack.setProperties(newProps.general);
                     currentTrack.doPlot(true);
+                    callback();
                 })
             } else {
                 console.log("temp");
                 temp = false;
                 DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 1 inch!");
+                callback();
             }
             return temp;
         }
@@ -3627,7 +3629,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 if (updateShadingsTabCb) updateShadingsTabCb(err);
             });
         }
-        function doApply(applyFinishCb) {
+        function doApply(callback) {
             if( self.applyInProgress) return;
             self.applyInProgress = true;
 
@@ -3637,10 +3639,12 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             }
             async.series([
                 function(callback) {
-                    updateGeneralTab();
-                    async.setImmediate(function() {
+                    updateGeneralTab(function (err) {
                         callback();
                     });
+                    // async.setImmediate(function() {
+                    //     callback();
+                    // });
                 },
                 function(callback) {
                     updateCurvesTab(function(err) {
@@ -3653,9 +3657,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     });
                 }
             ], function(err, results) {
-                console.log(err);
+                console.log(err, results);
                 console.log("applyInProgress", self.applyInProgress);
-                if (applyFinishCb) applyFinishCb(err);
+                if (!self.applyInProgress) callback(true);
             });
             self.applyInProgress = false;
         }
@@ -3663,8 +3667,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             doApply();
         };
         this.onOkButtonClicked = function () {
-            doApply(function(err) {
-                close(self.props);
+            doApply(function(result) {
+                if(result) {
+                    close(self.props);
+                }
             });
 
         };
@@ -4395,14 +4401,15 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         // console.log("thisProps", this.props);
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         let crossplotModel = wiD3CrossplotCtrl.crossplotModel;
-        this.props = crossplotModel.properties;
+        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
+        this.props = Object.assign({}, crossplotModel.properties, this.viCrossplot.getProperties());
         this.refCurves = [];
         this.selectedCurveX = null;
         this.selectedCurveY = null;
         this.selectedCurveZ = null;
         this.selectedZoneSet = null;
-
-        this.pointSet = wiD3CrossplotCtrl.pointSet;
+        console.log('PROPS', this.props);
+        this.pointSet = this.props.pointSet;
         if (!this.pointSet) {
             wiApiService.getCrossplot(crossplotModel.idCrossplot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
@@ -4432,13 +4439,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             });
         }
         if(this.pointSet.idCurveZ) {
-            console.log("idCurveZ", this.pointSet.idCurveZ);
             wiApiService.scaleCurve(this.pointSet.idCurveZ, function(scaleZ) {
                 self.pointSet.scaleMin = (findCurveById(self.pointSet.idCurveZ).properties.idFamily == null)? scaleX.minScale:self.pointSet.scaleMin;
                 self.pointSet.scaleMax = (findCurveById(self.pointSet.idCurveZ).properties.idFamily == null)? scaleX.maxScale:self.pointSet.scaleMax;
             })
         }
-        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
+
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.depthType = (self.pointSet && self.pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
         this.lineMode = self.pointSet.lineMode ? self.pointSet.lineMode : true;
@@ -4497,7 +4503,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.compare = false;
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-        console.log("curvesOnDataset", this.curvesOnDataset);
         function getTopFromWell() {
             return parseFloat(self.well.properties.topDepth);
         }
@@ -4520,59 +4525,49 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             }
         }
 
-        this.onselectedCurveXChange = function () {
-            if (self.selectedCurveX) {
-                self.pointSet.idCurveX = self.selectedCurveX;
-            }
-            wiApiService.scaleCurve(self.selectedCurveX, function (scaleObj) {
-                $timeout(function () {
-                    let curveX = findCurveById(self.selectedCurveX);
-                    if (curveX.properties.idFamily == null) {
-                        self.pointSet.scaleLeft = scaleObj.minScale;
-                        self.pointSet.scaleRight = scaleObj.maxScale;
-                    } else {
-                        self.pointSet.scaleLeft = curveX.properties.minScale;
-                        self.pointSet.scaleRight = curveX.properties.maxScale;
+        function onSelectedCurveChange(symbol) {
+            return function() {
+                let idCurve = self['selectedCurve' + symbol]
+                if (idCurve) {
+                    let key1, key2;
+                    switch(symbol) {
+                        case 'X':
+                            key1 = 'scaleLeft';
+                            key2 = 'scaleRight';
+                            break;
+                        case 'Y':
+                            key1 = 'scaleBottom';
+                            key2 = 'scaleTop';
+                            break;
+                        case 'Z':
+                            key1 = 'scaleMin';
+                            key2 = 'scaleMax';
+                            break;
                     }
-                })
-            });
+
+                    self.pointSet['idCurve' + symbol] = idCurve;
+                    let curve = findCurveById(idCurve).properties;
+                    if (curve.idFamily == null) {
+                        wiApiService.scaleCurve(idCurve, function (scaleObj) {
+                            $timeout(function () {
+                                self.pointSet[key1] = scaleObj.minScale;
+                                self.pointSet[key2] = scaleObj.maxScale;
+                            });
+                        });
+                    }
+                    else {
+                        let scaleObj = utils.getListFamily().filter(function(f) { return f.idFamily == curve.idFamily; })[0];
+                        self.pointSet[key1] = scaleObj.minScale;
+                        self.pointSet[key2] = scaleObj.maxScale;
+                    }
+                }
+            }
         }
 
-        this.onselectedCurveYChange = function () {
-            if (self.selectedCurveY) {
-                self.pointSet.idCurveY = self.selectedCurveY;
-            }
-            wiApiService.scaleCurve(self.selectedCurveY, function (scaleObj) {
-                $timeout(function () {
-                    let curveY = findCurveById(self.selectedCurveY);
-                    if (curveY.properties.idFamily == null) {
-                        self.pointSet.scaleBottom = scaleObj.minScale;
-                        self.pointSet.scaleTop = scaleObj.maxScale;
-                    } else {
-                        self.pointSet.scaleBottom = curveY.properties.minScale;
-                        self.pointSet.scaleTop = curveY.properties.maxScale;
-                    }
-                })
-            });
-        }
+        this.onselectedCurveXChange = onSelectedCurveChange('X');
+        this.onselectedCurveYChange = onSelectedCurveChange('Y');
+        this.onselectedCurveZChange = onSelectedCurveChange('Z');
 
-        this.onselectedCurveZChange = function () {
-            if (self.selectedCurveZ) {
-                self.pointSet.idCurveZ = self.selectedCurveZ;
-            }
-            wiApiService.scaleCurve(self.selectedCurveZ, function (scaleObj) {
-                $timeout(function () {
-                    let curveZ = findCurveById(self.selectedCurveZ);
-                    if (curveZ.properties.idFamily == null) {
-                        self.pointSet.scaleMin = scaleObj.minScale;
-                        self.pointSet.scaleMax = scaleObj.maxScale;
-                    } else {
-                        self.pointSet.scaleMin = curveZ.properties.minScale;
-                        self.pointSet.scaleMax = curveZ.properties.maxScale;
-                    }
-                })
-            });
-        }
         this.onZoneSetChange = function () {
             if(self.selectedZoneSet){
                 self.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
@@ -4640,7 +4635,44 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.refCurves[index].color = colorStr;
             });
         }
+
         function updateCrossplot(callback) {
+
+            function updatePointSet(callback) {
+                // TO DO: Check if updating is necessary
+                props = angular.copy(self.props);
+                let pointSet = props.pointSet;
+                wiApiService.editPointSet(self.props.pointSet, function(res){
+                    async.eachOfSeries(['X', 'Y', 'Z'], function(symbol, idx, callback) {
+                        let idKey = 'idCurve' + symbol;
+                        let objKey = 'curve' + symbol;
+                        if (pointSet[idKey] != null && pointSet[objKey] == null) {
+                            wiApiService.dataCurve(pointSet[idKey], function (data) {
+                                let curve = utils.getModel('curve', pointSet[idKey]).properties;
+                                pointSet[objKey] = graph.buildCurve(curve, data, self.well.properties);
+                                callback();
+                            });
+                        }
+                        else callback();
+                    }, function() {
+                        callback(props);
+                    });
+                });
+            }
+
+
+            function setProps() {
+                self.props.reference_curves = self.refCurves;
+                crossplotModel.properties = self.props;
+                wiApiService.editCrossplot(crossplotModel.properties, function(returnData) {
+                    updatePointSet(function(props) {
+                        wiD3CrossplotCtrl.viCrossplot = self.viCrossplot;
+                        self.viCrossplot.setProperties(props);
+                        self.viCrossplot.doPlot();
+                    });
+                });
+
+            }
             if(self.refCurves && self.refCurves.length) {
                 async.eachOfSeries(self.refCurves, function(curve, idx, callback) {
                     switch(self.refCurves[idx].change){
@@ -4684,22 +4716,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                                 break;
                         }
                     }
-                    self.props.reference_curves = self.refCurves;
-                    crossplotModel.properties = self.props;
-                    console.log("crossplotModel", crossplotModel.properties);
-                    wiApiService.editCrossplot(crossplotModel.properties, function(returnData) {
-                        console.log('Return Data', returnData);
-                        if (callback) callback(crossplotModel.properties);
-                    });
+                    setProps();
                 });
             }
             else {
-                self.props.reference_curves = self.refCurves;
-                crossplotModel.properties = self.props;
-                wiApiService.editCrossplot(crossplotModel.properties, function(returnData) {
-                    console.log('Return Data', returnData);
-                    if (callback) callback(crossplotModel.properties);
-                });
+                setProps();
             }
             // let crossplotObj = {};
             // let pointSet = angular.copy(self.pointSet);
@@ -5133,12 +5154,26 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            wiApiService.infoCurve(self.SelectedCurve.id, function(curve){
-                $timeout(function(){
-                    self.histogramProps.leftScale = curve.LineProperty.minScale;
-                    self.histogramProps.rightScale = curve.LineProperty.maxScale;
-                });
-            })
+            let family = utils.findFamilyById(self.SelectedCurve.properties.idFamily);
+            console.log(self.SelectedCurve, family);
+            if (family) {
+                self.histogramProps.leftScale = family.minScale;
+                self.histogramProps.rightScale = family.maxScale;
+            }
+            else if(self.SelectedCurve.properties.minScale != null && 
+                    self.SelectedCurve.properties.maxScale != null ) {
+                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
+                self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
+            }
+            else {
+                wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
+                    console.log('scale curve');
+                    $timeout(function(){
+                        self.histogramProps.leftScale = scale.minScale;
+                        self.histogramProps.rightScale = scale.maxScale;
+                    });
+                })
+            }
         }
 
         function getTopFromWell() {
@@ -6839,28 +6874,30 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
 
 exports.annotationPropertiesDialog = function (ModalService, annotationProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
+        window.ANNOTATION = this;
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let props = annotationProperties || {
-            text: "Type some text here"
-        };
-        self.text = props.text;
+        self.props = annotationProperties;
+        self.alignment = (self.props.vAlign + '.' + self.props.hAlign).toLowerCase();
+
+        this.onAlignmentChange = function () {
+            [self.props.vAlign, self.props.hAlign] = self.alignment.split('.');
+        }
 
         this.onApplyButtonClicked = function () {
-            bindProps();
-            callback(props);
+            callback(self.returnProps());
         };
         this.onOkButtonClicked = function () {
-            bindProps();
-            close(props, 100);
+            close(self.returnProps(), 100);
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
-
-        function bindProps() {
-            props.text = self.text;
+        this.returnProps = function () {
+            let props = angular.copy(self.props);
+            props.textStyle = JSON.stringify(props.textStyle);
+            return props;
         }
     }
     ModalService.showModal({
@@ -6873,7 +6910,7 @@ exports.annotationPropertiesDialog = function (ModalService, annotationPropertie
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
-            if (data) callback(data);
+            if (data && callback) callback(data);
         });
     });
 }

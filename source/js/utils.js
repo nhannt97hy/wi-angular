@@ -262,9 +262,9 @@ exports.createZoneSet = function (idWell, callback) {
             idWell: idWell
         }
         wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
-            if(!dataReturn.name){
+            if (!dataReturn || !dataReturn.idZoneSet){
                 DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Zone Set: " + ret + " existed!");
-            }else{
+            } else {
                 __GLOBAL.$timeout(function () {
                     if (callback) callback(dataReturn);
                     refreshProjectState();
@@ -1998,3 +1998,14 @@ function getPalettes(callback) {
     }
 }
 exports.getPalettes = getPalettes;
+
+function findFamilyById(idFamily) {
+    if (!idFamily) return null;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let families = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
+    return families.binarySearch(function(family) {
+        return family.idFamily === idFamily;
+    }, idFamily);
+}
+
+exports.findFamilyById = findFamilyById;
