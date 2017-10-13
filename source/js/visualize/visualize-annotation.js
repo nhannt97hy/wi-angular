@@ -184,7 +184,7 @@ Annotation.prototype.updateDraglineGroups = function(left, top, right, bottom, o
 }
 
 Annotation.prototype.destroy = function() {
-    this.svgContainer.destroy();
+    this.svgContainer.remove();
 }
 
 Annotation.prototype.on = function(type, cb) {

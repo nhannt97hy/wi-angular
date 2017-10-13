@@ -924,7 +924,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.images.forEach(function (image) {
                             image.src = image.location;
                             wiD3Ctrl.addImageToTrack(trackObj, image);
-
+                        })
+                        aTrack.annotations.forEach(function (anno) {
+                            wiD3Ctrl.addAnnotationToTrack(trackObj, anno);
                         })
                         if (!aTrack.lines || aTrack.lines.length == 0) {
                             aTrack = tracks.shift();

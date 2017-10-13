@@ -5486,8 +5486,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         this.nameVAlign = props.nameVAlign.toLowerCase();
         this.precision = props.precision;
         this.onPrecisionChange = function () {
-            self.pow = Math.pow(10, self.precision);
-            this.depth = Math.round(props.depth * this.pow) / this.pow;
+            self.depth = +self.depth.toFixed(self.precision);
         }
         this.onPrecisionChange();
         this.depthHAlign = props.depthHAlign.toLowerCase();
@@ -6910,12 +6909,15 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
 
 exports.annotationPropertiesDialog = function (ModalService, annotationProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
-        window.ANNOTATION = this;
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         self.props = annotationProperties;
-        
+        this.props.left = +this.props.left.toFixed(2);
+        this.props.top = +this.props.top.toFixed(2);
+        this.props.bottom = +this.props.bottom.toFixed(2);
+        this.props.width = +this.props.width.toFixed(2);
+
         this.onApplyButtonClicked = function () {
             callback(self.returnProps());
         };
