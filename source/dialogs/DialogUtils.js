@@ -5553,15 +5553,15 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             displayProp: 'id',
             checkBoxes: true
         };
-        // this.example13model=[{id: 2}];
-        let polygons = angular.copy(wiD3Crossplot.getPolygons());
-        console.log("polygons", polygons);
-        this.polygonList = new Array();
-        polygons.forEach(function(polygonItem, index) {
-            polygonItem.id = index;
-            polygonItem.label = index;
-            self.polygonList.push(polygonItem);
-        });
+        this.example13model=[{id: 2}];
+        // let polygons = angular.copy(wiD3Crossplot.getPolygons());
+        // console.log("polygons", polygons);
+        this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
+        // polygons.forEach(function(polygonItem, index) {
+        //     polygonItem.id = index;
+        //     polygonItem.label = index;
+        //     self.polygonList.push(polygonItem);
+        // });
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
@@ -5594,7 +5594,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         this.removeRow = function () {
             if (!self.regressionLines[self.__idx]) return;
             if(self.regressionLines[self.__idx].change == change.created) {
-                self.regressionLines[self.__idx].change = change.uncreated;
+                self.regressionLines.splice(self.__idx, 1);
             } else {
                 self.regressionLines[self.__idx].change = change.deleted;
             }
@@ -5606,6 +5606,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             self.regressionLines.push({
                 change: change.created,
                 index: self.regressionLines.length,
+                regType: "Linear",
                 lineStyle: {
                     lineColor: "blue",
                     lineWidth: 1,
@@ -5614,7 +5615,8 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                 exclude: true,
                 polygons: [],
                 fitX: 0,
-                fitY: 0
+                fitY: 0,
+                idCrossPlot: self.viCross.idCrossPlot
             });
             console.log("addRow", self.regressionLines);
         };
@@ -5630,48 +5632,53 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             }, self.regressionLines[index]);
         };
         function setRegressionLines(callback) {
-            let regressionLinesIdx = [];
-            self.regressionLines.forEach(function(item, index){
-                item.idCrossPlot = self.viCross.idCrossPlot;
-                switch (item.change) {
-                    case 0:
-                        console.log("unchange:", item);
-                        break;
-                    case 1:
-                        wiApiService.createRegressionLines(item, function(res) {
-                            console.log("create", item);
-                            item.change = 0;
-                        });
-                        break;
-                    case 2:
-                        wiApiService.editRegressionLines(item, function(res) {
-                            console.log("edit", res);
-                            item.change = 0;
-                        });
-                        break;
-                    case 3:
-                        wiApiService.removeRegressionLines(item.idRegressionLine, function(res){
-                            console.log("remove", res);
-                            // self.regressionLines.splice(item, 1);
-                            regressionLinesIdx.push(index);
-                        });
-                        break;
-                    case 4:
-                        console.log("uncreated", item);
-                        // self.regressionLines.splice(item, 1);
-                        regressionLinesIdx.push(index);
-                        break;
-                    default:
-                        console.log('Something went wrong!');
-                        break;
-                }
-            });
-            console.log('regressionLinesObj', self.regressionLines, regressionLinesIdx);
-            regressionLinesIdx.forEach(function(item) {
-                self.regressionLines.splice(item, 1);
-            })
-            if (callback) {
-                callback();
+            if(self.regressionLines && self.regressionLines.length) {
+                async.eachOfSeries(self.regressionLines, function(regLine, idx, callback){
+                    switch(regLine.change) {
+                        case change.created:
+                            wiApiService.createRegressionLines(regLine, function(res){
+                                console.log("create", res);
+                                callback();
+                            });
+                            break;
+                        case change.updated:
+                            wiApiService.editRegressionLines(regLine, function(res){
+                                console.log("update", res);
+                                callback();
+                            });
+                            break;
+                        case change.deleted:
+                            wiApiService.removeRegressionLines(regLine.idRegressionLine, function(res){
+                                console.log("delete", res);
+                                callback();
+                            });
+                            break;
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function(err) {
+                    for (let i = self.regressionLines.length - 1; i >= 0; i--){
+                        switch(self.regressionLines[i].change) {
+                            case change.created:
+                            case change.updated:
+                                self.regressionLines[i].change = change.unchanged;
+                                break;
+                            case change.deleted:
+                                self.regressionLines.splice(i, 1);
+                                break;
+                        }
+                    }
+                    self.viCross.regressionLines = self.regressionLines;
+                    viCrossplot.setProperties(self.viCross)
+                    viCrossplot.doPlot();
+                    if(callback) callback();
+                });
+            } else {
+                self.viCross.regressionLines = self.regressionLines;
+                viCrossplot.setProperties(self.viCross)
+                viCrossplot.doPlot();
+                if(callback) callback();
             }
         }
         this.onOkButtonClicked = function () {
@@ -6816,8 +6823,7 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                         switch(self.userDefineLines[i].change) {
                             case change.created:
                             case change.updated:
-                                delete self.userDefineLines[i].change;
-                                delete self.userDefineLines[i].index;
+                                self.userDefineLines[i].change = change.unchanged;
                                 break;
                             case change.deleted:
                                 self.userDefineLines.splice(i, 1);

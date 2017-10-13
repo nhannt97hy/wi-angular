@@ -79,7 +79,7 @@ let wiLogplotsModel = require('./wi-logplots.model');
 let wiLogplotModel = require('./wi-logplot.model');
 let wiZone = require('./wi-zone');
 let wiUser = require('./wi-user');
-
+let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 
@@ -131,6 +131,7 @@ let app = angular.module('wiapp',
         wiContainer.name,
         wiReferenceWindow.name,
         wiUser.name,
+        wiMultiselect.name,
 
         'angularModalService',
         'angularResizable',
