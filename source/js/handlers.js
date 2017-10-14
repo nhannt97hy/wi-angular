@@ -6,7 +6,7 @@ exports.NewProjectButtonClicked = function () {
     DialogUtils.newProjectDialog(ModalService, function (data) {
         self.wiApiService.createProject(data, function (response) {
             if(!response.name){
-                DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!"); 
+                DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!");
             }else{
                 let utils = self.wiComponentService.getComponent('UTILS');
                 utils.projectOpen(self.wiComponentService, response);
@@ -242,7 +242,7 @@ exports.BlankLogplotButtonClicked = function () {
     const $timeout = this.$timeout;
     DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function(logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
@@ -278,27 +278,27 @@ exports.TrippleComboButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "TripleCombo")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
-                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
-                    wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Gamma Ray', function() {
-                            wiD3Ctrl.addLogTrack('Resistivity', function() {
-                                wiD3Ctrl.addLogTrack('Log Porosity');
-                            });
+                    if(logplot.familiesWithoutCurve.length > 0){
+                        let message = "Not Found Curves in families : ";
+                        logplot.familiesWithoutCurve.forEach(function(r){
+                            message += r + "<br>";
                         });
-                    });
+                        setTimeout(function(){
+                            DialogUtils.warningMessageDialog(ModalService, message);
+                        }, 1000);
+                    }
                 });
             })
             .catch(function (err) {
-                console.error('DensityNeutronDialog err ' + err);
-                utils.error('DensityNeutronDialog err ' + err);
+                console.error('TripleComboDialog err ' + err);
+                utils.error(err + '! Plot Name existed!');
             });
     });
 };
@@ -317,25 +317,27 @@ exports.DensityNeutronButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "DensityNeutron")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
-                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
-                    wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Gammaray', function() {
-                            wiD3Ctrl.addLogTrack('Neutron - Density');
+                    if(logplot.familiesWithoutCurve.length > 0){
+                        let message = "Not Found Curves in families : ";
+                        logplot.familiesWithoutCurve.forEach(function(r){
+                            message += r + "<br>";
                         });
-                    });
+                        setTimeout(function(){
+                            DialogUtils.warningMessageDialog(ModalService, message);
+                        }, 1000);
+                    }
                 });
             })
             .catch(function (err) {
                 console.error('DensityNeutronDialog err ' + err);
-                utils.error('DensityNeutronDialog err ' + err);
+                utils.error(err + '! Plot Name existed!');
             });
     });
 };
@@ -354,27 +356,27 @@ exports.ResistivitySonicButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "ResistivitySonic")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
-                    let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
-                    wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Gamma Ray', function() {
-                            wiD3Ctrl.addLogTrack('Resistivity', function() {
-                                wiD3Ctrl.addLogTrack('Sonic');
-                            });
+                    if(logplot.familiesWithoutCurve.length > 0){
+                        let message = "Not Found Curves in families : ";
+                        logplot.familiesWithoutCurve.forEach(function(r){
+                            message += r + "<br>";
                         });
-                    });
+                        setTimeout(function(){
+                            DialogUtils.warningMessageDialog(ModalService, message);
+                        }, 1000);
+                    }
                 });
             })
             .catch(function (err) {
-                console.error('DensityNeutronDialog err ' + err);
-                utils.error('DensityNeutronDialog err ' + err);
+                console.error('ResistivitySonicDialog err ' + err);
+                utils.error(err + '! Plot Name existed!');
             });
     });
 };
@@ -393,14 +395,14 @@ exports.TriTracksBlankButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Track 1', function() {
@@ -432,14 +434,14 @@ exports.InputCurveButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Grammaray', function() {
@@ -473,14 +475,14 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -520,14 +522,14 @@ exports.Syn_CurveButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -563,14 +565,14 @@ exports.ResultButtonClicked = function () {
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         console.log(logplotName);
-        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName)
+        utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
                 utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    let logplotName = 'logplot' + logplotModel.properties.idPlot;    
+                    let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Lithology', function() {
@@ -697,7 +699,7 @@ exports.BlankHistogramButtonClicked = function () {
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let selectedNode = utils.getSelectedNode();
-    if (selectedNode.type != 'histograms') return;    
+    if (selectedNode.type != 'histograms') return;
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',

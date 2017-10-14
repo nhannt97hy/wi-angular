@@ -814,7 +814,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     });
 };
 
-exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName) {
+exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'logplots') return;
     let well = getModel('well', selectedNode.properties.idWell);
@@ -831,7 +831,8 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         idWell: selectedNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
-        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null
+        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null,
+        plotTemplate: type ? type : null
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
