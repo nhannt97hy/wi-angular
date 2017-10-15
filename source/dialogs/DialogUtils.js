@@ -1939,7 +1939,6 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        console.log("$$", options);
 
         this.shadingOptions = shadingOptions;
         if (options) {
@@ -5067,7 +5066,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.zoneSetList = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
-        console.log("histogram", this.histogramProps);
         this.well.children.forEach(function(child, i){
             switch (child.type){
             case 'dataset':
@@ -5120,7 +5118,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                   "datasetName": "W3",
                   "$$hashKey": "object:784"
                 };
-                 console.log(self.option,"option");
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -5217,7 +5214,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.setClickedRow = function(index){
             self.SelectedRefCurve = index;
         }
-
+        /*
         this.onRefCurveChange = function(index, curve){
             self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
@@ -5261,7 +5258,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
         }
-
+        */
         this.IsNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
@@ -5279,6 +5276,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
+            /*
             if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
                 //for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--)
                 async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
@@ -5332,14 +5330,14 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     });
                 });
             }
-            else {
-                self.histogramProps.reference_curves = self.ref_Curves_Arr;
+            else { */
+            //    self.histogramProps.reference_curves = self.ref_Curves_Arr;
                 histogramModel.properties = self.histogramProps;
                 wiApiService.editHistogram(histogramModel.properties, function(returnData) {
                     console.log('Return Data', returnData);
                     if (callback) callback(histogramModel.properties);
                 });
-            }
+            //}
         }
 
         this.onOKButtonClicked = function () {
@@ -6548,7 +6546,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 });
             }
         })
-        console.log("well", this.well);
         // function getTopFromWell() {
         //     return parseFloat(self.well.properties.topDepth);
         // }
@@ -6566,24 +6563,40 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             self.SelectedRefCurve = index;
         }
 
-        this.onRefCurveChange = function(index, curve){
+        this.onRefCurveChange = function(index) {
+            if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
+                self.ref_Curves_Arr[index].flag = self._FEDIT;
+            }
+        }
+        this.onSelectRefCurve = function(index, curve){
             self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
                 self.ref_Curves_Arr[index].flag = self._FEDIT;
             }
             if(curve) {
-                if(self.ref_Curves_Arr[index].curve.minScale != null && self.ref_Curves_Arr[index].curve.maxScale != null){
+                let family = utils.findFamilyById(self.ref_Curves_Arr[index].curve.idFamily);
+                if (family) {
+                    self.ref_Curves_Arr[index].left = family.minScale;
+                    self.ref_Curves_Arr[index].right = family.maxScale;
+                    self.ref_Curves_Arr[index].color = family.lineColor;
+                }
+                else if(!self.ref_Curves_Arr[index].curve.minScale  
+                    && !self.ref_Curves_Arr[index].curve.maxScale != null ) {
                     self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
                     self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
-                }else{
+                    self.ref_Curves_Arr[index].color = 'black';
+                }
+                else {
                     wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
                         console.log('scale curve');
                         $timeout(function(){
                             self.ref_Curves_Arr[index].left = scale.minScale;
                             self.ref_Curves_Arr[index].right = scale.maxScale;
+                            self.ref_Curves_Arr[index].right = 'black';
                         });
                     })
                 }
+
             }
         }
 

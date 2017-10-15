@@ -33,18 +33,6 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
     };
 
-    this.onClick1 = function($index) {
-        console.log('onClick:', $index, self);
-        wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
-        wiComponentService.putComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD, self.config[$index].data.payload);
-
-        if (self.config[$index].data.properties) {
-            wiComponentService.emit('update-properties', self.config[$index].data.properties.listConfig);
-
-            console.log('properties', self.config[$index].data.properties.listConfig);
-        }
-    };
-
     this.onClick = function($index) {
         if(self.container && self.container.selectHandler) {
             self.container.selectHandler(self.config[$index]);
@@ -62,26 +50,6 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             selectedNode.handler();
         }
     }
-
-    this.onDoubleClick1 = function ($index) {
-        if (self.config[$index].data.handler) {
-            self.config[$index].data.handler();
-        } else if (self.config[$index].children && self.config[$index].children.length !== 0) {
-            self.onCollapse($index);
-        } else {
-            let treeFunctions = wiComponentService.getComponent(wiComponentService.TREE_FUNCTIONS);
-            if (treeFunctions) {
-                // get func from component service
-                if (self.config && self.config[$index] && self.config[$index].type
-                    && treeFunctions[self.config[$index].type]) {
-                    treeFunctions[self.config[$index].type](self.config[$index].data.payload);
-                }
-                else {
-                    console.log(treeFunctions, self.config, self.config[$index]);
-                }
-            }
-        }
-    };
 
     this.getItemActiveName = function () {
         return wiComponentService.getState(wiComponentService.ITEM_ACTIVE_STATE);

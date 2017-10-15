@@ -448,10 +448,10 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 var well = utils.findWellById(itemProperties.idWell);
                 config = {
                     name: currentItem.name,
-                    heading: 'Divison and Scales',
+                    heading: 'Division and Scales',
                     data: [{
-                        key: 'histogramDivison',
-                        label: 'Histogram Divison',
+                        key: 'histogramDivision',
+                        label: 'Histogram Division',
                         value: '',
                         editable: true
                     }, {
@@ -578,6 +578,11 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }]
                 }
                 listConfig.push(config);
+                if (!currentItem.data.ts || Date.now() - currentItem.data.ts > 30000)
+                    wiApiService.getHistogram(itemProperties.idHistogram, function(dataReturn) {
+                        itemProperties.reference_curves = dataReturn.reference_curves;
+                        currentItem.data.ts = Date.now();
+                    });
                 break;
             default:
                 break;

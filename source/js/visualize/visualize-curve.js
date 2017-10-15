@@ -275,7 +275,8 @@ Curve.prototype.getAllColors = function() {
  * Get transform function for x coordinate
  */
 Curve.prototype.getTransformX = function() {
-    let rect = this.root.node().getBoundingClientRect();
+    //let rect = this.root.node().getBoundingClientRect();
+    let rect = Utils.getBoundingClientDimension(this.root.node());
     let windowX = this.getWindowX();
     let self = this;
 
@@ -313,7 +314,8 @@ Curve.prototype.getTransformX = function() {
  */
 Curve.prototype.doPlot = function(highlight, keepPrevious) {
     let self = this;
-    let rect = this.root.node().getBoundingClientRect();
+    //let rect = this.root.node().getBoundingClientRect();
+    let rect = Utils.getBoundingClientDimension(this.root.node());
     if (!keepPrevious) this.adjustSize();
     this.updateHeader();
 
@@ -382,7 +384,8 @@ Curve.prototype.updateHeader = function() {
 }
 
 Curve.prototype.getCanvasTranslateXForWrapMode = function() {
-    let width = this.root.node().clientWidth;
+    //let width = this.root.node().clientWidth;
+    let width = $(this.root.node()).width();
     let wrapMode = Utils.lowercase(this.wrapMode);
     let ret = [];
 
