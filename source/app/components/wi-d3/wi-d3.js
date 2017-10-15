@@ -323,6 +323,38 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    this.addAnnotation = function () {
+        let [topDepth, bottomDepth] = self.getDepthRangeFromSlidingBar();
+        let range = bottomDepth - topDepth;
+        let top = (topDepth + bottomDepth) / 2;
+        let bottom = top + (range / 10);
+        let defaultAnn = {
+            text: 'Type some text here',
+            textStyle: {
+                fontSize: '12px',
+                fill: 'Black'
+            },
+            background: "Yellow",
+            top: top,
+            bottom: bottom,
+            left: 0,
+            width: 100,
+            vAlign: 'Center',
+            hAlign: 'Center',
+            justification: 'Center',
+            fitBounds: true,
+            deviceSpace: true,
+            shadow: false,
+            vertical: false
+        }
+        DialogUtils.annotationPropertiesDialog(ModalService, defaultAnn, function (annotationConfig) {
+            annotationConfig.idTrack = _currentTrack.id;
+            wiApiService.createAnnotation(annotationConfig, function (annotation) {
+                self.addAnnotationToTrack(_currentTrack, annotation);
+            })
+        })
+    }
+
     this.addAnnotationToTrack = function(track, config) {
         if (!track || !track.addAnnotation) return;
         let ann = track.addAnnotation(config);
@@ -334,10 +366,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         ann.on('dblclick', _annotationOnDoubleClick);
         ann.onRectDragEnd(function() {
-            // TODO: Send api to update annotation
+            // Send api to update annotation
+            let annoConfig = ann.getProperties();
+            delete annoConfig.textStyle;
+            wiApiService.editAnnotation(annoConfig, function () {});
         });
         ann.onLineDragEnd(function() {
-            // TODO: Send api to update annotation
+            // Send api to update annotation
+            let annoConfig = ann.getProperties();
+            delete annoConfig.textStyle;
+            wiApiService.editAnnotation(annoConfig, function () {});
         })
         return ann;
     }
@@ -950,6 +988,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         _plotZoneSet(track);
                         Utils.refreshProjectState();
                     })
+                } else if (drawing.isAnnotation()) {
+                    // Send api before deleting
+                    wiApiService.removeAnnotation(drawing.idAnnotation, function () {
+                        track.removeDrawing(drawing);
+                    })
                 }
 
                 return;
@@ -961,17 +1004,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _annotationOnDoubleClick() {
-        DialogUtils.annotationPropertiesDialog(ModalService, _currentTrack.getCurrentDrawing(), function (annotationConfig) {
-            annotationConfig.idTrack = _currentTrack.id;
-            wiApiService.editAnnotation(annotationConfig, function () {
-                
-            })
-        })
+        annotationProperties();
         d3.event.stopPropagation();
     }
 
     function _markerOnDoubleClick() {
-        console.log('Marker double clicked');
         markerProperties();
         d3.event.stopPropagation();
     }
@@ -1038,10 +1075,39 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
         })
     }
+    function annotationProperties (anno) {
+        if (!anno) anno = _currentTrack.getCurrentDrawing();
+        console.log(anno);
+        DialogUtils.annotationPropertiesDialog(ModalService, anno.getProperties(), function (annotationConfig) {
+            annotationConfig.idTrack = _currentTrack.id;
+            wiApiService.editAnnotation(annotationConfig, function () {
+                anno.setProperties(annotationConfig);
+                anno.doPlot();
+            })
+        })
+    }
 
     function _annotationOnRightClick() {
-        // TODO: open dialog
-        console.log('ANNOTATION RIGHT CLICK');
+        let anno = _currentTrack.getCurrentDrawing();
+        self.setContextMenu([
+            {
+                name: "AnnotationProperties",
+                label: "Annotation Properties",
+                icon: "annotation-16x16-edit",
+                handler: function () {
+                    annotationProperties(anno);
+                }
+            }, {
+                name: "RemoveAnnotation",
+                label: "Remove Annotation",
+                icon: "annotation-delete-16x16",
+                handler: function () {
+                    wiApiService.removeAnnotation(anno.idAnnotation, function () {
+                        _currentTrack.removeDrawing(anno);
+                    })
+                }
+            }
+        ]);
     }
 
     function _markerOnRightClick() {
@@ -1591,35 +1657,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Add Annotation",
             icon: 'annotation-16x16',
             handler: function () {
-                let [topDepth, bottomDepth] = self.getDepthRangeFromSlidingBar();
-                let range = bottomDepth - topDepth;
-                let top = (topDepth + bottomDepth) / 2;
-                let bottom = top + (range / 10);
-                let defaultAnn = {
-                    text: 'Type some text here',
-                    textStyle: {
-                        fontSize: '12px',
-                        fill: 'Black'
-                    },
-                    background: "Yellow",
-                    top: top,
-                    bottom: bottom,
-                    left: 0,
-                    width: 100,
-                    vAlign: 'Center',
-                    hAlign: 'Center',
-                    justification: 'Center',
-                    fitBounds: true,
-                    deviceSpace: true,
-                    shadow: false,
-                    vertical: false
-                }
-                DialogUtils.annotationPropertiesDialog(ModalService, defaultAnn, function (annotationConfig) {
-                    annotationConfig.idTrack = _currentTrack.id;
-                    wiApiService.createAnnotation(annotationConfig, function () {
-                        self.addAnnotationToTrack(_currentTrack, annotationConfig);
-                    })
-                })
+                self.addAnnotation();
             }
         },
         {

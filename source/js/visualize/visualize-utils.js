@@ -21,6 +21,7 @@ exports.convertColorToRGB = convertColorToRGB;
 exports.uniq = uniq;
 exports.clone = clone;
 exports.range = range;
+exports.sort = sort;
 exports.getScaleFunc = getScaleFunc;
 exports.setIfNotNull = setIfNotNull;
 exports.setIfSelfNull = setIfSelfNull;
