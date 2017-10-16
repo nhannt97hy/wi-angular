@@ -94,6 +94,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.linkModels = function () {
         self.zoneArr = null;
+        self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
