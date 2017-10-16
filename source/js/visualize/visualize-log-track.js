@@ -105,7 +105,7 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'showYGrids', props.showDepthGrid);
     Utils.setIfNotNull(this, 'xMajorTicks', parseInt(props.majorTicks));
     Utils.setIfNotNull(this, 'xMinorTicks', parseInt(props.minorTicks));
-    Utils.setIfNotNull(this, 'width', parseInt(props.width));
+    Utils.setIfNotNull(this, 'width', props.width);
     Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.color));
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
     Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
