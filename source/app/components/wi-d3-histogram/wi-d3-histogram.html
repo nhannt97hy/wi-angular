@@ -19,8 +19,11 @@
                 Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
             </h5>
             <div class='histogram-container'>
-                <div style='padding-left:2em;' ng-show="wiD3Histogram.histogramModel.properties.idCurve">{{wiD3Histogram.histogramModel.properties.plotType}}</div>
-                <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' style="flex:1" ng-dblclick='wiD3Histogram.histogramFormat();'></div>
+                <div style='display:flex;flex-direction:row;justify-content:space-between;'>
+                    <div>{{wiD3Histogram.histogramModel.properties.plotType}}</div>
+                    <div>Probability (%)</div>
+                </div>
+                <div id='{{wiD3Histogram.histogramAreaId}}' wi-element-ready='wiD3Histogram.onReady()' class='d3-histogram-region' ng-dblclick='wiD3Histogram.histogramFormat();'></div>
                 <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Histogram.histogramModel.properties.xLabel}}</div>
             </div>
         </div>

@@ -64,7 +64,6 @@ Histogram.prototype.setCurve = function(data) {
 
 Histogram.prototype.getTickValuesY = function() {
     if (this.histogramModel.properties.plotType != "Frequency") { // Percentile
-        console.log('getTickValuesY: Percent');
         return d3.range(0, 100, 10);
     }
     // plotType == Frequency
@@ -134,11 +133,13 @@ function __reverseBins(bins) {
         bins[halfLen].x1 = temp;
     }
 }
+const MINOR_TICKS = 5
 Histogram.prototype.doPlot = function() {
     var self = this;
     // Adjust svgContainer size
-    self.svgContainer.attr('width',self.container.node().clientWidth)
-        .attr('height', self.container.node().clientHeight);
+    self.svgContainer
+        .attr('width', $(this.container.node()).width())
+        .attr('height', $(this.container.node()).height());
 
     // remove previously render histograms
     this.svgContainer.selectAll('.bars, path.gaussian-line, path.cumulative-line, line.mean-line, line.sigma-line, .mean-label, .sigma-label').remove();
@@ -161,10 +162,12 @@ Histogram.prototype.doPlot = function() {
 
     // Local variables
     console.log('Do plot begin');
-    let wdX = this.getWindowX();
+    let wdX = this.getWindowX(self.histogramModel.properties.loga, 
+        self.histogramModel.properties.flipHorizontal);
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
-    let transformX = this.getTransformX();
+    let transformX = this.getTransformX(self.histogramModel.properties.loga, 
+        self.histogramModel.properties.flipHorizontal);
     let transformY = null, transformCumulativeY = null;
 
     let nBins = this.histogramModel.properties.divisions;
@@ -175,10 +178,14 @@ Histogram.prototype.doPlot = function() {
     let jumpFactor = Math.ceil(nBins/20);
     if (jumpFactor > 1) realStep = jumpFactor * step;
 
+    let tickCountX = (vpX[1] - vpX[0])/40;
     // Setup Axis X
     this.axisX = d3.axisBottom(transformX)
-        .tickValues(d3.range(wdX[0], wdX[1] + realStep/2, realStep))
-        .tickFormat(Utils.getDecimalFormatter(0));
+       // .ticks(tickCountX, ',.0f');
+       // .tickValues(d3.range(wdX[0], wdX[1] + realStep/2, realStep))
+        .tickValues(d3.range(wdX[0], wdX[1], realStep))
+        .tickFormat(Utils.getDecimalFormatter(0))
+        .tickPadding(10);
 
     // Setup histogram generator
     let thresholds = d3.range(domain[0], domain[1], (domain[1] - domain[0])/nBins);
@@ -218,11 +225,17 @@ Histogram.prototype.doPlot = function() {
     // After having data, we can setup vertical transformation and Y axis 
     let wdY = this.getWindowY();
     transformY = this.getTransformY();
+    
     transformCumulativeY = this.getTransformCumulativeY();
 
     var tickCount = Math.floor(vpY[1]/40);
+    var allTickCount = (tickCount - 1)*MINOR_TICKS + 1;
     this.axisY = d3.axisLeft(transformY)
-        .ticks(tickCount, ',.0f');
+        .ticks(allTickCount , ',.0f')
+        .tickFormat(function (d, i) {
+            return (i % MINOR_TICKS)?"":d;
+        })
+        .tickPadding(10);
 
 //    this.axisCumulativeY = d3.axisRight(transformCumulativeY)
 //        .ticks(tickCount, ',.2f');
@@ -237,6 +250,28 @@ Histogram.prototype.doPlot = function() {
     this.svgContainer.select('g.vi-histogram-axis-y-ticks')
         .call(this.axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
+
+
+    this.svgContainer.selectAll('g.vi-histogram-axis-y-ticks .tick.major')
+        .classed('major', false)
+        .select('.second-label').remove();
+
+    this.svgContainer.selectAll('g.vi-histogram-axis-y-ticks .tick')
+        .filter(function(d, i) {
+            return (i % MINOR_TICKS) == 0;
+        })
+        .classed('major', true);
+
+    this.svgContainer.selectAll('g.vi-histogram-axis-y-ticks .tick.major')
+        .append('text')
+        .attr('class', 'second-label')
+        .text(function(d) {
+            var newLabel = transformCumulativeY.invert(transformY(d)).toFixed(0);
+            return newLabel;
+        })
+        .attr('text-anchor', 'start')
+        .attr('fill', '#000')
+        .style('transform', 'translate(' + (vpX[1] + 4) + 'px, 2px)');
 //    this.svgContainer.select('g.vi-histogram-axis-cumulative-y-ticks')
 //        .call(this.axisCumulativeY)
 //        .style('transform', 'translateX(' + (vpX[1] - 100) + 'px)');
@@ -252,11 +287,9 @@ Histogram.prototype.doPlot = function() {
     }
 
     if (self.histogramModel.properties.showGrid) {
-        console.log('Show grid');
         self.container.classed('show-grid', true).classed('hide-grid', false);
     }
     else {
-        console.log('Hide grid');
         self.container.classed('show-grid', false).classed('hide-grid', true);
     }
     function showTooltip(d, i) {
@@ -301,15 +334,23 @@ Histogram.prototype.doPlot = function() {
 
         // Column width and gap setups
         var gap = 4;
-        let colWidth = Math.abs(transformX(self.fullBins[0].x1) - transformX(self.fullBins[0].x0));
+        let colWidth = d3.min(self.fullBins, function(d) {
+            var w = Math.abs(transformX(d.x1) - transformX(d.x0));
+            return w;
+        });
         gap = Math.min(gap, Math.floor(colWidth/5));
         
         // Generate histogram segments
         if (self.intervalBins) {
             // For intervalDepth case
             bars.append('rect')
-                .attr('x', gap/2)
-                .attr('width', colWidth - gap)
+                //.attr('x', gap/2)
+                //.attr('width', colWidth - gap)
+                .attr('x', 3)
+                .attr('width', function(d, i) {
+                    var width = Math.abs(transformX(self.fullBins[i].x1) - transformX(self.fullBins[i].x0));
+                    return width - 3;
+                })
                 .attr('y', function(d, i) {
                     if (self.histogramModel.properties.plotType != 'Frequency') {
                         return (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
@@ -331,8 +372,13 @@ Histogram.prototype.doPlot = function() {
             // For zonalDepth case
             for (let j in self.zoneBins) {
                 bars.append('rect')
-                    .attr('x', gap/2)
-                    .attr('width', colWidth - gap)
+                    //.attr('x', gap/2)
+                    //.attr('width', colWidth - gap)
+                    .attr('x', 3)
+                    .attr('width', function(d, i) {
+                        var width = Math.abs(transformX(self.fullBins[i].x1) - transformX(self.fullBins[i].x0));
+                        return width - 3;
+                    })
                     .attr('y', function(d, i) {
                         var fullBinHeight, cumHeight;
                         if (self.histogramModel.properties.plotType != 'Frequency') {
@@ -378,7 +424,8 @@ Histogram.prototype.doPlot = function() {
             })
             .y(function(d) {
                 return gaussianTransformY(d.y);
-            });
+            })
+            .curve(d3.curveBasis);
         self.svgContainer.append('path').datum(gaussianPoints)
                 .attr('class', 'gaussian-line').attr('d', line);
         let meanPos = transformX(self.mean);
@@ -474,7 +521,6 @@ Histogram.prototype.doPlot = function() {
     }
     function drawCumulativeCurve() {
         var cumulativePoints = getCumulativeData();
-        console.log(cumulativePoints);
         var cumulativeTransformY = d3.scaleLinear()
             .domain(d3.extent(cumulativePoints, function(d) {return d.y;}))
             .range([vpY[1], vpY[0]]);
@@ -485,7 +531,8 @@ Histogram.prototype.doPlot = function() {
             })
             .y(function(d) {
                 return cumulativeTransformY(d.y);
-            });
+            })
+            .curve(d3.curveBasis);
 
         self.svgContainer.append('path').datum(cumulativePoints)
                 .attr('class', 'cumulative-line').attr('d', line);
@@ -555,11 +602,12 @@ Histogram.prototype.doPlot = function() {
 Histogram.prototype.init = function(domElem) {
     var self = this;
     console.log("init histogram into domElem:", domElem);
-    this.container = d3.select(domElem).attr('class', 'vi-histogram-container');
+    this.container = d3.select(domElem).classed('vi-histogram-container', true);
+    
     this.svgContainer = this.container.append('svg')
         .attr('class', 'vi-histogram-svg')
-        .attr('width',this.container.node().clientWidth)
-        .attr('height', this.container.node().clientHeight);
+        .attr('width', $(this.container.node()).width())
+        .attr('height', $(this.container.node()).height());
 
     this.container.append('div').attr('class', 'vi-histogram-tooltip').style('opacity', 0);
 
@@ -602,22 +650,37 @@ Histogram.prototype.getViewportX = function() {
 Histogram.prototype.getWindowY = function() {
     if (this.histogramModel.properties.plotType != 'Frequency') {
         let total = this.fullData.length;
-        console.log('getWindowY: Percent');
         return [0, d3.max(this.fullBins, function(d) { return d.length*100/total;})];
     }
     return [0, d3.max(this.fullBins, function(d) {return d.length;})];
 }
-Histogram.prototype.getWindowX = function() {
-    return [this.histogramModel.properties.leftScale, this.histogramModel.properties.rightScale];
+Histogram.prototype.getWindowX = function(isLoga, isFlipped) {
+    var left = this.histogramModel.properties.leftScale;
+    var right = this.histogramModel.properties.rightScale;
+
+    if (isFlipped) {
+        left = this.histogramModel.properties.rightScale;
+        right = this.histogramModel.properties.leftScale;
+    }
+
+    if (!isLoga) 
+        return [left, right];
+    var left = (left > 0)? left : 0.001;
+    var right = (right)? right: 0.001;
+    return [left, right];
 }
 
 Histogram.prototype.getNormalizedWindowX = function() {
-    return d3.extent(this.getWindowX());
+    return d3.extent(this.getWindowX(this.histogramModel.properties.loga, 
+        this.histogramModel.properties.flipHorizontal));
 }
 
-Histogram.prototype.getTransformX = function() {
-    return d3.scaleLinear()
-        .domain(this.getWindowX())
+Histogram.prototype.getTransformX = function(isLoga, isFlipped) {
+    if (!isLoga) return d3.scaleLinear()
+        .domain(this.getWindowX(false, isFlipped))
+        .range(this.getViewportX());
+    return d3.scaleLog()
+        .domain(this.getWindowX(true, isFlipped))
         .range(this.getViewportX());
 }
 
@@ -786,11 +849,11 @@ Histogram.prototype.getMedian = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData) return null;
-        return d3.median(this.intervalData);
+        return d3.median(this.intervalData).toFixed(__DECIMAL_LEN);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
-    return d3.median(this.joinZoneData());
+    return d3.median(this.joinZoneData()).toFixed(__DECIMAL_LEN);
 }
 
 function calPercentile(data, p) {

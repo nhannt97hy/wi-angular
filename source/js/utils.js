@@ -23,10 +23,6 @@ function debounce(func, wait, immediate) {
     };
 };
 
-function getDialogUtils() {
-    const wiComponentService = __GLOBAL.wiComponentService;
-    let w
-}
 exports.objcpy = function (destObj, sourceObj) {
     if (destObj) {
         for (let attr in sourceObj) {
@@ -749,11 +745,14 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 exports.getCurveData = getCurveData;
 
 function getCurveData(apiService, idCurve, callback) {
-    apiService.post(apiService.DATA_CURVE, {
+    apiService.dataCurve(idCurve, function(curve) {
+        callback(null, curve);
+    });
+    /*apiService.post(apiService.DATA_CURVE, {
             idCurve
         }, function (curve) {
             callback(null, curve);
-        });
+        });*/
 }
 
 //exports.getCurveDataByName = getCurveDataByName;
@@ -814,7 +813,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     });
 };
 
-exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName) {
+exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'logplots') return;
     let well = getModel('well', selectedNode.properties.idWell);
@@ -831,7 +830,8 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         idWell: selectedNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
-        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null
+        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null,
+        plotTemplate: type ? type : null
     };
     return new Promise(function(resolve, reject){
         wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
@@ -924,7 +924,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.images.forEach(function (image) {
                             image.src = image.location;
                             wiD3Ctrl.addImageToTrack(trackObj, image);
-
+                        })
+                        aTrack.annotations.forEach(function (anno) {
+                            wiD3Ctrl.addAnnotationToTrack(trackObj, anno);
                         })
                         if (!aTrack.lines || aTrack.lines.length == 0) {
                             aTrack = tracks.shift();
@@ -1047,7 +1049,6 @@ function getModel(type, id) {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let model = null;
-    console.log(rootNodes[0], type);
     visit(rootNodes[0], function (node) {
         if (node.type == type && node.id == id) {
             model = node;

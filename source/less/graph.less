@@ -126,22 +126,17 @@
     flex: 1;
     overflow: visible;
     position: relative;
+    padding: 0px 50px 20px 50px;
+    //box-sizing: content-box;
     .vi-histogram-svg {
-        overflow: hidden;
+        overflow: visible;
         //border: 1px solid blue;
         position: absolute;
-        top: 0;
-        left: 0;
-        padding: 0px 2px 20px 50px;
+        top: 0px;
+        left: 50px;
+        //padding: 0px 50px 20px 50px;
         //background-color: yellow;
-        .tick {
-            line {
-                stroke: gray;
-                stroke-dasharray: 20, 2;
-                stroke-width: 1;
-                stroke-opacity: 0.3;
-            }
-        }
+
         .mean-line {
             stroke: #88FF88;
             stroke-width: 1px;
@@ -179,4 +174,19 @@
     width: 5px;
     z-index: 2;
     height: 100%;
+}
+.tick {
+    line {
+        stroke: rgba(0,118,118,1);
+        stroke-dasharray: 20, 2;
+        stroke-width: 1;
+        stroke-opacity: 0.3;
+    }
+}
+.tick.major { 
+    line {
+        stroke: rgba(0,118,118,1);
+        stroke-dasharray: 0;
+        stroke-opacity: 0.8;
+    }
 }

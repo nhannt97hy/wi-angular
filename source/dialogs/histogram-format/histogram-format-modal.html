@@ -149,6 +149,7 @@
                             </div>
                         </div>
                     </wi-tab>
+<!--
                     <wi-tab heading='Discriminators'>
                         <div class="container-fluid">
                             <form class='form-horizontal'>
@@ -211,6 +212,7 @@
                             </form>
                         </div>
                     </wi-tab>
+-->
                     <wi-tab heading='Options'>
                         <div class="padding-1em container-fluid">
                             <div class="row">
@@ -256,6 +258,7 @@
                             </div>
                         </div>
                     </wi-tab>
+<!--
                     <wi-tab heading='Reference Window'>
                         <div class="padding-1em container-fluid">
                             <div class="row">
@@ -339,22 +342,30 @@
                                                             </ui-select>
                                                         </td>
                                                         <td>
-                                                            <input type="number" class="form-control wi-form-control"
+                                                            <input type="number" class="form-control"
                                                             ng-model="ref_curve.left" step='1'
                                                             ng-change="wiModal.onRefCurveChange($index)">
                                                         </td>
                                                         <td>
-                                                            <input type="number" class="form-control wi-form-control"
+                                                            <input type="number" class="form-control"
                                                             ng-model="ref_curve.right" step='1'
                                                             ng-change="wiModal.onRefCurveChange($index)">
                                                         </td>
                                                         <td>
-                                                            <input type="checkbox" ng-model="ref_curve.visiable"
-                                                            ng-change="wiModal.onRefCurveChange($index)">
+                                                            <div class='checkbox'>
+                                                                <input style='margin-left:-10px;' 
+                                                                    type="checkbox" 
+                                                                    ng-model="ref_curve.visiable"
+                                                                    ng-change="wiModal.onRefCurveChange($index)">
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input type="checkbox" ng-model="ref_curve.log"
-                                                            ng-change="wiModal.onRefCurveChange($index)">
+                                                            <div class='checkbox'>
+                                                                <input style='margin-left:-10px;' 
+                                                                    type="checkbox" 
+                                                                    ng-model="ref_curve.log"
+                                                                    ng-change="wiModal.onRefCurveChange($index)">
+                                                            </div>
                                                         </td>
                                                         <td>
                                                             <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" class="form-control wi-form-control width-80px thick-border" type="button">
@@ -376,6 +387,7 @@
                             </div>
                         </div>
                     </wi-tab>
+-->
                 </wi-tabset>
             </div>
 

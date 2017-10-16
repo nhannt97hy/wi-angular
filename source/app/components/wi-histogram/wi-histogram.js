@@ -19,7 +19,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (self.name) wiComponentService.putComponent(self.name, self);
 
         self.histogramModel = self.getHistogramModel();
-        console.log('histogramModel: ', self.histogramModel);
     };
     this.getwiD3Ctrl = function() {
         return wiComponentService.getComponent(self.wiD3AreaName);
