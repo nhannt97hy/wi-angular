@@ -1,0 +1,12 @@
+<div class="row">
+    <div ng-if="!wiConditionNode.item.children" class="condition-child">
+        {{wiConditionNode.item.left.name}} {{wiConditionNode.item.comparison}} {{wiConditionNode.item.right.value}}
+    </div>
+    <div ng-if="wiConditionNode.item.children" class="condition-parent">
+        <div class="condition-item col-sm-11">
+            <wi-condition-node item='childNode' ng-repeat="childNode in wiConditionNode.item.children">
+            </wi-condition-node>
+        </div>
+        <div class="condition-operator">{{wiConditionNode.item.operator}}</div>
+    </div>
+</div>

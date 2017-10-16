@@ -7,70 +7,10 @@
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
-                    <div class="row">
-                        <form class="form-horizontal form-condensed">
-                            <div class="form-group">
-                                <!-- <div class="col-sm-11">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Use</th>
-                                                <th>Curve</th>
-                                                <th>Func</th>
-                                                <th>Value</th>
-                                                <th>Combine With</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="item in wiModal.discrimArr"
-                                            ng-click="wiModal.setClickedRow($index)"
-                                            ng-class="{selected: wiModal.SelectedRow == $index}">
-                                                <td></td>
-                                                <td><input type="checkbox" ng-model="item.use"></td>
-                                                <td>
-                                                    <ui-select ng-model="item.curve">
-                                                        <ui-select-match placeholder='Select a curve'>{{item.curve.properties.name}}</ui-select-match>
-                                                        <ui-select-choices group-by="'datasetName'"
-                                                        repeat='curve in wiModal.curvesArr | filter: $select.search'>
-                                                        <div class="padding-left-20px">{{curve.properties.name}}</div>
-                                                        </ui-select-choices>
-                                                    </ui-select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-control wi-form-control"
-                                                    ng-model="item.func">
-                                                        <option value="{{func}}" ng-repeat="func in wiModal.funcChoices">{{func}}</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <input type="number" class="form-control wi-form-control" ng-model="item.value">
-                                                </td>
-                                                <td>
-                                                    <select class="form-control wi-form-control" ng-model="item.combine">
-                                                        <option value="Or">Or</option>
-                                                        <option value="And">And</option>
-                                                    </select>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="col-sm-1">
-                                        <button type="button" class="btn btn-default">
-                                                <i class="delete-16x16"></i>                                            
-                                        </button>
-                                        <button type="button" class="btn btn-default">
-                                                <i class="arrow-up-16x16"></i>                                            
-                                        </button>
-                                        <button type="button" class="btn btn-default">
-                                                <i class="arrow-down-16x16"></i>                                            
-                                        </button>
-                                </div> -->
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                    <!-- <div class="row"> -->
+                        <wi-condition-node item='wiModal.conditionTree'></wi-condition-node>
+                    <!-- </div> -->
+            </div>
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default">
