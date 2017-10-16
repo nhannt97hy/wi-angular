@@ -83,6 +83,8 @@ let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 
+let wiConditionNode = require('./wi-condition-node');
+
 let app = angular.module('wiapp',
     [
         wiButton.name,
@@ -132,6 +134,8 @@ let app = angular.module('wiapp',
         wiReferenceWindow.name,
         wiUser.name,
         wiMultiselect.name,
+
+        wiConditionNode.name,
 
         'angularModalService',
         'angularResizable',

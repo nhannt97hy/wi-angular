@@ -6185,108 +6185,53 @@ exports.discriminatorDialog = function (ModalService, type, wiCtrl, callback) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         window.DISC = this;
-
-        this.props = null;
-        this.well = null;
-        this.datasets = [];
-        this.curvesArr = [];
-        this.SelectedRow = 0;
-        switch (type) {
-            case 'crossplot':
-                var crossplotModel = utils.getModel('crossplot', wiCtrl.id);
-                self.props = angular.copy(crossplotModel.properties);
-                self.well = utils.findWellByCrossplot(wiCtrl.id);
-                break;
-
-            case 'histogram':
-                var histogramModel = utils.getModel('histogram', wiCtrl.id);
-                self.props = angular.copy(histogramModel.properties);
-                self.well = utils.findWellByHistogram(wiCtrl.id);
-                break;
-        }
-
-        this.well.children.forEach(function (child, i) {
-            if (child.type == 'dataset') {
-                self.datasets.push(child);
-            }
-
-            if (i == self.well.children.length - 1) {
-                self.datasets.forEach(function (child) {
-                    child.children.forEach(function (item) {
-                        if (item.type == 'curve') {
-                            var d = item;
-                            d.datasetName = child.properties.name;
-                            self.curvesArr.push(d);
-                        }
-                    })
-                });
-            }
-        })
-
-        this.funcChoices = ['<', '=', '>', '<=', '>='];
-
         // mock
-        this.discrimArr = [{
-                use: true,
-                curve: {
-                    "name": "curve",
-                    "type": "curve",
-                    "id": 3,
-                    "properties": {
-                        "idDataset": 2,
-                        "idCurve": 3,
-                        "idFamily": 2,
-                        "name": "ECGR",
-                        "unit": "GAPI",
-                        "alias": "ECGR",
-                        "minScale": 0,
-                        "maxScale": 200
-                    },
-                    "data": {
-                        "childExpanded": true,
-                        "icon": "curve-16x16",
-                        "label": "ECGR",
-                        "unit": "GAPI",
-                        "selected": false
-                    },
-                    "curveData": null,
-                    "datasetName": "W3"
+        // Comparison operators: $lt/$gt/$lte/$gte/$eq/$neq
+        // Logical operators: $and/$or/$xor/$not/$noop
+        this.conditionTree = {
+            operator: "or",
+            children: [{
+                    operator: "and",
+                    children: [{
+                            left: {
+                                type: 'curve',
+                                name: "ECGR",
+                                value: 3
+                            },
+                            right: {
+                                type: 'value',
+                                value: 100
+                            },
+                            comparison: "<"
+                        },
+                        {
+                            left: {
+                                type: 'curve',
+                                name: 'DTCO3',
+                                value: 4
+                            },
+                            right: {
+                                type: 'value',
+                                value: 10
+                            },
+                            comparison: ">"
+                        }
+                    ]
                 },
-                func: '<',
-                value: 100,
-                combine: 'And'
-            },
-            {
-                use: false,
-                curve: {
-                    "name": "curve",
-                    "type": "curve",
-                    "id": 3,
-                    "properties": {
-                        "idDataset": 2,
-                        "idCurve": 3,
-                        "idFamily": 2,
-                        "name": "ECGR",
-                        "unit": "GAPI",
-                        "alias": "ECGR",
-                        "minScale": 0,
-                        "maxScale": 200
+                {
+                    left: {
+                        type: 'curve',
+                        name: 'DTCO3',
+                        value: 4
                     },
-                    "data": {
-                        "childExpanded": true,
-                        "icon": "curve-16x16",
-                        "label": "ECGR",
-                        "unit": "GAPI",
-                        "selected": false
+                    right: {
+                        type: 'value',
+                        value: 10
                     },
-                    "curveData": null,
-                    "datasetName": "W3"
-                },
-                func: '>',
-                value: 60,
-                combine: 'Or'
-            }
-        ];
+                    comparison: "="
+                }
+            ]
+        };
 
         // this.setClickedRow = function(idx){
         //     self.SelectedRow = idx;
