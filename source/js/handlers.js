@@ -298,7 +298,7 @@ exports.TrippleComboButtonClicked = function () {
             })
             .catch(function (err) {
                 console.error('TripleComboDialog err ' + err);
-                utils.error(err + '! Plot Name existed!');
+                utils.error(err + '! ERR!');
             });
     });
 };
@@ -337,7 +337,7 @@ exports.DensityNeutronButtonClicked = function () {
             })
             .catch(function (err) {
                 console.error('DensityNeutronDialog err ' + err);
-                utils.error(err + '! Plot Name existed!');
+                utils.error(err + '! ERR!');
             });
     });
 };
@@ -376,7 +376,7 @@ exports.ResistivitySonicButtonClicked = function () {
             })
             .catch(function (err) {
                 console.error('ResistivitySonicDialog err ' + err);
-                utils.error(err + '! Plot Name existed!');
+                utils.error(err + '! ERR!');
             });
     });
 };
