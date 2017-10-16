@@ -30,7 +30,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function saveHistogramNow(callback) {
         wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
-            console.log('updated');
             if (callback) callback();
         });
     }
@@ -95,6 +94,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.linkModels = function () {
         self.zoneArr = null;
+        self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
@@ -134,13 +134,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.visHistogram.signal('histogram-update', "refresh");
     }
     this.onZoneCtrlReady = function(zoneCtrl) {
-        console.log(zoneCtrl);
         zoneCtrl.trap('zone-data', function() {
             self.refreshHistogram();
         });
     }
     this.onRefWindCtrlReady = function(refWindCtrl) {
-        refWindCtrl.update(getWell(), self.histogramModel.properties.reference_curves);
+        refWindCtrl.update(getWell(), 
+            self.histogramModel.properties.reference_curves, 
+            self.histogramModel.properties.referenceScale,
+            self.histogramModel.properties.referenceVertLineNumber);
     }
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
@@ -159,7 +161,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.onReady = function () {
         self.linkModels();
         let domElem = document.getElementById(self.histogramAreaId);
-        console.log(self.histogramAreaId, domElem);
         self.createVisualizeHistogram(self.histogramModel, domElem);
         self.histogramModel.properties.histogramTitle = getHistogramTitle();
     }
@@ -192,7 +193,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function(histogramProperties) {
             self.linkModels();
             self.getZoneCtrl().zoneUpdate();
-            self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves);
+            //self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves, histogramProperties.referenceScale);
         });
     }
 
@@ -282,7 +283,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 DialogUtils.referenceWindowsDialog(ModalService, _well, self.histogramModel, function() {
                     saveHistogramNow(function() {
-                        self.getWiRefWindCtrl().update(getWell(), self.histogramModel.properties.reference_curves);                    
+                        self.getWiRefWindCtrl().update(getWell(), 
+                            self.histogramModel.properties.reference_curves, 
+                            self.histogramModel.properties.referenceScale,
+                            self.histogramModel.properties.referenceVertLineNumber);
                     });
                 });
             }
@@ -378,7 +382,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         // trap load-statistic event to process
         self.visHistogram.trap('data-processing-done', function(arg) {
-            console.log("data processing ready: we load statistics:", arg);
             loadStatistics();
         });
 

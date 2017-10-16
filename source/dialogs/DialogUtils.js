@@ -1939,7 +1939,6 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        console.log("$$", options);
 
         this.shadingOptions = shadingOptions;
         if (options) {
@@ -3370,7 +3369,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
-            if(self.props.general.width > 1) {
+            if(self.props.general.width > 0.5) {
                 wiApiService.editTrack(self.props.general, function(res) {
                     console.log("res", res);
                     let newProps = angular.copy(self.props);
@@ -3382,7 +3381,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             } else {
                 console.log("temp");
                 temp = false;
-                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 1 inch!");
+                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
                 callback();
             }
             return temp;
@@ -5103,7 +5102,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.zoneSetList = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
-        console.log("histogram", this.histogramProps);
         this.well.children.forEach(function(child, i){
             switch (child.type){
             case 'dataset':
@@ -5156,7 +5154,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                   "datasetName": "W3",
                   "$$hashKey": "object:784"
                 };
-                 console.log(self.option,"option");
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -5253,7 +5250,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.setClickedRow = function(index){
             self.SelectedRefCurve = index;
         }
-
+        /*
         this.onRefCurveChange = function(index, curve){
             self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
@@ -5297,7 +5294,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
         }
-
+        */
         this.IsNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
@@ -5315,6 +5312,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
+            /*
             if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
                 //for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--)
                 async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
@@ -5368,14 +5366,14 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     });
                 });
             }
-            else {
-                self.histogramProps.reference_curves = self.ref_Curves_Arr;
+            else { */
+            //    self.histogramProps.reference_curves = self.ref_Curves_Arr;
                 histogramModel.properties = self.histogramProps;
                 wiApiService.editHistogram(histogramModel.properties, function(returnData) {
                     console.log('Return Data', returnData);
                     if (callback) callback(histogramModel.properties);
                 });
-            }
+            //}
         }
 
         this.onOKButtonClicked = function () {
@@ -5582,21 +5580,23 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             deleted: 3,
             uncreated: 4
         }
-        $scope.selectDataSetting = {
-            showCheckAll: false,
-            showUncheckAll: false,
-            displayProp: 'id',
-            checkBoxes: true
-        };
-        this.example13model=[{id: 2}];
         // let polygons = angular.copy(wiD3Crossplot.getPolygons());
-        // console.log("polygons", polygons);
-        this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
+        // this.polygonList = new Array();
         // polygons.forEach(function(polygonItem, index) {
-        //     polygonItem.id = index;
-        //     polygonItem.label = index;
-        //     self.polygonList.push(polygonItem);
+        //     let pItem = {
+        //         idPolygon: polygonItem.idPolygon,
+        //         idx: index
+        //     }
+        //     self.polygonList.push(pItem);
         // });
+
+        let polygons = angular.copy(wiD3Crossplot.getPolygons());
+        this.polygonList = new Array();
+        polygons.forEach(function(polygonItem, index) {
+            self.polygonList.push(polygonItem.idPolygon);
+        });
+        // this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
+        
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
@@ -5616,6 +5616,18 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                return (item.change != change.deleted && item.change != change.uncreated);
            });
         }
+        // this.polygonList.forEach(function(polygon){
+        //     self.regressionLines.forEach(function(regLine) {
+        //         if(Array.isArray(regLine.polygons) && regLine.polygons.length > 0) {
+        //             for (let p of regLine.polygons) {
+        //                 if( p == polygon.idPolygon) {
+        //                     p = polygon;
+        //                 }
+        //             }
+        //         }
+        //     });
+        // });
+        console.log("TTTT", this.regressionLines); 
         this.__idx = 0;
         $scope.selectedRow = 0;
         this.setClickedRow = function (indexRow) {
@@ -5649,8 +5661,6 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                 },
                 exclude: true,
                 polygons: [],
-                fitX: 0,
-                fitY: 0,
                 idCrossPlot: self.viCross.idCrossPlot
             });
             console.log("addRow", self.regressionLines);
@@ -5669,16 +5679,23 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         function setRegressionLines(callback) {
             if(self.regressionLines && self.regressionLines.length) {
                 async.eachOfSeries(self.regressionLines, function(regLine, idx, callback){
+                    let pArr = [];
+                    regLine.polygons.forEach(function(p, index){
+                        console.log("ppp", p);
+                        pArr.push(p.idPolygon);
+                    });
+                    regLine.polygons = pArr;
+                    console.log("regLine", regLine, self.polygonList);
                     switch(regLine.change) {
                         case change.created:
                             wiApiService.createRegressionLines(regLine, function(res){
-                                console.log("create", res);
+                                console.log("create", res, regLine);
                                 callback();
                             });
                             break;
                         case change.updated:
                             wiApiService.editRegressionLines(regLine, function(res){
-                                console.log("update", res);
+                                console.log("update", res, regLine);
                                 callback();
                             });
                             break;
@@ -6187,108 +6204,53 @@ exports.discriminatorDialog = function (ModalService, type, wiCtrl, callback) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         window.DISC = this;
-
-        this.props = null;
-        this.well = null;
-        this.datasets = [];
-        this.curvesArr = [];
-        this.SelectedRow = 0;
-        switch (type) {
-            case 'crossplot':
-                var crossplotModel = utils.getModel('crossplot', wiCtrl.id);
-                self.props = angular.copy(crossplotModel.properties);
-                self.well = utils.findWellByCrossplot(wiCtrl.id);
-                break;
-
-            case 'histogram':
-                var histogramModel = utils.getModel('histogram', wiCtrl.id);
-                self.props = angular.copy(histogramModel.properties);
-                self.well = utils.findWellByHistogram(wiCtrl.id);
-                break;
-        }
-
-        this.well.children.forEach(function (child, i) {
-            if (child.type == 'dataset') {
-                self.datasets.push(child);
-            }
-
-            if (i == self.well.children.length - 1) {
-                self.datasets.forEach(function (child) {
-                    child.children.forEach(function (item) {
-                        if (item.type == 'curve') {
-                            var d = item;
-                            d.datasetName = child.properties.name;
-                            self.curvesArr.push(d);
-                        }
-                    })
-                });
-            }
-        })
-
-        this.funcChoices = ['<', '=', '>', '<=', '>='];
-
         // mock
-        this.discrimArr = [{
-                use: true,
-                curve: {
-                    "name": "curve",
-                    "type": "curve",
-                    "id": 3,
-                    "properties": {
-                        "idDataset": 2,
-                        "idCurve": 3,
-                        "idFamily": 2,
-                        "name": "ECGR",
-                        "unit": "GAPI",
-                        "alias": "ECGR",
-                        "minScale": 0,
-                        "maxScale": 200
-                    },
-                    "data": {
-                        "childExpanded": true,
-                        "icon": "curve-16x16",
-                        "label": "ECGR",
-                        "unit": "GAPI",
-                        "selected": false
-                    },
-                    "curveData": null,
-                    "datasetName": "W3"
+        // Comparison operators: $lt/$gt/$lte/$gte/$eq/$neq
+        // Logical operators: $and/$or/$xor/$not/$noop
+        this.conditionTree = {
+            operator: "or",
+            children: [{
+                    operator: "and",
+                    children: [{
+                            left: {
+                                type: 'curve',
+                                name: "ECGR",
+                                value: 3
+                            },
+                            right: {
+                                type: 'value',
+                                value: 100
+                            },
+                            comparison: "<"
+                        },
+                        {
+                            left: {
+                                type: 'curve',
+                                name: 'DTCO3',
+                                value: 4
+                            },
+                            right: {
+                                type: 'value',
+                                value: 10
+                            },
+                            comparison: ">"
+                        }
+                    ]
                 },
-                func: '<',
-                value: 100,
-                combine: 'And'
-            },
-            {
-                use: false,
-                curve: {
-                    "name": "curve",
-                    "type": "curve",
-                    "id": 3,
-                    "properties": {
-                        "idDataset": 2,
-                        "idCurve": 3,
-                        "idFamily": 2,
-                        "name": "ECGR",
-                        "unit": "GAPI",
-                        "alias": "ECGR",
-                        "minScale": 0,
-                        "maxScale": 200
+                {
+                    left: {
+                        type: 'curve',
+                        name: 'DTCO3',
+                        value: 4
                     },
-                    "data": {
-                        "childExpanded": true,
-                        "icon": "curve-16x16",
-                        "label": "ECGR",
-                        "unit": "GAPI",
-                        "selected": false
+                    right: {
+                        type: 'value',
+                        value: 10
                     },
-                    "curveData": null,
-                    "datasetName": "W3"
-                },
-                func: '>',
-                value: 60,
-                combine: 'Or'
-            }
-        ];
+                    comparison: "="
+                }
+            ]
+        };
 
         // this.setClickedRow = function(idx){
         //     self.SelectedRow = idx;
@@ -6583,7 +6545,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 });
             }
         })
-        console.log("well", this.well);
         // function getTopFromWell() {
         //     return parseFloat(self.well.properties.topDepth);
         // }
@@ -6601,24 +6562,40 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             self.SelectedRefCurve = index;
         }
 
-        this.onRefCurveChange = function(index, curve){
+        this.onRefCurveChange = function(index) {
+            if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
+                self.ref_Curves_Arr[index].flag = self._FEDIT;
+            }
+        }
+        this.onSelectRefCurve = function(index, curve){
             self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
                 self.ref_Curves_Arr[index].flag = self._FEDIT;
             }
             if(curve) {
-                if(self.ref_Curves_Arr[index].curve.minScale != null && self.ref_Curves_Arr[index].curve.maxScale != null){
+                let family = utils.findFamilyById(self.ref_Curves_Arr[index].curve.idFamily);
+                if (family) {
+                    self.ref_Curves_Arr[index].left = family.minScale;
+                    self.ref_Curves_Arr[index].right = family.maxScale;
+                    self.ref_Curves_Arr[index].color = family.lineColor;
+                }
+                else if(!self.ref_Curves_Arr[index].curve.minScale  
+                    && !self.ref_Curves_Arr[index].curve.maxScale != null ) {
                     self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
                     self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
-                }else{
+                    self.ref_Curves_Arr[index].color = 'black';
+                }
+                else {
                     wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
                         console.log('scale curve');
                         $timeout(function(){
                             self.ref_Curves_Arr[index].left = scale.minScale;
                             self.ref_Curves_Arr[index].right = scale.maxScale;
+                            self.ref_Curves_Arr[index].right = 'black';
                         });
                     })
                 }
+
             }
         }
 

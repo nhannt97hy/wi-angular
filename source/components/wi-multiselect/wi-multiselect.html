@@ -13,7 +13,7 @@
       </li>
       <li ng-repeat="i in items | filter:searchText">
         <a ng-click="select(i); focus()">
-          <i ng-class="{'glyphicon glyphicon-ok': i.checked, 'icon-empty': !i.checked}"></i>{{i.label}}</a>
+          <i ng-class="{'glyphicon glyphicon-ok': i.checked, 'glyphicon glyphicon-empty': !i.checked}"></i>{{i.label}}</a>
       </li>
     </ul>
   </div>

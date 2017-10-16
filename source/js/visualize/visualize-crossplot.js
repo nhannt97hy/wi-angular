@@ -50,7 +50,7 @@ const REGRESSION_LINE_SCHEMA = {
         exclude: { type: 'Boolean', default: false },
         polygons: {
             type: 'Array',
-            item: { type: 'Object' },
+            item: { type: 'Integer' },
             default: []
         },
         fitX: { type: 'Float' },
@@ -189,7 +189,7 @@ const TERNARY_SCHEMA = {
                     properties: {
                         polygons: {
                             type: 'Array',
-                            item: { type: 'Object' },
+                            item: { type: 'Integer' },
                             default: []
                         },
                         exclude: { type: 'Boolean', default: false }
@@ -787,9 +787,7 @@ Crossplot.prototype.prepareRegressionLines = function() {
     let self = this;
     regLines.forEach(function(l) {
         let polygons = self.polygons.filter(function(p) {
-            return l.polygons.map(function(lp){
-                return lp.idPolygon;
-            }).indexOf(p.idPolygon) > -1;
+            return l.polygons.indexOf(p.idPolygon) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {
@@ -1206,7 +1204,7 @@ Crossplot.prototype.calculateTernary = function() {
         points = [calc.point];
     }
     else if (calc.type == 'Area') {
-        let idCalcPolygons = calc.area.polygons.map(function(cp){ return cp.idPolygon; });
+        let idCalcPolygons = calc.area.polygons;
         let polygons = self.polygons.filter(function(p) { return idCalcPolygons.indexOf(p.idPolygon) > -1; });
         points = self.filterByPolygons(polygons, self.data, calc.area.exclude);
     }
