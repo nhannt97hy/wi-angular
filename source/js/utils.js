@@ -1679,6 +1679,11 @@ function openCrossplotTab(crossplotModel, callback) {
                         if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
                             for (let regLine of crossplot.regressionlines) {
                                 try {
+                                    let pArr = [];
+                                    regLine.polygons.forEach(function(p, index){
+                                        pArr.push(p.idPolygon);
+                                    })
+                                    regLine.polygons = pArr;
                                     regLine.lineStyle = JSON.parse(regLine.lineStyle);
                                 } catch(e) {
                                     console.log(e);

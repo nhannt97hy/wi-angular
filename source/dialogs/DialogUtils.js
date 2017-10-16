@@ -3370,7 +3370,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
-            if(self.props.general.width > 1) {
+            if(self.props.general.width > 0.5) {
                 wiApiService.editTrack(self.props.general, function(res) {
                     console.log("res", res);
                     let newProps = angular.copy(self.props);
@@ -3382,7 +3382,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             } else {
                 console.log("temp");
                 temp = false;
-                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 1 inch!");
+                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
                 callback();
             }
             return temp;
@@ -5547,21 +5547,23 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             deleted: 3,
             uncreated: 4
         }
-        $scope.selectDataSetting = {
-            showCheckAll: false,
-            showUncheckAll: false,
-            displayProp: 'id',
-            checkBoxes: true
-        };
-        this.example13model=[{id: 2}];
         // let polygons = angular.copy(wiD3Crossplot.getPolygons());
-        // console.log("polygons", polygons);
-        this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
+        // this.polygonList = new Array();
         // polygons.forEach(function(polygonItem, index) {
-        //     polygonItem.id = index;
-        //     polygonItem.label = index;
-        //     self.polygonList.push(polygonItem);
+        //     let pItem = {
+        //         idPolygon: polygonItem.idPolygon,
+        //         idx: index
+        //     }
+        //     self.polygonList.push(pItem);
         // });
+
+        let polygons = angular.copy(wiD3Crossplot.getPolygons());
+        this.polygonList = new Array();
+        polygons.forEach(function(polygonItem, index) {
+            self.polygonList.push(polygonItem.idPolygon);
+        });
+        // this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
+        
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
@@ -5581,6 +5583,18 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                return (item.change != change.deleted && item.change != change.uncreated);
            });
         }
+        // this.polygonList.forEach(function(polygon){
+        //     self.regressionLines.forEach(function(regLine) {
+        //         if(Array.isArray(regLine.polygons) && regLine.polygons.length > 0) {
+        //             for (let p of regLine.polygons) {
+        //                 if( p == polygon.idPolygon) {
+        //                     p = polygon;
+        //                 }
+        //             }
+        //         }
+        //     });
+        // });
+        console.log("TTTT", this.regressionLines); 
         this.__idx = 0;
         $scope.selectedRow = 0;
         this.setClickedRow = function (indexRow) {
@@ -5614,8 +5628,6 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                 },
                 exclude: true,
                 polygons: [],
-                fitX: 0,
-                fitY: 0,
                 idCrossPlot: self.viCross.idCrossPlot
             });
             console.log("addRow", self.regressionLines);
@@ -5634,16 +5646,23 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         function setRegressionLines(callback) {
             if(self.regressionLines && self.regressionLines.length) {
                 async.eachOfSeries(self.regressionLines, function(regLine, idx, callback){
+                    let pArr = [];
+                    regLine.polygons.forEach(function(p, index){
+                        console.log("ppp", p);
+                        pArr.push(p.idPolygon);
+                    });
+                    regLine.polygons = pArr;
+                    console.log("regLine", regLine, self.polygonList);
                     switch(regLine.change) {
                         case change.created:
                             wiApiService.createRegressionLines(regLine, function(res){
-                                console.log("create", res);
+                                console.log("create", res, regLine);
                                 callback();
                             });
                             break;
                         case change.updated:
                             wiApiService.editRegressionLines(regLine, function(res){
-                                console.log("update", res);
+                                console.log("update", res, regLine);
                                 callback();
                             });
                             break;
