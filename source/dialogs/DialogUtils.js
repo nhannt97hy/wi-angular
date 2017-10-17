@@ -32,6 +32,7 @@ exports.authenticationDialog = function (ModalService, callback) {
         }
         this.onLoginButtonClicked = function () {
             self.error = null;
+            if (!self.username || !self.password) return;
             let dataRequest = {
                 username: self.username,
                 password: self.password
@@ -5572,7 +5573,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
+        console.log("wiD3Crossplot", wiD3Crossplot);
         let change = {
             unchanged: 0,
             created: 1,
@@ -5580,21 +5581,21 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             deleted: 3,
             uncreated: 4
         }
-        // let polygons = angular.copy(wiD3Crossplot.getPolygons());
-        // this.polygonList = new Array();
-        // polygons.forEach(function(polygonItem, index) {
-        //     let pItem = {
-        //         idPolygon: polygonItem.idPolygon,
-        //         idx: index
-        //     }
-        //     self.polygonList.push(pItem);
-        // });
-
         let polygons = angular.copy(wiD3Crossplot.getPolygons());
         this.polygonList = new Array();
         polygons.forEach(function(polygonItem, index) {
-            self.polygonList.push(polygonItem.idPolygon);
+            let pItem = {
+                idPolygon: polygonItem.idPolygon,
+                idx: index
+            }
+            self.polygonList.push(pItem);
         });
+
+        // let polygons = angular.copy(wiD3Crossplot.getPolygons());
+        // this.polygonList = new Array();
+        // polygons.forEach(function(polygonItem, index) {
+        //     self.polygonList.push(polygonItem.idPolygon);
+        // });
         // this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
         
         let viCrossplot = wiD3Crossplot.getViCrossplot();
@@ -5627,6 +5628,23 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         //         }
         //     });
         // });
+        this.polygonsArr = new Array(); 
+        this.polygonList.forEach(function(polygon){
+            self.regressionLines.forEach(function(regLine, index){
+                let pArr = [];
+                console.log("reggg", regLine.polygons);
+                for( let i = 0; i < regLine.polygons; i++){
+                    if( regLine.polygons[i] == polygon.idPolygon) pArr.push(polygon);
+                    console.log("pArr", pArr);
+
+                }
+                self.polygonsArr.push(pArr);
+            });
+        });
+        this.setPolygonArr = function (index) {
+            self.regressionLines[index].polygons = self.polygonsArr[index];
+        }
+        // this.polygonsArr = [[{"idPolygon":5,"idx":0},{"idPolygon":6,"idx":1}]]
         console.log("TTTT", this.regressionLines); 
         this.__idx = 0;
         $scope.selectedRow = 0;
@@ -5653,6 +5671,8 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             self.regressionLines.push({
                 change: change.created,
                 index: self.regressionLines.length,
+                displayLine: true,
+                displayEquation: true,
                 regType: "Linear",
                 lineStyle: {
                     lineColor: "blue",

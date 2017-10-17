@@ -59,9 +59,9 @@
                                             <select ng-model="regLine.regType"
                                                     class="form-control wi-form-control"
                                                     ng-change="wiModal.onChange(regLine.index)">
-                                                <option value="Linear">Linear</option>
-                                                <option value="Exponent">Exponent</option>
-                                                <option value="Power">Power</option>
+                                                <option value="linear">Linear</option>
+                                                <option value="exponent">Exponent</option>
+                                                <option value="power">Power</option>
                                             </select>
                                         </td>
                                         <td>
@@ -84,12 +84,12 @@
                                                 class="normal-text"></div> -->
                                                 <!-- item.id as item.datasetCurve for item in wiModal.curvesArr -->
                                             <multiselect class="input-xlarge" multiple="true"
-                                                ng-model="regLine.polygons"
-                                                options="p for p in wiModal.polygonList"
+                                                ng-model="wiModal.polygonsArr[$index]"
+                                                options="p as p.idx for p in wiModal.polygonList"
                                                 change="selected()" 
-                                                ng-change="wiModal.onChange(regLine.index)">
+                                                ng-change="wiModal.onChange(regLine.index); wiModal.setPolygonArr($index);">
                                             </multiselect>
-                                            {{regLine.polygons}}
+                                            {{wiModal.polygonsArr[$index]}}--{{regLine.polygons}}
                                         </td>
                                         
                                         <td style="width: 7%">

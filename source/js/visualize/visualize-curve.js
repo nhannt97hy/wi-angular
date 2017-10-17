@@ -64,7 +64,9 @@ function Curve(config) {
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
 
-    this.rawData = config.data || [];
+    // this.rawData = config.data || [];
+    this.rawData = config._data || [];
+
     this.data = Utils.parseData(this.rawData);
     this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);

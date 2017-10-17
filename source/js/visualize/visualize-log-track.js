@@ -301,7 +301,7 @@ LogTrack.prototype.addCurve = function(data, config) {
             dash: null
         };
     }
-    config.data = data;
+    config._data = data;
     config.yStep = config.yStep || this.yStep;
     config.offsetY = config.offsetY || this.offsetY;
 

@@ -210,6 +210,7 @@ function zoneToTreeConfig(zone) {
         icon: 'zone-table-16x16',
         label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}`
     }
+    zoneModel.parent = 'zoneset' + zone.idZoneSet;
     return zoneModel;
 }
 exports.zoneToTreeConfig = zoneToTreeConfig;
@@ -309,6 +310,7 @@ function logplotToTreeConfig(plot) {
             openLogplotTab(__GLOBAL.wiComponentService, selectedNode);
         }
     }
+    plotModel.parent = 'well' + plot.idWell;
     /*
     plotModel.tracks = new Array();
     if (!plot.tracks) return plotModel;
@@ -355,7 +357,7 @@ function crossplotToTreeConfig(crossplot) {
             openCrossplotTab(selectedNode);
         }
     }
-
+    crossplotModel.parent = 'well' + crossplot.idWell;
     return crossplotModel;
 }
 
@@ -411,7 +413,7 @@ function histogramToTreeConfig(histogram) {
             openHistogramTab(selectedNode);
         }
     }
-
+    histogramModel.parent = 'well' + histogram.idWell;
     return histogramModel;
 }
 
@@ -438,6 +440,7 @@ function curveToTreeConfig(curve) {
         unit: curveModel.properties.unit
     };
     curveModel.curveData = null;
+    curveModel.parent = 'dataset' + curve.idDataset;
     return curveModel;
 }
 
@@ -460,6 +463,7 @@ function datasetToTreeConfig(dataset) {
         icon: "curve-data-16x16",
         label: dataset.name
     };
+    datasetModel.parent = 'well' + dataset.idWell;
     datasetModel.children = new Array();
     if (!dataset.curves) return datasetModel;
 
@@ -574,7 +578,7 @@ function wellToTreeConfig(well) {
         icon: "well-16x16",
         label: well.name
     };
-
+    wellModel.parent = 'project' + well.idProject;
     wellModel.children = new Array();
 
     if (well.datasets) {
@@ -784,6 +788,26 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
                         });
                     });
+                }
+                else if (errorCode === 0) {
+                    errorMsg("Cannot drop curve from another well");
+                }
+                return;
+            }
+            if (wiD3Ctrl && !track) {
+                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                if (errorCode > 0) {
+                    wiD3Ctrl.addLogTrack(null, function (newViTrack) {
+                        apiService.createLine({
+                            idTrack: newViTrack.id,
+                            idCurve: idCurve
+                        }, function (line) {
+                            let lineModel = lineToTreeConfig(line);
+                            getCurveData(apiService, idCurve, function (err, data) {
+                                if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                            });
+                        });
+                    })
                 }
                 else if (errorCode === 0) {
                     errorMsg("Cannot drop curve from another well");
@@ -1343,118 +1367,124 @@ exports.renameCurve = function () {
 
 exports.copyCurve = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'curve') return;
-    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, selectedNode);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (selectedNodes[0].type != 'curve') return;
+    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, selectedNodes);
     wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
 }
 
 exports.cutCurve = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'curve') return;
-    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, selectedNode);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (selectedNodes[0].type != 'curve') return;
+    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, selectedNodes);
     wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
 }
 
 exports.pasteCurve = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let selectedNode = getSelectedNode();
+    if (!selectedNode) return;
     if (selectedNode.type != 'curve' && selectedNode.type != 'dataset') return;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let wiApiService = __GLOBAL.wiApiService;
+    let currentDatasetName = "";
+    let currentDataset;
+    if (selectedNode.type == 'curve') {
+        // selectedNode is Curve
+        currentDataset = findDatasetById(selectedNode.properties.idDataset);
+        currentDatasetName = currentDataset.properties.name;
+    } else {
+        // selectedNode is Dataset
+        currentDatasetName = selectedNode.properties.name;
+        currentDataset = selectedNode;
+    }
     // if copying
-    let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
-    if (copyingCurve) {
-        let isCurveExist = false;
-        // console.log(copyingCurve.properties.name);
-        // console.log("===========");
-        // console.log(selectedNode.children);
-        selectedNode.children.forEach(function(c){
-            if(copyingCurve.properties.name == c.data.label) {
-                isCurveExist = true;
-            }
-        });
-        if(!isCurveExist){
-            if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-            let currentDatasetName = "";
-            if (selectedNode.type == 'curve') {
-                let currentDataset = findDatasetById(selectedNode.properties.idDataset);
-                currentDatasetName = currentDataset.properties.name;
-            } else {
-                currentDatasetName = selectedNode.properties.name;
-            }
-            let curveInfo = {
-                idCurve: copyingCurve.properties.idCurve,
-                desDatasetId: selectedNode.properties.idDataset
-            }
-            wiApiService.copyCurve(curveInfo, function (curve) {
-                refreshProjectState();
-            });
-            wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
-        } else {
-            //console.log("Curve exist");
-            DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", copyingCurve.properties.name +" existed! Override it ?", function(yes){
-                if(yes){
-                    if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                    let currentDatasetName = "";
-                    if (selectedNode.type == 'curve') {
-                        let currentDataset = findDatasetById(selectedNode.properties.idDataset);
-                        currentDatasetName = currentDataset.properties.name;
-                    } else {
-                        currentDatasetName = selectedNode.properties.name;
-                    }
-                    let curveInfo = {
-                        idCurve: copyingCurve.properties.idCurve,
-                        desDatasetId: selectedNode.properties.idDataset
-                    }
-                    wiApiService.copyCurve(curveInfo, function (curve) {
-                        refreshProjectState();
-                    });
-                    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
-                } else {
-                    return;
+    let copyingCurves = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
+    if (Array.isArray(copyingCurves)) {
+        async.eachOf(copyingCurves, function (copyingCurve, index, next) {
+            let isCurveExist = false;
+            currentDataset.children.forEach(function(curve){
+                if(copyingCurve.properties.name == curve.properties.name) {
+                    isCurveExist = true;
                 }
             });
-        }
+            if(!isCurveExist){
+                if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+                let curveInfo = {
+                    idCurve: copyingCurve.properties.idCurve,
+                    desDatasetId: selectedNode.properties.idDataset
+                }
+                wiApiService.copyCurve(curveInfo, function (curve) {
+                    next();
+                });
+                wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+            } else {
+                // curve existed
+                DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", copyingCurve.properties.name +" existed! Override it ?", function(yes){
+                    if(yes){
+                        if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+                        let curveInfo = {
+                            idCurve: copyingCurve.properties.idCurve,
+                            desDatasetId: selectedNode.properties.idDataset
+                        }
+                        wiApiService.copyCurve(curveInfo, function (curve) {
+                            next();
+                        });
+                        wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+                    } else {
+                        next();
+                        return;
+                    }
+                });
+            }
+        }, function (err) {
+            refreshProjectState();
+        });
         return;
     }
     // if cutting
-    let cuttingCurve = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
-    if (cuttingCurve) {
-        let isCurveExist = false;
-        selectedNode.children.forEach(function(c){
-            if(cuttingCurve.properties.name == c.data.label) {
-                isCurveExist = true;
-            }
-        });
-        if(!isCurveExist){
-            if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-            let curveInfo = {
-                idCurve: cuttingCurve.properties.idCurve,
-                desDatasetId: selectedNode.properties.idDataset,
-            }
-            wiApiService.cutCurve(curveInfo, function () {
-                refreshProjectState();
-            });
-            wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
-        } else {
-            DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", cuttingCurve.properties.name +" existed! Override it ?",function(yes){
-                if(yes){
-                    if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                    let curveInfo = {
-                        idCurve: cuttingCurve.properties.idCurve,
-                        desDatasetId: selectedNode.properties.idDataset,
-                    }
-                    wiApiService.cutCurve(curveInfo, function () {
-                        refreshProjectState();
-                    });
-                    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
-                } else {
-                    return;
+    let cuttingCurves = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
+    if (Array.isArray(cuttingCurves)) {
+        async.eachOf(cuttingCurves, function (cuttingCurve, index, next) {
+            let isCurveExist = false;
+            currentDataset.children.forEach(function(curve){
+                if(cuttingCurve.properties.name == curve.properties.name) {
+                    isCurveExist = true;
                 }
             });
-        }
+            if(!isCurveExist){
+                if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+                let curveInfo = {
+                    idCurve: cuttingCurve.properties.idCurve,
+                    desDatasetId: selectedNode.properties.idDataset,
+                }
+                wiApiService.cutCurve(curveInfo, function () {
+                    next();
+                });
+                wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+            } else {
+                // curve existed
+                DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", cuttingCurve.properties.name +" existed! Override it ?",function(yes){
+                    if(yes){
+                        if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
+                        let curveInfo = {
+                            idCurve: cuttingCurve.properties.idCurve,
+                            desDatasetId: selectedNode.properties.idDataset,
+                        }
+                        wiApiService.cutCurve(curveInfo, function () {
+                            next();
+                        });
+                        wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+                    } else {
+                        next();
+                        return;
+                    }
+                });
+            }
+        }, function (err) {
+            refreshProjectState();
+        })
         return;
     }
 }
@@ -1723,13 +1753,14 @@ function openCrossplotTab(crossplotModel, callback) {
                                 })
                             }
                         }
-
+                        console.log("createViCrossplot", viCurveX, viCurveY);
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 
                     if (pointSet.idCurveZ) {
-                        wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
-                            let viCurveZ = graph.buildCurve( curveZ, curveZ.data, wellProps.properties);
+                        wiApiService.dataCurve(pointSet.idCurveZ, function (dataZ) {
+                            let curveZ = getModel('curve', pointSet.idCurveZ);
+                            let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
                         });
