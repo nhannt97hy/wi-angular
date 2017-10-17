@@ -33,9 +33,48 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
     };
 
-    this.onClick = function($index) {
-        if(self.container && self.container.selectHandler) {
-            self.container.selectHandler(self.config[$index]);
+    this.onClick = function ($index, $event) {
+        if (!self.container && self.container.selectHandler) return;
+        let node = self.config[$index];
+        node.$index = $index;
+        if (!node) {
+            self.container.unselectAllNodes();
+            return;
+        }
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if (!Array.isArray(selectedNodes)) selectedNodes = [];
+        if (!$event.shiftKey) {
+            if (selectedNodes.length) {
+                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    self.container.unselectAllNodes();
+                }
+            }
+            self.container.selectHandler(node);
+        } else {
+            // shift key
+            if (selectedNodes.length) {
+                if (selectedNodes.includes(node)) return;
+                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                    self.container.unselectAllNodes();
+                    self.container.selectHandler(node);
+                } else {
+                    if (node.$index < selectedNodes[0].$index) {
+                        let fromIndex = node.$index;
+                        let toIndex = selectedNodes[0].$index;
+                        self.container.unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            self.container.selectHandler(self.config[i]);
+                        }
+                    } else {
+                        let fromIndex = selectedNodes[0].$index;
+                        let toIndex = node.$index;
+                        self.container.unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            self.container.selectHandler(self.config[i]);
+                        }
+                    }
+                }
+            }
         }
     }
 

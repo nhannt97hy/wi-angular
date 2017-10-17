@@ -355,7 +355,7 @@ gulp.task('pre', ['gen-template', 'gen-functions'], function () {
 
 const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor',
                     'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include'];
-gulp.task('build', mainTasks, function () {
+gulp.task('build-full', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
             if (f.includes('main') && !f.includes('bundle')) {
@@ -374,6 +374,13 @@ gulp.task('default', ['watch']);
 gulp.task('github-page', function () {
     return gulp.src("./build/**/*")
         .pipe(deploy());
+});
+
+gulp.task('build', mainTasks, function() {
+    gulp.src([
+        'build/js/main.js'
+    ])
+        .pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
 });
 
 gulp.task('build-visualize', mainTasks, function() {
