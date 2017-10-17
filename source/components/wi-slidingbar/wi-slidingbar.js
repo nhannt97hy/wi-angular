@@ -54,6 +54,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                     return;
                 }
                 if (_viCurve) _viCurve.destroy();
+                console.log("slidingCurve", config);
+                config._data = dataCurve;
                 _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
                 _viCurve.doPlot();
             });

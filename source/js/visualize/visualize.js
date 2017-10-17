@@ -65,7 +65,7 @@ exports.removeTrack = function(track, domElem) {
  * @returns {Object} The created curve
  */
 exports.createCurve = function(config, data, domElem) {
-    config.data = data;
+    config._data = data;
     let curve = new Curve(config);
     curve.init(domElem);
     return curve;
