@@ -162,11 +162,24 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         getRefCurveContainer()
             .on('mousewheel', function() {
                 let absDeltaY = Math.abs(d3.event.deltaY);
-                absDeltaY = ( absDeltaY > 4) ? (absDeltaY / 3) : absDeltaY;
+                absDeltaY = ( absDeltaY > 4) ? (absDeltaY / 2) : absDeltaY;
                 let sign = (d3.event.deltaY < 0)?-1:1;
-                let realDeltaY = sign * absDeltaY * _scale / getDpcm() / 4;
+                let realDeltaY = sign * absDeltaY * _scale / getDpcm() / 100;
                 refresh(_top + realDeltaY);
-            });
+            })
+            .call(d3.drag()
+                .on('start', function() {
+                    console.log('start', this);
+                    d3.select(this).select('canvas').style('cursor', 'move');
+                })
+                .on('drag', function() {
+                    let realDeltaY = -1 * d3.event.dy * _scale / getDpcm() / 100;
+                    refresh(_top + realDeltaY);
+                })
+                .on('end', function() {
+                    d3.select(this).select('canvas').style('cursor', 'crosshair');
+                })
+            );
     }
 
     this.update = update;
