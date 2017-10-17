@@ -794,6 +794,26 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 }
                 return;
             }
+            if (wiD3Ctrl && !track) {
+                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                if (errorCode > 0) {
+                    wiD3Ctrl.addLogTrack(null, function (newViTrack) {
+                        apiService.createLine({
+                            idTrack: newViTrack.id,
+                            idCurve: idCurve
+                        }, function (line) {
+                            let lineModel = lineToTreeConfig(line);
+                            getCurveData(apiService, idCurve, function (err, data) {
+                                if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                            });
+                        });
+                    })
+                }
+                else if (errorCode === 0) {
+                    errorMsg("Cannot drop curve from another well");
+                }
+                return;
+            }
             if (wiSlidingBarCtrl) {
                 let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
                 if(errorCode > 0) {
