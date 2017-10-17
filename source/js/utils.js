@@ -1723,13 +1723,14 @@ function openCrossplotTab(crossplotModel, callback) {
                                 })
                             }
                         }
-
+                        console.log("createViCrossplot", viCurveX, viCurveY);
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 
                     if (pointSet.idCurveZ) {
-                        wiApiService.infoCurve(pointSet.idCurveZ, function (curveZ) {
-                            let viCurveZ = graph.buildCurve( curveZ, curveZ.data, wellProps.properties);
+                        wiApiService.dataCurve(pointSet.idCurveZ, function (dataZ) {
+                            let curveZ = getModel('curve', pointSet.idCurveZ);
+                            let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
                         });

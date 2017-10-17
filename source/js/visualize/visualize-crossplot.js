@@ -39,8 +39,8 @@ const REGRESSION_LINE_SCHEMA = {
     properties: {
         idRegressionLine: { type: 'Integer' },
         lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
-        displayLine: { type: 'Boolean', default: true },
-        displayEquation: { type: 'Boolean', default: true },
+        displayLine: { type: 'Boolean', default: false },
+        displayEquation: { type: 'Boolean', default: false },
         regType: {
             type: 'Enum',
             values: ['Linear', 'Exponent', 'Power'],
@@ -1040,6 +1040,7 @@ Crossplot.prototype.plotSymbols = function() {
 }
 
 Crossplot.prototype.prepareData = function() {
+    console.log("pointset", this.pointSet);
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
