@@ -829,7 +829,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             }
             wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
         }
-        wiComponentService.emit('update-properties', currentNode);
     }
 }
 

@@ -41,6 +41,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             self.container.unselectAllNodes();
             return;
         }
+        wiComponentService.emit('update-properties', node);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if (!Array.isArray(selectedNodes)) selectedNodes = [];
         if (!$event.shiftKey) {
