@@ -808,16 +808,27 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         }
     }
 
-    // Select tree node and update wi-properties
-    this.selectHandler = function(currentNode) {
+    this.unselectAllNodes = function () {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         self.treeConfig.forEach(function(item) {
             utils.visit(item, function(node) {
                 if(node.data) node.data.selected = false;
             });
         });
-        if( currentNode.data ) currentNode.data.selected = true;
-        wiComponentService.emit('update-properties', currentNode);
+        wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+    }
+
+    // Select tree node and update wi-properties
+    this.selectHandler = function(currentNode) {
+        if( currentNode.data ) {
+            currentNode.data.selected = true;
+            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            if (!Array.isArray(selectedNodes)) selectedNodes = [];
+            if (!selectedNodes.includes(currentNode)) {
+                selectedNodes.push(currentNode);
+            }
+            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+        }
     }
 }
 

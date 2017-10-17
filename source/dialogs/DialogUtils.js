@@ -32,6 +32,7 @@ exports.authenticationDialog = function (ModalService, callback) {
         }
         this.onLoginButtonClicked = function () {
             self.error = null;
+            if (!self.username || !self.password) return;
             let dataRequest = {
                 username: self.username,
                 password: self.password
