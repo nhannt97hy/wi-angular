@@ -65,7 +65,7 @@ exports.removeTrack = function(track, domElem) {
  * @returns {Object} The created curve
  */
 exports.createCurve = function(config, data, domElem) {
-    config.data = data;
+    config._data = data;
     let curve = new Curve(config);
     curve.init(domElem);
     return curve;
@@ -100,7 +100,7 @@ exports.buildCurve = function(config, data, well) {
         config.offsetY = parseFloat(well.topDepth);
         config.yStep = parseFloat(well.step);
     }
-    config.data = data;
+    config._data = data;
     return new Curve(config);
 }
 /**

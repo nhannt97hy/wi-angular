@@ -39,8 +39,8 @@ const REGRESSION_LINE_SCHEMA = {
     properties: {
         idRegressionLine: { type: 'Integer' },
         lineStyle: CommonSchema.LINE_STYLE_SCHEMA,
-        displayLine: { type: 'Boolean', default: true },
-        displayEquation: { type: 'Boolean', default: true },
+        displayLine: { type: 'Boolean', default: false },
+        displayEquation: { type: 'Boolean', default: false },
         regType: {
             type: 'Enum',
             values: ['Linear', 'Exponent', 'Power'],
@@ -50,7 +50,7 @@ const REGRESSION_LINE_SCHEMA = {
         exclude: { type: 'Boolean', default: false },
         polygons: {
             type: 'Array',
-            item: { type: 'Object' },
+            item: { type: 'Integer' },
             default: []
         },
         fitX: { type: 'Float' },
@@ -189,7 +189,7 @@ const TERNARY_SCHEMA = {
                     properties: {
                         polygons: {
                             type: 'Array',
-                            item: { type: 'Object' },
+                            item: { type: 'Integer' },
                             default: []
                         },
                         exclude: { type: 'Boolean', default: false }
@@ -787,9 +787,7 @@ Crossplot.prototype.prepareRegressionLines = function() {
     let self = this;
     regLines.forEach(function(l) {
         let polygons = self.polygons.filter(function(p) {
-            return l.polygons.map(function(lp){
-                return lp.idPolygon;
-            }).indexOf(p.idPolygon) > -1;
+            return l.polygons.indexOf(p.idPolygon) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {
@@ -1042,6 +1040,7 @@ Crossplot.prototype.plotSymbols = function() {
 }
 
 Crossplot.prototype.prepareData = function() {
+    console.log("pointset", this.pointSet);
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
@@ -1206,7 +1205,7 @@ Crossplot.prototype.calculateTernary = function() {
         points = [calc.point];
     }
     else if (calc.type == 'Area') {
-        let idCalcPolygons = calc.area.polygons.map(function(cp){ return cp.idPolygon; });
+        let idCalcPolygons = calc.area.polygons;
         let polygons = self.polygons.filter(function(p) { return idCalcPolygons.indexOf(p.idPolygon) > -1; });
         points = self.filterByPolygons(polygons, self.data, calc.area.exclude);
     }

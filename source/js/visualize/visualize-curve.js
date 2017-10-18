@@ -14,7 +14,7 @@ Utils.extend(Drawing, Curve);
  * @param {Number} [config.idCurve] - The id of this line(curve) in backend (idCurve field)
  * @param {Number} [config.idDataset] - The id of the dataset in backend (idDataset field)
  * @param {String} [config.name] - Name of new curve
- * @param {Array} [config.data] - Data containing x, y coordinates or the curve
+ * @param {Array} [config._data] - Data containing x, y coordinates or the curve * CHANGE config.data -> config._data -- TUNG *
  * @param {String} [config.unit] - Unit of data
  * @param {Number} [config.minX] - Mininum x value to show
  * @param {Number} [config.maxX] - Maximum x value to show
@@ -64,7 +64,9 @@ function Curve(config) {
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
 
-    this.rawData = config.data || [];
+    // this.rawData = config.data || [];
+    this.rawData = config._data || [];
+
     this.data = Utils.parseData(this.rawData);
     this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
@@ -275,7 +277,8 @@ Curve.prototype.getAllColors = function() {
  * Get transform function for x coordinate
  */
 Curve.prototype.getTransformX = function() {
-    let rect = this.root.node().getBoundingClientRect();
+    //let rect = this.root.node().getBoundingClientRect();
+    let rect = Utils.getBoundingClientDimension(this.root.node());
     let windowX = this.getWindowX();
     let self = this;
 
@@ -313,7 +316,8 @@ Curve.prototype.getTransformX = function() {
  */
 Curve.prototype.doPlot = function(highlight, keepPrevious) {
     let self = this;
-    let rect = this.root.node().getBoundingClientRect();
+    //let rect = this.root.node().getBoundingClientRect();
+    let rect = Utils.getBoundingClientDimension(this.root.node());
     if (!keepPrevious) this.adjustSize();
     this.updateHeader();
 
@@ -382,7 +386,8 @@ Curve.prototype.updateHeader = function() {
 }
 
 Curve.prototype.getCanvasTranslateXForWrapMode = function() {
-    let width = this.root.node().clientWidth;
+    //let width = this.root.node().clientWidth;
+    let width = $(this.root.node()).width();
     let wrapMode = Utils.lowercase(this.wrapMode);
     let ret = [];
 

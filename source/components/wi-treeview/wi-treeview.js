@@ -33,21 +33,49 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
     };
 
-    this.onClick1 = function($index) {
-        console.log('onClick:', $index, self);
-        wiComponentService.setState(wiComponentService.ITEM_ACTIVE_STATE, self.config[$index].name);
-        wiComponentService.putComponent(wiComponentService.ITEM_ACTIVE_PAYLOAD, self.config[$index].data.payload);
-
-        if (self.config[$index].data.properties) {
-            wiComponentService.emit('update-properties', self.config[$index].data.properties.listConfig);
-
-            console.log('properties', self.config[$index].data.properties.listConfig);
+    this.onClick = function ($index, $event) {
+        if (!self.container && self.container.selectHandler) return;
+        let node = self.config[$index];
+        node.$index = $index;
+        if (!node) {
+            self.container.unselectAllNodes();
+            return;
         }
-    };
-
-    this.onClick = function($index) {
-        if(self.container && self.container.selectHandler) {
-            self.container.selectHandler(self.config[$index]);
+        wiComponentService.emit('update-properties', node);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if (!Array.isArray(selectedNodes)) selectedNodes = [];
+        if (!$event.shiftKey) {
+            if (selectedNodes.length) {
+                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    self.container.unselectAllNodes();
+                }
+            }
+            self.container.selectHandler(node);
+        } else {
+            // shift key
+            if (selectedNodes.length) {
+                if (selectedNodes.includes(node)) return;
+                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                    self.container.unselectAllNodes();
+                    self.container.selectHandler(node);
+                } else {
+                    if (node.$index < selectedNodes[0].$index) {
+                        let fromIndex = node.$index;
+                        let toIndex = selectedNodes[0].$index;
+                        self.container.unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            self.container.selectHandler(self.config[i]);
+                        }
+                    } else {
+                        let fromIndex = selectedNodes[0].$index;
+                        let toIndex = node.$index;
+                        self.container.unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            self.container.selectHandler(self.config[i]);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -62,26 +90,6 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             selectedNode.handler();
         }
     }
-
-    this.onDoubleClick1 = function ($index) {
-        if (self.config[$index].data.handler) {
-            self.config[$index].data.handler();
-        } else if (self.config[$index].children && self.config[$index].children.length !== 0) {
-            self.onCollapse($index);
-        } else {
-            let treeFunctions = wiComponentService.getComponent(wiComponentService.TREE_FUNCTIONS);
-            if (treeFunctions) {
-                // get func from component service
-                if (self.config && self.config[$index] && self.config[$index].type
-                    && treeFunctions[self.config[$index].type]) {
-                    treeFunctions[self.config[$index].type](self.config[$index].data.payload);
-                }
-                else {
-                    console.log(treeFunctions, self.config, self.config[$index]);
-                }
-            }
-        }
-    };
 
     this.getItemActiveName = function () {
         return wiComponentService.getState(wiComponentService.ITEM_ACTIVE_STATE);

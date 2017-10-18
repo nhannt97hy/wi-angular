@@ -78,6 +78,7 @@ app.factory(wiServiceName, function () {
         PROJECT_LOADED: 'project-loaded',
         ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
         LIST_FAMILY: 'list-family',
+        SELECTED_NODES: 'selected-nodes',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',

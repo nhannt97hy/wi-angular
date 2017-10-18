@@ -43,6 +43,7 @@ exports.getLineFuncFromTwoPoints = getLineFuncFromTwoPoints;
 exports.getDistance = getDistance;
 exports.sum = sum;
 exports.mean = mean;
+exports.getBoundingClientDimension = getBoundingClientDimension;
 
 function getProperties(obj) {
     let props = {};
@@ -684,4 +685,9 @@ function sum(arr) {
 
 function mean(arr) {
     return sum(arr) / arr.length;
+}
+
+function getBoundingClientDimension(aNode) {
+    var jQueryObj = $(aNode);
+    return {width:jQueryObj.width(), height:jQueryObj.height()};
 }

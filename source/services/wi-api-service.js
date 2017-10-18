@@ -243,45 +243,38 @@ var wiApiWorker = function($http, wiComponentService){
             self.$http(job.request)
                 .then(
                     function (response) {
-                    // if (response.data && response.data.code === 200) {
-                    //     if(!job.callback) {
-                    //         self.stopWorking();
-                    //         return;
-                    //     }
-                    //     job.callback(response.data.content);
-                    // }else if (response.data && response.data.code === 401){
-                    //     window.localStorage.removeItem('token');
-                    //     window.localStorage.removeItem('username');
-                    //     window.localStorage.removeItem('password');
-                    //     window.localStorage.removeItem('rememberAuth');
-                    //     location.reload();
-                    // }else if (response.data) {
-                    //     return new Promise(function(resolve, reject){
-                    //         reject(response.data.reason)
-                    //     });
-                    // } else {
-                    //     return new Promise(function(resolve, reject){
-                    //         reject('Something went wrong!');
-                    //     });
-                    // }
-                    job.callback(response.data.content);
+                    if (!response.data) {
+                        self.stopWorking();
+                        return;
+                    }
+                    if (response.data.code == 200) {
+                        job.callback(response.data.content);
+                    } else {
+                        if (response.data.reason) self.getUtils().error('Error: ' + response.data.reason);
+                    }
                     self.stopWorking();
                 })
                 .catch(function(err){
                     self.isFree = true;
+                    if (err.status >= 500 || err.status < 0) {
+                        self.getUtils().error('Error connecting to server!');
+                        self.stopWorking();
+                        return;
+                    }
                     if(err.status == 401){
-                        alert(err.data.reason);
+                        if (err.data.reason) alert(err.data.reason);
                         window.localStorage.removeItem('token');
                         window.localStorage.removeItem('username');
                         window.localStorage.removeItem('password');
                         window.localStorage.removeItem('rememberAuth');
+                        self.stopWorking();
                         location.reload();
                     } else {
                         self.stopWorking();
                         console.error(job.request);
-                        job.callback(err);
+                        // job.callback(err);
+                        if (err.data.reason) self.getUtils().error(err.data.reason);
                     }
-                    // self.getUtils().error(err);
                 });
 
         }
@@ -323,6 +316,7 @@ wiApiWorker.prototype.stopWorking = function(){
     // }
     self.working();
 }
+wiApiWorker.prototype.getUtils = Service.prototype.getUtils;
 
 Service.prototype.post = function (route, payload, callback) {
     var self = this;

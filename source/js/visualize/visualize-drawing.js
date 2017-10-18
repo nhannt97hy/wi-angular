@@ -102,7 +102,8 @@ Drawing.prototype.lower = function() {
  * Adjust drawing size when bounding rectangle changes
  */
 Drawing.prototype.adjustSize = function() {
-    let rect = this.root.node().getBoundingClientRect();
+    //let rect = this.root.node().getBoundingClientRect();
+    let rect = Utils.getBoundingClientDimension(this.root.node());
     if (this.canvas) {
         this.canvas
             .attr('width', rect.width)

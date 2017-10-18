@@ -1588,9 +1588,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
-
         $timeout(function() {
             graph.sheetDraggable(document.getElementById(self.plotAreaId));
+            let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+            let domElement = $(`wi-d3[name=${self.name}]`);
+            domElement.on('mouseover', function () {
+                if (!dragMan.dragging) return;
+                dragMan.wiD3Ctrl = self;
+            });
         }, 1000)
     };
 
