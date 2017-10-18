@@ -84,12 +84,12 @@
                                                 class="normal-text"></div> -->
                                                 <!-- item.id as item.datasetCurve for item in wiModal.curvesArr -->
                                             <multiselect class="input-xlarge" multiple="true"
-                                                ng-model="wiModal.polygonsArr[$index]"
-                                                options="p as p.idx for p in wiModal.polygonList"
+                                                ng-model="regLine.polygons"
+                                                options="p for p in wiModal.polygonList"
                                                 change="selected()" 
-                                                ng-change="wiModal.onChange(regLine.index); wiModal.setPolygonArr($index);">
+                                                ng-change="wiModal.onChange(regLine.index);">
                                             </multiselect>
-                                            {{wiModal.polygonsArr[$index]}}--{{regLine.polygons}}
+                                            {{regLine.polygons}}
                                         </td>
                                         
                                         <td style="width: 7%">

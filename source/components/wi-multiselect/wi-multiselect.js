@@ -104,8 +104,10 @@ angular.module('wi.multiselect', [])
                             var local = {};
                             local[parsedResult.itemName] = model[i];
                             scope.items.push({
-                                label: parsedResult.viewMapper(local),
-                                model: model[i],
+                                //label: parsedResult.viewMapper(local),
+                                label: model[i].value,
+                                model: model[i].value, // TUNG
+                                bgColor: model[i].bgColor, // TUNG
                                 checked: false
                             });
                         }

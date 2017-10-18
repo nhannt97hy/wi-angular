@@ -261,7 +261,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.viCrossplot.doPlot();
     }
     this.getPolygons = function () {
+        // let polygons = new Array();
         if (!self.viCrossplot) return [];
+        // console.log("getP", self.viCrossplot);
+        // wiApiService.getCrossplot(self.viCrossplot.idCrossPlot, function(crossplot) {
+
+        // })
         return self.viCrossplot.polygons;
     }
     this.getRegressionLines = function () {

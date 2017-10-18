@@ -253,7 +253,7 @@ var wiApiWorker = function($http, wiComponentService){
                         return;
                     }
                     if (response.data.code == 200) {
-                        job.callback(response.data.content);
+                        if( job.callback ) job.callback(response.data.content);
                     } else {
                         if (response.data.reason) self.getUtils().error('Error: ' + response.data.reason);
                     }
@@ -1154,15 +1154,16 @@ Service.prototype.getPolygon = function (idPolygon, callback) {
 }
 Service.prototype.removePolygon = function (idPolygon, callback) {
     let self = this;
-    this.delete(DELETE_POLYGON, { idPolygon: idPolygon })
-        .then(function (returnData) {
-            if (callback) {
-                callback(returnData);
-            }
-        })
-        .catch(function (err) {
-            self.getUtils().error(err);
-        });
+    this.delete(DELETE_POLYGON, { idPolygon: idPolygon }, callback);
+    // this.delete(DELETE_POLYGON, { idPolygon: idPolygon })
+    //     .then(function (returnData) {
+    //         if (callback) {
+    //             callback(returnData);
+    //         }
+    //     })
+    //     .catch(function (err) {
+    //         self.getUtils().error(err);
+    //     });
 }
 
 Service.prototype.createRegressionLines = function (data, callback) {
