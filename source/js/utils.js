@@ -816,6 +816,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             }
             if (wiSlidingBarCtrl) {
                 let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
+                console.log('drop curve into slidingBar', errorCode);
                 if(errorCode > 0) {
                     wiSlidingBarCtrl.createPreview(idCurve);
                 }

@@ -14,7 +14,7 @@ Utils.extend(Drawing, Curve);
  * @param {Number} [config.idCurve] - The id of this line(curve) in backend (idCurve field)
  * @param {Number} [config.idDataset] - The id of the dataset in backend (idDataset field)
  * @param {String} [config.name] - Name of new curve
- * @param {Array} [config.data] - Data containing x, y coordinates or the curve
+ * @param {Array} [config._data] - Data containing x, y coordinates or the curve * CHANGE config.data -> config._data -- TUNG *
  * @param {String} [config.unit] - Unit of data
  * @param {Number} [config.minX] - Mininum x value to show
  * @param {Number} [config.maxX] - Maximum x value to show
