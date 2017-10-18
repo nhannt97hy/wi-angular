@@ -20,8 +20,6 @@ let wiDropdown = require('./wi-dropdown.js');
 let wiToolbar = require('./wi-toolbar.js');
 let wiTabs = require('./wi-tabs.js');
 let wiCanvasRect = require('./wi-canvas-rect.js');
-let wiLevelMenu = require('./wi-level-menu.js');
-
 
 let wiTreeview = require('./wi-treeview');
 let wiStatusBar = require('./wi-status-bar');
@@ -111,7 +109,6 @@ let app = angular.module('wiapp',
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
-        wiLevelMenu.name,
 
         // models
         wiDepth.name,

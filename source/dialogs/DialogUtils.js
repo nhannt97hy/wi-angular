@@ -6230,6 +6230,8 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.well = plotCtrl.getWell();
         this.datasets = [];
         this.curvesArr = [];
+        this.props = plotCtrl.getModel().properties;
+        this.conditionTree = angular.copy(self.props.discriminator);
 
         wiComponentService.on('discriminator-update', function(){
             console.log('update handling');
@@ -6255,84 +6257,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             }
         })
         
-        // mock
-        // Comparison operators: $lt/$gt/$lte/$gte/$eq/$neq
-        // Logical operators: $and/$or/$xor/$not/$noop
-        this.conditionTree = {
-            operator: 'or',
-            children: [{
-                    operator: 'and',
-                    children: [
-                        {
-                            operator: 'and',
-                            children: [
-                                {
-                                    left: {
-                                        type: 'curve',
-                                        value: 1
-                                    },
-                                    right: {
-                                        type: 'value',
-                                        value: 100
-                                    },
-                                    comparison: '<'
-                                },
-                                {
-                                    left: {
-                                        type: 'curve',
-                                        value: 2
-                                    },
-                                    right: {
-                                        type: 'value',
-                                        value: 90
-                                    },
-                                    comparison: '>'
-                                }
-                            ]
-                        },
-                        {
-                            left: {
-                                type: 'curve',
-                                value: 2
-                            },
-                            right: {
-                                type: 'value',
-                                value: 60
-                            },
-                            comparison: '>'
-                        }
-                    ]
-                },
-                {
-                    left: {
-                        type: 'curve',
-                        value: 1
-                    },
-                    right: {
-                        type: 'value',
-                        value: 10
-                    },
-                    comparison: '='
-                }
-            ]
-        };
-
         this.conditionExpr = parse(this.conditionTree);
-
-        this.onApplyButtonClicked = function () {
-            console.log('Apply');
-            if (callback) callback(self.conditionTree);
-        }
-
-        this.onOKButtonClicked = function () {
-            console.log('OK');
-            if (callback) callback();
-            close(null);
-        }
-
-        this.onCancelButtonClicked = function () {
-            close(null);
-        }
 
         function parse(tree) {
             let str = "";
@@ -6461,6 +6386,29 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 }
                 self.conditionExpr = parse(self.conditionTree);
             }
+        }
+
+        this.onApplyButtonClicked = function () {
+            console.log('Apply');
+            let payload = {
+                discriminator: JSON.stringify(self.props.discriminator),
+                idHistogram: self.props.idHistogram ? self.props.idHistogram : null,
+                idCrossPlot: self.props.idCrossPlot ? self.props.idCrossPlot : null
+            }
+            wiApiService.editHistogram(payload, function(){
+                self.props.discriminator = self.conditionTree;
+                if (callback) callback(self.conditionTree);
+            })
+        }
+
+        this.onOKButtonClicked = function () {
+            console.log('OK');
+            if (callback) callback();
+            close(null);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
         }
     }
 
