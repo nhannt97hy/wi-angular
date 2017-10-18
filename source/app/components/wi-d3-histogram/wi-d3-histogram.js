@@ -52,7 +52,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.zoneArr = null;
 
     this.isShowWiZone = true;
-    this.isShowReferenceWindow = true;
+    // this.isShowReferenceWindow = true;
 
     function getIdHistogram() {
         return self.name.replace('histogram', "").replace("D3Area", "");
@@ -64,6 +64,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
         }
         return _well;
+    }
+
+    this.getModel = function(){
+        return self.wiHistogramCtrl.getModel();
     }
     function getHistogramTitle() {
         let well = getWell();
@@ -94,7 +98,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.linkModels = function () {
         self.zoneArr = null;
-        self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
+        self.histogramModel = self.getModel();
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
@@ -166,7 +170,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
-        self.histogramModel = self.wiHistogramCtrl.getHistogramModel();
+        self.histogramModel = self.getModel();
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -181,12 +185,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowWiZone = false;
     }
 
-    this.toogleShowReferenceWindow = function () {
-        self.isShowReferenceWindow = !self.isShowReferenceWindow;
-    }
+    // this.toogleShowReferenceWindow = function () {
+    //     self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
+    // }
 
     this.CloseReferenceWindow = function () {
-        self.isShowReferenceWindow = false;
+        self.histogramModel.properties.referenceDisplay = false;
     }
 
     this.histogramFormat = function(){
@@ -197,9 +201,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
 
-    this.histogramDiscriminator = function(){
-        DialogUtils.discriminatorDialog(ModalService, 'histogram', self.wiHistogramCtrl, function(){
-            console.log('Discriminator');
+    this.discriminator = function(){
+        DialogUtils.discriminatorDialog(ModalService, self, function(data){
+            console.log('Discriminator', data);
         })
     }
     this.showContextMenu = function (event) {
@@ -221,9 +225,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, {
             name: "Discriminator",
             label: "Discriminator",
-            icon: "properties2-16x16",
+            icon: "ti-filter",
             handler: function () {
-                self.histogramDiscriminator();
+                self.discriminator();
             }
         }, {
             name: "FlipHorizontalAxis",
@@ -273,9 +277,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }, {
             name: "ShowReferenceWindow",
-            label: "Show/Hide Reference Window",
-            handler: function () {
-                self.toogleShowReferenceWindow();
+            label: "Show Reference Window",
+            "isCheckType": "true",
+            checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,            
+            handler: function (index) {
+                // self.toogleShowReferenceWindow();
+                self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
+                self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
             }
         },{
             name: "ReferenceWindow",
@@ -353,7 +361,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 foreground: histogramModel.properties.color
             },
             color: histogramModel.properties.color,
-            discriminators: {},
+            discriminator: histogramModel.properties.discriminator,
             idWell: histogramModel.properties.idWell,
             idCurve: histogramModel.properties.idCurve,
             idZoneSet: histogramModel.properties.idZoneSet,

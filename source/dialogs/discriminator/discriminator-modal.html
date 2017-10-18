@@ -6,11 +6,18 @@
                 <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;Discriminators</h4>
             </div>
             <div class="modal-body">
-                <div class="container-fluid">
-                    <!-- <div class="row"> -->
-                        <wi-condition-node item='wiModal.conditionTree'></wi-condition-node>
-                    <!-- </div> -->
-            </div>
+                <div class="text-right">
+                        <button class="btn btn-default" ng-click="wiModal.deleteCondition()">Delete</button>
+                        <button class="btn btn-default" ng-click="wiModal.addCondition()">Add</button>
+                </div>
+                <div style="padding: 0.5em 0; border: 2px solid black">
+                    <div class="container-fluid">
+                        <wi-condition-node item='wiModal.conditionTree' curve-options='wiModal.curvesArr' on-delete='wiModal.onDeleteNode' root="wiModal.conditionTree"></wi-condition-node>
+                    </div>
+                </div>
+                <div class='form-group conditionExpr'>
+                    <textarea class='form-control' disabled ng-model="wiModal.conditionExpr"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default">
@@ -20,7 +27,7 @@
                     <span class="ok-16x16"></span>&nbsp;Ok
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
-                    <span class="close-16x16"></span>&nbsp;Close
+                    <span class="close-16x16"></span>&nbsp;Cancel
                 </button>
             </div>
         </div>

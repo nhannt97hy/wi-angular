@@ -18,13 +18,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.wiD3AreaName = self.name + "D3Area";
         if (self.name) wiComponentService.putComponent(self.name, self);
 
-        self.histogramModel = self.getHistogramModel();
+        self.histogramModel = self.getModel();
     };
     this.getwiD3Ctrl = function() {
         return wiComponentService.getComponent(self.wiD3AreaName);
     }
 
-    this.getHistogramModel = function(){
+    this.getModel = function(){
         return utils.findHistogramModelById(self.id);
     }
 }

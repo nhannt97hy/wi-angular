@@ -1,12 +1,35 @@
-<div class="row">
-    <div ng-if="!wiConditionNode.item.children" class="condition-child">
-        {{wiConditionNode.item.left.name}} {{wiConditionNode.item.comparison}} {{wiConditionNode.item.right.value}}
-    </div>
-    <div ng-if="wiConditionNode.item.children" class="condition-parent">
-        <div class="condition-item col-sm-11">
-            <wi-condition-node item='childNode' ng-repeat="childNode in wiConditionNode.item.children">
-            </wi-condition-node>
+<div class='condition-item' 
+    ng-class="{'condition-item-selected': wiConditionNode.item.selected}"
+    ng-click="wiConditionNode.doSelect($event)">
+    
+    <div ng-if="!wiConditionNode.isNull() && !wiConditionNode.item.children" class="container-fluid">
+        <div class='col-xs-5'>
+            <select class='form-control' ng-model="wiConditionNode.item.left.value"
+                ng-options="curve.id as curve.properties.name group by curve.datasetName for curve in wiConditionNode.curveOptions"
+                ng-change="wiConditionNode.update();"></select>
         </div>
-        <div class="condition-operator">{{wiConditionNode.item.operator}}</div>
+        <div class='col-xs-3'>
+            <select class='form-control' ng-model="wiConditionNode.item.comparison" 
+                ng-options="com for com in wiConditionNode.comparisons"
+                ng-change="wiConditionNode.update();"></select>
+        </div>
+        <div class='col-xs-4'>
+            <input class='form-control' type="number" ng-model="wiConditionNode.item.right.value"
+            ng-change="wiConditionNode.update();">
+        </div>
+    </div>
+    <div ng-if="!wiConditionNode.isNull() && wiConditionNode.item.children" class='condition-node' 
+        >
+        <div class="condition-operands">
+            <div ng-repeat="childNode in wiConditionNode.item.children" class='container-fluid'>
+                <wi-condition-node item='childNode' curve-options='wiConditionNode.curveOptions' on-delete='wiConditionNode.onDelete' root='wiConditionNode.root'>
+                </wi-condition-node>
+            </div>
+        </div>
+        <div class="condition-operator">
+            <select class='form-control width-auto' ng-model="wiConditionNode.item.operator"
+                ng-options="op for op in wiConditionNode.operators"
+                ng-change="wiConditionNode.update();"></select>
+        </div>
     </div>
 </div>

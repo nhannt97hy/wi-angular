@@ -10,7 +10,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let zoneCtrl = null, refWindCtrl;
     this.viCrossplot = {};
     this.isShowWiZone = true;
-    this.isShowReferenceWindow = true;
+    // this.isShowReferenceWindow = true;
     let _well = null;
     window.abc = this;
 
@@ -54,6 +54,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _well = utils.findWellByCrossplot(self.wiCrossplotCtrl.id);
         }
         return _well;
+    }
+
+    this.getModel = function(){
+        return self.crossplotModel;
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
@@ -120,7 +124,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.CloseReferenceWindow = function () {
-        self.isShowReferenceWindow = false;
+        self.crossplotModel.properties.referenceDisplay = false;
         utils.triggerWindowResize();
     }
     this.propertiesDialog = function () {
@@ -149,6 +153,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             openDialog();
         }
     }
+
+    this.discriminator = function(){
+        DialogUtils.discriminatorDialog(ModalService, self, function(data){
+            console.log('Discriminator', data);
+        })
+    }
     let commonCtxMenu = [
         {
             name: "Refresh",
@@ -162,6 +172,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "properties2-16x16",
             handler: function () {
                 self.propertiesDialog();
+            }
+        }, {
+            name: "Discriminator",
+            label: "Discriminator",
+            icon: "ti-filter",
+            handler: function () {
+                self.discriminator();
             }
         }, {
             name: "ShowOverlay",
@@ -182,12 +199,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }, {
             name: "ShowReferenceWindow",
-            label: "Show/Hide Reference Window",
+            label: "Show Reference Window",
             isCheckType: "true",
-            checked: self.isShowReferenceWindow,
+            checked: self.crossplotModel ? self.crossplotModel.properties.referenceDisplay : false,
             handler: function (index) {
-                self.isShowReferenceWindow = !self.isShowReferenceWindow
-                self.contextMenu[index].checked = self.isShowReferenceWindow;
+                self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
+                self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
                 utils.triggerWindowResize();
             }
         },{

@@ -1,20 +1,39 @@
 wi-condition-node {
-    & > div {
-        border: 1px solid rgb(209, 202, 202);
-    }
-    .condition-parent{
+    .condition-node{
         display: flex;
         flex-direction: row;
+        display: flex;
+        justify-content: center;
+        text-align: center;
     }
-    .condition-child {
-        padding: 1rem;
+    .condition-operands {
+        flex: 1;
     }
-
     .condition-operator {
+        text-align: center;
+        flex-basis: 90px;
+        // border: 1px solid #e61212;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        text-align: center;
-        width: 5rem;
     }
+    .condition-item {
+        padding: 1em;
+        display: block;
+        border: 1px solid rgb(209, 202, 202);
+    }
+    .condition-item-selected {
+        border: 1px solid red;
+    }
+    .condition-item-selected input,
+    .condition-item-selected select,
+    {
+        border-color: red;
+        color: red;
+    }
+    .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-1, .col-xs-8, .col-xs-6, .container-fluid {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+    button.close {display:none;}
 }

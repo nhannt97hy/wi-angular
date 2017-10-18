@@ -135,11 +135,6 @@ const EDIT_REGRESSIONLINES = '/project/well/cross-plot/regression-line/edit';
 const GET_REGRESSIONLINES = '/project/well/cross-plot/regression-line/info';
 const DELETE_REGRESSIONLINES = '/project/well/cross-plot/regression-line/delete';
 
-const CREATE_DISCRIM = '/project/well/cross-plot/discrim/new';
-const EDIT_DISCRIM = '/project/well/cross-plot/discrim/edit';
-const GET_DISCRIM = '/project/well/cross-plot/discrim/info';
-const DELETE_DISCRIM = '/project/well/cross-plot/discrim/delete';
-
 const GET_PALETTES = '/pal/all';
 
 const CREATE_HISTOGRAM = '/project/well/histogram/new';
@@ -1181,23 +1176,6 @@ Service.prototype.getRegressionLines = function (idRegressionLine, callback) {
 Service.prototype.removeRegressionLines = function (idRegressionLine, callback) {
     let self = this;
     this.delete(DELETE_REGRESSIONLINES, { idRegressionLine: idRegressionLine }, callback);
-}
-
-Service.prototype.createDiscrim = function (data, callback) {
-    let self = this;
-    this.post(CREATE_DISCRIM, data, callback);
-}
-Service.prototype.editDiscrim = function (data, callback) {
-    let self = this;
-    this.post(EDIT_DISCRIM, data, callback);
-}
-Service.prototype.getDiscrim = function (idDiscrim, callback) {
-    let self = this;
-    this.post(GET_DISCRIM, { idDiscrim: idDiscrim }, callback);
-}
-Service.prototype.removeDiscrim = function (idDiscrim, callback) {
-    let self = this;
-    this.delete(DELETE_DISCRIM, { idDiscrim: idDiscrim }, callback);
 }
 
 // histogram apis
