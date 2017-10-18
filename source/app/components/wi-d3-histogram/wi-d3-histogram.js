@@ -201,7 +201,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
 
-    this.histogramDiscriminator = function(){
+    this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
             console.log('Discriminator', data);
         })
@@ -227,7 +227,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Discriminator",
             icon: "ti-filter",
             handler: function () {
-                self.histogramDiscriminator();
+                self.discriminator();
             }
         }, {
             name: "FlipHorizontalAxis",

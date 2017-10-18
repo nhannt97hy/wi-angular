@@ -14,7 +14,7 @@
       <div style='padding-bottom:0.5em;' class='text-center'>{{wiD3Crossplot.crossplotModel.properties.xLabel}}</div>
     </div>
   </div>
-  <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.isShowReferenceWindow" style="min-width:20%;max-width:30%">
+  <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.crossplotModel.properties.referenceDisplay" style="min-width:20%;max-width:30%">
     <wi-container 
       name='RefCrossplotContainer' title='Reference Curve' close-handler='wiD3Crossplot.CloseReferenceWindowZz'>
       <wi-reference-window

@@ -337,6 +337,7 @@ function crossplotToTreeConfig(crossplot) {
         idWell: crossplot.idWell,
         idCrossplot: crossplot.idCrossPlot,
         name: crossplot.name,
+        discriminator: crossplot.discriminator,
         referenceTopDepth: crossplot.referenceTopDepth,
         referenceBottomDepth: crossplot.referenceBottomDepth,
         referenceScale: crossplot.referenceScale,
