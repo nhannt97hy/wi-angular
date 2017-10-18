@@ -392,7 +392,7 @@ function histogramToTreeConfig(histogram) {
         plot: histogram.plot,
         plotType: histogram.plotType,
         color: histogram.color,
-        // discriminators: histogram.discriminators,
+        discriminators: histogram.discriminators,
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,

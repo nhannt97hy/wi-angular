@@ -197,8 +197,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.histogramDiscriminator = function(){
-        DialogUtils.discriminatorDialog(ModalService, 'histogram', self.wiHistogramCtrl, function(){
-            console.log('Discriminator');
+        DialogUtils.discriminatorDialog(ModalService, self, function(data){
+            console.log('Discriminator', data);
         })
     }
     this.showContextMenu = function (event) {
@@ -349,7 +349,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 foreground: histogramModel.properties.color
             },
             color: histogramModel.properties.color,
-            discriminators: {},
+            discriminators: histogramModel.properties.discriminators,
             idWell: histogramModel.properties.idWell,
             idCurve: histogramModel.properties.idCurve,
             idZoneSet: histogramModel.properties.idZoneSet,
