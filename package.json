@@ -15,8 +15,7 @@
     "gulp-inject": "^4.2.0",
     "gulp-open": "^2.0.0",
     "gulp-rsync": "0.0.8",
-    "gulp-watch": "^4.3.11",
-    "jsontoxml": "0.0.11"
+    "gulp-watch": "^4.3.11"
   },
   "devDependencies": {
     "async": "^2.4.1",
