@@ -202,7 +202,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
-            console.log('Discriminator', data);
+            // console.log('Discriminator', data);
+            utils.evaluateExpr(self.getWell(), data);
         })
     }
     this.showContextMenu = function (event) {

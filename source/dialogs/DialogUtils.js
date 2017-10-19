@@ -6573,7 +6573,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
 
             if (!self.conditionTree) {
                 self.conditionTree = {
-                    comparison: '<',
+                    comparison: '>',
                     left: {
                         type: 'curve',
                         value:getFirstCurve()
@@ -6596,7 +6596,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 children: [
                     selectedNode,
                     {
-                        comparison: '<',
+                        comparison: '>',
                         left: {
                             type: 'curve',
                             value: getFirstCurve()

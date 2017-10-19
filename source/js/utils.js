@@ -2056,3 +2056,99 @@ function findFamilyById(idFamily) {
 }
 
 exports.findFamilyById = findFamilyById;
+
+exports.evaluateExpr = evaluateExpr;
+function evaluateExpr(well, discriminator){
+    // let self = new Object();
+    let result = new Array();
+    let wellProps = well.properties;
+    let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;
+    let curveSet = new Set();
+    let curvesData = new Array();
+    
+    function findCurve(condition){
+        if(condition.children && condition.children.length){
+            condition.children.forEach(function(child){
+                findCurve(child);
+            })
+        }else{
+            curveSet.add(condition.left.value);
+            if(condition.right.type == 'curve'){
+                curveSet.add(condition.right.value);
+            }
+        }
+    }
+
+    findCurve(discriminator);
+
+    function evaluate(condition, index){
+        if(condition.children && condition.children.length){
+            // console.log('hasChilds');
+            let left = evaluate(condition.children[0], index);
+            let right = evaluate(condition.children[1], index);
+            switch (condition.operator){
+                case 'and':
+                    return left && right;
+                case 'or':
+                    return left || right;
+            }
+        }
+        else {
+            // console.log('isLeaft')
+            let leftCurve = curvesData.find(function(curve){
+                return curve.idCurve == condition.left.value;
+            });
+
+            let left = leftCurve.data[index].x;
+            // console.log('left', left);
+
+            let right = condition.right.value;
+            if(condition.right.type == 'curve'){
+                let rightCurve = curvesData.find(function(curve){
+                    return curve.idCurve == condition.right.value;
+                })
+                right = rightCurve.data[index].x;
+            }
+
+            // console.log('right',right);
+            if(left && right){
+                // console.log('not Null');
+                switch (condition.comparison){
+                    case '<':
+                        return left < right;
+                    case '>':
+                        return left > right;
+                    case '=':
+                        return left == right;
+                    case '<=':
+                        return left <= right;
+                    case '>=':
+                        return left >= right;
+                }
+            }else{
+                return true;
+            }
+            
+        }
+    }
+    async.series([
+        function (callback) {
+            for (let curve of curveSet) {
+                __GLOBAL.wiApiService.dataCurve(curve, function (data) {
+                    curvesData.push({
+                        idCurve: curve,
+                        data: data
+                    })
+                    callback();
+                })
+            }
+        },
+        function () {
+            console.log('done!', curvesData);
+            for (let i = 0; i <= length; i++){
+                result.push(evaluate(discriminator, i));
+            }
+            console.log(result);
+        }
+    ])
+}
