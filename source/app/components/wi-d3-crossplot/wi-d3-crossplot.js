@@ -32,7 +32,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
         if (self.crossplotModel) {
-            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
             });
         }
@@ -144,7 +144,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
         }
         if (!self.crossplotModel || !self.pointSet) {
-            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                 console.log('res', crossplot);
                 self.pointSet = crossplot.pointsets[0];
                 openDialog();

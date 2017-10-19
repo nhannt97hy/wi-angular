@@ -4423,7 +4423,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             function(cb) {
                 var pointsets = self.crossplotModel.properties.pointsets; 
                 if (!pointsets || !pointsets.length || !pointsets[0].idPointSet ) {
-                    wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+                    wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                         // self.crossplotModel.properties.pointSet = crossplot.pointsets[0];
                         self.crossplotModel.properties = crossplot;
                         cb();
@@ -4600,20 +4600,19 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         // modal button
         this.colorSymbol = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.crossplotModel.properties.pointSet.pointColor, function (colorStr) {
-                self.crossplotModel.properties.pointSet.pointColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.crossplotModel.properties.pointsets[0].pointColor, function (colorStr) {
+                self.crossplotModel.properties.pointsets[0].pointColor = colorStr;
             });
         };
         
         function updateCrossplot(callback) {
-            
-
             async.parallel([
                 function(cb) {
+                    console.log("editCrossplot", self.crossplotModel.properties);
                     wiApiService.editCrossplot(self.crossplotModel.properties, cb);
                 },
                 function(cb) {
-                    wiApiService.editPointSet(self.crossplotModel.properties.pointSet, cb);
+                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], cb);
                 }
             ], function(err, result) {
                 if (err) console.error(err);
@@ -4814,7 +4813,7 @@ exports.crossplotFormatDialog1 = function (ModalService, wiCrossplotCtrl, callba
             async.waterfall([
                 function(cb) {
                     if (!self.props.pointSet || self.props.pointSet == {} || !self.props.pointSet.idPointSet) {
-                        wiApiService.getCrossplot(self.props.idCrossplot, function (crossplot) {
+                        wiApiService.getCrossplot(self.props.idCrossPlot, function (crossplot) {
                             self.props.pointSet = crossplot.pointsets[0];
                             cb();
                         });
@@ -6772,10 +6771,10 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     self.props.discriminator = JSON.stringify(self.conditionTree);
                     if (callback) callback(self.conditionTree);
                 })
-            }else if (self.props.idCrossplot){
+            }else if (self.props.idCrossPlot){
                 let payload = {
                     discriminator: JSON.stringify(self.conditionTree),
-                    idCrossplot: self.props.idCrossplot,
+                    idCrossPlot: self.props.idCrossPlot,
                     idWell: self.props.idWell                    
                 }
                 wiApiService.editCrossplot(payload, function(){
@@ -6799,10 +6798,10 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     if (callback) callback(self.conditionTree);
                     close(null);
                 })
-            }else if (self.props.idCrossplot){
+            }else if (self.props.idCrossPlot){
                 let payload = {
                     discriminator: JSON.stringify(self.conditionTree),
-                    idCrossplot: self.props.idCrossplot,
+                    idCrossPlot: self.props.idCrossPlot,
                     idWell: self.props.idWell
                 }
                 wiApiService.editCrossplot(payload, function(){
@@ -7156,7 +7155,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             let newRefCurve = {
                 color: "rgb(0,0,0)",
                 idHistogram: self.props.idHistogram ? self.props.idHistogram : null,
-                idCrossPlot: self.props.idCrossplot ? self.props.idCrossplot : null,
+                idCrossPlot: self.props.idCrossPlot ? self.props.idCrossPlot : null,
                 left: 0,
                 right: 0,
                 visiable: true,

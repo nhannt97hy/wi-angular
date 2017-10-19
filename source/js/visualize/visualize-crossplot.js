@@ -1297,7 +1297,7 @@ Crossplot.prototype.genColor = function() {
 }
 
 Crossplot.prototype.getSvgClipId = function() {
-    return 'vi-crossplot-svg-clip-' + this.idCrossplot;
+    return 'vi-crossplot-svg-clip-' + this.idCrossPlot;
 }
 
 Crossplot.prototype.on = function(type, cb) {

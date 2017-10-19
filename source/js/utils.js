@@ -335,7 +335,7 @@ function crossplotToTreeConfig(crossplot) {
     crossplotModel.id = crossplot.idCrossPlot;
     crossplotModel.properties = {
         idWell: crossplot.idWell,
-        idCrossplot: crossplot.idCrossPlot,
+        idCrossPlot: crossplot.idCrossPlot,
         name: crossplot.name,
         discriminator: crossplot.discriminator,
         referenceTopDepth: crossplot.referenceTopDepth,
@@ -1135,9 +1135,9 @@ exports.findWellByLogplot = function (idLogplot) {
     }) || [];
     return path[1];
 };
-exports.findWellByCrossplot = function (idCrossplot) {
+exports.findWellByCrossplot = function (idCrossPlot) {
     var path = getSelectedPath(function (node) {
-        return node.type == 'crossplot' && node.id == idCrossplot;
+        return node.type == 'crossplot' && node.id == idCrossPlot;
     }) || [];
     return path[1];
 }
@@ -1680,13 +1680,13 @@ function openCrossplotTab(crossplotModel, callback) {
     let graph = wiComponentService.getComponent('GRAPH');
     if (crossplotModel.data.opened) return;
     crossplotModel.data.opened = true;
-    let crossplotName = 'crossplot' + crossplotModel.properties.idCrossplot;
+    let crossplotName = 'crossplot' + crossplotModel.properties.idCrossPlot;
     let wiCrossplotCtrl = __GLOBAL.wiComponentService.getComponent(crossplotName);
     let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
 
     let wellProps = findWellById(crossplotModel.properties.idWell);
 
-    wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
+    wiApiService.getCrossplot(crossplotModel.properties.idCrossPlot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
             console.log("crosplot", crossplot);

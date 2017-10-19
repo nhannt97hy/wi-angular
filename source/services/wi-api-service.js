@@ -1109,13 +1109,13 @@ Service.prototype.editCrossplot = function (data, callback) {
     let self = this;
     this.post(EDIT_CROSSPLOT, data, callback);
 }
-Service.prototype.getCrossplot = function (idCrossplot, callback) {
+Service.prototype.getCrossplot = function (idCrossPlot, callback) {
     let self = this;
-    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossplot }, callback);
+    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossPlot }, callback);
 }
-Service.prototype.removeCrossplot = function (idCrossplot, callback) {
+Service.prototype.removeCrossplot = function (idCrossPlot, callback) {
     let self = this;
-    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossplot }, callback);
+    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossPlot }, callback);
 }
 
 Service.prototype.createPointSet = function (data, callback) {
