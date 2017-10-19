@@ -1777,7 +1777,7 @@ function openCrossplotTab(crossplotModel, callback) {
 };
 exports.openCrossplotTab = openCrossplotTab;
 
-exports.createHistogram = function (idWell, curve, histogramName) {
+exports.createHistogram = function (idWell, curve, histogramName, histogramTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let dataRequest = curve ? {
         idWell: idWell,
@@ -1787,17 +1787,19 @@ exports.createHistogram = function (idWell, curve, histogramName) {
         name: histogramName
     }: {
         idWell: idWell,
-        name: histogramName
+        name: histogramName,
+        histogramTemplate: histogramTemplate
     };
     __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
-        if(!histogram.name){
-            DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Name: " + dataRequest.name + " existed!");
-        } else {
-            let histogramModel = histogramToTreeConfig(histogram);
-            refreshProjectState().then(function () {
-                openHistogramTab(histogramModel);
-            });
-        }
+        let histogramModel = histogramToTreeConfig(histogram);
+        refreshProjectState().then(function () {
+            openHistogramTab(histogramModel);
+        });
+        setTimeout(function () {
+           if(histogram.noCurveFound || histogram.noCurveFound == "true"){
+               DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
+           }
+        }, 1000);
     })
 };
 

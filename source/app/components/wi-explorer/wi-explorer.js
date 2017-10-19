@@ -595,66 +595,84 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Neutron Gamma",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.NeutronGammaButtonClicked();
+                                }
+                            },{
+                                name: "NeutronDensity",
+                                label: "Neutron Density",
+                                icon: "",
+                                handler: function () {
+                                    globalHandlers.NeutronDensityButtonClicked();
                                 }
                             }, {
                                 name: "NeutronSonic",
                                 label: "Neutron Sonic",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.NeuTronSonicButtonClicked();
                                 }
                             }, {
                                 name: "NeutronRt",
                                 label: "Neutron Rt",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.NeuTronRtButtonClicked();
                                 }
                             }, {
                                 name: "DensityGamma",
                                 label: "Density Gamma",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.DensityGammaButtonClicked();
                                 }
                             }, {
                                 name: "DensityRt",
                                 label: "Density Rt",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.DensityRtButtonClicked();
                                 }
                             }, {
                                 name: "SonicDensity",
                                 label: "Sonic Density",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.SonicDensityButtonClicked();
                                 }
                             }, {
                                 name: "SonicRt",
                                 label: "Sonic Rt",
                                 icon: "crossplot-new-16x16",
                                 handler: function () {
+                                    globalHandlers.SonicRtButtonClicked();
                                 }
                             }, {
                                 name: "SonicPhiTotal",
                                 label: "Sonic PHI_TOTAL",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.SonicPHI_TOTALButtonClicked();
                                 }
                             }, {
                                 name: "SonicGamma",
                                 label: "Sonic Gamma",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.SonicGammaButtonClicked();
                                 }
                             }, {
                                 name: "RtRxo",
                                 label: "Rt_Rxo",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.RtRx0ButtonClicked();
                                 }
                             }, {
                                 name: "PickettPlot",
                                 label: "Pickett Plot",
                                 icon: "",
                                 handler: function () {
+                                    globalHandlers.PickettButtonClicked();
                                 }
                             }
                         ]
@@ -717,7 +735,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "GR Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.GammaRayButtonClicked();
                                 }
                             },
                             {
@@ -725,7 +743,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "DT Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.DensityButtonClicked();
                                 }
                             },
                             {
@@ -733,7 +751,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "NPHI Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.NeutronButtonClicked();
                                 }
                             },
                             {
@@ -741,7 +759,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "RHOB Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.SonicButtonClicked();
                                 }
                             },
                             {
@@ -749,7 +767,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "LLD Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.DeepResistivityButtonClicked();
                                 }
                             },
                             {
@@ -757,7 +775,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "PHI_TOTAL Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.PHI_TOTALButtonClicked();
                                 }
                             },
                             {
@@ -765,7 +783,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "MSLF Histogram",
                                 icon: "",
                                 handler: function () {
-
+                                    globalHandlers.MSFLHistogramButtonClicked();
                                 }
                             },
                             
