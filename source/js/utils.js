@@ -1653,21 +1653,27 @@ exports.createPointSet = function (pointSetData, callback) {
     })
 }
 
-exports.createCrossplot = function (idWell, crossplotName, callback) {
+exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let dataRequest = {
         idWell: idWell,
-        name: crossplotName
+        name: crossplotName,
+        crossTemplate: crossTemplate
     }
     __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
-        if(!crossplot.name){
-            DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Name: " + dataRequest.name + " existed!");
-        } else {
-            let crossplotModel = crossplotToTreeConfig(crossplot);
-            refreshProjectState().then(function () {
-                openCrossplotTab(crossplotModel, callback);
-            });
-        }
+        let crossplotModel = crossplotToTreeConfig(crossplot);
+        refreshProjectState().then(function () {
+            openCrossplotTab(crossplotModel, callback);
+        });
+        setTimeout(function () {
+            if(crossplot.foundCurveX && crossplot.foundCurveY){
+
+            } else {
+                let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
+                let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
+                if(crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX +"<br>"+ curveY);
+            }
+        }, 1000);
     })
 }
 

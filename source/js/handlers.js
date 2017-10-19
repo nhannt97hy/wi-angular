@@ -639,56 +639,113 @@ exports.BlankCrossPlotButtonClicked = function () {
     });
 };
 
+function newCrossPlotTemplate(templateCross, wiComponentService, ModalService, wiApiService, $timeout, callback) {
+    console.log("Template Cross Plot clicked ", templateCross);
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'crossplots') return;
+    let promptConfig = {
+        title: 'Create New Crossplots Template',
+        inputName: 'Crossplot Name',
+        input: templateCross
+    }
+    DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+        console.log("CROSS NAME : ", crossplotName);
+        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(){
+        }, templateCross);
+    });
+}
+
 exports.SonicPHI_TOTALButtonClicked = function () {
     console.log('SonicPHI_TOTALButton is clicked');
+    newCrossPlotTemplate("SonicPhi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeutronDensityButtonClicked = function () {
     console.log('NeutronDensityButton is clicked');
+    newCrossPlotTemplate("NeutronDensity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeutronGammaButtonClicked = function () {
     console.log('NeutronGammaButton is clicked');
+    newCrossPlotTemplate("NeutronGamma", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicGammaButtonClicked = function () {
     console.log('SonicGammaButton is clicked');
+    newCrossPlotTemplate("SonicGamma", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeuTronSonicButtonClicked = function () {
     console.log('NeuTronSonicButton is clicked');
+    newCrossPlotTemplate("NeutronSonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DensityGammaButtonClicked = function () {
     console.log('DenityGammaButton is clicked');
+    newCrossPlotTemplate("DensityGamma", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeuTronRtButtonClicked = function () {
     console.log('NeuTronRtButton is clicked');
+    newCrossPlotTemplate("NeutronResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DensitySonicButtonClicked = function () {
     console.log('DensitySonicButton is clicked');
+    newCrossPlotTemplate("DensitySonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DensityRtButtonClicked = function () {
     console.log('DensityRtButton is clicked');
+    newCrossPlotTemplate("DensityResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicDensityButtonClicked = function () {
     console.log('SonicDensityButton is clicked');
+    newCrossPlotTemplate("SonicDensity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicRtButtonClicked = function () {
     console.log('SonicRtButton is clicked');
+    newCrossPlotTemplate("SonicResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.RtRx0ButtonClicked = function () {
     console.log('RtRx0Button is clicked');
+    newCrossPlotTemplate("DeepResistivityShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.PickettButtonClicked = function () {
     console.log('PickettButton is clicked');
+    newCrossPlotTemplate("PickettPlot", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.BlankHistogramButtonClicked = function () {
