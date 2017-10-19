@@ -152,7 +152,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .tickFormat("");
 
         let step = _scale / 100;
-        let axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.floor(_bottom), step))
+        let axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.round(_bottom), step))
             .tickFormat(d3.format(',.0f'))
             .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
