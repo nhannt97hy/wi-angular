@@ -405,7 +405,7 @@ gulp.task('deploy-dev', function() {
 	return gulp.src("./build/**/*")
         .pipe(rsync({
             root: "build/",
-            hostname: "hoangbd@dev.sflow.me",
+            hostname: "dev.sflow.me",
             destination:"/opt/build",
 			port: 2221
     }));
