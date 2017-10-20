@@ -6585,7 +6585,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.conditionTree = JSON.parse(angular.copy(self.props.discriminator));
 
         wiComponentService.on('discriminator-update', function(){
-            console.log('update handling');
+            // console.log('update handling');
             self.conditionExpr = parse(self.conditionTree);        
         })
 
@@ -6617,7 +6617,9 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 return "( " + parse(tree.children[0]) + " " + tree.operator.toUpperCase() + " " + parse(tree.children[1]) + " )";
             }
             else if (tree.left && tree.right && tree.comparison) {
-                return "( " + getCurveName(tree.left.value) + " " + tree.comparison + " " + tree.right.value + " )"; 
+                let left = getCurveName(tree.left.value);
+                let right = tree.right.type=='value'? tree.right.value: getCurveName(tree.right.value);
+                return "( " + left + " " + tree.comparison + " " + right + " )"; 
             }
 
             return str;
@@ -6745,7 +6747,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             console.log('Apply');
             if(self.props.idHistogram){
                 let payload = {
-                    discriminator: JSON.stringify(self.conditionTree),
+                    discriminator: self.conditionTree,
                     idHistogram: self.props.idHistogram
                 }
                 wiApiService.editHistogram(payload, function(){
@@ -6754,7 +6756,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 })
             }else if (self.props.idCrossPlot){
                 let payload = {
-                    discriminator: JSON.stringify(self.conditionTree),
+                    discriminator: self.conditionTree,
                     idCrossPlot: self.props.idCrossPlot,
                     idWell: self.props.idWell                    
                 }

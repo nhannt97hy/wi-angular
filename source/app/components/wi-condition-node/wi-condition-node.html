@@ -6,16 +6,16 @@
         <div class='col-xs-5'>
             <select class='form-control' ng-model="wiConditionNode.item.left.value"
                 ng-options="curve.id as curve.properties.name group by curve.datasetName for curve in wiConditionNode.curveOptions"
-                ng-change="wiConditionNode.update();"></select>
+                ng-change="wiConditionNode.update()"></select>
         </div>
         <div class='col-xs-3'>
             <select class='form-control' ng-model="wiConditionNode.item.comparison" 
                 ng-options="com for com in wiConditionNode.comparisons"
-                ng-change="wiConditionNode.update();"></select>
+                ng-change="wiConditionNode.update()"></select>
         </div>
         <div class='col-xs-4'>
-            <input class='form-control' type="number" ng-model="wiConditionNode.item.right.value"
-            ng-change="wiConditionNode.update();">
+            <wi-multi-input model='wiConditionNode.item.right' curves-list='wiConditionNode.curveOptions'
+            ng-change='wiConditionNode.update()'></wi-multi-input>
         </div>
     </div>
     <div ng-if="!wiConditionNode.isNull() && wiConditionNode.item.children" class='condition-node' 
@@ -29,7 +29,7 @@
         <div class="condition-operator">
             <select class='form-control width-auto' ng-model="wiConditionNode.item.operator"
                 ng-options="op for op in wiConditionNode.operators"
-                ng-change="wiConditionNode.update();"></select>
+                ng-change="wiConditionNode.update()"></select>
         </div>
     </div>
 </div>

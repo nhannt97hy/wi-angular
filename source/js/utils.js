@@ -2099,7 +2099,7 @@ function evaluateExpr(well, discriminator){
                 return curve.idCurve == condition.left.value;
             });
 
-            let left = leftCurve.data[index].x;
+            let left = parseFloat(leftCurve.data[index].x);
             // console.log('left', left);
 
             let right = condition.right.value;
@@ -2107,7 +2107,7 @@ function evaluateExpr(well, discriminator){
                 let rightCurve = curvesData.find(function(curve){
                     return curve.idCurve == condition.right.value;
                 })
-                right = rightCurve.data[index].x;
+                right = parseFloat(rightCurve.data[index].x);
             }
 
             // console.log('right',right);
@@ -2131,24 +2131,24 @@ function evaluateExpr(well, discriminator){
             
         }
     }
-    async.series([
-        function (callback) {
-            for (let curve of curveSet) {
-                __GLOBAL.wiApiService.dataCurve(curve, function (data) {
-                    curvesData.push({
-                        idCurve: curve,
-                        data: data
-                    })
-                    callback();
+    let curveArr = Array.from(curveSet);
+    async.each(
+        curveArr,
+        function (curve, done) {
+            __GLOBAL.wiApiService.dataCurve(curve, function (data) {
+                curvesData.push({
+                    idCurve: curve,
+                    data: data
                 })
-            }
+                done();
+            })
         },
-        function () {
+        function (err) {
             console.log('done!', curvesData);
             for (let i = 0; i <= length; i++){
                 result.push(evaluate(discriminator, i));
             }
             console.log(result);
         }
-    ])
+        )
 }
