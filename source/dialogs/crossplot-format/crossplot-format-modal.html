@@ -250,8 +250,8 @@
                                             <div class="col-sm-8">
                                                 <select class="form-control wi-form-control" ng-model="wiModal.selectedZone" ng-change="wiModal.onActiveZoneChange()"
                                                 ng-disabled="wiModal.depthType=='intervalDepth'">
-                                                    <option value="All" ng-selected="wiModal.props.pointSet.activeZone=='All'">All</option>
-                                                    <option value="{{zone.id}}" ng-repeat="zone in wiModal.zoneSets[wiModal.selectedZoneSet.idx].children" ng-selected="wiModal.props.pointSet.activeZone==zone.id">{{zone.properties.name}}</option>
+                                                    <option value="All" ng-selected="wiModal.crossplotModel.properties.pointsets[0].activeZone=='All'">All</option>
+                                                    <option value="{{zone.id}}" ng-repeat="zone in wiModal.zoneSets[wiModal.selectedZoneSet.idx].children" ng-selected="wiModal.crossplotModel.properties.pointsets[0].activeZone==zone.id">{{zone.properties.name}}</option>
                                                 </select>
                                             </div>
                                         <!-- </div> -->

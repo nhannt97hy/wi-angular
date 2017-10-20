@@ -108,6 +108,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.onZoneCtrlReady = function(zoneCtrl) {
         zoneCtrl.trap('zone-data', function(data) {
+            console.log("zone data", data);
             self.updateViCrossplotZones(data);
         });
     }

@@ -4569,13 +4569,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.onDepthTypeChanged = function(){
             switch (self.depthType) {
                 case "intervalDepth":
-                    self.crossplotModel.properties.pointSet.intervalDepthTop = self.crossplotModel.properties.pointSet.intervalDepthTop ? self.crossplotModel.properties.pointSet.intervalDepthTop: getTopFromWell();
-                    self.crossplotModel.properties.pointSet.intervalDepthBottom = self.crossplotModel.properties.pointSet.intervalDepthBottom ? self.crossplotModel.properties.pointSet.intervalDepthBottom : getBottomFromWell();
-                    self.crossplotModel.properties.pointSet.idZoneSet = null;
+                    self.crossplotModel.properties.pointsets[0].intervalDepthTop = self.crossplotModel.properties.pointsets[0].intervalDepthTop ? self.crossplotModel.properties.pointsets[0].intervalDepthTop: getTopFromWell();
+                    self.crossplotModel.properties.pointsets[0].intervalDepthBottom = self.crossplotModel.properties.pointsets[0].intervalDepthBottom ? self.crossplotModel.properties.pointsets[0].intervalDepthBottom : getBottomFromWell();
+                    self.crossplotModel.properties.pointsets[0].idZoneSet = null;
                     break;
                 case "zonalDepth":
                     if(self.selectedZoneSet){
-                        self.crossplotModel.properties.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                        self.crossplotModel.properties.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
                     }
                     break;
             }
@@ -4583,18 +4583,18 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.onZoneSetChange = function () {
             if(self.selectedZoneSet){
-                self.crossplotModel.properties.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                self.crossplotModel.properties.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
             }
         }
 
         this.onActiveZoneChange = function(){
             if (self.selectedZone) {
-                self.crossplotModel.properties.pointSet.activeZone = self.selectedZone;
+                self.crossplotModel.properties.pointsets[0].activeZone = self.selectedZone;
             }
         }
 
         this.onLineModeChange = function(){
-            self.crossplotModel.properties.pointSet.lineMode = self.lineMode;
+            self.crossplotModel.properties.pointsets[0].lineMode = self.lineMode;
         }
 
         // modal button
