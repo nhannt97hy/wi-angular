@@ -9,6 +9,7 @@ function isFunction(functionToCheck) {
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    window.VISD3HISTOGRAM = self;
     let _well = null;
 
     let curveLoading = false;

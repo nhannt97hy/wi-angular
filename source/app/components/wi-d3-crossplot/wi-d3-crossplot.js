@@ -3,6 +3,7 @@ const moduleName = 'wi-d3-crossplot';
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    window.VISCROSSPLOT = self;
     let graph = wiComponentService.getComponent('GRAPH');
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -85,10 +86,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
         return refWindCtrl;
     }
+
     this.linkModels = function () {
         self.zoneArr = null;
-        if (self.crossplotModel && self.crossplotModel.properties.pointSet && self.crossplotModel.properties.pointSet.idZoneSet) {
-            self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointSet.idZoneSet);
+        console.log("crossLinkModel:", self.crossplotModel);
+
+        if (self.crossplotModel && self.crossplotModel.properties.pointsets[0] && self.crossplotModel.properties.pointsets[0].idZoneSet) {
+            console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
+            self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {}
@@ -103,6 +108,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.onZoneCtrlReady = function(zoneCtrl) {
         zoneCtrl.trap('zone-data', function(data) {
+            console.log("zone data", data);
             self.updateViCrossplotZones(data);
         });
     }
@@ -140,6 +146,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
             console.log("Model", self.crossplotModel);
             DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
+                console.log("ret", ret);
                 self.linkModels();
             })
         }
