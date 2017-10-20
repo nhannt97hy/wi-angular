@@ -89,7 +89,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.linkModels = function () {
         self.zoneArr = null;
-        console.log("crossLinkModel:", self.crossplotModel);
 
         if (self.crossplotModel && self.crossplotModel.properties.pointsets[0] && self.crossplotModel.properties.pointsets[0].idZoneSet) {
             console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
@@ -100,6 +99,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
             self.getZoneCtrl().zones = self.zoneArr;
             self.getZoneCtrl().zoneUpdate();
+            if (!self.pointSet) self.pointSet = self.crossplotModel.properties.pointsets[0];
             self.pointSet.zones = self.zoneArr.map(function(zone) {
                 return zone.properties;
             });
@@ -152,7 +152,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         if (!self.crossplotModel || !self.pointSet) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
-                console.log('res', crossplot);
                 self.pointSet = crossplot.pointsets[0];
                 openDialog();
             });

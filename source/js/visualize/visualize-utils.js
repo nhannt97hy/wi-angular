@@ -113,20 +113,22 @@ function setProperties(obj, props, forArray) {
 
 function getArrayFromSchema(arr, schema) {
     let tmpArr = [];
-    arr.forEach(function(val) {
-        if (schema.type == 'Integer') tmpArr.push(parseInt(val))
-        else if (schema.type == 'Float') tmpArr.push(parseFloat(val))
-        else if (schema.type == 'Object' && schema.properties !== undefined) {
-            let tmpObj = { PROPERTIES: schema.properties };
-            setProperties(tmpObj, val);
-            delete tmpObj.PROPERTIES;
-            tmpArr.push(tmpObj);
-        }
-        else if (schema.type == 'Array' && schema.item != undefined) {
-            tmpArr.push(getArrayFromSchema(val, schema.item));
-        }
-        else tmpArr.push(val);
-    });
+    if(Array.isArray(arr) && arr.length) {
+        arr.forEach(function(val) {
+            if (schema.type == 'Integer') tmpArr.push(parseInt(val))
+            else if (schema.type == 'Float') tmpArr.push(parseFloat(val))
+            else if (schema.type == 'Object' && schema.properties !== undefined) {
+                let tmpObj = { PROPERTIES: schema.properties };
+                setProperties(tmpObj, val);
+                delete tmpObj.PROPERTIES;
+                tmpArr.push(tmpObj);
+            }
+            else if (schema.type == 'Array' && schema.item != undefined) {
+                tmpArr.push(getArrayFromSchema(val, schema.item));
+            }
+            else tmpArr.push(val);
+        });
+    }
     return tmpArr;
 }
 
