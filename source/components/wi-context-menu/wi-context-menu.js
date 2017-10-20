@@ -10,6 +10,21 @@ function Controller($scope, wiComponentService) {
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
     var onDismiss = null;
+
+    this.dismiss = function(event, button){
+        if(event){
+            event.stopPropagation();
+        }
+
+        if(!button){
+            self.dismissAll();
+        }else{
+            if(!button.childContextMenu || !button.childContextMenu.length){
+                self.dismissAll();
+            }
+        }
+
+    }
     this.dismissAll = function () {
         self.shown = false;
         self.contextMenus = [];
