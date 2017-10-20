@@ -1,4 +1,4 @@
-<div ng-show="wiContextMenu.shown" ng-click="wiContextMenu.dismissAll()" wi-right-click="wiContextMenu.dismissAll()" class="context-menu-backdrop">
+<div ng-show="wiContextMenu.shown" ng-click="wiContextMenu.dismiss()" wi-right-click="wiContextMenu.dismiss()" class="context-menu-backdrop">
     <div ng-repeat="contextMenu in wiContextMenu.contextMenus"
          wi-element-ready="wiContextMenu.ngRepeatFinished()"
          class="context-menu-wrapper fade-in"
@@ -16,7 +16,8 @@
                    handler="button.handler"
                    separator='{{button.separator}}'
                    ng-mouseenter='wiContextMenu.onMouseEnterButton(button, $event, $index)'
-                   ng-mouseleave='wiContextMenu.onMouseLeaveButton(button)'>
+                   ng-mouseleave='wiContextMenu.onMouseLeaveButton(button)'
+                   ng-click="wiContextMenu.dismiss($event, button)">
         </wi-button>
     </div>
 </div>
