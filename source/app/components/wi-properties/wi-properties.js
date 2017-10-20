@@ -443,6 +443,13 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }]
                 }
                 listConfig.push(config);
+                if (!currentItem.data.ts || Date.now() - currentItem.data.ts > 30000)
+                    wiApiService.getCrossplot(itemProperties.idCrossPlot, function(dataReturn) {
+                        console.log(dataReturn);
+                        currentItem.properties = dataReturn;
+                        itemProperties = currentItem.properties;
+                        currentItem.data.ts = Date.now();
+                    });
                 break;
             case 'histogram':
                 var well = utils.findWellById(itemProperties.idWell);

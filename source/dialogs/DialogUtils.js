@@ -4403,8 +4403,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         this.crossplotModel = angular.copy(wiD3CrossplotCtrl.crossplotModel);
-        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
-
+        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot.getProperties();
         // this.props = crossplotModel.properties;
         this.selectedCurveX = null;
         this.selectedCurveY = null;
@@ -4418,7 +4417,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-
+        
         async.waterfall([
             function(cb) {
                 var pointsets = self.crossplotModel.properties.pointsets; 
@@ -4604,20 +4603,110 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.crossplotModel.properties.pointsets[0].pointColor = colorStr;
             });
         };
-        
+        // function buildPayload(crossplotProps) {
+        //     let props = crossplotProps;
+        //     delete props.pointsets[0].curveX;
+        //     delete props.pointsets[0].curveY;
+        //     delete props.pointsets[0].curveZ;
+        //     return props
+        // }
         function updateCrossplot(callback) {
+            // var payload = buildPayload(self.crossplotModel.properties);
             async.parallel([
                 function(cb) {
-                    console.log("editCrossplot", self.crossplotModel.properties);
-                    wiApiService.editCrossplot(self.crossplotModel.properties, cb);
+                    wiApiService.editCrossplot(self.crossplotModel.properties, function(){
+                        cb();
+                    });
                 },
                 function(cb) {
-                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], cb);
+                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], function(){
+                        cb();
+                    });
                 }
             ], function(err, result) {
-                if (err) console.error(err);
-                else 
+                if (err) {
+                    console.error(err);
+                    utils.error(err);
+                }
+                else {
                     wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModel.properties;
+                    let pointSet = self.crossplotModel.properties.pointsets[0];
+
+                    // let crossplotProps = angular.copy(self.crossplotModel.properties);
+                    // crossplotProps.pointSet = crossplotProps.pointsets[0];
+                    var xCurveData, yCurveData, zCurveData;
+                    async.parallel([
+                        function(cb) {
+                            if (pointSet.idCurveX) {
+                                wiApiService.dataCurve(pointSet.idCurveX, function (curveData) {
+                                    xCurveData = curveData;
+                                    cb();
+                                })
+                            }
+                            else async.setImmediate(cb);
+                        },
+                        function(cb) {
+                            if (pointSet.idCurveY) {
+                                wiApiService.dataCurve(pointSet.idCurveY, function (curveData) {
+                                    yCurveData = curveData;
+                                    cb();
+                                });
+                            }
+                            else async.setImmediate(cb);
+                        },
+                        function(cb) {
+                            if (pointSet.idCurveZ) {
+                                wiApiService.dataCurve(pointSet.idCurveZ, function (curveData) {
+                                    zCurveData = curveData;
+                                    cb();
+                                })
+                            }
+                            else async.setImmediate(cb);
+                        }
+                    ], function(result, err) {
+                        console.log(result, err);
+                        let crossplotProps = angular.copy(self.crossplotModel.properties);
+                        crossplotProps.pointSet = crossplotProps.pointsets[0];
+                        
+                        if (xCurveData) {
+                            crossplotProps.pointSet.curveX 
+                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveX }, xCurveData, self.well.properties);
+                        }
+                        if (yCurveData) {
+                            crossplotProps.pointSet.curveY 
+                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveY }, yCurveData, self.well.properties);
+                        }
+                        if (zCurveData) {
+                            crossplotProps.pointSet.curveZ 
+                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveZ }, zCurveData, self.well.properties);
+                        }
+
+                        wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
+                        wiD3CrossplotCtrl.viCrossplot.doPlot();
+                        if (callback) callback();
+
+                    });
+                    // wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
+                    //     wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
+                    //         if (pointSet.idCurveZ) {
+                    //             wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
+                    //                 pointSet.curveZ = graph.buildCurve({ 
+                    //                     idCurve: pointSet.idCurveZ 
+                    //                 }, zCurveData, self.well.properties);
+                    //             })
+                    //         }
+
+                    //         // let crossplotProps = angular.copy(self.crossplotModel.properties);
+                    //         // crossplotProps.pointSet = crossplotProps.pointsets[0];
+                    //         // crossplotProps.pointSet.curveX = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveX }, xCurveData, self.well.properties);
+                    //         // crossplotProps.pointSet.curveY = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveY }, yCurveData, self.well.properties);
+                            
+                    //         // wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
+                    //         // wiD3CrossplotCtrl.viCrossplot.doPlot();
+                    //     });
+                    // });
+                    // if (callback) callback();
+                }
             });
 
             /*
@@ -4691,13 +4780,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         };
         this.onOkButtonClicked = function () {
             updateCrossplot(function () {
-                close(self.crossplotModel.properties.pointSet);
+                close(self.crossplotModel.properties);
             });
         };
         this.onApplyButtonClicked = function () {
             // updateCrossplot();
             updateCrossplot(function () {
-                if (callback) callback(self.crossplotModel.properties.pointSet);
+                if (callback) callback(self.crossplotModel.properties);
             });
         };
         this.onCancelButtonClicked = function () {
