@@ -13,7 +13,7 @@
       </li>
       <li ng-repeat="i in items | filter:searchText">
         <a ng-click="select(i); focus()">
-          <i class='glyphicon glyphicon-ok' ng-class="{'color-black': i.checked, 'color-lightgray': !i.checked}"></i><span class='display-inline-block' style="padding-left: 0.2em; padding-right: 0.2em; border:1px solid #ccc;" ng-style="{'background-color':i.bgColor}">{{i.label}}</span>
+          <i class='glyphicon glyphicon-ok' ng-class="{'color-black': i.checked, 'color-lightgray': !i.checked}"></i><span class='display-inline-block' style="padding-left: 1em; padding-right: 1em; border-width: 2px; border-style: solid;" ng-style="{'border-color':i.bgColor}">{{i.label}}</span>
         </a>
       </li>
     </ul>

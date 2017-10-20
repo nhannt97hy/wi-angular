@@ -422,7 +422,7 @@ exports.histogramToTreeConfig = histogramToTreeConfig;
 
 function curveToTreeConfig(curve) {
     var curveModel = new Object();
-    curveModel.name = 'curve';
+    curveModel.name = curve.name;
     curveModel.type = 'curve';
     curveModel.id = curve.idCurve;
     curveModel.properties = {
@@ -1761,7 +1761,6 @@ function openCrossplotTab(crossplotModel, callback) {
                                 })
                             }
                         }
-                        console.log("createViCrossplot", viCurveX, viCurveY);
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                     }
 

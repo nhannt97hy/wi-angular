@@ -5952,11 +5952,11 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         //     }
         //     self.polygonList.push(pItem);
         // });
-
         let polygons = angular.copy(wiD3Crossplot.getPolygons());
         this.polygonList = new Array();
         polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
+                idx: index + 1,
                 value:polygonItem.idPolygon,
                 bgColor: polygonItem.lineStyle
             });
@@ -6819,9 +6819,6 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
 
 
 exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
-    let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
-    let props = angular.copy(viCrossplot.getProperties());
-    let ternary = this.ternary = props.ternary;
 
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
@@ -6844,24 +6841,27 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
         $scope.result = {}
         this.idPolygonTest = [];
-        // let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
-        // let props = angular.copy(viCrossplot.getProperties());
-        // let ternary = this.ternary = props.ternary;
+        let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
+        let props = angular.copy(viCrossplot.getProperties());
+        let ternary = this.ternary = props.ternary;
 
         this.vertices = ternary.vertices.map(function(vertex, index) {
             vertex.change = change.unchanged;
             vertex.index = index;
             return vertex;
         });
-
+        this.modelData = [];
+        this.optionsData = [1, 2, 3];
         let savedTernary = angular.copy(ternary);
         this.__idx = 0;
         $scope.selectedRow = 0;
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
-
+        console.log("///", $scope.calculateOptions);
+        
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
+                idx: index + 1, 
                 value: polygonItem.idPolygon,
                 bgColor: polygonItem.lineStyle
             });
