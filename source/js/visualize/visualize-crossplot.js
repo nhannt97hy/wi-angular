@@ -14,7 +14,7 @@ function Crossplot(config) {
     //this.paddingBottom = 50;
     this.paddingLeft = 50;
     this.paddingRight = 50;
-    this.paddingTop = 10;
+    this.paddingTop = 20;
     this.paddingBottom = 50;
 
     this.rectZWidth = 0;
