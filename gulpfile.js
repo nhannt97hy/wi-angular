@@ -396,7 +396,7 @@ gulp.task('deploy', function() {
     return gulp.src("./build/**/*")
         .pipe(rsync({
             root: "build/",
-            hostname: "centos@54.169.109.34",
+            hostname: "wi.i2g.cloud",
             destination:"/opt/wi-angular/build",
 			port: 22
         }));
