@@ -4612,6 +4612,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         // }
         function updateCrossplot(callback) {
             // var payload = buildPayload(self.crossplotModel.properties);
+            self.updating = true;
             async.parallel([
                 function(cb) {
                     wiApiService.editCrossplot(self.crossplotModel.properties, function(){
@@ -4683,6 +4684,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
                         //wiD3CrossplotCtrl.viCrossplot.doPlot();
+                        self.updating = false;
                         if (callback) callback(crossplotProps);
 
                     });
@@ -4692,14 +4694,14 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
  
         };
         this.onOkButtonClicked = function () {
-            updateCrossplot(function () {
-                close(self.crossplotModel.properties);
+            updateCrossplot(function (crossplotProps) {
+                close(crossplotProps);
             });
         };
         this.onApplyButtonClicked = function () {
             // updateCrossplot();
-            updateCrossplot(function () {
-                if (callback) callback(self.crossplotModel.properties);
+            updateCrossplot(function (crossplotProps) {
+                if (callback) callback(crossplotProps);
             });
         };
         this.onCancelButtonClicked = function () {
@@ -4713,6 +4715,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
+        modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');

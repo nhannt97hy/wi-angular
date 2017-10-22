@@ -42,8 +42,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
     };
-    this.onReady = function () {
+
+    this.onLoading = function() {
         document.getElementById(self.name + "-spinner").appendChild((new Spinner()).spin().el);
+    }
+
+    this.onReady = function () {
         self.linkModels();
 
         // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);

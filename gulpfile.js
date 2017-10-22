@@ -398,6 +398,7 @@ gulp.task('deploy', function() {
             root: "build/",
             hostname: "wi.i2g.cloud",
             destination:"/opt/wi-angular/build",
+            username: "centos",
 			port: 22
         }));
 });
