@@ -240,6 +240,7 @@ Crossplot.prototype.getProperties = function() {
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+    //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
     if (props.pointSet && props.pointSet.idZoneSet != null) {
         this.pointSet.zAxes = 'Zone';
     }
