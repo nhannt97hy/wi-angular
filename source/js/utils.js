@@ -1762,6 +1762,9 @@ function openCrossplotTab(crossplotModel, callback) {
                             }
                         }
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                        //__GLOBAL.$timeout(function() {
+                        //    wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                        //}, 1500);
                     }
 
                     if (pointSet.idCurveZ) {
@@ -2057,8 +2060,7 @@ function findFamilyById(idFamily) {
 exports.findFamilyById = findFamilyById;
 
 exports.evaluateExpr = evaluateExpr;
-function evaluateExpr(well, discriminator){
-    // let self = new Object();
+function evaluateExpr(well, discriminator) {
     let result = new Array();
     let wellProps = well.properties;
     let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;
@@ -2082,7 +2084,6 @@ function evaluateExpr(well, discriminator){
 
     function evaluate(condition, index){
         if(condition.children && condition.children.length){
-            // console.log('hasChilds');
             let left = evaluate(condition.children[0], index);
             let right = evaluate(condition.children[1], index);
             switch (condition.operator){
@@ -2093,7 +2094,6 @@ function evaluateExpr(well, discriminator){
             }
         }
         else {
-            // console.log('isLeaft')
             let leftCurve = curvesData.find(function(curve){
                 return curve.idCurve == condition.left.value;
             });
@@ -2109,9 +2109,7 @@ function evaluateExpr(well, discriminator){
                 right = parseFloat(rightCurve.data[index].x);
             }
 
-            // console.log('right',right);
             if(left && right){
-                // console.log('not Null');
                 switch (condition.comparison){
                     case '<':
                         return left < right;
@@ -2149,5 +2147,5 @@ function evaluateExpr(well, discriminator){
             }
             console.log(result);
         }
-        )
+    );
 }

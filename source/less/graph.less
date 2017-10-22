@@ -67,22 +67,29 @@
     cursor: row-resize;
 }
 
+.vi-crossplot-header-container {
+    flex: 0 1 auto;
+    text-align: center;
+    .vi-crossplot-header-name {
+        font-size: 20px;
+    }
+    .vi-crossplot-header-reference {
+
+    }
+}
+
+.vi-crossplot-footer-container {
+    flex: 0 1 auto;
+    height: 20px;
+    line-height: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
 .vi-crossplot-container {
     position: relative;
     flex: 1;
     display: flex;
     flex-flow: column;
-
-    .vi-crossplot-header-container {
-        flex: 0 1 auto;
-        text-align: center;
-        .vi-crossplot-header-name {
-            font-size: 20px;
-        }
-        .vi-crossplot-header-reference {
-
-        }
-    }
 
     .vi-crossplot-body-container {
         position: relative;
@@ -114,25 +121,19 @@
         }
     }
 
-    .vi-crossplot-footer-container {
-        flex: 0 1 auto;
-        height: 20px;
-        line-height: 20px;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
 }
 
 .vi-histogram-container {
     flex: 1;
     overflow: visible;
     position: relative;
-    padding: 0px 50px 20px 50px;
+    padding: 10px 50px 20px 50px;
     //box-sizing: content-box;
     .vi-histogram-svg {
         overflow: visible;
         //border: 1px solid blue;
         position: absolute;
-        top: 0px;
+        top: 10px;
         left: 50px;
         //padding: 0px 50px 20px 50px;
         //background-color: yellow;

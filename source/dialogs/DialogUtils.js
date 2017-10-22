@@ -4681,9 +4681,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                                 = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveZ }, zCurveData, self.well.properties);
                         }
 
-                        wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
-                        wiD3CrossplotCtrl.viCrossplot.doPlot();
-                        if (callback) callback();
+                        //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
+                        //wiD3CrossplotCtrl.viCrossplot.doPlot();
+                        if (callback) callback(crossplotProps);
 
                     });
                     // wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {

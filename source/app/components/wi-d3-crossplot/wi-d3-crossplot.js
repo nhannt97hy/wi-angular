@@ -13,7 +13,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.isShowWiZone = true;
     // this.isShowReferenceWindow = true;
     let _well = null;
-    window.abc = this;
 
     var saveCrossplot= utils.debounce(function() {
         wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
@@ -24,8 +23,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.saveCrossplot = saveCrossplot;
 
     function saveCrossplotNow(callback) {
+        console.log('saveCrossplotNow');
         wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
-            console.log('updated');
+            console.log('updated', self.crossplotModel.properties);
             if (callback) callback();
         });
     }
@@ -43,11 +43,83 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
     this.onReady = function () {
+        document.getElementById(self.name + "-spinner").appendChild((new Spinner()).spin().el);
         self.linkModels();
 
         // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
     }
     // let well = utils.findWellById(self.crossplotModel.properties.idWell);
+
+    function buildHistogramProps(crossplotModel, xy) {
+        var histogramProps = {};
+        var pointSet = null;
+        //histogramProps = crossplotModel.properties;
+        if (crossplotModel.properties.pointsets && crossplotModel.properties.pointsets.length) {
+            pointSet = crossplotModel.properties.pointsets[0];
+            histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
+            histogramProps.leftScale = (xy == 'xCurve')?pointSet.scaleLeft:pointSet.scaleBottom;
+            histogramProps.rightScale = (xy == 'xCurve')?pointSet.scaleRight:pointSet.scaleTop;
+            histogramProps.idZoneSet = pointSet.idZoneSet;
+            histogramProps.intervalDepthTop = pointSet.intervalDepthTop;
+            histogramProps.intervalDepthBottom = pointSet.intervalDepthBottom;
+            histogramProps.color = pointSet.pointColor;
+            histogramProps.activeZone = pointSet.activeZone;
+            histogramProps.divisions = (xy == 'xCurve')?pointSet.majorX:pointSet.majorY;
+        }
+        histogramProps.loga = false;
+        histogramProps.showGrid = false;
+        histogramProps.showGaussian = true;
+        histogramProps.showCumulative = true;
+        histogramProps.plotType = 'Frequency';
+        histogramProps.plot = 'Bar';
+        return histogramProps;
+    }
+    this.histogramXReady = function() {
+        self.histogramModelX = {
+            properties: buildHistogramProps(self.crossplotModel, 'xCurve')
+        };
+        var elem = document.getElementById(self.name + 'HistogramX');
+        var well = getWell();
+        self.xHistogram = graph.createHistogram(self.histogramModelX, parseFloat(well.properties.step), 
+                parseFloat(well.properties.topDepth), 
+                parseFloat(well.properties.bottomDepth), elem);
+
+        let activeZones = self.getZoneCtrl().getActiveZones();
+        self.xHistogram.setZoneSet(activeZones);
+        self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
+
+        self.xHistogram.doPlot();
+    }
+    this.histogramYReady = function() {
+        self.histogramModelY = {
+            properties: buildHistogramProps(self.crossplotModel, 'yCurve')
+        };
+        var containerId = "#" + self.name + 'HistogramY';
+        var elem = $(containerId);
+        var innerElem = $(containerId + ' .transform-group');
+        new ResizeSensor(elem[0], function() {
+            innerElem.css('width', elem[0].clientHeight + 'px');
+            innerElem.css('height', elem[0].clientWidth + 'px');
+        });
+        innerElem.css('width', elem[0].clientHeight + 'px');
+        innerElem.css('height', elem[0].clientWidth + 'px');
+        var well = getWell();
+        self.yHistogram = graph.createHistogram(self.histogramModelY, parseFloat(well.properties.step), 
+                parseFloat(well.properties.topDepth), 
+                parseFloat(well.properties.bottomDepth), innerElem[0]);
+
+        let activeZones = self.getZoneCtrl().getActiveZones();
+        self.yHistogram.setZoneSet(activeZones);
+        self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
+
+        self.yHistogram.doPlot();
+    }
+    this.doShowHistogram = function() {
+        if (self.crossplotModel && self.crossplotModel.properties) {
+            self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
+            if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
+        }
+    }
 
     this.getWell = getWell;
     function getWell() {
@@ -75,7 +147,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.onRefWindCtrlReady = function(refWindCtrl) {
         console.log('Reference window is ready to update');
-        refWindCtrl.update(getWell(), self.crossplotModel.properties.reference_curves);
+        refWindCtrl.update(
+            getWell(), 
+            self.crossplotModel.properties.reference_curves, 
+            self.crossplotModel.properties.referenceScale,
+            self.crossplotModel.properties.referenceVertLineNumber);
     }
 
     this.getWiRefWindCtrlName = function () {
@@ -90,7 +166,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.linkModels = function () {
         self.zoneArr = null;
 
-        if (self.crossplotModel && self.crossplotModel.properties.pointsets[0] && self.crossplotModel.properties.pointsets[0].idZoneSet) {
+        if (self.crossplotModel && self.crossplotModel.properties.pointsets && 
+            self.crossplotModel.properties.pointsets.length &&
+            self.crossplotModel.properties.pointsets[0] && 
+            self.crossplotModel.properties.pointsets[0].idZoneSet) {
             console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneArr = self.zoneSetModel.children;
@@ -145,10 +224,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 })
             }
             console.log("Model", self.crossplotModel);
-            DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (ret) {
+            DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (crossplotProps) {
                 console.log("ret", ret);
                 self.linkModels();
-            })
+                self.viCrossplot.setProperties(crossplotProps);
+                self.viCrossplot.doPlot();
+            });
         }
         if (!self.crossplotModel || !self.pointSet) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
@@ -211,7 +292,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
                 self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
-                utils.triggerWindowResize();
+                $timeout(function() {
+                    self.getWiRefWindCtrl().refresh();
+                }, 100);
+                //utils.triggerWindowResize();
             }
         },{
             name: "ReferenceWindow",
@@ -220,8 +304,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let well = getWell();
                 DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
                     saveCrossplotNow(function() {
-                        console.log("READYYYYY");
-                        self.getWiRefWindCtrl().update(_well, self.crossplotModel.properties.reference_curves);
+                        self.getWiRefWindCtrl().update(_well, 
+                            self.crossplotModel.properties.reference_curves,
+                            self.crossplotModel.properties.referenceScale,
+                            self.crossplotModel.properties.referenceVertLineNumber);
                     });
                 });
             }
@@ -234,8 +320,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, {
             name: "ShowHistogram",
             label: "Show Histogram",
-            handler: function () {
-
+            isCheckType: "true",
+            checked: (self.crossplotModel && self.crossplotModel.properties)?self.crossplotModel.properties.showHistogram:false,
+            handler: function (index) {
+                self.doShowHistogram();
+                self.contextMenu[index].checked = self.crossplotModel.properties.showHistogram;;
             }
         }, {
             name: "Function",

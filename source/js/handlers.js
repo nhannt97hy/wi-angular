@@ -633,7 +633,7 @@ exports.BlankCrossPlotButtonClicked = function () {
                     idCrossPlot: wiCrossplotCtrl.id,
                     idWell: selectedNode.properties.idWell,
                     pointSet: pointSet
-                })
+                });
             })
         });
     });
