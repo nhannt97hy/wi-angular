@@ -14,15 +14,15 @@
                 ng-change="wiConditionNode.update()"></select>
         </div>
         <div class='col-xs-4'>
-            <wi-multi-input model='wiConditionNode.item.right' curves-list='wiConditionNode.curveOptions'
+            <wi-multi-input ng-model='wiConditionNode.item.right' model='wiConditionNode.item.right' curves-list='wiConditionNode.curveOptions'
             ng-change='wiConditionNode.update()'></wi-multi-input>
         </div>
     </div>
     <div ng-if="!wiConditionNode.isNull() && wiConditionNode.item.children" class='condition-node' 
         >
         <div class="condition-operands">
-            <div ng-repeat="childNode in wiConditionNode.item.children" class='container-fluid'>
-                <wi-condition-node item='childNode' curve-options='wiConditionNode.curveOptions' on-delete='wiConditionNode.onDelete' root='wiConditionNode.root'>
+            <div ng-repeat="childNode in wiConditionNode.item.children">
+                <wi-condition-node item='childNode' curve-options='wiConditionNode.curveOptions' root='wiConditionNode.root'>
                 </wi-condition-node>
             </div>
         </div>

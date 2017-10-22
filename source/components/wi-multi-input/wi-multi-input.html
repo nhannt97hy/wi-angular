@@ -1,7 +1,7 @@
-<div class="dropdown form-group"  uib-dropdown>
+<div class="dropdown"  uib-dropdown>
     <button class="btn btn-default dropdown-toggle multi-input-selected" uib-dropdown-toggle id="dropdownMenu">
         <span ng-if="wiMultiInput.model.type == 'value'">
-            {{wiMultiInput.model.value}}
+            {{wiMultiInput.SelectedValue}}
         </span>
         <span ng-if="wiMultiInput.model.type == 'curve'">
             {{wiMultiInput.SelectedCurve.properties.name}}
@@ -11,14 +11,15 @@
     <ul class="dropdown-menu multi-input-menu" aria-labelledby="dropdownMenu" uib-dropdown-menu role="menu">
         <li style="margin-bottom: 7px">
             <label>
-                <input type="radio" name='inputType' value="value" ng-model="wiMultiInput.model.type">
+                <input type="radio" name='inputType' value="value" ng-model="wiMultiInput.model.type" style="vertical-align:top"
+                ng-click="wiMultiInput.onValueChange()">
                 Value
             </label>
-            <input type="number" ng-model="wiMultiInput.model.value" ng-disabled="wiMultiInput.model.type == 'curve'" class="form-control wi-form-control">
+            <input type="number" ng-model="wiMultiInput.SelectedValue" ng-disabled="wiMultiInput.model.type == 'curve'" class="form-control wi-form-control" ng-change='wiMultiInput.onValueChange()'>
         </li>
         <li>
             <label>
-                <input type="radio" name='inputType' value="curve" ng-model="wiMultiInput.model.type"
+                <input type="radio" name='inputType' value="curve" ng-model="wiMultiInput.model.type" style="vertical-align:top"
                 ng-click="wiMultiInput.onSelectCurve()">
                 Curve
             </label>

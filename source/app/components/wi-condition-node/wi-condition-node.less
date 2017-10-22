@@ -1,10 +1,6 @@
 wi-condition-node {
     .condition-node{
         display: flex;
-        flex-direction: row;
-        display: flex;
-        justify-content: center;
-        text-align: center;
     }
     .condition-operands {
         flex: 1;
@@ -12,10 +8,10 @@ wi-condition-node {
     .condition-operator {
         text-align: center;
         flex-basis: 90px;
-        // border: 1px solid #e61212;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        margin-left: 1em;
     }
     .condition-item {
         padding: 1em;
@@ -25,15 +21,14 @@ wi-condition-node {
     .condition-item-selected {
         border: 1px solid red;
     }
-    .condition-item-selected input,
     .condition-item-selected select,
+    .condition-item-selected wi-multi-input button,
     {
         border-color: red;
-        color: red;
+        // color: red;
     }
     .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-1, .col-xs-8, .col-xs-6, .container-fluid {
         padding-left: 3px;
         padding-right: 3px;
     }
-    button.close {display:none;}
 }

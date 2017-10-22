@@ -8,7 +8,6 @@ function Controller(wiComponentService) {
     this.operators = ['and', 'or'];
 
     this.update = function () {
-        console.log('update');
         wiComponentService.emit('discriminator-update');
     }
 
