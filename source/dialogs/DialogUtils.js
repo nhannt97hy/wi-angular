@@ -6660,7 +6660,6 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             });
             let selectedNode;
             let parentNode = null;
-            console.log(retVal, path);
 
             if (!self.conditionTree) {
                 self.conditionTree = {

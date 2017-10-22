@@ -6,22 +6,25 @@ function Controller() {
 
     this.$onInit = function(){
         if(self.model.type == 'value'){
-            self.selected = self.model.value;
+            self.SelectedValue = self.model.value;
         }else if (self.model.type == 'curve') {
             self.SelectedCurve = self.curvesList.find(curve => {
                 return curve.id == self.model.value;
             })
-            self.selected = self.SelectedCurve.properties.name;
         }else{
             return;
         }
     }
 
+    this.onValueChange = function(){
+        self.model.value = self.SelectedValue;
+    }
+
     this.onSelectCurve = function(){
         if(!self.SelectedCurve){
             self.SelectedCurve = self.curvesList[0];
-            self.model.value = self.SelectedCurve.properties.idCurve;            
         }
+        self.model.value = self.SelectedCurve.properties.idCurve;            
     }
     this.onSelectCurveChange = function(){
         if(self.SelectedCurve){
