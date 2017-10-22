@@ -42,8 +42,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
     };
-    this.onReady = function () {
+
+    this.onLoading = function() {
         document.getElementById(self.name + "-spinner").appendChild((new Spinner()).spin().el);
+    }
+
+    this.onReady = function () {
         self.linkModels();
 
         // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
@@ -225,10 +229,33 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
             console.log("Model", self.crossplotModel);
             DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (crossplotProps) {
-                console.log("ret", ret);
+                console.log("ret", crossplotProps);
+                crossplotProps.pointSet = crossplotProps.pointsets[0];
                 self.linkModels();
                 self.viCrossplot.setProperties(crossplotProps);
                 self.viCrossplot.doPlot();
+                if (self.histogramModelX) {
+                    if ($('#' + self.name + "HistogramX").length) {
+                        self.histogramModelX.properties = buildHistogramProps(self.crossplotModel, 'xCurve');
+                        self.xHistogram.setHistogramModel(self.histogramModelX);
+                        let activeZones = self.getZoneCtrl().getActiveZones();
+                        self.xHistogram.setZoneSet(activeZones);
+                        self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
+
+                        self.xHistogram.doPlot();
+                    }
+                }
+                if (self.histogramModelY) {
+                    if ($('#' + self.name + "HistogramY").length) {
+                        self.histogramModelY.properties = buildHistogramProps(self.crossplotModel, 'yCurve');
+                        self.yHistogram.setHistogramModel(self.histogramModelY);
+                        let activeZones = self.getZoneCtrl().getActiveZones();
+                        self.yHistogram.setZoneSet(activeZones);
+                        self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
+
+                        self.yHistogram.doPlot();
+                    }
+                }
             });
         }
         if (!self.crossplotModel || !self.pointSet) {

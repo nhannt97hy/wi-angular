@@ -14,7 +14,7 @@ function Crossplot(config) {
     //this.paddingBottom = 50;
     this.paddingLeft = 50;
     this.paddingRight = 50;
-    this.paddingTop = 20;
+    this.paddingTop = 10;
     this.paddingBottom = 50;
 
     this.rectZWidth = 0;
@@ -240,6 +240,7 @@ Crossplot.prototype.getProperties = function() {
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+    //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
     if (props.pointSet && props.pointSet.idZoneSet != null) {
         this.pointSet.zAxes = 'Zone';
     }

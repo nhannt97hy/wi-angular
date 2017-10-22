@@ -31,6 +31,7 @@
                     </div>
                     <div ng-dblclick="wiD3Crossplot.propertiesDialog();" style='flex:1' class='vi-crossplot-container' 
                         wi-element-ready='wiD3Crossplot.onReady()'>
+                        <div ng-if='wiD3Crossplot.loading' wi-element-ready="wiD3Crossplot.onLoading();" style="position:absolute;top:0;left:0;bottom:0;right:0" id="{{wiD3Crossplot.name + '-spinner'}}"></div>
                     </div>
                 </div>
             </div>

@@ -1691,12 +1691,15 @@ function openCrossplotTab(crossplotModel, callback) {
     let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
 
     let wellProps = findWellById(crossplotModel.properties.idWell);
-
+    wiD3CrossplotCtrl.loading = true;
     wiApiService.getCrossplot(crossplotModel.properties.idCrossPlot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
             console.log("crosplot", crossplot);
-            if (!pointSet.idCurveX || !pointSet.idCurveY) return;
+            if (!pointSet.idCurveX || !pointSet.idCurveY) {
+                wiD3CrossplotCtrl.loading = false;
+                return;
+            }
 
             wiApiService.dataCurve(pointSet.idCurveX, function (dataX) {
                 wiApiService.dataCurve(pointSet.idCurveY, function (dataY) {
@@ -1773,12 +1776,17 @@ function openCrossplotTab(crossplotModel, callback) {
                             let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
+                            wiD3CrossplotCtrl.loading = false;
                         });
                     } else {
                         createViCrossplot();
+                        wiD3CrossplotCtrl.loading = false;
                     }
                 })
             })
+        }
+        else {
+            wiD3CrossplotCtrl.loading = false;
         }
     })
     if (callback) callback(wiCrossplotCtrl);

@@ -4612,6 +4612,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         // }
         function updateCrossplot(callback) {
             // var payload = buildPayload(self.crossplotModel.properties);
+            self.updating = true;
             async.parallel([
                 function(cb) {
                     wiApiService.editCrossplot(self.crossplotModel.properties, function(){
@@ -4683,110 +4684,24 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
                         //wiD3CrossplotCtrl.viCrossplot.doPlot();
+                        self.updating = false;
                         if (callback) callback(crossplotProps);
 
                     });
-                    // wiApiService.dataCurve(pointSet.idCurveX, function (xCurveData) {
-                    //     wiApiService.dataCurve(pointSet.idCurveY, function (yCurveData) {
-                    //         if (pointSet.idCurveZ) {
-                    //             wiApiService.dataCurve(pointSet.idCurveZ, function (zCurveData) {
-                    //                 pointSet.curveZ = graph.buildCurve({ 
-                    //                     idCurve: pointSet.idCurveZ 
-                    //                 }, zCurveData, self.well.properties);
-                    //             })
-                    //         }
-
-                    //         // let crossplotProps = angular.copy(self.crossplotModel.properties);
-                    //         // crossplotProps.pointSet = crossplotProps.pointsets[0];
-                    //         // crossplotProps.pointSet.curveX = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveX }, xCurveData, self.well.properties);
-                    //         // crossplotProps.pointSet.curveY = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveY }, yCurveData, self.well.properties);
-                            
-                    //         // wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
-                    //         // wiD3CrossplotCtrl.viCrossplot.doPlot();
-                    //     });
-                    // });
-                    // if (callback) callback();
                 }
             });
 
-            /*
-            let updateBackend = function(callback) {
-                async.waterfall([
-                    function(cb) {
-                        wiApiService.editCrossplot(self.crossplotModel.properties, function() {
-                            cb();
-                        });
-                    },
-                    function(cb) {
-                        wiApiService.editPointSet(self.crossplotModel.properties.pointSet, function() {
-                            cb();
-                        });
-                    },
-                ], function(err) {
-                    if (err) {
-                        console.log('ERROR', err);
-                        utils.error(err);
-                    }
-                    else if (callback) callback();
-                });
-            }
-
-            
-            let updateVisualize = function(callback) {
-                let findCurveData = function(cb) {
-                    let props = angular.copy(self.crossplotModel.properties);
-                    let pointSet = props.pointSet;
-
-                    async.eachOfSeries(CURVE_SYMBOLS, function(symbol, idx, callback) {
-                        let idKey = 'idCurve' + symbol;
-                        let objKey = 'curve' + symbol;
-                        if (pointSet[idKey] != null && pointSet[objKey] == null) {
-                            wiApiService.dataCurve(pointSet[idKey], function (data) {
-                                let curve = utils.getModel('curve', pointSet[idKey]).properties;
-                                pointSet[objKey] = graph.buildCurve(curve, data, self.well.properties);
-                                callback();
-                            });
-                        }
-                        else
-                            callback();
-                    }, function() {
-                        cb(null, props);
-                    });
-                }
-                let rePlot = function(props, cb) {
-                    self.viCrossplot.setProperties(props);
-                    self.viCrossplot.doPlot();
-                    cb();
-                }
-
-                async.waterfall([
-                    findCurveData,
-                    rePlot
-                ], function(err) {
-                    if (err) {
-                        console.log('ERROR', err);
-                        utils.error(err);
-                    }
-                    else if (callback) callback();
-                });
-            }
-
-            async.waterfall([
-                updateBackend,
-                updateVisualize
-            ], callback);
-            */
  
         };
         this.onOkButtonClicked = function () {
-            updateCrossplot(function () {
-                close(self.crossplotModel.properties);
+            updateCrossplot(function (crossplotProps) {
+                close(crossplotProps);
             });
         };
         this.onApplyButtonClicked = function () {
             // updateCrossplot();
-            updateCrossplot(function () {
-                if (callback) callback(self.crossplotModel.properties);
+            updateCrossplot(function (crossplotProps) {
+                if (callback) callback(crossplotProps);
             });
         };
         this.onCancelButtonClicked = function () {
@@ -4800,6 +4715,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
+        modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
