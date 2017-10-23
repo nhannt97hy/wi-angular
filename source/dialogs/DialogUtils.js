@@ -18,7 +18,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
             if (self.error) return;
             let dataRequest = {
                     username: self.usernameReg,
-                    password: self.passwordReg
+                    password: self.passwordReg,
+                    email: self.useremailReg,
+                    fullname: self.userfullnameReg
             }
             wiApiService.register(dataRequest, function (token) {
                 // let userInfo = {
