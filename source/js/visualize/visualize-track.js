@@ -275,7 +275,7 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 }
 
 /**
- * Register event when drag track. TODO !!!
+ * Register event when drag track
  */
 Track.prototype.onTrackDrag = function(callback) {
     let self = this;
@@ -283,18 +283,20 @@ Track.prototype.onTrackDrag = function(callback) {
     $(this.trackContainer.node()).draggable({
         axis: 'x',
         containment: 'parent',
-        // helper: 'clone',
-        revert: true,
-        revertDuration: 500,
-        opacity: 0.3,
+        helper: function () {
+            width = self.width;
+            self.width = 60;
+            self.doPlot();
+            return $(self.trackContainer.node()).clone().css('z-index', 99);
+        },
+        opacity: 0.7,
         distance: 10,
         handle: '.vi-track-header-name',
         snap: '.vi-track-vertical-resizer',
         scope: 'tracks',
         start: function (event, ui) {
             document.addEventListener('ontrackdrop', onTrackDropHandler, false);
-            width = self.width;
-            self.width = 60;
+            self.width = width;
             self.doPlot();
             function onTrackDropHandler(event) {
                 document.removeEventListener('ontrackdrop', onTrackDropHandler);
@@ -302,10 +304,6 @@ Track.prototype.onTrackDrag = function(callback) {
                 callback(self, event.desTrack);
             }
         },
-        stop : function (event, ui) {
-            self.width = width;
-            self.doPlot();
-        }
     });
     $(this.verticalResizer.node()).droppable({
         accept: '.vi-track-container',

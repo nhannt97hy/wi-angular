@@ -938,41 +938,82 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         })
     }
-    window.LOGTRACKARRAY = _tracks;
+
+    function editOrderNum(viTrack, orderNum) {
+        return new Promise((resolve, reject) => {
+            if (viTrack.isLogTrack()) {
+                wiApiService.editTrack({idTrack: viTrack.id, orderNum: orderNum}, function () {
+                    resolve();
+                })
+            } else if (viTrack.isDepthTrack()) {
+                wiApiService.editDepthTrack({idDepthAxis: viTrack.id, orderNum: orderNum}, function () {
+                    resolve();
+                })
+            } else if (viTrack.isZoneTrack()) {
+                wiApiService.editZoneTrack({idZoneTrack: viTrack.id, orderNum: orderNum}, function () {
+                    resolve();
+                })
+            }
+        }).then(function () {
+            viTrack.orderNum = orderNum;
+            viTrack.updateOrderNum();
+            _tracks.sort(function(track1, track2) {
+                return track1.orderNum.localeCompare(track2.orderNum);
+            });
+            graph.rearrangeTracks(self);
+        })
+    }
+
+    function reindexAllTracks() {
+        let promises = [];
+        let backupTracks = angular.copy(_tracks);
+        for (var i = 0; i < _tracks.length; i++) {
+            let viTrack = _tracks[i];
+            let orderNum;
+            if (i == 0) orderNum = 'a';
+            else orderNum = String.fromCharCode(_tracks[i-1].orderNum.charCodeAt(0) + 1);
+            viTrack.orderNum = orderNum;
+            promises.push(new Promise((resolve, reject) => {
+                if (viTrack.isLogTrack()) {
+                    wiApiService.editTrack({ idTrack: viTrack.id, orderNum: orderNum }, function () {
+                        resolve();
+                    })
+                } else if (viTrack.isDepthTrack()) {
+                    wiApiService.editDepthTrack({ idDepthAxis: viTrack.id, orderNum: orderNum }, function () {
+                        resolve();
+                    })
+                } else if (viTrack.isZoneTrack()) {
+                    wiApiService.editZoneTrack({ idZoneTrack: viTrack.id, orderNum: orderNum }, function () {
+                        resolve();
+                    })
+                }
+            }).then(function () {
+                viTrack.updateOrderNum();
+            }));
+        }
+        Promise.all(promises)
+            .then(function () {
+                _tracks.sort(function (track1, track2) {
+                    return track1.orderNum.localeCompare(track2.orderNum);
+                });
+                graph.rearrangeTracks(self);
+            }).catch(function (err) {
+                if (err) {
+                    _tracks = backupTracks;
+                }
+            })
+    }
+    window.TRACKS = _tracks;
     function _registerTrackDragCallback() {
         _tracks.forEach(function(track) {
             track.onTrackDrag(function (srcTrack, desTrack) {
                 let desTrackIndex = _tracks.findIndex(track => track == desTrack);
                 if (_tracks[desTrackIndex + 1] == srcTrack) return;
                 let orderNum = getOrderKey(desTrack);
-                if (srcTrack.isLogTrack()) {
-                    wiApiService.editTrack({idTrack: srcTrack.id, orderNum: orderNum}, function () {
-                        srcTrack.orderNum = orderNum;
-                        srcTrack.updateOrderNum();
-                        _tracks.sort(function(track1, track2) {
-                            return track1.orderNum.localeCompare(track2.orderNum);
-                        });
-                        graph.rearrangeTracks(self);
-                    })
-                } else if (srcTrack.isDepthTrack()) {
-                    wiApiService.editDepthTrack({idDepthAxis: srcTrack.id, orderNum: orderNum}, function () {
-                        srcTrack.orderNum = orderNum;
-                        srcTrack.updateOrderNum();
-                        _tracks.sort(function(track1, track2) {
-                            return track1.orderNum.localeCompare(track2.orderNum);
-                        });
-                        graph.rearrangeTracks(self);
-                    })
-                } else if (srcTrack.isZoneTrack()) {
-                    wiApiService.editZoneTrack({idZoneTrack: srcTrack.id, orderNum: orderNum}, function () {
-                        srcTrack.orderNum = orderNum;
-                        srcTrack.updateOrderNum();
-                        _tracks.sort(function(track1, track2) {
-                            return track1.orderNum.localeCompare(track2.orderNum);
-                        });
-                        graph.rearrangeTracks(self);
-                    })
-                }
+                editOrderNum(srcTrack, orderNum).then(function () {
+                    if (orderNum.length < 50) return;
+                    reindexAllTracks();
+                })
             });
         });
     }
