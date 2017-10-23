@@ -142,7 +142,7 @@ exports.DeleteItemButtonClicked = function () {
                         });
                         break;
                     case 'crossplot':
-                        wiApiService.removeCrossplot(selectedNode.properties.idCrossplot, function () {
+                        wiApiService.removeCrossplot(selectedNode.properties.idCrossPlot, function () {
                             $timeout(function () {
                                 selectedNode.data.deleted = true;
                                 wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);

@@ -335,7 +335,7 @@ function crossplotToTreeConfig(crossplot) {
     crossplotModel.id = crossplot.idCrossPlot;
     crossplotModel.properties = {
         idWell: crossplot.idWell,
-        idCrossplot: crossplot.idCrossPlot,
+        idCrossPlot: crossplot.idCrossPlot,
         name: crossplot.name,
         discriminator: crossplot.discriminator,
         referenceTopDepth: crossplot.referenceTopDepth,
@@ -422,7 +422,7 @@ exports.histogramToTreeConfig = histogramToTreeConfig;
 
 function curveToTreeConfig(curve) {
     var curveModel = new Object();
-    curveModel.name = 'curve';
+    curveModel.name = curve.name;
     curveModel.type = 'curve';
     curveModel.id = curve.idCurve;
     curveModel.properties = {
@@ -1135,9 +1135,9 @@ exports.findWellByLogplot = function (idLogplot) {
     }) || [];
     return path[1];
 };
-exports.findWellByCrossplot = function (idCrossplot) {
+exports.findWellByCrossplot = function (idCrossPlot) {
     var path = getSelectedPath(function (node) {
-        return node.type == 'crossplot' && node.id == idCrossplot;
+        return node.type == 'crossplot' && node.id == idCrossPlot;
     }) || [];
     return path[1];
 }
@@ -1653,21 +1653,27 @@ exports.createPointSet = function (pointSetData, callback) {
     })
 }
 
-exports.createCrossplot = function (idWell, crossplotName, callback) {
+exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let dataRequest = {
         idWell: idWell,
-        name: crossplotName
+        name: crossplotName,
+        crossTemplate: crossTemplate
     }
     __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
-        if(!crossplot.name){
-            DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Name: " + dataRequest.name + " existed!");
-        } else {
-            let crossplotModel = crossplotToTreeConfig(crossplot);
-            refreshProjectState().then(function () {
-                openCrossplotTab(crossplotModel, callback);
-            });
-        }
+        let crossplotModel = crossplotToTreeConfig(crossplot);
+        refreshProjectState().then(function () {
+            openCrossplotTab(crossplotModel, callback);
+        });
+        setTimeout(function () {
+            if(crossplot.foundCurveX && crossplot.foundCurveY){
+
+            } else {
+                let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
+                let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
+                if(crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX +"<br>"+ curveY);
+            }
+        }, 1000);
     })
 }
 
@@ -1680,17 +1686,20 @@ function openCrossplotTab(crossplotModel, callback) {
     let graph = wiComponentService.getComponent('GRAPH');
     if (crossplotModel.data.opened) return;
     crossplotModel.data.opened = true;
-    let crossplotName = 'crossplot' + crossplotModel.properties.idCrossplot;
+    let crossplotName = 'crossplot' + crossplotModel.properties.idCrossPlot;
     let wiCrossplotCtrl = __GLOBAL.wiComponentService.getComponent(crossplotName);
     let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
 
     let wellProps = findWellById(crossplotModel.properties.idWell);
-
-    wiApiService.getCrossplot(crossplotModel.properties.idCrossplot, function (crossplot) {
+    wiD3CrossplotCtrl.loading = true;
+    wiApiService.getCrossplot(crossplotModel.properties.idCrossPlot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
             console.log("crosplot", crossplot);
-            if (!pointSet.idCurveX || !pointSet.idCurveY) return;
+            if (!pointSet.idCurveX || !pointSet.idCurveY) {
+                wiD3CrossplotCtrl.loading = false;
+                return;
+            }
 
             wiApiService.dataCurve(pointSet.idCurveX, function (dataX) {
                 wiApiService.dataCurve(pointSet.idCurveY, function (dataY) {
@@ -1755,8 +1764,10 @@ function openCrossplotTab(crossplotModel, callback) {
                                 })
                             }
                         }
-                        console.log("createViCrossplot", viCurveX, viCurveY);
                         wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                        //__GLOBAL.$timeout(function() {
+                        //    wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                        //}, 1500);
                     }
 
                     if (pointSet.idCurveZ) {
@@ -1765,19 +1776,24 @@ function openCrossplotTab(crossplotModel, callback) {
                             let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
+                            wiD3CrossplotCtrl.loading = false;
                         });
                     } else {
                         createViCrossplot();
+                        wiD3CrossplotCtrl.loading = false;
                     }
                 })
             })
+        }
+        else {
+            wiD3CrossplotCtrl.loading = false;
         }
     })
     if (callback) callback(wiCrossplotCtrl);
 };
 exports.openCrossplotTab = openCrossplotTab;
 
-exports.createHistogram = function (idWell, curve, histogramName) {
+exports.createHistogram = function (idWell, curve, histogramName, histogramTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let dataRequest = curve ? {
         idWell: idWell,
@@ -1787,17 +1803,19 @@ exports.createHistogram = function (idWell, curve, histogramName) {
         name: histogramName
     }: {
         idWell: idWell,
-        name: histogramName
+        name: histogramName,
+        histogramTemplate: histogramTemplate
     };
     __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
-        if(!histogram.name){
-            DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Name: " + dataRequest.name + " existed!");
-        } else {
-            let histogramModel = histogramToTreeConfig(histogram);
-            refreshProjectState().then(function () {
-                openHistogramTab(histogramModel);
-            });
-        }
+        let histogramModel = histogramToTreeConfig(histogram);
+        refreshProjectState().then(function () {
+            openHistogramTab(histogramModel);
+        });
+        setTimeout(function () {
+           if(histogram.noCurveFound || histogram.noCurveFound == "true"){
+               DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
+           }
+        }, 1000);
     })
 };
 
@@ -2047,3 +2065,94 @@ function findFamilyById(idFamily) {
 }
 
 exports.findFamilyById = findFamilyById;
+
+exports.evaluateExpr = evaluateExpr;
+function evaluateExpr(well, discriminator) {
+    let result = new Array();
+    let wellProps = well.properties;
+    let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;
+    let curveSet = new Set();
+    let curvesData = new Array();
+    
+    function findCurve(condition){
+        if(condition.children && condition.children.length){
+            condition.children.forEach(function(child){
+                findCurve(child);
+            })
+        }else{
+            curveSet.add(condition.left.value);
+            if(condition.right.type == 'curve'){
+                curveSet.add(condition.right.value);
+            }
+        }
+    }
+
+    findCurve(discriminator);
+
+    function evaluate(condition, index){
+        if(condition.children && condition.children.length){
+            let left = evaluate(condition.children[0], index);
+            let right = evaluate(condition.children[1], index);
+            switch (condition.operator){
+                case 'and':
+                    return left && right;
+                case 'or':
+                    return left || right;
+            }
+        }
+        else {
+            let leftCurve = curvesData.find(function(curve){
+                return curve.idCurve == condition.left.value;
+            });
+
+            let left = parseFloat(leftCurve.data[index].x);
+            // console.log('left', left);
+
+            let right = condition.right.value;
+            if(condition.right.type == 'curve'){
+                let rightCurve = curvesData.find(function(curve){
+                    return curve.idCurve == condition.right.value;
+                })
+                right = parseFloat(rightCurve.data[index].x);
+            }
+
+            if(left && right){
+                switch (condition.comparison){
+                    case '<':
+                        return left < right;
+                    case '>':
+                        return left > right;
+                    case '=':
+                        return left == right;
+                    case '<=':
+                        return left <= right;
+                    case '>=':
+                        return left >= right;
+                }
+            }else{
+                return true;
+            }
+            
+        }
+    }
+    let curveArr = Array.from(curveSet);
+    async.each(
+        curveArr,
+        function (curve, done) {
+            __GLOBAL.wiApiService.dataCurve(curve, function (data) {
+                curvesData.push({
+                    idCurve: curve,
+                    data: data
+                })
+                done();
+            })
+        },
+        function (err) {
+            console.log('done!', curvesData);
+            for (let i = 0; i <= length; i++){
+                result.push(evaluate(discriminator, i));
+            }
+            console.log(result);
+        }
+    );
+}

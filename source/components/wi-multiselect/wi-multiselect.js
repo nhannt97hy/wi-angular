@@ -105,7 +105,7 @@ angular.module('wi.multiselect', [])
                             local[parsedResult.itemName] = model[i];
                             scope.items.push({
                                 //label: parsedResult.viewMapper(local),
-                                label: model[i].value,
+                                label: model[i].idx,
                                 model: model[i].value, // TUNG
                                 bgColor: model[i].bgColor, // TUNG
                                 checked: false

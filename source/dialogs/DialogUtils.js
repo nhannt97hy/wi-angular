@@ -4403,8 +4403,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         this.crossplotModel = angular.copy(wiD3CrossplotCtrl.crossplotModel);
-        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot;
-
+        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot.getProperties();
         // this.props = crossplotModel.properties;
         this.selectedCurveX = null;
         this.selectedCurveY = null;
@@ -4418,12 +4417,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-
+        
         async.waterfall([
             function(cb) {
                 var pointsets = self.crossplotModel.properties.pointsets; 
                 if (!pointsets || !pointsets.length || !pointsets[0].idPointSet ) {
-                    wiApiService.getCrossplot(self.crossplotModel.properties.idCrossplot, function (crossplot) {
+                    wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                         // self.crossplotModel.properties.pointSet = crossplot.pointsets[0];
                         self.crossplotModel.properties = crossplot;
                         cb();
@@ -4570,13 +4569,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.onDepthTypeChanged = function(){
             switch (self.depthType) {
                 case "intervalDepth":
-                    self.crossplotModel.properties.pointSet.intervalDepthTop = self.crossplotModel.properties.pointSet.intervalDepthTop ? self.crossplotModel.properties.pointSet.intervalDepthTop: getTopFromWell();
-                    self.crossplotModel.properties.pointSet.intervalDepthBottom = self.crossplotModel.properties.pointSet.intervalDepthBottom ? self.crossplotModel.properties.pointSet.intervalDepthBottom : getBottomFromWell();
-                    self.crossplotModel.properties.pointSet.idZoneSet = null;
+                    self.crossplotModel.properties.pointsets[0].intervalDepthTop = self.crossplotModel.properties.pointsets[0].intervalDepthTop ? self.crossplotModel.properties.pointsets[0].intervalDepthTop: getTopFromWell();
+                    self.crossplotModel.properties.pointsets[0].intervalDepthBottom = self.crossplotModel.properties.pointsets[0].intervalDepthBottom ? self.crossplotModel.properties.pointsets[0].intervalDepthBottom : getBottomFromWell();
+                    self.crossplotModel.properties.pointsets[0].idZoneSet = null;
                     break;
                 case "zonalDepth":
                     if(self.selectedZoneSet){
-                        self.crossplotModel.properties.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                        self.crossplotModel.properties.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
                     }
                     break;
             }
@@ -4584,121 +4583,125 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.onZoneSetChange = function () {
             if(self.selectedZoneSet){
-                self.crossplotModel.properties.pointSet.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                self.crossplotModel.properties.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
             }
         }
 
         this.onActiveZoneChange = function(){
             if (self.selectedZone) {
-                self.crossplotModel.properties.pointSet.activeZone = self.selectedZone;
+                self.crossplotModel.properties.pointsets[0].activeZone = self.selectedZone;
             }
         }
 
         this.onLineModeChange = function(){
-            self.crossplotModel.properties.pointSet.lineMode = self.lineMode;
+            self.crossplotModel.properties.pointsets[0].lineMode = self.lineMode;
         }
 
         // modal button
         this.colorSymbol = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.crossplotModel.properties.pointSet.pointColor, function (colorStr) {
-                self.crossplotModel.properties.pointSet.pointColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.crossplotModel.properties.pointsets[0].pointColor, function (colorStr) {
+                self.crossplotModel.properties.pointsets[0].pointColor = colorStr;
             });
         };
-        
+        // function buildPayload(crossplotProps) {
+        //     let props = crossplotProps;
+        //     delete props.pointsets[0].curveX;
+        //     delete props.pointsets[0].curveY;
+        //     delete props.pointsets[0].curveZ;
+        //     return props
+        // }
         function updateCrossplot(callback) {
-            
-
+            // var payload = buildPayload(self.crossplotModel.properties);
+            self.updating = true;
             async.parallel([
                 function(cb) {
-                    wiApiService.editCrossplot(self.crossplotModel.properties, cb);
+                    wiApiService.editCrossplot(self.crossplotModel.properties, function(){
+                        cb();
+                    });
                 },
                 function(cb) {
-                    wiApiService.editPointSet(self.crossplotModel.properties.pointSet, cb);
-                }
-            ], function(err, result) {
-                if (err) console.error(err);
-                else 
-                    wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModel.properties;
-            });
-
-            /*
-            let updateBackend = function(callback) {
-                async.waterfall([
-                    function(cb) {
-                        wiApiService.editCrossplot(self.crossplotModel.properties, function() {
-                            cb();
-                        });
-                    },
-                    function(cb) {
-                        wiApiService.editPointSet(self.crossplotModel.properties.pointSet, function() {
-                            cb();
-                        });
-                    },
-                ], function(err) {
-                    if (err) {
-                        console.log('ERROR', err);
-                        utils.error(err);
-                    }
-                    else if (callback) callback();
-                });
-            }
-
-            
-            let updateVisualize = function(callback) {
-                let findCurveData = function(cb) {
-                    let props = angular.copy(self.crossplotModel.properties);
-                    let pointSet = props.pointSet;
-
-                    async.eachOfSeries(CURVE_SYMBOLS, function(symbol, idx, callback) {
-                        let idKey = 'idCurve' + symbol;
-                        let objKey = 'curve' + symbol;
-                        if (pointSet[idKey] != null && pointSet[objKey] == null) {
-                            wiApiService.dataCurve(pointSet[idKey], function (data) {
-                                let curve = utils.getModel('curve', pointSet[idKey]).properties;
-                                pointSet[objKey] = graph.buildCurve(curve, data, self.well.properties);
-                                callback();
-                            });
-                        }
-                        else
-                            callback();
-                    }, function() {
-                        cb(null, props);
+                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], function(){
+                        cb();
                     });
                 }
-                let rePlot = function(props, cb) {
-                    self.viCrossplot.setProperties(props);
-                    self.viCrossplot.doPlot();
-                    cb();
+            ], function(err, result) {
+                if (err) {
+                    console.error(err);
+                    utils.error(err);
                 }
+                else {
+                    wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModel.properties;
+                    let pointSet = self.crossplotModel.properties.pointsets[0];
 
-                async.waterfall([
-                    findCurveData,
-                    rePlot
-                ], function(err) {
-                    if (err) {
-                        console.log('ERROR', err);
-                        utils.error(err);
-                    }
-                    else if (callback) callback();
-                });
-            }
+                    // let crossplotProps = angular.copy(self.crossplotModel.properties);
+                    // crossplotProps.pointSet = crossplotProps.pointsets[0];
+                    var xCurveData, yCurveData, zCurveData;
+                    async.parallel([
+                        function(cb) {
+                            if (pointSet.idCurveX) {
+                                wiApiService.dataCurve(pointSet.idCurveX, function (curveData) {
+                                    xCurveData = curveData;
+                                    cb();
+                                })
+                            }
+                            else async.setImmediate(cb);
+                        },
+                        function(cb) {
+                            if (pointSet.idCurveY) {
+                                wiApiService.dataCurve(pointSet.idCurveY, function (curveData) {
+                                    yCurveData = curveData;
+                                    cb();
+                                });
+                            }
+                            else async.setImmediate(cb);
+                        },
+                        function(cb) {
+                            if (pointSet.idCurveZ) {
+                                wiApiService.dataCurve(pointSet.idCurveZ, function (curveData) {
+                                    zCurveData = curveData;
+                                    cb();
+                                })
+                            }
+                            else async.setImmediate(cb);
+                        }
+                    ], function(result, err) {
+                        console.log(result, err);
+                        let crossplotProps = angular.copy(self.crossplotModel.properties);
+                        crossplotProps.pointSet = crossplotProps.pointsets[0];
+                        
+                        if (xCurveData) {
+                            crossplotProps.pointSet.curveX 
+                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveX }, xCurveData, self.well.properties);
+                        }
+                        if (yCurveData) {
+                            crossplotProps.pointSet.curveY 
+                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveY }, yCurveData, self.well.properties);
+                        }
+                        if (zCurveData) {
+                            crossplotProps.pointSet.curveZ 
+                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveZ }, zCurveData, self.well.properties);
+                        }
 
-            async.waterfall([
-                updateBackend,
-                updateVisualize
-            ], callback);
-            */
+                        //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
+                        //wiD3CrossplotCtrl.viCrossplot.doPlot();
+                        self.updating = false;
+                        if (callback) callback(crossplotProps);
+
+                    });
+                }
+            });
+
  
         };
         this.onOkButtonClicked = function () {
-            updateCrossplot(function () {
-                close(self.crossplotModel.properties.pointSet);
+            updateCrossplot(function (crossplotProps) {
+                close(crossplotProps);
             });
         };
         this.onApplyButtonClicked = function () {
             // updateCrossplot();
-            updateCrossplot(function () {
-                if (callback) callback(self.crossplotModel.properties.pointSet);
+            updateCrossplot(function (crossplotProps) {
+                if (callback) callback(crossplotProps);
             });
         };
         this.onCancelButtonClicked = function () {
@@ -4712,6 +4715,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
+        modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -4814,7 +4818,7 @@ exports.crossplotFormatDialog1 = function (ModalService, wiCrossplotCtrl, callba
             async.waterfall([
                 function(cb) {
                     if (!self.props.pointSet || self.props.pointSet == {} || !self.props.pointSet.idPointSet) {
-                        wiApiService.getCrossplot(self.props.idCrossplot, function (crossplot) {
+                        wiApiService.getCrossplot(self.props.idCrossPlot, function (crossplot) {
                             self.props.pointSet = crossplot.pointsets[0];
                             cb();
                         });
@@ -5511,6 +5515,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     })
                 });
                 //wi-level-menu
+                /*
                 self.option=self.datasets;
                 self.testVar= {
                   "name": "curve",
@@ -5537,6 +5542,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                   "datasetName": "W3",
                   "$$hashKey": "object:784"
                 };
+                */
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -5633,52 +5639,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this.setClickedRow = function(index){
             self.SelectedRefCurve = index;
         }
-        /*
-        this.onRefCurveChange = function(index, curve){
-            self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
-            if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
-                self.ref_Curves_Arr[index].flag = self._FEDIT;
-            }
-            if(curve) {
-                if(self.ref_Curves_Arr[index].curve.minScale != null && self.ref_Curves_Arr[index].curve.maxScale != null){
-                    self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
-                    self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
-                }else{
-                    wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
-                        console.log('scale curve');
-                        $timeout(function(){
-                            self.ref_Curves_Arr[index].left = scale.minScale;
-                            self.ref_Curves_Arr[index].right = scale.maxScale;
-                        });
-                    })
-                }
-            }
-        }
-
-        this.AddRefCurve = function(){
-            let newRefCurve = {
-                color: "rgb(0,0,0)",
-                idHistogram: self.histogramProps.idHistogram,
-                left: 0,
-                right: 0,
-                visiable: true,
-                log: true,
-                flag: self._FNEW
-            }
-
-            self.ref_Curves_Arr.push(newRefCurve);
-        }
-
-        this.DeleteRefCurve = function(){
-            if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
-                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-            }else{
-                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
-            }
-            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-        }
-        */
-        this.IsNotValid = function () {
+        this.isNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
                 if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
@@ -5695,81 +5656,16 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
 
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
-            /*
-            if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
-                //for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--)
-                async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
-                    switch(self.ref_Curves_Arr[idx].flag){
-                        case self._FDEL:
-                            wiApiService.removeRefCurve(self.ref_Curves_Arr[idx].idReferenceCurve, function(){
-                                console.log('removeRefCurve');
-                                callback();
-                            });
-                            break;
-
-                        case self._FNEW:
-                            wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
-                                //delete self.ref_Curves_Arr[idx].flag;
-                                self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
-                                console.log('createRefCurve');
-                                callback();
-                            });
-                            break;
-
-                        case self._FEDIT:
-                            wiApiService.editRefCurve(self.ref_Curves_Arr[idx], function(){
-                                //delete self.ref_Curves_Arr[idx].flag;
-                                console.log('editRefCurve');
-                                callback();
-                            })
-                            break;
-
-                        default:
-                            callback();
-                            break;
-                    }
-                }, function(err) {
-                    for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--) {
-                        switch(self.ref_Curves_Arr[i].flag){
-                            case self._FDEL:
-                                self.ref_Curves_Arr.splice(i, 1);
-                                break;
-                            case self._FNEW:
-                            case self._FEDIT:
-                                delete self.ref_Curves_Arr[i].flag;
-                                break;
-                        }
-                    }
-                    self.histogramProps.reference_curves = self.ref_Curves_Arr;
-                    histogramModel.properties = self.histogramProps;
-                    console.log("histogramModel:", histogramModel.properties);
-                    wiApiService.editHistogram(histogramModel.properties, function(returnData) {
-                        console.log('Return Data', returnData);
-                        if (callback) callback(histogramModel.properties);
-                    });
-                });
-            }
-            else { */
-            //    self.histogramProps.reference_curves = self.ref_Curves_Arr;
-                histogramModel.properties = self.histogramProps;
-                wiApiService.editHistogram(histogramModel.properties, function(returnData) {
-                    console.log('Return Data', returnData);
-                    if (callback) callback(histogramModel.properties);
-                });
-            //}
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+            });
         }
 
         this.onOKButtonClicked = function () {
             self.onApplyButtonClicked();
             console.log("on OK clicked");
-            // histogramModel.properties = self.histogramProps;
-            // wiApiService.editHistogram(histogramModel.properties, function(returnData){
-            //     console.log('Return Data', returnData);
-            //     if (callback) callback(histogramModel.properties);
-                //let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                //wiD3Ctrl.linkModels();
-                //wiD3Ctrl.getZoneCtrl().zoneUpdate();
-            // });
             close(null);
         }
         this.onCancelButtonClicked = function () {
@@ -5972,11 +5868,11 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         //     }
         //     self.polygonList.push(pItem);
         // });
-
         let polygons = angular.copy(wiD3Crossplot.getPolygons());
         this.polygonList = new Array();
         polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
+                idx: index + 1,
                 value:polygonItem.idPolygon,
                 bgColor: polygonItem.lineStyle
             });
@@ -6605,7 +6501,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.conditionTree = JSON.parse(angular.copy(self.props.discriminator));
 
         wiComponentService.on('discriminator-update', function(){
-            console.log('update handling');
+            // console.log('update handling');
             self.conditionExpr = parse(self.conditionTree);        
         })
 
@@ -6637,7 +6533,9 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 return "( " + parse(tree.children[0]) + " " + tree.operator.toUpperCase() + " " + parse(tree.children[1]) + " )";
             }
             else if (tree.left && tree.right && tree.comparison) {
-                return "( " + getCurveName(tree.left.value) + " " + tree.comparison + " " + tree.right.value + " )"; 
+                let left = getCurveName(tree.left.value);
+                let right = tree.right.type=='value'? tree.right.value: getCurveName(tree.right.value);
+                return "( " + left + " " + tree.comparison + " " + right + " )"; 
             }
 
             return str;
@@ -6678,11 +6576,10 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             });
             let selectedNode;
             let parentNode = null;
-            console.log(retVal, path);
 
             if (!self.conditionTree) {
                 self.conditionTree = {
-                    comparison: '<',
+                    comparison: '>',
                     left: {
                         type: 'curve',
                         value:getFirstCurve()
@@ -6705,7 +6602,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 children: [
                     selectedNode,
                     {
-                        comparison: '<',
+                        comparison: '>',
                         left: {
                             type: 'curve',
                             value: getFirstCurve()
@@ -6765,17 +6662,17 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             console.log('Apply');
             if(self.props.idHistogram){
                 let payload = {
-                    discriminator: JSON.stringify(self.conditionTree),
+                    discriminator: self.conditionTree,
                     idHistogram: self.props.idHistogram
                 }
                 wiApiService.editHistogram(payload, function(){
                     self.props.discriminator = JSON.stringify(self.conditionTree);
                     if (callback) callback(self.conditionTree);
                 })
-            }else if (self.props.idCrossplot){
+            }else if (self.props.idCrossPlot){
                 let payload = {
-                    discriminator: JSON.stringify(self.conditionTree),
-                    idCrossplot: self.props.idCrossplot,
+                    discriminator: self.conditionTree,
+                    idCrossPlot: self.props.idCrossPlot,
                     idWell: self.props.idWell                    
                 }
                 wiApiService.editCrossplot(payload, function(){
@@ -6799,10 +6696,10 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     if (callback) callback(self.conditionTree);
                     close(null);
                 })
-            }else if (self.props.idCrossplot){
+            }else if (self.props.idCrossPlot){
                 let payload = {
                     discriminator: JSON.stringify(self.conditionTree),
-                    idCrossplot: self.props.idCrossplot,
+                    idCrossPlot: self.props.idCrossPlot,
                     idWell: self.props.idWell
                 }
                 wiApiService.editCrossplot(payload, function(){
@@ -6837,9 +6734,6 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
 
 
 exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
-    let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
-    let props = angular.copy(viCrossplot.getProperties());
-    let ternary = this.ternary = props.ternary;
 
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
@@ -6862,24 +6756,27 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
         $scope.result = {}
         this.idPolygonTest = [];
-        // let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
-        // let props = angular.copy(viCrossplot.getProperties());
-        // let ternary = this.ternary = props.ternary;
+        let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
+        let props = angular.copy(viCrossplot.getProperties());
+        let ternary = this.ternary = props.ternary;
 
         this.vertices = ternary.vertices.map(function(vertex, index) {
             vertex.change = change.unchanged;
             vertex.index = index;
             return vertex;
         });
-
+        this.modelData = [];
+        this.optionsData = [1, 2, 3];
         let savedTernary = angular.copy(ternary);
         this.__idx = 0;
         $scope.selectedRow = 0;
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
-
+        console.log("///", $scope.calculateOptions);
+        
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
+                idx: index + 1, 
                 value: polygonItem.idPolygon,
                 bgColor: polygonItem.lineStyle
             });
@@ -7156,7 +7053,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             let newRefCurve = {
                 color: "rgb(0,0,0)",
                 idHistogram: self.props.idHistogram ? self.props.idHistogram : null,
-                idCrossPlot: self.props.idCrossplot ? self.props.idCrossplot : null,
+                idCrossPlot: self.props.idCrossPlot ? self.props.idCrossPlot : null,
                 left: 0,
                 right: 0,
                 visiable: true,
@@ -7175,15 +7072,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
         }
-
-        // this.IsNotValid = function () {
-        //     var inValid = false;
-        //     if (self.props.leftScale == null || self.props.rightScale == null || self.props.leftScale == self.props.rightScale) {
-        //         inValid = true;;
-        //     }
-
-        //     return inValid;
-        // }
 
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");

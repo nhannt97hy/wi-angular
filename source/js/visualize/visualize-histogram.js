@@ -22,7 +22,6 @@ function Histogram(histogramModel) {
     this.zoneData = new Array();
     this.zoneBins = new Array();
 
-    this.drawPending = false;
 }
 Histogram.prototype.trap = function (eventName, handlerCb) {
     let eventHandlers = this.handlers[eventName];
@@ -43,9 +42,12 @@ Histogram.prototype.signal = function (eventName, data) {
     }
 }
 
+Histogram.prototype.setHistogramModel = function(histogramModel) {
+    this.histogramModel = histogramModel;
+}
+
 Histogram.prototype.setZoneSet = function(zoneSet) {
     this.zoneSet = zoneSet;
-    //if (this.drawPending) this.doPlot();
 }
 Histogram.prototype.setCurve = function(data) {
     if (data == null) {
@@ -59,7 +61,6 @@ Histogram.prototype.setCurve = function(data) {
         return;
     }
     this.data = data.filter(function(d) {return !isNaN(d.x);}); // ? clone
-    //if (this.drawPending) this.doPlot();
 }
 
 Histogram.prototype.getTickValuesY = function() {
@@ -136,6 +137,16 @@ function __reverseBins(bins) {
 const MINOR_TICKS = 5
 Histogram.prototype.doPlot = function() {
     var self = this;
+    if (self.timerHandle) {
+        clearTimeout(self.timerHandle)
+    }
+    self.timerHandle = setTimeout(function() {
+        self.timerHandle = null;
+        self._doPlot();
+    }, 1000);
+}
+Histogram.prototype._doPlot = function() {
+    var self = this;
     // Adjust svgContainer size
     self.svgContainer
         .attr('width', $(this.container.node()).width())
@@ -157,8 +168,6 @@ Histogram.prototype.doPlot = function() {
         console.error('No zoneSet to draw');
         return;
     }
-    // pass checking. Set drawPending = false
-    this.drawPending = false;
 
     // Local variables
     console.log('Do plot begin');
@@ -631,11 +640,6 @@ Histogram.prototype.init = function(domElem) {
 
     this.trap('histogram-update', function() {
         console.warn('Update histogram');
-        if (self.drawPending) {
-            console.warn('draw request is pending already');
-            //return;
-        }
-        self.drawPending = true;
         self.doPlot();
     });
     window.VISHISTOGRAM = this;

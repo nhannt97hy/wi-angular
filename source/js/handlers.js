@@ -633,65 +633,123 @@ exports.BlankCrossPlotButtonClicked = function () {
                     idCrossPlot: wiCrossplotCtrl.id,
                     idWell: selectedNode.properties.idWell,
                     pointSet: pointSet
-                })
+                });
             })
         });
     });
 };
 
+function newCrossPlotTemplate(templateCross, wiComponentService, ModalService, wiApiService, $timeout, callback) {
+    console.log("Template Cross Plot clicked ", templateCross);
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'crossplots') return;
+    let promptConfig = {
+        title: 'Create New Crossplots Template',
+        inputName: 'Crossplot Name',
+        input: templateCross
+    }
+    DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+        console.log("CROSS NAME : ", crossplotName);
+        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(){
+        }, templateCross);
+    });
+}
+
 exports.SonicPHI_TOTALButtonClicked = function () {
     console.log('SonicPHI_TOTALButton is clicked');
+    newCrossPlotTemplate("SonicPhi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeutronDensityButtonClicked = function () {
     console.log('NeutronDensityButton is clicked');
+    newCrossPlotTemplate("NeutronDensity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeutronGammaButtonClicked = function () {
     console.log('NeutronGammaButton is clicked');
+    newCrossPlotTemplate("NeutronGamma", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicGammaButtonClicked = function () {
     console.log('SonicGammaButton is clicked');
+    newCrossPlotTemplate("SonicGamma", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeuTronSonicButtonClicked = function () {
     console.log('NeuTronSonicButton is clicked');
+    newCrossPlotTemplate("NeutronSonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
-exports.DenityGammaButtonClicked = function () {
+exports.DensityGammaButtonClicked = function () {
     console.log('DenityGammaButton is clicked');
+    newCrossPlotTemplate("DensityGamma", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeuTronRtButtonClicked = function () {
     console.log('NeuTronRtButton is clicked');
+    newCrossPlotTemplate("NeutronResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DensitySonicButtonClicked = function () {
     console.log('DensitySonicButton is clicked');
+    newCrossPlotTemplate("DensitySonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DensityRtButtonClicked = function () {
     console.log('DensityRtButton is clicked');
+    newCrossPlotTemplate("DensityResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicDensityButtonClicked = function () {
     console.log('SonicDensityButton is clicked');
+    newCrossPlotTemplate("SonicDensity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicRtButtonClicked = function () {
     console.log('SonicRtButton is clicked');
+    newCrossPlotTemplate("SonicResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.RtRx0ButtonClicked = function () {
     console.log('RtRx0Button is clicked');
+    newCrossPlotTemplate("DeepResistivityShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.PickettButtonClicked = function () {
     console.log('PickettButton is clicked');
+    newCrossPlotTemplate("PickettPlot", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.BlankHistogramButtonClicked = function () {
+    console.log("Blank Hisogram clicked");
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -711,36 +769,78 @@ exports.BlankHistogramButtonClicked = function () {
     });
 }
 
+function newTemplateHistogram(templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback){
+    console.log("Template Hisogram clicked ", templateHistogram);
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'histograms') return;
+    let promptConfig = {
+        title: 'Create New Histogram Template',
+        inputName: 'Histogram Name',
+        input: templateHistogram
+    }
+
+    DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+        utils.createHistogram(selectedNode.properties.idWell, null, histogramName, templateHistogram);
+    });
+}
+
 exports.PHI_TOTALButtonClicked = function () {
     console.log('PHI_TOTALButton is clicked');
+    newTemplateHistogram("Phi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.GammaRayButtonClicked = function () {
     console.log('GammaRayButton is clicked');
+    newTemplateHistogram("GammaRay", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
+
 };
 
 exports.NeutronButtonClicked = function () {
     console.log('NeutronButton is clicked');
+    newTemplateHistogram("Neutron", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
+    newTemplateHistogram("Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SonicButtonClicked = function () {
     console.log('SonicButton is clicked');
+    newTemplateHistogram("Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.SallowResistivityButtonClicked = function () {
     console.log('SallowResistivityButton is clicked');
+    newTemplateHistogram("ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.DeepResistivityButtonClicked = function () {
     console.log('DeepResistivityButton is clicked');
+    newTemplateHistogram("DeepResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.MSFLHistogramButtonClicked = function () {
     console.log('MSFLHistogramButton is clicked');
+    newTemplateHistogram("ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.AddCurveButtonClicked = function () {

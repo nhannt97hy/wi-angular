@@ -8,13 +8,13 @@
             </div>
 
             <div class="modal-body">
-                <multiselect class="input-xlarge" multiple="true"
+                <!-- <multiselect class="input-xlarge" multiple="true"
                     ng-model="wiModal.idPolygonTest"
                     options="p for p in wiModal.polygonList"
                     change="selected()">
                 </multiselect>
-                {{calculateOptions.area.polygons}}
-                <!-- <div class="container-fluid padding-0">
+                {{calculateOptions.area.polygons}} -->
+                <div class="container-fluid padding-0">
                     <div class="col-sm-11 padding-right-0">
                         <form class="form-horizontal form-condensed dialog-style" action="" name="modalTernary">
                             <h5 class="normal-text">Vertices Manager</h5>
@@ -128,15 +128,17 @@
                                         Area
                                     </label>
                                 </div>
-                                <div class="col-sm-3">
-                                    <multiselect class="input-xlarge" multiple="true"
+                                <div class="col-sm-2" ng-repeat="i in [1]" 
+                                    style="padding-right: 0; margin-left: 23px; padding-left:19px;">
+                                    <multiselect class="selectPolygons" multiple="true"
                                         ng-model="calculateOptions.area.polygons"
                                         options="p for p in wiModal.polygonList"
-                                        change="selected()">
+                                        change="selected()"
+                                        disabled="calculateOptions.type != 'Area'">
                                     </multiselect>
-                                    {{calculateOptions.area.polygons}}--
                                 </div>
-                                <div class="form-group col-sm-3" style="padding-left: 26px">
+                                <div class="form-group col-sm-2" 
+                                    style="margin-left: 50px; padding-left: 5px;">
                                     <select ng-model="calculateOptions.area.exclude"
                                             class="form-control wi-form-control"
                                             ng-disabled="calculateOptions.type != 'Area'"
@@ -174,7 +176,7 @@
                             <span class="plus-16x16"></span>
                         </button>
                     </div>
-                </div> -->
+                </div>
             </div>
             <div class="modal-footer">
                 <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3">

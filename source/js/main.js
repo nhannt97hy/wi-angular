@@ -41,6 +41,7 @@ let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
+let wiMultiInput = require('./wi-multi-input');
 
 let layoutManager = require('./layout');
 
@@ -104,6 +105,7 @@ let app = angular.module('wiapp',
         wiLogplot.name,
         wiExplorer.name,
         wiProperties.name,
+        wiMultiInput.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -139,6 +141,7 @@ let app = angular.module('wiapp',
 
         // 3rd lib
         'ngFileUpload',
+        'ui.bootstrap',
         'ngSanitize',
         'ui.select',
         'angularjs-dropdown-multiselect'

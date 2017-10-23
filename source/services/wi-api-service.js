@@ -15,8 +15,9 @@ let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
-//   const BASE_URL = 'http://localhost:3000';
+//  const BASE_URL = 'http://localhost:3000';
 const BASE_URL = 'http://dev.sflow.me';
+//const BASE_URL = 'http://wi.i2g.cloud';
 // const BASE_URL = 'http://192.168.0.223';
 // const BASE_URL = 'http://192.168.0.130:3000';
 
@@ -1109,13 +1110,13 @@ Service.prototype.editCrossplot = function (data, callback) {
     let self = this;
     this.post(EDIT_CROSSPLOT, data, callback);
 }
-Service.prototype.getCrossplot = function (idCrossplot, callback) {
+Service.prototype.getCrossplot = function (idCrossPlot, callback) {
     let self = this;
-    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossplot }, callback);
+    this.post(GET_CROSSPLOT, { idCrossPlot: idCrossPlot }, callback);
 }
-Service.prototype.removeCrossplot = function (idCrossplot, callback) {
+Service.prototype.removeCrossplot = function (idCrossPlot, callback) {
     let self = this;
-    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossplot }, callback);
+    this.delete(DELETE_CROSSPLOT, { idCrossPlot: idCrossPlot }, callback);
 }
 
 Service.prototype.createPointSet = function (data, callback) {

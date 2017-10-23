@@ -9,6 +9,7 @@ function isFunction(functionToCheck) {
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
+    window.VISD3HISTOGRAM = self;
     let _well = null;
 
     let curveLoading = false;
@@ -101,12 +102,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.histogramModel = self.getModel();
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
+            if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
+                self.visHistogram.setHistogramModel(self.histogramModel);
             self.zoneArr = self.zoneSetModel.children;
-            // self.zoneArr.forEach(function (zone) {
-            //     zone.handler = function () {
-            //         console.log("----", zone.properties.idZone);
-            //     }
-            // });
             self.getZoneCtrl().zones = self.zoneArr;
 
         }
@@ -131,6 +129,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.visHistogram) {
             let activeZones = self.getZoneCtrl().getActiveZones();
             console.warn("---", activeZones);
+            if ( isFunction(self.visHistogram.setHistogramModel) )
+                self.visHistogram.setHistogramModel(self.histogramModel);
             if ( isFunction(self.visHistogram.setZoneSet) ) 
                 self.visHistogram.setZoneSet(activeZones);
         }
@@ -203,7 +203,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
-            console.log('Discriminator', data);
+            // console.log('Discriminator', data);
+            utils.evaluateExpr(self.getWell(), data);
         })
     }
     this.showContextMenu = function (event) {

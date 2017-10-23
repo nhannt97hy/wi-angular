@@ -59,9 +59,9 @@
                                             <select ng-model="regLine.regType"
                                                     class="form-control wi-form-control"
                                                     ng-change="wiModal.onChange(regLine.index)">
-                                                <option value="linear">Linear</option>
-                                                <option value="exponent">Exponent</option>
-                                                <option value="power">Power</option>
+                                                <option value="Linear">Linear</option>
+                                                <option value="Exponent">Exponent</option>
+                                                <option value="Power">Power</option>
                                             </select>
                                         </td>
                                         <td>
@@ -89,7 +89,6 @@
                                                 change="selected()" 
                                                 ng-change="wiModal.onChange(regLine.index);">
                                             </multiselect>
-                                            {{regLine.polygons}}
                                         </td>
                                         
                                         <td style="width: 7%">
@@ -116,7 +115,9 @@
                         </button>
                     </div>
                 </div>
+                
             </div>
+
             <div class="modal-footer">
                  <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
                     <span class="ok-16x16"></span>&nbsp;Apply

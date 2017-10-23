@@ -396,8 +396,9 @@ gulp.task('deploy', function() {
     return gulp.src("./build/**/*")
         .pipe(rsync({
             root: "build/",
-            hostname: "centos@54.169.109.34",
+            hostname: "wi.i2g.cloud",
             destination:"/opt/wi-angular/build",
+            username: "centos",
 			port: 22
         }));
 });
@@ -405,7 +406,7 @@ gulp.task('deploy-dev', function() {
 	return gulp.src("./build/**/*")
         .pipe(rsync({
             root: "build/",
-            hostname: "hoangbd@dev.sflow.me",
+            hostname: "dev.sflow.me",
             destination:"/opt/build",
 			port: 2221
     }));

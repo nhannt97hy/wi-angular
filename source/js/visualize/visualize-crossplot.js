@@ -8,9 +8,13 @@ module.exports = Crossplot;
 function Crossplot(config) {
     this.setProperties(config);
 
-    this.paddingLeft = 100;
+    //this.paddingLeft = 100;
+    //this.paddingRight = 50;
+    //this.paddingTop = 50;
+    //this.paddingBottom = 50;
+    this.paddingLeft = 50;
     this.paddingRight = 50;
-    this.paddingTop = 50;
+    this.paddingTop = 20;
     this.paddingBottom = 50;
 
     this.rectZWidth = 0;
@@ -236,6 +240,7 @@ Crossplot.prototype.getProperties = function() {
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+    //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
     if (props.pointSet && props.pointSet.idZoneSet != null) {
         this.pointSet.zAxes = 'Zone';
     }
@@ -391,11 +396,16 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-ternary');
 
+    
+    new ResizeSensor( $(this.root.node()), function(param) {
+        self.doPlot();
+    } );
+    /*
     d3.select(window)
         .on('resize', function() {
             self.doPlot();
         });
-
+    */
     this.doPlot();
 
     this.on('mousedown', function() { self.mouseDownCallback() });
@@ -403,6 +413,7 @@ Crossplot.prototype.init = function(domElem) {
 }
 
 Crossplot.prototype.createContainer = function() {
+    /*
     this.container = this.root.append('div')
         .attr('class', 'vi-crossplot-container');
 
@@ -416,12 +427,17 @@ Crossplot.prototype.createContainer = function() {
         .append('div')
             .attr('class', function(d) { return 'vi-crossplot-header-row ' + d; })
             .text('-');
+    */
+    this.container = this.root.select('.vi-crossplot-container');
+    this.headerContainer = this.root.select('div.vi-crossplot-header-container');
 
     this.bodyContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-body-container');
-
+    /*
     this.footerContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-footer-container');
+    */
+    this.footerContainer = this.root.select('.vi-crossplot-footer-container');
 }
 
 Crossplot.prototype.adjustSize = function() {
@@ -1297,7 +1313,7 @@ Crossplot.prototype.genColor = function() {
 }
 
 Crossplot.prototype.getSvgClipId = function() {
-    return 'vi-crossplot-svg-clip-' + this.idCrossplot;
+    return 'vi-crossplot-svg-clip-' + this.idCrossPlot;
 }
 
 Crossplot.prototype.on = function(type, cb) {

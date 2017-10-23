@@ -37,7 +37,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             ]).enter()
             .append('g')
                 .attr('class', function(d) { return 'vi-refwind-axis-group ' + d; });
-        console.log(self.name + "-spinner");
         document.getElementById(self.name + "-spinner").appendChild((new Spinner()).spin().el);
     }
 
@@ -124,7 +123,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         }
     }
-
+    this.refresh = refresh;
     function refresh(top, scale) {
         if (!_viCurves || !_viCurves.length) return;
         if (top) _top = top;
@@ -152,7 +151,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .tickFormat("");
 
         let step = _scale / 100;
-        let axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.floor(_bottom), step))
+        let axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.round(_bottom), step))
             .tickFormat(d3.format(',.0f'))
             .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
@@ -184,7 +183,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.update = update;
     function update(well, referenceCurves, scale, vertLineNo) {
-        // Update reference windows TODO !!!
         let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
         _minY = parseFloat(well.properties.topDepth);
         _maxY = parseFloat(well.properties.bottomDepth);

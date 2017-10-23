@@ -1,0 +1,36 @@
+<div class="dropdown"  uib-dropdown>
+    <button class="btn btn-default dropdown-toggle multi-input-selected" uib-dropdown-toggle id="dropdownMenu">
+        <span ng-if="wiMultiInput.model.type == 'value'">
+            {{wiMultiInput.SelectedValue}}
+        </span>
+        <span ng-if="wiMultiInput.model.type == 'curve'">
+            {{wiMultiInput.SelectedCurve.properties.name}}
+        </span>
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu multi-input-menu" aria-labelledby="dropdownMenu" uib-dropdown-menu role="menu">
+        <li style="margin-bottom: 7px">
+            <label>
+                <input type="radio" name='inputType' value="value" ng-model="wiMultiInput.model.type" style="vertical-align:top"
+                ng-click="wiMultiInput.onValueChange()">
+                Value
+            </label>
+            <input type="number" ng-model="wiMultiInput.SelectedValue" ng-disabled="wiMultiInput.model.type == 'curve'" class="form-control wi-form-control" ng-change='wiMultiInput.onValueChange()'>
+        </li>
+        <li>
+            <label>
+                <input type="radio" name='inputType' value="curve" ng-model="wiMultiInput.model.type" style="vertical-align:top"
+                ng-click="wiMultiInput.onSelectCurve()">
+                Curve
+            </label>
+            <ui-select ng-model="wiMultiInput.SelectedCurve" ng-change="wiMultiInput.onSelectCurveChange()" class="normal-text"
+            ng-disabled="wiMultiInput.model.type == 'value'" class="form-control wi-form-control">
+                <ui-select-match placeholder='Select a curve'>{{wiMultiInput.SelectedCurve.properties.name}}</ui-select-match>
+                <ui-select-choices group-by="'datasetName'"
+                repeat='curve in wiMultiInput.curvesList | filter:{properties: {name:$select.search}} track by curve.id'>
+                    <div class="padding-left-20px">{{curve.properties.name}}</div>
+                </ui-select-choices>
+        </ui-select>
+        </li>
+    </ul>
+</div>

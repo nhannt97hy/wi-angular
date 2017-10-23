@@ -117,8 +117,8 @@ module.exports.putTabRightWithModel = function (model) {
         case 'crossplot':
             itemId = 'crossplot' + model.id;
             tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
-            name = 'crossplot' + model.properties.idCrossplot;
-            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossplot + '"></wi-crossplot>'
+            name = 'crossplot' + model.properties.idCrossPlot;
+            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
             break;
         case 'histogram':
             itemId = 'histogram' + model.id;
