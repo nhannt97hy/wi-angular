@@ -1,4 +1,4 @@
-exports.authenticationDialog = function (ModalService, callback) {
+exports.authenticationDialog = function (ModalService, wiComponentService,callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.disabled = false;
@@ -21,13 +21,19 @@ exports.authenticationDialog = function (ModalService, callback) {
                     password: self.passwordReg
             }
             wiApiService.register(dataRequest, function (token) {
-                let userInfo = {
-                    username: self.usernameReg,
-                    password: self.passwordReg,
-                    token: token
-                }
-                wiApiService.setAuthenticationInfo(userInfo);
-                close(userInfo);
+                // let userInfo = {
+                //     username: self.usernameReg,
+                //     password: self.passwordReg,
+                //     token: token
+                // }
+                // wiApiService.setAuthenticationInfo(userInfo);
+                // close(100);
+                setTimeout(function () {
+                    warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
+                        location.reload();
+                    });
+                }, 200);
+
             });
         }
         this.onLoginButtonClicked = function () {
@@ -3915,7 +3921,8 @@ function errorMessageDialog(ModalService, errorMessage) {
     });
 };
 
-exports.warningMessageDialog = function (ModalService, warningMessage) {
+exports.warningMessageDialog = warningMessageDialog;
+function warningMessageDialog (ModalService, warningMessage, callback) {
     function ModalController($scope, close) {
         let self = this;
         this.warning = warningMessage;
@@ -3931,6 +3938,7 @@ exports.warningMessageDialog = function (ModalService, warningMessage) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
+            if (callback) callback();
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
         })

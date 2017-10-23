@@ -235,7 +235,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
     if(!window.localStorage.getItem('rememberAuth')) {
-        DialogUtils.authenticationDialog(ModalService, function (userInfo) {
+        DialogUtils.authenticationDialog(ModalService, wiComponentService, function (userInfo) {
             if (userInfo.remember) {
                 window.localStorage.setItem('rememberAuth', true);
             }
