@@ -2076,22 +2076,24 @@ function evaluateExpr(well, discriminator) {
     let curvesData = new Array();
     
     function findCurve(condition){
-        if(condition.children && condition.children.length){
+        if(condition && condition.children && condition.children.length){
             condition.children.forEach(function(child){
                 findCurve(child);
             })
-        }else{
+        }else if (condition && condition.left && condition.right) {
             curveSet.add(condition.left.value);
             if(condition.right.type == 'curve'){
                 curveSet.add(condition.right.value);
             }
+        }else {
+            return;
         }
     }
 
     findCurve(discriminator);
 
     function evaluate(condition, index){
-        if(condition.children && condition.children.length){
+        if(condition && condition.children && condition.children.length){
             let left = evaluate(condition.children[0], index);
             let right = evaluate(condition.children[1], index);
             switch (condition.operator){
@@ -2101,13 +2103,12 @@ function evaluateExpr(well, discriminator) {
                     return left || right;
             }
         }
-        else {
+        else if (condition && condition.left && condition.right){
             let leftCurve = curvesData.find(function(curve){
                 return curve.idCurve == condition.left.value;
             });
 
             let left = parseFloat(leftCurve.data[index].x);
-            // console.log('left', left);
 
             let right = condition.right.value;
             if(condition.right.type == 'curve'){
@@ -2133,7 +2134,8 @@ function evaluateExpr(well, discriminator) {
             }else{
                 return true;
             }
-            
+        }else {
+            return true;
         }
     }
     let curveArr = Array.from(curveSet);
@@ -2153,7 +2155,8 @@ function evaluateExpr(well, discriminator) {
             for (let i = 0; i <= length; i++){
                 result.push(evaluate(discriminator, i));
             }
-            console.log(result);
+            // console.log(result);
+            return result;
         }
     );
 }
