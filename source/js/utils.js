@@ -2067,7 +2067,8 @@ function findFamilyById(idFamily) {
 exports.findFamilyById = findFamilyById;
 
 exports.evaluateExpr = evaluateExpr;
-function evaluateExpr(well, discriminator) {
+function evaluateExpr(well, discriminator, callback) {
+    discriminator = discriminator == 'null' ? null : JSON.parse(discriminator);
     let result = new Array();
     let wellProps = well.properties;
     let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;
@@ -2131,7 +2132,7 @@ function evaluateExpr(well, discriminator) {
                         return left >= right;
                 }
             }else{
-                return true;
+                return false;
             }
         }else {
             return true;
@@ -2155,7 +2156,7 @@ function evaluateExpr(well, discriminator) {
                 result.push(evaluate(discriminator, i));
             }
             // console.log(result);
-            return result;
+            callback(result);
         }
     );
 }

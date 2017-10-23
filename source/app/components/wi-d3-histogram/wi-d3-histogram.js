@@ -113,8 +113,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         if (self.histogramModel.properties.idCurve) {
             self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-            if (self.visHistogram) {
-                if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+            if (Object.keys(self.visHistogram).length !==0) {
+                if(self.visHistogram.discriminator != self.histogramModel.properties.discriminator){
+                    self.visHistogram.discriminator = self.histogramModel.properties.discriminator;
+                    utils.evaluateExpr(self.getWell(), self.visHistogram.discriminator, function(result){
+                        self.visHistogram.discriminatorArr = result;
+                        console.log('link models');
+
+                        if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                            self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
+                            loadCurve(self.visHistogram.idCurve);
+                        } else {
+                            self.visHistogram.signal('histogram-update', "no load curve");
+                        }
+                    });
+                } else if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
                     self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
                     loadCurve(self.visHistogram.idCurve);
                 } else {
@@ -200,7 +213,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
             console.log('Discriminator', data);
-            utils.evaluateExpr(self.getWell(), data);
+            self.linkModels();
         })
     }
     this.showContextMenu = function (event) {
@@ -390,9 +403,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             loadStatistics();
         });
 
-        if (self.visHistogram.idCurve) {
-            loadCurve(self.visHistogram.idCurve);
+        if(self.visHistogram.discriminator && self.visHistogram.discriminator != 'null'){
+            utils.evaluateExpr(self.getWell(), self.visHistogram.discriminator, function(result){
+                console.log(result);
+                self.visHistogram.discriminatorArr = result;
+                console.log('createVisualizeHistogram');
+                if (self.visHistogram.idCurve) {
+                    loadCurve(self.visHistogram.idCurve);
+                }
+            });            
+        }else{
+            if (self.visHistogram.idCurve) {
+                loadCurve(self.visHistogram.idCurve);
+            }
         }
+
     }
     this.unloadCurve = unloadCurve;
     function unloadCurve() {

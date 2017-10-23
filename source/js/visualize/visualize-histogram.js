@@ -13,12 +13,15 @@ function Histogram(histogramModel) {
 
     this.histogramModel = histogramModel;
     this.idCurve = histogramModel.properties.idCurve;
+    this.discriminator = histogramModel.properties.discriminator;
+    this.discriminatorArr = null;
 
     // visualize instant vars
     this.svgContainer = null;
     this.depthStep = -1;
     this.fullData = null;
     this.intervalData = null;
+    this.discriminatorData = null;
     this.zoneData = new Array();
     this.zoneBins = new Array();
 
@@ -60,7 +63,7 @@ Histogram.prototype.setCurve = function(data) {
         delete this.standardDeviation;        
         return;
     }
-    this.data = data.filter(function(d) {return !isNaN(d.x);}); // ? clone
+    this.data = data;
 }
 
 Histogram.prototype.getTickValuesY = function() {
@@ -69,6 +72,22 @@ Histogram.prototype.getTickValuesY = function() {
     }
     // plotType == Frequency
     return d3.range(0, d3.max(this.bins, function(d) {return d.length}), 100);
+}
+
+Histogram.prototype.getDiscriminatorData = function (){
+    let self = this;
+    if(self.discriminatorArr && self.discriminatorArr.length){
+        let result = [];
+        for(let i = 0; i < self.data.length; i++){
+            if(self.discriminatorArr[i]){
+                result.push(self.data[i]);
+            }
+        }
+        return result.filter(function(d) {return !isNaN(d.x);});
+    }else {
+        console.log('no discriminator');
+        return self.data.filter(function(d) {return !isNaN(d.x);});
+    }
 }
 
 Histogram.prototype.filterF = function(d, zoneIdx) {
@@ -92,21 +111,21 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
 
 Histogram.prototype.getZoneData = function(idx) {
     var self = this;
-    return this.data.filter(function(d) {
+    return this.discriminatorData.filter(function(d) {
         return self.filterF.call(self, d, idx);
     }).map(function(d) { return parseFloat(d.x); });
 }
 
 Histogram.prototype.getIntervalData = function() {
     var self = this;
-    return this.data.filter(function(d) {
+    return this.discriminatorData.filter(function(d) {
         return self.filterF.call(self, d);
     }).map(function(d) { return parseFloat(d.x); });
 }
 
 Histogram.prototype.getFullData = function() {
     var self = this;
-    return this.data.map(function(d) { return parseFloat(d.x); });
+    return this.discriminatorData.map(function(d) { return parseFloat(d.x); });
 }
 
 function __reverseBins(bins) {
@@ -202,6 +221,7 @@ Histogram.prototype._doPlot = function() {
 
     // Prepare data and group them in bins: fullData/fullBins, intervalData/intervalBins, zoneData[]/zoneBins[]
     // We may reverse bins if necessary
+    this.discriminatorData = this.getDiscriminatorData();
     this.fullData = this.getFullData();
     this.fullBins = histogramGenerator(this.fullData);
     if (step < 0) __reverseBins(this.fullBins);

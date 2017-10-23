@@ -6498,7 +6498,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.datasets = [];
         this.curvesArr = [];
         this.props = plotCtrl.getModel().properties;
-        this.conditionTree = self.props.discriminator || self.props.discriminator == 'null' ? null: JSON.parse(angular.copy(self.props.discriminator));
+        this.conditionTree = self.props.discriminator == 'null' ? null: JSON.parse(self.props.discriminator);
 
         wiComponentService.on('discriminator-update', function(){
             self.conditionExpr = parse(self.conditionTree);        
@@ -6687,7 +6687,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             console.log('OK');
             if(self.props.idHistogram){
                 let payload = {
-                    discriminator: JSON.stringify(self.conditionTree),
+                    discriminator: self.conditionTree,
                     idHistogram: self.props.idHistogram
                 }
                 wiApiService.editHistogram(payload, function(){
