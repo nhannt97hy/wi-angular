@@ -5,6 +5,7 @@ function Controller() {
     let self = this;
 
     this.$onInit = function(){
+        self.name = 'inputType' + Math.random();
         if(self.model.type == 'value'){
             self.SelectedValue = self.model.value;
         }else if (self.model.type == 'curve') {

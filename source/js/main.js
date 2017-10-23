@@ -42,6 +42,7 @@ let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
 let wiMultiInput = require('./wi-multi-input');
+let wiCustomInput = require('./wi-custom-input');
 
 let layoutManager = require('./layout');
 
@@ -106,6 +107,7 @@ let app = angular.module('wiapp',
         wiExplorer.name,
         wiProperties.name,
         wiMultiInput.name,
+        wiCustomInput.name,
 
         wiElementReady.name,
         wiRightClick.name,

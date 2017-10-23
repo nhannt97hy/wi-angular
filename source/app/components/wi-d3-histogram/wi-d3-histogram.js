@@ -185,10 +185,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.isShowWiZone = false;
     }
 
-    // this.toogleShowReferenceWindow = function () {
-    //     self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
-    // }
-
     this.CloseReferenceWindow = function () {
         self.histogramModel.properties.referenceDisplay = false;
     }
@@ -203,7 +199,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
-            // console.log('Discriminator', data);
+            console.log('Discriminator', data);
             utils.evaluateExpr(self.getWell(), data);
         })
     }
