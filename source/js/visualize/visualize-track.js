@@ -89,7 +89,20 @@ Track.prototype.createContainer = function() {
         .style('flex-direction', 'column')
         .style('outline', 'none');
 }
-
+Track.prototype.updateOrderNum = function() {
+    this.trackContainer.datum(this.orderNum)
+        .attr('tabindex', isNaN(this.orderNum) ? -1 : this.orderNum)
+        .attr('data-order-num', function(d) { return d; })
+        .style('width', this.width + 'px')
+        .style('display', 'flex')
+        .style('flex-direction', 'column')
+        .style('outline', 'none');
+    this.verticalResizer.datum(this.orderNum + "*")
+        .attr('class', 'vi-track-vertical-resizer')
+        .attr('data-order-num', function(d) {return d;})
+        .style('width', '5px')
+        .style('cursor', 'col-resize');
+}
 /**
  * Create DOM element containing header
  */
@@ -117,10 +130,8 @@ Track.prototype.createHeaderContainer = function() {
         .style('z-index', 1)
         .text(this.name)
         .on('mousedown', function(d) {
-            console.log('mouse down', d);
         })
         .on('mouseup', function(d) {
-            console.log('mouse up', d);
         });
 
     this.drawingHeaderContainer = this.headerContainer.append('div')
@@ -266,19 +277,45 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 /**
  * Register event when drag track. TODO !!!
  */
-Track.prototype.onTrackDrag = function() {
-    return;
+Track.prototype.onTrackDrag = function(callback) {
     let self = this;
+    let width;
     $(this.trackContainer.node()).draggable({
         axis: 'x',
         containment: 'parent',
-        helper: "clone", /*function() {
-            var elem = document.createElement('div');
-            elem.className = 'vi-track-vertical-resizer outline ui-draggable';
-            return elem;
-        },*/
+        // helper: 'clone',
+        revert: true,
+        revertDuration: 500,
+        opacity: 0.3,
+        distance: 10,
         handle: '.vi-track-header-name',
-        snap: '.vi-track-vertical-resizer'
+        snap: '.vi-track-vertical-resizer',
+        scope: 'tracks',
+        start: function (event, ui) {
+            document.addEventListener('ontrackdrop', onTrackDropHandler, false);
+            width = self.width;
+            self.width = 60;
+            self.doPlot();
+            function onTrackDropHandler(event) {
+                document.removeEventListener('ontrackdrop', onTrackDropHandler);
+                if (self == event.desTrack) return;
+                callback(self, event.desTrack);
+            }
+        },
+        stop : function (event, ui) {
+            self.width = width;
+            self.doPlot();
+        }
+    });
+    $(this.verticalResizer.node()).droppable({
+        accept: '.vi-track-container',
+        tolerance: "touch",
+        scope: 'tracks',
+        drop: function (event, ui) {
+            let onTrackDrop = new Event('ontrackdrop');
+            onTrackDrop.desTrack = self;
+            document.dispatchEvent(onTrackDrop);
+        }
     });
 }
 
