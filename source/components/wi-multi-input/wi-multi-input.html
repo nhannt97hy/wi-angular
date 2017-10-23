@@ -11,7 +11,7 @@
     <ul class="dropdown-menu multi-input-menu" aria-labelledby="dropdownMenu" uib-dropdown-menu role="menu">
         <li style="margin-bottom: 7px">
             <label>
-                <input type="radio" name='inputType' value="value" ng-model="wiMultiInput.model.type" style="vertical-align:top"
+                <input type="radio" name='{{wiMultiInput.name}}' value="value" ng-model="wiMultiInput.model.type" style="vertical-align:top"
                 ng-click="wiMultiInput.onValueChange()">
                 Value
             </label>
@@ -19,7 +19,7 @@
         </li>
         <li>
             <label>
-                <input type="radio" name='inputType' value="curve" ng-model="wiMultiInput.model.type" style="vertical-align:top"
+                <input type="radio" name='{{wiMultiInput.name}}' value="curve" ng-model="wiMultiInput.model.type" style="vertical-align:top"
                 ng-click="wiMultiInput.onSelectCurve()">
                 Curve
             </label>

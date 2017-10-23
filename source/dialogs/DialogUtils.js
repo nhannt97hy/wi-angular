@@ -1,4 +1,4 @@
-exports.authenticationDialog = function (ModalService, callback) {
+exports.authenticationDialog = function (ModalService, wiComponentService,callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
         this.disabled = false;
@@ -21,13 +21,19 @@ exports.authenticationDialog = function (ModalService, callback) {
                     password: self.passwordReg
             }
             wiApiService.register(dataRequest, function (token) {
-                let userInfo = {
-                    username: self.usernameReg,
-                    password: self.passwordReg,
-                    token: token
-                }
-                wiApiService.setAuthenticationInfo(userInfo);
-                close(userInfo);
+                // let userInfo = {
+                //     username: self.usernameReg,
+                //     password: self.passwordReg,
+                //     token: token
+                // }
+                // wiApiService.setAuthenticationInfo(userInfo);
+                // close(100);
+                setTimeout(function () {
+                    warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
+                        location.reload();
+                    });
+                }, 200);
+
             });
         }
         this.onLoginButtonClicked = function () {
@@ -3915,7 +3921,8 @@ function errorMessageDialog(ModalService, errorMessage) {
     });
 };
 
-exports.warningMessageDialog = function (ModalService, warningMessage) {
+exports.warningMessageDialog = warningMessageDialog;
+function warningMessageDialog (ModalService, warningMessage, callback) {
     function ModalController($scope, close) {
         let self = this;
         this.warning = warningMessage;
@@ -3931,6 +3938,7 @@ exports.warningMessageDialog = function (ModalService, warningMessage) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
+            if (callback) callback();
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
         })
@@ -6498,10 +6506,9 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.datasets = [];
         this.curvesArr = [];
         this.props = plotCtrl.getModel().properties;
-        this.conditionTree = JSON.parse(angular.copy(self.props.discriminator));
+        this.conditionTree = self.props.discriminator || self.props.discriminator == 'null' ? null: JSON.parse(angular.copy(self.props.discriminator));
 
         wiComponentService.on('discriminator-update', function(){
-            // console.log('update handling');
             self.conditionExpr = parse(self.conditionTree);        
         })
 
@@ -6972,7 +6979,53 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this.well = well;
         this.datasets = [];
         this.curvesArr = [];
-        this.SelectedCurve = {};
+
+        this.scaleOpt = [
+            {
+                value: 20,
+                label: '1:20'
+            },
+            {
+                value: 50,
+                label: '1:50'
+            },
+            {
+                value: 100,
+                label: '1:100'
+            },
+            {
+                value: 200,
+                label: '1:200'
+            },
+            {
+                value: 300,
+                label: '1:300'
+            },
+            {
+                value: 500,
+                label: '1:500'
+            },
+            {
+                value: 1000,
+                label: '1:1000'
+            },
+            {
+                value: 2000,
+                label: '1:2000'
+            },
+            {
+                value: 3000,
+                label: '1:3000'
+            },
+            {
+                value: 5000,
+                label: '1:5000'
+            },
+            {
+                value: -1,
+                label: 'Full'
+            },
+        ]
         this.well.children.forEach(function(child, i){
             switch (child.type){
                 case 'dataset':
@@ -6980,27 +7033,28 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                     break;
             }
             if (i == self.well.children.length - 1) {
-                // set default curve
                 self.datasets.forEach(function (child) {
                     child.children.forEach(function (item) {
                         if (item.type == 'curve') {
                             var d = item;
                             d.datasetName = child.properties.name;
                             self.curvesArr.push(d);
-                            if (d.id == self.props.idCurve) {
-                                self.SelectedCurve = d;
-                            }
                         }
                     })
                 });
             }
         })
-        // function getTopFromWell() {
-        //     return parseFloat(self.well.properties.topDepth);
-        // }
-        // function getBottomFromWell() {
-        //     return parseFloat(self.well.properties.bottomDepth);
-        // }
+        function getTopFromWell() {
+            return parseFloat(self.well.properties.topDepth);
+        }
+        function getBottomFromWell() {
+            return parseFloat(self.well.properties.bottomDepth);
+        }
+
+        this.defaultDepthButtonClick = function(){
+            self.props.referenceTopDepth = getTopFromWell();
+            self.props.referenceBottomDepth = getBottomFromWell();
+        }
 
         this.chooseRefCurveColor = function(index){
             DialogUtils.colorPickerDialog(ModalService, self.ref_Curves_Arr[index].color, function (colorStr) {
@@ -7076,7 +7130,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
             if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
-                //for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--)
                 async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
                     switch(self.ref_Curves_Arr[idx].flag){
                         case self._FDEL:
@@ -7088,7 +7141,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
 
                         case self._FNEW:
                             wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
-                                //delete self.ref_Curves_Arr[idx].flag;
                                 self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
                                 console.log('createRefCurve');
                                 callback();
@@ -7097,7 +7149,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
 
                         case self._FEDIT:
                             wiApiService.editRefCurve(self.ref_Curves_Arr[idx], function(){
-                                //delete self.ref_Curves_Arr[idx].flag;
                                 console.log('editRefCurve');
                                 callback();
                             })
@@ -7123,24 +7174,11 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                     self.props.reference_curves = self.ref_Curves_Arr;
                     plotModel.properties = self.props;
                     if (callback) callback();
-                    // wiApiService.editHistogram(plotModel.properties, function(returnData) {
-                    //     console.log('Return Data', returnData);
-                    //     self.props.reference_curves = self.ref_Curves_Arr;
-                    //     plotModel.properties = self.props;
-                    //     if (callback) callback(plotModel.properties);
-                    // });
                 });
             }
             else {
                 self.props.reference_curves = self.ref_Curves_Arr;
                 plotModel.properties = self.props;
-                if (callback) callback();
-                // wiApiService.editHistogram(plotModel.properties, function(returnData) {
-                //     console.log('Return Data', returnData);
-                //     self.props.reference_curves = self.ref_Curves_Arr;
-                //     plotModel.properties = self.props;
-                //     if (callback) callback(plotModel.properties);
-                // });
             }
 
         }
