@@ -275,7 +275,7 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 }
 
 /**
- * Register event when drag track. TODO !!!
+ * Register event when drag track
  */
 Track.prototype.onTrackDrag = function(callback) {
     let self = this;
