@@ -2027,11 +2027,10 @@ function updateLinesOnCurveEdited (curveModel) {
         viTracks.forEach(function (viTrack) {
             if (!viTrack.isLogTrack()) return;
             let viCurve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
+            if (!viCurve) return;
             wiApiService.infoLine(viCurve.id, function (line) {
-                console.log('11111111111', line);
                 viCurve.setProperties(line);
                 viCurve.doPlot();
-                console.log('2222222222', viCurve);
             })
         })
     });

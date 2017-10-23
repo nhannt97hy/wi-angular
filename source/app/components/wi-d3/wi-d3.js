@@ -28,11 +28,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         DialogUtils.errorMessageDialog(ModalService, message );
     }
-    function getOrderKey() {
+    function getOrderKey(track) {
         if (_tracks.length <= 0) {
             return 'a';
         }
-        var currentIdx = _tracks.indexOf(_currentTrack);
+        if (!track) track = _currentTrack;
+        var currentIdx = _tracks.indexOf(track);
         if(currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
             currentIdx = _tracks.length - 1;
             let currentOrderKey = _tracks[currentIdx].orderNum;
@@ -118,7 +119,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             width: Utils.inchToPixel(logTrack.width)
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
-        graph.rearangeTracks(self);
+        graph.rearrangeTracks(self);
 
         _tracks.push(track);
         _tracks.sort(function(track1, track2) {
@@ -170,7 +171,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log("config", config);
 
         let track = graph.createDepthTrack(config, document.getElementById(self.plotAreaId));
-        graph.rearangeTracks(self);
+        graph.rearrangeTracks(self);
 
         _tracks.push(track);
         _tracks.sort(function(track1, track2) {
@@ -238,7 +239,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log(config);
 
         let track = graph.createZoneTrack(config, document.getElementById(self.plotAreaId));
-        graph.rearangeTracks(self);
+        graph.rearrangeTracks(self);
         _tracks.push(track);
         _tracks.sort(function(track1, track2) {
             return track1.orderNum.localeCompare(track2.orderNum);
@@ -937,10 +938,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         })
     }
-
+    window.LOGTRACKARRAY = _tracks;
     function _registerTrackDragCallback() {
         _tracks.forEach(function(track) {
-            track.onTrackDrag();
+            track.onTrackDrag(function (srcTrack, desTrack) {
+                let desTrackIndex = _tracks.findIndex(track => track == desTrack);
+                if (_tracks[desTrackIndex + 1] == srcTrack) return;
+                let orderNum = getOrderKey(desTrack);
+                if (srcTrack.isLogTrack()) {
+                    wiApiService.editTrack({idTrack: srcTrack.id, orderNum: orderNum}, function () {
+                        srcTrack.orderNum = orderNum;
+                        srcTrack.updateOrderNum();
+                        _tracks.sort(function(track1, track2) {
+                            return track1.orderNum.localeCompare(track2.orderNum);
+                        });
+                        graph.rearrangeTracks(self);
+                    })
+                } else if (srcTrack.isDepthTrack()) {
+                    wiApiService.editDepthTrack({idDepthAxis: srcTrack.id, orderNum: orderNum}, function () {
+                        srcTrack.orderNum = orderNum;
+                        srcTrack.updateOrderNum();
+                        _tracks.sort(function(track1, track2) {
+                            return track1.orderNum.localeCompare(track2.orderNum);
+                        });
+                        graph.rearrangeTracks(self);
+                    })
+                } else if (srcTrack.isZoneTrack()) {
+                    wiApiService.editZoneTrack({idZoneTrack: srcTrack.id, orderNum: orderNum}, function () {
+                        srcTrack.orderNum = orderNum;
+                        srcTrack.updateOrderNum();
+                        _tracks.sort(function(track1, track2) {
+                            return track1.orderNum.localeCompare(track2.orderNum);
+                        });
+                        graph.rearrangeTracks(self);
+                    })
+                }
+            });
         });
     }
 
