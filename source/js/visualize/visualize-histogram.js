@@ -93,20 +93,23 @@ Histogram.prototype.getDiscriminatorData = function (){
 Histogram.prototype.filterF = function(d, zoneIdx) {
     var tempDepth = 0;
     if (!this.histogramModel) return false;
+    if(this.histogramModel.properties.leftScale == this.histogramModel.properties.rightScale) return false;
     if (this.histogramModel.properties.idZoneSet & !zoneIdx) {
         return true;
     }
 
     tempDepth = this.startDepth + this.depthStep * parseInt(d.y);
+    left = Math.min(this.histogramModel.properties.leftScale, this.histogramModel.properties.rightScale);
+    right = Math.max(this.histogramModel.properties.leftScale, this.histogramModel.properties.rightScale);
 
     if(this.histogramModel && this.histogramModel.properties.idZoneSet) {
         let zone = this.zoneSet[zoneIdx];
         return (!isNaN(d.y) && ( tempDepth >= zone.properties.startDepth ) && 
-                ( tempDepth < zone.properties.endDepth ));
+                ( tempDepth < zone.properties.endDepth ) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
     }
 
     return (!isNaN(d.y) && ( tempDepth >= this.histogramModel.properties.intervalDepthTop ) && 
-            ( tempDepth < this.histogramModel.properties.intervalDepthBottom ));
+            ( tempDepth < this.histogramModel.properties.intervalDepthBottom ) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
 }
 
 Histogram.prototype.getZoneData = function(idx) {
@@ -810,7 +813,7 @@ function calAverageDeviation(data) {
 Histogram.prototype.getAverageDeviation = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return calAverageDeviation(this.intervalData);
     }
     // zonalDepth case
@@ -825,7 +828,7 @@ Histogram.prototype.getStandardDeviation = function() {
 Histogram.prototype._getStandardDeviation = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return d3.deviation(this.intervalData);
     }
     // zonalDepth case
@@ -837,7 +840,7 @@ Histogram.prototype._getStandardDeviation = function () {
 Histogram.prototype.getVariance = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return d3.variance(this.intervalData).toFixed(__DECIMAL_LEN);
     }
     // zonalDepth case
@@ -849,7 +852,7 @@ Histogram.prototype.getVariance = function () {
 Histogram.prototype.getSkewness = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return ss.sampleSkewness(this.intervalData).toFixed(__DECIMAL_LEN);
     }
     // zonalDepth case
@@ -861,7 +864,7 @@ Histogram.prototype.getSkewness = function () {
 Histogram.prototype.getKurtosis = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return ss.sampleKurtosis(this.intervalData).toFixed(__DECIMAL_LEN);
     }
     // zonalDepth case
@@ -872,7 +875,7 @@ Histogram.prototype.getKurtosis = function () {
 Histogram.prototype.getMedian = function () {
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return d3.median(this.intervalData).toFixed(__DECIMAL_LEN);
     }
     // zonalDepth case
@@ -890,7 +893,7 @@ Histogram.prototype.getPercentile = function (p) {
 
     if (!this.histogramModel.properties.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
+        if (!this.intervalData || !this.intervalData.length) return null;
         return calPercentile(this.intervalData, p);
     }
     // zonalDepth case
