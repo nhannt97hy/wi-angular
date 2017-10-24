@@ -31,12 +31,15 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 // }
                 // wiApiService.setAuthenticationInfo(userInfo);
                 // close(100);
-                setTimeout(function () {
-                    warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
-                        location.reload();
-                    });
-                }, 200);
-
+                if(token != "CAPTCHA"){
+                    setTimeout(function () {
+                        warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
+                            location.reload();
+                        });
+                    }, 200);
+                } else {
+                    alert("Captcha is not correct!");
+                }
             });
         }
         this.onLoginButtonClicked = function () {
