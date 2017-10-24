@@ -65,21 +65,34 @@ exports.PlotBarsButtonClicked = PlotBarsButtonClicked;
 function PlotBarsButtonClicked() {
     console.log('PlotBarsButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    var plot = wiHistogramCtrl.histogramModel.properties.plot;
-    switch(plot) {
-    case 'Curve':
-        wiHistogramCtrl.histogramModel.properties.plot = "Bar";
-        break;
-    default:
-        wiHistogramCtrl.histogramModel.properties.plot = "Curve";
-    }
+    let currentPlot = wiHistogramCtrl.histogramModel.properties.plot;
+    switch(currentPlot) {
+        case 'Bar': 
+            wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+            break;
+        default:
+            wiHistogramCtrl.histogramModel.properties.plot = "Bar";
+    } 
+    // wiHistogramCtrl.histogramModel.properties.plot = "Bar";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.PlotCurvesButtonClicked = function() {
     console.log('PlotCurvesButton is clicked');
-    PlotBarsButtonClicked.call(this);
+    // PlotBarsButtonClicked.call(this);
+    let wiHistogramCtrl = this.wiHistogram;
+    let currentPlot = wiHistogramCtrl.histogramModel.properties.plot;
+    switch(currentPlot) {
+        case 'Bar': 
+            wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+            break;
+        default:
+            wiHistogramCtrl.histogramModel.properties.plot = "Bar";
+    } 
+    //wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();   
 }
 
 exports.FrequencyButtonClicked = FrequencyButtonClicked;

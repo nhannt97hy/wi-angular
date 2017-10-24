@@ -175,7 +175,7 @@ Histogram.prototype._doPlot = function() {
         .attr('height', $(this.container.node()).height());
 
     // remove previously render histograms
-    this.svgContainer.selectAll('.bars, path.gaussian-line, path.cumulative-line, line.mean-line, line.sigma-line, .mean-label, .sigma-label').remove();
+    this.svgContainer.selectAll('.bars, .curves, path.gaussian-line, path.cumulative-line, line.mean-line, line.sigma-line, .mean-label, .sigma-label').remove();
 
     // Sanity checking
     if (!this.data) {
@@ -307,8 +307,11 @@ Histogram.prototype._doPlot = function() {
 //    this.svgContainer.select('g.vi-histogram-axis-cumulative-y-ticks')
 //        .call(this.axisCumulativeY)
 //        .style('transform', 'translateX(' + (vpX[1] - 100) + 'px)');
-
-    drawBarHistogram();
+    if(self.histogramModel.properties.plot === "Bar") {
+        drawBarHistogram();
+    } else if(self.histogramModel.properties.plot === "Curve"){
+        drawCurveHistogram();
+    }
 
     if (self.histogramModel.properties.showGaussian) {
         drawGaussianCurve();
@@ -352,6 +355,7 @@ Histogram.prototype._doPlot = function() {
         }
         return bin.length;
     }
+
     function drawBarHistogram() {
         // Generate column groups
         let bars = self.svgContainer.selectAll('.bars').data(self.fullBins).enter()
@@ -444,6 +448,48 @@ Histogram.prototype._doPlot = function() {
         }
     }
 
+    function drawCurveHistogram() {
+        var line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+        
+        if (self.intervalBins) {
+            line
+                .x(function(d, i) {
+                    var width = Math.abs(transformX(self.fullBins[i].x1) - transformX(self.fullBins[i].x0));
+                    return transformX(d.x0) + width;
+                })
+                .y(function(d, i) {
+                    if(self.histogramModel.properties.plotType != 'Frequency') {
+                        return transformY(d.length*100/self.fullData.length);
+                    }
+                    return transformY(d.length);    
+                });
+        } else {
+            line
+                .x(function(d, i) {
+                    var width = Math.abs(transformX(self.fullBins[i].x1) - transformX(self.fullBins[i].x0));
+                    return transformX(d.x0) + width;
+                })
+                .y(function(d, i) {
+                    let binsHeight = 0;
+                    for(let j = 0; j < self.zoneBins.length; ++j) {
+                        if(!binsHeight) {
+                            binsHeight = self.zoneBins[j][i].length;
+                        } else {
+                            binsHeight += self.zoneBins[j][i].length;
+                        }
+                    }
+                    if(self.histogramModel.properties.plotType != 'Frequency') {
+                        return transformY(binsHeight*100/self.fullData.length);
+                    }
+                    return transformY(binsHeight);    
+                });   
+        }
+
+        self.svgContainer.append('path').datum(self.fullBins)
+            .attr('class', 'curves')
+            .attr('d', line);
+    }
+
     function drawGaussianCurve() {
         var gaussianPoints = getData(4000);
         var gaussianTransformY = d3.scaleLinear()
@@ -457,7 +503,9 @@ Histogram.prototype._doPlot = function() {
             .y(function(d) {
                 return gaussianTransformY(d.y);
             })
-            .curve(d3.curveBasis);
+            .curve(d3.curveCatmullRom.alpha(0.2));
+
+            //.curve(d3.curveBasis);
         self.svgContainer.append('path').datum(gaussianPoints)
                 .attr('class', 'gaussian-line').attr('d', line);
         let meanPos = transformX(self.mean);
@@ -564,7 +612,8 @@ Histogram.prototype._doPlot = function() {
             .y(function(d) {
                 return cumulativeTransformY(d.y);
             })
-            .curve(d3.curveBasis);
+            .curve(d3.curveCatmullRom.alpha(0.2));
+            //.curve(d3.curveBasis);
 
         self.svgContainer.append('path').datum(cumulativePoints)
                 .attr('class', 'cumulative-line').attr('d', line);

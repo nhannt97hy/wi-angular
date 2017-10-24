@@ -1234,6 +1234,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     wiApiService.removeZone(zone.id, function () {
                         _currentTrack.removeZone(zone);
                         _plotZoneSet(_currentTrack);
+                        Utils.refreshProjectState();
                     });
                 }
             }, {
