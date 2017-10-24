@@ -337,7 +337,7 @@ function crossplotToTreeConfig(crossplot) {
         idWell: crossplot.idWell,
         idCrossPlot: crossplot.idCrossPlot,
         name: crossplot.name,
-        discriminator: crossplot.discriminator,
+        discriminator: crossplot.discriminator == 'null'? null : crossplot.discriminator,
         referenceTopDepth: crossplot.referenceTopDepth,
         referenceBottomDepth: crossplot.referenceBottomDepth,
         referenceScale: crossplot.referenceScale,
@@ -391,7 +391,7 @@ function histogramToTreeConfig(histogram) {
         plot: histogram.plot,
         plotType: histogram.plotType,
         color: histogram.color,
-        discriminator: histogram.discriminator,
+        discriminator: histogram.discriminator == 'null'? null : JSON.parse(histogram.discriminator),
         idWell: histogram.idWell,
         idCurve: histogram.idCurve,
         idZoneSet: histogram.idZoneSet,
@@ -2068,7 +2068,6 @@ exports.findFamilyById = findFamilyById;
 
 exports.evaluateExpr = evaluateExpr;
 function evaluateExpr(well, discriminator, callback) {
-    discriminator = discriminator == 'null' ? null : JSON.parse(discriminator);
     let result = new Array();
     let wellProps = well.properties;
     let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;

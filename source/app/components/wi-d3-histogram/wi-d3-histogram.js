@@ -403,7 +403,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             loadStatistics();
         });
 
-        if(self.visHistogram.discriminator && self.visHistogram.discriminator != 'null'){
+        if(self.visHistogram.discriminator){
             utils.evaluateExpr(self.getWell(), self.visHistogram.discriminator, function(result){
                 console.log(result);
                 self.visHistogram.discriminatorArr = result;

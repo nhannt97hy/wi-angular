@@ -6508,7 +6508,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.datasets = [];
         this.curvesArr = [];
         this.props = plotCtrl.getModel().properties;
-        this.conditionTree = self.props.discriminator == 'null' ? null: JSON.parse(self.props.discriminator);
+        this.conditionTree = angular.copy(self.props.discriminator);
 
         wiComponentService.on('discriminator-update', function(){
             self.conditionExpr = parse(self.conditionTree);        
@@ -6675,7 +6675,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     idHistogram: self.props.idHistogram
                 }
                 wiApiService.editHistogram(payload, function(){
-                    self.props.discriminator = JSON.stringify(self.conditionTree);
+                    self.props.discriminator = self.conditionTree;
                     if (callback) callback(self.conditionTree);
                 })
             }else if (self.props.idCrossPlot){
@@ -6685,7 +6685,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     idWell: self.props.idWell                    
                 }
                 wiApiService.editCrossplot(payload, function(){
-                    self.props.discriminator = JSON.stringify(self.conditionTree);
+                    self.props.discriminator = self.conditionTree;
                     if (callback) callback(self.conditionTree);
                 })
             }else{
@@ -6701,18 +6701,18 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     idHistogram: self.props.idHistogram
                 }
                 wiApiService.editHistogram(payload, function(){
-                    self.props.discriminator = JSON.stringify(self.conditionTree);
+                    self.props.discriminator = self.conditionTree;
                     if (callback) callback(self.conditionTree);
                     close(null);
                 })
             }else if (self.props.idCrossPlot){
                 let payload = {
-                    discriminator: JSON.stringify(self.conditionTree),
+                    discriminator: self.conditionTree,
                     idCrossPlot: self.props.idCrossPlot,
                     idWell: self.props.idWell
                 }
                 wiApiService.editCrossplot(payload, function(){
-                    self.props.discriminator = JSON.stringify(self.conditionTree);
+                    self.props.discriminator = self.conditionTree;
                     if (callback) callback(self.conditionTree);
                     close(null);
                 })
