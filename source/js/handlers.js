@@ -102,9 +102,10 @@ exports.AddNewButtonClicked = function () {
 
     DialogUtils.addNewDialog(this.ModalService, function (newWell) {
         if (newWell) {
-            let wellModel = utils.wellToTreeConfig(newWell);
-            let selectedProjectNode = utils.getSelectedProjectNode();
-            selectedProjectNode.children.push(wellModel);
+            // let wellModel = utils.wellToTreeConfig(newWell);
+            // let selectedProjectNode = utils.getSelectedProjectNode();
+            // selectedProjectNode.children.push(wellModel);
+            utils.refreshProjectState();
         }
     });
 };
