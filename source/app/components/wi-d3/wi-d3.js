@@ -1348,7 +1348,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     // idDesCurve: idDesCurve
                     newCurvename: "new_curve",
                     idLine: currentCurve.id,
-                    data: JSON.stringify(currentCurve.data),
+                    data: currentCurve.data,
                     isBackup: true
                 }
                 wiApiService.editDataCurve(request, function (response) {
