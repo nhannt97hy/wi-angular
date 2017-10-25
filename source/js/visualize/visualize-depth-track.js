@@ -148,7 +148,7 @@ DepthTrack.prototype.updateHeader = function() {
     Track.prototype.updateHeader.call(this);
 
     this.drawingHeaderContainer.select('.vi-track-unit')
-        .text(this.unit);
+        .html(this.unit + '<br>' + '1:' + this.scale);
 }
 
 /**
@@ -159,4 +159,12 @@ DepthTrack.prototype.updateBody = function() {
 
     this.yAxisGroupRight
         .style('transform', 'translateX(' + this.plotContainer.node().clientWidth + 'px)');
+}
+
+/**
+ * Update scale in header
+ */
+DepthTrack.prototype.updateScale = function (scale) {
+    this.scale = scale;
+    this.updateHeader();
 }

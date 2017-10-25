@@ -126,6 +126,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let low = min + (max - min) * self.slidingBarState.top / 100;
         let high = low + (max - min) * self.slidingBarState.range / 100;
         wiD3Controller.setDepthRange([low, high]);
+        wiD3Controller.updateScale();
     }
 
     function updateState(top, height, pHeight) {

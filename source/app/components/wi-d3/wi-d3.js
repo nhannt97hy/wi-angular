@@ -185,6 +185,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
+        self.updateScale();
     };
 
     this.addZoneTrack = function(callback) {
@@ -511,6 +512,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     };
 
+    this.updateScale = function () {
+        let track = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container`);
+        if (!track.length) return;
+        let trackHeight = track.height();
+        let dpCm = Utils.getDpcm();
+        let heightCm = trackHeight / dpCm;
+        let depthRange = this.getDepthRange();
+        let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
+        console.log(depthRange, heightCm);
+        _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
+            depthTrack.updateScale(scale.toFixed(0));
+        })
+    }
 
     this.setDepthRange = function(depthRange) {
         _depthRange = depthRange;
@@ -519,6 +533,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             track.maxY = depthRange[1];
         });
         self.plotAll();
+        this.updateScale();
     };
 
     this.setDepthRangeForTrack = function(track, depthRange) {

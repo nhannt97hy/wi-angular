@@ -138,6 +138,7 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     let depthHeightCm = heightCm * rangeUnit;
     let depthHeightM = depthHeightCm / 100;
     depthRange[1] = depthRange[0] + depthHeightM;
+    if (depthRange[1] > wiD3Ctrl.getMaxDepth()) depthRange[1] = wiD3Ctrl.getMaxDepth();
     console.log(depthRange, trackHeight, heightCm, depthHeightM, dpCm);
     wiD3Ctrl.setDepthRange(depthRange);
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
