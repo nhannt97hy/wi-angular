@@ -909,7 +909,13 @@ exports.CurveComrarisonButtonClicked = function () {
 };
 
 exports.CurveAverageButtonClicked = function () {
-    console.log('CurveAverageButton is clicked');
+    console.log('AboutButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveAverageDialog(this.ModalService, function (data) {
+        console.log("curveAverage");
+    });
 };
 
 exports.FormationResistivityButtonClicked = function () {
