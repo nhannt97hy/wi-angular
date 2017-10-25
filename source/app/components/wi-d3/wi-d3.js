@@ -1315,12 +1315,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _curveOnRightClick() {
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         //console.log('-------------');
+        let currentCurve = _currentTrack.getCurrentCurve();
         self.setContextMenu([{
             name: "CurveProperties",
             label: "Curve Properties",
             icon: "curve-properties-16x16",
             handler: function () {
-                let currentCurve = _currentTrack.getCurrentCurve();
                 DialogUtils.curvePropertiesDialog(
                     ModalService,
                     wiComponentService,
@@ -1335,7 +1335,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Edit Curve",
             icon: "edit-curve-text-16x16",
             handler: function () {
-                Utils.error("Feature is not implemented");
+                // Utils.error("Feature is not implemented");
+
+                let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+                let datasetModel = Utils.getModel('dataset', currentCurve.idDataset);
+                let wellModel = Utils.getModel('well', datasetModel.properties.idWell);
+                let request = {
+                    projectName: rootNodes.name,
+                    wellName: wellModel.properties.name,
+                    idDataset: currentCurve.idDataset,
+                    idSrcCurve: currentCurve.idCurve,
+                    // idDesCurve: idDesCurve
+                    newCurvename: "new_curve",
+                    idLine: currentCurve.id,
+                    data: JSON.stringify(currentCurve.data),
+                    isBackup: true
+                }
+                wiApiService.editDataCurve(request, function (response) {
+                    console.log('edit curve response', response);
+                });
             }
         }, {
             name: "DepthShift",

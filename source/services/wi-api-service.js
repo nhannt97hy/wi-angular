@@ -54,6 +54,7 @@ const DELETE_CURVE = '/project/well/dataset/curve/delete';
 const COPY_CURVE = '/project/well/dataset/curve/copy';
 const CUT_CURVE = '/project/well/dataset/curve/move';
 const SCALE_CURVE = '/project/well/dataset/curve/scale';
+const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
 
 const FAMILY_LIST = '/family/list';
 
@@ -825,6 +826,16 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
     } catch (err) {
         self.getUtils().error(err);
     }
+}
+Service.prototype.editDataCurve = function (request, callback) {
+    const self = this;
+    this.postWithFile(EDIT_DATA_CURVE, request)
+        .then(function (response) {
+            if (callback) callback(response);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
 }
 
 Service.prototype.listFamily = async function (callback) {
