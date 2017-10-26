@@ -216,7 +216,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         this.title = promptConfig.title;
         this.inputName = promptConfig.inputName;
         this.input = promptConfig.input;
-        this.type = promptConfig.type;
+        this.type = promptConfig.type ? promptConfig.type : 'text';
         this.options = promptConfig.options;
         this.onBlur = function(args) {
             console.log('onBlur', args);
