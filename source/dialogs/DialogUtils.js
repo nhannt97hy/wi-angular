@@ -7420,7 +7420,6 @@ exports.curveAverageDialog = function (ModalService, callback) {
         this.wellModel = angular.copy(self.wells[0]);
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
-
         this.defaultDepth = function () {
             self.topDepth = parseFloat(this.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
@@ -7432,6 +7431,74 @@ exports.curveAverageDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "curve-average/curve-average-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curveRescaleDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.wells = wiExplorer.treeConfig[0].children;
+        this.wellModel = angular.copy(self.wells[1]);
+        this.topDepth = parseFloat(this.wellModel.properties.topDepth);
+        this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+
+        this.defaultDepth = function () {
+            self.topDepth = parseFloat(this.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-rescale/curve-rescale-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curveComrarisonDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.wells = wiExplorer.treeConfig[0].children;
+        this.wellModel = angular.copy(self.wells[0]);
+        this.topDepth = parseFloat(this.wellModel.properties.topDepth);
+        this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+
+        this.defaultDepth = function () {
+            self.topDepth = parseFloat(this.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-comparison/curve-comparison-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
