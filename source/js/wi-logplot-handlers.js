@@ -226,6 +226,20 @@ exports.ScaleFullButtonClicked = function () {
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
+exports.ScaleCustomButtonClicked = function() {
+    let self = this;
+    let currentScale = parseInt(this.wiLogplot.getwiD3Ctrl().scale);
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let promptConfig = {
+        title: 'Custom Scale',
+        inputName: 'Scale',
+        input: currentScale,
+        type: 'number'
+    }
+    DialogUtils.promptDialog(self.ModalService, promptConfig, function(scale){
+        scaleTo(scale, self.wiLogplot, self.wiComponentService);    
+    })
+}
 exports.ZoomInButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().zoom(false);
 };
