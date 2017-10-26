@@ -906,10 +906,22 @@ exports.CurveDerivativeButtonClicked = function () {
 
 exports.CurveRescaleButtonClicked = function () {
     console.log('CurveRescaleButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveRescaleDialog(this.ModalService, function (data) {
+        console.log("curveRescale");
+    });
 };
 
 exports.CurveComrarisonButtonClicked = function () {
     console.log('CurveComrarisonButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveComrarisonDialog(this.ModalService, function (data) {
+        console.log("curveComrarision");
+    });
 };
 
 exports.CurveAverageButtonClicked = function () {

@@ -521,7 +521,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let depthRange = this.getDepthRange();
         let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
         this.scale = scale.toFixed(0);
-        console.log(depthRange, heightCm);
+        // console.log(depthRange, heightCm);
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
         })
@@ -963,6 +963,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     if (track == t) return;
                     t.horizontalResizerDragCallback();
                 })
+                self.updateScale();
             });
         })
     }
@@ -1245,7 +1246,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Auto Zone Named",
                 handler: function () {
                     _currentTrack.autoName().forEach(function(zone) {
-                        wiApiService.editZone(zone.getProperties(), function () { });
+                        wiApiService.editZone(zone.getProperties(), function () {
+                            _plotZoneSet(_currentTrack);
+                            Utils.refreshProjectState();
+                        });
                     });
                     _currentTrack.doPlot(true);
                 }

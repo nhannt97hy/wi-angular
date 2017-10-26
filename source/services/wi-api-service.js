@@ -56,6 +56,8 @@ const CUT_CURVE = '/project/well/dataset/curve/move';
 const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
 
+const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
+
 const FAMILY_LIST = '/family/list';
 
 const CREATE_PLOT = '/project/well/plot/new';
@@ -838,6 +840,10 @@ Service.prototype.editDataCurve = function (request, callback) {
         });
 }
 
+Service.prototype.processingDataCurve = function(request, callback) {
+    var self = this;
+    this.postWithFile(PROCESSING_DATA_CURVE, request, callback);
+}
 Service.prototype.listFamily = async function (callback) {
     const self = this;
     this.post(FAMILY_LIST, {}, callback);
