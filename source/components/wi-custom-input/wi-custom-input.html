@@ -1,10 +1,20 @@
 <div class="dropdown"  uib-dropdown>
-    <input type="number" ng-model="wiCustomInput.model" class="form-control wi-form-control">
-    <i class="caret" uib-dropdown-toggle id="dropdownMenu"></i>
+    <input type="number" ng-if="wiCustomInput.type == 'number'" ng-model="wiCustomInput.model" class="form-control wi-form-control">
+    <input type="text" ng-if="wiCustomInput.type == 'curve'" ng-model="wiCustomInput.model.name" class="form-control wi-form-control"
+    ng-change="wiCustomInput.onChanged()">
+    <button uib-dropdown-toggle id="dropdownMenu" class="custom-btn">
+        <i class="ti-angle-down"></i>
+    </button>
     <ul class="dropdown-menu custom-input-menu" aria-labelledby="dropdownMenu" uib-dropdown-menu role="menu">
-        <li ng-repeat="opt in wiCustomInput.options" ng-click="wiCustomInput.onClick(opt.value)" class="custom-item">
+        <li ng-if="wiCustomInput.type == 'number'" ng-repeat="opt in wiCustomInput.options" ng-click="wiCustomInput.onClick(opt.value)" class="custom-item"
+        ng-class="{'custom-item-selected': opt.value==wiCustomInput.model}">
             <span class="custom-value">{{opt.value}}</span>
             <span class="custom-label">{{opt.label}}</span>
+        </li>
+        <li ng-if="wiCustomInput.type == 'curve'" ng-repeat="opt in wiCustomInput.options" ng-click="wiCustomInput.onClickCurve(opt)" class="custom-item"
+        ng-class="{'custom-item-selected': opt.properties.name==wiCustomInput.model.name}">
+            <span class="custom-value">{{opt.properties.name}}</span>
+            <span class="custom-label">{{opt.datasetName}}</span>
         </li>
     </ul>
 </div>

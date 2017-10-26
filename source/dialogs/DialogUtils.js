@@ -3382,7 +3382,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
-            if(self.props.general.width > 0.5) {
+            if(self.props.general.width >= 0.5 ) {
                 wiApiService.editTrack(self.props.general, function(res) {
                     console.log("res", res);
                     let newProps = angular.copy(self.props);
@@ -5528,35 +5528,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         }
                     })
                 });
-                //wi-level-menu
-                /*
-                self.option=self.datasets;
-                self.testVar= {
-                  "name": "curve",
-                  "type": "curve",
-                  "id": 3,
-                  "properties": {
-                    "idDataset": 2,
-                    "idCurve": 3,
-                    "idFamily": 2,
-                    "name": "ECGR",
-                    "unit": "GAPI",
-                    "alias": "ECGR",
-                    "minScale": 0,
-                    "maxScale": 200
-                  },
-                  "data": {
-                    "childExpanded": false,
-                    "icon": "curve-16x16",
-                    "label": "ECGR",
-                    "unit": "GAPI",
-                    "selected": false
-                  },
-                  "curveData": null,
-                  "datasetName": "W3",
-                  "$$hashKey": "object:784"
-                };
-                */
+                
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -7414,6 +7386,197 @@ exports.curveAverageDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
         window.curveAvg = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
+        this.wells = wiExplorer.treeConfig[0].children;
+        this.wellModel = angular.copy(self.wells[0]);
+        this.idWell = this.wellModel.id;
+        this.topDepth = parseFloat(this.wellModel.properties.topDepth);
+        this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+
+        this.availableCurves = [];
+        this.selectedCurves = [];
+        this.datasets = [];
+        this.curvesOnDataset = [];
+        this.calcMethod = "lateral";
+        this.selectedDataset = {};
+        this.idSelectedDataset = null;
+        this.idDesCurve = null;
+        this.defaultDepth = function () {
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+        }
+        getAllCurvesOnSelectWell(this.wellModel);
+        this.selectWell = function(idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.availableCurves = [];
+            self.datasets = [];
+            getAllCurvesOnSelectWell(self.wellModel);
+        };
+        this.onChangeDataset = function(idDataset) {
+            self.selectedDataset = utils.findDatasetById(idDataset);
+            self.curvesOnDataset = [];
+            self.selectedDataset.children.forEach(function (item) {
+                if (item.type == 'curve') {
+                    item.properties.dataset = self.selectedDataset.properties.name;
+                    self.curvesOnDataset.push(item);
+                }
+            });
+            self.idDesCurve = self.curvesOnDataset[0].id;
+        }
+        function getAllCurvesOnSelectWell(well) {
+            well.children.forEach(function (child) {
+                if (child.type == 'dataset') self.datasets.push(child);
+            });
+            self.datasets.forEach(function (child) {
+                child.children.forEach(function (item) {
+                    if (item.type == 'curve') {
+                        item.properties.dataset = child.properties.name;
+                        item.flag = false;
+                        self.availableCurves.push(item);
+                    }
+                })
+            });
+            self.selectedDataset = self.datasets[0];
+            self.idSelectedDataset = self.selectedDataset.id;
+            self.selectedDataset.children.forEach(function (item) {
+                if (item.type == 'curve') {
+                    item.properties.dataset = self.selectedDataset.properties.name;
+                    self.curvesOnDataset.push(item);
+                }
+            });
+            self.idDesCurve = self.selectedDataset.children[0].id;
+            console.log("curves", self.availableCurves);
+        }
+        this.select = function (curve) {
+            if(curve.flag == false) curve.flag = true;
+            else if (curve.flag == true) curve.flag = false;
+        }
+        function getDataTopBottomRange (data, topPos, bottomPos) {
+            let retData = [];
+            for(let i = 0; i < data.length; i++) {
+                if(i < topPos || i > bottomPos) retData.push(null);
+                else retData.push(data[i]);
+            }
+            return retData;
+        }
+        function curveAverageCacl () {
+            let allData = [];
+            let dataAvg = [];
+            self.selectedCurves = self.availableCurves.filter(function(curve, index) {
+                return (curve.flag == true);
+            });
+            let yTop = Math.round((
+                            self.topDepth - parseFloat(self.wellModel.properties.topDepth))
+                                        /parseFloat(self.wellModel.properties.step));
+            let yBottom = Math.round((
+                            self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
+                                        /parseFloat(self.wellModel.properties.step));
+            console.log("yy", yTop, yBottom);
+            if(self.selectedCurves.length > 0){
+                async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
+                    wiApiService.dataCurve(item.id, function (dataCurve){
+                        allData.push(dataCurve.map(d => d.x));
+                        callback();
+                    });
+                }, function(err) {
+                    if (err) {
+                        DialogUtils.errorMessageDialog(ModalService, err);
+                    }
+                    let meanData = [];
+                    if(self.calcMethod == 'arithmetic') {
+                        for( var i = 0; i < allData[0].length; i++){
+                            let sum = 0;
+                            for ( let j = 0; j < allData.length; j++) sum += parseFloat(allData[j][i]);
+                            meanData.push(sum / allData.length);
+                        }
+                        dataAvg = getDataTopBottomRange(meanData, yTop, yBottom);
+                    } else if (self.calcMethod == 'lateral') {
+                        for( var i = 0; i < allData[0].length; i++){
+                            let sum = 0;
+                            for ( let j = 0; j < allData.length; j++) sum += parseFloat(allData[j][i]);
+                            meanData.push(sum / allData.length);
+                        }
+                        dataAvg = getDataTopBottomRange(meanData, yTop, yBottom);
+                    }
+                    let request = {
+                        idDataset: self.idSelectedDataset,
+                        curveName: null,
+                        idDesCurve: self.idDesCurve,
+                        data: dataAvg
+                    }
+                    wiApiService.processingDataCurve(request, function(res) {
+                        console.log("processingDataCurve");
+                        utils.refreshProjectState();
+                    })
+                });
+            }
+        };
+        this.onRunButtonClicked = function () {
+            curveAverageCacl();
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-average/curve-average-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curveRescaleDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.wells = wiExplorer.treeConfig[0].children;
+        this.wellModel = angular.copy(self.wells[1]);
+        this.topDepth = parseFloat(this.wellModel.properties.topDepth);
+        this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+
+        this.defaultDepth = function () {
+            self.topDepth = parseFloat(this.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-rescale/curve-rescale-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.curveComrarisonDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.wells = wiExplorer.treeConfig[0].children;
@@ -7431,7 +7594,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: "curve-average/curve-average-modal.html",
+        templateUrl: "curve-comparison/curve-comparison-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
@@ -7441,6 +7604,61 @@ exports.curveAverageDialog = function (ModalService, callback) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
+        });
+    });
+}
+
+exports.curveConvolutionDialog = function(ModalService){
+    function ModalController(wiComponentService, wiApiService, close){
+        let self = this;
+        window.curveCov = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = this.project.children;
+        this.SelectedWell = this.wellArr[0];        
+        this.datasets = [];
+        this.curvesArr = [];
+        this.ResultCurve = {
+            name: '',
+            id: null
+        }
+        this.SelectedWell.children.forEach(function(child, i){
+            if(child.type == 'dataset')
+                self.datasets.push(child);
+
+            if(i == self.wellArr.length - 1){
+                self.datasets.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            var d = item;
+                            d.datasetName = child.properties.name;
+                            self.curvesArr.push(d);
+                        }
+                    })
+                });
+            }
+        })
+        this.inputIdCurve = self.datasets[0].children[0].id;
+        this.stdIdCurve = self.datasets[0].children[0].id;
+        this.outIdDataset = self.datasets[0].id;
+
+
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-convolution/curve-convolution-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
         });
     });
 }

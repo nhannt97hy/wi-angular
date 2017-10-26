@@ -1,5 +1,5 @@
-let Utils = require('./visualize-utils');
-
+let visUtils = require('./visualize-utils');
+let utils = require('./../utils');
 module.exports = Track;
 
 /**
@@ -15,13 +15,13 @@ function Track(config) {
     this.BODY_CONTAINER_HEIGHT = 70;
     this.BODY_HIGHLIGHT_COLOR = '#ffffe0';
     this.BODY_DEFAULT_COLOR = 'transparent';
-    this.MIN_WIDTH = 120;
+    this.MIN_WIDTH = utils.inchToPixel(0.5);
 
     this.orderNum = config.orderNum;
     this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
-    this.type = Utils.pascalCaseToLowerDash(this.constructor.name);
+    this.type = visUtils.pascalCaseToLowerDash(this.constructor.name);
     this.justification = config.justification || 'center';
     this.showTitle = (config.showTitle == null) ? true : config.showTitle;
 
@@ -268,7 +268,7 @@ Track.prototype.headerScrollCallback = function() {
     let maxTop = rowHeight + extraHeight;
     let minTop = this.headerContainer.node().clientHeight - this.drawingHeaderContainer.node().clientHeight + extraHeight;
 
-    top = minTop < maxTop ? Utils.clip(top, [minTop, maxTop]) : maxTop;
+    top = minTop < maxTop ? visUtils.clip(top, [minTop, maxTop]) : maxTop;
     this.drawingHeaderContainer
         .style('top', top + 'px');
 }
@@ -421,8 +421,8 @@ Track.prototype.getWindowY = function() {
         ? [this.minY, this.maxY]
         : [0, 10000];
 
-    windowY[0] = this.offsetY + Utils.roundUp(windowY[0] - this.offsetY, this.yStep);
-    windowY[1] = this.offsetY + Utils.roundDown(windowY[1] - this.offsetY, this.yStep);
+    windowY[0] = this.offsetY + visUtils.roundUp(windowY[0] - this.offsetY, this.yStep);
+    windowY[1] = this.offsetY + visUtils.roundDown(windowY[1] - this.offsetY, this.yStep);
     return windowY;
 }
 
