@@ -193,21 +193,31 @@ Track.prototype.createVerticalResizer = function() {
         .attr('class', 'vi-track-vertical-resizer')
         .attr('data-order-num', function(d) {return d;})
         .style('width', '5px')
-        .style('cursor', 'col-resize')
-        .call(d3.drag()
-            .on('start', function() {
+        .style('cursor', 'col-resize');
+}
+
+/**
+ * Function to call when vertical resizer is dragged
+ */
+Track.prototype.onVerticalResizerDrag = function (cb) {
+    let minWidth = this.MIN_WIDTH;
+    let compensator;
+    let self = this;
+    this.verticalResizer.call(d3.drag()
+        .on('start', function () {
+            compensator = 0;
+        })
+        .on('drag', function () {
+            compensator += d3.event.dx;
+            if ((self.width + compensator) > minWidth) {
+                self.width += compensator;
                 compensator = 0;
-            })
-            .on('drag', function() {
-                compensator += d3.event.dx;
-                if (( self.width + compensator ) > minWidth) {
-                    self.width += compensator;
-                    compensator = 0;
-                    self.trackContainer.style('width', self.width + 'px');
-                    self.doPlot();
-                }
-            })
-        );
+                self.trackContainer.style('width', self.width + 'px');
+                self.doPlot();
+            }
+        }).on('end', function () {
+            cb();
+        }));
 }
 
 /**
