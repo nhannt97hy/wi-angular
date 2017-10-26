@@ -16,10 +16,10 @@ let app = angular.module(moduleName, []);
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
 //  const BASE_URL = 'http://localhost:3000';
-const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://dev.sflow.me';
 //const BASE_URL = 'http://wi.i2g.cloud';
 // const BASE_URL = 'http://192.168.0.223';
-// const BASE_URL = 'http://192.168.0.130:3000';
+const BASE_URL = 'http://192.168.0.130:3000';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -55,6 +55,8 @@ const COPY_CURVE = '/project/well/dataset/curve/copy';
 const CUT_CURVE = '/project/well/dataset/curve/move';
 const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
+
+const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
 const FAMILY_LIST = '/family/list';
 
@@ -838,6 +840,10 @@ Service.prototype.editDataCurve = function (request, callback) {
         });
 }
 
+Service.prototype.processingDataCurve = function(request, callback) {
+    var self = this;
+    this.postWithFile(PROCESSING_DATA_CURVE, request, callback);
+}
 Service.prototype.listFamily = async function (callback) {
     const self = this;
     this.post(FAMILY_LIST, {}, callback);

@@ -520,9 +520,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let heightCm = trackHeight / dpCm;
         let depthRange = this.getDepthRange();
         let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
-        console.log(depthRange, heightCm);
+        this.scale = scale.toFixed(0);
+        // console.log(depthRange, heightCm);
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
-            depthTrack.updateScale(scale.toFixed(0));
+            depthTrack.updateScale(self.scale);
         })
     }
 
@@ -928,6 +929,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('dblclick', function() {
             openTrackPropertiesDialog();
         });
+        track.onVerticalResizerDrag(function () {
+            if (track.isLogTrack()) {
+                wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, function () {
+                })
+            } else if (track.isDepthTrack()) {
+                wiApiService.editDepthTrack({ idDepthAxis: track.id, width: Utils.pixelToInch(track.width) }, function () {
+                })
+            } else if (track.isZoneTrack()) {
+                wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, function () {
+                })
+            }
+        });
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
@@ -950,6 +963,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     if (track == t) return;
                     t.horizontalResizerDragCallback();
                 })
+                self.updateScale();
             });
         })
     }
@@ -1348,7 +1362,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     // idDesCurve: idDesCurve
                     newCurvename: "new_curve",
                     idLine: currentCurve.id,
-                    data: currentCurve.data,
+                    data: currentCurve.data.map(d => d.x),
                     isBackup: true
                 }
                 wiApiService.editDataCurve(request, function (response) {
