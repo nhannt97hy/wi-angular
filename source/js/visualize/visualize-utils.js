@@ -81,6 +81,7 @@ function setProperties(obj, props, forArray) {
         }
         else if (value === null) {
             if (obj[key] === undefined && schema.null === false && schema.default !== undefined) obj[key] = schema.default;
+            else obj[key] = null;
         }
         else if (schema.type == 'Integer') {
             obj[key] = value == null ? null : parseInt(value);
