@@ -1,0 +1,145 @@
+<div class='modal fade'>
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class="well-insight-16x16"></span>&nbsp;Curve Comparison</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" action="" name="modalCurveRescale">
+                    <h5 class="modal-infomation-title"><span class="well-16x16"></span>&nbsp;Well</h5>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3"> Select well:</label>
+                        <div class="col-sm-9">
+                            <select ng-model="wiModal.wellModel.id"
+                                    class="form-control wi-form-control"
+                                    ng-options="well.id as well.properties.name for well in wiModal.wells">
+                            </select>
+                        </div>
+                    </div>
+                    <h5 class="modal-infomation-title"><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
+                    <div class="form-group">
+                        <label class="control-label col-sm-1" for="">Top</label>
+                        <div class="col-sm-4">
+                            <input ng-model="wiModal.topDepth"
+                                   type="number" class="form-control wi-form-control" step="any">
+                        </div>
+                        <label for="" class="control-label col-sm-1" style="padding-left: 0">Bottom</label>
+                        <div class="col-sm-4">
+                            <input ng-model="wiModal.bottomDepth"
+                                   type="number" class="form-control wi-form-control" step="any">
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-default"
+                                    ng-click="wiModal.defaultDepth()">Default</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-1">
+                            <input type="checkbox" class="form-control wi-form-control" ng-model="checked">
+                        </div>
+                        <label for="" class="control-label col-sm-2"> Use zone</label>
+                    </div>
+                    <div class="form-group">
+                        <div>
+                            <label for="" class="col-sm-2 control-label">Parameter</label>
+                            <div class="col-sm-4">
+                                <select ng-disabled="!checked"
+                                        class="form-control wi-form-control"
+                                >
+                                </select>
+                            </div>
+                            <label for="" class="col-sm-2 control-label">Zone set</label>
+                            <div class="col-sm-4">
+                                <select ng-disabled="!checked"
+                                        class="form-control wi-form-control"
+                                >
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Name</th>
+                                    <th>Top</th>
+                                    <th>Bottom</th>
+                                    <th>Color</th>
+                                    <th>Use</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <h5 class="modal-infomation-title">Curve Comparison</h5>
+                    <div class="form-group">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Curve 1</th>
+                                <th>Curve 2</th>
+                                <th>Difference</th>
+                                <th>Correlation</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                </td>
+                                <td>
+                                    <select
+                                            class="wi-select-control"
+                                    >
+                                    </select>
+                                </td>
+                                <td>
+                                    <select
+                                            class="wi-select-control"
+                                    >
+                                    </select>
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <select
+                                            class="wi-select-control"
+                                    >
+                                    </select>
+                                </td>
+                                <td>
+                                    <select
+                                            class="wi-select-control"
+                                    >
+                                    </select>
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="run-16x16"></span>Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>Close</button>
+            </div>
+        </div>
+    </div>
+</div>
