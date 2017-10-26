@@ -1246,7 +1246,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Auto Zone Named",
                 handler: function () {
                     _currentTrack.autoName().forEach(function(zone) {
-                        wiApiService.editZone(zone.getProperties(), function () { });
+                        wiApiService.editZone(zone.getProperties(), function () {
+                            _plotZoneSet(_currentTrack);
+                            Utils.refreshProjectState();
+                        });
                     });
                     _currentTrack.doPlot(true);
                 }
