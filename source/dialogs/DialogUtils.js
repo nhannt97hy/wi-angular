@@ -5528,35 +5528,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         }
                     })
                 });
-                //wi-level-menu
-                /*
-                self.option=self.datasets;
-                self.testVar= {
-                  "name": "curve",
-                  "type": "curve",
-                  "id": 3,
-                  "properties": {
-                    "idDataset": 2,
-                    "idCurve": 3,
-                    "idFamily": 2,
-                    "name": "ECGR",
-                    "unit": "GAPI",
-                    "alias": "ECGR",
-                    "minScale": 0,
-                    "maxScale": 200
-                  },
-                  "data": {
-                    "childExpanded": false,
-                    "icon": "curve-16x16",
-                    "label": "ECGR",
-                    "unit": "GAPI",
-                    "selected": false
-                  },
-                  "curveData": null,
-                  "datasetName": "W3",
-                  "$$hashKey": "object:784"
-                };
-                */
+                
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -7441,6 +7413,61 @@ exports.curveAverageDialog = function (ModalService, callback) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
             callback(ret);
+        });
+    });
+}
+
+exports.curveConvolutionDialog = function(ModalService){
+    function ModalController(wiComponentService, wiApiService, close){
+        let self = this;
+        window.curveCov = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+        this.wellArr = this.project.children;
+        this.SelectedWell = this.wellArr[0];        
+        this.datasets = [];
+        this.curvesArr = [];
+        this.ResultCurve = {
+            name: '',
+            id: null
+        }
+        this.SelectedWell.children.forEach(function(child, i){
+            if(child.type == 'dataset')
+                self.datasets.push(child);
+
+            if(i == self.wellArr.length - 1){
+                self.datasets.forEach(function (child) {
+                    child.children.forEach(function (item) {
+                        if (item.type == 'curve') {
+                            var d = item;
+                            d.datasetName = child.properties.name;
+                            self.curvesArr.push(d);
+                        }
+                    })
+                });
+            }
+        })
+        this.inputIdCurve = self.datasets[0].children[0].id;
+        this.stdIdCurve = self.datasets[0].children[0].id;
+        this.outIdDataset = self.datasets[0].id;
+
+
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-convolution/curve-convolution-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
         });
     });
 }

@@ -890,6 +890,10 @@ exports.CurveFilterButtonClicked = function () {
 
 exports.CurveConvolutionButtonClicked = function () {
     console.log('CurveConvolutionButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveConvolutionDialog(this.ModalService);
 };
 
 exports.CurveDeconvolutionButtonClicked = function () {
