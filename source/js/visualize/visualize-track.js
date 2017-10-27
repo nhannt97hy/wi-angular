@@ -88,6 +88,10 @@ Track.prototype.createContainer = function() {
         .style('display', 'flex')
         .style('flex-direction', 'column')
         .style('outline', 'none');
+    let self = this;
+    new ResizeSensor( $(this.root.node()), function(param) {
+        self.doPlot();
+    } );
 }
 Track.prototype.updateOrderNum = function() {
     this.trackContainer.datum(this.orderNum)
