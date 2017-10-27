@@ -4465,7 +4465,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             getZonesAndCurvesInDataset,
             function(cb) {
                 CURVE_SYMBOLS.forEach(function(symbol) {
-                    autoScaleCurve(symbol);
+                    autoScaleCurve(symbol, true);
                 });
                 cb();
             }
@@ -4527,12 +4527,14 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             }[symbol];
         }
 
-        function autoScaleCurve(symbol) {
+        function autoScaleCurve(symbol, noForce) {
             let key = 'idCurve' + symbol;
             let scaleKeys = getScaleKeys(symbol);
             let pointSet = self.crossplotModel.properties.pointsets[0];
             let idCurve = pointSet[key];
             if (pointSet && pointSet[key]) {
+                if (noForce && pointSet[scaleKeys[0]] != null && pointSet[scaleKeys[1]] != null) return;
+
                 let curve = findCurveById(idCurve).properties;
 
                 let family = utils.findFamilyById(curve.idFamily);
