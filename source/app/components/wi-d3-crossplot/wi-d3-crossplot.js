@@ -496,8 +496,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.viCrossplot.plotArea();
     }
 
-    this.pickPoint = function(idx, callback) {
-        self.viCrossplot.startAddTernaryPoint(idx);
+    this.pickPoint = function(callback) {
+        self.viCrossplot.startAddTernaryPoint();
         self.setContextMenu([
             {
                 name: "End",

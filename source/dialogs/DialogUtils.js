@@ -4682,18 +4682,20 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                         console.log(result, err);
                         let crossplotProps = angular.copy(self.crossplotModel.properties);
                         crossplotProps.pointSet = crossplotProps.pointsets[0];
-
                         if (xCurveData) {
+                            let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
                             crossplotProps.pointSet.curveX
-                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveX }, xCurveData, self.well.properties);
+                                = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
                         }
                         if (yCurveData) {
+                            let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
                             crossplotProps.pointSet.curveY
-                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveY }, yCurveData, self.well.properties);
+                                = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
                         }
                         if (zCurveData) {
+                            let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
                             crossplotProps.pointSet.curveZ
-                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveZ }, zCurveData, self.well.properties);
+                                = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
                         }
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
@@ -5965,6 +5967,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                         case change.created:
                             wiApiService.createRegressionLines(regLine, function(res){
                                 console.log("create", res, regLine);
+                                regLine.idRegressionLine = res.idRegressionLine;
                                 callback();
                             });
                             break;
@@ -5997,8 +6000,8 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                         }
                     }
                     self.viCross.regressionLines = self.regressionLines;
-                    viCrossplot.setProperties(self.viCross)
-                    viCrossplot.doPlot();
+                    viCrossplot.setProperties({ regressionLines: self.regressionLines });
+                    viCrossplot.plotRegressionLines();
                     if(callback) callback();
                 });
             } else {
@@ -6863,6 +6866,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
                     calculateOptions.point = point;
                     $scope.$apply();
                 }
+                viCrossplot.onMouseDown(wiD3CrossplotCtrl.viCrossplotMouseDownCallback);
             });
         };
 
@@ -7291,8 +7295,9 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                 async.eachOfSeries(self.userDefineLines, function(udLine, idx, callback){
                     switch(self.userDefineLines[idx].change) {
                         case change.created:
-                            wiApiService.createUserDefineLine(self.userDefineLines[idx], function(){
-                                console.log("create UDL");
+                            wiApiService.createUserDefineLine(self.userDefineLines[idx], function(response){
+                                self.userDefineLines[idx].idUserDefineLine = response.idUserDefineLine;
+                                console.log("create UDL", response.idUserDefineLine);
                                 callback();
                             });
                             break;
@@ -7325,8 +7330,8 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                         }
                     }
                     self.viCross.userDefineLines = self.userDefineLines;
-                    viCrossplot.setProperties(self.viCross)
-                    viCrossplot.doPlot();
+                    viCrossplot.setProperties({ userDefineLines: self.userDefineLines });
+                    viCrossplot.plotUserDefineLines();
                     if(callback) callback();
                 });
             } else {
