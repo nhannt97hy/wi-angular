@@ -408,6 +408,7 @@ gulp.task('deploy-dev', function() {
             root: "build/",
             hostname: "dev.sflow.me",
             destination:"/opt/build",
+            username: "ec2-user",
 			port: 2221
     }));
 });
