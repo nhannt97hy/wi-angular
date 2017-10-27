@@ -114,7 +114,8 @@ DepthTrack.prototype.doPlot = function(highlight) {
     //     .tickSize(5);
 
 
-    let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
+    // let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
+    let step = transformY.invert(Utils.getDpcm()) - windowY[0];
     let start = Utils.roundUp(windowY[0], step);
     let end = Utils.roundDown(windowY[1], step);
     let yAxisRight = d3.axisLeft(transformY)
