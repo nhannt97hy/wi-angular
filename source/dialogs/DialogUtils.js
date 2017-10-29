@@ -7403,7 +7403,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         this.calcMethod = "lateral";
         this.selectedDataset = {};
         this.idSelectedDataset = null;
-        this.idDesCurve = null;
+        this.desCurve = null;
         this.defaultDepth = function () {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
@@ -7426,7 +7426,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                     self.curvesOnDataset.push(item);
                 }
             });
-            self.idDesCurve = self.curvesOnDataset[0].id;
+            self.desCurve = angular.copy(self.curvesOnDataset[0]);
         }
         function getAllCurvesOnSelectWell(well) {
             well.children.forEach(function (child) {
@@ -7449,7 +7449,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                     self.curvesOnDataset.push(item);
                 }
             });
-            self.idDesCurve = self.selectedDataset.children[0].id;
+            self.desCurve = angular.copy(self.selectedDataset.children[0]);
             console.log("curves", self.availableCurves);
         }
         this.select = function (curve) {
@@ -7488,31 +7488,60 @@ exports.curveAverageDialog = function (ModalService, callback) {
                         DialogUtils.errorMessageDialog(ModalService, err);
                     }
                     let meanData = [];
-                    if(self.calcMethod == 'arithmetic') {
-                        for( var i = 0; i < allData[0].length; i++){
+                    if(self.calcMethod == 'lateral') {
+                        let len = allData[0].length;
+                        for( var i = 0; i < len; i++){
                             let sum = 0;
-                            for ( let j = 0; j < allData.length; j++) sum += parseFloat(allData[j][i]);
-                            meanData.push(sum / allData.length);
+                            let count = 0;
+                            for ( let j = 0; j < allData.length; j++) {
+                                if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
+                                else sum += parseFloat(allData[j][i]);
+                            }
+                            if (count > 0) meanData.push(null);
+                            else meanData.push(sum / allData.length);
                         }
                         dataAvg = getDataTopBottomRange(meanData, yTop, yBottom);
-                    } else if (self.calcMethod == 'lateral') {
+                    } else if (self.calcMethod == 'arithmetic') {
                         for( var i = 0; i < allData[0].length; i++){
                             let sum = 0;
-                            for ( let j = 0; j < allData.length; j++) sum += parseFloat(allData[j][i]);
-                            meanData.push(sum / allData.length);
+                            for ( let j = 0; j < allData.length; j++) {
+                                if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
+                                else sum += parseFloat(allData[j][i]);
+                            }
+                            meanData.push(sum / (allData.length - count));
                         }
                         dataAvg = getDataTopBottomRange(meanData, yTop, yBottom);
                     }
-                    let request = {
-                        idDataset: self.idSelectedDataset,
-                        curveName: null,
-                        idDesCurve: self.idDesCurve,
-                        data: dataAvg
+                    console.log("desCurve", self.desCurve);
+                    let request = {};
+                    if(self.desCurve.id != null) {
+                        dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
+                            if(ret) {
+                                request = {
+                                    idDataset: self.idSelectedDataset,
+                                    idDesCurve: self.desCurve.id,
+                                    data: dataAvg
+                                }
+                                console.log("request", request);
+                                wiApiService.processingDataCurve(request, function(res) {
+                                    console.log("processingDataCurve", request);
+                                    utils.refreshProjectState();
+                                })
+                            }
+                        });
+                    } 
+                    else {
+                        request = {
+                            idDataset: self.idSelectedDataset,
+                            curveName: self.desCurve.name,
+                            unit: self.desCurve.properties.unit,
+                            data: dataAvg
+                        }
+                        wiApiService.processingDataCurve(request, function(res) {
+                            console.log("processingDataCurve", request);
+                            utils.refreshProjectState();
+                        })
                     }
-                    wiApiService.processingDataCurve(request, function(res) {
-                        console.log("processingDataCurve");
-                        utils.refreshProjectState();
-                    })
                 });
             }
         };
@@ -7543,10 +7572,14 @@ exports.curveAverageDialog = function (ModalService, callback) {
 exports.curveRescaleDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        window.curveAvg = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[1]);
+        this.wellModel = angular.copy(self.wells[0]);
+        this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
 

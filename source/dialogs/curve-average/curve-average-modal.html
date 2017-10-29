@@ -102,12 +102,13 @@
                         </div>
                         <label for="" class="col-sm-2 padding-right-0">Output Curve</label>
                         <div class="col-sm-4">
-                            <select ng-model="wiModal.idDesCurve"
+                            <!-- <select ng-model="wiModal.idDesCurve"
                                     ng-options="curve.id as curve.properties.name for curve in wiModal.curvesOnDataset"
                                     class="form-control wi-form-control">
-                            </select>
-                            <!-- <wi-custom-input model='wiModal.idDesCurve' 
-                                            options='wiModal.curvesOnDataset'></wi-custom-input> -->
+                            </select> -->
+                            <wi-custom-input type='curve' model='wiModal.desCurve' 
+                                            options='wiModal.curvesOnDataset' class="col-sm-6"
+                                            style="width: 100%"></wi-custom-input>
                         </div>
                     </div>
                 </form>

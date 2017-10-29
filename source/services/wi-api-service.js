@@ -841,8 +841,14 @@ Service.prototype.editDataCurve = function (request, callback) {
 }
 
 Service.prototype.processingDataCurve = function(request, callback) {
-    var self = this;
-    this.postWithFile(PROCESSING_DATA_CURVE, request, callback);
+    const self = this;
+    this.postWithFile(PROCESSING_DATA_CURVE, request)
+        .then(function (response) {
+            if (callback) callback(response);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
 }
 Service.prototype.listFamily = async function (callback) {
     const self = this;

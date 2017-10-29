@@ -5,32 +5,36 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
                 <h4><span class="curve-listing-16x16"></span>&nbsp;Rescale Curve</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body dialog-style">
                 <form class="form-horizontal" action="" name="modalCurveRescale">
-                    <h5 class="modal-infomation-title"><span class="well-16x16"></span>&nbsp;Well</h5>
                     <div class="form-group">
-                        <label class="control-label col-sm-3"> Select well:</label>
-                        <div class="col-sm-9">
-                            <select ng-model="wiModal.wellModel.id"
+                        <label class="control-label col-sm-2">
+                            <span class="well-16x16"></span> Well
+                        </label>
+                        <div class="col-sm-10">
+                            <select ng-model="wiModal.idWell"
                                     class="form-control wi-form-control"
-                                    ng-options="well.id as well.properties.name for well in wiModal.wells">
+                                    ng-options="well.id as well.properties.name for well in wiModal.wells"
+                                    ng-change="wiModal.selectWell(wiModal.idWell)">
                             </select>
                         </div>
                     </div>
-                    <h5 class="modal-infomation-title"><span class="depth-blank-16x16"></span>&nbsp;Depth</h5>
+                    <h5><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
                     <div class="form-group">
-                        <label class="control-label col-sm-1" for="">Top</label>
+                        <label class="control-label col-sm-1">
+                            Top
+                        </label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.topDepth"
-                                   type="number" class="form-control wi-form-control" step="any">
+                                    type="number" class="form-control wi-form-control" step="any">
                         </div>
-                        <label for="" class="control-label col-sm-1" style="padding-left: 0">Bottom</label>
+                        <label for="" class="control-label col-sm-1 padding-left-0">Bottom</label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.bottomDepth"
                                    type="number" class="form-control wi-form-control" step="any">
                         </div>
                         <div class="col-sm-2">
-                            <button class="btn btn-default"
+                            <button class="btn btn-default small-button" 
                                     ng-click="wiModal.defaultDepth()">Default</button>
                         </div>
                     </div>
