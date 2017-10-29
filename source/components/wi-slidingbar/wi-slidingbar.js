@@ -149,7 +149,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
         parentHeight = parseInt($(self.contentId).height());
         //self.parentHeight = parentHeight;
-        let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
+        //let initialHeight = Math.round(parentHeight * (MIN_RANGE) / 100);
+        let initialHeight = parentHeight * (MIN_RANGE) / 100;
 
         self.tinyWindow = {
             top: 0,
@@ -216,8 +217,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             tempTopHandler = pHeight + _offsetTop - self.tinyWindow.height;
         }
 
-        let newTop = Math.round(tempTopHandler);
-        let newHeight = Math.ceil(self.tinyWindow.height);
+        //let newTop = Math.round(tempTopHandler);
+        //let newHeight = Math.ceil(self.tinyWindow.height);
+        let newTop = tempTopHandler;
+        let newHeight = self.tinyWindow.height;
         updateSlidingHandler(newTop, newHeight);
 
         updateWid3();
@@ -246,8 +249,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
-        let newTop = Math.round((topPercent * parentHeight) / 100);
-        let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
+        //let newTop = Math.round((topPercent * parentHeight) / 100);
+        //let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
+        let newTop = (topPercent * parentHeight) / 100.;
+        let newHeight = (rangePercent * parentHeight) / 100.;
 
         if (newTop < 0) newTop = 0;
 
@@ -288,8 +293,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
         let scale = currentParentHeight / self.tinyWindow.height;
-        let newParentHeight = Math.round(currentParentHeight * scale);
-        let newTop = Math.round((self.slidingBarState.top * newParentHeight) / 100);
+        let newParentHeight = currentParentHeight * scale;
+        let newTop = (self.slidingBarState.top * newParentHeight) / 100;
+        //let newParentHeight = Math.round(currentParentHeight * scale);
+        //let newTop = Math.round((self.slidingBarState.top * newParentHeight) / 100);
         
         $(self.contentId).height(newParentHeight);
         _offsetTop = newTop;

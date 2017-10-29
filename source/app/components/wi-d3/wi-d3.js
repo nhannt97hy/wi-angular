@@ -132,7 +132,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerLogTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
-        _registerTrackDragCallback();
+        _registerTrackDragCallback(track);
         return track;
     };
 
@@ -185,6 +185,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
+        _registerTrackDragCallback(track);
         self.updateScale();
     };
 
@@ -252,6 +253,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _registerZoneTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
+        _registerTrackDragCallback(track);
         wiComponentService.putComponent('vi-zone-track-' + config.id, track);
         return track;
     }
@@ -968,6 +970,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
     }
 
+    function orderTrack (viTrack, orderNum) {
+        viTrack.orderNum = orderNum;
+        viTrack.updateOrderNum();
+        _tracks.sort(function(track1, track2) {
+            return track1.orderNum.localeCompare(track2.orderNum);
+        });
+        graph.rearrangeTracks(self);
+    }
+
     function editOrderNum(viTrack, orderNum) {
         return new Promise((resolve, reject) => {
             if (viTrack.isLogTrack()) {
@@ -1033,17 +1044,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             })
     }
     window.TRACKS = _tracks;
-    function _registerTrackDragCallback() {
-        _tracks.forEach(function(track) {
-            track.onTrackDrag(function (srcTrack, desTrack) {
-                let desTrackIndex = _tracks.findIndex(track => track == desTrack);
-                if (_tracks[desTrackIndex + 1] == srcTrack) return;
-                let orderNum = getOrderKey(desTrack);
-                editOrderNum(srcTrack, orderNum).then(function () {
-                    if (orderNum.length < 50) return;
-                    reindexAllTracks();
-                })
-            });
+    function _registerTrackDragCallback(viTrack) {
+        let originalOrderNum = viTrack.orderNum;
+        viTrack.onTrackDrag(function (desTrack) {
+            // let desTrackIndex = _tracks.findIndex(track => track == desTrack);
+            // if (_tracks[desTrackIndex + 1] == viTrack || desTrack == viTrack) return;
+            // let orderNum = getOrderKey(desTrack);
+            // orderTrack(viTrack, orderNum);
+        }, function (desTrack) {
+            let desTrackIndex = _tracks.findIndex(track => track == desTrack);
+            if (_tracks[desTrackIndex + 1] == viTrack || desTrack == viTrack) return;
+            let orderNum = getOrderKey(desTrack);
+            editOrderNum(viTrack, orderNum).then(function () {
+                if (orderNum.length < 50) return;
+                reindexAllTracks();
+            }).catch(function () {
+                orderTrack(originalOrderNum);
+            })
         });
     }
 

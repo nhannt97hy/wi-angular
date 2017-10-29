@@ -88,6 +88,10 @@ Track.prototype.createContainer = function() {
         .style('display', 'flex')
         .style('flex-direction', 'column')
         .style('outline', 'none');
+    let self = this;
+    new ResizeSensor( $(this.root.node()), function(param) {
+        self.doPlot();
+    } );
 }
 Track.prototype.updateOrderNum = function() {
     this.trackContainer.datum(this.orderNum)
@@ -287,7 +291,7 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 /**
  * Register event when drag track
  */
-Track.prototype.onTrackDrag = function(callback) {
+Track.prototype.onTrackDrag = function(callbackDrag, callbackDrop) {
     let self = this;
     let width;
     $(this.trackContainer.node()).draggable({
@@ -305,13 +309,21 @@ Track.prototype.onTrackDrag = function(callback) {
         snap: '.vi-track-vertical-resizer',
         scope: 'tracks',
         start: function (event, ui) {
+            document.addEventListener('ontrackdrag', onTrackDragHandler, false);
+            self.width = width;
+            self.doPlot();
+            function onTrackDragHandler(event) {
+                document.removeEventListener('ontrackdrop', onTrackDragHandler);
+                if (self == event.desTrack) return;
+                callbackDrag(event.desTrack);
+            }
             document.addEventListener('ontrackdrop', onTrackDropHandler, false);
             self.width = width;
             self.doPlot();
             function onTrackDropHandler(event) {
                 document.removeEventListener('ontrackdrop', onTrackDropHandler);
                 if (self == event.desTrack) return;
-                callback(self, event.desTrack);
+                callbackDrop(event.desTrack);
             }
         },
     });
@@ -319,6 +331,11 @@ Track.prototype.onTrackDrag = function(callback) {
         accept: '.vi-track-container',
         tolerance: "touch",
         scope: 'tracks',
+        over: function (event, ui) {
+            let onTrackDrag = new Event('ontrackdrag');
+            onTrackDrag.desTrack = self;
+            document.dispatchEvent(onTrackDrag);
+        },
         drop: function (event, ui) {
             let onTrackDrop = new Event('ontrackdrop');
             onTrackDrop.desTrack = self;

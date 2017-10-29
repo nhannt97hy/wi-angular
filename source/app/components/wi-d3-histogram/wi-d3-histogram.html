@@ -101,7 +101,7 @@
         </div>
     </div>
     
-    <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Histogram.histogramModel.properties.referenceDisplay" style="min-width:20%;max-width:30%">
+    <div resizable r-directions="['left']" r-flex="true" ng-if="wiD3Histogram.histogramModel.properties.referenceDisplay" style="min-width:20%;max-width:30%">
         <wi-container title='Reference Curve' close-handler='wiD3Histogram.CloseReferenceWindow'>
             <wi-reference-window 
                 name='{{wiD3Histogram.getWiRefWindCtrlName()}}'

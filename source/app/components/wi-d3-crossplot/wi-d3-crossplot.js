@@ -84,8 +84,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         var elem = document.getElementById(self.name + 'HistogramX');
         var well = getWell();
-        self.xHistogram = graph.createHistogram(self.histogramModelX, parseFloat(well.properties.step), 
-                parseFloat(well.properties.topDepth), 
+        self.xHistogram = graph.createHistogram(self.histogramModelX, parseFloat(well.properties.step),
+                parseFloat(well.properties.topDepth),
                 parseFloat(well.properties.bottomDepth), elem);
 
         let activeZones = self.getZoneCtrl().getActiveZones();
@@ -108,8 +108,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         innerElem.css('width', elem[0].clientHeight + 'px');
         innerElem.css('height', elem[0].clientWidth + 'px');
         var well = getWell();
-        self.yHistogram = graph.createHistogram(self.histogramModelY, parseFloat(well.properties.step), 
-                parseFloat(well.properties.topDepth), 
+        self.yHistogram = graph.createHistogram(self.histogramModelY, parseFloat(well.properties.step),
+                parseFloat(well.properties.topDepth),
                 parseFloat(well.properties.bottomDepth), innerElem[0]);
 
         let activeZones = self.getZoneCtrl().getActiveZones();
@@ -152,8 +152,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.onRefWindCtrlReady = function(refWindCtrl) {
         console.log('Reference window is ready to update');
         refWindCtrl.update(
-            getWell(), 
-            self.crossplotModel.properties.reference_curves, 
+            getWell(),
+            self.crossplotModel.properties.reference_curves,
             self.crossplotModel.properties.referenceScale,
             self.crossplotModel.properties.referenceVertLineNumber);
     }
@@ -170,9 +170,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.linkModels = function () {
         self.zoneArr = null;
 
-        if (self.crossplotModel && self.crossplotModel.properties.pointsets && 
+        if (self.crossplotModel && self.crossplotModel.properties.pointsets &&
             self.crossplotModel.properties.pointsets.length &&
-            self.crossplotModel.properties.pointsets[0] && 
+            self.crossplotModel.properties.pointsets[0] &&
             self.crossplotModel.properties.pointsets[0].idZoneSet) {
             console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointsets[0].idZoneSet);
@@ -232,6 +232,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 console.log("ret", crossplotProps);
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
                 self.linkModels();
+                if (crossplotProps.pointSet.idZoneSet) {
+                    crossplotProps.pointSet.zones = self.pointSet.zones;
+                }
                 self.viCrossplot.setProperties(crossplotProps);
                 self.viCrossplot.doPlot();
                 if (self.histogramModelX) {
@@ -331,7 +334,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let well = getWell();
                 DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
                     saveCrossplotNow(function() {
-                        self.getWiRefWindCtrl().update(_well, 
+                        self.getWiRefWindCtrl().update(_well,
                             self.crossplotModel.properties.reference_curves,
                             self.crossplotModel.properties.referenceScale,
                             self.crossplotModel.properties.referenceVertLineNumber);
@@ -381,7 +384,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let domElem = document.getElementById(self.crossplotAreaId);
             self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
 
-            self.viCrossplot.onMouseDown(viCrossplotMouseDownCallback)
+            self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
         // }
         return self.viCrossplot;
     }
@@ -508,14 +511,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         ]);
         self.viCrossplot.onMouseDown(function(point) {
-            viCrossplotMouseDownCallback();
+            self.viCrossplotMouseDownCallback();
             if (d3.event.button == 2) return;
             if (callback) callback(point);
         })
     }
 
-    this.pickVertex = function(callback) {
-        self.viCrossplot.startAddTernaryVertex();
+    this.pickVertex = function(idx, callback) {
+        self.viCrossplot.startAddTernaryVertex(idx);
+
         self.setContextMenu([
             {
                 name: "End",
@@ -529,7 +533,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         ]);
         self.viCrossplot.onMouseDown(function(vertex) {
-            viCrossplotMouseDownCallback();
+            self.viCrossplotMouseDownCallback();
             if (d3.event.button == 2) return;
             if (callback) callback(vertex);
         })
@@ -565,7 +569,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-    function viCrossplotMouseDownCallback() {
+    this.viCrossplotMouseDownCallback = function() {
         if (d3.event.button == 2) return;
         if (self.viCrossplot.mode == 'PlotAreaRectangle') {
             if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {

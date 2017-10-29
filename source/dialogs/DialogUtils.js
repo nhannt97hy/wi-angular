@@ -4431,10 +4431,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-        
+
         async.waterfall([
             function(cb) {
-                var pointsets = self.crossplotModel.properties.pointsets; 
+                var pointsets = self.crossplotModel.properties.pointsets;
                 if (!pointsets || !pointsets.length || !pointsets[0].idPointSet ) {
                     wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                         // self.crossplotModel.properties.pointSet = crossplot.pointsets[0];
@@ -4446,10 +4446,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             },
             function(cb) {
                 let pointSet = self.crossplotModel.properties.pointsets[0];
-                if (!pointSet.pointSymbol) 
+                if (!pointSet.pointSymbol)
                     pointSet.pointSymbol = 'Circle';
 
-                if (!pointSet.numColor) 
+                if (!pointSet.numColor)
                     pointSet.numColor = 5;
 
                 pointSet.pointSymbol = utils.upperCaseFirstLetter(pointSet.pointSymbol);
@@ -4465,7 +4465,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             getZonesAndCurvesInDataset,
             function(cb) {
                 CURVE_SYMBOLS.forEach(function(symbol) {
-                    autoScaleCurve(symbol);
+                    autoScaleCurve(symbol, true);
                 });
                 cb();
             }
@@ -4527,12 +4527,14 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             }[symbol];
         }
 
-        function autoScaleCurve(symbol) {
+        function autoScaleCurve(symbol, noForce) {
             let key = 'idCurve' + symbol;
             let scaleKeys = getScaleKeys(symbol);
             let pointSet = self.crossplotModel.properties.pointsets[0];
             let idCurve = pointSet[key];
             if (pointSet && pointSet[key]) {
+                if (noForce && pointSet[scaleKeys[0]] != null && pointSet[scaleKeys[1]] != null) return;
+
                 let curve = findCurveById(idCurve).properties;
 
                 let family = utils.findFamilyById(curve.idFamily);
@@ -4682,18 +4684,20 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                         console.log(result, err);
                         let crossplotProps = angular.copy(self.crossplotModel.properties);
                         crossplotProps.pointSet = crossplotProps.pointsets[0];
-                        
                         if (xCurveData) {
-                            crossplotProps.pointSet.curveX 
-                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveX }, xCurveData, self.well.properties);
+                            let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
+                            crossplotProps.pointSet.curveX
+                                = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
                         }
                         if (yCurveData) {
-                            crossplotProps.pointSet.curveY 
-                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveY }, yCurveData, self.well.properties);
+                            let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
+                            crossplotProps.pointSet.curveY
+                                = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
                         }
                         if (zCurveData) {
-                            crossplotProps.pointSet.curveZ 
-                                = graph.buildCurve({ idCurve: crossplotProps.pointSet.idCurveZ }, zCurveData, self.well.properties);
+                            let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
+                            crossplotProps.pointSet.curveZ
+                                = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
                         }
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
@@ -4705,7 +4709,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 }
             });
 
- 
+
         };
         this.onOkButtonClicked = function () {
             updateCrossplot(function (crossplotProps) {
@@ -5343,7 +5347,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         }
         function sendPolygonsAPIs() {
             const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
-/*            
+/*
             const unchangedPolygons = self.polygons.filter(function(polygon) {
                 polygon.change == change.unchanged && polygon.points;
             })
@@ -5351,8 +5355,8 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
                 unchangedPolygon.points = JSON.parse(unchangedPolygon.points);
                 return unchangedPolygon;
             });
-            
-            const createdPolygons = self.polygons.filter(function(polygon){ 
+
+            const createdPolygons = self.polygons.filter(function(polygon){
                 polygon.change == change.created && polygon.points
             })
             .map(function(createdPolygon) {
@@ -5362,7 +5366,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
                 wiApiService.createPolygon(createdPolygon);
                 return createdPolygon;
             });
-            
+
             const updatedPolygons = self.polygons.filter(function(polygon) {
                 polygon.change == change.updated && polygon.points
             })
@@ -5397,7 +5401,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
                     polygon.idCrossPlot = idCrossPlot;
                     polygon.change = change.unchanged;
                     wiApiService.editPolygon(polygon, callback);
-                } 
+                }
                 else if (polygon.change == change.deleted) {
                     polygon.idCrossPlot = idCrossPlot;
                     polygon.change = change.deleted;
@@ -5528,7 +5532,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                         }
                     })
                 });
-                
+
                 // set default zone && activezone
                 if (self.zoneSetList && self.zoneSetList.length > 0) {
                     if (!self.histogramProps.idZoneSet) {
@@ -5864,7 +5868,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
             });
         });
         // this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
-        
+
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
@@ -5884,7 +5888,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                return (item.change != change.deleted && item.change != change.uncreated);
            });
         }
-        this.polygonsArr = new Array(); 
+        this.polygonsArr = new Array();
         // this.regressionLines.forEach(function(regLine, index){
         //     let pArr = [];
         //     console.log("reggg", regLine.polygons);
@@ -5900,7 +5904,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         //     self.regressionLines[index].polygons = self.polygonsArr[index];
         // }
         // this.polygonsArr = [[{"idPolygon":5,"idx":0},{"idPolygon":6,"idx":1}]]
-        console.log("TTTT", this.regressionLines); 
+        console.log("TTTT", this.regressionLines);
         this.__idx = 0;
         $scope.selectedRow = 0;
         this.setClickedRow = function (indexRow) {
@@ -5965,6 +5969,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                         case change.created:
                             wiApiService.createRegressionLines(regLine, function(res){
                                 console.log("create", res, regLine);
+                                regLine.idRegressionLine = res.idRegressionLine;
                                 callback();
                             });
                             break;
@@ -5997,8 +6002,8 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
                         }
                     }
                     self.viCross.regressionLines = self.regressionLines;
-                    viCrossplot.setProperties(self.viCross)
-                    viCrossplot.doPlot();
+                    viCrossplot.setProperties({ regressionLines: self.regressionLines });
+                    viCrossplot.plotRegressionLines();
                     if(callback) callback();
                 });
             } else {
@@ -6487,7 +6492,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.conditionTree = angular.copy(self.props.discriminator);
 
         wiComponentService.on('discriminator-update', function(){
-            self.conditionExpr = parse(self.conditionTree);        
+            self.conditionExpr = parse(self.conditionTree);
         })
 
         this.well.children.forEach(function(child, i){
@@ -6508,7 +6513,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 });
             }
         })
-        
+
         this.conditionExpr = parse(this.conditionTree);
 
         function parse(tree) {
@@ -6520,7 +6525,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             else if (tree.left && tree.right && tree.comparison) {
                 let left = getCurveName(tree.left.value);
                 let right = tree.right.type=='value'? tree.right.value: getCurveName(tree.right.value);
-                return "( " + left + " " + tree.comparison + " " + right + " )"; 
+                return "( " + left + " " + tree.comparison + " " + right + " )";
             }
 
             return str;
@@ -6574,14 +6579,14 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                         value: 0
                     }
                 };
-                self.conditionExpr = parse(self.conditionTree);            
+                self.conditionExpr = parse(self.conditionTree);
                 return;
             }
 
             if (!retVal) selectedNode = self.conditionTree;
-            
+
             if (retVal) selectedNode = path[0];
-            
+
             let newNode = {
                 operator: 'and',
                 children: [
@@ -6607,8 +6612,8 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
             else {
                 self.conditionTree = newNode;
             }
-            self.conditionExpr = parse(self.conditionTree);            
-            
+            self.conditionExpr = parse(self.conditionTree);
+
         }
         this.deleteCondition = function() {
             let path = new Array();
@@ -6620,7 +6625,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                     let selectedNode = path[0];
                     let parentNode = path[1];
                     let gParentNode = path[2];
-                    
+
                     let parentIdx = gParentNode.children.indexOf(parentNode);
                     let selectedIdx = parentNode.children.indexOf(selectedNode);
                     let theOtherNode = parentNode.children[(selectedIdx + 1) % 2];
@@ -6658,7 +6663,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 let payload = {
                     discriminator: self.conditionTree,
                     idCrossPlot: self.props.idCrossPlot,
-                    idWell: self.props.idWell                    
+                    idWell: self.props.idWell
                 }
                 wiApiService.editCrossplot(payload, function(){
                     self.props.discriminator = self.conditionTree;
@@ -6753,20 +6758,26 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         this.modelData = [];
         this.optionsData = [1, 2, 3];
         let savedTernary = angular.copy(ternary);
-        this.__idx = 0;
-        $scope.selectedRow = 0;
+
+        if (!this.vertices || !this.vertices.length) {
+            this.__idx = null;
+            $scope.selectedRow = null;
+        }
+        else {
+            this.__idx = 0;
+            $scope.selectedRow = 0;
+        }
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
-        console.log("///", $scope.calculateOptions);
-        
+
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
-                idx: index + 1, 
+                idx: index + 1,
                 value: polygonItem.idPolygon,
                 bgColor: polygonItem.lineStyle
             });
         });
-        console.log("polygonList:", this.polygonList, props.polygons);
+
         this.getVertices = function () {
             return self.vertices.filter(function (item, index) {
                return (item.change != change.deleted && item.change != change.uncreated);
@@ -6800,6 +6811,10 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             if (self.getVertices().length) {
                 self.setClickedRow(0);
             }
+            viCrossplot.setProperties({
+                ternary: { vertices: self.getVertices() }
+            });
+            viCrossplot.plotTernary();
         };
 
         this.addRow = function () {
@@ -6810,23 +6825,38 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
                 showed: true,
                 name: 'Material_' + (self.vertices.length + 1),
             });
+            self.setClickedRow(self.getVertices().length - 1);
         };
 
         this.pickVertex = function () {
             $('#ternary-modal').modal('hide');
-            wiD3CrossplotCtrl.pickVertex(function(vertex) {
+            let idx = $scope.selectedRow;
+            viCrossplot.setProperties({
+                ternary: {
+                    vertices: self.getVertices()
+                }
+            })
+            wiD3CrossplotCtrl.pickVertex(idx, function(vertex) {
                 $('#ternary-modal').modal('show');
-                if (vertex) {
+                vertex = angular.copy(vertex);
+
+                if (idx == null) {
                     vertex.name = 'Material_' + (self.vertices.length + 1);
                     viCrossplot.plotTernary();
-
-                    vertex = angular.copy(vertex);
                     vertex.change = change.created;
                     vertex.index = self.vertices.length;
-
                     self.vertices.push(vertex);
-                    $scope.$apply();
                 }
+                else {
+                    if (self.vertices[self.__idx].change == change.unchanged)
+                        vertex.change = change.updated;
+                    else
+                        vertex.change = change.created;
+                    vertex.index = self.vertices[self.__idx].index;
+                    self.vertices[self.__idx] = vertex;
+                }
+                $scope.$apply();
+                viCrossplot.onMouseDown(wiD3CrossplotCtrl.viCrossplotMouseDownCallback);
             });
         };
 
@@ -6838,6 +6868,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
                     calculateOptions.point = point;
                     $scope.$apply();
                 }
+                viCrossplot.onMouseDown(wiD3CrossplotCtrl.viCrossplotMouseDownCallback);
             });
         };
 
@@ -6850,7 +6881,6 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
 
         function setVertices(callback) {
-            console.log('gg', self.vertices);
             async.eachOfSeries(self.vertices, function(vertex, idx, cb){
                 vertex = self.vertices[idx];
                 let data = {
@@ -6860,7 +6890,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
                     style: vertex.style,
                     usedIn: vertex.used,
                     show: vertex.showed,
-                    idTernary: vertex.idTertex,
+                    idTernary: vertex.idVertex,
                     idCrossPlot: props.idCrossPlot
                 };
 
@@ -6868,6 +6898,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
                     case change.created:
                         wiApiService.createTernary(data, function(response) {
                             self.vertices[idx].change = change.unchanged;
+                            self.vertices[idx].idVertex = response.idTernary;
                             cb();
                         });
                         break;
@@ -7061,7 +7092,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                     self.ref_Curves_Arr[index].right = family.maxScale;
                     self.ref_Curves_Arr[index].color = family.lineColor;
                 }
-                else if(!self.ref_Curves_Arr[index].curve.minScale  
+                else if(!self.ref_Curves_Arr[index].curve.minScale
                     && !self.ref_Curves_Arr[index].curve.maxScale != null ) {
                     self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
                     self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
@@ -7266,8 +7297,9 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                 async.eachOfSeries(self.userDefineLines, function(udLine, idx, callback){
                     switch(self.userDefineLines[idx].change) {
                         case change.created:
-                            wiApiService.createUserDefineLine(self.userDefineLines[idx], function(){
-                                console.log("create UDL");
+                            wiApiService.createUserDefineLine(self.userDefineLines[idx], function(response){
+                                self.userDefineLines[idx].idUserDefineLine = response.idUserDefineLine;
+                                console.log("create UDL", response.idUserDefineLine);
                                 callback();
                             });
                             break;
@@ -7300,8 +7332,8 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
                         }
                     }
                     self.viCross.userDefineLines = self.userDefineLines;
-                    viCrossplot.setProperties(self.viCross)
-                    viCrossplot.doPlot();
+                    viCrossplot.setProperties({ userDefineLines: self.userDefineLines });
+                    viCrossplot.plotUserDefineLines();
                     if(callback) callback();
                 });
             } else {
@@ -7649,7 +7681,7 @@ exports.curveConvolutionDialog = function(ModalService){
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
         this.wellArr = this.project.children;
-        this.SelectedWell = this.wellArr[0];        
+        this.SelectedWell = this.wellArr[0];
         this.datasets = [];
         this.curvesArr = [];
         this.ResultCurve = {

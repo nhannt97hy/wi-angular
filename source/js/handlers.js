@@ -770,7 +770,7 @@ exports.BlankHistogramButtonClicked = function () {
     });
 }
 
-function newTemplateHistogram(templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback){
+function newTemplateHistogram(name, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback){
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -779,7 +779,7 @@ function newTemplateHistogram(templateHistogram, wiComponentService, ModalServic
     let promptConfig = {
         title: 'Create New Histogram Template',
         inputName: 'Histogram Name',
-        input: templateHistogram
+        input: name
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
@@ -789,14 +789,14 @@ function newTemplateHistogram(templateHistogram, wiComponentService, ModalServic
 
 exports.PHI_TOTALButtonClicked = function () {
     console.log('PHI_TOTALButton is clicked');
-    newTemplateHistogram("Phi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("PHI_TOTAL Histogram", "Phi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.GammaRayButtonClicked = function () {
     console.log('GammaRayButton is clicked');
-    newTemplateHistogram("GammaRay", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("GR Histogram", "GammaRay", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 
@@ -804,42 +804,42 @@ exports.GammaRayButtonClicked = function () {
 
 exports.NeutronButtonClicked = function () {
     console.log('NeutronButton is clicked');
-    newTemplateHistogram("Neutron", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("NPHI Histogram", "Neutron", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
-    newTemplateHistogram("Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("DT Histogram" ,"Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.SonicButtonClicked = function () {
     console.log('SonicButton is clicked');
-    newTemplateHistogram("Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("RHBO Histogram","Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.SallowResistivityButtonClicked = function () {
     console.log('SallowResistivityButton is clicked');
-    newTemplateHistogram("ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("MSFL Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.DeepResistivityButtonClicked = function () {
     console.log('DeepResistivityButton is clicked');
-    newTemplateHistogram("DeepResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("LLD Histogram", "DeepResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.MSFLHistogramButtonClicked = function () {
     console.log('MSFLHistogramButton is clicked');
-    newTemplateHistogram("ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("MSFL Histogram", "ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
