@@ -1202,9 +1202,9 @@ function sortProjectData(projectData){
             });
         });
         well.zonesets.sort((a,b)=>{
-            let nameA = a.name.toUpperCase();
-            let nameB = b.name.toUpperCase();
-            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+            let startA = parseFloat(a.startDepth);
+            let startB = parseFloat(b.startDepth);
+            return startA - startB;
         })
         well.zonesets.forEach(function(zoneset){
             zoneset.zones.sort((a,b)=>{
@@ -2073,7 +2073,7 @@ function evaluateExpr(well, discriminator, callback) {
     let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;
     let curveSet = new Set();
     let curvesData = new Array();
-    
+
     function findCurve(condition){
         if(condition && condition.children && condition.children.length){
             condition.children.forEach(function(child){
