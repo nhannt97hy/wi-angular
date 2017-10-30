@@ -735,24 +735,19 @@ LogTrack.prototype.updateAxis = function() {
     let rect = this.plotContainer.node().getBoundingClientRect();
     let windowY = this.getWindowY();
     let windowX = this.getWindowX();
+    let transformY = this.getTransformY();
 
     let xAxis = d3.axisTop(this.getTransformX())
         .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / (this.xMajorTicks * this.xMinorTicks || 1)))
         .tickFormat('')
         .tickSize(-rect.height);
 
-    // let start = windowY[0];
-    // let end = windowY[1];
-    // let step = (end - start) / this.yTicks;
+    // let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
 
-    // let yAxis = d3.axisLeft(this.getTransformY())
-    //     .tickValues(d3.range(start, end, step))
-    //     .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
-    //     .tickSize(-rect.width);
-    let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
+    let step = transformY.invert(Utils.getDpcm()) - windowY[0];
     let start = Utils.roundUp(windowY[0], step);
     let end = Utils.roundDown(windowY[1], step);
-    let yAxis = d3.axisLeft(this.getTransformY())
+    let yAxis = d3.axisLeft(transformY)
         .tickValues(d3.range(start, end + step/2, step))
         .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
         .tickSize(-rect.width);
