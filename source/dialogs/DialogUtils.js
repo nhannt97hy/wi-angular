@@ -3904,7 +3904,7 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
 
 exports.errorMessageDialog = errorMessageDialog;
 
-function errorMessageDialog(ModalService, errorMessage) {
+function errorMessageDialog(ModalService, errorMessage, callback) {
     function ModalController($scope, close) {
         let self = this;
         this.error = errorMessage;
@@ -3923,6 +3923,7 @@ function errorMessageDialog(ModalService, errorMessage) {
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+            if (callback) callback();
         })
     });
 };

@@ -63,11 +63,11 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
 
 exports.error = errorMsg;
 
-function errorMsg(errorMessage) {
+function errorMsg(errorMessage, callback) {
     errorMessage = errorMessage || "Something's wrong!";
     let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
-    DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage);
+    DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage, callback);
 }
 exports.warning = function (warningMessage) {
     if (!warningMessage) return;
@@ -1660,20 +1660,27 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
         name: crossplotName,
         crossTemplate: crossTemplate
     }
-    __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
-        let crossplotModel = crossplotToTreeConfig(crossplot);
-        refreshProjectState().then(function () {
-            openCrossplotTab(crossplotModel, callback);
-        });
-        setTimeout(function () {
-            if(crossplot.foundCurveX && crossplot.foundCurveY){
+    return new Promise(function (resolve, reject) {
+        __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
+            if (crossplot.name) {
+                resolve(crossplot);
+                let crossplotModel = crossplotToTreeConfig(crossplot);
+                refreshProjectState().then(function () {
+                    openCrossplotTab(crossplotModel, callback);
+                });
+                setTimeout(function () {
+                    if(crossplot.foundCurveX && crossplot.foundCurveY){
 
+                    } else {
+                        let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
+                        let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
+                        if(crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX +"<br>"+ curveY);
+                    }
+                }, 1000);
             } else {
-                let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
-                let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
-                if(crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX +"<br>"+ curveY);
+                reject(crossplot);
             }
-        }, 1000);
+        })
     })
 }
 
@@ -1806,16 +1813,23 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
         name: histogramName,
         histogramTemplate: histogramTemplate
     };
-    __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
-        let histogramModel = histogramToTreeConfig(histogram);
-        refreshProjectState().then(function () {
-            openHistogramTab(histogramModel);
-        });
-        setTimeout(function () {
-           if(histogram.noCurveFound || histogram.noCurveFound == "true"){
-               DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
-           }
-        }, 1000);
+    return new Promise(function (resolve, reject) {
+        __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
+            if (histogram.name) {
+                resolve(histogram);
+                let histogramModel = histogramToTreeConfig(histogram);
+                refreshProjectState().then(function () {
+                    openHistogramTab(histogramModel);
+                });
+                setTimeout(function () {
+                   if(histogram.noCurveFound || histogram.noCurveFound == "true"){
+                       DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
+                   }
+                }, 1000);
+            } else {
+                reject(histogram);
+            }
+        })
     })
 };
 

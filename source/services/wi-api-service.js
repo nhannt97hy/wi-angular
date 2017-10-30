@@ -254,7 +254,8 @@ var wiApiWorker = function($http, wiComponentService){
                     if (response.data.code == 200) {
                         if( job.callback ) job.callback(response.data.content);
                     } else {
-                        if (response.data.reason) self.getUtils().error('Error: ' + response.data.reason);
+                        job.callback(response.data.reason);
+                        // if (response.data.reason) self.getUtils().error('Error: ' + response.data.reason);
                     }
                     self.stopWorking();
                 })
