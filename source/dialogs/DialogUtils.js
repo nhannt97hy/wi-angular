@@ -7675,14 +7675,25 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
 }
 
 exports.curveConvolutionDialog = function(ModalService){
-    function ModalController(wiComponentService, wiApiService, close){
+    function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.curveCov = this;
+        this.applyingInProgress = false;        
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = this.project.children;
-        this.SelectedWell = this.wellArr[0];
+        this.refresh = function(cb){
+            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.wellArr = self.project.children;
+            if(!self.SelectedWell){
+                self.SelectedWell = self.wellArr[0];
+            }else{
+                self.SelectedWell = self.wellArr.find(function(well){
+                    return well.id == self.SelectedWell.id;
+                })
+            }
+            if(cb) cb();
+        }
+        this.refresh();
         this.datasets = [];
         this.curvesArr = [];
         this.curveData = [];        
@@ -7718,6 +7729,15 @@ exports.curveConvolutionDialog = function(ModalService){
             })
         }
         this.onWellChanged();
+
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.refresh(function(){
+                    self.onWellChanged();
+                });
+            }, 0);
+        });
         
         function convolution(input, kernel, out){
             // check validity of params
@@ -7745,6 +7765,8 @@ exports.curveConvolutionDialog = function(ModalService){
         }
 
         this.run = function(){
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
             self.curveData.length = 0;
             let curveSet = new Set();
             curveSet.add(self.inputIdCurve);
