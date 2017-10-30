@@ -235,6 +235,7 @@ exports.ExportWellTopButtonClicked = function () {
 };
 
 exports.BlankLogplotButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -242,7 +243,6 @@ exports.BlankLogplotButtonClicked = function () {
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
-        console.log(logplotName);
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function(logplot) {
                 console.log("Created new log plot", logplot);
@@ -258,14 +258,15 @@ exports.BlankLogplotButtonClicked = function () {
                 });
             })
             .catch(function(err) {
-                // console.error('newBlankLogplotDialog err ' + err);
-                // utils.error('newBlankLogplotDialog err ' + err);
-                DialogUtils.errorMessageDialog(ModalService, "Name: " + logplotName + " existed!");
+                utils.error(logplotName + " existed!", function () {
+                    exports.BlankLogplotButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.TrippleComboButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -298,13 +299,15 @@ exports.TrippleComboButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('TripleComboDialog err ' + err);
-                utils.error(err + '! ERR!');
+                utils.error(logplotName + " existed!", function () {
+                    exports.TrippleComboButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.DensityNeutronButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -337,13 +340,15 @@ exports.DensityNeutronButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('DensityNeutronDialog err ' + err);
-                utils.error(err + '! ERR!');
+                utils.error(logplotName + " existed!", function () {
+                    exports.DensityNeutronButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.ResistivitySonicButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -376,13 +381,15 @@ exports.ResistivitySonicButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('ResistivitySonicDialog err ' + err);
-                utils.error(err + '! ERR!');
+                utils.error(logplotName + " existed!", function () {
+                    exports.ResistivitySonicButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.TriTracksBlankButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -415,13 +422,15 @@ exports.TriTracksBlankButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('3TracksBlankDialog err ' + err);
-                utils.error('3TracksBlankDialog err ' + err);
+                utils.error(logplotName + " existed!", function () {
+                    exports.TriTracksBlankButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.InputCurveButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -456,13 +465,15 @@ exports.InputCurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('3TracksBlankDialog err ' + err);
-                utils.error('3TracksBlankDialog err ' + err);
+                utils.error(logplotName + " existed!", function () {
+                    exports.InputCurveButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.LithoPlusSyn_CurveButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -503,13 +514,15 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('3TracksBlankDialog err ' + err);
-                utils.error('3TracksBlankDialog err ' + err);
+                utils.error(logplotName + " existed!", function () {
+                    exports.LithoPlusSyn_CurveButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.Syn_CurveButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -546,13 +559,15 @@ exports.Syn_CurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('3TracksBlankDialog err ' + err);
-                utils.error('3TracksBlankDialog err ' + err);
+                utils.error(logplotName + " existed!", function () {
+                    exports.Syn_CurveButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.ResultButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -595,13 +610,15 @@ exports.ResultButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                console.error('3TracksBlankDialog err ' + err);
-                utils.error('3TracksBlankDialog err ' + err);
+                utils.error(logplotName + " existed!", function () {
+                    exports.ResultButtonClicked.call(self);
+                });
             });
     });
 };
 
 exports.BlankCrossPlotButtonClicked = function () {
+    const self = this;
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -636,7 +653,14 @@ exports.BlankCrossPlotButtonClicked = function () {
                     pointSet: pointSet
                 });
             })
-        });
+        })
+            .then(function (crossplot) {
+            })
+            .catch(function (err) {
+                utils.error(crossplotName + " existed!", function () {
+                    exports.BlankCrossPlotButtonClicked.call(self);
+                });
+            });
     });
 };
 
@@ -654,7 +678,15 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService, w
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         console.log("CROSS NAME : ", crossplotName);
         utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(){
-        }, templateCross);
+        }, templateCross)
+            .then(function (crossplot) {
+                callback(crossplot);
+            })
+            .catch(function (err) {
+                utils.error(crossplotName + " existed!", function () {
+                    newCrossPlotTemplate(templateCross, wiComponentService, ModalService, wiApiService, $timeout, callback);
+                });
+            });
     });
 }
 
@@ -750,6 +782,7 @@ exports.PickettButtonClicked = function () {
 };
 
 exports.BlankHistogramButtonClicked = function () {
+    const self = this;
     console.log("Blank Hisogram clicked");
     const wiComponentService = this.wiComponentService;
     const ModalService = this.ModalService;
@@ -767,6 +800,13 @@ exports.BlankHistogramButtonClicked = function () {
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
         utils.createHistogram(selectedNode.properties.idWell, null, histogramName)
+            .then(function (histogram) {
+            })
+            .catch(function (err) {
+                utils.error(histogramName + " existed!", function () {
+                    exports.BlankHistogramButtonClicked.call(self);
+                });
+            });
     });
 }
 
@@ -783,7 +823,14 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(selectedNode.properties.idWell, null, histogramName, templateHistogram);
+        utils.createHistogram(selectedNode.properties.idWell, null, histogramName, templateHistogram)
+            .then(function (histogram) {
+            })
+            .catch(function (err) {
+                utils.error(histogramName + " existed!", function () {
+                    newTemplateHistogram(templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
+                });
+            });
     });
 }
 
