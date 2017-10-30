@@ -12,13 +12,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let _vertLineNo = 5;
     let _refCurveContainer = null;
     let _viCurves = new Array();
+    let _wiD3CrossplotCtrl = null;
     self.loading = false;
     //this._viCurves = _viCurves;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);    
+    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+
+    const CANVAS_WIDTH = 2;
+    const CANVAS_STROKE_COLOR = 'Green';
 
     this.$onInit = function () {
-        if (self.name) wiComponentService.putComponent(self.name, self);
+        if (self.name) {
+            console.log('crossplot-reference-window', self.name);
+            wiComponentService.putComponent(self.name, self);
+        }
     }
     this.onReady = function() {
         if (self.onRefWindCtrlReady) self.onRefWindCtrlReady(self);
@@ -32,11 +39,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .attr('height', $(getRefCurveContainer().node()).height());
 
         self.svg.selectAll('g.vi-refwind-axis-group').data([
-                'vi-refwind-axis-ticks vi-refwind-axis-x-ticks', 
+                'vi-refwind-axis-ticks vi-refwind-axis-x-ticks',
                 'vi-refwind-axis-ticks vi-refwind-axis-y-ticks'
             ]).enter()
             .append('g')
                 .attr('class', function(d) { return 'vi-refwind-axis-group ' + d; });
+
+        self.canvas = getRefCurveContainer().append('canvas')
+            .attr('class', 'point-canvas')
+            .attr('width', CANVAS_WIDTH)
+            .attr('height', $(getRefCurveContainer().node()).height())
+            .style('transform', 'translateX(-' + CANVAS_WIDTH + 'px)');
         document.getElementById(self.name + "-spinner").appendChild((new Spinner()).spin().el);
     }
 
@@ -62,6 +75,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
         }
         return _refCurveContainer;
+    }
+
+    function getWid3CrossplotCtrl() {
+        if ( !_wiD3CrossplotCtrl ) {
+            _wiD3CrossplotCtrl = wiComponentService.getComponent(self.name.replace('RefWind', ''));
+        }
+        return _wiD3CrossplotCtrl;
     }
 
     this.addRefCurve = function(idCurve, config, callback) {
@@ -93,7 +113,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             return vc.id;
         });
     }
-    
+
     this.isRefCurveAdded = function(idCurve) {
         for (let vc of _viCurves) {
             if (idCurve == vc.id) return true;
@@ -130,7 +150,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (_top < _minY) _top = _minY;
 
         if (scale) _scale = scale;
-        
+
         adjustRange();
 
         _viCurves.forEach(function(viCurve) {
@@ -142,6 +162,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
         self.svg.attr('width', $(getRefCurveContainer().node()).width())
             .attr('height', $(getRefCurveContainer().node()).height());
+
+        self.canvas.attr('height', $(getRefCurveContainer().node()).height());
+
+        self.updateCanvas();
 
         let transformY = _viCurves[0].getTransformY();
         let transformX = d3.scaleLinear().range([0, $(getRefCurveContainer().node()).width()]);
@@ -156,8 +180,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
         self.svg.select('.vi-refwind-axis-x-ticks').call(axisX);
-        self.svg.select('.vi-refwind-axis-y-ticks').call(axisY);
-        
+        self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
+            .selectAll('.vi-refwind-axis-y-ticks .tick text')
+                .style('transform', 'translateX(-' + CANVAS_WIDTH + 'px)');
+
         getRefCurveContainer()
             .on('mousewheel', function() {
                 let absDeltaY = Math.abs(d3.event.deltaY);
@@ -181,16 +207,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             );
     }
 
+    this.updateCanvas = updateCanvas;
+    function updateCanvas() {
+        let transformY = _viCurves[0].getTransformY();
+        let viCrossplot = getWid3CrossplotCtrl().viCrossplot;
+        let ctx = self.canvas.node().getContext('2d');
+        ctx.clearRect(0, 0, CANVAS_WIDTH, $(getRefCurveContainer().node()).height());
+        if (viCrossplot && viCrossplot.data && viCrossplot.area && viCrossplot.area.points) {
+            let points = viCrossplot.data.filter(function(p) {
+                return p.depth >= _top && p.depth <= _bottom;
+            });
+            points = viCrossplot.filterByPolygons([viCrossplot.area], points);
+            ctx.beginPath();
+            points.forEach(function(p) {
+                let y = transformY(p.depth);
+                ctx.moveTo(0, y);
+                ctx.lineTo(CANVAS_WIDTH, y);
+            });
+            ctx.strokeStyle = CANVAS_STROKE_COLOR;
+            ctx.stroke();
+        }
+    }
+
     this.update = update;
     function update(well, referenceCurves, scale, vertLineNo) {
         let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
         _minY = parseFloat(well.properties.topDepth);
         _maxY = parseFloat(well.properties.bottomDepth);
-        //if (!_top || _top < _minY) 
+        //if (!_top || _top < _minY)
         _top = _minY;
         if (scale) _scale = scale;
         if (vertLineNo && !isNaN(vertLineNo)) _vertLineNo = vertLineNo;
-        
+
         adjustRange();
 
         let stepY = parseFloat(well.properties.step);
@@ -202,10 +250,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         else {
             for (let i = _viCurves.length - 1; i >= 0; i--) {
                 if (!referenceCurves.find(
-                        function(curve) { 
+                        function(curve) {
                             return _viCurves[i].id == curve.idCurve;
                         }
-                    ) 
+                    )
                 ) {
                     _viCurves[i].destroy();
                     _viCurves.splice(i, 1);
@@ -221,7 +269,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     maxY: _bottom,
                     yStep: stepY,
                     offsetY: _top,
-                    line: { 
+                    line: {
                         color: refCurve.color
                     }
                 }
