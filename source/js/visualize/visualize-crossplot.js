@@ -396,7 +396,7 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-ternary');
 
-    
+
     new ResizeSensor( $(this.root.node()), function(param) {
         self.doPlot();
     } );
@@ -1143,7 +1143,9 @@ Crossplot.prototype.plotTernary = function() {
         size: self.TERNARY_VERTEX_SIZE,
     });
 
-    vertices.forEach(function(v) {
+    vertices.filter(function(v){
+        return v.x != null && v.y != null;
+    }).forEach(function(v) {
         let x = transformX(v.x);
         let y = transformY(v.y);
         helper[Utils.lowercase(v.style)](x, y).classed('vi-crossplot-ternary-item', true);
@@ -1455,15 +1457,22 @@ Crossplot.prototype.mouseDownCallback = function() {
     }
     else if (this.mode == 'PlotTernaryVertex') {
         let vertices = this.ternary.vertices;
-        let vertex = {
-            x: x,
-            y: y,
-            name: 'Material_' + (vertices.length + 1),
-            style: 'Circle',
-            used: false,
-            showed: true
-        };
-        vertices.push(vertex);
+        let vertex = this.tmpVertex;
+        if (vertex == null) {
+            vertex = {
+                x: x,
+                y: y,
+                name: 'Material_' + (vertices.length + 1),
+                style: 'Circle',
+                used: false,
+                showed: true
+            };
+            vertices.push(vertex);
+        }
+        else {
+            vertex.x = x;
+            vertex.y = y;
+        }
         this.plotTernary();
         return vertex;
     }
@@ -1477,8 +1486,10 @@ Crossplot.prototype.mouseDownCallback = function() {
     }
 }
 
-Crossplot.prototype.startAddTernaryVertex = function() {
+Crossplot.prototype.startAddTernaryVertex = function(idx) {
     this.setMode('PlotTernaryVertex');
+    if (idx == null) this.tmpVertex = null;
+    else this.tmpVertex = this.ternary.vertices[idx];
 }
 
 Crossplot.prototype.endAddTernaryVertex = function() {

@@ -507,37 +507,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 handler: function () {
                                     globalHandlers.TrippleComboButtonClicked();
                                 }
-                            }, {
-                                name: "InputCurves",
-                                label: "Input Curves",
-                                icon: "",
-                                handler: function () {
-                                    globalHandlers.InputCurveButtonClicked();
-                                }
-                            }, {
-                                name: "SynCurves",
-                                label: "Syn. Curves",
-                                icon: "",
-                                handler: function () {
-                                    globalHandlers.Syn_CurveButtonClicked();
-                                }
-                            }, {
-                                name: "LithoSynCurves",
-                                label: "Litho + Syn. Curves",
-                                icon: "",
-                                handler: function () {
-                                    globalHandlers.LithoPlusSyn_CurveButtonClicked();
-                                }
-                            }, {
-                                separator: '1'
-                            }, {
-                                name: "Result",
-                                label: "Result",
-                                icon: "",
-                                handler: function () {
-                                    globalHandlers.ResultButtonClicked();
-                                }
                             }
+                            // , {
+                            //     name: "InputCurves",
+                            //     label: "Input Curves",
+                            //     icon: "",
+                            //     handler: function () {
+                            //         globalHandlers.InputCurveButtonClicked();
+                            //     }
+                            // }, {
+                            //     name: "SynCurves",
+                            //     label: "Syn. Curves",
+                            //     icon: "",
+                            //     handler: function () {
+                            //         globalHandlers.Syn_CurveButtonClicked();
+                            //     }
+                            // }, {
+                            //     name: "LithoSynCurves",
+                            //     label: "Litho + Syn. Curves",
+                            //     icon: "",
+                            //     handler: function () {
+                            //         globalHandlers.LithoPlusSyn_CurveButtonClicked();
+                            //     }
+                            // }, {
+                            //     separator: '1'
+                            // }, {
+                            //     name: "Result",
+                            //     label: "Result",
+                            //     icon: "",
+                            //     handler: function () {
+                            //         globalHandlers.ResultButtonClicked();
+                            //     }
+                            // }
                         ]
                     }, {
                         separator: '1'

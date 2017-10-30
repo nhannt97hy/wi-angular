@@ -694,3 +694,19 @@ function getBoundingClientDimension(aNode) {
     var jQueryObj = $(aNode);
     return {width:jQueryObj.width(), height:jQueryObj.height()};
 }
+
+exports.getDpi = getDpi;
+function getDpi() {
+    let inch = document.createElement('inch');
+    inch.style = 'height: 1in; width: 1in; left: -100%; position: absolute; top: -100%;';
+    document.body.appendChild(inch);
+    let devicePixelRatio = window.devicePixelRatio || 1;
+    let dpi = inch.clientWidth * devicePixelRatio;
+    document.body.removeChild(inch);
+    return dpi;
+}
+
+exports.getDpcm = getDpcm;
+function getDpcm() {
+    return getDpi() / 2.54;
+}

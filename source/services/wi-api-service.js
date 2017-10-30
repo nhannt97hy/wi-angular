@@ -278,7 +278,8 @@ var wiApiWorker = function($http, wiComponentService){
                         self.stopWorking();
                         console.error(job.request);
                         // job.callback(err);
-                        if (err.data.reason) self.getUtils().error(err.data.reason);
+                        if (err.data && err.data.reason) self.getUtils().error(err.data.reason);
+                        else self.getUtils().error(err);
                     }
                 });
 
@@ -842,8 +843,14 @@ Service.prototype.editDataCurve = function (request, callback) {
 }
 
 Service.prototype.processingDataCurve = function(request, callback) {
-    var self = this;
-    this.postWithFile(PROCESSING_DATA_CURVE, request, callback);
+    const self = this;
+    this.postWithFile(PROCESSING_DATA_CURVE, request)
+        .then(function (response) {
+            if (callback) callback(response);
+        })
+        .catch(function (err) {
+            self.getUtils().error(err);
+        });
 }
 Service.prototype.listFamily = async function (callback) {
     const self = this;
@@ -1336,5 +1343,9 @@ Service.prototype.setAuthenticationInfo = function(authenInfo) {
     __USERINFO.password = authenInfo.password;
     __USERINFO.token = authenInfo.token;
 }
+
+Service.prototype.getCaptcha = function () {
+    return BASE_URL + "/captcha.png";
+};
 exports.name = moduleName;
 

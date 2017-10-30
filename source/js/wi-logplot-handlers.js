@@ -125,13 +125,11 @@ exports.PrintToImageButtonClicked = function () {
 function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     console.log('scaleTo', wiLogplot);
     let track = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`);
-    console.log(track);
     if (!track.length) return false;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let dpCm = utils.getDpcm();
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     let depthRange = wiD3Ctrl.getDepthRange();
-    console.log(depthRange);
 
     let trackHeight = track.height();
     let heightCm = trackHeight / dpCm;
@@ -139,7 +137,7 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     let depthHeightM = depthHeightCm / 100;
     depthRange[1] = depthRange[0] + depthHeightM;
     if (depthRange[1] > wiD3Ctrl.getMaxDepth()) depthRange[1] = wiD3Ctrl.getMaxDepth();
-    console.log(depthRange, trackHeight, heightCm, depthHeightM, dpCm);
+    console.log('SCALE', depthRange);
     wiD3Ctrl.setDepthRange(depthRange);
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 }
@@ -237,7 +235,7 @@ exports.ScaleCustomButtonClicked = function() {
         type: 'number'
     }
     DialogUtils.promptDialog(self.ModalService, promptConfig, function(scale){
-        scaleTo(scale, self.wiLogplot, self.wiComponentService);    
+        scaleTo(scale, self.wiLogplot, self.wiComponentService);
     })
 }
 exports.ZoomInButtonClicked = function () {

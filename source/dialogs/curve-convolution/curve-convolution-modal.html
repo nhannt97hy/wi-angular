@@ -11,7 +11,7 @@
                     <div class="form-group">
                         <label class="col-sm-6">Select Well:</label>
                         <div class="col-sm-6">
-                            <select class="form-control wi-form-control" ng-model="wiModal.SelectedWell" ng-options="well as well.properties.name for well in wiModal.wellArr"></select>
+                            <select class="form-control wi-form-control" ng-model="wiModal.SelectedWell" ng-options="well as well.properties.name for well in wiModal.wellArr" ng-change='wiModal.onWellChanged()'></select>
                         </div>
                     </div>
                     <div class="form-group">
@@ -30,7 +30,7 @@
                     <div class="form-group">
                         <label class="col-sm-6">Dataset:</label>
                         <div class="col-sm-6">
-                            <select class="form-control wi-form-control" ng-model="wiModal.outIdDataset" ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets"></select>
+                            <select class="form-control wi-form-control" ng-model="wiModal.ResultCurve.idDataset" ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets"></select>
                         </div>
                     </div>
                     <div class="form-group">
