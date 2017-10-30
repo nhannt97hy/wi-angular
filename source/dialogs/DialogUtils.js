@@ -7644,29 +7644,92 @@ exports.curveConvolutionDialog = function(ModalService){
         this.SelectedWell = this.wellArr[0];
         this.datasets = [];
         this.curvesArr = [];
-        this.ResultCurve = {
-            name: '',
-            id: null
-        }
-        this.SelectedWell.children.forEach(function(child, i){
-            if(child.type == 'dataset')
-                self.datasets.push(child);
+        this.curveData = [];        
+        this.onWellChanged = function(){
+            self.datasets.length = 0;
+            self.curvesArr.length = 0;
+            self.SelectedWell.children.forEach(function(child, i){
+                if(child.type == 'dataset')
+                    self.datasets.push(child);
+    
+                if(i == self.wellArr.length - 1){
+                    self.datasets.forEach(function (child) {
+                        child.children.forEach(function (item) {
+                            if (item.type == 'curve') {
+                                var d = item;
+                                d.idDataset = child.id;
+                                d.datasetName = child.properties.name;
+                                self.curvesArr.push(d);
+                            }
+                        })
+                    });
+                    self.ResultCurve = {
+                        idDataset: self.datasets[0].id,
+                        curveName: self.curvesArr[0].name,
+                        idDesCurve: self.curvesArr[0].id,
+                        data: []
+                    }
+                    self.inputIdCurve = self.datasets[0].children[0].id;
+                    self.stdIdCurve = self.datasets[0].children[0].id;
+                }
 
-            if(i == self.wellArr.length - 1){
-                self.datasets.forEach(function (child) {
-                    child.children.forEach(function (item) {
-                        if (item.type == 'curve') {
-                            var d = item;
-                            d.datasetName = child.properties.name;
-                            self.curvesArr.push(d);
-                        }
-                    })
-                });
+                
+            })
+        }
+        this.onWellChanged();
+        
+        function convolution(input, kernel, out){
+            // check validity of params
+            if(!input || !out || !kernel) return false;
+            if(input.length <=0 || kernel.length <= 0) return false;
+        
+            // start convolution from out[kernelSize-1] to out[dataSize-1] (last)
+            for(let i = kernel.length - 1; i < input.length; ++i)
+            {
+                out[i] = 0;                             // init to 0 before accumulate
+        
+                for(let j = i, k = 0; k < kernel.length; --j, ++k)
+                    out[i] += input[j] * kernel[k];
             }
-        })
-        this.inputIdCurve = self.datasets[0].children[0].id;
-        this.stdIdCurve = self.datasets[0].children[0].id;
-        this.outIdDataset = self.datasets[0].id;
+        
+            // convolution from out[0] to out[kernelSize-2]
+            for(let i = 0; i < kernel.length - 1; ++i)
+            {
+                out[i] = 0;                             // init to 0 before sum
+        
+                for(let j = i, k = 0; j >= 0; --j, ++k)
+                    out[i] += input[j] * kernel[k];
+            }
+            return true;
+        }
+
+        this.run = function(){
+            self.curveData.length = 0;
+            let curveSet = new Set();
+            curveSet.add(self.inputIdCurve);
+            curveSet.add(self.stdIdCurve);
+            async.each(Array.from(curveSet), function(curve, done){
+                wiApiService.dataCurve(curve, function(data){
+                    let dataF = data.map(function(d){
+                        return parseFloat(d.x);
+                    })
+                    self.curveData.push(dataF);
+                    done();
+                })
+            }, function(err){
+                let input = self.curveData[0];
+                let kernel = self.curveData.length == 1 ? self.curveData[0] : self.curveData[1];
+                if(convolution(input, kernel, self.ResultCurve.data)){
+                    console.log(self.ResultCurve);
+                    wiApiService.processingDataCurve(self.ResultCurve, function(){
+                        console.log('Done!');
+                        utils.refreshProjectState();
+                    })
+                }else {
+                    console.log('err');
+                }
+            })
+        }
 
 
         this.onCancelButtonClicked = function(){
