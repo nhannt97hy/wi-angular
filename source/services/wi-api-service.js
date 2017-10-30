@@ -1342,5 +1342,9 @@ Service.prototype.setAuthenticationInfo = function(authenInfo) {
     __USERINFO.password = authenInfo.password;
     __USERINFO.token = authenInfo.token;
 }
+
+Service.prototype.getCaptcha = function () {
+    return BASE_URL + "/captcha.png";
+};
 exports.name = moduleName;
 

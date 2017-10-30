@@ -3,6 +3,7 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         let self = this;
         this.disabled = false;
         this.error = null;
+        this.captchaPNG = wiApiService.getCaptcha();
         this.checkPasswords = function () {
             if (!self.passwordReg || !self.passwordConfirm) {
                 self.error = 'Passwords must not be empty.'
