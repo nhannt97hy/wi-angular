@@ -3,13 +3,13 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         let self = this;
         this.disabled = false;
         this.error = null;
+        this.captchaPNG = wiApiService.getCaptcha();
         this.checkPasswords = function () {
             if (!self.passwordReg || !self.passwordConfirm) {
                 self.error = 'Passwords must not be empty.'
             }
             if (self.passwordReg != self.passwordConfirm) {
                 self.error = 'Passwords do not match.'
-
             }
         }
         this.onRegisterButtonClicked = function () {
@@ -3904,7 +3904,7 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
 
 exports.errorMessageDialog = errorMessageDialog;
 
-function errorMessageDialog(ModalService, errorMessage) {
+function errorMessageDialog(ModalService, errorMessage, callback) {
     function ModalController($scope, close) {
         let self = this;
         this.error = errorMessage;
@@ -3923,6 +3923,7 @@ function errorMessageDialog(ModalService, errorMessage) {
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+            if (callback) callback();
         })
     });
 };
@@ -7461,7 +7462,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[0]);
+        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
+        else this.wellModel = angular.copy(self.wells[0]);
         this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
@@ -7535,6 +7538,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
             return retData;
         }
         function curveAverageCacl () {
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
             let allData = [];
             let dataAvg = [];
             self.selectedCurves = self.availableCurves.filter(function(curve, index) {
@@ -7615,6 +7620,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 });
             }
         };
+
         this.onRunButtonClicked = function () {
             curveAverageCacl();
         }
@@ -7642,20 +7648,57 @@ exports.curveAverageDialog = function (ModalService, callback) {
 exports.curveRescaleDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        window.curve = this.curveModel;
         window.curveAvg = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[0]);
+        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
+        else this.wellModel = angular.copy(self.wells[0]);
+
         this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
 
+        window.wellModel = this.wellModel;
+        this.curves = this.wellModel.children[0].children;
+        console.log(this.curves);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedNodes && selectedNodes[0].type == 'curve') this.curveModel = selectedNodes[0];
+        else this.curveModel = angular.copy(self.curves[0]);
+
+        this.nameCurve = this.curveModel.name;
+        this.unitCurve = this.curveModel.properties.unit;
+        this.idCurve = this.curveModel.id;
+
+        this.selectedWell = function (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.idWell = self.wellModel.id;
+            self.curves = self.wellModel.children[0].children;
+            self.curveModel = self.curves[0];
+            self.idCurve = self.curveModel.id;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+        }
+        this.selectedCurve = function (idCurve) {
+            self.curveModel = utils.getCurveFromId(idCurve);
+            self.idCurve = self.curveModel.id;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+        }
         this.defaultDepth = function () {
-            self.topDepth = parseFloat(this.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+        }
+        this.onRunButtonClicked = function () {
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
         }
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -7680,16 +7723,68 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 exports.curveComrarisonDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[0]);
+        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
+        else this.wellModel = angular.copy(self.wells[0]);
+        this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
 
+        this.curves = this.wellModel.children[0].children;
+        this.numberCurve = this.curves.length;
+        this.curveModel = angular.copy(self.curves[0]);
+        window.numberCurve = this.numberCurve;
+        this.idCurve = this.curveModel.id;
+
+        this.checked = false;
+        this.style = {
+            "opacity": "0.3",
+            "pointer-events": "none"
+        }
+        this.disable = function (check) {
+            if(check) {
+                self.style = {};
+            }else {
+                self.style = {
+                    "opacity": "0.3",
+                    "pointer-events": "none"
+                }
+            }
+        }
+        this.getNumerCurve = function () {
+            var array = new Array(self.numberCurve);
+            return array;
+        }
+        this.selectedWell = function (idWell) {
+            window.numberCurve = this.numberCurve;
+            self.wellModel = utils.findWellById(idWell);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.idWell = self.wellModel.id;
+            self.curves = self.wellModel.children[0].children;
+            self.numberCurve = self.curves.length;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+            self.idCurve = self.curveModel.id;
+        }
+        this.selectedCurve = function (idCurve) {
+            self.curveModel = utils.getCurveFromId(idCurve);
+            self.idCurve = self.curveModel.id;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+        }
         this.defaultDepth = function () {
             self.topDepth = parseFloat(this.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        }
+
+        this.onRunButtonClicked = function () {
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
         }
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -7712,39 +7807,151 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
 }
 
 exports.curveConvolutionDialog = function(ModalService){
-    function ModalController(wiComponentService, wiApiService, close){
+    function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.curveCov = this;
+        this.applyingInProgress = false;        
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = this.project.children;
-        this.SelectedWell = this.wellArr[0];
+        this.refresh = function(cb){
+            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.wellArr = self.project.children;
+            if(!self.SelectedWell){
+                self.SelectedWell = self.wellArr[0];
+            }else{
+                self.SelectedWell = self.wellArr.find(function(well){
+                    return well.id == self.SelectedWell.id;
+                })
+            }
+            if(cb) cb();
+        }
+        this.refresh();
         this.datasets = [];
         this.curvesArr = [];
-        this.ResultCurve = {
-            name: '',
-            id: null
-        }
-        this.SelectedWell.children.forEach(function(child, i){
-            if(child.type == 'dataset')
-                self.datasets.push(child);
+        this.curveData = [];        
+        this.onWellChanged = function(){
+            self.datasets.length = 0;
+            self.curvesArr.length = 0;
+            self.SelectedWell.children.forEach(function(child, i){
+                if(child.type == 'dataset')
+                    self.datasets.push(child);
+    
+                if(i == self.wellArr.length - 1){
+                    self.datasets.forEach(function (child) {
+                        child.children.forEach(function (item) {
+                            if (item.type == 'curve') {
+                                var d = item;
+                                d.idDataset = child.id;
+                                d.datasetName = child.properties.name;
+                                self.curvesArr.push(d);
+                            }
+                        })
+                    });
+                    self.ResultCurve = {
+                        idDataset: self.datasets[0].id,
+                        curveName: self.curvesArr[0].name,
+                        idDesCurve: self.curvesArr[0].id,
+                        data: []
+                    }
+                    self.inputIdCurve = self.datasets[0].children[0].id;
+                    self.stdIdCurve = self.datasets[0].children[0].id;
+                }
 
-            if(i == self.wellArr.length - 1){
-                self.datasets.forEach(function (child) {
-                    child.children.forEach(function (item) {
-                        if (item.type == 'curve') {
-                            var d = item;
-                            d.datasetName = child.properties.name;
-                            self.curvesArr.push(d);
-                        }
-                    })
+                
+            })
+        }
+        this.onWellChanged();
+
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.refresh(function(){
+                    self.onWellChanged();
                 });
+            }, 0);
+        });
+        
+        function convolution(input, kernel, out){ // need update
+            // check validity of params
+            if(!input || !out || !kernel) return false;
+            if(input.length <=0 || kernel.length <= 0) return false;
+        
+            // // start convolution from out[kernelSize-1] to out[dataSize-1] (last)
+            // for(let i = kernel.length - 1; i < input.length; ++i)
+            // {
+            //     out[i] = 0;                             // init to 0 before accumulate
+        
+            //     for(let j = i, k = 0; k < kernel.length; --j, ++k)
+            //         out[i] += input[j] * kernel[k];
+            // }
+        
+            // // convolution from out[0] to out[kernelSize-2]
+            // for(let i = 0; i < kernel.length - 1; ++i)
+            // {
+            //     out[i] = 0;                             // init to 0 before sum
+        
+            //     for(let j = i, k = 0; j >= 0; --j, ++k)
+            //         out[i] += input[j] * kernel[k];
+            // }
+
+            for (let n = 0; n < input.length + kernel.length - 1; n++) {
+                out[n] = 0;
+
+                let kmin = (n >= kernel.length - 1) ? n - (kernel.length - 1) : 0;
+                let kmax = (n < input.length - 1) ? n : input.length - 1;
+
+                for (let k = kmin; k <= kmax; k++) {
+                    out[n] += input[k] * kernel[n - k];
+                }
             }
-        })
-        this.inputIdCurve = self.datasets[0].children[0].id;
-        this.stdIdCurve = self.datasets[0].children[0].id;
-        this.outIdDataset = self.datasets[0].id;
+            return true;
+        }
+
+        function saveCurve(curve){
+            wiApiService.processingDataCurve(curve, function(){
+                console.log('Curve Saved!');
+                utils.refreshProjectState();
+            })
+        }
+
+        this.run = function(){
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            self.curveData.length = 0;
+            let curveSet = new Set();
+            curveSet.add(self.inputIdCurve);
+            curveSet.add(self.stdIdCurve);
+            async.each(Array.from(curveSet), function(curve, done){
+                wiApiService.dataCurve(curve, function(data){
+                    let dataF = data.map(function(d){
+                        return parseFloat(d.x);
+                    })
+                    self.curveData.push(dataF);
+                    done();
+                })
+            }, function(err){
+                let input = self.curveData[0];
+                let kernel = self.curveData.length == 1 ? self.curveData[0] : self.curveData[1];
+                if(convolution(input, kernel, self.ResultCurve.data)){
+                    console.log(self.ResultCurve);
+                    if(self.ResultCurve.idDesCurve){
+                        DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
+                            if(ret){
+                                let curve = angular.copy(self.ResultCurve);
+                                delete curve.curveName;
+                                saveCurve(curve);
+                            }else{
+                                self.applyingInProgress = false;            
+                            }
+                        })
+                    }else{
+                        saveCurve(self.ResultCurve);
+                    }
+                }else {
+                    console.log('Convolution err!');
+                }
+            })
+        }
 
 
         this.onCancelButtonClicked = function(){
