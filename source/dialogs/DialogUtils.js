@@ -7740,29 +7740,47 @@ exports.curveConvolutionDialog = function(ModalService){
             }, 0);
         });
         
-        function convolution(input, kernel, out){
+        function convolution(input, kernel, out){ // need update
             // check validity of params
             if(!input || !out || !kernel) return false;
             if(input.length <=0 || kernel.length <= 0) return false;
         
-            // start convolution from out[kernelSize-1] to out[dataSize-1] (last)
-            for(let i = kernel.length - 1; i < input.length; ++i)
-            {
-                out[i] = 0;                             // init to 0 before accumulate
+            // // start convolution from out[kernelSize-1] to out[dataSize-1] (last)
+            // for(let i = kernel.length - 1; i < input.length; ++i)
+            // {
+            //     out[i] = 0;                             // init to 0 before accumulate
         
-                for(let j = i, k = 0; k < kernel.length; --j, ++k)
-                    out[i] += input[j] * kernel[k];
-            }
+            //     for(let j = i, k = 0; k < kernel.length; --j, ++k)
+            //         out[i] += input[j] * kernel[k];
+            // }
         
-            // convolution from out[0] to out[kernelSize-2]
-            for(let i = 0; i < kernel.length - 1; ++i)
-            {
-                out[i] = 0;                             // init to 0 before sum
+            // // convolution from out[0] to out[kernelSize-2]
+            // for(let i = 0; i < kernel.length - 1; ++i)
+            // {
+            //     out[i] = 0;                             // init to 0 before sum
         
-                for(let j = i, k = 0; j >= 0; --j, ++k)
-                    out[i] += input[j] * kernel[k];
+            //     for(let j = i, k = 0; j >= 0; --j, ++k)
+            //         out[i] += input[j] * kernel[k];
+            // }
+
+            for (let n = 0; n < input.length + kernel.length - 1; n++) {
+                out[n] = 0;
+
+                let kmin = (n >= kernel.length - 1) ? n - (kernel.length - 1) : 0;
+                let kmax = (n < input.length - 1) ? n : input.length - 1;
+
+                for (let k = kmin; k <= kmax; k++) {
+                    out[n] += input[k] * kernel[n - k];
+                }
             }
             return true;
+        }
+
+        function saveCurve(curve){
+            wiApiService.processingDataCurve(curve, function(){
+                console.log('Curve Saved!');
+                utils.refreshProjectState();
+            })
         }
 
         this.run = function(){
@@ -7785,12 +7803,21 @@ exports.curveConvolutionDialog = function(ModalService){
                 let kernel = self.curveData.length == 1 ? self.curveData[0] : self.curveData[1];
                 if(convolution(input, kernel, self.ResultCurve.data)){
                     console.log(self.ResultCurve);
-                    wiApiService.processingDataCurve(self.ResultCurve, function(){
-                        console.log('Done!');
-                        utils.refreshProjectState();
-                    })
+                    if(self.ResultCurve.idDesCurve){
+                        DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
+                            if(ret){
+                                let curve = angular.copy(self.ResultCurve);
+                                delete curve.curveName;
+                                saveCurve(curve);
+                            }else{
+                                self.applyingInProgress = false;            
+                            }
+                        })
+                    }else{
+                        saveCurve(self.ResultCurve);
+                    }
                 }else {
-                    console.log('err');
+                    console.log('Convolution err!');
                 }
             })
         }
