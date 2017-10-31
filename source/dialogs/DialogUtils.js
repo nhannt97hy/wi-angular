@@ -995,15 +995,17 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
 
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
-        this.symbolType = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.symbolType = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star"];
         this.symbolWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let type = 'Circle';
+
+        this.drawIcon = drawIcon;
         function drawIcon(idIcon, type){
             let icon =  $('#' + idIcon)[0];
             console.log("type", type, icon);
 
             let ctx = icon.getContext('2d');
-            ctx.clearRect(0, 0, sample.width, sample.height);
+            ctx.clearRect(0, 0, icon.width, icon.height);
 
             let helper = new graph.CanvasHelper(ctx, {
                 strokeStyle: 'black',
@@ -1034,14 +1036,12 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
                 break;
             }
         }
-        $timeout(function() {
-            drawIcon(self.symbolOptions.symbolStyle.symbolName + 'Icon', self.symbolOptions.symbolStyle.symbolName);
-            self.symbolType.forEach(function(type, index){
-                console.log("symbolType:", type);
-                drawIcon(type, type);
-            })
-        })
-
+        // $timeout(function() {
+        //     self.drawIcon(self.symbolOptions.symbolStyle.symbolName + 'Icon', self.symbolOptions.symbolStyle.symbolName);
+        // })
+        this.onSelectSymbol = function () {
+            console.log("choossss");
+        }
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
@@ -4619,6 +4619,43 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.crossplotModel.properties.pointsets[0].pointColor = colorStr;
             });
         };
+        this.drawIcon = drawIcon;
+        function drawIcon(idIcon, type){
+            let icon =  $('#' + idIcon)[0];
+            console.log("type", type, icon);
+
+            let ctx = icon.getContext('2d');
+            ctx.clearRect(0, 0, icon.width, icon.height);
+
+            let helper = new graph.CanvasHelper(ctx, {
+                strokeStyle: 'black',
+                fillStyle: 'black',
+                size: 30
+            });
+            let funcType = type.toLowerCase();
+            switch(funcType){
+                case 'circle':
+                    helper.circle(10, 10);
+                    break;
+                case 'cross':
+                    helper.cross(10, 10);
+                    break;
+                case 'diamond':
+                    helper.diamond(10, 10);
+                    break;
+                case 'plus':
+                    helper.plus(10, 10);
+                    break;
+                case 'square':
+                    helper.square(10, 10);
+                    break;
+                case 'star':
+                    helper.star(10, 10);
+                    break;
+                default:
+                break;
+            }
+        }
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
         //     delete props.pointsets[0].curveX;
@@ -4626,6 +4663,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         //     delete props.pointsets[0].curveZ;
         //     return props
         // }
+
         function updateCrossplot(callback) {
             // var payload = buildPayload(self.crossplotModel.properties);
             self.updating = true;
