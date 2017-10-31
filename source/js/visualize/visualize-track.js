@@ -424,9 +424,6 @@ Track.prototype.getWindowY = function() {
     let windowY = (this.minY != null && this.maxY != null)
         ? [this.minY, this.maxY]
         : [0, 10000];
-
-    windowY[0] = this.offsetY + visUtils.roundUp(windowY[0] - this.offsetY, this.yStep);
-    windowY[1] = this.offsetY + visUtils.roundDown(windowY[1] - this.offsetY, this.yStep);
     return windowY;
 }
 
@@ -436,7 +433,7 @@ Track.prototype.getWindowY = function() {
  * @returns {Array} Range of transformed y values to show
  */
 Track.prototype.getViewportY = function() {
-    return [0, this.plotContainer.node().clientHeight];
+    return [0, visUtils.getBoundingClientDimension(this.plotContainer.node()).height];
 }
 
 /**
@@ -444,7 +441,7 @@ Track.prototype.getViewportY = function() {
  * @returns {Array} Range of transformed x values to show
  */
 Track.prototype.getViewportX = function() {
-    return [0, this.plotContainer.node().clientWidth];
+    return [0, visUtils.getBoundingClientDimension(this.plotContainer.node()).width];
 }
 
 /**
