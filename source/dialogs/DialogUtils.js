@@ -7810,9 +7810,9 @@ exports.curveConvolutionDialog = function(ModalService){
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function(cb){
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wellArr = self.project.children;
+            self.wellArr = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.SelectedWell){
-                self.SelectedWell = self.wellArr[0];
+                self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
             }else{
                 self.SelectedWell = self.wellArr.find(function(well){
                     return well.id == self.SelectedWell.id;
@@ -7825,30 +7825,34 @@ exports.curveConvolutionDialog = function(ModalService){
         this.curvesArr = [];
         this.curveData = [];        
         this.onWellChanged = function(){
-            self.datasets.length = 0;
-            self.curvesArr.length = 0;
-            self.SelectedWell.children.forEach(function(child, i){
-                if(child.type == 'dataset')
-                    self.datasets.push(child);
-    
-                if(i == self.SelectedWell.children.length - 1){
-                    self.datasets.forEach(function (child) {
-                        child.children.forEach(function (item) {
-                            if (item.type == 'curve') {
-                                self.curvesArr.push(item);
+            if(self.SelectedWell){
+                self.datasets.length = 0;
+                self.curvesArr.length = 0;
+                self.SelectedWell.children.forEach(function(child, i){
+                    if(child.type == 'dataset')
+                        self.datasets.push(child);
+        
+                    if(i == self.SelectedWell.children.length - 1){
+                        self.datasets.forEach(function (child) {
+                            child.children.forEach(function (item) {
+                                if (item.type == 'curve') {
+                                    self.curvesArr.push(item);
+                                }
+                            })
+                        });
+                        if(self.curvesArr.length){
+                            self.ResultCurve = {
+                                idDataset: self.datasets[0].id,
+                                curveName: self.curvesArr[0].name,
+                                idDesCurve: self.curvesArr[0].id,
+                                data: []
                             }
-                        })
-                    });
-                    self.ResultCurve = {
-                        idDataset: self.datasets[0].id,
-                        curveName: self.curvesArr[0].name,
-                        idDesCurve: self.curvesArr[0].id,
-                        data: []
+                            self.inputCurve = self.datasets[0].children[0];
+                            self.stdCurve = self.datasets[0].children[0];
+                        }
                     }
-                    self.inputCurve = self.datasets[0].children[0];
-                    self.stdCurve = self.datasets[0].children[0];
-                }
-            })
+                })
+            }        
         }
         this.onWellChanged();
 
