@@ -2681,11 +2681,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             })
         });
         console.log("curvesArr", this.curvesArr);
-        this.curvesArr.forEach(function (curve, index) {
-            let dataset = utils.findDatasetById(curve.properties.idDataset);
-            curve.properties.datasetName = dataset.properties.name;
-            console.log("curveObj", curve);
-        })
+        // this.curvesArr.forEach(function (curve, index) {
+        //     let dataset = utils.findDatasetById(curve.properties.idDataset);
+        //     curve.properties.datasetName = dataset.properties.name;
+        //     console.log("curveObj", curve);
+        // })
 
         this.lineCurve = [];
         this.fillPatternOptions = new Array();
@@ -2696,7 +2696,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.curvesOnDataset.push(curvesOnDatasetItem);
         })
         this.curvesArr.forEach(function (item) {
-            let selectedCurve = item.properties.datasetName + '.' + item.properties.name;
+            let selectedCurve = item.datasetName + '.' + item.properties.name;
             item.datasetCurve = selectedCurve;
         });
 
@@ -5563,7 +5563,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
                     child.children.forEach(function (item) {
                         if (item.type == 'curve') {
                             var d = item;
-                            d.datasetName = child.properties.name;
                             self.curvesArr.push(d);
                             if (d.id == self.histogramProps.idCurve) {
                                 self.SelectedCurve = d;
@@ -6544,9 +6543,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
                 self.datasets.forEach(function (child) {
                     child.children.forEach(function (item) {
                         if (item.type == 'curve') {
-                            var d = item;
-                            d.datasetName = child.properties.name;
-                            self.curvesArr.push(d);
+                            self.curvesArr.push(item);
                         }
                     })
                 });
@@ -7084,9 +7081,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 self.datasets.forEach(function (child) {
                     child.children.forEach(function (item) {
                         if (item.type == 'curve') {
-                            var d = item;
-                            d.datasetName = child.properties.name;
-                            self.curvesArr.push(d);
+                            self.curvesArr.push(item);
                         }
                     })
                 });
@@ -7840,10 +7835,7 @@ exports.curveConvolutionDialog = function(ModalService){
                     self.datasets.forEach(function (child) {
                         child.children.forEach(function (item) {
                             if (item.type == 'curve') {
-                                var d = item;
-                                d.idDataset = child.id;
-                                d.datasetName = child.properties.name;
-                                self.curvesArr.push(d);
+                                self.curvesArr.push(item);
                             }
                         })
                     });

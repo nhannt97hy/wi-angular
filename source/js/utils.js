@@ -431,9 +431,9 @@ function curveToTreeConfig(curve) {
         idFamily: curve.idFamily,
         name: curve.name,
         unit: curve.unit || "NA",
-        dataset: curve.dataset,
         alias: curve.name
     };
+    curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
@@ -469,6 +469,7 @@ function datasetToTreeConfig(dataset) {
     if (!dataset.curves) return datasetModel;
 
     dataset.curves.forEach(function (curve) {
+        curve.dataset = dataset.name;
         datasetModel.children.push(curveToTreeConfig(curve));
     });
 
