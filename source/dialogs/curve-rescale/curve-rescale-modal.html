@@ -11,9 +11,10 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3"> Select well:</label>
                         <div class="col-sm-9">
-                            <select ng-model="wiModal.wellModel.id"
-                                    class="form-control wi-form-control"
-                                    ng-options="well.id as well.properties.name for well in wiModal.wells">
+                            <select class="form-control wi-form-control"
+                                    ng-model="wiModal.idWell"
+                                    ng-options="well.id as well.properties.name for well in wiModal.wells"
+                                    ng-change="wiModal.selectedWell(wiModal.idWell)">
                             </select>
                         </div>
                     </div>
@@ -30,7 +31,7 @@
                                    type="number" class="form-control wi-form-control" step="any">
                         </div>
                         <div class="col-sm-2">
-                            <button class="btn btn-default"
+                            <button class="btn btn-default small-button"
                                     ng-click="wiModal.defaultDepth()">Default</button>
                         </div>
                     </div>
@@ -38,9 +39,10 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3"> Curve input</label>
                         <div class="col-sm-9">
-                            <select ng-model="wiModal.wellModel.id"
-                                    class="form-control wi-form-control"
-                                    ng-options="well.id as well.properties.name for well in wiModal.wells">
+                            <select class="form-control wi-form-control"
+                                    ng-model="wiModal.idCurve"
+                                    ng-options="curve.id as curve.name for curve in wiModal.curves"
+                                    ng-change="wiModal.selectedCurve(wiModal.idCurve)">
                             </select>
                         </div>
                     </div>
@@ -57,27 +59,26 @@
                     <div class="form-group">
                         <label for="" class="col-sm-3 control-label"> Logarithmic</label>
                         <div class="col-sm-1">
-                            <input type="checkbox" class="form-control wi-form-control">
+                            <input type="checkbox" class="input-check">
                         </div>
                     </div>
                     <h5 class="modal-infomation-title">Output</h5>
                     <div class="form-group">
                         <label class="control-label col-sm-3"> Dataset</label>
                         <div class="col-sm-9">
-                            <select ng-model="wiModal.wellModel.id"
-                                    class="form-control wi-form-control"
-                                    ng-options="well.id as well.properties.name for well in wiModal.wells">
+                            <select class="form-control wi-form-control"
+                                    >
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="" class="control-label col-sm-3"> Curve output</label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control wi-form-control">
+                            <input type="text" class="form-control wi-form-control" ng-model="wiModal.nameCurve">
                         </div>
                         <label for="" class="control-label col-sm-3"> Unit</label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control wi-form-control">
+                            <input type="text" class="form-control wi-form-control" ng-model="wiModal.unitCurve">
                         </div>
                     </div>
                     <div class="form-group">
@@ -93,13 +94,13 @@
                     <div class="form-group">
                         <label for="" class="col-sm-3 control-label"> Logarithmic</label>
                         <div class="col-sm-1">
-                            <input type="checkbox" class="form-control wi-form-control">
+                            <input type="checkbox" class="input-check">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="run-16x16"></span>Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'><span class="run-16x16"></span>Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>Close</button>
             </div>
         </div>
