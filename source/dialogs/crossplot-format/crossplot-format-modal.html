@@ -146,10 +146,22 @@
                                                 Point Symbol
                                             </label>
                                             <div class="col-sm-8">
-                                                <select class="form-control wi-form-control"
+                                                <!-- <select class="form-control wi-form-control"
                                                         ng-model="wiModal.crossplotModel.properties.pointsets[0].pointSymbol"
                                                         ng-options="item for item in wiModal.selectPointSymbol">
-                                                </select>
+                                                </select> -->
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="wiModal.crossplotModel.properties.pointsets[0].pointSymbol">
+                                                    <ui-select-match>
+                                                        <div ng-repeat="type in wiModal.selectPointSymbol"
+                                                             ng-if="wiModal.crossplotModel.properties.pointsets[0].pointSymbol==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="type in wiModal.selectPointSymbol" position="down">
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
+                                                    </ui-select-choices>
+                                                </ui-select>
                                             </div>
                                         </div>
                                     </div>

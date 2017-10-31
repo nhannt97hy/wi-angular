@@ -10,7 +10,6 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
             }
             if (self.passwordReg != self.passwordConfirm) {
                 self.error = 'Passwords do not match.'
-
             }
         }
         this.onRegisterButtonClicked = function () {
@@ -996,15 +995,17 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
 
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
-        this.symbolType = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.symbolType = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star"];
         this.symbolWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let type = 'Circle';
+
+        this.drawIcon = drawIcon;
         function drawIcon(idIcon, type){
             let icon =  $('#' + idIcon)[0];
             console.log("type", type, icon);
 
             let ctx = icon.getContext('2d');
-            ctx.clearRect(0, 0, sample.width, sample.height);
+            ctx.clearRect(0, 0, icon.width, icon.height);
 
             let helper = new graph.CanvasHelper(ctx, {
                 strokeStyle: 'black',
@@ -1035,14 +1036,12 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
                 break;
             }
         }
-        $timeout(function() {
-            drawIcon(self.symbolOptions.symbolStyle.symbolName + 'Icon', self.symbolOptions.symbolStyle.symbolName);
-            self.symbolType.forEach(function(type, index){
-                console.log("symbolType:", type);
-                drawIcon(type, type);
-            })
-        })
-
+        // $timeout(function() {
+        //     self.drawIcon(self.symbolOptions.symbolStyle.symbolName + 'Icon', self.symbolOptions.symbolStyle.symbolName);
+        // })
+        this.onSelectSymbol = function () {
+            console.log("choossss");
+        }
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
@@ -4621,6 +4620,43 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 self.crossplotModel.properties.pointsets[0].pointColor = colorStr;
             });
         };
+        this.drawIcon = drawIcon;
+        function drawIcon(idIcon, type){
+            let icon =  $('#' + idIcon)[0];
+            console.log("type", type, icon);
+
+            let ctx = icon.getContext('2d');
+            ctx.clearRect(0, 0, icon.width, icon.height);
+
+            let helper = new graph.CanvasHelper(ctx, {
+                strokeStyle: 'black',
+                fillStyle: 'black',
+                size: 30
+            });
+            let funcType = type.toLowerCase();
+            switch(funcType){
+                case 'circle':
+                    helper.circle(10, 10);
+                    break;
+                case 'cross':
+                    helper.cross(10, 10);
+                    break;
+                case 'diamond':
+                    helper.diamond(10, 10);
+                    break;
+                case 'plus':
+                    helper.plus(10, 10);
+                    break;
+                case 'square':
+                    helper.square(10, 10);
+                    break;
+                case 'star':
+                    helper.star(10, 10);
+                    break;
+                default:
+                break;
+            }
+        }
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
         //     delete props.pointsets[0].curveX;
@@ -4628,6 +4664,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         //     delete props.pointsets[0].curveZ;
         //     return props
         // }
+
         function updateCrossplot(callback) {
             // var payload = buildPayload(self.crossplotModel.properties);
             self.updating = true;
@@ -7425,7 +7462,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[0]);
+        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
+        else this.wellModel = angular.copy(self.wells[0]);
         this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
@@ -7499,6 +7538,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
             return retData;
         }
         function curveAverageCacl () {
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
             let allData = [];
             let dataAvg = [];
             self.selectedCurves = self.availableCurves.filter(function(curve, index) {
@@ -7579,6 +7620,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 });
             }
         };
+
         this.onRunButtonClicked = function () {
             curveAverageCacl();
         }
@@ -7606,20 +7648,57 @@ exports.curveAverageDialog = function (ModalService, callback) {
 exports.curveRescaleDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        window.curve = this.curveModel;
         window.curveAvg = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[0]);
+        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
+        else this.wellModel = angular.copy(self.wells[0]);
+
         this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
 
+        window.wellModel = this.wellModel;
+        this.curves = this.wellModel.children[0].children;
+        console.log(this.curves);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedNodes && selectedNodes[0].type == 'curve') this.curveModel = selectedNodes[0];
+        else this.curveModel = angular.copy(self.curves[0]);
+
+        this.nameCurve = this.curveModel.name;
+        this.unitCurve = this.curveModel.properties.unit;
+        this.idCurve = this.curveModel.id;
+
+        this.selectedWell = function (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.idWell = self.wellModel.id;
+            self.curves = self.wellModel.children[0].children;
+            self.curveModel = self.curves[0];
+            self.idCurve = self.curveModel.id;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+        }
+        this.selectedCurve = function (idCurve) {
+            self.curveModel = utils.getCurveFromId(idCurve);
+            self.idCurve = self.curveModel.id;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+        }
         this.defaultDepth = function () {
-            self.topDepth = parseFloat(this.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+        }
+        this.onRunButtonClicked = function () {
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
         }
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -7644,16 +7723,68 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 exports.curveComrarisonDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.wells = wiExplorer.treeConfig[0].children;
-        this.wellModel = angular.copy(self.wells[0]);
+        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
+        else this.wellModel = angular.copy(self.wells[0]);
+        this.idWell = this.wellModel.id;
         this.topDepth = parseFloat(this.wellModel.properties.topDepth);
         this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
 
+        this.curves = this.wellModel.children[0].children;
+        this.numberCurve = this.curves.length;
+        this.curveModel = angular.copy(self.curves[0]);
+        window.numberCurve = this.numberCurve;
+        this.idCurve = this.curveModel.id;
+
+        this.checked = false;
+        this.style = {
+            "opacity": "0.3",
+            "pointer-events": "none"
+        }
+        this.disable = function (check) {
+            if(check) {
+                self.style = {};
+            }else {
+                self.style = {
+                    "opacity": "0.3",
+                    "pointer-events": "none"
+                }
+            }
+        }
+        this.getNumerCurve = function () {
+            var array = new Array(self.numberCurve);
+            return array;
+        }
+        this.selectedWell = function (idWell) {
+            window.numberCurve = this.numberCurve;
+            self.wellModel = utils.findWellById(idWell);
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.idWell = self.wellModel.id;
+            self.curves = self.wellModel.children[0].children;
+            self.numberCurve = self.curves.length;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+            self.idCurve = self.curveModel.id;
+        }
+        this.selectedCurve = function (idCurve) {
+            self.curveModel = utils.getCurveFromId(idCurve);
+            self.idCurve = self.curveModel.id;
+            self.nameCurve = self.curveModel.name;
+            self.unitCurve = self.curveModel.properties.unit;
+        }
         this.defaultDepth = function () {
             self.topDepth = parseFloat(this.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        }
+
+        this.onRunButtonClicked = function () {
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
         }
         this.onCancelButtonClicked = function () {
             close(null, 100);
