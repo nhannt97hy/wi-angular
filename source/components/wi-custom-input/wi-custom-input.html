@@ -12,7 +12,7 @@
             <span class="custom-label">{{opt.label}}</span>
         </li>
         <li ng-if="wiCustomInput.type == 'curve'" ng-repeat="opt in wiCustomInput.options" ng-click="wiCustomInput.onClickCurve(opt)" class="custom-item"
-        ng-class="{'custom-item-selected': opt.properties.name==wiCustomInput.model.curveName && opt.idDataset==wiCustomInput.model.idDataset}">
+        ng-class="{'custom-item-selected': opt.properties.name==wiCustomInput.model.curveName && opt.properties.idDataset==wiCustomInput.model.idDataset}">
             <span class="custom-value">{{opt.properties.name}}</span>
             <span class="custom-label">{{opt.datasetName}}</span>
         </li>
