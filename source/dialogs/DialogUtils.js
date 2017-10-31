@@ -7853,11 +7853,9 @@ exports.curveConvolutionDialog = function(ModalService){
                         idDesCurve: self.curvesArr[0].id,
                         data: []
                     }
-                    self.inputIdCurve = self.datasets[0].children[0].id;
-                    self.stdIdCurve = self.datasets[0].children[0].id;
+                    self.inputCurve = self.datasets[0].children[0];
+                    self.stdCurve = self.datasets[0].children[0];
                 }
-
-                
             })
         }
         this.onWellChanged();
@@ -7901,8 +7899,8 @@ exports.curveConvolutionDialog = function(ModalService){
             self.applyingInProgress = true;
             self.curveData.length = 0;
             let curveSet = new Set();
-            curveSet.add(self.inputIdCurve);
-            curveSet.add(self.stdIdCurve);
+            curveSet.add(self.inputCurve.id);
+            curveSet.add(self.stdCurve.id);
             async.each(Array.from(curveSet), function(curve, done){
                 wiApiService.dataCurve(curve, function(data){
                     let dataF = data.map(function(d){
