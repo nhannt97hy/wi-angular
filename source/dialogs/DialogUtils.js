@@ -7705,7 +7705,7 @@ exports.curveConvolutionDialog = function(ModalService){
                 if(child.type == 'dataset')
                     self.datasets.push(child);
     
-                if(i == self.wellArr.length - 1){
+                if(i == self.SelectedWell.children.length - 1){
                     self.datasets.forEach(function (child) {
                         child.children.forEach(function (item) {
                             if (item.type == 'curve') {
@@ -7745,24 +7745,6 @@ exports.curveConvolutionDialog = function(ModalService){
             if(!input || !out || !kernel) return false;
             if(input.length <=0 || kernel.length <= 0) return false;
         
-            // // start convolution from out[kernelSize-1] to out[dataSize-1] (last)
-            // for(let i = kernel.length - 1; i < input.length; ++i)
-            // {
-            //     out[i] = 0;                             // init to 0 before accumulate
-        
-            //     for(let j = i, k = 0; k < kernel.length; --j, ++k)
-            //         out[i] += input[j] * kernel[k];
-            // }
-        
-            // // convolution from out[0] to out[kernelSize-2]
-            // for(let i = 0; i < kernel.length - 1; ++i)
-            // {
-            //     out[i] = 0;                             // init to 0 before sum
-        
-            //     for(let j = i, k = 0; j >= 0; --j, ++k)
-            //         out[i] += input[j] * kernel[k];
-            // }
-
             for (let n = 0; n < input.length + kernel.length - 1; n++) {
                 out[n] = 0;
 
