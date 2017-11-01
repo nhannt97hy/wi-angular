@@ -60,31 +60,30 @@
                     <div class="form-group">
                         <label class="control-label col-sm-4">Curve search mask </label>
                         <div class="col-sm-4">
-                            <input type="text" class="form-control wi-form-control">
-                        </div>
-                        <div class="col-sm-4">
-                            <button class="btn btn-default small-button">Apply</button>
+                            <input type="text" class="form-control wi-form-control" ng-model="filterCurve">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-sm-4">Available curves</label>
-                        <div class="col-sm-8" style="height: 10em; overflow: auto;">
-                            <table class="table table-bordered availableCurve">
-                                <thead>
+                        <div class="col-sm-8">
+                            <table class="table availableCurve">
+                                <thead style="display: block">
                                     <tr>
-                                        <th style="width: 20%"></th>
-                                        <th style="width: 40%">Curve</th>
-                                        <th style="width: 40%">Dataset</th>
+                                        <th style="width: 15%"></th>
+                                        <th style="width: 42%">Curve</th>
+                                        <th style="width: 43%">Dataset</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr ng-repeat="curve in wiModal.availableCurves"
+                                <tbody style="display: block;height: 10em; overflow-y: auto">
+                                    <tr ng-repeat="curve in wiModal.availableCurves | filter:{name: filterCurve}"
                                         ng-class="{'selected': curve.flag}">
-                                        <td><a ng-click="wiModal.select(curve); wiModal.focus()">
+                                        <td style="width: 15%;"><a ng-click="wiModal.select(curve); wiModal.focus()">
                                             <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i></a>
                                         </td>
-                                        <td>{{curve.name}}</td>
-                                        <td>{{curve.properties.dataset}}</td>
+                                        <td style="width:42%;">{{curve.name}}</td>
+                                        <td style="width: 43%">{{curve.properties.dataset}}</td>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -470,6 +470,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let area = self.viCrossplot.endAddAreaRectangle();
                     if (callback) callback(area);
                     self.contextMenu = commonCtxMenu;
+                    self.updateRefWindCanvas();
                 }
             }
         ]);
@@ -486,6 +487,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let area = self.viCrossplot.endAddAreaPolygon();
                     if (callback) callback(area);
                     self.contextMenu = commonCtxMenu;
+                    self.updateRefWindCanvas();
                 }
             }
         ]);
@@ -494,6 +496,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.deleteArea = function() {
         self.viCrossplot.area = null;
         self.viCrossplot.plotArea();
+        self.updateRefWindCanvas();
     }
 
     this.pickPoint = function(callback) {
@@ -569,12 +572,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    this.updateRefWindCanvas = function() {
+        if (!self.crossplotModel.properties.referenceDisplay) return;
+        let refWindCtrl = this.getWiRefWindCtrl();
+        refWindCtrl.updateCanvas();
+    }
+
     this.viCrossplotMouseDownCallback = function() {
         if (d3.event.button == 2) return;
         if (self.viCrossplot.mode == 'PlotAreaRectangle') {
             if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
                 self.viCrossplot.endAddAreaRectangle();
                 self.contextMenu = commonCtxMenu;
+                self.updateRefWindCanvas();
             }
         }
         else if (self.viCrossplot.mode == 'PlotUserLine') {

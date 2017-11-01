@@ -9,19 +9,19 @@ function Controller() {
     }
 
     this.onChanged = function(){
-        if(self.model.id) self.model.id = null;
+        if(self.model.idDesCurve) self.model.idDesCurve = null;
         let curveModel = self.options.find(curve => {
-            return curve.properties.name == self.model.name;
+            return curve.properties.name == self.model.curveName && curve.idDataset == self.model.idDataset;
         });
 
         if(curveModel) {
-            self.model.id = curveModel.properties.idCurve;
+            self.model.idDesCurve = curveModel.properties.idCurve;
         }
     }
 
     this.onClickCurve = function(curve){
-        self.model.name = curve.properties.name;
-        self.model.id = curve.properties.idCurve;        
+        self.model.curveName = curve.properties.name;
+        self.model.idDesCurve = curve.properties.idCurve;        
     }
 }
 

@@ -121,7 +121,6 @@ CanvasHelper.RAW_PATTERNS = {
     sandstone: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="white"/><path d="M1,5L2,5M5,2L6,2M11,2L13,2M7,6L9,6M2,9L4,9M12,8L13,8M9,11L10,11M4,16L6,16M12,15L14,15" stroke="black" fill="none"/></g></svg>',
     shale: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M5,1L7,3M7,1L9,3M9,1L11,3M11,1L13,3M13,1L15,3M0,11L2,9M2,11L4,9M4,11L6,9M6,11L8,9M14,11L16,9" stroke="black" fill="none"/></g></svg>',
     siltstone: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M13,0L14,0M5,4L7,6M7,4L9,6M9,4L11,6M11,4L13,6M13,4L15,6M1,6L2,6M5,8L6,8M11,9L13,9M0,13L2,11M2,13L4,11M4,13L6,11M6,13L8,11M14,13L16,11" stroke="black" fill="none"/></g></svg>'
-    // test: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><defs/><g><path d="M0,0L10,0" fill="white" stroke="#000000" stroke-miterlimit="10" pointer-events="none"/><path d="M 6 13 L 16 13" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none"/></g></svg>',
 }
 
 function prepare(canvas) {

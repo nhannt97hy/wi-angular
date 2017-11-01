@@ -73,12 +73,16 @@
                                                         class="form-control wi-form-control"
                                                         ng-options="item for item in wiModal.symbolType">
                                                 </select> -->
-                                                <ui-select theme="bootstrap" tagging ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
                                                     <ui-select-match>
-                                                        <canvas id="{{wiModal.symbolOptions.symbolStyle.symbolName + 'Icon'}}" width="20" height="20"></canvas>{{wiModal.symbolOptions.symbolStyle.symbolName}}
+                                                        <div ng-repeat="type in wiModal.symbolType"
+                                                             ng-if="wiModal.symbolOptions.symbolStyle.symbolName==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
                                                     </ui-select-match>
                                                     <ui-select-choices repeat="type in wiModal.symbolType" position="down">
-                                                        <canvas id="{{type}}" width="20" height="20"></canvas>{{type}}
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>

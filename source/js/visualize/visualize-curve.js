@@ -326,7 +326,7 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
     let windowY = this.getWindowY();
 
     let plotSamples = this.data.filter(function(item) {
-        return Utils.isWithinYRange(item, windowY);
+        return Utils.isWithinYRange(item, [windowY[0] - self.yStep, windowY[1] + self.yStep]);
     });
     if (plotSamples.length == 0) return;
     let ctx = this.ctx;
