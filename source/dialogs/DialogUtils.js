@@ -7805,7 +7805,7 @@ exports.curveConvolutionDialog = function(ModalService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.curveCov = this;
-        this.applyingInProgress = false;        
+        this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function(cb){
@@ -7823,7 +7823,7 @@ exports.curveConvolutionDialog = function(ModalService){
         this.refresh();
         this.datasets = [];
         this.curvesArr = [];
-        this.curveData = [];        
+        this.curveData = [];
         this.onWellChanged = function(){
             if(self.SelectedWell){
                 self.datasets.length = 0;
@@ -7831,7 +7831,7 @@ exports.curveConvolutionDialog = function(ModalService){
                 self.SelectedWell.children.forEach(function(child, i){
                     if(child.type == 'dataset')
                         self.datasets.push(child);
-        
+
                     if(i == self.SelectedWell.children.length - 1){
                         self.datasets.forEach(function (child) {
                             child.children.forEach(function (item) {
@@ -7852,7 +7852,7 @@ exports.curveConvolutionDialog = function(ModalService){
                         }
                     }
                 })
-            }        
+            }
         }
         this.onWellChanged();
 
@@ -7864,12 +7864,12 @@ exports.curveConvolutionDialog = function(ModalService){
                 });
             }, 0);
         });
-        
+
         function convolution(input, kernel, out){ // need update
             // check validity of params
             if(!input || !out || !kernel) return false;
             if(input.length <=0 || kernel.length <= 0) return false;
-        
+
             for (let n = 0; n < input.length + kernel.length - 1; n++) {
                 out[n] = 0;
 
@@ -7917,7 +7917,7 @@ exports.curveConvolutionDialog = function(ModalService){
                                 delete curve.curveName;
                                 saveCurve(curve);
                             }else{
-                                self.applyingInProgress = false;            
+                                self.applyingInProgress = false;
                             }
                         })
                     }else{
@@ -8078,7 +8078,6 @@ exports.curveDerivativeDialog = function(ModalService){
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
             self.SelectedCurve = self.curves[0];
             self.selectedDataset = self.datasets[0];
-            this.getNullValueNumber();
             self.curveName = self.SelectedCurve.properties.name;
         }
         this.clickDefault = function () {
