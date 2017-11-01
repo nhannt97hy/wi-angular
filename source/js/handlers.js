@@ -928,7 +928,11 @@ exports.CurvesHeaderButtonClicked = function () {
 };
 
 exports.FillDataGapsButtonClicked = function () {
-    console.log('FillDataGapsButton is clicked');
+     console.log('FillDataGapsButton is clicked');
+     let self = this;
+     let wiComponentService = this.wiComponentService;
+     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+     DialogUtils.fillDataGapsDialog(this.ModalService);
 };
 
 exports.CurveFilterButtonClicked = function () {
@@ -949,6 +953,11 @@ exports.CurveDeconvolutionButtonClicked = function () {
 
 exports.CurveDerivativeButtonClicked = function () {
     console.log('CurveDerivativeButton is clicked');
+
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveDerivativeDialog(this.ModalService);
 };
 
 exports.CurveRescaleButtonClicked = function () {
@@ -1118,4 +1127,3 @@ exports.AboutButtonClicked = function () {
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
-

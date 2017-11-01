@@ -1,8 +1,8 @@
 <div class="dropdown"  uib-dropdown>
-    <input type="number" ng-if="wiCustomInput.type == 'number'" ng-model="wiCustomInput.model" class="form-control wi-form-control" required>
+    <input type="number" ng-if="wiCustomInput.type == 'number'" ng-model="wiCustomInput.model" class="form-control wi-form-control" required ng-disabled='wiCustomInput.disabled'>
     <input type="text" ng-if="wiCustomInput.type == 'curve'" ng-model="wiCustomInput.model.curveName" class="form-control wi-form-control"
-    ng-change="wiCustomInput.onChanged()" required>
-    <button uib-dropdown-toggle id="dropdownMenu" class="custom-btn">
+    ng-change="wiCustomInput.onChanged()" required ng-disabled='wiCustomInput.disabled'>
+    <button uib-dropdown-toggle id="dropdownMenu" class="custom-btn" ng-disabled='wiCustomInput.disabled'>
         <i class="ti-angle-down"></i>
     </button>
     <ul class="dropdown-menu custom-input-menu" aria-labelledby="dropdownMenu" uib-dropdown-menu role="menu">
