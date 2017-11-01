@@ -1,0 +1,126 @@
+<div class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class="curve-convolution-16x16"></span>&nbsp;Fill Gaps</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form class='col-sm-12 form-horizontal form-condensed'>
+                        <div id="settings">
+                            <h5>Settings</h5>
+                            <div class="container-fluid">
+                                <div class='form-group'>
+                                    <label class="col-sm-2">Select well</label>
+                                    <div class="col-sm-4">
+                                        <select class="form-control wi-form-control" ng-model="wiModal.selectedWell" ng-options="well as well.properties.name for well in wiModal.wells" ng-change="wiModal.onWellChange()">
+                                       </select>
+                                    </div>
+                                    <label class="col-sm-2">Input Curve</label>
+                                    <div class="col-sm-4">
+                                        <ui-select ng-model="wiModal.SelectedCurve" class="normal-text"
+                                         ng-change="wiModal.getNullValueNumber()">
+                                            <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
+                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                                <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2">Top Depth</label>
+                                    <div class="col-sm-4">
+                                        <input class="form-control wi-form-control" type="number" ng-model="wiModal.topDepth" step="any">
+                                    </div>
+                                    <label class="col-sm-2">Botton Depth</label>
+                                    <div class="col-sm-2">
+                                        <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <button class="btn btn-default small-button" ng-click="wiModal.clickDefault()"style="with=100%;">Default</button>
+                                    </div>
+                                </div>
+                                <div class='form-group'>
+                                    <div class="col-sm-4">
+                                        <button class="btn btn-default small-button" ng-click="wiModal.NullnumberDefault()">Null value's Number</button>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input class="form-control wi-form-control" type="number" min="0" max="{{wiModal.NullData.length}}" ng-model="wiModal.Nullnumber">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2">Gaps maximum with</label>
+                                    <div class="col-sm-4">
+                                        <input class="form-control wi-form-control" type="text" ng-model="wiModal.gapsMaximum">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label>
+                                            <input ng-model="wiModal.calcMethod"
+                                                    type="radio" value="lateral" class="wi-form-control">In samples
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label>
+                                            <input ng-model="wiModal.calcMethod"
+                                                    type="radio" value="arithmetic" class="wi-form-control">In M
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="Output">
+                            <h5>Output</h5>
+                            <div class="container-fluid">
+                                <div class='form-group'>
+                                    <label class="col-sm-2">Dataset</label>
+                                    <div class="col-sm-4">
+                                        <select class="form-control wi-form-control" ng-options="dataset as dataset.properties.name for dataset in wiModal.datasets"
+                                                 ng-model="wiModal.selectedDataset">
+                                        </select>
+                                    </div>
+                                    <label class="col-sm-2">Name</label>
+                                    <div class="col-sm-4">
+                                        <input class="form-control wi-form-control" ng-model="wiModal.curveName">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="Advance">
+                            <h5>Advance(optional)</h5>
+                            <div class="container-fluid">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4">Slect other curves to fill gaps:</label>
+                                    <div class="col-sm-8" style="height: 10em; overflow: auto;">
+                                        <table class="table table-bordered availableCurve">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 20%"></th>
+                                                    <th style="width: 40%">Curve</th>
+                                                    <th style="width: 40%">Dataset</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="curve in wiModal.availableCurves" ng-class="{'selected': curve.flag}">
+                                                    <td><a ng-click="wiModal.select(curve); wiModal.focus()">
+                                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i></a>
+                                                    </td>
+                                                    <td>{{curve.name}}</td>
+                                                    <td>{{curve.properties.dataset}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+                    </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class='btn btn-default' ng-click='wiModal.run()'><span class="run-16x16"></span>&nbsp;Run</button>
+                    <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
