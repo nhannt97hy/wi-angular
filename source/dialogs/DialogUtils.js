@@ -7561,7 +7561,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                                 })
                             }
                         });
-                    } 
+                    }
                     else {
                         request = {
                             idDataset: self.idSelectedDataset,
@@ -7716,6 +7716,163 @@ exports.curveConvolutionDialog = function(ModalService){
 
     ModalService.showModal({
         templateUrl: "curve-convolution/curve-convolution-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+exports.fillDataGapsDialog = function(ModalService){
+    function ModalController(wiComponentService, wiApiService, close){
+        let self = this;
+        window.filldata = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.refresh = function (cb) {
+            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.wells = self.project.children;
+            if(!self.selectedWell){
+                self.selectedWell = self.wells[0];
+
+            }else {
+                self.selectedWell = self.wells.find(function (well) {
+                    return well.id == self.selectedWell.id;
+                })
+            }
+            if(cb) cb();
+        }
+        this.refresh();
+        this.datasets =[];
+        this.curves = [];
+        this.onWellChange = function () {
+            self.datasets.length = 0;
+            self.curves.length = 0;
+            this.selectedWell.children.forEach(function(child,i) {
+                if(child.type == 'dataset')
+                   self.datasets.push(child);
+               if(i == self.selectedWell.children.length - 1){
+                   self.datasets.forEach(function (child) {
+                       child.children.forEach(function (item) {
+                           if (item.type == 'curve') {
+                               var d = item;
+                               d.datasetName = child.properties.name;
+                               self.curves.push(d);
+                           }
+                       })
+                   });
+               }
+            })
+            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
+            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+            self.SelectedCurve = self.curves[0];
+            self.selectedDataset = self.datasets[0];
+            this.getNullValueNumber();
+            this.NullnumberDefault();
+            self.curveName = self.SelectedCurve.properties.name;
+        }
+        this.clickDefault = function () {
+            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
+            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+        }
+
+       this.NullnumberDefault = function () {
+            self.Nullnumber = self.NullData.length;
+       }
+       this.NullData = [];
+        this.getNullValueNumber = function () {
+            wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
+                self.NullData = data.filter(function (d) {
+                    return isNaN(d.x);
+                })
+                self.Nullnumber = self.NullData.length;
+                console.log(self.Nullnumber,"self.Nullnumber");
+            })
+            self.curveName = self.SelectedCurve.properties.name;
+        }
+        this.onWellChange();
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "fill-data-gaps/fill-data-gaps-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+exports.curveDerivativeDialog = function(ModalService){
+    function ModalController(wiComponentService, wiApiService, close){
+        let self = this;
+        window.derectivedata = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.refresh = function (cb) {
+            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.wells = self.project.children;
+            if(!self.selectedWell){
+                self.selectedWell = self.wells[0];
+
+            }else {
+                self.selectedWell = self.wells.find(function (well) {
+                    return well.id == self.selectedWell.id;
+                })
+            }
+            if(cb) cb();
+        }
+        this.refresh();
+        this.datasets =[];
+        this.curves = [];
+        this.onWellChange = function () {
+            self.datasets.length = 0;
+            self.curves.length = 0;
+            this.selectedWell.children.forEach(function(child,i) {
+                if(child.type == 'dataset')
+                   self.datasets.push(child);
+               if(i == self.selectedWell.children.length - 1){
+                   self.datasets.forEach(function (child) {
+                       child.children.forEach(function (item) {
+                           if (item.type == 'curve') {
+                               var d = item;
+                               d.datasetName = child.properties.name;
+                               self.curves.push(d);
+                           }
+                       })
+                   });
+               }
+            })
+            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
+            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+            self.SelectedCurve = self.curves[0];
+            self.selectedDataset = self.datasets[0];
+            this.getNullValueNumber();
+            self.curveName = self.SelectedCurve.properties.name;
+        }
+        this.clickDefault = function () {
+            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
+            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+        }
+       this.NullData = [];
+        this.onWellChange();
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-derivative/curve-derivative-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
