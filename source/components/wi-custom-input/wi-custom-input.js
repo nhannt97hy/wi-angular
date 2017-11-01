@@ -34,7 +34,8 @@ app.component(name, {
     bindings: {
         model: '=',
         options: '<',
-        type: '@'
+        type: '@',
+        disabled: '<'
     }
 });
 
