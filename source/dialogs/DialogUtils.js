@@ -7833,31 +7833,23 @@ exports.curveConvolutionDialog = function(ModalService){
                         self.datasets.push(child);
 
                     if(i == self.SelectedWell.children.length - 1){
-                        async.each(self.datasets, function(child, callback){
-                            async.each(child.children, function(item, cb){
+                        self.datasets.forEach(function (child) {
+                            child.children.forEach(function (item) {
                                 if (item.type == 'curve') {
                                     self.curvesArr.push(item);
                                 }
-                                cb();
-                            }, function(err){
-                                callback();
                             })
-                        }, function(err){
-                            if(self.curvesArr.length){
-                                self.ResultCurve = {
-                                    idDataset: self.datasets[0].id,
-                                    curveName: self.curvesArr[0].name,
-                                    idDesCurve: self.curvesArr[0].id,
-                                    data: []
-                                }
-                                self.inputCurve = self.datasets[0].children[0];
-                                self.stdCurve = self.datasets[0].children[0];
-                            }else {
-                                delete self.ResultCurve;
-                                delete self.inputCurve;
-                                delete self.stdCurve;
+                        });
+                        if(self.curvesArr.length){
+                            self.ResultCurve = {
+                                idDataset: self.datasets[0].id,
+                                curveName: self.curvesArr[0].name,
+                                idDesCurve: self.curvesArr[0].id,
+                                data: []
                             }
-                        })
+                            self.inputCurve = self.datasets[0].children[0];
+                            self.stdCurve = self.datasets[0].children[0];
+                        }
                     }
                 })
             }
@@ -7964,7 +7956,7 @@ exports.fillDataGapsDialog = function(ModalService){
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function (cb) {
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wells = self.project.children;
+            self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
                 self.selectedWell = self.wells[0];
 
@@ -8050,7 +8042,7 @@ exports.curveDerivativeDialog = function(ModalService){
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function (cb) {
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wells = self.project.children;
+            self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
                 self.selectedWell = self.wells[0];
 
@@ -8064,6 +8056,7 @@ exports.curveDerivativeDialog = function(ModalService){
         this.refresh();
         this.datasets =[];
         this.curves = [];
+        this.checked = false;
         this.onWellChange = function () {
             self.datasets.length = 0;
             self.curves.length = 0;
@@ -8075,7 +8068,6 @@ exports.curveDerivativeDialog = function(ModalService){
                        child.children.forEach(function (item) {
                            if (item.type == 'curve') {
                                var d = item;
-                               d.datasetName = child.properties.name;
                                self.curves.push(d);
                            }
                        })
@@ -8084,15 +8076,48 @@ exports.curveDerivativeDialog = function(ModalService){
             })
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
-            self.SelectedCurve = self.curves[0];
-            self.selectedDataset = self.datasets[0];
-            self.curveName = self.SelectedCurve.properties.name;
+            if (self.curves.length) {
+                self.SelectedCurve = self.curves[0];
+                self.selectedDataset = self.datasets[0].id;
+                self.firtCurve = {
+                    idDataset: self.selectedDataset,
+                    curveName: self.curves[0].properties.name,
+                    idDesCurve: self.curves[0].id,
+                    data: []
+                }
+                self.secondCurve = {
+                    idDataset: self.selectedDataset,
+                    curveName: self.curves[0].properties.name,
+                    idDesCurve: self.curves[0].id,
+                    data: []
+                }
+            }else {
+                delete self.firtCurve;
+                delete self.secondCurve;
+                delete self.SelectedCurve;
+                delete self.selectedDataset;
+
+            }
+
+        }
+        this.validate = function(){
+            if(self.topDepth == null || self.bottomDepth == null || self.topDepth > self.bottomDepth){
+                return true;
+            }
+            if ((self.firtCurve && self.firtCurve.curveName == null) || typeof self.firtCurve == 'undefined') {
+                return true;
+            }
+
+            if (self.checked) {
+                if ((self.secondCurve && self.secondCurve.curveName == null) || typeof self.secondCurve == 'undefined') {
+                    return true;
+                }
+            }
         }
         this.clickDefault = function () {
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
         }
-       this.NullData = [];
         this.onWellChange();
         this.onCancelButtonClicked = function(){
             close(null);
