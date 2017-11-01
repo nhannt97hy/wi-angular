@@ -8100,6 +8100,10 @@ exports.curveDerivativeDialog = function(ModalService){
             }
 
         }
+        this.onDatasetChange = function(){
+            self.firtCurve.idDataset = self.selectedDataset;
+            self.secondCurve.idDataset = self.selectedDataset;
+        }
         this.validate = function(){
             if(self.topDepth == null || self.bottomDepth == null || self.topDepth > self.bottomDepth){
                 return true;

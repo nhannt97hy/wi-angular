@@ -1,7 +1,4 @@
 wi-custom-input {
-    // .custom-input-selected {
-    //     width: 100%;
-    // }
     input[type=number] {
         padding-right: 25px;
     }
@@ -13,7 +10,7 @@ wi-custom-input {
         margin: 0;
     }
     .custom-input-menu {
-        width: fit-content;
+        min-width: -webkit-fill-available;
         max-height: 200px;
         overflow-y: scroll;
         overflow-x: hidden;
@@ -58,8 +55,11 @@ wi-custom-input {
        padding: 2px;
        border: 1px solid transparent;
        background: transparent;
-       &:hover {
+       &:hover:enabled {
            background-color: #ccc;
+       }
+       &:disabled {
+           cursor: not-allowed;
        }
    }
 }
