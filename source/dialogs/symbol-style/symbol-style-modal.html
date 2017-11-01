@@ -16,10 +16,22 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-4">Symbol Type</label>
                                             <div class="col-sm-8">
-                                                <select ng-model="wiModal.options.symbolStyle.symbolName"
+                                                <!-- <select ng-model="wiModal.options.symbolStyle.symbolName"
                                                         class="form-control wi-form-control"
                                                         ng-options="item for item in wiModal.symbolType">
-                                                </select>
+                                                </select> -->
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="wiModal.options.symbolStyle.symbolName">
+                                                    <ui-select-match>
+                                                        <div ng-repeat="type in wiModal.symbolType"
+                                                             ng-if="wiModal.options.symbolStyle.symbolName==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="type in wiModal.symbolType" position="down">
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
+                                                    </ui-select-choices>
+                                                </ui-select>
                                             </div>
                                         </div>
                                     </div>
