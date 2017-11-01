@@ -440,8 +440,9 @@ function curveToTreeConfig(curve) {
         label: curve.name,
         unit: curveModel.properties.unit
     };
+    curveModel.lineProperties = curve.LineProperty;
     curveModel.curveData = null;
-    curveModel.parent = 'dataset' + curve.idDataset;
+    curveModel.parent = curve.dataset;
     return curveModel;
 }
 
@@ -449,7 +450,7 @@ exports.curveToTreeConfig = curveToTreeConfig;
 
 function datasetToTreeConfig(dataset) {
     var datasetModel = new Object();
-    datasetModel.name = "dataset";
+    datasetModel.name = dataset.name;
     datasetModel.type = "dataset";
     datasetModel.id = dataset.idDataset;
     datasetModel.properties = {
@@ -2174,3 +2175,52 @@ function evaluateExpr(well, discriminator, callback) {
         }
     );
 }
+exports.drawIcon = drawIcon;
+function drawIcon(idIcon, type){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+
+    let icon =  $('#' + idIcon)[0];
+    console.log("type", type, icon);
+
+    let ctx = icon.getContext('2d');
+    ctx.clearRect(0, 0, icon.width, icon.height);
+
+    let helper = new graph.CanvasHelper(ctx, {
+        strokeStyle: 'black',
+        fillStyle: 'black',
+        size: 30
+    });
+    let funcType = type.toLowerCase();
+    switch(funcType){
+        case 'circle':
+            helper.circle(10, 10);
+            break;
+        case 'cross':
+            helper.cross(10, 10);
+            break;
+        case 'diamond':
+            helper.diamond(10, 10);
+            break;
+        case 'plus':
+            helper.plus(10, 10);
+            break;
+        case 'square':
+            helper.square(10, 10);
+            break;
+        case 'star':
+            helper.star(10, 10);
+            break;
+        default:
+        break;
+    }
+}
+function getDataTopBottomRange (data, topPos, bottomPos) {
+    let retData = [];
+    for(let i = 0; i < data.length; i++) {
+        if(i < topPos || i > bottomPos) retData.push(null);
+        else retData.push(data[i]);
+    }
+    return retData;
+}
+exports.getDataTopBottomRange = getDataTopBottomRange;
