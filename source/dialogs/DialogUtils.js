@@ -6456,7 +6456,15 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.datasets = [];
         this.curvesArr = [];
         this.props = plotCtrl.getModel().properties;
-        this.conditionTree = angular.copy(self.props.discriminator);
+        if (!self.props.discriminator || this.conditionTree == 'null'){
+            this.conditionTree = null;
+        }
+        else if (typeof self.props.discriminator == 'string') {
+            this.conditionTree = JSON.parse(self.props.discriminator)
+        }
+        else {
+            this.conditionTree = angular.copy(self.props.discriminator);
+        }
 
         wiComponentService.on('discriminator-update', function(){
             self.conditionExpr = parse(self.conditionTree);

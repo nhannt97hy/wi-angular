@@ -205,6 +205,16 @@ const TERNARY_SCHEMA = {
     }
 }
 
+const WELL_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idWell: { type: 'Integer' },
+        bottomDepth: { type: 'Float' },
+        topDepth: { type: 'Float' },
+        step: { type: 'Float' }
+    }
+}
+
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
@@ -227,7 +237,15 @@ Crossplot.prototype.PROPERTIES = {
         item: USER_DEFINE_LINE_SCHEMA,
         default: []
     },
-    ternary: TERNARY_SCHEMA
+    ternary: TERNARY_SCHEMA,
+    discriminatorData: {
+        type: 'Array',
+        item: {
+            type: 'Boolean'
+        },
+        default: []
+    },
+    well: WELL_SCHEMA
 };
 
 Crossplot.prototype.getProperties = function() {
@@ -244,6 +262,7 @@ Crossplot.prototype.setProperties = function(props) {
     if (props.pointSet && props.pointSet.idZoneSet != null) {
         this.pointSet.zAxes = 'Zone';
     }
+    return this;
 }
 
 Crossplot.prototype.getViewportX = function() {
@@ -1056,7 +1075,6 @@ Crossplot.prototype.plotSymbols = function() {
 }
 
 Crossplot.prototype.prepareData = function() {
-    console.log("pointset", this.pointSet);
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
@@ -1114,6 +1132,12 @@ Crossplot.prototype.prepareData = function() {
             if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) {
                 return;
             }
+        }
+
+        if (self.discriminatorData.length) {
+            let well = self.well;
+            let index = Math.round((d.y - well.topDepth) / well.step);
+            if (!self.discriminatorData[index]) return;
         }
 
         if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {

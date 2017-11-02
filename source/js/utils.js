@@ -1773,7 +1773,19 @@ function openCrossplotTab(crossplotModel, callback) {
                                 })
                             }
                         }
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+
+                        wiD3CrossplotCtrl.loading = false;
+                        if (crossplot.discriminator && crossplot.discriminator != 'null' && crossplot.discriminator != {}) {
+                            console.log('crossplotDiscrim', crossplot.discriminator);
+                            crossplot.discriminator = JSON.parse(crossplot.discriminator);
+                            evaluateExpr(wellProps, crossplot.discriminator, function(result){
+                                crossplotConfig.discriminatorData = result;
+                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                            });
+                        }
+                        else {
+                            wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                        }
                         //__GLOBAL.$timeout(function() {
                         //    wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                         //}, 1500);
@@ -1785,11 +1797,9 @@ function openCrossplotTab(crossplotModel, callback) {
                             let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
-                            wiD3CrossplotCtrl.loading = false;
                         });
                     } else {
                         createViCrossplot();
-                        wiD3CrossplotCtrl.loading = false;
                     }
                 })
             })
@@ -2170,7 +2180,6 @@ function evaluateExpr(well, discriminator, callback) {
             for (let i = 0; i <= length; i++){
                 result.push(evaluate(discriminator, i));
             }
-            // console.log(result);
             callback(result);
         }
     );

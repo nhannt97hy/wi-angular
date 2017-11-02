@@ -273,7 +273,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
-            console.log('Discriminator', data);
+            utils.evaluateExpr(self.getWell(), data, function(result){
+                self.viCrossplot
+                    .setProperties({ discriminatorData: result })
+                    .doPlot();
+            });
         })
     }
     let commonCtxMenu = [
@@ -381,10 +385,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (!config) config = {};
         // if (!self.viCrossplot) {
-            let domElem = document.getElementById(self.crossplotAreaId);
-            self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
-
-            self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
+        let domElem = document.getElementById(self.crossplotAreaId);
+        config.well = getWell().properties;
+        self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+        self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
         // }
         return self.viCrossplot;
     }
