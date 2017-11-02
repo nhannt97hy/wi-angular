@@ -7847,12 +7847,12 @@ exports.curveConvolutionDialog = function(ModalService){
                             if(self.curvesArr.length){
                                 self.ResultCurve = {
                                     idDataset: self.datasets[0].id,
-                                    curveName: self.curvesArr[0].name,
-                                    idDesCurve: self.curvesArr[0].id,
+                                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
+                                    idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
                                     data: []
                                 }
-                                self.inputCurve = self.datasets[0].children[0];
-                                self.stdCurve = self.datasets[0].children[0];
+                                self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
                             }else {
                                 delete self.ResultCurve;
                                 delete self.inputCurve;
@@ -7900,9 +7900,7 @@ exports.curveConvolutionDialog = function(ModalService){
             })
         }
 
-        this.run = function(){
-            if (self.applyingInProgress) return;
-            self.applyingInProgress = true;
+        function run(){
             self.curveData.length = 0;
             let curveSet = new Set();
             curveSet.add(self.inputCurve.id);
@@ -7919,24 +7917,35 @@ exports.curveConvolutionDialog = function(ModalService){
                 let input = self.curveData[0];
                 let kernel = self.curveData.length == 1 ? self.curveData[0] : self.curveData[1];
                 if(convolution(input, kernel, self.ResultCurve.data)){
-                    console.log(self.ResultCurve);
                     if(self.ResultCurve.idDesCurve){
-                        DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
-                            if(ret){
-                                let curve = angular.copy(self.ResultCurve);
-                                delete curve.curveName;
-                                saveCurve(curve);
-                            }else{
-                                self.applyingInProgress = false;
-                            }
-                        })
-                    }else{
+                        let curve = angular.copy(self.ResultCurve);
+                        delete curve.curveName;
+                        saveCurve(curve);
+                    }
+                    else{
                         saveCurve(self.ResultCurve);
                     }
                 }else {
                     console.log('Convolution err!');
                 }
             })
+        }
+
+        this.onRunButtonClicked = function(){
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+
+            if(self.ResultCurve.idDesCurve){
+                DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
+                    if(ret){
+                        run();
+                    }else{
+                        self.applyingInProgress = false;
+                    }
+                })
+            }else{
+                run();
+            }
         }
 
 
