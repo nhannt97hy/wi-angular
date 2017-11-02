@@ -7834,27 +7834,36 @@ exports.curveConvolutionDialog = function(ModalService){
                         self.datasets.push(child);
 
                     if(i == self.SelectedWell.children.length - 1){
-                        self.datasets.forEach(function (child) {
-                            child.children.forEach(function (item) {
+                        async.each(self.datasets, function(child, callback){
+                            async.each(child.children, function(item, cb){
                                 if (item.type == 'curve') {
                                     self.curvesArr.push(item);
                                 }
+                                cb();
+                            }, function(err){
+                                callback();
                             })
-                        });
-                        if(self.curvesArr.length){
-                            self.ResultCurve = {
-                                idDataset: self.datasets[0].id,
-                                curveName: self.curvesArr[0].name,
-                                idDesCurve: self.curvesArr[0].id,
-                                data: []
+                        }, function(err){
+                            if(self.curvesArr.length){
+                                self.ResultCurve = {
+                                    idDataset: self.datasets[0].id,
+                                    curveName: self.curvesArr[0].name,
+                                    idDesCurve: self.curvesArr[0].id,
+                                    data: []
+                                }
+                                self.inputCurve = self.datasets[0].children[0];
+                                self.stdCurve = self.datasets[0].children[0];
+                            }else {
+                                delete self.ResultCurve;
+                                delete self.inputCurve;
+                                delete self.stdCurve;
                             }
-                            self.inputCurve = self.datasets[0].children[0];
-                            self.stdCurve = self.datasets[0].children[0];
-                        }
+                        })
                     }
                 })
             }
         }
+  
         this.onWellChanged();
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
