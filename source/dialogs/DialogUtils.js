@@ -7562,6 +7562,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         window.curveRe = this;
+        this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
@@ -7569,19 +7570,21 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         this.curves = [];
         this.wells = wiExplorer.treeConfig[0].children;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-
+        console.log("selectedNodes", selectedNodes);
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else this.wellModel = angular.copy(self.wells[0]);
         this.datasets = this.wellModel.children;
         this.curves = this.wellModel.children[0].children;
         if( selectedNodes && selectedNodes[0].type == 'curve') {
+            console.log("SELECTED_NODES");
             this.curveModel = setLinePropertiesIfNull(selectedNodes[0]);
             this.wellModel = utils.findWellByCurve(self.curveModel.id);
         }
         else this.curveModel = setLinePropertiesIfNull(angular.copy(self.curves[0]));
 
         this.idWell = this.wellModel.id;
-        this.logInput = false;
+        self.logInput = false;
+
         defaultDepth();
 
         this.defaultDepth = defaultDepth;
@@ -7593,12 +7596,15 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         function setLinePropertiesIfNull (curve) {
             let resCurve = curve;
             if(resCurve.lineProperties == null) {
-                wiApiService.infoCurve(resCurve.id, function(res) {
-                    resCurve.lineProperties = res.LineProperty;
-                });
+                let lineProperties = {
+                    minScale: 0,
+                    maxScale: 1
+                }
+                resCurve.lineProperties = lineProperties;
             }
             return resCurve;
         };
+
         this.outputObj = getOutput(this.curveModel);
         function getOutput (curveModel) {
             return {
@@ -7610,7 +7616,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                 logOutput: false
             }
         }
-        this.selectedWell = function (idWell) {
+        this.selectedWell = selectedWell;
+        function selectedWell (idWell) {
             self.wellModel = utils.findWellById(idWell);
             defaultDepth();
             self.curves = self.wellModel.children[0].children;
@@ -7623,12 +7630,26 @@ exports.curveRescaleDialog = function (ModalService, callback) {
             self.curveModel = setLinePropertiesIfNull(curveModel);
             $timeout(function(){
                 self.outputObj = getOutput(self.curveModel);
-            }, 1000);
+            }, 100);
         }
         this.defaultDepth = function () {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
         }
+        function refresh (cb) {
+            self.datasets = [];
+            self.availableCurves = [];
+            self.wellModel = utils.findWellById(self.idWell);
+            selectedWell(self.idWell);
+            if(cb) cb();
+        }
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                refresh(function(){
+                });
+            }, 100);
+        });
         function run () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
@@ -7645,25 +7666,56 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                                         /parseFloat(self.wellModel.properties.step));
 
             
-            function rescaleX (a, b, c, z, y) {
-                return parseFloat((c - a) * (z - y) / (b - a) + y);
+            function linearToLinearX (a, b, c, y, z) {
+                return (c - a) * (z - y) / (b - a) + y;
+            }
+            function linearToLogarithmX (a, b, c, y, z) {
+                return Math.pow(Math.E, (c - a) * (Math.log(z) - Math.log(y)) / ( b- a) + Math.log(y));
+            }
+            function logarithmToLinearX (a, b, c, y, z) {
+                return (Math.log(c) - Math.log(a)) * (z - y) / (Math.log(b) - Math.log(a)) + y
+            }
+            function logarithmToLogarithmX (a, b, c, y, z) {
+                return Math.pow(Math.E, (Math.log(c) - Math.log(a)) * (Math.log(z) - Math.log(y)) / (Math.log(b) - Math.log(a)) + log(y));
             }
             async.parallel([
                 function(callback){
                     wiApiService.dataCurve(self.curveModel.id, function (dataCurve){
-                        inputData = dataCurve.map(d => d.x);
+                        inputData = dataCurve.map(d => parseFloat(d.x));
                         callback();
                     });
                 }], 
                 function(err, results) {
                     let len = inputData.length;
+                    
                     for(let i = 0; i < len; i++) {
-                        outputData.push(rescaleX(self.curveModel.lineProperties.minScale, 
-                                                self.curveModel.lineProperties.maxScale, 
-                                                parseFloat(inputData[i]), 
-                                                self.outputObj.leftScale,
-                                                self.outputObj.rightScale))
-                    }
+                        if (inputData[i] == null || isNaN(inputData[i])) outputData.push(NaN);
+                        if (!self.logInput && !self.outputObj.logOutput) {
+                            outputData.push(linearToLinearX(self.curveModel.lineProperties.minScale, 
+                                                            self.curveModel.lineProperties.maxScale, 
+                                                            inputData[i], 
+                                                            self.outputObj.leftScale,
+                                                            self.outputObj.rightScale));
+                        } else if (!self.logInput && self.outputObj.logOutput) {
+                            outputData.push(linearToLogarithmX(self.curveModel.lineProperties.minScale, 
+                                                                self.curveModel.lineProperties.maxScale, 
+                                                                inputData[i], 
+                                                                self.outputObj.leftScale,
+                                                                self.outputObj.rightScale));
+                        } else if (self.logInput && !self.outputObj.logOutput) {
+                            outputData.push(logarithmToLinearX(self.curveModel.lineProperties.minScale, 
+                                                                self.curveModel.lineProperties.maxScale, 
+                                                                inputData[i], 
+                                                                self.outputObj.leftScale,
+                                                                self.outputObj.rightScale));
+                        } else if (self.logInput && self.outputObj.logOutput) {
+                            outputData.push(logarithmToLogarithmX(self.curveModel.lineProperties.minScale, 
+                                                                    self.curveModel.lineProperties.maxScale, 
+                                                                    inputData[i], 
+                                                                    self.outputObj.leftScale,
+                                                                    self.outputObj.rightScale));
+                        };
+                    };
                     console.log("outputData", inputData, outputData);
                     let request = {
                         idDataset: self.outputObj.idDataset,
@@ -7680,15 +7732,19 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                                 wiApiService.processingDataCurve(request, function(res) {
                                     console.log("processingDataCurve", res);
                                     utils.refreshProjectState();
+                                    self.applyingInProgress = false;
                                 })
                             }
                         });
                     } 
                     else {
                         delete request.idDesCurve;
+                        if (self.curveModel.properties.idFamily) 
+                            request.idFamily = self.curveModel.properties.idFamily;
                         wiApiService.processingDataCurve(request, function(res) {
                             console.log("processingDataCurve", res);
                             utils.refreshProjectState();
+                            self.applyingInProgress = false;
                         })
                     }                     
                 })
