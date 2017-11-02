@@ -947,7 +947,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
             });
         };
         this.drawIcon = utils.drawIcon;
-        
+
         this.onOkButtonClicked = function () {
             close(self.options);
         };
@@ -1002,7 +1002,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         let type = 'Circle';
 
         this.drawIcon = utils.drawIcon;
-        
+
         this.onSelectSymbol = function () {
             console.log("choossss");
         }
@@ -4585,7 +4585,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             });
         };
         this.drawIcon = utils.drawIcon;
-        
+
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
         //     delete props.pointsets[0].curveX;
@@ -6456,7 +6456,15 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         this.datasets = [];
         this.curvesArr = [];
         this.props = plotCtrl.getModel().properties;
-        this.conditionTree = angular.copy(self.props.discriminator);
+        if (!self.props.discriminator || this.conditionTree == 'null'){
+            this.conditionTree = null;
+        }
+        else if (typeof self.props.discriminator == 'string') {
+            this.conditionTree = JSON.parse(self.props.discriminator)
+        }
+        else {
+            this.conditionTree = angular.copy(self.props.discriminator);
+        }
 
         wiComponentService.on('discriminator-update', function(){
             self.conditionExpr = parse(self.conditionTree);
@@ -7406,7 +7414,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
         }
-        
+
         this.selectWell = function(idWell) {
             self.wellModel = utils.findWellById(idWell);
             defaultDepth();
@@ -7437,10 +7445,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
             console.log("curves", self.availableCurves);
         }
         this.select = function (curve) {
-            if(curve.flag == false) curve.flag = true;
-            else if (curve.flag == true) curve.flag = false;
+            curve.flag = !curve.flag;
         }
-        
+
         function refresh (cb) {
             self.datasets = [];
             self.availableCurves = [];
@@ -7592,7 +7599,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
         }
-        
+
         function setLinePropertiesIfNull (curve) {
             let resCurve = curve;
             if(resCurve.lineProperties == null) {
@@ -7653,7 +7660,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         function run () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth || 
+            if(self.topDepth < self.wellModel.properties.topDepth ||
                 self.bottomDepth > self.wellModel.properties.bottomDepth)
                 dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
             let inputData = [];
@@ -7665,7 +7672,6 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                             self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
                                         /parseFloat(self.wellModel.properties.step));
 
-            
             function linearToLinearX (a, b, c, y, z) {
                 return (c - a) * (z - y) / (b - a) + y;
             }
@@ -7677,6 +7683,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
             }
             function logarithmToLogarithmX (a, b, c, y, z) {
                 return Math.pow(Math.E, (Math.log(c) - Math.log(a)) * (Math.log(z) - Math.log(y)) / (Math.log(b) - Math.log(a)) + log(y));
+
             }
             async.parallel([
                 function(callback){
@@ -7684,7 +7691,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                         inputData = dataCurve.map(d => parseFloat(d.x));
                         callback();
                     });
-                }], 
+                }],
                 function(err, results) {
                     let len = inputData.length;
                     
@@ -7736,7 +7743,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                                 })
                             }
                         });
-                    } 
+                    }
                     else {
                         delete request.idDesCurve;
                         if (self.curveModel.properties.idFamily) 
@@ -7746,7 +7753,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                             utils.refreshProjectState();
                             self.applyingInProgress = false;
                         })
-                    }                     
+                    }
                 })
         }
         this.onRunButtonClicked = function () {
@@ -7890,27 +7897,36 @@ exports.curveConvolutionDialog = function(ModalService){
                         self.datasets.push(child);
 
                     if(i == self.SelectedWell.children.length - 1){
-                        self.datasets.forEach(function (child) {
-                            child.children.forEach(function (item) {
+                        async.each(self.datasets, function(child, callback){
+                            async.each(child.children, function(item, cb){
                                 if (item.type == 'curve') {
                                     self.curvesArr.push(item);
                                 }
+                                cb();
+                            }, function(err){
+                                callback();
                             })
-                        });
-                        if(self.curvesArr.length){
-                            self.ResultCurve = {
-                                idDataset: self.datasets[0].id,
-                                curveName: self.curvesArr[0].name,
-                                idDesCurve: self.curvesArr[0].id,
-                                data: []
+                        }, function(err){
+                            if(self.curvesArr.length){
+                                self.ResultCurve = {
+                                    idDataset: self.datasets[0].id,
+                                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
+                                    idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
+                                    data: []
+                                }
+                                self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                            }else {
+                                delete self.ResultCurve;
+                                delete self.inputCurve;
+                                delete self.stdCurve;
                             }
-                            self.inputCurve = self.datasets[0].children[0];
-                            self.stdCurve = self.datasets[0].children[0];
-                        }
+                        })
                     }
                 })
             }
         }
+
         this.onWellChanged();
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
@@ -7947,9 +7963,7 @@ exports.curveConvolutionDialog = function(ModalService){
             })
         }
 
-        this.run = function(){
-            if (self.applyingInProgress) return;
-            self.applyingInProgress = true;
+        function run(){
             self.curveData.length = 0;
             let curveSet = new Set();
             curveSet.add(self.inputCurve.id);
@@ -7966,24 +7980,35 @@ exports.curveConvolutionDialog = function(ModalService){
                 let input = self.curveData[0];
                 let kernel = self.curveData.length == 1 ? self.curveData[0] : self.curveData[1];
                 if(convolution(input, kernel, self.ResultCurve.data)){
-                    console.log(self.ResultCurve);
                     if(self.ResultCurve.idDesCurve){
-                        DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
-                            if(ret){
-                                let curve = angular.copy(self.ResultCurve);
-                                delete curve.curveName;
-                                saveCurve(curve);
-                            }else{
-                                self.applyingInProgress = false;
-                            }
-                        })
-                    }else{
+                        let curve = angular.copy(self.ResultCurve);
+                        delete curve.curveName;
+                        saveCurve(curve);
+                    }
+                    else{
                         saveCurve(self.ResultCurve);
                     }
                 }else {
                     console.log('Convolution err!');
                 }
             })
+        }
+
+        this.onRunButtonClicked = function(){
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+
+            if(self.ResultCurve.idDesCurve){
+                DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
+                    if(ret){
+                        run();
+                    }else{
+                        self.applyingInProgress = false;
+                    }
+                })
+            }else{
+                run();
+            }
         }
 
 
@@ -8027,6 +8052,19 @@ exports.fillDataGapsDialog = function(ModalService){
         this.refresh();
         this.datasets =[];
         this.curves = [];
+        this.NullnumberDefault = function () {
+             self.Nullnumber = self.NullData.length;
+        }
+        this.NullData = [];
+        this.getNullValueNumber = function () {
+             wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
+                 self.NullData = data.filter(function (d) {
+                     return isNaN(d.x);
+                 })
+                 self.Nullnumber = self.NullData.length;
+             })
+             self.curveName = self.SelectedCurve.properties.name;
+         }
         this.onWellChange = function () {
             self.datasets.length = 0;
             self.curves.length = 0;
@@ -8037,9 +8075,7 @@ exports.fillDataGapsDialog = function(ModalService){
                    self.datasets.forEach(function (child) {
                        child.children.forEach(function (item) {
                            if (item.type == 'curve') {
-                               var d = item;
-                               d.datasetName = child.properties.name;
-                               self.curves.push(d);
+                               self.curves.push(item);
                            }
                        })
                    });
@@ -8053,26 +8089,23 @@ exports.fillDataGapsDialog = function(ModalService){
             this.NullnumberDefault();
             self.curveName = self.SelectedCurve.properties.name;
         }
+
+        this.onWellChange();
         this.clickDefault = function () {
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
         }
 
-       this.NullnumberDefault = function () {
-            self.Nullnumber = self.NullData.length;
-       }
-       this.NullData = [];
-        this.getNullValueNumber = function () {
-            wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
-                self.NullData = data.filter(function (d) {
-                    return isNaN(d.x);
-                })
-                self.Nullnumber = self.NullData.length;
-                console.log(self.Nullnumber,"self.Nullnumber");
-            })
-            self.curveName = self.SelectedCurve.properties.name;
+        this.checked = false;
+        this.select = function (curve) {
+            curve.flag = !curve.flag;
         }
-        this.onWellChange();
+        this.checkAll = function () {
+            self.checked = !self.checked;
+            self.curves.forEach(function (curve) {
+               curve.flag = self.checked;
+            })
+        }
         this.onCancelButtonClicked = function(){
             close(null);
         }
@@ -8124,8 +8157,7 @@ exports.curveDerivativeDialog = function(ModalService){
                    self.datasets.forEach(function (child) {
                        child.children.forEach(function (item) {
                            if (item.type == 'curve') {
-                               var d = item;
-                               self.curves.push(d);
+                               self.curves.push(item);
                            }
                        })
                    });
@@ -8156,6 +8188,10 @@ exports.curveDerivativeDialog = function(ModalService){
 
             }
 
+        }
+        this.onDatasetChange = function(){
+            self.firtCurve.idDataset = self.selectedDataset;
+            self.secondCurve.idDataset = self.selectedDataset;
         }
         this.validate = function(){
             if(self.topDepth == null || self.bottomDepth == null || self.topDepth > self.bottomDepth){

@@ -38,7 +38,7 @@
                                         <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any">
                                     </div>
                                     <div class="col-sm-2">
-                                        <button class="btn btn-default small-button" ng-click="wiModal.clickDefault()"style="with=100%;">Default</button>
+                                        <button class="btn btn-default small-button" ng-click="wiModal.clickDefault()"style="width=100%;">Default</button>
                                     </div>
                                 </div>
                                 <div class='form-group'>
@@ -89,24 +89,40 @@
                         <div id="Advance">
                             <h5>Advance(optional)</h5>
                             <div class="container-fluid">
+                                <div class='form-group'>
+                                    <label class="col-sm-2">Curve Search</label>
+                                    <div class="col-sm-4">
+                                        <input class="form-control wi-form-control" ng-model="filterCurve">
+                                    </div>
+                                    <label class="col-sm-2">Dataset Search</label>
+                                    <div class="col-sm-4">
+                                        <input  class="form-control wi-form-control" ng-model="filterDataset">
+                                    </div>
+                                </div>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-4">Slect other curves to fill gaps:</label>
-                                    <div class="col-sm-8" style="height: 10em; overflow: auto;">
-                                        <table class="table table-bordered availableCurve">
-                                            <thead>
+                                    <label class="control-label col-sm-4">Select other curves to fill gaps:</label>
+                                    <div class="col-sm-8">
+                                        <table class="table availableCurve">
+                                            <thead style="display:block">
                                                 <tr>
-                                                    <th style="width: 20%"></th>
+                                                    <th style="width: 20%" ng-click="wiModal.checkAll()">
+                                                        <i class='glyphicon glyphicon-ok' ng-class="{'color-black': wiModal.checked, 'color-lightgray': !wiModal.checked}"></i>
+                                                        Check all
+                                                    </th>
                                                     <th style="width: 40%">Curve</th>
                                                     <th style="width: 40%">Dataset</th>
+                                                    <th></th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
-                                                <tr ng-repeat="curve in wiModal.availableCurves" ng-class="{'selected': curve.flag}">
-                                                    <td><a ng-click="wiModal.select(curve); wiModal.focus()">
-                                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i></a>
+                                            <tbody style="overflow-y: scroll;display:block;height:10em; overflow-x:hidden">
+                                                <tr ng-repeat="curve in wiModal.curves | filter:{name: filterCurve, datasetName:filterDataset} track by $index"
+                                                   ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
+                                                    <td style="width: 20%">
+                                                        <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
                                                     </td>
-                                                    <td>{{curve.name}}</td>
-                                                    <td>{{curve.properties.dataset}}</td>
+                                                    <td style="width: 40%">{{curve.name}}</td>
+                                                    <td style="width: 40%">{{curve.datasetName}}</td>
+                                                    <td></td>
                                                 </tr>
                                             </tbody>
                                         </table>

@@ -57,7 +57,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.run()' ng-disabled="!wiModal.inputCurve ||!wiModal.stdCurve || !wiModal.ResultCurve.curveName || wiModal.applyingInProgress"><span class="run-16x16"></span>&nbsp;Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled="!wiModal.inputCurve ||!wiModal.stdCurve || !wiModal.ResultCurve.curveName || wiModal.applyingInProgress"><span class="run-16x16"></span>&nbsp;Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Close</button>
             </div>
         </div>

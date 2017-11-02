@@ -32,14 +32,14 @@
                                 <div class="form-group">
                                     <label class="col-sm-2">Top Depth</label>
                                     <div class="col-sm-4">
-                                        <input class="form-control wi-form-control" type="number" ng-model="wiModal.topDepth" step="any">
+                                        <input class="form-control wi-form-control" type="number" ng-model="wiModal.topDepth" step="any" min='{{wiModal.selectedWell.properties.topDepth}}'>
                                     </div>
                                     <label class="col-sm-2">Botton Depth</label>
-                                    <div class="col-sm-2">
-                                        <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any">
+                                    <div class="col-sm-2 padding-right-0">
+                                        <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any" max='{{wiModal.selectedWell.properties.bottomDepth}}'>
                                     </div>
                                     <div class="col-sm-2">
-                                        <button class="btn btn-default small-button" ng-click="wiModal.clickDefault()"style="width=100%;">Default</button>
+                                        <button class="btn btn-default wi-form-control width-100-percent" ng-click="wiModal.clickDefault()">Default</button>
                                     </div>
                                 </div>
                             </div>
@@ -51,7 +51,8 @@
                                     <label class="col-sm-2">Dataset</label>
                                     <div class="col-sm-4">
                                         <select class="form-control wi-form-control" ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets"
-                                                 ng-model="wiModal.selectedDataset">
+                                                 ng-model="wiModal.selectedDataset"
+                                                 ng-change="wiModal.onDatasetChange()">
                                         </select>
                                     </div>
                                 </div>
@@ -64,13 +65,11 @@
                                 <div class='form-group'>
                                     <label class="col-sm-2">Second derivative</label>
                                     <div class="col-sm-4">
-                                            <wi-custom-input type='curve' model='wiModal.secondCurve'
-                                               options='wiModal.curves' disabled="!wiModal.checked"></wi-custom-input>
+                                        <wi-custom-input type='curve' model='wiModal.secondCurve'
+                                            options='wiModal.curves' disabled="!wiModal.checked"></wi-custom-input>
                                     </div>
                                     <div class="col-sm-4">
-                                        <div class="checkbox">
-                                            <label><input type="checkbox" ng-model="wiModal.checked" >Output second derivative</label>
-                                        </div>
+                                        <label><input type="checkbox" ng-model="wiModal.checked" >Output second derivative</label>
                                     </div>
                                 </div>
                             </div>
