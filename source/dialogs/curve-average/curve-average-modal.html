@@ -34,7 +34,7 @@
                                    type="number" class="form-control wi-form-control" step="any">
                         </div>
                         <div class="col-sm-2">
-                            <button class="btn btn-default small-button" 
+                            <button class="btn btn-default small-button"
                                     ng-click="wiModal.defaultDepth()">Default</button>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                                     <tr ng-repeat="curve in wiModal.availableCurves | filter:{name: filterCurve} track by $index"
                                         ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
                                         <td style="width: 15%;">
-                                            <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i></a>
+                                            <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
                                         </td>
                                         <td style="width:42%;">{{curve.name}}</td>
                                         <td style="width: 43%">{{curve.properties.dataset}}</td>
@@ -104,7 +104,7 @@
                         <div class="form-group col-sm-7">
                             <label class="col-sm-4 padding-right-0">Output Curve</label>
                             <div class="col-sm-8 padding-right-0">
-                                <wi-custom-input type='curve' model='wiModal.desCurve' 
+                                <wi-custom-input type='curve' model='wiModal.desCurve'
                                                 options='wiModal.availableCurves' class="col-sm-6"
                                                 style="width: 100%"></wi-custom-input>
                             </div>
@@ -113,7 +113,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' 
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'
                         ng-disabled="!wiModal.desCurve.curveName || wiModal.applyingInProgress"><span class="run-16x16"></span>Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>Cancel</button>
             </div>

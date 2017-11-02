@@ -947,7 +947,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
             });
         };
         this.drawIcon = utils.drawIcon;
-        
+
         this.onOkButtonClicked = function () {
             close(self.options);
         };
@@ -1002,7 +1002,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         let type = 'Circle';
 
         this.drawIcon = utils.drawIcon;
-        
+
         this.onSelectSymbol = function () {
             console.log("choossss");
         }
@@ -4585,7 +4585,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             });
         };
         this.drawIcon = utils.drawIcon;
-        
+
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
         //     delete props.pointsets[0].curveX;
@@ -7406,7 +7406,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
         }
-        
+
         this.selectWell = function(idWell) {
             self.wellModel = utils.findWellById(idWell);
             defaultDepth();
@@ -7437,10 +7437,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
             console.log("curves", self.availableCurves);
         }
         this.select = function (curve) {
-            if(curve.flag == false) curve.flag = true;
-            else if (curve.flag == true) curve.flag = false;
+            curve.flag = !curve.flag;
         }
-        
+
         function refresh (cb) {
             self.datasets = [];
             self.availableCurves = [];
@@ -7589,7 +7588,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
         }
-        
+
         function setLinePropertiesIfNull (curve) {
             let resCurve = curve;
             if(resCurve.lineProperties == null) {
@@ -7632,7 +7631,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         function run () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth || 
+            if(self.topDepth < self.wellModel.properties.topDepth ||
                 self.bottomDepth > self.wellModel.properties.bottomDepth)
                 dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
             let inputData = [];
@@ -7644,7 +7643,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                             self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
                                         /parseFloat(self.wellModel.properties.step));
 
-            
+
             function rescaleX (a, b, c, z, y) {
                 return parseFloat((c - a) * (z - y) / (b - a) + y);
             }
@@ -7654,13 +7653,13 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                         inputData = dataCurve.map(d => d.x);
                         callback();
                     });
-                }], 
+                }],
                 function(err, results) {
                     let len = inputData.length;
                     for(let i = 0; i < len; i++) {
-                        outputData.push(rescaleX(self.curveModel.lineProperties.minScale, 
-                                                self.curveModel.lineProperties.maxScale, 
-                                                parseFloat(inputData[i]), 
+                        outputData.push(rescaleX(self.curveModel.lineProperties.minScale,
+                                                self.curveModel.lineProperties.maxScale,
+                                                parseFloat(inputData[i]),
                                                 self.outputObj.leftScale,
                                                 self.outputObj.rightScale))
                     }
@@ -7683,14 +7682,14 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                                 })
                             }
                         });
-                    } 
+                    }
                     else {
                         delete request.idDesCurve;
                         wiApiService.processingDataCurve(request, function(res) {
                             console.log("processingDataCurve", res);
                             utils.refreshProjectState();
                         })
-                    }                     
+                    }
                 })
         }
         this.onRunButtonClicked = function () {
@@ -7863,7 +7862,7 @@ exports.curveConvolutionDialog = function(ModalService){
                 })
             }
         }
-  
+
         this.onWellChanged();
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
@@ -7980,6 +7979,19 @@ exports.fillDataGapsDialog = function(ModalService){
         this.refresh();
         this.datasets =[];
         this.curves = [];
+        this.NullnumberDefault = function () {
+             self.Nullnumber = self.NullData.length;
+        }
+        this.NullData = [];
+        this.getNullValueNumber = function () {
+             wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
+                 self.NullData = data.filter(function (d) {
+                     return isNaN(d.x);
+                 })
+                 self.Nullnumber = self.NullData.length;
+             })
+             self.curveName = self.SelectedCurve.properties.name;
+         }
         this.onWellChange = function () {
             self.datasets.length = 0;
             self.curves.length = 0;
@@ -7990,9 +8002,7 @@ exports.fillDataGapsDialog = function(ModalService){
                    self.datasets.forEach(function (child) {
                        child.children.forEach(function (item) {
                            if (item.type == 'curve') {
-                               var d = item;
-                               d.datasetName = child.properties.name;
-                               self.curves.push(d);
+                               self.curves.push(item);
                            }
                        })
                    });
@@ -8006,26 +8016,23 @@ exports.fillDataGapsDialog = function(ModalService){
             this.NullnumberDefault();
             self.curveName = self.SelectedCurve.properties.name;
         }
+
+        this.onWellChange();
         this.clickDefault = function () {
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
         }
 
-       this.NullnumberDefault = function () {
-            self.Nullnumber = self.NullData.length;
-       }
-       this.NullData = [];
-        this.getNullValueNumber = function () {
-            wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
-                self.NullData = data.filter(function (d) {
-                    return isNaN(d.x);
-                })
-                self.Nullnumber = self.NullData.length;
-                console.log(self.Nullnumber,"self.Nullnumber");
-            })
-            self.curveName = self.SelectedCurve.properties.name;
+        this.checked = false;
+        this.select = function (curve) {
+            curve.flag = !curve.flag;
         }
-        this.onWellChange();
+        this.checkAll = function () {
+            self.checked = !self.checked;
+            self.curves.forEach(function (curve) {
+               curve.flag = self.checked;
+            })
+        }
         this.onCancelButtonClicked = function(){
             close(null);
         }
@@ -8077,8 +8084,7 @@ exports.curveDerivativeDialog = function(ModalService){
                    self.datasets.forEach(function (child) {
                        child.children.forEach(function (item) {
                            if (item.type == 'curve') {
-                               var d = item;
-                               self.curves.push(d);
+                               self.curves.push(item);
                            }
                        })
                    });
