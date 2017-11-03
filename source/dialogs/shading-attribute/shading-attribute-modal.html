@@ -17,7 +17,7 @@
                                     Name
                                 </label>
                                 <div class="col-sm-6 padding-0">
-                                    <input type="text" 
+                                    <input type="text"
                                             ng-model="wiModal.shadingOptions.name"
                                             class="form-control wi-form-control normal-text">
                                 </div>
@@ -39,7 +39,7 @@
                             <div class="row padding-bottom-1em">
                                 <div class="col-sm-4">
                                     <select ng-model="wiModal.shadingOptions.idRightLine" name="curveName"
-                                            class="form-control wi-form-control normal-text" 
+                                            class="form-control wi-form-control normal-text"
                                             ng-change="wiModal.shadingOptions.rightFixedValue = null;
                                             wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine);"
                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset">
@@ -48,14 +48,14 @@
                                 </div>
                                 <div class="col-sm-4">
                                     <select ng-model="wiModal.shadingOptions.idLeftLine" name="curveName"
-                                            class="form-control wi-form-control normal-text" 
+                                            class="form-control wi-form-control normal-text"
                                             ng-options="item.id as item.datasetCurve for item in wiModal.leftLimit"
                                             ng-change="wiModal.shadingOptions.leftFixedValue = null; wiModal.setLimit2(); wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine);"
                                             ng-disabled="!wiModal.shadingOptions.idRightLine">
                                     </select>
                                 </div>
                                 <div class="col-sm-4">
-                                    <input type="number" ng-model="wiModal.shadingOptions.leftFixedValue" 
+                                    <input type="number" ng-model="wiModal.shadingOptions.leftFixedValue"
                                             class="form-control wi-form-control normal-text"
                                             ng-change="wiModal.shadingOptions.idLeftLine = null;
                                             wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine); wiModal.shadingOptions.idLeftLine = -3"
@@ -74,7 +74,7 @@
                                         <option value="fillPattern">Fill Pattern</option>
                                         <option value="variableShading">Variable Shading</option>
 
-                                    <!-- <option ng-repeat="shadingStyle in wiModal.getShadingStyles()" 
+                                    <!-- <option ng-repeat="shadingStyle in wiModal.getShadingStyles()"
                                         value="{{shadingStyle.value}}">{{shadingStyle.name}}</option> -->
                                 </select>
                             </div>
@@ -89,8 +89,8 @@
                                         <label>
                                             <input type="checkbox" id="displayFill"
                                                    value="" name=""
-                                                   ng-model="wiModal.checkboxVal" 
-                                                   ng-change="wiModal.fillPatternOptions.fill.display = !wiModal.checkboxVal; wiModal.correctFillingStyle()" 
+                                                   ng-model="wiModal.checkboxVal"
+                                                   ng-change="wiModal.fillPatternOptions.fill.display = !wiModal.checkboxVal; wiModal.correctFillingStyle()"
                                                    >
                                                 Positive/Negative Fill
                                         </label>
@@ -107,17 +107,17 @@
                                                 <ui-select theme="bootstrap" ng-model="wiModal.fillPatternOptions.fill.pattern.name"
                                                             ng-disabled="!wiModal.fillPatternOptions.fill.display">
                                                     <ui-select-match>
-                                                        <wi-canvas-rect name="_selectedPatternCanvas" 
-                                                                        pattern="{{wiModal.fillPatternOptions.fill.pattern.name}}" 
-                                                                        width="270" height="20" 
-                                                                        foreground="{{wiModal.fillPatternOptions.fill.pattern.foreground}}" 
+                                                        <wi-canvas-rect name="_selectedPatternCanvas"
+                                                                        pattern="{{wiModal.fillPatternOptions.fill.pattern.name}}"
+                                                                        width="270" height="20"
+                                                                        foreground="{{wiModal.fillPatternOptions.fill.pattern.foreground}}"
                                                                         background='{{wiModal.fillPatternOptions.fill.pattern.background}}'>
                                                         </wi-canvas-rect>
                                                     </ui-select-match>
                                                     <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                                        <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
-                                                                        width="270" height="20" 
-                                                                        foreground="{{wiModal.fillPatternOptions.fill.pattern.foreground}}" 
+                                                        <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                        width="270" height="20"
+                                                                        foreground="{{wiModal.fillPatternOptions.fill.pattern.foreground}}"
                                                                         background='{{wiModal.fillPatternOptions.fill.pattern.background}}'>
                                                         </wi-canvas-rect>
                                                     </ui-select-choices>
@@ -130,8 +130,8 @@
                                             <div class="form-group">
                                                 <label class="control-label col-sm-8 small-text">Foreground</label>
                                                 <div class="col-sm-4 text-left">
-                                                    <button ng-click="wiModal.foreground()" 
-                                                    ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}" 
+                                                    <button ng-click="wiModal.foreground()"
+                                                    ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}"
                                                             class="form-control wi-form-control width-80px thick-border"
                                                             ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
                                                 </div>
@@ -159,7 +159,7 @@
                                         <div class="col-sm-7 padding-left-3em">
                                             <div class="form-group">
                                                 <label>
-                                                    <input type="checkbox" 
+                                                    <input type="checkbox"
                                                            ng-model="wiModal.fillPatternOptions.positiveFill.display"
                                                            ng-disabled="wiModal.fillPatternOptions.fill.display">
                                                     Positive fill
@@ -174,17 +174,17 @@
                                                     <div class="col-sm-6">
                                                         <ui-select theme="bootstrap" ng-model="wiModal.fillPatternOptions.positiveFill.pattern.name" ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display">
                                                             <ui-select-match>
-                                                                <wi-canvas-rect name="_selectedPatternCanvasPositive" 
-                                                                                pattern="{{wiModal.fillPatternOptions.positiveFill.pattern.name}}" 
-                                                                                width="270" height="20" 
-                                                                                foreground="{{wiModal.fillPatternOptions.positiveFill.pattern.foreground}}" 
+                                                                <wi-canvas-rect name="_selectedPatternCanvasPositive"
+                                                                                pattern="{{wiModal.fillPatternOptions.positiveFill.pattern.name}}"
+                                                                                width="270" height="20"
+                                                                                foreground="{{wiModal.fillPatternOptions.positiveFill.pattern.foreground}}"
                                                                                 background='{{wiModal.fillPatternOptions.positiveFill.pattern.background}}'>
                                                                 </wi-canvas-rect>
                                                             </ui-select-match>
                                                             <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
-                                                                                width="270" height="20" 
-                                                                                foreground="{{wiModal.fillPatternOptions.positiveFill.pattern.foreground}}" 
+                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                                width="270" height="20"
+                                                                                foreground="{{wiModal.fillPatternOptions.positiveFill.pattern.foreground}}"
                                                                                 background='{{wiModal.fillPatternOptions.positiveFill.pattern.background}}'>
                                                                 </wi-canvas-rect>
                                                             </ui-select-choices>
@@ -198,7 +198,7 @@
                                                         <label class="control-label col-sm-8 small-text">Positive Foreground</label>
                                                         <div class="col-sm-4 text-left">
                                                             <button ng-click="wiModal.posPositiveForeground()" ng-style="{'background-color':wiModal.fillPatternOptions.positiveFill.pattern.foreground}"
-                                                                    class="form-control wi-form-control width-80px thick-border" 
+                                                                    class="form-control wi-form-control width-80px thick-border"
                                                                     ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display"></button>
                                                         </div>
                                                     </div>
@@ -207,8 +207,8 @@
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-8 small-text padding-0">Positive Background</label>
                                                         <div class="col-sm-4 text-left">
-                                                            <button ng-click="wiModal.posPositiveBackground()" ng-style="{'background-color':wiModal.fillPatternOptions.positiveFill.pattern.background}" 
-                                                                    class="form-control wi-form-control width-80px thick-border" 
+                                                            <button ng-click="wiModal.posPositiveBackground()" ng-style="{'background-color':wiModal.fillPatternOptions.positiveFill.pattern.background}"
+                                                                    class="form-control wi-form-control width-80px thick-border"
                                                                     ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display"></button>
                                                         </div>
                                                     </div>
@@ -238,17 +238,17 @@
                                                     <div class="col-sm-6">
                                                         <ui-select theme="bootstrap" ng-model="wiModal.fillPatternOptions.negativeFill.pattern.name" ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display">
                                                             <ui-select-match>
-                                                                <wi-canvas-rect name="_selectedPatternCanvasNegative" 
-                                                                                pattern="{{wiModal.fillPatternOptions.negativeFill.pattern.name}}" 
-                                                                                width="270" height="20" 
-                                                                                foreground="{{wiModal.fillPatternOptions.negativeFill.pattern.foreground}}" 
+                                                                <wi-canvas-rect name="_selectedPatternCanvasNegative"
+                                                                                pattern="{{wiModal.fillPatternOptions.negativeFill.pattern.name}}"
+                                                                                width="270" height="20"
+                                                                                foreground="{{wiModal.fillPatternOptions.negativeFill.pattern.foreground}}"
                                                                                 background='{{wiModal.fillPatternOptions.negativeFill.pattern.background}}'>
                                                                 </wi-canvas-rect>
                                                             </ui-select-match>
                                                             <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
-                                                                                width="270" height="20" 
-                                                                                foreground="{{wiModal.fillPatternOptions.negativeFill.pattern.foreground}}" 
+                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                                width="270" height="20"
+                                                                                foreground="{{wiModal.fillPatternOptions.negativeFill.pattern.foreground}}"
                                                                                 background='{{wiModal.fillPatternOptions.negativeFill.pattern.background}}'>
                                                                 </wi-canvas-rect>
                                                             </ui-select-choices>
@@ -261,7 +261,7 @@
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-8 small-text">Negative Foreground</label>
                                                         <div class="col-sm-4 text-left">
-                                                            <button ng-click="wiModal.negPositiveForeground()" ng-style="{'background-color':wiModal.fillPatternOptions.negativeFill.pattern.foreground}" 
+                                                            <button ng-click="wiModal.negPositiveForeground()" ng-style="{'background-color':wiModal.fillPatternOptions.negativeFill.pattern.foreground}"
                                                                     class="form-control wi-form-control width-80px thick-border"
                                                                     ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display">
                                                             </button>
@@ -272,7 +272,7 @@
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-8 small-text padding-0">Negative Background</label>
                                                         <div class="col-sm-4 text-left">
-                                                            <button ng-click="wiModal.negPositiveBackground()" ng-style="{'background-color':wiModal.fillPatternOptions.negativeFill.pattern.background}" 
+                                                            <button ng-click="wiModal.negPositiveBackground()" ng-style="{'background-color':wiModal.fillPatternOptions.negativeFill.pattern.background}"
                                                                     class="form-control wi-form-control width-80px thick-border"
                                                                     ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display">
                                                             </button>
@@ -318,8 +318,8 @@
                                     <div class="form-group">
                                         <label>
                                             <input type="checkbox"
-                                                   ng-model="wiModal.displayType" 
-                                                   ng-change="wiModal.correctFillingStyleVarShading()" 
+                                                   ng-model="wiModal.displayType"
+                                                   ng-change="wiModal.correctFillingStyleVarShading()"
                                                    >
                                                 Positive/Negative Fill
                                         </label>
@@ -328,8 +328,8 @@
                             </div>
                             <div class="row padding-left-2em">
                                 <label>
-                                    <input type="radio" value="gradient" 
-                                            ng-model="wiModal.varShadingType" 
+                                    <input type="radio" value="gradient"
+                                            ng-model="wiModal.varShadingType"
                                             ng-change="wiModal.setGradientIfNull()">
                                     Gradient
                                 </label>
@@ -339,7 +339,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4">Low</label>
@@ -349,7 +349,7 @@
                                                         ng-model="wiModal.variableShadingOptions.fill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -390,7 +390,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
 
@@ -400,7 +400,7 @@
                                     <div class="col-sm-7">
                                         <div class="form-group">
                                             <label>
-                                                <input type="checkbox" 
+                                                <input type="checkbox"
                                                        ng-model="wiModal.variableShadingOptions.positiveFill.display"
                                                        ng-disabled="wiModal.variableShadingOptions.fill.display">
                                                 Positive side
@@ -410,7 +410,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4
@@ -421,7 +421,7 @@
                                                         ng-model="wiModal.variableShadingOptions.positiveFill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -465,7 +465,7 @@
                                     <div class="col-sm-7">
                                         <div class="form-group">
                                             <label>
-                                                <input type="checkbox" 
+                                                <input type="checkbox"
                                                        ng-model="wiModal.variableShadingOptions.negativeFill.display"
                                                        ng-disabled="wiModal.variableShadingOptions.fill.display">
                                                 Negative side
@@ -475,7 +475,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4
@@ -486,7 +486,7 @@
                                                         ng-model="wiModal.variableShadingOptions.negativeFill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -536,7 +536,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4
@@ -547,7 +547,7 @@
                                                         ng-model="wiModal.variableShadingOptions.fill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -586,7 +586,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4
@@ -597,7 +597,7 @@
                                                         ng-model="wiModal.variableShadingOptions.positiveFill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -633,7 +633,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4
@@ -644,7 +644,7 @@
                                                         ng-model="wiModal.variableShadingOptions.negativeFill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -681,7 +681,7 @@
                                 <div class="row padding-bottom-1em padding-left-1em">
                                     <div class="col-sm-3">
                                         Curve Value:
-                                    </div> 
+                                    </div>
                                     <div class="col-sm-4">
                                         <div class="form-group">
                                             <label class="control-label col-sm-4
@@ -692,7 +692,7 @@
                                                         ng-model="wiModal.variableShadingOptions.fill.varShading.startX">
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
                                     <div class="col-sm-5 padding-0">
                                         <div class="form-group">
                                             <label class="control-label col-sm-5 padding-right-0 padding-left-60px">High</label>
@@ -734,17 +734,17 @@
                                                     <td>
                                                         <ui-select theme="bootstrap" ng-model="fill.pattern">
                                                             <ui-select-match>
-                                                                <wi-canvas-rect name="row_{{$index}}" 
-                                                                                pattern="{{fill.pattern}}" 
-                                                                                width="80" height="20" 
-                                                                                foreground="{{fill.foreground}}" 
+                                                                <wi-canvas-rect name="row_{{$index}}"
+                                                                                pattern="{{fill.pattern}}"
+                                                                                width="80" height="20"
+                                                                                foreground="{{fill.foreground}}"
                                                                                 background='{{fill.background}}'>
                                                                 </wi-canvas-rect>
                                                             </ui-select-match>
                                                             <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns" position="down">
-                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
-                                                                                width="80" height="20" 
-                                                                                foreground="{{fill.foreground}}" 
+                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                                width="80" height="20"
+                                                                                foreground="{{fill.foreground}}"
                                                                                 background="{{fill.background}}">
                                                                 </wi-canvas-rect>
                                                             </ui-select-choices>
@@ -783,7 +783,7 @@
                                                 ng-change="wiModal.setCustomFills()">
                                                 <option value="">--------</option>
                                         </select>
-                                    </div> 
+                                    </div>
                                     <br>
                                     <div class="row">
                                         <div class="col-sm-7">
@@ -792,7 +792,7 @@
                                                     Custom Name
                                                 </label>
                                                 <div class="col-sm-7 padding-0">
-                                                    <input type="text" 
+                                                    <input type="text"
                                                             ng-model="wiModal.variableShadingOptions.fill.varShading.customFills.name"
                                                             class="form-control wi-form-control normal-text">
                                                 </div>

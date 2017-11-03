@@ -1,0 +1,91 @@
+<div class='modal fade'>
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class="well-insight-16x16"></span>Split&nbsp;Curve</h4>
+            </div>
+            <div class="modal-body dialog-style">
+                <form class="form-horizontal" action="" name="modalSplitCurve">
+                    <h5 class="modal-infomation-title">
+                        <span class="well-insight-16x16"></span>
+                        Well
+                    </h5>
+                    <div class="row form-group">
+                        <label class="control-label col-sm-2">
+                            Select Well
+                        </label>
+                        <div class="col-sm-10">
+                            <select ng-model="wiModal.wellModel.id"
+                                    class="form-control wi-form-control"
+                                    ng-options="well.id as well.properties.name for well in wiModal.wells"
+                                    ng-change="wiModal.selectWell(wiModal.wellModel.id)">
+                            </select>
+                        </div>
+                    </div>
+                    <h5 class="modal-infomation-title"><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
+                    <div class="row form-group" style="opacity: 0.3; pointer-events: none;">
+                        <label class="control-label col-sm-2">
+                            Top
+                        </label>
+                        <div class="col-sm-4">
+                            <input ng-model="wiModal.topDepth"
+                                   type="number" class="form-control wi-form-control">
+                        </div>
+                        <label class="control-label col-sm-2 padding-left-0">
+                            Bottom
+                        </label>
+                        <div class="col-sm-4">
+                            <input ng-model="wiModal.bottomDepth"
+                                   type="number" class="form-control wi-form-control">
+                        </div>
+                    </div>
+                    <h5 class="modal-infomation-title">
+                        <span class="curve-input-16x16"></span>&nbsp;
+                        Input
+                    </h5>
+                    <div class="row form-group">
+                        <label class="col-sm-2 control-label" style="padding-right: 0">
+                            Input Curve
+                        </label>
+                        <div class="col-sm-4">
+                            <select name="" id=""
+                                    class="form-control wi-form-control"
+                                    ng-model="wiModal.curveModel.id"
+                                    ng-options="curve.id as curve.name for curve in wiModal.curves"
+                                    ng-change="wiModal.selectCurve(wiModal.curveModel.id)"
+                            >
+                            </select>
+                        </div>
+                        <label for="" class="col-sm-2 control-label" style="padding-left: 0">
+                            Number Split
+                        </label>
+                        <div class="col-sm-4">
+                            <input type="number" step="1" ng-model="wiModal.numberSplit" class="form-control wi-form-control">
+                        </div>
+                    </div>
+                    <h5 class="modal-infomation-title">
+                        <span class="save-result-16x16"></span>
+                        Output
+                    </h5>
+                    <div class="row form-group">
+                        <label for="" class="col-sm-2">
+                            Dataset
+                        </label>
+                        <div class="col-sm-4">
+                            <select ng-model="wiModal.idSelectedDataset"
+                                    ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets"
+                                    ng-change="wiModal.onChangeDataset(wiModal.idSelectedDataset)"
+                                    class="form-control wi-form-control">
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'><span class="run-16x16"></span>Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

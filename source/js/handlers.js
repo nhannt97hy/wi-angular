@@ -913,10 +913,17 @@ exports.InteractiveBaselineShiftButtonClicked = function () {
 
 exports.SplitCurvesButtonClicked = function () {
     console.log('SplitCurvesButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.splitCurveDialog(this.ModalService, function (data) {
+        console.log("splitCurve");
+    });
 };
 
 exports.InteractiveCurveSplitButtonClicked = function () {
     console.log('InteractiveCurveSplitButton is clicked');
+
 };
 
 exports.MergeCurvesButtonClicked = function () {

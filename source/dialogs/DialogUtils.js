@@ -7628,7 +7628,6 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 
         window.wellModel = this.wellModel;
         this.curves = this.wellModel.children[0].children;
-        console.log(this.curves);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if( selectedNodes && selectedNodes[0].type == 'curve') this.curveModel = selectedNodes[0];
         else this.curveModel = angular.copy(self.curves[0]);
@@ -7931,6 +7930,67 @@ exports.curveConvolutionDialog = function(ModalService){
         modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.splitCurveDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        window.split = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
+        this.wells = wiExplorer.treeConfig[0].children;
+        this.curves = [];
+        this.topDepth;
+        this.bottomDepth;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedNodes) {
+            if( selectedNodes[0].type == 'well' )
+                this.wellModel = selectedNodes[0];
+            if( selectedNodes[0].type == 'curve' ) {
+                this.curveModel = selectedNodes[0];
+                this.wellModel = utils.findWellByCurve(self.curveModel.id);
+            }
+        }
+        else {
+            this.wellModel = angular.copy(self.wells[0]);
+            this.curveModel = self.wellModel.children[0].children[0];
+        }
+        function depthInfo() {
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.curves = self.wellModel.children[0].children;
+        }
+        depthInfo();
+        this.selectWell = function (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            depthInfo();
+            self.curveModel =self.curves[0];
+        }
+        this.selectCurve = function (idCurve) {
+            self.curveModel = utils.getCurveFromId(idCurve);
+        }
+
+        this.numberSplit = 1;
+
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+    ModalService.showModal({
+        "templateUrl": "split-curve/split-curve-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
         });
     });
 }
