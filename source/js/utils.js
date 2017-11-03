@@ -333,11 +333,14 @@ function crossplotToTreeConfig(crossplot) {
     crossplotModel.name = 'crossplot';
     crossplotModel.type = 'crossplot';
     crossplotModel.id = crossplot.idCrossPlot;
+    console.log("crossplotToTreeConfig", crossplot.axisColors)
     crossplotModel.properties = {
         idWell: crossplot.idWell,
         idCrossPlot: crossplot.idCrossPlot,
         name: crossplot.name,
-        discriminator: crossplot.discriminator == 'null'? null : crossplot.discriminator,
+        discriminator: crossplot.discriminator == 'null' ? null : crossplot.discriminator,
+        axisColors: (!crossplot.axisColors || crossplot.axisColors == 'null') ? null : JSON.parse(crossplot.axisColors),
+        isDefineDepthColors: crossplot.isDefineDepthColors,
         referenceTopDepth: crossplot.referenceTopDepth,
         referenceBottomDepth: crossplot.referenceBottomDepth,
         referenceScale: crossplot.referenceScale,
@@ -1749,6 +1752,12 @@ function openCrossplotTab(crossplotModel, callback) {
                                     console.log(e);
                                 }
                             }
+                        }
+                        if (!crossplot.axisColors || crossplot.axisColors == 'null') {
+                            crossplot.axisColors = [];
+                        }
+                        else if (typeof crossplot.axisColors == 'string') {
+                            crossplot.axisColors = JSON.parse(crossplot.axisColors);
                         }
 
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
