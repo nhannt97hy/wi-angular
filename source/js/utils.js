@@ -333,11 +333,14 @@ function crossplotToTreeConfig(crossplot) {
     crossplotModel.name = 'crossplot';
     crossplotModel.type = 'crossplot';
     crossplotModel.id = crossplot.idCrossPlot;
+    console.log("crossplotToTreeConfig", crossplot.axisColors)
     crossplotModel.properties = {
         idWell: crossplot.idWell,
         idCrossPlot: crossplot.idCrossPlot,
         name: crossplot.name,
-        discriminator: crossplot.discriminator == 'null'? null : crossplot.discriminator,
+        discriminator: crossplot.discriminator == 'null' ? null : crossplot.discriminator,
+        axisColors: (!crossplot.axisColors || crossplot.axisColors == 'null') ? null : JSON.parse(crossplot.axisColors),
+        isDefineDepthColors: crossplot.isDefineDepthColors,
         referenceTopDepth: crossplot.referenceTopDepth,
         referenceBottomDepth: crossplot.referenceBottomDepth,
         referenceScale: crossplot.referenceScale,
@@ -431,17 +434,18 @@ function curveToTreeConfig(curve) {
         idFamily: curve.idFamily,
         name: curve.name,
         unit: curve.unit || "NA",
-        dataset: curve.dataset,
         alias: curve.name
     };
+    curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
         label: curve.name,
         unit: curveModel.properties.unit
     };
+    curveModel.lineProperties = curve.LineProperty;
     curveModel.curveData = null;
-    curveModel.parent = 'dataset' + curve.idDataset;
+    curveModel.parent = curve.dataset;
     return curveModel;
 }
 
@@ -449,7 +453,7 @@ exports.curveToTreeConfig = curveToTreeConfig;
 
 function datasetToTreeConfig(dataset) {
     var datasetModel = new Object();
-    datasetModel.name = "dataset";
+    datasetModel.name = dataset.name;
     datasetModel.type = "dataset";
     datasetModel.id = dataset.idDataset;
     datasetModel.properties = {
@@ -469,6 +473,7 @@ function datasetToTreeConfig(dataset) {
     if (!dataset.curves) return datasetModel;
 
     dataset.curves.forEach(function (curve) {
+        curve.dataset = dataset.name;
         datasetModel.children.push(curveToTreeConfig(curve));
     });
 
@@ -1113,6 +1118,21 @@ function findDatasetById(idDataset) {
 
 exports.findDatasetById = findDatasetById;
 
+function findZoneSetById(idZoneSet) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let zoneSet = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'zoneset' && node.id == idZoneSet) {
+            zoneSet = node;
+        }
+    });
+    return zoneSet;
+}
+
+exports.findDatasetById = findDatasetById;
+
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
@@ -1748,6 +1768,12 @@ function openCrossplotTab(crossplotModel, callback) {
                                 }
                             }
                         }
+                        if (!crossplot.axisColors || crossplot.axisColors == 'null') {
+                            crossplot.axisColors = [];
+                        }
+                        else if (typeof crossplot.axisColors == 'string') {
+                            crossplot.axisColors = JSON.parse(crossplot.axisColors);
+                        }
 
                         let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
                         let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
@@ -1771,7 +1797,19 @@ function openCrossplotTab(crossplotModel, callback) {
                                 })
                             }
                         }
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+
+                        wiD3CrossplotCtrl.loading = false;
+                        if (crossplot.discriminator && crossplot.discriminator != 'null' && crossplot.discriminator != {}) {
+                            console.log('crossplotDiscrim', crossplot.discriminator);
+                            crossplot.discriminator = JSON.parse(crossplot.discriminator);
+                            evaluateExpr(wellProps, crossplot.discriminator, function(result){
+                                crossplotConfig.discriminatorData = result;
+                                wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                            });
+                        }
+                        else {
+                            wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
+                        }
                         //__GLOBAL.$timeout(function() {
                         //    wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                         //}, 1500);
@@ -1783,11 +1821,9 @@ function openCrossplotTab(crossplotModel, callback) {
                             let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
-                            wiD3CrossplotCtrl.loading = false;
                         });
                     } else {
                         createViCrossplot();
-                        wiD3CrossplotCtrl.loading = false;
                     }
                 })
             })
@@ -2168,8 +2204,56 @@ function evaluateExpr(well, discriminator, callback) {
             for (let i = 0; i <= length; i++){
                 result.push(evaluate(discriminator, i));
             }
-            // console.log(result);
             callback(result);
         }
     );
 }
+exports.drawIcon = drawIcon;
+function drawIcon(idIcon, type){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+
+    let icon =  $('#' + idIcon)[0];
+    console.log("type", type, icon);
+
+    let ctx = icon.getContext('2d');
+    ctx.clearRect(0, 0, icon.width, icon.height);
+
+    let helper = new graph.CanvasHelper(ctx, {
+        strokeStyle: 'black',
+        fillStyle: 'black',
+        size: 30
+    });
+    let funcType = type.toLowerCase();
+    switch(funcType){
+        case 'circle':
+            helper.circle(10, 10);
+            break;
+        case 'cross':
+            helper.cross(10, 10);
+            break;
+        case 'diamond':
+            helper.diamond(10, 10);
+            break;
+        case 'plus':
+            helper.plus(10, 10);
+            break;
+        case 'square':
+            helper.square(10, 10);
+            break;
+        case 'star':
+            helper.star(10, 10);
+            break;
+        default:
+        break;
+    }
+}
+function getDataTopBottomRange (data, topPos, bottomPos) {
+    let retData = [];
+    for(let i = 0; i < data.length; i++) {
+        if(i < topPos || i > bottomPos) retData.push(null);
+        else retData.push(data[i]);
+    }
+    return retData;
+}
+exports.getDataTopBottomRange = getDataTopBottomRange;

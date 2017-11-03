@@ -205,6 +205,16 @@ const TERNARY_SCHEMA = {
     }
 }
 
+const WELL_SCHEMA = {
+    type: 'Object',
+    properties: {
+        idWell: { type: 'Integer' },
+        bottomDepth: { type: 'Float' },
+        topDepth: { type: 'Float' },
+        step: { type: 'Float' }
+    }
+}
+
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
@@ -227,7 +237,31 @@ Crossplot.prototype.PROPERTIES = {
         item: USER_DEFINE_LINE_SCHEMA,
         default: []
     },
-    ternary: TERNARY_SCHEMA
+    ternary: TERNARY_SCHEMA,
+    discriminatorData: {
+        type: 'Array',
+        item: {
+            type: 'Boolean'
+        },
+        default: []
+    },
+    well: WELL_SCHEMA,
+    isDefineDepthColors: {
+        type: 'Boolean',
+        default: false
+    },
+    axisColors: {
+        type: 'Array',
+        item: {
+            type: 'Object',
+            properties: {
+                minValue: { type: 'Float' },
+                maxValue: { type: 'Float' },
+                color: { type: 'String' }
+            },
+        },
+        default: []
+    }
 };
 
 Crossplot.prototype.getProperties = function() {
@@ -244,6 +278,7 @@ Crossplot.prototype.setProperties = function(props) {
     if (props.pointSet && props.pointSet.idZoneSet != null) {
         this.pointSet.zAxes = 'Zone';
     }
+    return this;
 }
 
 Crossplot.prototype.getViewportX = function() {
@@ -282,9 +317,25 @@ Crossplot.prototype.getTransformZ = function() {
     if (this.pointSet.zAxes == 'Curve') {
         let wdZ = this.getWindowZ();
         let reverse = wdZ[0] > wdZ[1];
-        return d3.scaleQuantize()
-            .domain(Utils.sort(wdZ))
-            .range(reverse ? Utils.clone(this.colors).reverse() : this.colors);
+        if (this.shouldUseAxisColors()) {
+            let domain = [];
+            let range = ['transparent'];
+            let colors = this.axisColors.sort(function(a, b) {
+                return a.minValue - b.minValue;
+            });
+            colors.forEach(function(c) {
+                domain.push(c.minValue);
+                domain.push(c.maxValue);
+                range.push(c.color);
+                range.push('transparent');
+            });
+            return d3.scaleQuantile().domain(domain).range(range);
+        }
+        else {
+            return d3.scaleQuantize()
+                .domain(Utils.sort(wdZ))
+                .range(reverse ? Utils.clone(this.colors).reverse() : this.colors);
+        }
     }
     else if (this.pointSet.zAxes == 'Zone') {
         let domain = [];
@@ -460,7 +511,7 @@ Crossplot.prototype.doPlot = function() {
     if (!this.pointSet || !this.pointSet.curveX || !this.pointSet.curveY) return;
 
     this.prepareData();
-    this.genColorList();
+    if (!this.shouldUseAxisColors()) this.genColorList();
     this.rectZWidth = this.shouldPlotZAxis() ? 20 : 0;
 
     this.adjustSize();
@@ -532,14 +583,32 @@ Crossplot.prototype.updateAxisTicks = function() {
     if (!this.pointSet.curveZ) return;
 
     let wdZ = this.getWindowZ();
-    let stepZ = (wdZ[1]-wdZ[0]) / (this.pointSet.numColor || 1);
+    let stepZ, transformZ, tickValues;
 
-    let transformZ = d3.scaleLinear()
-        .domain(wdZ)
-        .range(vpY);
+    if (this.shouldUseAxisColors()) {
+        let depths = [];
+        this.axisColors.forEach(function(c) {
+            depths.push(c.minValue);
+            depths.push(c.maxValue);
+        });
+        depths = Utils.uniq(depths.sort());
+        tickValues = depths;
+
+        transformZ = d3.scaleLinear()
+            .domain([d3.min(depths), d3.max(depths)])
+            .range(vpY);
+
+    }
+    else {
+        stepZ = (wdZ[1]-wdZ[0]) / (this.pointSet.numColor || 1);
+        tickValues = d3.range(wdZ[0], wdZ[1] + stepZ/2, stepZ);
+        transformZ = d3.scaleLinear()
+            .domain(wdZ)
+            .range(vpY);
+    }
 
     let axisZ = d3.axisRight(transformZ)
-        .tickValues(d3.range(wdZ[0], wdZ[1] + stepZ/2, stepZ))
+        .tickValues(tickValues)
         .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsZ));
 
     this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
@@ -595,27 +664,59 @@ Crossplot.prototype.updateAxisZRects = function() {
 
     rectGroup.style('display', 'block');
 
-    let vpY = this.getViewportY();
-    let stepY = (vpY[1]-vpY[0]) / (this.pointSet.numColor || 1);
-    let colors = this.colors;
     let MARGIN_LEFT = 4;
+    let vpY = this.getViewportY();
 
     rectGroup.selectAll('rect').remove();
 
-    rectGroup.selectAll('rect')
-        .data(d3.range(vpY[0], vpY[1], stepY).map(function(d, i) {
-            return {
-                y: d,
-                fill: colors[i]
-            }
-        }))
-        .enter()
-        .append('rect')
-            .attr('x', this.getViewportX()[1] + MARGIN_LEFT)
-            .attr('y', function(d) { return d.y + stepY; })
-            .attr('width', this.rectZWidth - MARGIN_LEFT)
-            .attr('height', -stepY)
-            .attr('fill', function(d) { return d.fill; });
+    if (this.shouldUseAxisColors()) {
+        let depths = [];
+        this.axisColors.forEach(function(c) {
+            depths.push(c.minValue);
+            depths.push(c.maxValue);
+        });
+        depths = Utils.uniq(depths.sort());
+        transformZ = d3.scaleLinear()
+            .domain([d3.min(depths), d3.max(depths)])
+            .range(vpY);
+        rectGroup.selectAll('rect')
+            .data(this.axisColors.map(function(d) {
+                return {
+                    minValue: transformZ(d.minValue),
+                    maxValue: transformZ(d.maxValue),
+                    color: d.color
+                }
+            }))
+            .enter()
+            .append('rect')
+                .attr('x', this.getViewportX()[1] + MARGIN_LEFT)
+                .attr('y', function(d) { return d.maxValue; })
+                .attr('width', this.rectZWidth - MARGIN_LEFT)
+                .attr('height', function(d) { return d.minValue - d.maxValue; })
+                .attr('fill', function(d) { return d.color; });
+    }
+    else {
+        let stepY, colors;
+        stepY = (vpY[1]-vpY[0]) / (this.pointSet.numColor || 1);
+        colors = this.colors;
+        rectGroup.selectAll('rect')
+            .data(d3.range(vpY[0], vpY[1], stepY).map(function(d, i) {
+                return {
+                    y: d,
+                    fill: colors[i]
+                }
+            }))
+            .enter()
+            .append('rect')
+                .attr('x', this.getViewportX()[1] + MARGIN_LEFT)
+                .attr('y', function(d) { return d.y + stepY; })
+                .attr('width', this.rectZWidth - MARGIN_LEFT)
+                .attr('height', -stepY)
+                .attr('fill', function(d) { return d.fill; });
+    }
+
+
+
 }
 
 Crossplot.prototype.updateAxisLabels = function() {
@@ -1015,6 +1116,10 @@ Crossplot.prototype.shouldPlotZAxis = function() {
     return this.pointSet.curveZ && this.pointSet.zAxes == 'Curve';
 }
 
+Crossplot.prototype.shouldUseAxisColors = function() {
+    return this.isDefineDepthColors && this.axisColors && this.axisColors.length;
+}
+
 Crossplot.prototype.plotSymbols = function() {
     let self = this;
     let zAxes = self.pointSet.zAxes;
@@ -1056,7 +1161,6 @@ Crossplot.prototype.plotSymbols = function() {
 }
 
 Crossplot.prototype.prepareData = function() {
-    console.log("pointset", this.pointSet);
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
@@ -1114,6 +1218,12 @@ Crossplot.prototype.prepareData = function() {
             if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) {
                 return;
             }
+        }
+
+        if (self.discriminatorData.length) {
+            let well = self.well;
+            let index = Math.round((d.y - well.topDepth) / well.step);
+            if (!self.discriminatorData[index]) return;
         }
 
         if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {

@@ -30,7 +30,7 @@
                                                                     style="stroke: {{wiModal.lineOptions.lineStyle.lineColor}}; stroke-width: 1"></line>
                                                             </svg>
                                                         </div>
-            
+
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>
@@ -40,10 +40,7 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-6" for="line-width">Line Width</label>
                                             <div class="col-sm-6">
-                                                <input type="number" id="line-width"
-                                                    min="1" max="10"
-                                                    class="form-control wi-form-control"
-                                                    ng-model="wiModal.lineOptions.lineStyle.lineWidth">
+                                                <input type="number" id="line-width" min="1" max="10" class="form-control wi-form-control" ng-model="wiModal.lineOptions.lineStyle.lineWidth">
                                             </div>
                                         </div>
                                     </div>
@@ -76,13 +73,16 @@
                                                         class="form-control wi-form-control"
                                                         ng-options="item for item in wiModal.symbolType">
                                                 </select> -->
-                                                <ui-select theme="bootstrap" tagging
+                                                <ui-select theme="bootstrap"
                                                             ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
                                                     <ui-select-match>
-                                                        <canvas id="{{wiModal.symbolOptions.symbolStyle.symbolName + 'Icon'}}" width="20" height="20"></canvas>{{wiModal.symbolOptions.symbolStyle.symbolName}}
+                                                        <div ng-repeat="type in wiModal.symbolType"
+                                                             ng-if="wiModal.symbolOptions.symbolStyle.symbolName==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
                                                     </ui-select-match>
                                                     <ui-select-choices repeat="type in wiModal.symbolType" position="down">
-                                                        <canvas id="{{type}}" width="20" height="20"></canvas>{{type}}
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>
@@ -92,10 +92,7 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-6 padding-right-0">Symbol Size</label>
                                             <div class="col-sm-6">
-                                                <input type="number" id="symbol-size"
-                                                    min="1" max="30"
-                                                    class="form-control wi-form-control"
-                                                    ng-model="wiModal.symbolOptions.symbolStyle.symbolSize">
+                                                <input type="number" id="symbol-size" min="1" max="30" class="form-control wi-form-control" ng-model="wiModal.symbolOptions.symbolStyle.symbolSize">
                                             </div>
                                         </div>
                                     </div>
@@ -121,18 +118,11 @@
                                             <div class="col-sm-9">
                                                 <ui-select theme="bootstrap" ng-model="wiModal.symbolOptions.patternFill.pattern">
                                                     <ui-select-match>
-                                                        <wi-canvas-rect name="_selectedPatternFill" 
-                                                                        pattern="{{wiModal.symbolOptions.patternFill.pattern}}" 
-                                                                        width="270" height="20" 
-                                                                        foreground="{{wiModal.symbolOptions.patternFill.foreground}}" 
-                                                                        background='{{wiModal.symbolOptions.patternFill.background}}'>
+                                                        <wi-canvas-rect name="_selectedPatternFill" pattern="{{wiModal.symbolOptions.patternFill.pattern}}" width="270" height="20" foreground="{{wiModal.symbolOptions.patternFill.foreground}}" background='{{wiModal.symbolOptions.patternFill.background}}'>
                                                         </wi-canvas-rect>
                                                     </ui-select-match>
                                                     <ui-select-choices repeat="symbolPattern in wiModal.symbolPatterns">
-                                                        <wi-canvas-rect name="{{symbolPattern}}" pattern="{{symbolPattern}}" 
-                                                                        width="270" height="20" 
-                                                                        foreground="{{wiModal.symbolOptions.patternFill.foreground}}" 
-                                                                        background='{{wiModal.symbolOptions.patternFill.background}}'>
+                                                        <wi-canvas-rect name="{{symbolPattern}}" pattern="{{symbolPattern}}" width="270" height="20" foreground="{{wiModal.symbolOptions.patternFill.foreground}}" background='{{wiModal.symbolOptions.patternFill.background}}'>
                                                         </wi-canvas-rect>
                                                     </ui-select-choices>
                                                 </ui-select>
@@ -153,7 +143,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div> 
+                                </div>
                             </form>
                         </div>
                     </wi-tab>

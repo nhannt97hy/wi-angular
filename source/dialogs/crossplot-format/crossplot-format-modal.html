@@ -146,10 +146,22 @@
                                                 Point Symbol
                                             </label>
                                             <div class="col-sm-8">
-                                                <select class="form-control wi-form-control"
+                                                <!-- <select class="form-control wi-form-control"
                                                         ng-model="wiModal.crossplotModel.properties.pointsets[0].pointSymbol"
                                                         ng-options="item for item in wiModal.selectPointSymbol">
-                                                </select>
+                                                </select> -->
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="wiModal.crossplotModel.properties.pointsets[0].pointSymbol">
+                                                    <ui-select-match>
+                                                        <div ng-repeat="type in wiModal.selectPointSymbol"
+                                                             ng-if="wiModal.crossplotModel.properties.pointsets[0].pointSymbol==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="type in wiModal.selectPointSymbol" position="down">
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
+                                                    </ui-select-choices>
+                                                </ui-select>
                                             </div>
                                         </div>
                                     </div>
@@ -214,7 +226,7 @@
                                             <label class="control-label col-sm-4">Top (m)</label>
                                             <div class="col-sm-8">
                                                 <input type="number" step="0.0001" class="form-control wi-form-control"
-                                                ng-model="wiModal.crossplotModel.properties.pointsets[0].intervalDepthTop" 
+                                                ng-model="wiModal.crossplotModel.properties.pointsets[0].intervalDepthTop"
                                                 ng-disabled="!(wiModal.depthType=='intervalDepth')">
                                             </div>
                                         <!-- </div> -->
@@ -296,8 +308,61 @@
                     </wi-tab>
                     <wi-tab heading="Axis Colors">
                         <div class="container-fluid">
-                            <div class="empty">
+
+                            <div class="col-sm-11 padding-right-0">
+                                <form class="form-horizontal form-condensed">
+                                    <label class="control-label">
+                                        <input ng-model="isDefineDepthColors"
+                                            type="checkbox"
+                                            ng-change="toggleDefineDepthColors()" />
+                                        Define Depth Colors
+                                    </label>
+
+                                    <table class="font-size-10px table table-bordered axisColorTable">
+                                        <thead>
+                                        <tr>
+                                            <th>Min Value</th>
+                                            <th>Max Value</th>
+                                            <th>Color</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in axisColors track by $index"
+                                            ng-class="{selected:$index == selectedAxisColorRow}"
+                                            ng-click="setClickedAxisColorRow($index)">
+                                            <td>
+                                                <input ng-model="item.minValue"
+                                                        ng-disabled="isDefineDepthColors == false"
+                                                        type="text" class="form-control wi-form-control valign-middle pull-left" />
+                                            </td>
+                                            <td>
+                                                <input ng-model="item.maxValue"
+                                                        ng-disabled="isDefineDepthColors == false"
+                                                        type="text" class="form-control wi-form-control valign-middle pull-left" />
+                                            </td>
+                                            <td>
+                                                <button ng-click="selectAxisColor($index)"
+                                                        ng-style="{'background-color':item.color}"
+                                                        ng-disabled="isDefineDepthColors == false"
+                                                        class="form-control wi-form-control width-80px thick-border">
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    </table>
+                                </form>
                             </div>
+
+                            <div class="col-sm-1">
+                                <br><br>
+                                <button class="btn btn-default" type="button" ng-click="removeAxisColorRow();">
+                                    <span class="delete-16x16"></span>
+                                </button>
+                                <button class="btn btn-default" type="button" ng-click="addAxisColorRow();">
+                                    <span class="plus-16x16"></span>
+                                </button>
+                            </div>
+
                         </div>
                     </wi-tab>
                     <wi-tab heading="Options">

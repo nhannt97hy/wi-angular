@@ -1,19 +1,26 @@
 const name = 'wiCustomInput';
 const moduleName = 'wi-custom-input';
 
-function Controller() {
+function Controller($scope) {
     let self = this;
 
     this.onClick = function(val){
         self.model = val;
     }
 
+    if(self.type == 'curve' && self.type.model){
+        $scope.$watch(() => {
+                return self.model.idDataset;
+            }, (value) => {
+                self.onChanged();
+        })
+    }
+
     this.onChanged = function(){
         if(self.model.idDesCurve) self.model.idDesCurve = null;
         let curveModel = self.options.find(curve => {
-            return curve.properties.name == self.model.curveName && curve.idDataset == self.model.idDataset;
+            return curve.properties.name == self.model.curveName && curve.properties.idDataset == self.model.idDataset;
         });
-
         if(curveModel) {
             self.model.idDesCurve = curveModel.properties.idCurve;
         }
@@ -21,7 +28,7 @@ function Controller() {
 
     this.onClickCurve = function(curve){
         self.model.curveName = curve.properties.name;
-        self.model.idDesCurve = curve.properties.idCurve;        
+        self.onChanged();
     }
 }
 
@@ -34,7 +41,8 @@ app.component(name, {
     bindings: {
         model: '=',
         options: '<',
-        type: '@'
+        type: '@',
+        disabled: '<'
     }
 });
 

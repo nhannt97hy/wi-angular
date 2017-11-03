@@ -6,7 +6,9 @@ img {
 .modal {
 	overflow: hidden;
 }
-
+.modal-header {
+	padding: 10px;
+}
 .form-horizontal .control-label {
     text-align: left;
 	font-style: normal !important;
@@ -230,6 +232,9 @@ form h5:after {
 }
 .valign-middle {
 	vertical-align: middle;
+}
+.valign-bottom {
+	vertical-align: bottom;
 }
 .color-error {
 	color: red;
@@ -503,17 +508,32 @@ input[type="checkbox"] {
 	padding: 1px 8px;
 }
 .availableCurve {
+	// thead, tbody, tr, th, td {
+	// 	display: block;
+	// }
 	thead>tr>th {
 		text-align: center;
+		padding: 0.6em;
 	};
 	tbody>tr>td {
 		text-align: center;
 		padding: 0.3em;
 	}
 	background: #F2F2F2;
+	border: 1px solid #ccc;
 }
 input[type=checkbox].input-check {
 	margin-top: 60%;
 	width: 15px;
 	height: 15px;
+}
+.border-right-gray {
+	border-right: 1px solid #ccc;
+}
+.colorZone {
+	margin: auto;
+	width: 3em;
+	height: 1.5em;
+	border-radius: 5px;
+	border: 1px solid #333;
 }
