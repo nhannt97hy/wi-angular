@@ -59,7 +59,7 @@
                                 <div class='form-group'>
                                     <label class="col-sm-2">Firt derivative</label>
                                     <div class="col-sm-4">
-                                        <wi-custom-input type='curve' model='wiModal.firtCurve' options='wiModal.curves'></wi-custom-input>
+                                        <wi-custom-input type='curve' model='wiModal.firstCurve' options='wiModal.curves'></wi-custom-input>
                                     </div>
                                 </div>
                                 <div class='form-group'>
@@ -78,7 +78,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.run()' ng-disabled="wiModal.validate();"><span class="run-16x16"></span>&nbsp;Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled="wiModal.validate();"><span class="run-16x16"></span>&nbsp;Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Close</button>
             </div>
         </div>
