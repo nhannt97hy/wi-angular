@@ -7782,53 +7782,70 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 exports.curveComrarisonDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        window.compa = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.wells = wiExplorer.treeConfig[0].children;
-        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
-        else this.wellModel = angular.copy(self.wells[0]);
-        this.idWell = this.wellModel.id;
-        this.topDepth = parseFloat(this.wellModel.properties.topDepth);
-        this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
-        this.curves = this.wellModel.children[0].children;
-        this.numberCurve = this.curves.length;
-        this.curveModel = angular.copy(self.curves[0]);
-        window.numberCurve = this.numberCurve;
-        this.idCurve = this.curveModel.id;
+        let zoneSetParaModel = {};
+        let zoneArr = [];
+        this.zoneSetPara = [];
+        this.zones = [];
+        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
+        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
+            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+            zoneSetParaModel = selectedNodes[0];
+        }
+        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
+            zoneSetParaModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+            this.wellModel = utils.findWellById(zoneSetParaModel.properties.idWell);
+        }
+        else this.wellModel = angular.copy(self.wells[0]);
+
+        this.idWell = this.wellModel.id;
+        defaultDepth();
 
         this.checked = false;
-        this.style = {
-            "opacity": "0.3",
+        let style = {
+            "opacity": "0.7",
             "pointer-events": "none"
         }
-        this.disable = function (check) {
-            if(check) {
-                self.style = {};
-            }else {
-                self.style = {
-                    "opacity": "0.3",
-                    "pointer-events": "none"
-                }
+        this.style = style;
+
+        this.checkUseZone = function (check) {
+            self.style = check ? {} : style;
+            self.zoneSetPara = self.wellModel.children[1].children;
+            if (self.zoneSetPara.length) {
+                self.zoneSetParaModel = Object.keys(zoneSetParaModel).length ? zoneSetParaModel : self.zoneSetPara[0];
+                selectZoneSetPara(self.zoneSetParaModel);
             }
         }
-        this.getNumerCurve = function () {
-            var array = new Array(self.numberCurve);
-            return array;
+        function selectZoneSetPara (zoneSetParaModel) {
+            self.zones = [];
+            if(Object.keys(zoneSetParaModel).length) zoneArr = zoneSetParaModel.children;
+            if(Array.isArray(zoneArr) && zoneArr.length) {
+                zoneArr.forEach(function(z, index) {
+                    z.use = false;
+                    self.zones.push(z);
+                })
+            }
         }
-        this.selectedWell = function (idWell) {
-            window.numberCurve = this.numberCurve;
-            self.wellModel = utils.findWellById(idWell);
+        this.selectZoneSetPara = selectZoneSetPara;
+        this.defaultDepth = defaultDepth;
+        function defaultDepth () {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+        }
+        
+        this.selectedWell = function (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            defaultDepth();
             self.idWell = self.wellModel.id;
-            self.curves = self.wellModel.children[0].children;
-            self.numberCurve = self.curves.length;
-            self.nameCurve = self.curveModel.name;
-            self.unitCurve = self.curveModel.properties.unit;
-            self.idCurve = self.curveModel.id;
+            self.zoneSetPara = self.wellModel.children[1].children;
+            self.zoneSetParaModel = self.zoneSetPara.length ? self.zoneSetPara[0] : {};
+            selectZoneSetPara(self.zoneSetParaModel);
         }
         this.selectedCurve = function (idCurve) {
             self.curveModel = utils.getCurveFromId(idCurve);

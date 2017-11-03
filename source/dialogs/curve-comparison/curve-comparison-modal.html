@@ -5,27 +5,32 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
                 <h4><span class="well-insight-16x16"></span>&nbsp;Curve Comparison</h4>
             </div>
-            <div class="modal-body">
-                <form class="form-horizontal" action="" name="modalCurveRescale">
-                    <h5 class="modal-infomation-title"><span class="well-16x16"></span>&nbsp;Well</h5>
+            <div class="modal-body dialog-style">
+                <form class="form-horizontal form-condensed" name="modalCurveComparison">
                     <div class="form-group">
-                        <label class="control-label col-sm-3"> Select well:</label>
-                        <div class="col-sm-9">
-                            <select class="form-control wi-form-control"
-                                    ng-model="wiModal.idWell"
+                        <label class="control-label col-sm-2">
+                            <span class="well-16x16"></span> Well
+                        </label>
+                        <div class="col-sm-10">
+                            <select ng-model="wiModal.idWell"
+                                    class="form-control wi-form-control"
                                     ng-options="well.id as well.properties.name for well in wiModal.wells"
                                     ng-change="wiModal.selectedWell(wiModal.idWell)">
                             </select>
                         </div>
                     </div>
-                    <h5 class="modal-infomation-title"><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
+                    <div class="row">
+                        <h5><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
+                    </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-1" for="">Top</label>
+                        <label class="control-label col-sm-1">
+                            Top
+                        </label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.topDepth"
-                                   type="number" class="form-control wi-form-control" step="any">
+                                    type="number" class="form-control wi-form-control" step="any">
                         </div>
-                        <label for="" class="control-label col-sm-1" style="padding-left: 0">Bottom</label>
+                        <label for="" class="control-label col-sm-1 padding-left-0">Bottom</label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.bottomDepth"
                                    type="number" class="form-control wi-form-control" step="any">
@@ -35,46 +40,74 @@
                                     ng-click="wiModal.defaultDepth()">Default</button>
                         </div>
                     </div>
+                    
                     <div class="form-group">
-                        <div class="col-sm-1">
-                            <input type="checkbox" class="input-check" ng-model="wiModal.checked" ng-change="wiModal.disable(wiModal.checked)">
-                        </div>
-                        <label for="" class="control-label col-sm-2"> Use zone</label>
+                        <label>
+                            <input type="checkbox"
+                                   ng-model="wiModal.checked"
+                                   ng-change="wiModal.checkUseZone(wiModal.checked)">Use zone
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <div ng-style="wiModal.style">
-                            <label for="" class="col-sm-2 control-label">Parameter</label>
-                            <div class="col-sm-4">
-                                <select class="form-control wi-form-control"
-                                >
-                                </select>
+                    <div ng-style="wiModal.style">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="" class="col-sm-4 control-label">Parameter</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control wi-form-control"
+                                            ng-model="wiModal.zoneSetParaModel"
+                                            ng-options="z as z.properties.name for z in wiModal.zoneSetPara"
+                                            ng-change="wiModal.selectZoneSetPara(wiModal.zoneSetParaModel)">
+                                    </select>
+                                </div>
                             </div>
-                            <label for="" class="col-sm-2 control-label">Zone set</label>
-                            <div class="col-sm-4">
-                                <select class="form-control wi-form-control"
-                                >
-                                </select>
-                            </div>
-                            <table class="table availableCurve">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Name</th>
-                                    <th>Top</th>
-                                    <th>Bottom</th>
-                                    <th>Color</th>
-                                    <th>Use</th>
-                                </tr>
-                                </thead>
-                                <tbody style="height: 10em;">
-
-                                </tbody>
-                            </table>
                         </div>
-                    </div>
-                    <h5 class="modal-infomation-title">Curve Comparison</h5>
-                    <div class="form-group">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="" class="col-sm-4 control-label">Zone set</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control wi-form-control">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                         <table class="table availableCurve">
+                            <thead style="">
+                                <tr>
+                                    <th style="width: 20%">Name</th>
+                                    <th style="width: 20%">Top</th>
+                                    <th style="width: 20%">Bottom</th>
+                                    <th style="width: 20%">Color</th>
+                                    <th style="width: 20%">Use</th>
+                                </tr>
+                            </thead>
+                            <tbody style="height: 7em; overflow-y: auto">
+                                <tr ng-repeat="zone in wiModal.zones track by $index"
+                                    ng-class="{selected:$index == selectedRow}"
+                                    ng-click="wiModal.setClickedRow($index)">
+                                    <td style="width: 20%">
+                                        {{zone.properties.name}}
+                                    </td>        
+                                    <td style="width: 20%">
+                                        {{zone.properties.startDepth}}
+                                    </td>
+                                    <td style="width: 20%">
+                                        {{zone.properties.endDepth}}
+                                    </td>
+                                    <td style="width: 20%">
+                                        <div class="colorZone" ng-style="{'background':zone.properties.background}"></div>
+                                    </td>
+                                    <td style="width: 20%">
+                                        <input type="checkbox" ng-model="zone.use">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <h5 class="modal-infomation-title">Curve Comparison</h5>
+                    </div>
+                    <div class="form-group">
+                        <table class="table availableCurve margin-bottom-0">
                             <thead style="display: block">
                             <tr>
                                 <th style="width: 25%">Curve 1</th>

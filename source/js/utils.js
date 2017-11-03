@@ -1115,6 +1115,21 @@ function findDatasetById(idDataset) {
 
 exports.findDatasetById = findDatasetById;
 
+function findZoneSetById(idZoneSet) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let zoneSet = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'zoneset' && node.id == idZoneSet) {
+            zoneSet = node;
+        }
+    });
+    return zoneSet;
+}
+
+exports.findDatasetById = findDatasetById;
+
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
