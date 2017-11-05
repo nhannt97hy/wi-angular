@@ -4594,12 +4594,96 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         //     return props
         // }
 
+        // AXIS COLORS - START
+        $scope.isDefineDepthColors = self.crossplotModel.properties.isDefineDepthColors;
+        $scope.axisColors = self.crossplotModel.properties.axisColors;
+
+        if (!$scope.axisColors || $scope.axisColors == 'null')
+            $scope.axisColors = [];
+        else if (typeof $scope.axisColors == 'string')
+            $scope.axisColors = JSON.parse($scope.axisColors);
+
+        $scope.selectedAxisColorRow = $scope.axisColors.length ? 0 : null;
+
+        $scope.setClickedAxisColorRow = function (indexRow) {
+            $scope.selectedAxisColorRow = indexRow;
+        };
+
+        $scope.removeAxisColorRow = function () {
+            if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
+            $scope.axisColors.splice($scope.selectedAxisColorRow, 1);
+            if ($scope.axisColors.length) {
+                $scope.setClickedAxisColorRow(0);
+            }
+        };
+
+        $scope.selectAxisColor = function(index) {
+            let item = $scope.axisColors[index];
+            DialogUtils.colorPickerDialog(ModalService, item.color || 'Black', function (colorStr) {
+                item.color = colorStr;
+            });
+        }
+
+        $scope.addAxisColorRow = function () {
+            $scope.axisColors.push({});
+            $scope.setClickedAxisColorRow($scope.axisColors.length - 1);
+        };
+
+        $scope.toggleDefineDepthColors = function() {
+            $scope.isDefineDepthColors = !$scope.isDefineDepthColors;
+        }
+        // AXIS COLORS - END
+
+        function isOverlapAxisColors(axisColors) {
+            axisColors = axisColors.map(function(a) {
+                return {
+                    minValue: parseFloat(a.minValue),
+                    maxValue: parseFloat(a.maxValue)
+                }
+            }).sort(function(a, b) {
+                return a.minValue - b.minValue;
+            });
+            for (let i = 1; i < axisColors.length; i ++) {
+                if (axisColors[i-1].maxValue >  axisColors[i].minValue)
+                    return true;
+            }
+            return false;
+        }
+
         function updateCrossplot(callback) {
             // var payload = buildPayload(self.crossplotModel.properties);
+
+            self.crossplotModel.properties.isDefineDepthColors = $scope.isDefineDepthColors;
+            self.crossplotModel.properties.axisColors = $scope.axisColors;
+
+            if ($scope.isDefineDepthColors) {
+                for (let c of $scope.axisColors) {
+                    if (c.minValue == null || c.maxValue == null || c.color == null) {
+                        utils.error("Axis color define value can not be blank");
+                        return;
+                    }
+                    if (parseFloat(c.minValue) > parseFloat(c.maxValue)) {
+                        utils.error("Axis color min value can not be greater than max value");
+                        return;
+                    }
+                }
+                if (isOverlapAxisColors($scope.axisColors)) {
+                    utils.error("Axis color define value is overlap");
+                    return;
+                }
+            }
+
             self.updating = true;
             async.parallel([
                 function(cb) {
-                    wiApiService.editCrossplot(self.crossplotModel.properties, function(){
+                    payload = {
+                        idCrossPlot: self.crossplotModel.properties.idCrossPlot,
+                        isDefineDepthColors: $scope.isDefineDepthColors,
+                        axisColors: JSON.stringify($scope.axisColors),
+                        idWell: self.well.properties.idWell
+                    };
+                    wiApiService.editCrossplot(payload, function(response){
+                        console.log('updateCrossplot', payload, response);
                         cb();
                     });
                 },
@@ -7694,31 +7778,31 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                 }],
                 function(err, results) {
                     let len = inputData.length;
-                    
+
                     for(let i = 0; i < len; i++) {
                         if (inputData[i] == null || isNaN(inputData[i])) outputData.push(NaN);
                         if (!self.logInput && !self.outputObj.logOutput) {
-                            outputData.push(linearToLinearX(self.curveModel.lineProperties.minScale, 
-                                                            self.curveModel.lineProperties.maxScale, 
-                                                            inputData[i], 
+                            outputData.push(linearToLinearX(self.curveModel.lineProperties.minScale,
+                                                            self.curveModel.lineProperties.maxScale,
+                                                            inputData[i],
                                                             self.outputObj.leftScale,
                                                             self.outputObj.rightScale));
                         } else if (!self.logInput && self.outputObj.logOutput) {
-                            outputData.push(linearToLogarithmX(self.curveModel.lineProperties.minScale, 
-                                                                self.curveModel.lineProperties.maxScale, 
-                                                                inputData[i], 
+                            outputData.push(linearToLogarithmX(self.curveModel.lineProperties.minScale,
+                                                                self.curveModel.lineProperties.maxScale,
+                                                                inputData[i],
                                                                 self.outputObj.leftScale,
                                                                 self.outputObj.rightScale));
                         } else if (self.logInput && !self.outputObj.logOutput) {
-                            outputData.push(logarithmToLinearX(self.curveModel.lineProperties.minScale, 
-                                                                self.curveModel.lineProperties.maxScale, 
-                                                                inputData[i], 
+                            outputData.push(logarithmToLinearX(self.curveModel.lineProperties.minScale,
+                                                                self.curveModel.lineProperties.maxScale,
+                                                                inputData[i],
                                                                 self.outputObj.leftScale,
                                                                 self.outputObj.rightScale));
                         } else if (self.logInput && self.outputObj.logOutput) {
-                            outputData.push(logarithmToLogarithmX(self.curveModel.lineProperties.minScale, 
-                                                                    self.curveModel.lineProperties.maxScale, 
-                                                                    inputData[i], 
+                            outputData.push(logarithmToLogarithmX(self.curveModel.lineProperties.minScale,
+                                                                    self.curveModel.lineProperties.maxScale,
+                                                                    inputData[i],
                                                                     self.outputObj.leftScale,
                                                                     self.outputObj.rightScale));
                         };
@@ -7746,7 +7830,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
                     }
                     else {
                         delete request.idDesCurve;
-                        if (self.curveModel.properties.idFamily) 
+                        if (self.curveModel.properties.idFamily)
                             request.idFamily = self.curveModel.properties.idFamily;
                         wiApiService.processingDataCurve(request, function(res) {
                             console.log("processingDataCurve", res);
@@ -7782,53 +7866,70 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 exports.curveComrarisonDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
+        window.compa = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.wells = wiExplorer.treeConfig[0].children;
-        let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedWells && selectedWells[0].type == 'well') this.wellModel = selectedWells[0];
-        else this.wellModel = angular.copy(self.wells[0]);
-        this.idWell = this.wellModel.id;
-        this.topDepth = parseFloat(this.wellModel.properties.topDepth);
-        this.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
-        this.curves = this.wellModel.children[0].children;
-        this.numberCurve = this.curves.length;
-        this.curveModel = angular.copy(self.curves[0]);
-        window.numberCurve = this.numberCurve;
-        this.idCurve = this.curveModel.id;
+        let zoneSetParaModel = {};
+        let zoneArr = [];
+        this.zoneSetPara = [];
+        this.zones = [];
+        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
+        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
+            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+            zoneSetParaModel = selectedNodes[0];
+        }
+        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
+            zoneSetParaModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+            this.wellModel = utils.findWellById(zoneSetParaModel.properties.idWell);
+        }
+        else this.wellModel = angular.copy(self.wells[0]);
+
+        this.idWell = this.wellModel.id;
+        defaultDepth();
 
         this.checked = false;
-        this.style = {
-            "opacity": "0.3",
+        let style = {
+            "opacity": "0.7",
             "pointer-events": "none"
         }
-        this.disable = function (check) {
-            if(check) {
-                self.style = {};
-            }else {
-                self.style = {
-                    "opacity": "0.3",
-                    "pointer-events": "none"
-                }
+        this.style = style;
+
+        this.checkUseZone = function (check) {
+            self.style = check ? {} : style;
+            self.zoneSetPara = self.wellModel.children[1].children;
+            if (self.zoneSetPara.length) {
+                self.zoneSetParaModel = Object.keys(zoneSetParaModel).length ? zoneSetParaModel : self.zoneSetPara[0];
+                selectZoneSetPara(self.zoneSetParaModel);
             }
         }
-        this.getNumerCurve = function () {
-            var array = new Array(self.numberCurve);
-            return array;
+        function selectZoneSetPara (zoneSetParaModel) {
+            self.zones = [];
+            if(Object.keys(zoneSetParaModel).length) zoneArr = zoneSetParaModel.children;
+            if(Array.isArray(zoneArr) && zoneArr.length) {
+                zoneArr.forEach(function(z, index) {
+                    z.use = false;
+                    self.zones.push(z);
+                })
+            }
         }
-        this.selectedWell = function (idWell) {
-            window.numberCurve = this.numberCurve;
-            self.wellModel = utils.findWellById(idWell);
+        this.selectZoneSetPara = selectZoneSetPara;
+        this.defaultDepth = defaultDepth;
+        function defaultDepth () {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+        }
+        
+        this.selectedWell = function (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            defaultDepth();
             self.idWell = self.wellModel.id;
-            self.curves = self.wellModel.children[0].children;
-            self.numberCurve = self.curves.length;
-            self.nameCurve = self.curveModel.name;
-            self.unitCurve = self.curveModel.properties.unit;
-            self.idCurve = self.curveModel.id;
+            self.zoneSetPara = self.wellModel.children[1].children;
+            self.zoneSetParaModel = self.zoneSetPara.length ? self.zoneSetPara[0] : {};
+            selectZoneSetPara(self.zoneSetParaModel);
         }
         this.selectedCurve = function (idCurve) {
             self.curveModel = utils.getCurveFromId(idCurve);
@@ -8134,7 +8235,7 @@ exports.curveDerivativeDialog = function(ModalService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.DERI = this;
-        this.applyingInProgress = false;        
+        this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function (cb) {
@@ -8264,7 +8365,7 @@ exports.curveDerivativeDialog = function(ModalService){
 
         function processing2(){
             self.secondCurve.data = derivative(self.firstCurve.data);
-            saveCurve(self.secondCurve, true);            
+            saveCurve(self.secondCurve, true);
         }
 
         function run(){
@@ -8275,7 +8376,7 @@ exports.curveDerivativeDialog = function(ModalService){
                     processing();
                 })
             }else{
-                processing();                
+                processing();
             }
         }
 
@@ -8295,7 +8396,7 @@ exports.curveDerivativeDialog = function(ModalService){
                 run();
             }
         }
-        
+
         this.onCancelButtonClicked = function(){
             close(null);
         }

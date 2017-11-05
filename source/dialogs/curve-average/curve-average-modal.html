@@ -78,10 +78,10 @@
                                 <tbody style="display: block;height: 10em; overflow-y: auto">
                                     <tr ng-repeat="curve in wiModal.availableCurves | filter:{name: filterCurve} track by $index"
                                         ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
-                                        <td style="width: 15%;">
+                                        <td style="width: 15%;" class="border-right-gray">
                                             <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
                                         </td>
-                                        <td style="width:42%;">{{curve.name}}</td>
+                                        <td style="width:42%;" class="border-right-gray">{{curve.name}}</td>
                                         <td style="width: 43%">{{curve.properties.dataset}}</td>
                                         <td></td>
                                     </tr>
