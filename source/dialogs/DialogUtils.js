@@ -7908,14 +7908,18 @@ exports.curveConvolutionDialog = function(ModalService){
                             })
                         }, function(err){
                             if(self.curvesArr.length){
-                                self.ResultCurve = {
-                                    idDataset: self.datasets[0].id,
-                                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
-                                    idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
-                                    data: []
+                                if(!self.ResultCurve){
+                                    self.ResultCurve = {
+                                        idDataset: self.datasets[0].id,
+                                        curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
+                                        idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
+                                        data: []
+                                    }
                                 }
-                                self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
-                                self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                if(!self.inputCurve)
+                                    self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                if(!self.stdCurve)
+                                    self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
                             }else {
                                 delete self.ResultCurve;
                                 delete self.inputCurve;
@@ -7938,19 +7942,26 @@ exports.curveConvolutionDialog = function(ModalService){
             }, 0);
         });
 
-        function convolution(input, kernel, out){ // need update
+        function convolution(input, kernel, out){
             // check validity of params
             if(!input || !out || !kernel) return false;
-            if(input.length <=0 || kernel.length <= 0) return false;
+            if(input.length < 1 || kernel.length < 1) return false;
 
-            for (let n = 0; n < input.length + kernel.length - 1; n++) {
-                out[n] = 0;
+            let inputF = input.filter(d => {return !isNaN(d);});
+            let inputSize = input.length;
+            kernel = kernel.filter(d => {return !isNaN(d);});
+            kernel = kernel.reverse();
+            let kernelSize = kernel.length;
 
-                let kmin = (n >= kernel.length - 1) ? n - (kernel.length - 1) : 0;
-                let kmax = (n < input.length - 1) ? n : input.length - 1;
-
-                for (let k = kmin; k <= kmax; k++) {
-                    out[n] += input[k] * kernel[n - k];
+            for(let n = 0; n < inputSize; n++){
+                if(!isNaN(input[n])){
+                    kernel.unshift(kernel.pop());
+                    out[n] = 0;
+                    for(let k = 0; k < kernelSize; k++){
+                        out[n] += (inputF[k] || 0) * (kernel[k] || 0);
+                    }
+                }else{
+                    out[n] = NaN;
                 }
             }
             return true;
