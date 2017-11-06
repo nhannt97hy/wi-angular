@@ -21,6 +21,8 @@ const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://192.168.0.223';
 // const BASE_URL = 'http://192.168.0.130:3000';
 
+
+const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
@@ -324,17 +326,18 @@ wiApiWorker.prototype.stopWorking = function(){
 }
 wiApiWorker.prototype.getUtils = Service.prototype.getUtils;
 
-Service.prototype.post = function (route, payload, callback) {
+//add authenService parameter for using authenticate service
+Service.prototype.post = function (route, payload, callback, authenService) {
     var self = this;
     let requestObj = {
-        url: self.baseUrl + route,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Referrer-Policy': 'no-referrer',
-                'Authorization': __USERINFO.token
-            },
-            data: payload
+        url: authenService ? AUTHENTICATION_SERVICE + route : self.baseUrl + route,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Referrer-Policy': 'no-referrer',
+            'Authorization': __USERINFO.token
+        },
+        data: payload
     };
     let jobObj = {
         request: requestObj,
@@ -342,10 +345,10 @@ Service.prototype.post = function (route, payload, callback) {
     };
     self.wiApiWorker.enqueueJob(jobObj);
 }
-Service.prototype.delete = function(route, payload, callback){
+Service.prototype.delete = function(route, payload, callback, authenService){
     var self = this;
     let requestObj = {
-        url: self.baseUrl + route,
+        url: authenService ? AUTHENTICATION_SERVICE + route : self.baseUrl + route,
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -435,13 +438,13 @@ Service.prototype.delete = function (route, payload) {
 Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
-    this.post(LOGIN, data, callback);
+    this.post(LOGIN, data, callback, true);
 }
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     console.log(data);
-    this.post(REGISTER, data, callback);
+    this.post(REGISTER, data, callback, true);
 }
 Service.prototype.postWithTemplateFile = function (dataPayload) {
     var self = this;
