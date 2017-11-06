@@ -8049,17 +8049,19 @@ exports.curveConvolutionDialog = function(ModalService){
             if(input.length < 1 || kernel.length < 1) return false;
 
             let inputF = input.filter(d => {return !isNaN(d);});
+            inputF.length = input.length;
             let inputSize = input.length;
-            kernel = kernel.filter(d => {return !isNaN(d);});
-            kernel = kernel.reverse();
+            kernelF = kernel.filter(d => {return !isNaN(d);});
+            kernelF.length = kernel.length;
+            kernelF = kernelF.reverse();
             let kernelSize = kernel.length;
 
             for(let n = 0; n < inputSize; n++){
                 if(!isNaN(input[n])){
-                    kernel.unshift(kernel.pop());
+                    kernelF.unshift(kernelF.pop());
                     out[n] = 0;
                     for(let k = 0; k < kernelSize; k++){
-                        out[n] += (inputF[k] || 0) * (kernel[k] || 0);
+                        out[n] += (inputF[k] || 0) * (kernelF[k] || 0);
                     }
                 }else{
                     out[n] = NaN;
@@ -8275,20 +8277,24 @@ exports.curveDerivativeDialog = function(ModalService){
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
             if (self.curves.length) {
-                self.SelectedCurve = self.curves[0];
-                self.selectedDataset = self.datasets[0].id;
-                self.firstCurve = {
-                    idDataset: self.selectedDataset,
-                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
-                    idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
-                    data: []
-                }
-                self.secondCurve = {
-                    idDataset: self.selectedDataset,
-                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
-                    idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
-                    data: []
-                }
+                if(!self.SelectedCurve)
+                    self.SelectedCurve = self.curves[0];
+                if(!self.selectedDataset)
+                    self.selectedDataset = self.datasets[0].id;
+                if(!self.firstCurve)
+                    self.firstCurve = {
+                        idDataset: self.selectedDataset,
+                        curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
+                        idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
+                        data: []
+                    }
+                if(!self.secondCurve)
+                    self.secondCurve = {
+                        idDataset: self.selectedDataset,
+                        curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
+                        idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
+                        data: []
+                    }
             }else {
                 delete self.firstCurve;
                 delete self.secondCurve;

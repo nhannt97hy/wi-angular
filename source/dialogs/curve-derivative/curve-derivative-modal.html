@@ -1,8 +1,8 @@
-<div class="modal fade">
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled="wiModal.applyingInProgress">&times;</button>
                 <h4><span class="curve-edit-16x16"></span>&nbsp;Curve Derivative</h4>
             </div>
             <div class="modal-body">
@@ -79,7 +79,7 @@
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled="wiModal.validate();"><span class="run-16x16"></span>&nbsp;Run</button>
-                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Close</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()' ng-disabled="wiModal.applyingInProgress"><span class="close-16x16"></span>&nbsp;Close</button>
             </div>
         </div>
     </div>
