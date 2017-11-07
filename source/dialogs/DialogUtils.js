@@ -7926,6 +7926,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         let zoneArr = [];
         this.zoneSetPara = [];
         this.zones = [];
+        this.curves = [];
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
             this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
@@ -7939,7 +7940,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
 
         this.idWell = this.wellModel.id;
         defaultDepth();
-
+        getAllCurvesOnSelectWell(this.wellModel);
         this.checked = false;
         let style = {
             "opacity": "0.7",
@@ -7973,28 +7974,90 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         }
         
         this.selectedWell = function (idWell) {
+            self.curves = [];
             self.wellModel = utils.findWellById(idWell);
             defaultDepth();
             self.idWell = self.wellModel.id;
             self.zoneSetPara = self.wellModel.children[1].children;
             self.zoneSetParaModel = self.zoneSetPara.length ? self.zoneSetPara[0] : {};
             selectZoneSetPara(self.zoneSetParaModel);
+            getAllCurvesOnSelectWell(self.wellModel);
         }
-        this.selectedCurve = function (idCurve) {
-            self.curveModel = utils.getCurveFromId(idCurve);
-            self.idCurve = self.curveModel.id;
-            self.nameCurve = self.curveModel.name;
-            self.unitCurve = self.curveModel.properties.unit;
+        
+        function getAllCurvesOnSelectWell(well) {
+            let datasets = [];
+            well.children.forEach(function (child) {
+                if (child.type == 'dataset') datasets.push(child);
+            });
+            datasets.forEach(function (child) {
+                child.children.forEach(function (item) {
+                    if (item.type == 'curve') {
+                        self.curves.push(item);
+                    }
+                })
+            });
         }
-        this.defaultDepth = function () {
-            self.topDepth = parseFloat(this.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(this.wellModel.properties.bottomDepth);
-        }
-
+        this.curvesComparison = new Array();
+        for (let i = 0; i < 15; i++) {
+            this.curvesComparison.push({
+                curve1: null,
+                curve2: null,
+                difference: null,
+                correlation: null
+            });
+        };
         this.onRunButtonClicked = function () {
-            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
-        }
+            if (self.applyingInProgress) return;
+                self.applyingInProgress = true;
+            if(!self.checked && (self.topDepth < self.wellModel.properties.topDepth ||
+                                self.bottomDepth > self.wellModel.properties.bottomDepth))
+            {
+                dialogUtils.errorMessageDialog(ModalService, 
+                                    "Input invalid [" + self.wellModel.properties.topDepth + "," + 
+                                    self.wellModel.properties.bottomDepth+ "]" );
+            }
+            async.each(self.curvesComparison, function(comparison, callback){
+                if (comparison.curve1 && comparison.curve2) {
+                    wiApiService.dataCurve(comparison.curve1.id, function(dataCurve1){
+                        wiApiService.dataCurve(comparison.curve2.id, function(dataCurve2){
+                            let data1 = dataCurve1.map(d => parseFloat(d.x));
+                            let data2 = dataCurve2.map(d => parseFloat(d.x));
+                            console.log("data", data1, data2);
+                            let S = null;
+                            let Sx = null;
+                            let Sy = null;
+                            let Sxy = null;
+                            let Sx2 = null;
+                            let Sy2 = null;
+                            if(!self.checked) {
+                                let len = data1.length;
+                                for (let i = 0; i < len; i++){
+                                    if (data1[i] != null && !isNaN(data1[i]) && 
+                                        data2[i] != null && !isNaN(data2[i])) {
+                                            S += (data1[i] - data2[i]) * (data1[i] - data2[i]); 
+                                            Sxy += (data1[i] * data2[i]);
+                                    };
+                                    if (data1[i] != null && !isNaN(data1[i]) ){
+                                        Sx += data1[i];
+                                        Sx2 += Math.pow(data1[i], 2);
+                                    };
+                                    if (data1[i] != null && !isNaN(data1[i]) ){
+                                        Sy += data2[i];
+                                        Sy2 += Math.pow(data2[i], 2);
+                                    };
+                                };
+                                console.log("diff, corr", S / len, (len * Sxy - Sx * Sy) / Math.pow((len * Sx2 - Sx * Sx) * (len * Sy2 - Sy * Sy), 0.5));
+
+                                comparison.difference = S / len;
+                                comparison.correlation = (len * Sxy - Sx * Sy) / Math.pow((len * Sx2 - Sx * Sx) * (len * Sy2 - Sy * Sy), 0.5);
+                            }
+                        });
+                    });
+                };
+            }, function(err){
+                console.log(err);
+            });
+        };
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };
