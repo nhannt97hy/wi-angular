@@ -8143,9 +8143,10 @@ exports.fillDataGapsDialog = function(ModalService){
     function ModalController(wiComponentService, wiApiService, close){
         let self = this;
         window.filldata = this;
+        this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.refresh = function (cb) {
+        function refresh(cb) {
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
             self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
@@ -8158,20 +8159,26 @@ exports.fillDataGapsDialog = function(ModalService){
             }
             if(cb) cb();
         }
-        this.refresh();
+        refresh();
+        this.gapsMaximum = 3;
+        this.calcMethod = 'sample';
+        this.suffix = '_fg';
         this.datasets =[];
         this.curves = [];
-        this.NullnumberDefault = function () {
-             self.Nullnumber = self.NullData.length;
-        }
-        this.NullData = [];
-        this.getNullValueNumber = function () {
-             wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
-                 self.NullData = data.filter(function (d) {
-                     return isNaN(d.x);
-                 })
-                 self.Nullnumber = self.NullData.length;
-             })
+        this.CurvesData = [];
+        this.getCurveData = function () {
+            let curveModel = self.CurvesData.find(curve => {return curve.id == self.SelectedCurve.id;});
+            if(curveModel){
+                self.Nullnumber = curveModel.data.filter(d => {return isNaN(d.x);}).length;
+            }else{
+                wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
+                    self.CurvesData.push({
+                        id: self.SelectedCurve.id,
+                        data: data
+                    });
+                    self.Nullnumber = data.filter(d => { return isNaN(d.x);}).length;
+                })
+            }
              self.curveName = self.SelectedCurve.properties.name;
          }
         this.onWellChange = function () {
@@ -8192,10 +8199,9 @@ exports.fillDataGapsDialog = function(ModalService){
             })
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
-            self.SelectedCurve = self.curves[0];
-            self.selectedDataset = self.datasets[0];
-            this.getNullValueNumber();
-            this.NullnumberDefault();
+            if(!self.SelectedCurve) self.SelectedCurve = self.curves[0];
+            if(!self.selectedDataset) self.selectedDataset = self.datasets[0];
+            this.getCurveData();
             self.curveName = self.SelectedCurve.properties.name;
         }
 
@@ -8214,6 +8220,26 @@ exports.fillDataGapsDialog = function(ModalService){
             self.curves.forEach(function (curve) {
                curve.flag = self.checked;
             })
+        }
+        function run(){
+            console.log('run');
+        }
+
+        this.onRunButtonClicked = function(){
+            if(self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            let otherCurves = self.curves.find(curve => {return curve.flag == true;});
+            if(self.curveName + self.suffix == self.SelectedCurve.name || (self.suffix == '' && otherCurves.length)){
+                DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
+                    if(ret){
+                        run();
+                    }else{
+                        self.applyingInProgress = false;
+                    }
+                })
+            }else{
+                run();
+            }
         }
         this.onCancelButtonClicked = function(){
             close(null);
