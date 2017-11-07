@@ -28,15 +28,17 @@
                         </label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.topDepth"
-                                    type="number" class="form-control wi-form-control" step="any">
+                                    type="number" class="form-control wi-form-control" step="any"
+                                    ng-disabled="wiModal.checked">
                         </div>
                         <label for="" class="control-label col-sm-1 padding-left-0">Bottom</label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.bottomDepth"
-                                   type="number" class="form-control wi-form-control" step="any">
+                                   type="number" class="form-control wi-form-control" step="any"
+                                   ng-disabled="wiModal.checked">
                         </div>
                         <div class="col-sm-2">
-                            <button class="btn btn-default small-button"
+                            <button class="btn btn-default small-button" ng-disabled="wiModal.checked"
                                     ng-click="wiModal.defaultDepth()">Default</button>
                         </div>
                     </div>
@@ -71,16 +73,17 @@
                             </div>
                         </div>
                         <table class="table availableCurve">
-                            <thead style="">
+                            <thead style="display: block;">
                                 <tr>
                                     <th style="width: 20%">Name</th>
                                     <th style="width: 20%">Top</th>
                                     <th style="width: 20%">Bottom</th>
                                     <th style="width: 20%">Color</th>
                                     <th style="width: 20%">Use</th>
+                                    <th></th>
                                 </tr>
                             </thead>
-                            <tbody style="height: 7em; overflow-y: auto">
+                            <tbody style="display: block; height: 7em; overflow-y: auto">
                                 <tr ng-repeat="zone in wiModal.zones track by $index"
                                     ng-class="{selected:$index == selectedRow}"
                                     ng-click="wiModal.setClickedRow($index)">
@@ -99,6 +102,7 @@
                                     <td style="width: 20%">
                                         <input type="checkbox" ng-model="zone.use">
                                     </td>
+                                    <td></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -118,22 +122,37 @@
                             </tr>
                             </thead>
                             <tbody style="display: block; height: 10em; overflow-y: auto">
-                            <tr ng-repeat="curve in wiModal.curves">
+                            <tr ng-repeat="compa in wiModal.curvesComparison">
                                 <td style="width: 25%">
-                                    <select class="form-control wi-select-control"
-                                            ng-model="wiModal.idCurve"
-                                            ng-options="cur.id as cur.name for cur in wiModal.curves"
-                                            ng-change="wiModal.selectedCurve(wiModal.idCurve)">
-                                    </select>
+                                    <!-- <select class="form-control wi-form-control"
+                                            ng-model="compa.curve1"
+                                            ng-options="curve as curve.name for curve in wiModal.curves">
+                                    </select> -->
+                                    <ui-select ng-model="compa.curve1"
+                                                class="normal-text">
+                                        <ui-select-match placeholder='Select a curve'>
+                                            {{compa.curve1.properties.name}}
+                                        </ui-select-match>
+                                        <ui-select-choices group-by="'datasetName'" position="down"
+                                                            repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                        </ui-select-choices>
+                                    </ui-select>
                                 </td>
                                 <td style="width: 25%">
-                                    <select class="form-control wi-select-control"
-                                            ng-model="wiModal.curves"
-                                            ng-options="cur.id as cur.name for cur in wiModal.curves">
-                                    </select>
+                                    <ui-select ng-model="compa.curve2"
+                                                class="normal-text">
+                                        <ui-select-match placeholder='Select a curve'>
+                                            {{compa.curve2.properties.name}}
+                                        </ui-select-match>
+                                        <ui-select-choices group-by="'datasetName'" position="down"
+                                                            repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                        </ui-select-choices>
+                                    </ui-select>
                                 </td>
-                                <td style="width: 25%"></td>
-                                <td style="width: 25%"></td>
+                                <td style="width: 25%">{{compa.difference}}</td>
+                                <td style="width: 25%">{{compa.correlation}}</td>
                                 <td></td>
                             </tr>
                             </tbody>
