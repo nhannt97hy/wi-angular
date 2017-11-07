@@ -23,6 +23,7 @@ const BASE_URL = 'http://dev.sflow.me';
 
 
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+// const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
@@ -1348,7 +1349,7 @@ Service.prototype.setAuthenticationInfo = function(authenInfo) {
 }
 
 Service.prototype.getCaptcha = function () {
-    return BASE_URL + "/captcha.png";
+    return AUTHENTICATION_SERVICE + "/captcha.png";
 };
 exports.name = moduleName;
 
