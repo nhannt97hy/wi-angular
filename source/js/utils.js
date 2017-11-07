@@ -1222,15 +1222,15 @@ function sortProjectData(projectData){
             });
         });
         well.zonesets.sort((a,b)=>{
-            let startA = parseFloat(a.startDepth);
-            let startB = parseFloat(b.startDepth);
-            return startA - startB;
-        })
+            let nameA = a.name.toUpperCase();
+            let nameB = b.name.toUpperCase();
+            return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+        });
         well.zonesets.forEach(function(zoneset){
             zoneset.zones.sort((a,b)=>{
-                let nameA = parseInt(a.name);
-                let nameB = parseInt(b.name);
-                return nameA > nameB;
+                let depthA = parseFloat(a.startDepth);
+                let depthB = parseFloat(b.startDepth);
+                return depthA - depthB;
             })
         })
     });

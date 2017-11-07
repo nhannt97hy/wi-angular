@@ -23,7 +23,20 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                     fullname: self.userfullnameReg,
                     captcha: self.captcha
             }
-            wiApiService.register(dataRequest, function (token) {
+            wiApiService.register(dataRequest, function (response) {
+                if(response == "USER_EXISTED"){
+                    // alert("User existed");
+                    authenticationMessage(ModalService, "Registration", "User already exists!", function () {
+                    });
+                } else if(response == "WRONG_CAPTCHA"){
+                    //alert("Wrong captcha");
+                    authenticationMessage(ModalService, "Registration", "Captcha was not correct!", function () {
+                    });
+                } else {
+                    authenticationMessage(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
+                        location.reload();
+                    });
+                }
                 // let userInfo = {
                 //     username: self.usernameReg,
                 //     password: self.passwordReg,
@@ -31,15 +44,15 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 // }
                 // wiApiService.setAuthenticationInfo(userInfo);
                 // close(100);
-                if(token != "CAPTCHA"){
-                    setTimeout(function () {
-                        warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
-                            location.reload();
-                        });
-                    }, 200);
-                } else {
-                    alert("Captcha is not correct!");
-                }
+                // if(token != "CAPTCHA"){
+                //     setTimeout(function () {
+                //         warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
+                //             location.reload();
+                //         });
+                //     }, 200);
+                // } else {
+                //     alert("Captcha is not correct!");
+                // }
             });
         }
         this.onLoginButtonClicked = function () {
@@ -49,15 +62,26 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 username: self.username,
                 password: self.password
             }
-            wiApiService.login(dataRequest, function(token) {
-                let userInfo = {
-                    username: self.username,
-                    password: self.password,
-                    token: token,
-                    remember: self.remember
-                };
-                wiApiService.setAuthenticationInfo(userInfo);
-                close(userInfo);
+            wiApiService.login(dataRequest, function(response) {
+                if(response == "USER_NOT_EXISTS"){
+                    authenticationMessage(ModalService, "Login", "User is not exists.", function () {
+                    });
+                } else if (response == "WRONG_PASSWORD") {
+                    authenticationMessage(ModalService, "Login", "Password is not correct.", function () {
+                    });
+                } else if (response == "NOT_ACTIVATED"){
+                    authenticationMessage(ModalService, "Login", "You are not activated. Please wait for account activation.", function () {
+                    });
+                } else {
+                    let userInfo = {
+                        username: self.username,
+                        password: self.password,
+                        token: response,
+                        remember: self.remember
+                    };
+                    wiApiService.setAuthenticationInfo(userInfo);
+                    close(userInfo);
+                }
             });
 
         }
@@ -78,7 +102,30 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         });
     });
 };
-
+exports.authenticationMessage = authenticationMessage;
+function authenticationMessage(ModalService, type, message, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.title = type;
+        this.message = message;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: 'authentication-message/authentication-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            if (callback) callback();
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        })
+    });
+}
 
 exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
