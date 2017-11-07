@@ -23,7 +23,20 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                     fullname: self.userfullnameReg,
                     captcha: self.captcha
             }
-            wiApiService.register(dataRequest, function (token) {
+            wiApiService.register(dataRequest, function (response) {
+                if(response == "USER_EXISTED"){
+                    // alert("User existed");
+                    authenticationMessage(ModalService, "Registration", "User already exists!", function () {
+                    });
+                } else if(response == "WRONG_CAPTCHA"){
+                    //alert("Wrong captcha");
+                    authenticationMessage(ModalService, "Registration", "Captcha was not correct!", function () {
+                    });
+                } else {
+                    authenticationMessage(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
+                        location.reload();
+                    });
+                }
                 // let userInfo = {
                 //     username: self.usernameReg,
                 //     password: self.passwordReg,
@@ -31,15 +44,15 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 // }
                 // wiApiService.setAuthenticationInfo(userInfo);
                 // close(100);
-                if(token != "CAPTCHA"){
-                    setTimeout(function () {
-                        warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
-                            location.reload();
-                        });
-                    }, 200);
-                } else {
-                    alert("Captcha is not correct!");
-                }
+                // if(token != "CAPTCHA"){
+                //     setTimeout(function () {
+                //         warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
+                //             location.reload();
+                //         });
+                //     }, 200);
+                // } else {
+                //     alert("Captcha is not correct!");
+                // }
             });
         }
         this.onLoginButtonClicked = function () {
@@ -49,15 +62,26 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 username: self.username,
                 password: self.password
             }
-            wiApiService.login(dataRequest, function(token) {
-                let userInfo = {
-                    username: self.username,
-                    password: self.password,
-                    token: token,
-                    remember: self.remember
-                };
-                wiApiService.setAuthenticationInfo(userInfo);
-                close(userInfo);
+            wiApiService.login(dataRequest, function(response) {
+                if(response == "USER_NOT_EXISTS"){
+                    authenticationMessage(ModalService, "Login", "User is not exists.", function () {
+                    });
+                } else if (response == "WRONG_PASSWORD") {
+                    authenticationMessage(ModalService, "Login", "Password is not correct.", function () {
+                    });
+                } else if (response == "NOT_ACTIVATED"){
+                    authenticationMessage(ModalService, "Login", "You are not activated. Please wait for account activation.", function () {
+                    });
+                } else {
+                    let userInfo = {
+                        username: self.username,
+                        password: self.password,
+                        token: response,
+                        remember: self.remember
+                    };
+                    wiApiService.setAuthenticationInfo(userInfo);
+                    close(userInfo);
+                }
             });
 
         }
@@ -78,7 +102,30 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         });
     });
 };
-
+exports.authenticationMessage = authenticationMessage;
+function authenticationMessage(ModalService, type, message, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.title = type;
+        this.message = message;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: 'authentication-message/authentication-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            if (callback) callback();
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        })
+    });
+}
 
 exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
@@ -8011,14 +8058,18 @@ exports.curveConvolutionDialog = function(ModalService){
                             })
                         }, function(err){
                             if(self.curvesArr.length){
-                                self.ResultCurve = {
-                                    idDataset: self.datasets[0].id,
-                                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
-                                    idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
-                                    data: []
+                                if(!self.ResultCurve){
+                                    self.ResultCurve = {
+                                        idDataset: self.datasets[0].id,
+                                        curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
+                                        idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
+                                        data: []
+                                    }
                                 }
-                                self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
-                                self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                if(!self.inputCurve)
+                                    self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                if(!self.stdCurve)
+                                    self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
                             }else {
                                 delete self.ResultCurve;
                                 delete self.inputCurve;
@@ -8041,19 +8092,28 @@ exports.curveConvolutionDialog = function(ModalService){
             }, 0);
         });
 
-        function convolution(input, kernel, out){ // need update
+        function convolution(input, kernel, out){
             // check validity of params
             if(!input || !out || !kernel) return false;
-            if(input.length <=0 || kernel.length <= 0) return false;
+            if(input.length < 1 || kernel.length < 1) return false;
 
-            for (let n = 0; n < input.length + kernel.length - 1; n++) {
-                out[n] = 0;
+            let inputF = input.filter(d => {return !isNaN(d);});
+            inputF.length = input.length;
+            let inputSize = input.length;
+            kernelF = kernel.filter(d => {return !isNaN(d);});
+            kernelF.length = kernel.length;
+            kernelF = kernelF.reverse();
+            let kernelSize = kernel.length;
 
-                let kmin = (n >= kernel.length - 1) ? n - (kernel.length - 1) : 0;
-                let kmax = (n < input.length - 1) ? n : input.length - 1;
-
-                for (let k = kmin; k <= kmax; k++) {
-                    out[n] += input[k] * kernel[n - k];
+            for(let n = 0; n < inputSize; n++){
+                if(!isNaN(input[n])){
+                    kernelF.unshift(kernelF.pop());
+                    out[n] = 0;
+                    for(let k = 0; k < kernelSize; k++){
+                        out[n] += (inputF[k] || 0) * (kernelF[k] || 0);
+                    }
+                }else{
+                    out[n] = NaN;
                 }
             }
             return true;
@@ -8182,9 +8242,10 @@ exports.fillDataGapsDialog = function(ModalService){
     function ModalController(wiComponentService, wiApiService, close){
         let self = this;
         window.filldata = this;
+        this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.refresh = function (cb) {
+        function refresh(cb) {
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
             self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
@@ -8197,20 +8258,26 @@ exports.fillDataGapsDialog = function(ModalService){
             }
             if(cb) cb();
         }
-        this.refresh();
+        refresh();
+        this.gapsMaximum = 3;
+        this.calcMethod = 'sample';
+        this.suffix = '_fg';
         this.datasets =[];
         this.curves = [];
-        this.NullnumberDefault = function () {
-             self.Nullnumber = self.NullData.length;
-        }
-        this.NullData = [];
-        this.getNullValueNumber = function () {
-             wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
-                 self.NullData = data.filter(function (d) {
-                     return isNaN(d.x);
-                 })
-                 self.Nullnumber = self.NullData.length;
-             })
+        this.CurvesData = [];
+        this.getCurveData = function () {
+            let curveModel = self.CurvesData.find(curve => {return curve.id == self.SelectedCurve.id;});
+            if(curveModel){
+                self.Nullnumber = curveModel.data.filter(d => {return isNaN(d.x);}).length;
+            }else{
+                wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
+                    self.CurvesData.push({
+                        id: self.SelectedCurve.id,
+                        data: data
+                    });
+                    self.Nullnumber = data.filter(d => { return isNaN(d.x);}).length;
+                })
+            }
              self.curveName = self.SelectedCurve.properties.name;
          }
         this.onWellChange = function () {
@@ -8231,10 +8298,9 @@ exports.fillDataGapsDialog = function(ModalService){
             })
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
-            self.SelectedCurve = self.curves[0];
-            self.selectedDataset = self.datasets[0];
-            this.getNullValueNumber();
-            this.NullnumberDefault();
+            if(!self.SelectedCurve) self.SelectedCurve = self.curves[0];
+            if(!self.selectedDataset) self.selectedDataset = self.datasets[0];
+            this.getCurveData();
             self.curveName = self.SelectedCurve.properties.name;
         }
 
@@ -8253,6 +8319,26 @@ exports.fillDataGapsDialog = function(ModalService){
             self.curves.forEach(function (curve) {
                curve.flag = self.checked;
             })
+        }
+        function run(){
+            console.log('run');
+        }
+
+        this.onRunButtonClicked = function(){
+            if(self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            let otherCurves = self.curves.find(curve => {return curve.flag == true;});
+            if(self.curveName + self.suffix == self.SelectedCurve.name || (self.suffix == '' && otherCurves.length)){
+                DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite?", function(ret){
+                    if(ret){
+                        run();
+                    }else{
+                        self.applyingInProgress = false;
+                    }
+                })
+            }else{
+                run();
+            }
         }
         this.onCancelButtonClicked = function(){
             close(null);
@@ -8316,20 +8402,24 @@ exports.curveDerivativeDialog = function(ModalService){
             self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
             if (self.curves.length) {
-                self.SelectedCurve = self.curves[0];
-                self.selectedDataset = self.datasets[0].id;
-                self.firstCurve = {
-                    idDataset: self.selectedDataset,
-                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
-                    idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
-                    data: []
-                }
-                self.secondCurve = {
-                    idDataset: self.selectedDataset,
-                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
-                    idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
-                    data: []
-                }
+                if(!self.SelectedCurve)
+                    self.SelectedCurve = self.curves[0];
+                if(!self.selectedDataset)
+                    self.selectedDataset = self.datasets[0].id;
+                if(!self.firstCurve)
+                    self.firstCurve = {
+                        idDataset: self.selectedDataset,
+                        curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
+                        idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
+                        data: []
+                    }
+                if(!self.secondCurve)
+                    self.secondCurve = {
+                        idDataset: self.selectedDataset,
+                        curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
+                        idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
+                        data: []
+                    }
             }else {
                 delete self.firstCurve;
                 delete self.secondCurve;
