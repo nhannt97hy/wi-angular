@@ -93,10 +93,10 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
-        $('.modal-backdrop').attr('class', 'white-backdrop');
+        $('.modal-backdrop').css({'opacity': 1, 'background-color': '#ffffff'});
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.white-backdrop').remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (callback && data) callback(data);
         });
@@ -121,7 +121,7 @@ function authenticationMessage(ModalService, type, message, callback) {
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             if (callback) callback();
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         })
     });
@@ -159,7 +159,7 @@ exports.newProjectDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (data) {
@@ -223,7 +223,7 @@ exports.openProjectDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (data) {
@@ -250,7 +250,7 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -288,7 +288,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
             $(modal.element[0]).find('input').focus();
         }, 500);
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
             callback(ret);
@@ -499,7 +499,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -550,7 +550,7 @@ exports.addNewDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -573,7 +573,7 @@ exports.wellHeaderDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -620,7 +620,7 @@ exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -650,7 +650,7 @@ exports.curveAliasDialog = function (ModalService, callback) {
     }).then(function (modal) {
         modal.element.modal();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -672,7 +672,7 @@ exports.familyEditDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -707,7 +707,7 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
             $(modal.element[0]).find('input').focus();
         }, 500);
         modal.close.then(function (newPlot) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (callback && newPlot) callback(newPlot);
@@ -738,7 +738,7 @@ exports.tripleComboDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             callback(ret);
@@ -767,7 +767,7 @@ exports.densityNeutronDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -795,7 +795,7 @@ exports.resistivitySonicDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -823,7 +823,7 @@ exports.threeTracksBlankDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -851,7 +851,7 @@ exports.inputCurveDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -879,7 +879,7 @@ exports.lithoSynCurveDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -908,7 +908,7 @@ exports.addCurveDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (ret) callback(ret);
         });
@@ -953,7 +953,7 @@ exports.lineStyleDialog = function (ModalService, wiComponentService, callback, 
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             console.log(ret);
             if (ret) callback(ret);
@@ -1012,7 +1012,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             console.log(ret);
             if (ret) callback(ret);
@@ -1093,7 +1093,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (lineOptions, symbolOptions) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (lineOptions || symbolOptions) {
                 console.log(lineOptions, symbolOptions);
@@ -1407,7 +1407,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 break;
         }
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (callback) callback(ret);
@@ -1469,7 +1469,7 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
     }).then(function (modal) {
         modal.element.modal();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) console.log("imported", data);
         });
@@ -1633,7 +1633,7 @@ exports.importLASDialog = function (ModalService) {
     }).then(function (modal) {
         modal.element.modal();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) console.log("imported", data);
         });
@@ -1825,7 +1825,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     }).then(function (modal) {
         modal.element.modal();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -1945,7 +1945,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     // }).then(function (modal) {
         // modal.element.modal();
         // modal.close.then(function (data) {
-            // $('.modal-backdrop')[0].remove();
+            // $('.modal-backdrop').last().remove();
             // $('body').removeClass('modal-open');
             // if (data) callback(data);
         // });
@@ -2056,7 +2056,7 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
         thisModal.enableFill("positiveNegative", false);
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (data) {
@@ -2122,7 +2122,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -2643,7 +2643,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         thisModal.enableFill("positiveNegative", false);
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) {
                 var objData = JSON.parse(data);
@@ -3711,7 +3711,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         if (options.shadingOnly) { wiModal.shadingOnly = true };
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -3763,7 +3763,7 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -3847,7 +3847,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -3906,7 +3906,7 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -3932,7 +3932,7 @@ function errorMessageDialog(ModalService, errorMessage, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (callback) callback();
         })
@@ -3957,7 +3957,7 @@ function warningMessageDialog (ModalService, warningMessage, callback) {
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             if (callback) callback();
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         })
     });
@@ -3983,7 +3983,7 @@ exports.aboutDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (data) {
@@ -4018,7 +4018,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (data) {
@@ -4048,7 +4048,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (newPlot) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (callback && newPlot) callback(newPlot);
@@ -4126,7 +4126,7 @@ exports.colorPickerDialog1 = function (ModalService, currentColor, callback) {
         });
         $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (callback) if (colorStr) callback(colorStr);
@@ -4317,7 +4317,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
         });
         $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (callback) if (colorStr) callback(colorStr);
         });
@@ -4409,7 +4409,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
         thisModal.enableFill("positiveNegative", false);
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -4834,7 +4834,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         $(modal.element[0].children[0]).draggable();
         modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
             callback(ret);
@@ -5277,7 +5277,7 @@ exports.crossplotFormatDialog1 = function (ModalService, wiCrossplotCtrl, callba
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
             callback(ret);
@@ -5361,7 +5361,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
             callback(ret);
@@ -5539,7 +5539,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('.modal').remove();
             $('body').removeClass('modal-open');
             if (ret && callback) callback(ret);
@@ -5577,7 +5577,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
             $(modal.element[0]).find('input').focus();
         }, 500);
         modal.close.then(function (newPlot) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
 
             if (callback) callback(newPlot);
@@ -5768,7 +5768,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
         })
@@ -5834,7 +5834,7 @@ exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     })
@@ -5928,7 +5928,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) callback(data);
         });
@@ -6141,7 +6141,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('.modal').remove();
             $('body').removeClass('modal-open');
             if (ret && callback) callback(ret);
@@ -6570,7 +6570,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
         })
@@ -6819,7 +6819,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
         })
@@ -7071,7 +7071,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('.modal').remove();
             $('body').removeClass('modal-open');
             if (ret && callback) callback(ret);
@@ -7311,7 +7311,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (!ret) return;
         })
@@ -7467,7 +7467,7 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('.modal').remove();
             $('body').removeClass('modal-open');
             if (ret && callback) callback(ret);
@@ -7509,7 +7509,7 @@ exports.annotationPropertiesDialog = function (ModalService, annotationPropertie
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data && callback) callback(data);
         });
@@ -7689,7 +7689,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -7905,7 +7905,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -8071,7 +8071,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -8246,7 +8246,7 @@ exports.curveConvolutionDialog = function(ModalService){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });
@@ -8418,7 +8418,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });
@@ -8539,7 +8539,7 @@ exports.fillDataGapsDialog = function(ModalService){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });
@@ -8727,7 +8727,7 @@ exports.curveDerivativeDialog = function(ModalService){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
-            $('.modal-backdrop')[0].remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });
