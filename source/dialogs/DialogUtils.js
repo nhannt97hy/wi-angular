@@ -8121,13 +8121,13 @@ exports.curveConvolutionDialog = function(ModalService){
                             })
                         }, function(err){
                             if(self.curvesArr.length){
-                                self.inputCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
-                                self.stdCurve = self.datasets[0].children.length ? self.datasets[0].children[0]: null;
+                                self.inputCurve = self.curvesArr[0];
+                                self.stdCurve = self.curvesArr[0];
                                 self.ResultCurve = {
                                     idDataset: self.datasets[0].id,
-                                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name : null,
-                                    idDesCurve: self.datasets[0].children.length? self.datasets[0].children[0].id: null,
-                                    unit: self.inputCurve? self.inputCurve.properties.unit: null,
+                                    curveName: self.inputCurve.name,
+                                    idDesCurve: self.inputCurve.id,
+                                    unit: self.inputCurve.properties.unit,
                                     data: []
                                 }
                             }else {
@@ -8909,16 +8909,16 @@ exports.curveDerivativeDialog = function(ModalService){
                 self.selectedDataset = self.datasets[0].id;
                 self.firstCurve = {
                     idDataset: self.selectedDataset,
-                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
-                    idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
+                    curveName: self.SelectedCurve.name,
+                    idDesCurve: self.SelectedCurve.id,
                     unit: self.SelectedCurve.properties.unit,
                     data: []
                 }
                 self.secondCurve = {
                     idDataset: self.selectedDataset,
-                    curveName: self.datasets[0].children.length ? self.datasets[0].children[0].name: null,
-                    idDesCurve: self.datasets[0].children.length ? self.datasets[0].children[0].id: null,
-                    unit: self.SelectedCurve.properties.unit,                    
+                    curveName: self.SelectedCurve.name,
+                    idDesCurve: self.SelectedCurve.id,
+                    unit: self.SelectedCurve.properties.unit,
                     data: []
                 }
             }else {
