@@ -8501,6 +8501,7 @@ exports.mergeCurveDialog = function (ModalService) {
             defaultDepth();
             getAllCurvesOnSelectWell(self.wellModel);
         }
+        
         // wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
         //     self.applyingInProgress = false;
         //     $timeout(function(){
@@ -8920,7 +8921,9 @@ exports.curveDerivativeDialog = function(ModalService){
 
 exports.TVDConversionDialog = function (ModalService) {
     function ModalController(wiComponentService, wiApiService, close) {
-
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
     }
     ModalService.showModal({
         templateUrl: "tvd-conversion/tvd-conversion-modal.html",
