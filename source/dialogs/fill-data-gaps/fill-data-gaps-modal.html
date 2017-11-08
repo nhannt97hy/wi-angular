@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled='wiModal.applyingInProgress'>&times;</button>
                 <h4><span class="curve-fill-data-gaps-16x16"></span>&nbsp;Fill Gaps</h4>
             </div>
             <div class="modal-body">
@@ -119,7 +119,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody style="overflow-y: scroll;display:block;height:10em; overflow-x:hidden">
-                                                <tr ng-repeat="curve in wiModal.curves | filter:{name: filterCurve, datasetName:filterDataset} track by $index"
+                                                <tr ng-repeat="curve in wiModal.curves | filter:{name: filterCurve, datasetName:filterDataset}| filter: wiModal.CurveF track by $index"
                                                    ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
                                                     <td style="width: 20%">
                                                         <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
@@ -137,8 +137,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'><span class="run-16x16"></span>&nbsp;Run</button>
-                    <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Close</button>
+                    <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'
+                    ng-disabled='wiModal.applyingInProgress || (wiModal.curveName + wiModal.suffix) == ""'><span class="run-16x16"></span>&nbsp;Run</button>
+                    <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'
+                    ng-disabled='wiModal.applyingInProgress'><span class="close-16x16"></span>&nbsp;Close</button>
                 </div>
             </div>
         </div>
