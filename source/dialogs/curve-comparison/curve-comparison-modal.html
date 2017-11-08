@@ -1,4 +1,4 @@
-<div class='modal fade'>
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
     <div class='modal-dialog'>
         <div class="modal-content">
             <div class="modal-header">
@@ -7,11 +7,15 @@
             </div>
             <div class="modal-body dialog-style">
                 <form class="form-horizontal form-condensed" name="modalCurveComparison">
-                    <div class="form-group">
-                        <label class="control-label col-sm-2">
-                            <span class="well-16x16"></span> Well
+                    <h5 class="modal-infomation-title">
+                        <span class="well-16x16"></span>
+                        Well
+                    </h5>
+                    <div class="row form-group">
+                        <label class="control-label col-sm-3">
+                            Select well:
                         </label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-9">
                             <select ng-model="wiModal.idWell"
                                     class="form-control wi-form-control"
                                     ng-options="well.id as well.properties.name for well in wiModal.wells"
@@ -72,18 +76,19 @@
                                 </div>
                             </div>
                         </div>
-                        <table class="table availableCurve">
-                            <thead style="display: block;">
+                        <table class="table table-bordered availableCurve">
+                            <thead>
                                 <tr>
                                     <th style="width: 20%">Name</th>
                                     <th style="width: 20%">Top</th>
                                     <th style="width: 20%">Bottom</th>
                                     <th style="width: 20%">Color</th>
                                     <th style="width: 20%">Use</th>
-                                    <th></th>
                                 </tr>
                             </thead>
-                            <tbody style="display: block; height: 7em; overflow-y: auto">
+                            <tbody style="height: 7em;">
+                            
+                            </style>>
                                 <tr ng-repeat="zone in wiModal.zones track by $index"
                                     ng-class="{selected:$index == selectedRow}"
                                     ng-click="wiModal.setClickedRow($index)">
@@ -102,7 +107,6 @@
                                     <td style="width: 20%">
                                         <input type="checkbox" ng-model="zone.use">
                                     </td>
-                                    <td></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -111,17 +115,16 @@
                         <h5 class="modal-infomation-title">Curve Comparison</h5>
                     </div>
                     <div class="form-group">
-                        <table class="table availableCurve margin-bottom-0">
-                            <thead style="display: block">
+                        <table class="table table-bordered availableCurve">
+                            <thead>
                             <tr>
                                 <th style="width: 25%">Curve 1</th>
                                 <th style="width: 25%">Curve 2</th>
                                 <th style="width: 25%">Difference</th>
                                 <th style="width: 25%">Correlation</th>
-                                <th></th>
                             </tr>
                             </thead>
-                            <tbody style="display: block; height: 10em; overflow-y: auto">
+                            <tbody>
                             <tr ng-repeat="compa in wiModal.curvesComparison">
                                 <td style="width: 25%">
                                     <ui-select ng-model="compa.curve1"
@@ -149,7 +152,6 @@
                                 </td>
                                 <td style="width: 25%">{{compa.difference}}</td>
                                 <td style="width: 25%">{{compa.correlation}}</td>
-                                <td></td>
                             </tr>
                             </tbody>
                         </table>

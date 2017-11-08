@@ -927,7 +927,12 @@ exports.InteractiveCurveSplitButtonClicked = function () {
 };
 
 exports.MergeCurvesButtonClicked = function () {
-    console.log('MergeCurvesButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.mergeCurveDialog(this.ModalService, function (data) {
+        console.log("mergeCurve");
+    });
 };
 
 exports.CurvesHeaderButtonClicked = function () {
@@ -1019,6 +1024,12 @@ exports.PythonProgramButtonClicked = function () {
 
 exports.TVDConversionButtonClicked = function () {
     console.log('TVDConversionButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.TVDConversionDialog(this.ModalService, function (data) {
+        console.log("TVD");
+    });
 };
 
 exports.PCAAnalysisButtonClicked = function () {

@@ -11,7 +11,7 @@
                         <span class="well-16x16"></span>
                         Well
                     </h5>
-                    <div class="form-group">
+                    <div class="row form-group">
                         <label class="control-label col-sm-3">
                             Select well:
                         </label>
@@ -24,13 +24,13 @@
                         </div>
                     </div>
                     <h5><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
-                    <div class="form-group">
+                    <div class="row form-group">
                         <label class="control-label col-sm-1">
                             Top
                         </label>
                         <div class="col-sm-4">
                             <input ng-model="wiModal.topDepth"
-                                    type="number" class="form-control wi-form-control" step="any">
+                                   type="number" class="form-control wi-form-control" step="any">
                         </div>
                         <label for="" class="control-label col-sm-1 padding-left-0">Bottom</label>
                         <div class="col-sm-4">
@@ -46,47 +46,53 @@
                         <span class="curve-input-16x16"></span>&nbsp;
                         Input
                     </h5>
-                    <div class="form-group">
-                        <label for="" class="control-label col-sm-3">Calculation method </label>
-                        <div class="col-sm-4">
+                    <div class="row form-group">
+                        <label for="" class="control-label col-sm-3">Method </label>
+                        <div class="col-sm-2">
                             <label>
                                 <input ng-model="wiModal.calcMethod"
-                                        type="radio" value="lateral" class="wi-form-control"> Lateral Average
+                                       type="radio" value="max" class="wi-form-control"> Max
                             </label>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-2">
                             <label>
                                 <input ng-model="wiModal.calcMethod"
-                                        type="radio" value="arithmetic" class="wi-form-control"> Arithmetic Average
+                                       type="radio" value="min" class="wi-form-control"> Min
+                            </label>
+                        </div>
+                        <div class="col-sm-2">
+                            <label>
+                                <input ng-model="wiModal.calcMethod"
+                                       type="radio" value="average" class="wi-form-control"> Average
+                            </label>
+                        </div>
+                        <div class="col-sm-2">
+                            <label>
+                                <input ng-model="wiModal.calcMethod"
+                                       type="radio" value="sum" class="wi-form-control"> Sum
                             </label>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-3">Curve search mask </label>
-                        <div class="col-sm-4">
-                            <input type="text" class="form-control wi-form-control" ng-model="filterCurve">
-                        </div>
-                    </div>
-                    <div class="form-group">
+                    <div class="row form-group">
                         <label class="control-label col-sm-3">Available curves</label>
                         <div class="col-sm-9">
                             <table class="table table-bordered availableCurve">
                                 <thead>
-                                    <tr>
-                                        <th style="width: 10%"></th>
-                                        <th style="width: 45%">Curve</th>
-                                        <th style="width: 45%">Dataset</th>
-                                    </tr>
+                                <tr>
+                                    <th style="width: 10%"></th>
+                                    <th style="width: 45%">Curve</th>
+                                    <th style="width: 45%">Dataset</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="curve in wiModal.availableCurves | filter:{name: filterCurve} track by $index"
-                                        ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
-                                        <td style="width: 10%;" class="border-right-gray">
-                                            <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
-                                        </td>
-                                        <td style="width:45%;" class="border-right-gray">{{curve.name}}</td>
-                                        <td style="width: 45%">{{curve.properties.dataset}}</td>
-                                    </tr>
+                                <tr ng-repeat="curve in wiModal.availableCurves track by $index"
+                                    ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
+                                    <td style="width: 10%;">
+                                        <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
+                                    </td>
+                                    <td style="width:45%;">{{curve.name}}</td>
+                                    <td style="width: 45%">{{curve.properties.dataset}}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -107,8 +113,8 @@
                             <label class="col-sm-4 padding-right-0">Output Curve</label>
                             <div class="col-sm-8 padding-right-0">
                                 <wi-custom-input type='curve' model='wiModal.desCurve'
-                                                options='wiModal.availableCurves' class="col-sm-6"
-                                                style="width: 100%"></wi-custom-input>
+                                                 options='wiModal.availableCurves' class="col-sm-6"
+                                                 style="width: 100%"></wi-custom-input>
                             </div>
                         </div>
                     </div>

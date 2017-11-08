@@ -1,4 +1,4 @@
-<div class='modal fade'>
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
     <div class='modal-dialog'>
         <div class="modal-content">
             <div class="modal-header">
@@ -7,11 +7,15 @@
             </div>
             <div class="modal-body dialog-style">
                 <form class="form-horizontal" action="" name="modalCurveRescale">
-                    <div class="form-group">
-                        <label class="control-label col-sm-2">
-                            <span class="well-16x16"></span> Well
+                    <h5 class="modal-infomation-title">
+                        <span class="well-16x16"></span>
+                        Well
+                    </h5>
+                    <div class="row form-group">
+                        <label class="control-label col-sm-3">
+                            Select well:
                         </label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-9">
                             <select ng-model="wiModal.idWell"
                                     class="form-control wi-form-control"
                                     ng-options="well.id as well.properties.name for well in wiModal.wells"
@@ -19,10 +23,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row">
-                        <h5><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>
-                    </div>
-                    <div class="form-group">
+                    <h5 class="modal-infomation-title"><span class="depth-blank-16x16"></span>&nbsp;Depth Interval</h5>                
+                    <div class="row form-group">
                         <label class="control-label col-sm-1">
                             Top
                         </label>
@@ -40,10 +42,8 @@
                                     ng-click="wiModal.defaultDepth()">Default</button>
                         </div>
                     </div>
-                    <div class="row">
-                        <h5 class="modal-infomation-title"> Input</h5>
-                    </div>
-                    <div class="form-group">
+                    <h5 class="modal-infomation-title"> Input</h5>
+                    <div class="row form-group">
                         <label class="control-label col-sm-2 padding-right-0"> Curve input</label>
                         <div class="col-sm-10">
                             <!-- <select class="form-control wi-form-control"
@@ -64,7 +64,7 @@
                             </ui-select>
                         </div>
                     </div>
-                    <div class="form-group margin-bottom-0_3em">
+                    <div class="row form-group">
                         <label for="" class="control-label col-sm-2"> Left scale</label>
                         <div class="col-sm-4">
                             <input type="number" class="form-control wi-form-control"
@@ -76,17 +76,15 @@
                                     ng-model="wiModal.curveModel.lineProperties.maxScale">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="row form-group">
                         <label for="" class="col-sm-2 control-label padding-right-0"> Logarithmic</label>
                         <div class="col-sm-1">
                             <input type="checkbox" class="input-check"
                                     ng-model="wiModal.logInput">
                         </div>
                     </div>
-                    <div class="row">
-                        <h5 class="modal-infomation-title">Output</h5>
-                    </div>
-                    <div class="form-group">
+                    <h5 class="modal-infomation-title">Output</h5>
+                    <div class="row form-group">
                         <label class="control-label col-sm-2"> Dataset</label>
                         <div class="col-sm-10">
                             <select class="form-control wi-form-control"
@@ -95,7 +93,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="row form-group">
                         <label class="control-label col-sm-2 padding-right-0"> Curve output</label>
                         <div class="col-sm-4">
                             <input type="text" class="form-control wi-form-control" 
@@ -107,7 +105,7 @@
                                     ng-model="wiModal.outputObj.unit">
                         </div>
                     </div>
-                    <div class="form-group margin-bottom-0_3em">
+                    <div class="row form-group">
                         <label for="" class="control-label col-sm-2 padding-right-0"> Left scale</label>
                         <div class="col-sm-4">
                             <input type="number" class="form-control wi-form-control"
@@ -119,7 +117,7 @@
                                     ng-model="wiModal.outputObj.rightScale">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="row form-group">
                         <label for="" class="col-sm-2 control-label padding-right-0"> Logarithmic</label>
                         <div class="col-sm-1">
                             <input type="checkbox" class="input-check"

@@ -1,4 +1,4 @@
-<div class='modal fade'>
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
     <div class='modal-dialog'>
         <div class="modal-content">
             <div class="modal-header">
@@ -8,14 +8,14 @@
             <div class="modal-body dialog-style">
                 <form class="form-horizontal" action="" name="modalSplitCurve">
                     <h5 class="modal-infomation-title">
-                        <span class="well-insight-16x16"></span>
+                        <span class="well-16x16"></span>
                         Well
                     </h5>
                     <div class="row form-group">
-                        <label class="control-label col-sm-2">
-                            Select Well
+                        <label class="control-label col-sm-3">
+                            Select well:
                         </label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-9">
                             <select ng-model="wiModal.idWell"
                                     class="form-control wi-form-control"
                                     ng-options="well.id as well.properties.name for well in wiModal.wells"
@@ -67,7 +67,7 @@
                                    ng-model="wiModal.numberSplit"
                                    class="form-control wi-form-control"
                                    ng-change="wiModal.changeNumberSplit(wiModal.numberSplit)"
-                                    min="1" max="10">
+                                   min="1" max="10">
                         </div>
                     </div>
                     <h5 class="modal-infomation-title">
@@ -90,25 +90,24 @@
                         <div class="col-sm-12">
                             <table class="table table-bordered availableCurve">
                                 <thead style="display: block">
-                                    <tr style="width: 100%; display: table">
-                                        <th width="40%">Curve name</th>
-                                        <th width="30%">Depth start</th>
-                                        <th width="30%">Depth end</th>
-                                    </tr>
+                                <tr style="width: 100%; display: table">
+                                    <th width="40%">Curve name</th>
+                                    <th width="30%">Depth start</th>
+                                    <th width="30%">Depth end</th>
+                                </tr>
                                 </thead>
                                 <tbody style="display: block;height: 10em; overflow-y: overlay">
-                                    <tr ng-model="wiModal.array" ng-repeat="curve in wiModal.arrayCurve track by $index">
-                                        <td width="40%">
-                                            <input type="text" class="form-control wi-form-control" ng-model="curve.name">
-                                        </td>
-                                        <td width="30%">
-                                            <input type="number" class="form-control wi-form-control" step="any" ng-model="curve.start">
-                                        </td>
-                                        <td width="30%">
-                                            <input type="number" class="form-control wi-form-control" step="any" ng-model="curve.end">
-                                        </td>
-
-                                    </tr>
+                                <tr ng-model="wiModal.array" ng-repeat="curve in wiModal.arrayCurve track by $index">
+                                    <td width="40%">
+                                        <input type="text" class="form-control wi-form-control" ng-model="curve.name">
+                                    </td>
+                                    <td width="30%">
+                                        <input type="number" class="form-control wi-form-control" step="any" ng-model="curve.start">
+                                    </td>
+                                    <td width="30%">
+                                        <input type="number" class="form-control wi-form-control" step="any" ng-model="curve.end">
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
