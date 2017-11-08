@@ -7922,6 +7922,8 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.wells = wiExplorer.treeConfig[0].children;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
+        this.applyingInProgress = false;
+
         let zoneSetParaModel = {};
         let zoneArr = [];
         this.zoneSetPara = [];
@@ -8016,22 +8018,30 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                     "Input invalid [" + self.wellModel.properties.topDepth + "," + 
                                     self.wellModel.properties.bottomDepth+ "]" );
             }
+
+            
             async.each(self.curvesComparison, function(comparison, callback){
                 if (comparison.curve1 && comparison.curve2) {
                     wiApiService.dataCurve(comparison.curve1.id, function(dataCurve1){
                         wiApiService.dataCurve(comparison.curve2.id, function(dataCurve2){
                             let data1 = dataCurve1.map(d => parseFloat(d.x));
                             let data2 = dataCurve2.map(d => parseFloat(d.x));
-                            console.log("data", data1, data2);
-                            let S = null;
-                            let Sx = null;
-                            let Sy = null;
-                            let Sxy = null;
-                            let Sx2 = null;
-                            let Sy2 = null;
-                            if(!self.checked) {
-                                let len = data1.length;
-                                for (let i = 0; i < len; i++){
+                            // console.log("data", data1);
+                            function comparisonParam (start, end) {
+                                let S = null;
+                                let Sx = null;
+                                let Sy = null;
+                                let Sxy = null;
+                                let Sx2 = null;
+                                let Sy2 = null;
+                                let yStart = Math.round((
+                                                start - parseFloat(self.wellModel.properties.topDepth))
+                                                        /parseFloat(self.wellModel.properties.step));
+                                let yEnd = Math.round((
+                                                end - parseFloat(self.wellModel.properties.topDepth))
+                                                        /parseFloat(self.wellModel.properties.step));
+                                let N = yEnd - yStart + 1;
+                                for (let i = yStart; i <= yEnd; i++){
                                     if (data1[i] != null && !isNaN(data1[i]) && 
                                         data2[i] != null && !isNaN(data2[i])) {
                                             S += (data1[i] - data2[i]) * (data1[i] - data2[i]); 
@@ -8041,18 +8051,52 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                         Sx += data1[i];
                                         Sx2 += Math.pow(data1[i], 2);
                                     };
-                                    if (data1[i] != null && !isNaN(data1[i]) ){
+                                    if (data2[i] != null && !isNaN(data2[i]) ){
                                         Sy += data2[i];
                                         Sy2 += Math.pow(data2[i], 2);
                                     };
                                 };
-                                console.log("diff, corr", S / len, (len * Sxy - Sx * Sy) / Math.pow((len * Sx2 - Sx * Sx) * (len * Sy2 - Sy * Sy), 0.5));
-
-                                comparison.difference = S / len;
-                                comparison.correlation = (len * Sxy - Sx * Sy) / Math.pow((len * Sx2 - Sx * Sx) * (len * Sy2 - Sy * Sy), 0.5);
+                                return { S : S, Sx : Sx, Sy : Sy, Sxy : Sxy, Sx2 : Sx2, Sy2 : Sy2, N : N }
                             }
+                            let len = data1.length;
+                            if(!self.checked) {
+                                let param = comparisonParam(self.topDepth, self.bottomDepth);
+                                console.log("cpm", param, len);
+                                comparison.difference = (param.S / param.N).toFixed(4);
+                                comparison.correlation = ((param.N * param.Sxy - param.Sx * param.Sy) / 
+                                                            Math.pow((param.N * param.Sx2 - param.Sx * param.Sx) * (param.N * param.Sy2 - param.Sy * param.Sy), 0.5)).toFixed(4);
+                            } else {
+                                let S = null;
+                                let Sx = null;
+                                let Sy = null;
+                                let Sxy = null;
+                                let Sx2 = null;
+                                let Sy2 = null;
+                                let N = null;
+                                let temp = 0;
+                                self.zones.forEach(function (z) {
+                                    if(z.use) {
+                                        let p = comparisonParam(z.properties.startDepth, z.properties.endDepth);
+                                        S += p.S ; Sx += p.Sx ; Sy += p.Sy ; Sxy += p.Sxy ; Sx2 += p.Sx2 ; Sy2 += p.Sy2; N += p.N;
+                                        temp += 1;
+                                    }
+                                });
+                                if(temp) {
+                                    comparison.difference = (S / N).toFixed(4);
+                                    comparison.correlation = ((N * Sxy - Sx * Sy) / 
+                                                                Math.pow((N * Sx2 - Sx * Sx) * (N * Sy2 - Sy * Sy), 0.5)).toFixed(4);
+                                } else {
+                                    comparison.difference = 0;
+                                    comparison.correlation = 0;
+                                }
+                            }
+                            self.applyingInProgress = false;
+                            callback();
                         });
                     });
+                } else {
+                    self.applyingInProgress = false;
+                    callback();
                 };
             }, function(err){
                 console.log(err);
