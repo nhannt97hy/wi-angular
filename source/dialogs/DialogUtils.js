@@ -17,11 +17,11 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
             self.checkPasswords();
             if (self.error) return;
             let dataRequest = {
-                    username: self.usernameReg,
-                    password: self.passwordReg,
-                    email: self.useremailReg,
-                    fullname: self.userfullnameReg,
-                    captcha: self.captcha
+                username: self.usernameReg,
+                password: self.passwordReg,
+                email: self.useremailReg,
+                fullname: self.userfullnameReg,
+                captcha: self.captcha
             }
             wiApiService.register(dataRequest, function (response) {
                 if(response == "USER_EXISTED"){
@@ -8411,7 +8411,191 @@ exports.splitCurveDialog = function (ModalService, callback) {
         };
     }
     ModalService.showModal({
-        "templateUrl": "split-curve/split-curve-modal.html",
+        "templateUrl": "curve-split/curve-split-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.mergeCurveDialog = function (ModalService) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+        let self = this;
+        window.curveAvg = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
+        this.wells = wiExplorer.treeConfig[0].children;
+        this.applyingInProgress = false;
+
+        this.availableCurves = [];
+        this.selectedCurves = [];
+        this.datasets = [];
+        this.calcMethod = "lateral";
+        this.selectedDataset = {};
+        this.idSelectedDataset = null;
+        this.desCurve = null;
+        self.wells = wiExplorer.treeConfig[0].children;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if( selectedNodes && selectedNodes[0].type == 'well')
+            this.wellModel = selectedNodes[0];
+        else if( selectedNodes && selectedNodes[0].type == 'curve' ) {
+            this.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+        }
+        else {
+            this.wellModel = angular.copy(self.wells[0]);
+        }
+
+        self.idWell = self.wellModel.id;
+        refresh();
+        this.defaultDepth = defaultDepth;
+        function defaultDepth () {
+            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
+            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+        }
+
+        this.selectWell = function(idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            defaultDepth();
+            self.availableCurves = [];
+            self.datasets = [];
+            getAllCurvesOnSelectWell(self.wellModel);
+        };
+        function getAllCurvesOnSelectWell(well) {
+            well.children.forEach(function (child) {
+                if (child.type == 'dataset') self.datasets.push(child);
+            });
+            self.datasets.forEach(function (child) {
+                child.children.forEach(function (item) {
+                    if (item.type == 'curve') {
+                        item.properties.dataset = child.properties.name;
+                        item.flag = false;
+                        self.availableCurves.push(item);
+                    }
+                })
+            });
+            self.selectedDataset = self.datasets[0];
+            self.desCurve = {
+                idDataset: self.availableCurves[0].properties.idDataset,
+                curveName: self.availableCurves[0].name,
+                idDesCurve: self.availableCurves[0].id,
+                data: []
+            };
+            console.log("curves", self.availableCurves);
+        }
+        this.select = function (curve) {
+            curve.flag = !curve.flag;
+        }
+
+        function refresh () {
+            self.datasets = [];
+            self.availableCurves = [];
+            self.wellModel = utils.findWellById(self.idWell);
+            defaultDepth();
+            getAllCurvesOnSelectWell(self.wellModel);
+        }
+        // wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+        //     self.applyingInProgress = false;
+        //     $timeout(function(){
+        //         refresh(function(){
+        //         });
+        //     }, 100);
+        // });
+
+        // function curveAverageCacl () {
+        //     if (self.applyingInProgress) return;
+        //     self.applyingInProgress = true;
+        //     if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+        //         dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+        //     let allData = [];
+        //     let dataAvg = [];
+        //     self.selectedCurves = self.availableCurves.filter(function(curve, index) {
+        //         return (curve.flag == true);
+        //     });
+        //     let yTop = Math.round((
+        //         self.topDepth - parseFloat(self.wellModel.properties.topDepth))
+        //         /parseFloat(self.wellModel.properties.step));
+        //     let yBottom = Math.round((
+        //         self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
+        //         /parseFloat(self.wellModel.properties.step));
+        //     console.log("yy", yTop, yBottom);
+        //     if(self.selectedCurves.length > 0){
+        //         async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
+        //             wiApiService.dataCurve(item.id, function (dataCurve){
+        //                 allData.push(dataCurve.map(d => d.x));
+        //                 callback();
+        //             });
+        //         }, function(err) {
+        //             if (err) {
+        //                 DialogUtils.errorMessageDialog(ModalService, err);
+        //             }
+        //             let meanData = [];
+        //             if(self.calcMethod == 'lateral') {
+        //                 let len = allData[0].length;
+        //                 for( var i = 0; i < len; i++){
+        //                     let sum = 0;
+        //                     let count = 0;
+        //                     for ( let j = 0; j < allData.length; j++) {
+        //                         if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
+        //                         else sum += parseFloat(allData[j][i]);
+        //                     }
+        //                     if (count > 0) meanData.push(null);
+        //                     else meanData.push(sum / allData.length);
+        //                 }
+        //                 self.desCurve.data = utils.getDataTopBottomRange(meanData, yTop, yBottom);
+        //             } else if (self.calcMethod == 'arithmetic') {
+        //                 for( var i = 0; i < allData[0].length; i++){
+        //                     let sum = 0;
+        //                     for ( let j = 0; j < allData.length; j++) {
+        //                         if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
+        //                         else sum += parseFloat(allData[j][i]);
+        //                     }
+        //                     meanData.push(sum / (allData.length - count));
+        //                 }
+        //                 self.desCurve.data = utils.getDataTopBottomRange(meanData, yTop, yBottom);
+        //             }
+        //             console.log("desCurve", self.desCurve);
+        //             let request = {};
+        //             if(self.desCurve.idDesCurve) {
+        //                 dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
+        //                     if(ret) {
+        //                         let request = self.desCurve;
+        //                         delete request.curveName;
+        //                         wiApiService.processingDataCurve(request, function(res) {
+        //                             console.log("processingDataCurve", res);
+        //                             utils.refreshProjectState();
+        //                             self.applyInProgress = false;
+        //                         })
+        //                     }
+        //                 });
+        //             }
+        //             else {
+        //                 wiApiService.processingDataCurve(self.desCurve, function(res) {
+        //                     console.log("processingDataCurve", res);
+        //                     utils.refreshProjectState();
+        //                     self.applyInProgress = false;
+        //                 })
+        //             }
+        //         });
+        //     }
+        // };
+
+        this.onRunButtonClicked = function () {
+
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "curve-merge/curve-merge-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
@@ -8544,6 +8728,7 @@ exports.fillDataGapsDialog = function(ModalService){
         });
     });
 }
+
 exports.curveDerivativeDialog = function(ModalService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
@@ -8721,6 +8906,24 @@ exports.curveDerivativeDialog = function(ModalService){
 
     ModalService.showModal({
         templateUrl: "curve-derivative/curve-derivative-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.TVDConversionDialog = function (ModalService) {
+    function ModalController(wiComponentService, wiApiService, close) {
+
+    }
+    ModalService.showModal({
+        templateUrl: "tvd-conversion/tvd-conversion-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {

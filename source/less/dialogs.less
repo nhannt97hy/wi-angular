@@ -508,9 +508,17 @@ input[type="checkbox"] {
 	padding: 1px 8px;
 }
 .availableCurve {
-	// thead, tbody, tr, th, td {
-	// 	display: block;
-	// }
+	thead, tbody {
+		display: block;
+	}
+	tbody {
+		height: 10em;
+		overflow-y: overlay;
+	}
+	tr {
+		display: table;
+		width: 100%;
+	}
 	thead>tr>th {
 		text-align: center;
 		padding: 0.6em;
