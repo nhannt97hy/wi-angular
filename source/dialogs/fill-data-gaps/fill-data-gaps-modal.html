@@ -138,7 +138,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'
-                    ng-disabled='wiModal.applyingInProgress || (wiModal.curveName + wiModal.suffix) == ""'><span class="run-16x16"></span>&nbsp;Run</button>
+                    ng-disabled='wiModal.applyingInProgress || wiModal.SelectedCurve == undefined'><span class="run-16x16"></span>&nbsp;Run</button>
                     <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'
                     ng-disabled='wiModal.applyingInProgress'><span class="close-16x16"></span>&nbsp;Close</button>
                 </div>

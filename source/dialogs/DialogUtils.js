@@ -8616,7 +8616,7 @@ exports.fillDataGapsDialog = function(ModalService){
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
             self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
-                self.selectedWell = self.wells[0];
+                self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
 
             }else {
                 self.selectedWell = self.wells.find(function (well) {
@@ -8650,28 +8650,30 @@ exports.fillDataGapsDialog = function(ModalService){
         this.onWellChange = function () {
             self.datasets.length = 0;
             self.curves.length = 0;
-            this.selectedWell.children.forEach(function(child,i) {
-                if(child.type == 'dataset')
-                   self.datasets.push(child);
-               if(i == self.selectedWell.children.length - 1){
-                   self.datasets.forEach(function (child) {
-                       child.children.forEach(function (item) {
-                           if (item.type == 'curve') {
-                               let d = item;
-                               d.flag = false;
-                               d.overwrite = false;
-                               self.curves.push(d);
-                           }
-                       })
-                   });
-               }
-            })
-            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
-            self.SelectedCurve = self.curves[0];
-            self.selectedDataset = self.datasets[0];
-            this.getCurveData();
-            self.curveName = self.SelectedCurve.properties.name;
+            if(self.selectedWell){
+                this.selectedWell.children.forEach(function(child,i) {
+                    if(child.type == 'dataset')
+                       self.datasets.push(child);
+                   if(i == self.selectedWell.children.length - 1){
+                       self.datasets.forEach(function (child) {
+                           child.children.forEach(function (item) {
+                               if (item.type == 'curve') {
+                                   let d = item;
+                                   d.flag = false;
+                                   d.overwrite = false;
+                                   self.curves.push(d);
+                               }
+                           })
+                       });
+                   }
+                })
+                self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
+                self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+                self.SelectedCurve = self.curves[0];
+                self.selectedDataset = self.datasets[0];
+                this.getCurveData();
+                self.curveName = self.SelectedCurve.properties.name;
+            }
         }
 
         this.onWellChange();
@@ -8872,7 +8874,7 @@ exports.curveDerivativeDialog = function(ModalService){
             self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
             self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
-                self.selectedWell = self.wells[0];
+                self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
 
             }else {
                 self.selectedWell = self.wells.find(function (well) {
@@ -8889,43 +8891,45 @@ exports.curveDerivativeDialog = function(ModalService){
         this.onWellChange = function () {
             self.datasets.length = 0;
             self.curves.length = 0;
-            this.selectedWell.children.forEach(function (child, i) {
-                if (child.type == 'dataset')
-                    self.datasets.push(child);
-                if (i == self.selectedWell.children.length - 1) {
-                    self.datasets.forEach(function (child) {
-                        child.children.forEach(function (item) {
-                            if (item.type == 'curve') {
-                                self.curves.push(item);
-                            }
-                        })
-                    });
+            if(self.selectedWell){
+                this.selectedWell.children.forEach(function (child, i) {
+                    if (child.type == 'dataset')
+                        self.datasets.push(child);
+                    if (i == self.selectedWell.children.length - 1) {
+                        self.datasets.forEach(function (child) {
+                            child.children.forEach(function (item) {
+                                if (item.type == 'curve') {
+                                    self.curves.push(item);
+                                }
+                            })
+                        });
+                    }
+                })
+                self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
+                self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+                if (self.curves.length) {
+                    self.SelectedCurve = self.curves[0];
+                    self.selectedDataset = self.datasets[0].id;
+                    self.firstCurve = {
+                        idDataset: self.selectedDataset,
+                        curveName: self.SelectedCurve.name,
+                        idDesCurve: self.SelectedCurve.id,
+                        unit: self.SelectedCurve.properties.unit,
+                        data: []
+                    }
+                    self.secondCurve = {
+                        idDataset: self.selectedDataset,
+                        curveName: self.SelectedCurve.name,
+                        idDesCurve: self.SelectedCurve.id,
+                        unit: self.SelectedCurve.properties.unit,
+                        data: []
+                    }
+                }else {
+                    delete self.firstCurve;
+                    delete self.secondCurve;
+                    delete self.SelectedCurve;
+                    delete self.selectedDataset;
                 }
-            })
-            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
-            if (self.curves.length) {
-                self.SelectedCurve = self.curves[0];
-                self.selectedDataset = self.datasets[0].id;
-                self.firstCurve = {
-                    idDataset: self.selectedDataset,
-                    curveName: self.SelectedCurve.name,
-                    idDesCurve: self.SelectedCurve.id,
-                    unit: self.SelectedCurve.properties.unit,
-                    data: []
-                }
-                self.secondCurve = {
-                    idDataset: self.selectedDataset,
-                    curveName: self.SelectedCurve.name,
-                    idDesCurve: self.SelectedCurve.id,
-                    unit: self.SelectedCurve.properties.unit,
-                    data: []
-                }
-            }else {
-                delete self.firstCurve;
-                delete self.secondCurve;
-                delete self.SelectedCurve;
-                delete self.selectedDataset;
             }
         }
         this.onWellChange();
