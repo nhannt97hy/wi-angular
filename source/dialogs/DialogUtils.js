@@ -8486,7 +8486,6 @@ exports.mergeCurveDialog = function (ModalService) {
         this.selectedDataset = {};
         this.idSelectedDataset = null;
         this.desCurve = null;
-        self.wells = wiExplorer.treeConfig[0].children;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if( selectedNodes && selectedNodes[0].type == 'well')
             this.wellModel = selectedNodes[0];
@@ -8666,7 +8665,7 @@ exports.fillDataGapsDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         function refresh(cb) {
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+            self.project = angular.copy(wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0]);
             self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
             if(!self.selectedWell){
                 self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
@@ -9016,12 +9015,12 @@ exports.curveDerivativeDialog = function(ModalService){
             if(self.topDepth == null || self.bottomDepth == null || self.topDepth > self.bottomDepth){
                 return true;
             }
-            if ((self.firstCurve && self.firstCurve.curveName == null) || typeof self.firstCurve == 'undefined') {
+            if ((self.firstCurve && self.firstCurve.curveName == '') || typeof self.firstCurve == 'undefined') {
                 return true;
             }
 
             if (self.checked) {
-                if ((self.secondCurve && self.secondCurve.curveName == null) || typeof self.secondCurve == 'undefined') {
+                if ((self.secondCurve && self.secondCurve.curveName == '') || typeof self.secondCurve == 'undefined') {
                     return true;
                 }
                 if(self.firstCurve.curveName == self.secondCurve.curveName) return true;
