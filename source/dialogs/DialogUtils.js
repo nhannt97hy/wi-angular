@@ -7672,6 +7672,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
                         })
                     }
                 });
+            } else {
+                utils.refreshProjectState();
+                self.applyInProgress = false;
             } 
         };
 
@@ -8418,6 +8421,9 @@ exports.splitCurveDialog = function (ModalService, callback) {
                     self.process = true;
                 });
             } else {
+                self.arrayCurve = self.arrayCurve.filter(function(c){
+                    return (c.name);
+                })
                 wiApiService.dataCurve(self.curveModel.id, function(dataCurve) {
                     console.log(dataCurve);
 
@@ -8444,6 +8450,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
                         }, function(err) {
                             console.log('done');
                             utils.refreshProjectState();
+                            self.numberSplit = self.arrayCurve.length;
                         });
                     });
                 });
@@ -8590,21 +8597,25 @@ exports.mergeCurveDialog = function (ModalService) {
                                 if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
                                 else tempArr.push((allData[j][i]));
                             }
-                            return tempArr;
+                            return {tempArr: tempArr, count: count };
                         }
                         
                         switch (self.method) {
                             case "min":
-                                dataRes.push(Math.min.apply(null, getAllX(allData)));
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push(Math.min.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "max":
-                                dataRes.push(Math.max.apply(null, getAllX(allData)));
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push(Math.max.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "average":
-                                dataRes.push((getAllX(allData).reduce((a, b) => a + b, 0)) / N);
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push(((getAllX(allData).tempArr).reduce((a, b) => a + b, 0)) / N);
                                 break;
                             case "sum":
-                                dataRes.push(getAllX(allData).reduce((a, b) => a + b, 0));
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push((getAllX(allData).tempArr).reduce((a, b) => a + b, 0));
                                 break;
                             default:
                                 break;
@@ -8638,6 +8649,9 @@ exports.mergeCurveDialog = function (ModalService) {
                         })
                     }
                 });
+            } else {
+                utils.refreshProjectState();
+                self.applyInProgress = false;
             }
         }
         this.onCancelButtonClicked = function () {
