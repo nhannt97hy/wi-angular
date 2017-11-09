@@ -7599,9 +7599,10 @@ exports.curveAverageDialog = function (ModalService, callback) {
             self.applyingInProgress = true;
             if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
                 dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            let selectedCurves = [];
             let allData = [];
             let dataAvg = [];
-            self.selectedCurves = self.availableCurves.filter(function(curve, index) {
+            selectedCurves = self.availableCurves.filter(function(curve, index) {
                 return (curve.flag == true);
             });
             let yTop = Math.round((
@@ -7611,8 +7612,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
                             self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
                                         /parseFloat(self.wellModel.properties.step));
             console.log("yy", yTop, yBottom);
-            if(self.selectedCurves.length > 0){
-                async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
+            if(selectedCurves.length > 0){
+                async.eachOfSeries(selectedCurves, function(item, idx, callback) {
                     wiApiService.dataCurve(item.id, function (dataCurve){
                         allData.push(dataCurve.map(d => d.x));
                         callback();
@@ -7653,6 +7654,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                             if(ret) {
                                 let request = self.desCurve;
                                 delete request.curveName;
+                                console.log(request);
                                 wiApiService.processingDataCurve(request, function(res) {
                                     console.log("processingDataCurve", res);
                                     utils.refreshProjectState();
@@ -7662,6 +7664,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                         });
                     }
                     else {
+                        console.log(request);
                         wiApiService.processingDataCurve(self.desCurve, function(res) {
                             console.log("processingDataCurve", res);
                             utils.refreshProjectState();
@@ -7669,7 +7672,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                         })
                     }
                 });
-            }
+            } 
         };
 
         this.onRunButtonClicked = function () {
@@ -7922,6 +7925,8 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.wells = wiExplorer.treeConfig[0].children;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
+        this.applyingInProgress = false;
+
         let zoneSetParaModel = {};
         let zoneArr = [];
         this.zoneSetPara = [];
@@ -8016,22 +8021,30 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                     "Input invalid [" + self.wellModel.properties.topDepth + "," + 
                                     self.wellModel.properties.bottomDepth+ "]" );
             }
+
+            
             async.each(self.curvesComparison, function(comparison, callback){
                 if (comparison.curve1 && comparison.curve2) {
                     wiApiService.dataCurve(comparison.curve1.id, function(dataCurve1){
                         wiApiService.dataCurve(comparison.curve2.id, function(dataCurve2){
                             let data1 = dataCurve1.map(d => parseFloat(d.x));
                             let data2 = dataCurve2.map(d => parseFloat(d.x));
-                            console.log("data", data1, data2);
-                            let S = null;
-                            let Sx = null;
-                            let Sy = null;
-                            let Sxy = null;
-                            let Sx2 = null;
-                            let Sy2 = null;
-                            if(!self.checked) {
-                                let len = data1.length;
-                                for (let i = 0; i < len; i++){
+                            // console.log("data", data1);
+                            function comparisonParam (start, end) {
+                                let S = null;
+                                let Sx = null;
+                                let Sy = null;
+                                let Sxy = null;
+                                let Sx2 = null;
+                                let Sy2 = null;
+                                let yStart = Math.round((
+                                                start - parseFloat(self.wellModel.properties.topDepth))
+                                                        /parseFloat(self.wellModel.properties.step));
+                                let yEnd = Math.round((
+                                                end - parseFloat(self.wellModel.properties.topDepth))
+                                                        /parseFloat(self.wellModel.properties.step));
+                                let N = yEnd - yStart + 1;
+                                for (let i = yStart; i <= yEnd; i++){
                                     if (data1[i] != null && !isNaN(data1[i]) && 
                                         data2[i] != null && !isNaN(data2[i])) {
                                             S += (data1[i] - data2[i]) * (data1[i] - data2[i]); 
@@ -8041,18 +8054,52 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                         Sx += data1[i];
                                         Sx2 += Math.pow(data1[i], 2);
                                     };
-                                    if (data1[i] != null && !isNaN(data1[i]) ){
+                                    if (data2[i] != null && !isNaN(data2[i]) ){
                                         Sy += data2[i];
                                         Sy2 += Math.pow(data2[i], 2);
                                     };
                                 };
-                                console.log("diff, corr", S / len, (len * Sxy - Sx * Sy) / Math.pow((len * Sx2 - Sx * Sx) * (len * Sy2 - Sy * Sy), 0.5));
-
-                                comparison.difference = S / len;
-                                comparison.correlation = (len * Sxy - Sx * Sy) / Math.pow((len * Sx2 - Sx * Sx) * (len * Sy2 - Sy * Sy), 0.5);
+                                return { S : S, Sx : Sx, Sy : Sy, Sxy : Sxy, Sx2 : Sx2, Sy2 : Sy2, N : N }
                             }
+                            let len = data1.length;
+                            if(!self.checked) {
+                                let param = comparisonParam(self.topDepth, self.bottomDepth);
+                                console.log("cpm", param, len);
+                                comparison.difference = (param.S / param.N).toFixed(4);
+                                comparison.correlation = ((param.N * param.Sxy - param.Sx * param.Sy) / 
+                                                            Math.pow((param.N * param.Sx2 - param.Sx * param.Sx) * (param.N * param.Sy2 - param.Sy * param.Sy), 0.5)).toFixed(4);
+                            } else {
+                                let S = null;
+                                let Sx = null;
+                                let Sy = null;
+                                let Sxy = null;
+                                let Sx2 = null;
+                                let Sy2 = null;
+                                let N = null;
+                                let temp = 0;
+                                self.zones.forEach(function (z) {
+                                    if(z.use) {
+                                        let p = comparisonParam(z.properties.startDepth, z.properties.endDepth);
+                                        S += p.S ; Sx += p.Sx ; Sy += p.Sy ; Sxy += p.Sxy ; Sx2 += p.Sx2 ; Sy2 += p.Sy2; N += p.N;
+                                        temp += 1;
+                                    }
+                                });
+                                if(temp) {
+                                    comparison.difference = (S / N).toFixed(4);
+                                    comparison.correlation = ((N * Sxy - Sx * Sy) / 
+                                                                Math.pow((N * Sx2 - Sx * Sx) * (N * Sy2 - Sy * Sy), 0.5)).toFixed(4);
+                                } else {
+                                    comparison.difference = 0;
+                                    comparison.correlation = 0;
+                                }
+                            }
+                            self.applyingInProgress = false;
+                            callback();
                         });
                     });
+                } else {
+                    self.applyingInProgress = false;
+                    callback();
                 };
             }, function(err){
                 console.log(err);
@@ -8424,7 +8471,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
 exports.mergeCurveDialog = function (ModalService) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
-        window.curveAvg = this;
+        window.merge = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
@@ -8435,7 +8482,7 @@ exports.mergeCurveDialog = function (ModalService) {
         this.availableCurves = [];
         this.selectedCurves = [];
         this.datasets = [];
-        this.calcMethod = "lateral";
+        this.method = "average";
         this.selectedDataset = {};
         this.idSelectedDataset = null;
         this.desCurve = null;
@@ -8498,94 +8545,100 @@ exports.mergeCurveDialog = function (ModalService) {
             defaultDepth();
             getAllCurvesOnSelectWell(self.wellModel);
         }
-        // wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
-        //     self.applyingInProgress = false;
-        //     $timeout(function(){
-        //         refresh(function(){
-        //         });
-        //     }, 100);
-        // });
-
-        // function curveAverageCacl () {
-        //     if (self.applyingInProgress) return;
-        //     self.applyingInProgress = true;
-        //     if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
-        //         dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
-        //     let allData = [];
-        //     let dataAvg = [];
-        //     self.selectedCurves = self.availableCurves.filter(function(curve, index) {
-        //         return (curve.flag == true);
-        //     });
-        //     let yTop = Math.round((
-        //         self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-        //         /parseFloat(self.wellModel.properties.step));
-        //     let yBottom = Math.round((
-        //         self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-        //         /parseFloat(self.wellModel.properties.step));
-        //     console.log("yy", yTop, yBottom);
-        //     if(self.selectedCurves.length > 0){
-        //         async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
-        //             wiApiService.dataCurve(item.id, function (dataCurve){
-        //                 allData.push(dataCurve.map(d => d.x));
-        //                 callback();
-        //             });
-        //         }, function(err) {
-        //             if (err) {
-        //                 DialogUtils.errorMessageDialog(ModalService, err);
-        //             }
-        //             let meanData = [];
-        //             if(self.calcMethod == 'lateral') {
-        //                 let len = allData[0].length;
-        //                 for( var i = 0; i < len; i++){
-        //                     let sum = 0;
-        //                     let count = 0;
-        //                     for ( let j = 0; j < allData.length; j++) {
-        //                         if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
-        //                         else sum += parseFloat(allData[j][i]);
-        //                     }
-        //                     if (count > 0) meanData.push(null);
-        //                     else meanData.push(sum / allData.length);
-        //                 }
-        //                 self.desCurve.data = utils.getDataTopBottomRange(meanData, yTop, yBottom);
-        //             } else if (self.calcMethod == 'arithmetic') {
-        //                 for( var i = 0; i < allData[0].length; i++){
-        //                     let sum = 0;
-        //                     for ( let j = 0; j < allData.length; j++) {
-        //                         if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
-        //                         else sum += parseFloat(allData[j][i]);
-        //                     }
-        //                     meanData.push(sum / (allData.length - count));
-        //                 }
-        //                 self.desCurve.data = utils.getDataTopBottomRange(meanData, yTop, yBottom);
-        //             }
-        //             console.log("desCurve", self.desCurve);
-        //             let request = {};
-        //             if(self.desCurve.idDesCurve) {
-        //                 dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
-        //                     if(ret) {
-        //                         let request = self.desCurve;
-        //                         delete request.curveName;
-        //                         wiApiService.processingDataCurve(request, function(res) {
-        //                             console.log("processingDataCurve", res);
-        //                             utils.refreshProjectState();
-        //                             self.applyInProgress = false;
-        //                         })
-        //                     }
-        //                 });
-        //             }
-        //             else {
-        //                 wiApiService.processingDataCurve(self.desCurve, function(res) {
-        //                     console.log("processingDataCurve", res);
-        //                     utils.refreshProjectState();
-        //                     self.applyInProgress = false;
-        //                 })
-        //             }
-        //         });
-        //     }
-        // };
-
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                refresh(function(){
+                });
+            }, 100);
+        });
         this.onRunButtonClicked = function () {
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            let allData = [];
+            self.selectedCurves = self.availableCurves.filter(function(curve, index) {
+                return (curve.flag == true);
+            });
+            let yTop = Math.round((
+                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
+                /parseFloat(self.wellModel.properties.step));
+            let yBottom = Math.round((
+                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
+                /parseFloat(self.wellModel.properties.step));
+            console.log("yy", yTop, yBottom);
+            if(self.selectedCurves.length > 0){
+                async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
+                    wiApiService.dataCurve(item.id, function (dataCurve){
+                        allData.push(dataCurve.map(d => parseFloat(d.x)));
+                        callback();
+                    });
+                }, function(err) {
+                    if (err) {
+                        DialogUtils.errorMessageDialog(ModalService, err);
+                    }
+                    let dataRes = [];
+                    let N = allData.length;
+                    let len = allData[0].length;
+                    for( var i = 0; i < len; i++){
 
+                        function getAllX (allData) {
+                            let tempArr = [];
+                            let count = 0;
+                            for ( let j = 0; j < N; j++) {
+                                if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
+                                else tempArr.push((allData[j][i]));
+                            }
+                            return tempArr;
+                        }
+                        
+                        switch (self.method) {
+                            case "min":
+                                dataRes.push(Math.min.apply(null, getAllX(allData)));
+                                break;
+                            case "max":
+                                dataRes.push(Math.max.apply(null, getAllX(allData)));
+                                break;
+                            case "average":
+                                dataRes.push((getAllX(allData).reduce((a, b) => a + b, 0)) / N);
+                                break;
+                            case "sum":
+                                dataRes.push(getAllX(allData).reduce((a, b) => a + b, 0));
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    console.log("desCurve", dataRes );
+                    self.desCurve.data = utils.getDataTopBottomRange(dataRes, yTop, yBottom);
+                    let request = {};
+                    if(self.desCurve.idDesCurve) {
+                        dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
+                            if(ret) {
+                                let request = self.desCurve;
+                                delete request.curveName;
+                                console.log("req", request);
+                                wiApiService.processingDataCurve(request, function(res) {
+                                    console.log("processingDataCurve", res);
+                                    utils.refreshProjectState();
+                                    self.applyInProgress = false;
+                                })
+                            }
+                        });
+                    }
+                    else {
+                        let request = self.desCurve;
+                        delete request.idDesCurve;
+                        console.log("req", request);
+                        wiApiService.processingDataCurve(request, function(res) {
+                            console.log("processingDataCurve", res);
+                            utils.refreshProjectState();
+                            self.applyInProgress = false;
+                        })
+                    }
+                });
+            }
         }
         this.onCancelButtonClicked = function () {
             close(null, 100);
