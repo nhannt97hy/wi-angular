@@ -60,7 +60,8 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
             if (!self.username || !self.password) return;
             let dataRequest = {
                 username: self.username,
-                password: self.password
+                password: self.password,
+                whoami: 'main-service'
             }
             wiApiService.login(dataRequest, function(response) {
                 if(response == "USER_NOT_EXISTS"){
@@ -72,6 +73,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 } else if (response == "NOT_ACTIVATED"){
                     authenticationMessage(ModalService, "Login", "You are not activated. Please wait for account activation.", function () {
                     });
+                } else if(response == "DATABASE_CREATION_FAIL"){
+                    authenticationMessage(ModalService, "Login", "Backend Service problem.", function () {
+                    }); 
                 } else {
                     let userInfo = {
                         username: self.username,
@@ -7672,6 +7676,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
                         })
                     }
                 });
+            } else {
+                utils.refreshProjectState();
+                self.applyInProgress = false;
             } 
         };
 
@@ -8417,6 +8424,9 @@ exports.splitCurveDialog = function (ModalService, callback) {
                     self.process = true;
                 });
             } else {
+                self.arrayCurve = self.arrayCurve.filter(function(c){
+                    return (c.name);
+                })
                 wiApiService.dataCurve(self.curveModel.id, function(dataCurve) {
                     console.log(dataCurve);
 
@@ -8443,6 +8453,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
                         }, function(err) {
                             console.log('done');
                             utils.refreshProjectState();
+                            self.numberSplit = self.arrayCurve.length;
                         });
                     });
                 });
@@ -8588,21 +8599,25 @@ exports.mergeCurveDialog = function (ModalService) {
                                 if (allData[j][i] == null || isNaN(allData[j][i])) count += 1;
                                 else tempArr.push((allData[j][i]));
                             }
-                            return tempArr;
+                            return {tempArr: tempArr, count: count };
                         }
                         
                         switch (self.method) {
                             case "min":
-                                dataRes.push(Math.min.apply(null, getAllX(allData)));
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push(Math.min.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "max":
-                                dataRes.push(Math.max.apply(null, getAllX(allData)));
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push(Math.max.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "average":
-                                dataRes.push((getAllX(allData).reduce((a, b) => a + b, 0)) / N);
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push(((getAllX(allData).tempArr).reduce((a, b) => a + b, 0)) / N);
                                 break;
                             case "sum":
-                                dataRes.push(getAllX(allData).reduce((a, b) => a + b, 0));
+                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                else dataRes.push((getAllX(allData).tempArr).reduce((a, b) => a + b, 0));
                                 break;
                             default:
                                 break;
@@ -8636,6 +8651,9 @@ exports.mergeCurveDialog = function (ModalService) {
                         })
                     }
                 });
+            } else {
+                utils.refreshProjectState();
+                self.applyInProgress = false;
             }
         }
         this.onCancelButtonClicked = function () {
