@@ -8276,7 +8276,6 @@ exports.curveConvolutionDialog = function(ModalService){
             }
         }
 
-
         this.onCancelButtonClicked = function(){
             close(null);
         }
@@ -9106,7 +9105,12 @@ exports.curveDerivativeDialog = function(ModalService){
 
 exports.TVDConversionDialog = function (ModalService) {
     function ModalController(wiComponentService, wiApiService, close) {
+        let self = this;
+        window.tvd = this;
 
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
     }
     ModalService.showModal({
         templateUrl: "tvd-conversion/tvd-conversion-modal.html",

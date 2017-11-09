@@ -4,26 +4,25 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
                 <h4>
-                    <span class="well-insight-16x16"></span>&nbsp;Curve Average</h4>
+                    <span class="true-vertical-depth-16x16"></span>&nbsp;TVD Conversion</h4>
             </div>
             <div class="modal-body dialog-style">
                 <div class="row">
-                    <form class="form-horizontal" action="" name="modalCurveAverage">
+                    <form class="form-horizontal form-condensed" action="" name="modalCurveAverage">
                         <h5 class="modal-infomation-title">
                             <span class="well-16x16"></span>
                             Well
                         </h5>
                         <div class="container-fluid">
                         <div class="form-group">
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Select well
                             </label>
                             <div class="col-sm-4">
                                 <select class="form-control wi-form-control">
                                 </select>
                             </div>
-                       
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Dataset
                             </label>
                             <div class="col-sm-4">
@@ -31,61 +30,53 @@
                                 </select>
                             </div>
                         </div>
-                    
-                    
                         <div class="form-group">
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Top Depth
                             </label>
-                            <div class="col-sm-4">
-                                <input type="number" class="form-control wi-form-control" step="any">
+                            <div class="col-sm-2">
+                                <input type="number" class="form-control wi-form-control" step="any" disabled>
                             </div>
-                      
-                            <label for="" class="col-sm-2" style="padding-right: 0px">
+                            <label class="col-sm-2 text-right">
                                 Bottom Depth
                             </label>
-                            <div class="col-sm-2" style="padding-right: 0">
-                                <input type="number" class="form-control wi-form-control" step="any">
-                            </div>
                             <div class="col-sm-2">
-                                <button class="btn btn-default small-button width-100-percent" >Default</button>
+                                <input type="number" class="form-control wi-form-control" step="any" disabled>
                             </div>
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2 text-right">
                                 Step
                             </label>
-                            <div class="col-sm-4">
-                                <input type="number" class="form-control wi-form-control" step="any">
-                            </div>
-                        </div>  
-                        <div class="form-group">
-                            <div class="col-sm-6">
-                                <label>
-                                    <input type="radio" value="" class="wi-form-control"> Using Servey File
-                                </label>
-                            </div>
-                            <div class="col-sm-6">
-                                <label style="padding-left: 0px">
-                                    <input type="radio" value="" class="wi-form-control"> Using Curve
-                                </label>
+                            <div class="col-sm-2">
+                                <input type="number" class="form-control wi-form-control" step="any" disabled>
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-6">
+                                <input type="radio" value="file" class="wi-form-control" name='useType'> Using Servey File
+                            </label>
+                            <label class="col-sm-6">
+                                <input type="radio" value="curve" class="wi-form-control" name='useType'> Using Curve
+                            </label>
+                        </div>
+                        <div class="form-group">
                             <div class="col-sm-2">
-                                <button class="btn btn-default small-button">Browse</button>
+                                <label class="btn btn-default small-button">
+                                    <input class="display-none" type="file"
+                                    ngf-select
+                                    ng-model="wiModal.SurveyFile"
+                                    ngf-max-size="100MB" required/>
+                                    Browse</label>
                             </div>
                             <div class="col-sm-4">
-                                <input type="text" name="" value="" class="form-control wi-form-control">
+                                <input type="text" class="form-control wi-form-control" disabled>
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Deviation
                             </label>
                             <div class="col-sm-1">
                                 <select class="form-control wi-form-control"></select>
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Azimuth
                             </label>
                             <div class="col-sm-1">
@@ -93,25 +84,25 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Data start at line
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" name="" value="" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Depth is in column
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" name="" value="" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Deviation is in column
                             </label>
                             <div class="col-sm-1">
                                 <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Azimuth is in column
                             </label>
                             <div class="col-sm-1">
@@ -119,25 +110,25 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Well depth reference
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" name="" value="" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 TVD reference at
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" name="" value="" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 X at ref. depth
                             </label>
                             <div class="col-sm-1">
                                 <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 Y at ref. depth
                             </label>
                             <div class="col-sm-1">
@@ -145,36 +136,23 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="" class="col-sm-2">
+                            <label class="col-sm-2">
                                 TVDSS Method
                             </label>
                             <div class="col-sm-4">
                                 <select class="form-control wi-form-control">
-                                    
+                                  <option value="off">Default - Off Shore</option>
+                                  <option value="on">On Shore</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-sm-12">Method: </label>
-                            <div class="col-sm-3">
-                                <label>
-                                    <input type="radio" value="" class="wi-form-control"> Average Angle
-                                </label>
-                            </div>
-                            <div class="col-sm-3">
-                                <label>
-                                    <input type="radio" value="" class="wi-form-control"> Balanced Tangential
-                                </label>
-                            </div>
-                            <div class="col-sm-3">
-                                <label>
-                                    <input type="radio" value="" class="wi-form-control"> Radius Curvature
-                                </label>
-                            </div>
-                            <div class="col-sm-3">
-                                <label>
-                                    <input type="radio" value="" class="wi-form-control"> Minimum Curvature
-                                </label>
+                            <label class="col-sm-2">Method</label>
+                            <div class="col-sm-4">
+                                <select class="form-control wi-form-control">
+                                    <option value="1">Average Angle</option>
+                                    <option value="2">Balanced Tangential</option>
+                                    <option value="3">Radius Curvature</option>
+                                    <option value="4">Minimum Curvature</option>
+                                </select>
                             </div>
                         </div>
                         </div>
@@ -183,11 +161,11 @@
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'>
-                    <span class="apply-16x16"></span>Save</button>
+                    <span class="apply-16x16"></span>&nbsp;Save</button>
                 <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'>
-                    <span class="run-16x16"></span>Run</button>
+                    <span class="run-16x16"></span>&nbsp;Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>
-                    <span class="close-16x16"></span>Cancel</button>
+                    <span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>
     </div>
