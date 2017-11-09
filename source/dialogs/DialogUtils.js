@@ -60,7 +60,8 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
             if (!self.username || !self.password) return;
             let dataRequest = {
                 username: self.username,
-                password: self.password
+                password: self.password,
+                whoami: 'main-service'
             }
             wiApiService.login(dataRequest, function(response) {
                 if(response == "USER_NOT_EXISTS"){
@@ -72,6 +73,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 } else if (response == "NOT_ACTIVATED"){
                     authenticationMessage(ModalService, "Login", "You are not activated. Please wait for account activation.", function () {
                     });
+                } else if(response == "DATABASE_CREATION_FAIL"){
+                    authenticationMessage(ModalService, "Login", "Backend Service problem.", function () {
+                    }); 
                 } else {
                     let userInfo = {
                         username: self.username,
