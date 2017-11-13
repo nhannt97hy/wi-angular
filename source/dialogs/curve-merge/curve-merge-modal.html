@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
-                <h4><span class="well-insight-16x16"></span>&nbsp;Curve Average</h4>
+                <h4><span class="well-insight-16x16"></span>&nbsp;Merge Curve</h4>
             </div>
             <div class="modal-body dialog-style">
                 <form class="form-horizontal" action="" name="modalCurveAverage">
@@ -50,25 +50,25 @@
                         <label for="" class="control-label col-sm-3">Method </label>
                         <div class="col-sm-2">
                             <label>
-                                <input ng-model="wiModal.calcMethod"
+                                <input ng-model="wiModal.method"
                                        type="radio" value="max" class="wi-form-control"> Max
                             </label>
                         </div>
                         <div class="col-sm-2">
                             <label>
-                                <input ng-model="wiModal.calcMethod"
+                                <input ng-model="wiModal.method"
                                        type="radio" value="min" class="wi-form-control"> Min
                             </label>
                         </div>
                         <div class="col-sm-2">
                             <label>
-                                <input ng-model="wiModal.calcMethod"
+                                <input ng-model="wiModal.method"
                                        type="radio" value="average" class="wi-form-control"> Average
                             </label>
                         </div>
                         <div class="col-sm-2">
                             <label>
-                                <input ng-model="wiModal.calcMethod"
+                                <input ng-model="wiModal.method"
                                        type="radio" value="sum" class="wi-form-control"> Sum
                             </label>
                         </div>
