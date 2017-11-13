@@ -961,6 +961,10 @@ exports.CurveConvolutionButtonClicked = function () {
 
 exports.CurveDeconvolutionButtonClicked = function () {
     console.log('CurveDeconvolutionButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveConvolutionDialog(this.ModalService, true);
 };
 
 exports.CurveDerivativeButtonClicked = function () {

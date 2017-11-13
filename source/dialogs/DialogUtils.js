@@ -8132,10 +8132,11 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
     });
 }
 
-exports.curveConvolutionDialog = function(ModalService){
+exports.curveConvolutionDialog = function(ModalService, deconvolution){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.curveCov = this;
+        this.deconvolution = deconvolution;
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -8212,19 +8213,29 @@ exports.curveConvolutionDialog = function(ModalService){
             if(input.length < 1 || kernel.length < 1) return false;
 
             let inputF = input.filter(d => {return !isNaN(d);});
-            inputF.length = input.length;
+            // inputF.length = input.length;
             let inputSize = input.length;
             kernelF = kernel.filter(d => {return !isNaN(d);});
-            kernelF.length = kernel.length;
             kernelF = kernelF.reverse();
+            // kernelF.length = kernel.length;
+            // kernel = kernel.reverse();
             let kernelSize = kernel.length;
 
             for(let n = 0; n < inputSize; n++){
+                kernelF.unshift(kernelF.pop());
                 if(!isNaN(input[n])){
-                    kernelF.unshift(kernelF.pop());
-                    out[n] = 0;
+                    if(self.deconvolution){
+                        out[n] = input[n];
+                    }else{
+                        out[n] = 0;
+                    }
                     for(let k = 0; k < kernelSize; k++){
-                        out[n] += (inputF[k] || 0) * (kernelF[k] || 0);
+                        if(self.deconvolution){
+                            if(kernel[k])
+                                out[n] -= (input[k] || 0) / kernel[k]; // need update
+                        }else{
+                            out[n] += isNaN(inputF[k] * kernelF[k]) ? 0 : (inputF[k] * kernelF[k]);
+                        }
                     }
                 }else{
                     out[n] = NaN;
@@ -8256,9 +8267,11 @@ exports.curveConvolutionDialog = function(ModalService){
                     done();
                 })
             }, function(err){
-                let input = self.curveData[0];
-                let kernel = self.curveData.length == 1 ? self.curveData[0] : self.curveData[1];
+                let input = angular.copy(self.curveData[0]);
+                let kernel = self.curveData.length == 1 ? angular.copy(self.curveData[0]) : angular.copy(self.curveData[1]);
                 if(convolution(input, kernel, self.ResultCurve.data)){
+                    console.log(self.ResultCurve.data);
+                    // self.applyingInProgress = false;
                     saveCurve(self.ResultCurve);
                 }else {
                     console.log('Convolution err!');
@@ -8982,14 +8995,14 @@ exports.curveDerivativeDialog = function(ModalService){
                     self.firstCurve = {
                         idDataset: self.selectedDataset,
                         curveName: self.SelectedCurve.name,
-                        idDesCurve: self.SelectedCurve.id,
+                        idDesCurve: self.SelectedCurve.properties.idDataset != self.selectedDataset ? null: self.SelectedCurve.id,
                         unit: self.SelectedCurve.properties.unit,
                         data: []
                     }
                     self.secondCurve = {
                         idDataset: self.selectedDataset,
                         curveName: self.SelectedCurve.name,
-                        idDesCurve: self.SelectedCurve.id,
+                        idDesCurve: self.SelectedCurve.properties.idDataset != self.selectedDataset ? null: self.SelectedCurve.id,
                         unit: self.SelectedCurve.properties.unit,
                         data: []
                     }
