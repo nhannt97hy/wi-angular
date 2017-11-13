@@ -18,7 +18,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 
-    const CANVAS_WIDTH = 2;
+    const CANVAS_WIDTH = 5;
     const CANVAS_STROKE_COLOR = 'Green';
 
     this.$onInit = function () {
@@ -170,7 +170,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let transformY = _viCurves[0].getTransformY();
         let transformX = d3.scaleLinear().range([0, $(getRefCurveContainer().node()).width()]);
 
-        let axisX = d3.axisTop(transformX).ticks(_vertLineNo)
+        let axisX = d3.axisTop(transformX)
+            .tickValues(d3.range(0, 1, 1 / _vertLineNo))
             .tickSize(-1*$(getRefCurveContainer().node()).height())
             .tickFormat("");
 

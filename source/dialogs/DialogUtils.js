@@ -4834,7 +4834,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        modal.element.modal({backdrop:'static', keyboard:false});
         $(modal.element[0].children[0]).draggable();
         modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
