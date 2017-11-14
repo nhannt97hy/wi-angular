@@ -8395,7 +8395,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         }
         function refresh() {
             self.wellModel = utils.findWellById(self.idWell);
-            getInfo();
+            getAllCurve();
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.process = false;
@@ -8447,14 +8447,15 @@ exports.splitCurveDialog = function (ModalService, callback) {
                                 idDataset: self.idDataset,
                                 curveName: curve.name,
                                 unit: self.curveModel.properties.unit,
-                                data: curve.data
+                                data: curve.data,
+                                idFamily: self.curveModel.properties.idFamily
                             };
                             wiApiService.processingDataCurve(payload, cb);
                         }, function(err) {
-                            console.log('done');
                             utils.refreshProjectState();
                             self.numberSplit = self.arrayCurve.length;
                         });
+                        utils.refreshProjectState();
                     });
                 });
             }
@@ -8604,19 +8605,19 @@ exports.mergeCurveDialog = function (ModalService) {
                         
                         switch (self.method) {
                             case "min":
-                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                if(getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push(Math.min.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "max":
-                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                if(getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push(Math.max.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "average":
-                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                if(getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push(((getAllX(allData).tempArr).reduce((a, b) => a + b, 0)) / N);
                                 break;
                             case "sum":
-                                if(!getAllX(allData).count) dataRes.push(NaN);
+                                if(getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push((getAllX(allData).tempArr).reduce((a, b) => a + b, 0));
                                 break;
                             default:
