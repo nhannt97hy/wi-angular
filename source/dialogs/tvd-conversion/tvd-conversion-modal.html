@@ -8,7 +8,7 @@
             </div>
             <div class="modal-body dialog-style">
                 <div class="row">
-                    <form class="form-horizontal form-condensed" action="" name="modalCurveAverage">
+                    <form class="form-horizontal form-condensed">
                         <h5 class="modal-infomation-title">
                             <span class="well-16x16"></span>
                             Well
@@ -19,14 +19,20 @@
                                 Select well
                             </label>
                             <div class="col-sm-4">
-                                <select class="form-control wi-form-control">
+                                <select class="form-control wi-form-control"
+                                        ng-model="wiModal.idWell"
+                                        ng-options="well.id as well.properties.name for well in wiModal.wells"
+                                        ng-change="wiModal.onChangeWell(wiModal.idWell)">
                                 </select>
                             </div>
                             <label class="col-sm-2">
                                 Dataset
                             </label>
                             <div class="col-sm-4">
-                                <select class="form-control wi-form-control">
+                                <select class="form-control wi-form-control"
+                                        ng-model="wiModal.idDataset"
+                                        ng-options="dataset.id as dataset.name for dataset in wiModal.datasets"
+                                        ng-change="wiModal.onChangeDataset(wiModal.idDataset)">
                                 </select>
                             </div>
                         </div>
@@ -35,19 +41,22 @@
                                 Top Depth
                             </label>
                             <div class="col-sm-2">
-                                <input type="number" class="form-control wi-form-control" step="any" disabled>
+                                <input type="number" class="form-control wi-form-control" step="any" disabled
+                                        ng-model="wiModal.topDepth">
                             </div>
                             <label class="col-sm-2 text-right">
                                 Bottom Depth
                             </label>
                             <div class="col-sm-2">
-                                <input type="number" class="form-control wi-form-control" step="any" disabled>
+                                <input type="number" class="form-control wi-form-control" step="any" disabled
+                                         ng-model="wiModal.bottomDepth">
                             </div>
                             <label class="col-sm-2 text-right">
                                 Step
                             </label>
                             <div class="col-sm-2">
-                                <input type="number" class="form-control wi-form-control" step="any" disabled>
+                                <input type="number" class="form-control wi-form-control" step="any" disabled
+                                        ng-model="wiModal.step">
                             </div>
                         </div>
                         <div class="form-group">
@@ -96,13 +105,13 @@
                             <div class="col-sm-1">
                                 <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label class="col-sm-2">
+                            <label for="" class="col-sm-2" style="padding-right: 0px">
                                 Deviation is in column
                             </label>
                             <div class="col-sm-1">
                                 <input type="number" class="form-control wi-form-control">
                             </div>
-                            <label class="col-sm-2">
+                            <label for="" class="col-sm-2" style="padding-right: 0px">
                                 Azimuth is in column
                             </label>
                             <div class="col-sm-1">
@@ -160,8 +169,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'>
-                    <span class="apply-16x16"></span>&nbsp;Save</button>
+                <button class='btn btn-default' ng-click='wiModal.onSaveButtonClicked()'>
+                    <span class="apply-16x16"></span>Save</button>
                 <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'>
                     <span class="run-16x16"></span>&nbsp;Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>

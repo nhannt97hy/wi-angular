@@ -96,7 +96,14 @@ function setProperties(obj, props, forArray) {
         else if (schema.type == 'Object' && schema.properties !== undefined) {
             let tmpObj = obj[key] === undefined ? {} : obj[key];
             tmpObj.PROPERTIES = schema.properties;
-            setProperties(tmpObj, props[key]);
+            let tmpProps = props[key];
+            if (typeof tmpProps == 'string') {
+                try {
+                    tmpProps = JSON.parse(tmpProps);
+                }
+                catch (e) {}
+            }
+            setProperties(tmpObj, tmpProps);
             delete tmpObj.PROPERTIES;
             if (obj[key] === undefined) obj[key] = tmpObj;
             else merge(obj[key], tmpObj);
@@ -114,6 +121,12 @@ function setProperties(obj, props, forArray) {
 
 function getArrayFromSchema(arr, schema) {
     let tmpArr = [];
+    if (typeof arr == 'string') {
+        try {
+            arr = JSON.parse(arr);
+        }
+        catch(e) {}
+    }
     if(Array.isArray(arr) && arr.length) {
         arr.forEach(function(val) {
             if (schema.type == 'Integer') tmpArr.push(parseInt(val))

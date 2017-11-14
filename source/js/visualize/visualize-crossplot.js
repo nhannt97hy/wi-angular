@@ -7,7 +7,6 @@ module.exports = Crossplot;
 
 function Crossplot(config) {
     this.setProperties(config);
-
     //this.paddingLeft = 100;
     //this.paddingRight = 50;
     //this.paddingTop = 50;
@@ -274,6 +273,7 @@ Crossplot.prototype.getProperties = function() {
 
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+
     //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
     if (props.pointSet && props.pointSet.idZoneSet != null) {
         this.pointSet.zAxes = 'Zone';
@@ -1090,7 +1090,7 @@ Crossplot.prototype.plotPolygons = function() {
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')')
 
     let polygons = polygonContainer.selectAll('path')
-        .data(this.polygons);
+        .data(this.polygons.filter(function(p) { return p.points && p.points.length; }));
 
     let self = this;
     polygons.enter().append('path')

@@ -7,14 +7,13 @@ function Controller($scope) {
     this.onClick = function(val){
         self.model = val;
     }
-
-    if(self.type == 'curve' && self.type.model){
         $scope.$watch(() => {
                 return self.model.idDataset;
             }, (value) => {
-                self.onChanged();
+                if(self.type == 'curve'){
+                    self.onChanged();
+                }
         })
-    }
 
     this.onChanged = function(){
         if(self.model.idDesCurve) self.model.idDesCurve = null;
@@ -39,7 +38,7 @@ app.component(name, {
     controller: Controller,
     controllerAs: name,
     bindings: {
-        model: '=',
+        model: '<',
         options: '<',
         type: '@',
         disabled: '<'
