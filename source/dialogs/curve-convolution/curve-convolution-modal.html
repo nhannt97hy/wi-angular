@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled="wiModal.applyingInProgress">&times;</button>
-                <h4><span class="curve-convolution-16x16"></span>&nbsp;Curve Convolution</h4>
+                <h4><span ng-class="{'curve-convolution-16x16': !wiModal.deconvolution, 'curve-deconvolution-16x16': wiModal.deconvolution}"></span>&nbsp;Curve {{wiModal.deconvolution ? 'Deconvolution': 'Convolution'}}</h4>
             </div>
             <div class="modal-body">
                 <form class="form-horizontal">
