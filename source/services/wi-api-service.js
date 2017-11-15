@@ -16,14 +16,14 @@ let app = angular.module(moduleName, []);
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
 //  const BASE_URL = 'http://localhost:3000';
-// const BASE_URL = 'http://dev.sflow.me';
+const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://wi.i2g.cloud';
 // const BASE_URL = 'http://192.168.0.223';
-const BASE_URL = 'http://192.168.1.17:3000';
+// const BASE_URL = 'http://192.168.1.17:3000';
 
 
-// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-const AUTHENTICATION_SERVICE = 'http://192.168.1.17:2999';
+const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+// const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
