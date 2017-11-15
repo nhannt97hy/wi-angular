@@ -4,7 +4,8 @@ const moduleName = 'wi-explorer';
 function Controller($scope, wiComponentService, wiApiService, ModalService, WiWell, WiTreeConfig, $timeout) {
     let self = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);        
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
     this.$onInit = function () {
         self.treeviewName = self.name + 'treeview';
         $scope.handlers = wiComponentService.getComponent(wiComponentService.WI_EXPLORER_HANDLERS);
@@ -13,7 +14,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             let projectModel = utils.projectToTreeConfig(projectLoaded);
-            self.treeConfig = [projectModel];
+            let dustbinModel = utils.dustbinToTreeConfig();
+            self.treeConfig = [projectModel, dustbinModel];
             utils.putListFamily();
         });
 
@@ -23,30 +25,30 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         });
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
-            let backupConfig = self.treeConfig;
+            let backupConfig = [self.treeConfig[0]];
             let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             let ScrollTmp = window.localStorage.getItem('scrollTmp');
-            self.treeConfig = [utils.projectToTreeConfig(projectRefresh)];
-            console.log('backupConfig', backupConfig);
-            console.log('config', self.treeConfig);
+            self.treeConfig[0] = utils.projectToTreeConfig(projectRefresh);
             $timeout(function() {
-                self.backupConfig(backupConfig, self.treeConfig);
+                self.backupConfig(backupConfig, [self.treeConfig[0]]);
             });
-            utils.putListFamily();            
             $timeout(function(){
                 document.getElementById('treeContent').scrollTo(0,ScrollTmp);
             },100);
         });
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT1, function () {
-            let backupConfig = self.treeConfig;
-            let projectRefresh = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-            utils.pushProjectToExplorer(self, projectRefresh, wiComponentService, WiTreeConfig, WiWell, $timeout);
-
-            console.log('backupConfig', backupConfig);
-            console.log('config', self.treeConfig);
-            $timeout(function() {
-                self.backupConfig(backupConfig, self.treeConfig);
+        wiComponentService.on(wiComponentService.DUSTBIN_REFRESH_EVENT, function () {
+            wiApiService.getDustbin(self.treeConfig[0].id, function (dustbin) {
+                self.treeConfig[1] = utils.updateDustbinConfig(dustbin);
+                let backupConfig = [self.treeConfig[1]];
+                let ScrollTmp = window.localStorage.getItem('scrollTmp');
+                let dustbinModel = wiComponentService.getComponent(wiComponentService.DUSTBIN);
+                self.treeConfig[1] = dustbinModel;
+                $timeout(function() {
+                    self.backupConfig(backupConfig, [self.treeConfig[1]]);
+                });
+                $timeout(function(){
+                    document.getElementById('treeContent').scrollTo(0,ScrollTmp);
+                },100);
             });
         });
 
@@ -239,6 +241,18 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ]);
+            case 'group':
+                return [
+                    {
+                        label: "Group Manager",
+                        icon: "dataset-new-16x16",
+                        handler: function () {
+                            DialogUtils.groupManagerDialog(function () {
+                                utils.refreshProjectState();
+                            })
+                        }
+                    }
+                ];
             case 'well':
                 return defaultWellCtxMenu.concat([
                     {
@@ -275,6 +289,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Group",
                         icon: "",
                         handler: function () {
+                            DialogUtils.groupManagerDialog(function () {
+                                utils.refreshProjectState();
+                            })
                         }
                     }, {
                         separator: '1'
@@ -491,7 +508,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "Density Neutron",
                                 icon: "",
                                 handler: function () {
-                                    globalHandlers.DensityNeutronButtonClicked();                                    
+                                    globalHandlers.DensityNeutronButtonClicked();
                                 }
                             }, {
                                 name: "ResistivitySonic",
@@ -786,8 +803,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 handler: function () {
                                     globalHandlers.MSFLHistogramButtonClicked();
                                 }
-                            },
-                            
+                            }
                         ]
                     },
                     {
@@ -847,6 +863,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 selectedNodes.push(currentNode);
             }
             wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+        }
+        if (currentNode.type == 'dustbin' && !self.treeConfig[1].children.length) {
+            wiComponentService.emit(wiComponentService.DUSTBIN_REFRESH_EVENT);
         }
     }
 }

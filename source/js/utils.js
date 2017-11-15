@@ -479,8 +479,27 @@ function datasetToTreeConfig(dataset) {
 
     return datasetModel;
 }
-
 exports.datasetToTreeConfig = datasetToTreeConfig;
+
+function createDatasetsNode(parent) {
+    let datasetsModel = new Object();
+    datasetsModel.name = 'datasets';
+    datasetsModel.type = 'datasets';
+    datasetsModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Datasets"
+    };
+    datasetsModel.properties = {
+        idWell: parent.idWell
+    }
+    datasetsModel.children = new Array();
+    if (!parent.datasets) return datasetsModel;
+    parent.datasets.forEach(function (dataset) {
+        datasetsModel.children.push(datasetToTreeConfig(dataset));
+    });
+    return datasetsModel;
+}
 
 function createZoneSetsNode(well) {
     let zoneSetsModel = new Object();
@@ -602,7 +621,6 @@ function wellToTreeConfig(well) {
     wellModel.children.push(histogramNode);
     return wellModel;
 }
-
 exports.wellToTreeConfig = wellToTreeConfig;
 
 exports.projectToTreeConfig = function (project) {
@@ -633,7 +651,37 @@ exports.projectToTreeConfig = function (project) {
     return projectModel;
 }
 
-exports.visit = visit;
+
+function dustbinToTreeConfig (dustbin) {
+    var dustbinModel = new Object();
+    dustbinModel.type = 'dustbin';
+    dustbinModel.name = 'dustbin';
+    dustbinModel.properties = {};
+    dustbinModel.data = {
+        childExpanded: false,
+        icon: 'well-insight-16x16',
+        label: 'Dustbin',
+        selected: false
+    };
+    dustbinModel.children = new Array();
+
+    let wiComponentService = __GLOBAL.wiComponentService;
+    wiComponentService.putComponent(wiComponentService.DUSTBIN, dustbinModel);
+    if (dustbin) {
+        updateDustbinConfig(dustbin);
+    }
+    return dustbinModel;
+}
+exports.dustbinToTreeConfig = dustbinToTreeConfig;
+
+function updateDustbinConfig (dustbin) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let dustbinModel = dustbinToTreeConfig();
+    dustbinModel.children.push(createDatasetsNode(dustbin));
+    return dustbinModel;
+}
+exports.updateDustbinConfig = updateDustbinConfig;
+
 
 function visit(node, callback, options) {
     if (options && options.found) return;
@@ -651,6 +699,7 @@ function visit(node, callback, options) {
     if (options && options.path && options.path.pop)
         options.path.pop();
 }
+exports.visit = visit;
 
 exports.getSelectedNode = getSelectedNode;
 
@@ -910,11 +959,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         tracks.push(zoneTrack);
                     })
                 }
-                if (plot.image_tracks && plot.image_tracks.length) {
-                    plot.image_tracks.forEach(function (imageTrack) {
-                        tracks.push(imageTrack);
-                    })
-                }
 //
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
@@ -1003,13 +1047,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
                             for (let zone of zoneset.zones) {
                                 wiD3Ctrl.addZoneToTrack(viTrack, zone);
-                            }
-                        })
-                    } else if(aTrack.idImageTrack) {
-                        let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
-                        wiApiService.getImagesOfTrack(aTrack.idImageTrack, function (images) {
-                            for (let img of images) {
-                                wiD3Ctrl.addImageZoneToTrack(viTrack, img);
                             }
                         })
                     }

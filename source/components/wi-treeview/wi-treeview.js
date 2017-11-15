@@ -34,7 +34,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     };
 
     this.onClick = function ($index, $event) {
-        if (!self.container && self.container.selectHandler) return;
+        if (!self.container && !self.container.selectHandler) return;
         let node = self.config[$index];
         node.$index = $index;
         if (!node) {

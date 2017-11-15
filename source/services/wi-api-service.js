@@ -16,14 +16,14 @@ let app = angular.module(moduleName, []);
 //const BASE_URL = 'http://54.169.109.34';
 // const BASE_URL = 'http://sflow.me';
 //  const BASE_URL = 'http://localhost:3000';
-const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://wi.i2g.cloud';
 // const BASE_URL = 'http://192.168.0.223';
-// const BASE_URL = 'http://192.168.0.130:3000';
+const BASE_URL = 'http://192.168.1.17:3000';
 
 
-const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-// const AUTHENTICATION_SERVICE = 'http://localhost:2999';
+// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+const AUTHENTICATION_SERVICE = 'http://192.168.1.17:2999';
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
@@ -174,6 +174,9 @@ const DELETE_TERNARY = '/project/well/cross-plot/ternary/delete';
 
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
+
+const DUSTBIN = '/dustbin'
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -1372,10 +1375,6 @@ Service.prototype.removeTernary = function (idTernary, callback) {
     this.delete(DELETE_TERNARY, { idTernary: idTernary }, callback)
 }
 
-app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
-    return new Service(BASE_URL, $http, wiComponentService, Upload);
-});
-
 Service.prototype.getPalettes = function (callback) {
     let self = this;
     this.post(GET_PALETTES, {}, callback);
@@ -1397,5 +1396,17 @@ Service.prototype.setAuthenticationInfo = function(authenInfo) {
 Service.prototype.getCaptcha = function () {
     return AUTHENTICATION_SERVICE + "/captcha.png";
 };
+
+Service.prototype.getDustbin = function (idProject, callback) {
+    this.post(DUSTBIN, {idProject: idProject}, callback);
+}
+
+
+
+
+
+app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
+    return new Service(BASE_URL, $http, wiComponentService, Upload);
+});
 exports.name = moduleName;
 
