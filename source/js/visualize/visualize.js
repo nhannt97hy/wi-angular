@@ -5,6 +5,7 @@
 
 let DepthTrack = require('./visualize-depth-track');
 let LogTrack = require('./visualize-log-track');
+let ImageTrack = require('./visualize-image-track');
 let ZoneTrack = require('./visualize-zone-track');
 let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
@@ -47,6 +48,12 @@ exports.createZoneTrack = function(config, domElem) {
     let zoneTrack = new ZoneTrack(config);
     zoneTrack.init(domElem);
     return zoneTrack;
+}
+
+exports.createImageTrack = function (config, domElem) {
+    let imageTrack = new ImageTrack(config);
+    imageTrack.init(domElem);
+    return imageTrack;
 }
 
 /**

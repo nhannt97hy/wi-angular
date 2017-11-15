@@ -910,6 +910,11 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         tracks.push(zoneTrack);
                     })
                 }
+                if (plot.image_tracks && plot.image_tracks.length) {
+                    plot.image_tracks.forEach(function (imageTrack) {
+                        tracks.push(imageTrack);
+                    })
+                }
 //
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
@@ -998,6 +1003,13 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         wiApiService.getZoneSet(aTrack.zoneset.idZoneSet, function (zoneset) {
                             for (let zone of zoneset.zones) {
                                 wiD3Ctrl.addZoneToTrack(viTrack, zone);
+                            }
+                        })
+                    } else if(aTrack.idImageTrack) {
+                        let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
+                        wiApiService.getImagesOfTrack(aTrack.idImageTrack, function (images) {
+                            for (let img of images) {
+                                wiD3Ctrl.addImageZoneToTrack(viTrack, img);
                             }
                         })
                     }
