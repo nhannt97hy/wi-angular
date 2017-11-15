@@ -838,6 +838,26 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
+            case String(nodeType.match(/^.*-deleted/)):
+                return [
+                    {
+                        name: "Empty All",
+                        label: "Empty All",
+                        icon: "play-16x16",
+                        handler: function() {
+
+                        }
+                    },{
+                        name: "Restore All",
+                        label: "Restore All",
+                        icon: "play-16x16",
+                        handler: function() {
+
+                        }
+                    },{
+                        separator: '1'
+                    }
+                ];
             default:
                 return [];
         }

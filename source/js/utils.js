@@ -481,14 +481,35 @@ function datasetToTreeConfig(dataset) {
 }
 exports.datasetToTreeConfig = datasetToTreeConfig;
 
+
+function createWellsNode(parent) {
+    let wellsModel = new Object();
+    wellsModel.name = 'wells-deleted';
+    wellsModel.type = 'wells-deleted';
+    wellsModel.data = {
+        childExpanded: false,
+        icon: 'well-data-16x16',
+        label: "Well"
+    }
+    wellsModel.properties = {
+
+    }
+    wellsModel.children = new Array();
+    if(!parent.wells) return wellsModel;
+    parent.wells.forEach(function (well) {
+        wellsModel.children.push(wellToTreeConfig(well));
+    });
+    return wellsModel;
+}
+
 function createDatasetsNode(parent) {
     let datasetsModel = new Object();
-    datasetsModel.name = 'datasets';
-    datasetsModel.type = 'datasets';
+    datasetsModel.name = 'datasets-deleted';
+    datasetsModel.type = 'datasets-deleted';
     datasetsModel.data = {
         childExpanded: false,
-        icon: 'curve-data-16x16',
-        label: "Datasets"
+        icon: 'dataset-data-16x16',
+        label: "Dataset"
     };
     datasetsModel.properties = {
 
@@ -503,12 +524,12 @@ function createDatasetsNode(parent) {
 
 function createCurvesNode(parent) {
     let curvesModel = new Object();
-    curvesModel.name = 'curves';
-    curvesModel.type = 'curves';
+    curvesModel.name = 'curves-deleted';
+    curvesModel.type = 'curves-deleted';
     curvesModel.data = {
         childExpanded: false,
         icon: 'curve-data-16x16',
-        label: "Curves"
+        label: "Curve"
     }
     curvesModel.children = new Array();
     if(!parent.curves) return curvesModel;
@@ -518,30 +539,43 @@ function createCurvesNode(parent) {
     return curvesModel;
 }
 
-function createWellsNode(parent) {
-    let wellsModel = new Object();
-    wellsModel.name = 'wells';
-    wellsModel.type = 'wells';
-    wellsModel.data = {
+function createPlotsNode(parent) {
+    let plotsModel = new Object();
+    plotsModel.name = 'plots-deleted';
+    plotsModel.type = 'plots-deleted';
+    plotsModel.data = {
         childExpanded: false,
         icon: 'curve-data-16x16',
-        label: "Wells"
+        label: "Log Plot"
     }
-    wellsModel.properties = {
-
-    }
-    wellsModel.children = new Array();
-    if(!parent.wells) return wellsModel;
-    parent.wells.forEach(function (well) {
-        wellsModel.children.push(wellToTreeConfig(well));
+    plotsModel.children = new Array();
+    if(!parent.plots) return plotsModel;
+    parent.plots.forEach(function (plot) {
+        plotsModel.children.push(logplotToTreeConfig(plot));
     });
-    return wellsModel;
+    return plotsModel;
 }
 
+function createCrossplotsNode(parent) {
+    let crossplotsModel = new Object();
+    crossplotsModel.name = 'crossplots-deleted';
+    crossplotsModel.type = 'crossplots-deleted';
+    crossplotsModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Cross Plot"
+    }
+    crossplotsModel.children = new Array();
+    if(!parent.crossplots) return crossplotsModel;
+    parent.crossplots.forEach(function (crossplot) {
+        crossplotsModel.children.push(crossplotToTreeConfig(crossplot));
+    });
+    return crossplotsModel;
+}
 function createHistogramsNode(parent) {
     let histogramsModel = new Object();
-    histogramsModel.name = 'histograms';
-    histogramsModel.type = 'histograms';
+    histogramsModel.name = 'histograms-deleted';
+    histogramsModel.type = 'histograms-deleted';
     histogramsModel.data = {
         childExpanded: false,
         icon: 'curve-data-16x16',
@@ -555,39 +589,6 @@ function createHistogramsNode(parent) {
     return histogramsModel;
 }
 
-function createCrossplotsNode(parent) {
-    let crossplotsModel = new Object();
-    crossplotsModel.name = 'histograms';
-    crossplotsModel.type = 'histograms';
-    crossplotsModel.data = {
-        childExpanded: false,
-        icon: 'curve-data-16x16',
-        label: "Cross Plot"
-    }
-    crossplotsModel.children = new Array();
-    if(!parent.crossplots) return crossplotsModel;
-    parent.crossplots.forEach(function (crossplot) {
-        crossplotsModel.children.push(crossplotToTreeConfig(crossplot));
-    });
-    return crossplotsModel;
-}
-
-function createPlotsNode(parent) {
-    let plotsModel = new Object();
-    plotsModel.name = 'histograms';
-    plotsModel.type = 'histograms';
-    plotsModel.data = {
-        childExpanded: false,
-        icon: 'curve-data-16x16',
-        label: "Log Plot"
-    }
-    plotsModel.children = new Array();
-    if(!parent.plots) return plotsModel;
-    parent.plots.forEach(function (plot) {
-        plotsModel.children.push(logplotToTreeConfig(plot));
-    });
-    return plotsModel;
-}
 
 function createZoneSetsNode(well) {
     let zoneSetsModel = new Object();

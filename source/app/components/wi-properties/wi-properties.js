@@ -22,6 +22,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         checkbox: 'checkbox',
         select: 'select'
     }
+
     async function toListConfig(currentItem) {
         let listConfig = [];
         let config = {};
@@ -444,7 +445,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 }
                 listConfig.push(config);
                 if (!currentItem.data.ts || Date.now() - currentItem.data.ts > 30000)
-                    wiApiService.getCrossplot(itemProperties.idCrossPlot, function(dataReturn) {
+                    wiApiService.getCrossplot(itemProperties.idCrossPlot, function (dataReturn) {
                         console.log(dataReturn);
                         currentItem.properties = dataReturn;
                         itemProperties = currentItem.properties;
@@ -586,10 +587,118 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 }
                 listConfig.push(config);
                 if (!currentItem.data.ts || Date.now() - currentItem.data.ts > 30000)
-                    wiApiService.getHistogram(itemProperties.idHistogram, function(dataReturn) {
+                    wiApiService.getHistogram(itemProperties.idHistogram, function (dataReturn) {
                         itemProperties.reference_curves = dataReturn.reference_curves;
                         currentItem.data.ts = Date.now();
                     });
+                break;
+            case 'wells-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'datasets-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'curves-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'plots-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'crossplots-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'histograms-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'groups-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'zonesets-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
+                break;
+            case 'zones-deleted':
+                config = {
+                    name: currentItem.name,
+                    heading: 'Information',
+                    data: [{
+                        key: 'totals',
+                        label: 'Total Items',
+                        value: 0
+                    }]
+                }
+                listConfig.push(config);
                 break;
             default:
                 break;
