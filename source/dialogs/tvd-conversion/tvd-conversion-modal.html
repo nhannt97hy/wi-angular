@@ -9,9 +9,8 @@
             <div class="modal-body dialog-style">
                 <div class="row">
                     <form class="form-horizontal form-condensed">
-                        <h5 class="modal-infomation-title">
-                            <span class="well-16x16"></span>
-                            Well
+                        <h5>
+                            <span class="well-16x16"></span>Well
                         </h5>
                         <div class="container-fluid">
                         <div class="form-group">
@@ -20,9 +19,9 @@
                             </label>
                             <div class="col-sm-4">
                                 <select class="form-control wi-form-control"
-                                        ng-model="wiModal.idWell"
-                                        ng-options="well.id as well.properties.name for well in wiModal.wells"
-                                        ng-change="wiModal.onChangeWell(wiModal.idWell)">
+                                        ng-model="wiModal.SelectedWell"
+                                        ng-options="well as well.properties.name for well in wiModal.wells"
+                                        ng-change="wiModal.onChangeWell()">
                                 </select>
                             </div>
                             <label class="col-sm-2">
@@ -30,9 +29,8 @@
                             </label>
                             <div class="col-sm-4">
                                 <select class="form-control wi-form-control"
-                                        ng-model="wiModal.idDataset"
-                                        ng-options="dataset.id as dataset.name for dataset in wiModal.datasets"
-                                        ng-change="wiModal.onChangeDataset(wiModal.idDataset)">
+                                        ng-model="wiModal.SelectedDataset"
+                                        ng-options="dataset as dataset.name for dataset in wiModal.datasets">
                                 </select>
                             </div>
                         </div>
@@ -44,14 +42,14 @@
                                 <input type="number" class="form-control wi-form-control" step="any" disabled
                                         ng-model="wiModal.topDepth">
                             </div>
-                            <label class="col-sm-2 text-right">
+                            <label class="col-sm-2">
                                 Bottom Depth
                             </label>
                             <div class="col-sm-2">
                                 <input type="number" class="form-control wi-form-control" step="any" disabled
                                          ng-model="wiModal.bottomDepth">
                             </div>
-                            <label class="col-sm-2 text-right">
+                            <label class="col-sm-2">
                                 Step
                             </label>
                             <div class="col-sm-2">
@@ -60,36 +58,50 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-6">
-                                <input type="radio" value="file" class="wi-form-control" name='useType'> Using Servey File
+                            <label class="col-sm-4">
+                                <input type="radio" value="curve" class="wi-form-control" name='useType' ng-model="wiModal.useType"> Using Curve
                             </label>
-                            <label class="col-sm-6">
-                                <input type="radio" value="curve" class="wi-form-control" name='useType'> Using Curve
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-2">
-                                <label class="btn btn-default small-button">
-                                    <input class="display-none" type="file"
-                                    ngf-select
-                                    ng-model="wiModal.SurveyFile"
-                                    ngf-max-size="100MB" required/>
-                                    Browse</label>
-                            </div>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control wi-form-control" disabled>
-                            </div>
                             <label class="col-sm-2">
                                 Deviation
                             </label>
-                            <div class="col-sm-1">
-                                <select class="form-control wi-form-control"></select>
+                            <div class="col-sm-2">
+                                <ui-select ng-model="wiModal.DevCurve">
+                                    <ui-select-match placeholder='Select a curve'>{{wiModal.DevCurve.properties.name}}</ui-select-match>
+                                    <ui-select-choices group-by="'datasetName'"
+                                    repeat='curve in wiModal.curvesArr | filter:{properties: {name:$select.search}} track by curve.id'>
+                                        <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                    </ui-select-choices>
+                                </ui-select>
                             </div>
                             <label class="col-sm-2">
                                 Azimuth
                             </label>
-                            <div class="col-sm-1">
-                                <select class="form-control wi-form-control"></select>
+                            <div class="col-sm-2">
+                                <ui-select ng-model="wiModal.AziCurve">
+                                        <ui-select-match placeholder='Select a curve'>{{wiModal.AziCurve.properties.name}}</ui-select-match>
+                                        <ui-select-choices group-by="'datasetName'"
+                                        repeat='curve in wiModal.curvesArr | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4">
+                                <input type="radio" value="file" class="wi-form-control" name='useType' ng-model="wiModal.useType"> Using Servey File
+                            </label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control wi-form-control" disabled ng-model="wiModal.SurveyFile.name">
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="btn btn-default small-button width-100-percent"
+                                ng-class="{'label-disabled': wiModal.useType == 'curve'}">
+                                    <input class="display-none" type="file"
+                                    ngf-select ngf-pattern="'.txt,.xls,.xlsx'"
+                                    ng-model="wiModal.SurveyFile"
+                                    ngf-max-size="100MB" ng-disabled="wiModal.useType == 'curve'"
+                                    ng-change="wiModal.loadFile()"/>
+                                    Browse</label>
                             </div>
                         </div>
                         <div class="form-group">
@@ -97,51 +109,56 @@
                                 Data start at line
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-disabled="wiModal.useType == 'curve'"
+                                ng-model="wiModal.startData" min="0" step="1">
                             </div>
                             <label class="col-sm-2">
                                 Depth is in column
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-disabled="wiModal.useType == 'curve'"
+                                ng-model="wiModal.colDepth" min="1" step="1">
                             </div>
-                            <label for="" class="col-sm-2" style="padding-right: 0px">
+                            <label class="col-sm-2" style="padding-right: 0px">
                                 Deviation is in column
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-disabled="wiModal.useType == 'curve'"
+                                ng-model="wiModal.colDev" min="1" step="1">
                             </div>
-                            <label for="" class="col-sm-2" style="padding-right: 0px">
+                            <label class="col-sm-2" style="padding-right: 0px">
                                 Azimuth is in column
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-disabled="wiModal.useType == 'curve'"
+                                ng-model="wiModal.colAzi" min="1" step="1">
                             </div>
                         </div>
+                        <h5>Parameters</h5>
                         <div class="form-group">
                             <label class="col-sm-2">
-                                Well depth reference
+                                Elevation
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-model="wiModal.elevation">
                             </div>
                             <label class="col-sm-2">
                                 TVD reference at
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-model="wiModal.tvdRef">
                             </div>
                             <label class="col-sm-2">
                                 X at ref. depth
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-model="wiModal.xRef">
                             </div>
                             <label class="col-sm-2">
                                 Y at ref. depth
                             </label>
                             <div class="col-sm-1">
-                                <input type="number" class="form-control wi-form-control">
+                                <input type="number" class="form-control wi-form-control" ng-model="wiModal.yRef">
                             </div>
                         </div>
                         <div class="form-group">
@@ -149,19 +166,43 @@
                                 TVDSS Method
                             </label>
                             <div class="col-sm-4">
-                                <select class="form-control wi-form-control">
-                                  <option value="off">Default - Off Shore</option>
+                                <select class="form-control wi-form-control" ng-model="wiModal.tvdMethod">
+                                  <option value="off">Off Shore</option>
                                   <option value="on">On Shore</option>
                                 </select>
                             </div>
                             <label class="col-sm-2">Method</label>
                             <div class="col-sm-4">
-                                <select class="form-control wi-form-control">
+                                <select class="form-control wi-form-control" ng-model="wiModal.calMethod">
                                     <option value="1">Average Angle</option>
                                     <option value="2">Balanced Tangential</option>
                                     <option value="3">Radius Curvature</option>
                                     <option value="4">Minimum Curvature</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <label>Input</label>
+                                <div style="overflow-x:scroll;" id="inputDiv">
+                                    <table class="table table-bordered" id="inputTable">
+                                        <thead style="display: table-row;">
+                                            <tr>
+                                                <th ng-if="wiModal.input.length">Index</th>
+                                                <th ng-repeat="row in wiModal.input[3] track by $index" style="min-width:100px;text-align:center">Column{{$index + 1}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="height:200px;overflow-y:overlay;overflow-x:hidden;display:block">
+                                            <tr ng-repeat="row in wiModal.input">
+                                                <td style="min-width:49px;">{{$index}}</td>
+                                                <td ng-repeat="col in row track by $index" style="min-width:100px">{{col}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <label>Preview</label>
                             </div>
                         </div>
                         </div>
