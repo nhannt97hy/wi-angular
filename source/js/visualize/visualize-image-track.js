@@ -1,0 +1,241 @@
+let Utils = require('./visualize-utils');
+let Track = require('./visualize-track');
+let ImageZone = require('./visualize-image-zone');
+
+module.exports = ImageTrack;
+
+Utils.extend(Track, ImageTrack);
+
+function ImageTrack(config) {
+    Track.call(this, config);
+    this.MIN_WIDTH = 120;
+
+    this.id = config.id || config.idImageTrack;
+    this.idPlot = config.idPlot;
+
+    this.name = config.name || 'Image';
+    this.width = config.width || this.MIN_WIDTH;
+    this.minY = config.minY;
+    this.maxY = config.maxY;
+
+    this.drawings = config.imgzones || []; // Array of visualize imgzones
+
+    this.currentDrawing = null;
+    this.previousDrawing = null;
+    this.mode = null;
+}
+
+ImageTrack.prototype.getProperties = function() {
+    return {
+        idImageTrack: this.id,
+        title: this.name,
+        showTitle: this.showTitle,
+        topJustification: Utils.capitalize(this.justification),
+        bottomJustification: 'Center',
+        color: Utils.convertColorToRGB(this.color),
+        width: this.width
+    }
+}
+
+ImageTrack.prototype.setProperties = function(props) {
+    Utils.setIfNotNull(this, 'id', props.idImageTrack);
+    Utils.setIfNotNull(this, 'idPlot', props.idPlot);
+    Utils.setIfNotNull(this, 'name', props.title);
+    Utils.setIfNotNull(this, 'showTitle', props.showTitle);
+    Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
+    Utils.setIfNotNull(this, 'color', Utils.convertColorToRGB(props.color));
+    Utils.setIfNotNull(this, 'width', props.width);
+}
+
+ImageTrack.prototype.setMode = function(newMode) {
+    this.mode = newMode;
+    this.trackContainer.style('cursor', newMode == null ? 'default' : 'copy');
+}
+
+ImageTrack.prototype.getImageZones = function () {
+    return this.drawings.filter(function (d) {
+        return d.isImageZone();
+    });
+}
+
+ImageTrack.prototype.getCurrentImageZone = function() {
+    let current = this.currentDrawing;
+    if (current && current.isImageZone && current.isImageZone()) return current;
+    return null;
+}
+
+ImageTrack.prototype.getCurrentDrawing = function() {
+    return this.currentDrawing;
+}
+
+ImageTrack.prototype.setCurrentDrawing = function(drawing) {
+    if (drawing == this.currentDrawing) return;
+    this.previousDrawing = this.currentDrawing;
+    this.currentDrawing = drawing;
+
+    this.plotDrawing(this.previousDrawing);
+    this.plotDrawing(this.currentDrawing);
+
+    this.highlightHeader(this.previousDrawing);
+    this.highlightHeader(this.currentDrawing);
+}
+
+ImageTrack.prototype.init = function(baseElement) {
+    Track.prototype.init.call(this, baseElement);
+    let self = this;
+    this.trackContainer
+        .classed('vi-image-zone-track-container', true)
+        .on('mousedown', function() {
+            self.setCurrentDrawing(null);
+        });
+
+    this.svgContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing vi-track-svg-container');
+}
+
+
+ImageTrack.prototype.doPlot = function(highlight) {
+    Track.prototype.doPlot.call(this, highlight);
+    this.plotAllDrawings();
+    this.rearrangeHeaders();
+}
+
+ImageTrack.prototype.rearrangeHeaders = function() {
+    d3.select('.vi-track-drawing-header-container').selectAll('.vi-image-zone-header').sort(function (a, b) {
+        return a.dataset.topdepth - b.dataset.topdepth;
+        // return d3.select(a).attr('data-topdepth') - d3.select(b).attr('data-topdepth');
+    });
+}
+
+ImageTrack.prototype.plotAllDrawings = function() {
+    let self = this;
+    this.drawings.forEach(function(d) {
+        self.plotDrawing(d);
+    });
+}
+
+ImageTrack.prototype.plotDrawing = function(drawing) {
+    if (!drawing || !drawing.doPlot) return;
+    let windowY = this.getWindowY();
+    drawing.minY = windowY[0];
+    drawing.maxY = windowY[1];
+    if (drawing == this.currentDrawing) {
+        drawing.doPlot(true);
+        if (drawing.isImageZone())
+            drawing.svgGroup.raise();
+        else
+            drawing.raise();
+    }
+    else {
+        drawing.doPlot(false);
+    }
+}
+
+ImageTrack.prototype.plotImageZone = function(imgzone) {
+    if (imgzone && imgzone.isImageZone && imgzone.isImageZone())
+        this.plotDrawing(imgzone);
+}
+
+ImageTrack.prototype.addImageZone = function(config, track) {
+    let self = this;
+    if (!config.fill) {
+        config.fill = 'white';
+    }
+    if (config.minY == null) config.minY = track.minY;
+    if (config.maxY == null) config.maxY = track.maxY;
+    let imgzone = new ImageZone(config);
+    imgzone.init(this.plotContainer);
+    if (config.imageUrl) {
+        imgzone.doPlot(true);
+        imgzone.addImage(config);
+    }
+    imgzone.header = this.addImageZoneHeader(imgzone);
+    imgzone.on('mousedown', function() {
+        self.drawingMouseDownCallback(imgzone);
+    });
+    this.drawings.push(imgzone);
+    return imgzone;
+}
+
+ImageTrack.prototype.adjustImage = function(img) {
+    let self = this;
+    self.plotImageZone(img);
+    return img;
+}
+
+ImageTrack.prototype.removeDrawing = function(drawing) {
+    if (!drawing) return;
+    drawing.destroy();
+    let idx = this.drawings.indexOf(drawing);
+    this.drawings.splice(idx, 1);
+
+    if (drawing == this.currentDrawing)
+        this.currentDrawing = null;
+}
+
+ImageTrack.prototype.removeImage = function(imgzone) {
+    if (!imgzone || !imgzone.isImageZone()) return;
+    this.removeDrawing(imgzone);
+}
+
+ImageTrack.prototype.addImageZoneHeader = function(imgzone) {
+    let self = this;
+
+    let header = this.drawingHeaderContainer.append('div')
+        .attr('class', 'vi-image-zone-header')
+        .attr('data-topdepth', imgzone.topDepth)
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+
+    header.append('div')
+        .attr('class', 'vi-drawing-header-highlight-area vi-drawing-header-name vi-image-zone-header-name');
+
+    let rect = header.node().getBoundingClientRect();
+    
+    header.append('svg')
+        .attr('class', 'vi-drawing-header-fill vi-image-zone-header-fill')
+        .attr('width', rect.width)
+        .attr('height', rect.height);
+    return header;
+}
+
+ImageTrack.prototype.drawingMouseDownCallback = function(drawing) {
+    this.setCurrentDrawing(drawing);
+    d3.event.stopPropagation();
+    this.trackContainer.node().focus();
+}
+
+ImageTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
+    this.setCurrentDrawing(drawing);
+}
+
+ImageTrack.prototype.onImageZoneMouseDown = function(imgzone, cb) {
+    let self = this;
+    imgzone.on('mousedown', function() {
+        self.drawingMouseDownCallback(imgzone);
+        d3.select(this).raise();
+        cb();
+    });
+}
+
+ImageTrack.prototype.onImageZoneMouseOver = function (imgzone, cb) {
+    let self = this;
+    imgzone.on('mouseover', function () {
+        
+    });
+}
+
+ImageTrack.prototype.onImageZoneHeaderMouseDown = function(imgzone, cb) {
+    let self = this;
+    imgzone.header.on('mousedown', function() {
+        self.drawingHeaderMouseDownCallback(imgzone);
+        cb();
+    });
+}
+
+ImageTrack.prototype.highlightHeader = function(drawing) {
+    if (!drawing || !drawing.header) return;
+    let self = this;
+    drawing.header.select('.vi-drawing-header-highlight-area')
+        .style('background-color', drawing == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'white');
+}

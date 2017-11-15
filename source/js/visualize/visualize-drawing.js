@@ -57,6 +57,10 @@ Drawing.prototype.isAnnotation = function(){
     return this.constructor.name == 'Annotation';
 }
 
+Drawing.prototype.isImageZone = function () {
+    return this.constructor.name == 'ImageZone';
+}
+
 /**
  * Check if the drawing near a point
  * @param {Number} x - x coordinate of the point

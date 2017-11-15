@@ -189,6 +189,66 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.updateScale();
     };
 
+    this.addImageTrack = function(callback){
+        let trackOrder = getOrderKey();
+        if (trackOrder) {
+            const imageTracks = self.getTracks().filter(track => track.type == 'image-track');
+            const defaultImageTrackProp = {
+                showTitle: true,
+                title: "Image Track " + (imageTracks.length + 1),
+                topJustification: "center",
+                bottomJustification: "center",
+                trackColor: '#ffffff',
+                width: Utils.inchToPixel(1)
+            }
+            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
+                let dataRequest = {
+                    idPlot: self.logPlotCtrl.id,
+                    title: defaultImageTrackProp.title,
+                    showTitle: defaultImageTrackProp.showTitle,
+                    topJustification: defaultImageTrackProp.topJustification,
+                    bottomJustification: defaultImageTrackProp.bottomJustification,
+                    color: defaultImageTrackProp.trackColor,
+                    width: 1,
+                    orderNum: trackOrder
+                }
+                wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
+                    let imageTrack = dataRequest;
+                    imageTrack.idImageTrack = returnImageTrack.idImageTrack;
+                        let viTrack = self.pushImageTrack(dataRequest);
+                })
+            })
+        } else {
+            console.error('add new image track error!');
+        }
+    }
+
+    this.pushImageTrack = function(imageTrack){
+        let config = angular.copy(imageTrack);
+        config.id = imageTrack.idImageTrack;
+        config.name = imageTrack.title;
+        config.yStep = parseFloat(_getWellProps().step);
+        config.offsetY = parseFloat(_getWellProps().topDepth);
+        config.width = Utils.inchToPixel(imageTrack.width);
+        console.log(config);
+
+        let track = graph.createImageTrack(config, document.getElementById(self.plotAreaId));
+        graph.rearrangeTracks(self);
+        _tracks.push(track);
+        _tracks.sort(function(track1, track2) {
+            return track1.orderNum.localeCompare(track2.orderNum);
+        });
+        _setCurrentTrack(track);
+
+        let depthRange = self.getDepthRangeFromSlidingBar();
+        self.setDepthRangeForTrack(track, depthRange);
+
+        _registerTrackCallback(track);
+        _registerImageTrackCallback(track);
+        _registerTrackHorizontalResizerDragCallback();
+        return track;
+    }
+
     this.addZoneTrack = function(callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
@@ -321,6 +381,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return zone;
     }
 
+    this.addImageZoneToTrack = function (track, config) {
+        if (!track || !track.addImageZone) return;
+        let imgzone = track.addImageZone(config, track);
+        console.log(imgzone);
+        track.plotImageZone(imgzone);
+        track.rearrangeHeaders();
+        track.onImageZoneMouseDown(imgzone, function() {
+            if (d3.event.button == 2) {
+                _imageZoneOnRightClick();
+            }
+        });
+        track.onImageZoneHeaderMouseDown(imgzone, function() {
+            if (d3.event.button == 2) {
+                _imageZoneOnRightClick();
+            }
+        });
+        imgzone.on('dblclick', _imageZoneOnDoubleClick);
+        imgzone.header.on('dblclick', _imageZoneOnDoubleClick);
+        imgzone.onLineDragEnd(function() {
+            let image = track.adjustImage(imgzone);
+            image.idImageOfTrack = imgzone.idImageOfTrack;
+            // send api to edit image
+            wiApiService.editImage(image, function (imgProps) {
+                if (imgProps) {
+                    $timeout(function () {
+                        imgzone.setProperties(imgProps);
+                    });
+                }
+            });
+            track.plotImageZone(imgzone);
+            track.setMode(null);
+            track.rearrangeHeaders();
+        });
+        return imgzone;
+    }
+
     this.addMarker = function () {
         if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
             _currentTrack.setMode('AddMarker');
@@ -399,6 +495,30 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiApiService.editMarker(marker.getProperties(), function () {});
         });
         return marker;
+    }
+
+    this.addImageZone = function(imgzone, props) {
+        if(!imgzone) return;
+        let imageConfig = {
+            idImageTrack: props.idImageTrack,
+            fill: props.fill,
+            imageUrl: props.imageUrl,
+            width: 'inherit',
+            height: 'inherit'
+        };
+        imgzone.addImage(imageConfig);
+    }
+
+    this.changeImageZone = function(imgzone, props) {
+        if(!imgzone) return;
+        let imageConfig = {
+            idImageTrack: props.idImageTrack,
+            fill: props.fill,
+            imageUrl: props.imageUrl,
+            width: 'inherit',
+            height: 'inherit'
+        };
+        imgzone.changeImage(imageConfig);
     }
 
     this.addImageToTrack = function(track, config) {
@@ -921,6 +1041,72 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackCallback(track);
     }
 
+    function _registerImageTrackCallback(track) {
+        let imgzone;
+        track.plotContainer.call(d3.drag()
+            .on('start', function() {
+                track.setCurrentDrawing(null);
+                if (track.mode != 'AddImageZone') return;
+                track.startY = d3.mouse(track.plotContainer.node())[1];
+            })
+            .on('drag', function() {
+                if (track.mode != 'AddImageZone') return;
+                let y1 = d3.mouse(track.plotContainer.node())[1];
+                let y2 = track.startY;
+                let minY = d3.min([y1, y2]);
+                let maxY = d3.max([y1, y2]);
+                imgzone = track.getCurrentImageZone();
+
+                if (!imgzone) {
+                    imgzone = self.addImageZoneToTrack(track, {
+                        minY: track.minY,
+                        maxY: track.maxY
+                    });
+                    track.setCurrentDrawing(imgzone);
+                }
+                if (!imgzone) {
+                    track.setMode(null);
+                    return;
+                }
+                let transformY = imgzone.getTransformY();
+                let topDepth = transformY.invert(minY);
+                let bottomDepth = transformY.invert(maxY);
+                imgzone.setProperties({
+                    topDepth: topDepth,
+                    bottomDepth: bottomDepth,
+                    fill: 'white'
+                });
+                track.plotImageZone(imgzone);
+            })
+            .on('end', function() {
+                if (track.mode != 'AddImageZone') return;
+
+                DialogUtils.imageZonePropertiesDialog(ModalService, imgzone.getProperties(), function(props) {
+                    if (!props) {
+                        track.removeImage(imgzone);
+                        return;
+                    }
+                    props.idImageTrack = track.id;
+                    wiApiService.createImage(props, function (imgProps) {
+                        if (imgProps) {
+                            $timeout(function () {
+                                imgzone.setProperties(imgProps);
+                                self.addImageZone(imgzone, imgProps);
+                            });
+                        }
+                    });
+                });
+                track.plotImageZone(imgzone);
+                track.setMode(null);
+                track.rearrangeHeaders();
+            })
+        );
+        track.on('keydown', function() {
+            _onTrackKeyPressCallback(track);
+        });
+        _registerTrackCallback(track);
+    }
+
     function _registerTrackCallback(track) {
         track.on('focus', function() {
             _setCurrentTrack(track);
@@ -940,6 +1126,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 })
             } else if (track.isZoneTrack()) {
                 wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, function () {
+                })
+            } else if (track.isImageTrack()) {
+                wiApiService.editImageTrack({ idImageTrack: track.id, width: Utils.pixelToInch(track.width) }, function () {
                 })
             }
         });
@@ -993,6 +1182,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.editZoneTrack({idZoneTrack: viTrack.id, orderNum: orderNum}, function () {
                     resolve();
                 })
+            } else if (viTrack.isImageTrack()) {
+                wiApiService.editImageTrack({idImageTrack: viTrack.id, orderNum: orderNum}, function () {
+                    resolve();
+                })
             }
         }).then(function () {
             viTrack.orderNum = orderNum;
@@ -1024,6 +1217,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     })
                 } else if (viTrack.isZoneTrack()) {
                     wiApiService.editZoneTrack({ idZoneTrack: viTrack.id, orderNum: orderNum }, function () {
+                        resolve();
+                    })
+                } else if (viTrack.isImageTrack()) {
+                    wiApiService.editImageTrack({ idImageTrack: viTrack.id, orderNum: orderNum }, function () {
                         resolve();
                     })
                 }
@@ -1114,6 +1311,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         track.removeDrawing(drawing);
                     })
                 }
+                else if (drawing.isImageZone()) {
+                    // Send api before deleting
+                    wiApiService.removeImage(drawing.idImageOfTrack, function () {
+                        track.removeDrawing(drawing);
+                    })
+                }
 
                 return;
             case 'Escape':
@@ -1135,6 +1338,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _zoneOnDoubleClick() {
         zoneProperties();
+        // Prevent track properties dialog from opening
+        d3.event.stopPropagation();
+    }
+
+    function _imageZoneOnDoubleClick() {
+        imageProperties();
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
@@ -1181,6 +1390,36 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 Utils.refreshProjectState();
             })
         })
+    }
+
+    function imageProperties () {
+        let track = _currentTrack;
+        let imgzone = track.getCurrentImageZone();
+        console.log(imgzone);
+        imgzone.setProperties({
+            done: true
+        });
+
+        DialogUtils.imageZonePropertiesDialog(ModalService, imgzone, function(props) {
+            if (!props) return;
+            wiApiService.editImage(props, function (imgProps) {
+                if (imgProps) {
+                    $timeout(function () {
+                		imgzone.setProperties(imgProps);
+                		self.changeImageZone(imgzone, imgProps);
+                    });
+                }
+            });
+        });
+        track.plotImageZone(imgzone);
+        track.setMode(null);
+        track.rearrangeHeaders();
+    }
+
+    function showImage () {
+        let track = _currentTrack;
+        let imgzone = track.getCurrentImageZone();
+        DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), function () {});
     }
 
     function markerProperties (marker) {
@@ -1297,6 +1536,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Split Zone",
                 handler: function () {
                     _currentTrack.setMode('SplitZone');
+                }
+            }
+        ]);
+    }
+
+    function _imageZoneOnRightClick() {
+        let imgzone = _currentTrack.getCurrentImageZone();
+        self.setContextMenu([
+            {
+                name: "ImageProperties",
+                label: "Image Properties",
+                icon: "imgzone-edit-16x16",
+                handler: imageProperties
+            }, {
+                name: "ShowImage",
+                label: "Show Image",
+                icon: "imgzone-show-16x16",
+                handler: showImage
+            }, {
+                name: "RemoveImage",
+                label: "Remove Image",
+                icon: "imgzone-delete-16x16",
+                handler: function () {
+                    wiApiService.removeImage(imgzone.idImageOfTrack, function () {
+                        _currentTrack.removeImage(imgzone);
+                    });
                 }
             }
         ]);
@@ -1587,6 +1852,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         self.addLogTrack();
                     }
                 }, {
+                    name: 'AddImageTrack',
+                    label: 'Add Image Track',
+                    icon: 'image-track-16x16',
+                    handler: function () {
+                        self.addImageTrack();
+                    }
+                },  {
                     name: "AddZonationTrack",
                     label: "Add Zonation Track",
                     icon: 'zonation-track-add-16x16',
@@ -1621,6 +1893,68 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         logplotHandlers.DeleteTrackButtonClicked();
                     }
                 },
+            ]);
+        } else if (track.isImageTrack()) {
+            self.setContextMenu([
+                {
+                    name: "TrackProperties",
+                    label: "Track Properties",
+                    icon: 'track-properties-16x16',
+                    handler: openTrackPropertiesDialog
+                }, {
+                    separator: '1'
+                }, {
+                    name: "AddDepthTrack",
+                    label: "Add Depth Track",
+                    icon: 'depth-axis-add-16x16',
+                    handler: function () {
+                        self.addDepthTrack();
+                    }
+                }, {
+                    name: "AddLogTrack",
+                    label: "Add Log Track",
+                    icon: 'logplot-blank-16x16',
+                    handler: function () {
+                        self.addLogTrack();
+                    }
+                }, {
+                    name: 'AddImageTrack',
+                    label: 'Add Image Track',
+                    icon: 'image-track-16x16',
+                    handler: function () {
+                        self.addImageTrack();
+                    }
+                }, {
+                    name: "AddZonationTrack",
+                    label: "Add Zonation Track",
+                    icon: 'zonation-track-add-16x16',
+                    handler: function () {
+                        self.addZoneTrack();
+                    }
+                }, {
+                    separator: '1'
+                }, {
+                    name: "AddImage",
+                    label: "Add Image",
+                    icon: "image-16x16",
+                    handler: function () {
+                        track.setMode('AddImageZone');
+                    }
+                }, {
+                    name: "DuplicateTrack",
+                    label: "Duplicate Track",
+                    icon: 'track-duplicate-16x16',
+                    handler: function () {
+                        logplotHandlers.DuplicateTrackButtonClicked();
+                    }
+                }, {
+                    name: "DeleteTrack",
+                    label: "Delete Track",
+                    icon: 'track-delete-16x16',
+                    handler: function () {
+                        logplotHandlers.DeleteTrackButtonClicked();
+                    }
+                }
             ]);
         }
     }
@@ -1672,6 +2006,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
             });
+        } else if (_currentTrack.isImageTrack()) {
+            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
+                if (props) {
+                    props.idImageTrack = _currentTrack.id;
+                    console.log(props);
+                    wiApiService.editImageTrack(props, function () {
+                        props.width = Utils.inchToPixel(props.width);
+                        _currentTrack.setProperties(props);
+                        _currentTrack.doPlot(true);
+                    });
+                }
+            });
         }
     }
     /* Private End */
@@ -1701,6 +2047,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 break;
             case 'zone':
                 _zoneOnDoubleClick();
+                break;
+            case 'imagezone':
+                _imageZoneOnDoubleClick();
                 break;
             default:
                 break;
@@ -1781,6 +2130,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         },
         {
+            name: 'AddImageTrack',
+            label: 'Add Image Track',
+            icon: 'image-track-16x16',
+            handler: function () {
+                self.addImageTrack();
+            }
+        }, 
+        {
             name: "AddZonationTrack",
             label: "Add Zonation Track",
             icon: 'zonation-track-add-16x16',
@@ -1805,14 +2162,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: 'annotation-16x16',
             handler: function () {
                 self.addAnnotation();
-            }
-        },
-        {
-            name: "Add Image",
-            label: "Add Image",
-            icon: 'image-add-16x16',
-            handler: function () {
-                logplotHandlers.AddImageButtonClicked();
             }
         },
         {

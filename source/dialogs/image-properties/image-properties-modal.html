@@ -6,66 +6,149 @@
                 <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;Image Properties</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal">
-                    <div>
+                <form action="" class="form-horizontal" name="imageForm" id="form">
+                    <h5>Gallery</h5>
+                    <div class="panel panel-default" ng-show="wiModal.isGalleryOpening">
+                        <div class="panel-heading" style="padding: 0px">
+                            <div class="container-fluid" style="padding-top: 5px">
+                                <div class="col-sm-8" style="padding-left: 0px">
+                                    <label>Uploaded Images</label>
+                                </div>
+                                <div class="text-center col-sm-4">
+                                    <label>Preview</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-sm-8 panel-body" style="padding: 0px">
+                                <div class='position-relative'>
+                                    <input style='padding-left: 25px;' class="form-control wi-form-control" type="text" name="filter" ng-model="textFilter" ng-show="wiModal.isGalleryOpening">
+                                    <i class="fa fa-search position-absolute search-icon"></i>
+                                </div>
+                                <div class="panel-body scrollable">
+                                    <i class="empty" style="border: none" ng-if="!wiModal.uploadedImages.length">Nothing here yet. Please upload images first</i>
+                                    <ul>
+                                        <li style="list-style-type: none" ng-repeat="image in wiModal.uploadedImages | filter: textFilter" ng-click="wiModal.selectImage(image)" ng-class="{active : image === wiModal.selectedImage}">
+                                            <div class="panel-body selectable">{{image.name}}<span><button ng-click="wiModal.deleteUploadedImage(image)" class="display-right">&times;</button></span></div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 panel-body text-center" style="padding-top: 0px">
+                                <img ng-show="wiModal.selected" ngf-thumbnail="wiModal.imageUrl" class="thumb">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <button style="width: 100%;" type="button" class="btn btn-default" ng-click="wiModal.openGallery()">
+                                <span ng-show="wiModal.isGalleryOpening">Close Gallery</span>
+                                <span ng-hide="wiModal.isGalleryOpening">Open Gallery</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div ng-show="!wiModal.isGalleryOpening">
                         <h5>Image</h5>
                         <div class="form-group">
                             <div class="col-sm-3">
                                 <label for="selected" class="btn btn-default">Select</label>
                             </div>
                             <div class="col-sm-7">
-                                <input id="selected" class="display-none" type="file" ngf-select ng-model="wiModal.imageFile" required/>
+                                <input name="imageFile" id="selected" class="display-none" type="file" accept="image/*" ngf-max-size="2MB" ngf-model-invalid="errorFile" ngf-select ng-model="wiModal.imageFile"/>
                                 <input type="text" class="form-control" value="{{wiModal.imageFile.name}}" disabled>
+                                <i ng-show="imageForm.file.$error.maxSize" style="color: red">File too large. Max 2Mb</i>
                             </div>
                             <div class="col-sm-2">
-                                <button type="button" class="btn btn-default" ng-disabled="!wiModal.imageFile" ng-click="wiModal.onUploadButtonClicked()">
+                                <button type="button" class="btn btn-default" ng-disabled="!wiModal.imageFile || !imageForm.$valid" ng-click="wiModal.onUploadButtonClicked()">
                                     Upload
                                 </button>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-3 normal-text">Image URL</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" ng-model="wiModal.src" ng-change="wiModal.onImageUrlChange()">
+                            <label class="control-label col-sm-3 normal-text">Preview</label>
+                            <div class="col-sm-5">
+                                <img ng-show="imageForm.file.$valid" ngf-thumbnail="wiModal.imageFile" class="thumb">
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <h5>Boundaries</h5>
-                        <div class="form-group">
-                            <div class="col-sm-6">
-                                <label for="top" class="control-label col-sm-4 normal-text">Top</label>
-                                <div class="col-sm-8">
-                                    <input type="number" id="top" step="0.01" class="form-control" ng-model="wiModal.top" ng-change="wiModal.done = true">
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="bottom" class="control-label col-sm-4 normal-text">Bottom</label>
-                                <div class="col-sm-8">
-                                    <input type="number" id="bottom" step="0.01" class="col-sm-8 form-control" ng-model="wiModal.bottom" ng-change="wiModal.done = true">
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="left" class="control-label col-sm-4 normal-text">Left(%)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" id="left" step="0.01" class="col-sm-8 form-control" ng-model="wiModal.left" ng-change="wiModal.done = true">
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="width" class="control-label col-sm-4 normal-text">Width(%)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" id="width" step="0.01" min="1" class="col-sm-8 form-control" ng-model="wiModal.width" ng-change="wiModal.done = true">
-                                </div>
-                            </div>
+                    <h5>General</h5>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3 normal-text">Background</label>
+                        <div class="col-sm-8 text-left">
+                            <button ng-click="wiModal.background()" ng-style="{'background-color': wiModal.fill}" class="form-control wi-form-control width-80px thick-border"></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3 normal-text">Image URL</label>
+                        <div class="col-sm-9">
+                            <input name="image" type="text" class="form-control wi-form-control" ng-model="wiModal.imageUrl" ng-change="wiModal.onImageUrlChange()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="isShowName" class="col-sm-3 normal-text">
+                            <input type="checkbox" id="isShowName" ng-model="wiModal.showName">Show Name
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control wi-form-control" id="name" ng-model="wiModal.name" ng-disabled="!wiModal.showName">
                         </div>
                     </div>
                 </form>
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;OK</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>
     </div>
 </div>
+<style>
+    .thumb {
+        max-width: 100px;
+    }
+    div.selectable {
+        background: none;
+        border: none;
+        padding: 2px;
+        overflow: hidden;
+    }
+    div.selectable:hover {
+        position: relative;
+        background-color: lightgray;
+        cursor: pointer;
+    }
+    .display-right {
+        display: none;
+    }
+    .active {
+        position: relative;
+        background-color: lightgreen;
+    }
+    .active .display-right {
+        background: none;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        display: inline-block;
+        position: absolute;
+        right: 0%;
+    }
+    ul {
+        margin-left: 0px;
+        padding-left: 0px;
+    }
+    div.scrollable {
+        border: 1px solid #ccc;
+        border-top:none;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        padding: 0.5em 1em;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        height: 80px;
+    }
+    .search-icon {
+        top: 5px;
+        left: 8px;
+    }
+</style>

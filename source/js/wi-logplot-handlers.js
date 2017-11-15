@@ -331,6 +331,8 @@ exports.DeleteTrackButtonClicked = function () {
             wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
         } else if (currentTrack.type == 'zone-track') {
             wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.type == 'image-track') {
+            wiApiService.removeImageTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
         }
     });
 };

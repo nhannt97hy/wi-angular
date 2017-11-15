@@ -3917,6 +3917,213 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
     });
 }
 
+exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imageTrackProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = imageTrackProperties || {
+            showTitle: true,
+            title: "New Image Track",
+            topJustification: "center",
+            trackColor: '#ffffff',
+            width: utils.inchToPixel(2)
+            // parameterSet: null
+        }
+        props.width = utils.pixelToInch(props.width);
+        console.log(props);
+        this.showTitle = props.showTitle;
+        this.title = props.title;
+        this.topJustification = props.topJustification.toLowerCase();
+        this.trackColor = props.trackColor;
+        this.width = props.width;
+
+        this.trackBackground = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
+                self.trackColor = colorStr;
+            });
+        }
+        this.onOkButtonClicked = function () {
+            props = {
+                showTitle: self.showTitle,
+                title: self.title,
+                topJustification: self.topJustification,
+                trackColor: self.trackColor,
+                width: self.width,
+                parameterSet: self.parameterSet
+            }
+            // if (self.error) return;
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "image-track-properties/image-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    });
+}
+
+exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = config || {};
+
+        this.idImageOfTrack = props.idImageOfTrack;
+
+        this.imageFile = null;
+        this.done = props.done || false;
+        this.imageUrl = props.imageUrl || "";
+        this.name = props.name;
+        this.showName = props.showName;
+        this.fill = props.fill || 'white';
+
+        this.uploadedImages = [];
+
+        wiApiService.getImageGallery(function (images) {
+            self.uploadedImages = images.map(function(item) {
+                return {
+                    name: item.match(/\/([^\/]+)\/?$/)[1],
+                    imageUrl: wiApiService.BASE_URL + item
+                }
+            });
+        });
+
+        this.isGalleryOpening = false;
+
+        this.selectedImage = null;
+        this.selected = false;
+
+        this.onUploadButtonClicked = function () {
+            wiApiService.uploadImage({
+                file: self.imageFile
+            }, function (imageUrl) {
+                $scope.$apply(function () {
+                    self.imageUrl = imageUrl;
+                    self.onImageUrlChange();
+                    self.done = true;
+                    let latestImage = {
+                        name: self.imageUrl.match(/\/([^\/]+)\/?$/)[1],
+                        imageUrl: self.imageUrl
+                    }
+                    self.uploadedImages.push(latestImage);
+                });
+            });
+        }
+
+        this.background = function () {
+            dialogUtils.colorPickerDialog(ModalService, self.fill, function (colorStr) {
+                self.fill = colorStr;
+                console.log(colorStr);
+            });
+        }
+
+        this.openGallery = function () {
+            this.isGalleryOpening = !this.isGalleryOpening;
+            console.log("open gallery");
+        }
+
+        this.deleteUploadedImage = function (image) {
+            console.log('image was deleted');
+            console.warn(image);
+        }
+
+        this.selectImage = function (image) {
+            self.selectedImage = image;
+            self.selected = true;
+            self.imageUrl = image.imageUrl;
+            self.done = true;
+        }
+
+        function validateUrl (str) {
+            var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+            if (!(regex.test(str)))
+                return false;
+            return true;
+        }
+
+        this.onImageUrlChange = utils.debounce(function () {
+            if (validateUrl(self.imageUrl))
+                this.done = true;
+            else
+                this.done = false;
+        }, 500)
+
+        function bindProps() {
+            props.idImageOfTrack = self.idImageOfTrack;
+            props.imageUrl = self.imageUrl;
+            props.name = self.name;
+            props.showName = self.showName;
+            props.fill = self.fill;
+            props.done = self.done;
+        }
+
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "image-properties/image-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.showImageDialog = function (ModalService, image, callback) {
+    function ModalController ($scope, wiComponentService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let currentImage = image;
+
+        this.currentImageUrl = currentImage.imageUrl;
+        this.currentImageName = currentImage.name;
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "image-view/image-view-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback();
+        });
+    });
+}
+
 exports.errorMessageDialog = errorMessageDialog;
 
 function errorMessageDialog(ModalService, errorMessage, callback) {
