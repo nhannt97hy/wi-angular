@@ -491,7 +491,7 @@ function createDatasetsNode(parent) {
         label: "Datasets"
     };
     datasetsModel.properties = {
-        idWell: parent.idWell
+
     }
     datasetsModel.children = new Array();
     if (!parent.datasets) return datasetsModel;
@@ -499,6 +499,94 @@ function createDatasetsNode(parent) {
         datasetsModel.children.push(datasetToTreeConfig(dataset));
     });
     return datasetsModel;
+}
+
+function createCurvesNode(parent) {
+    let curvesModel = new Object();
+    curvesModel.name = 'curves';
+    curvesModel.type = 'curves';
+    curvesModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Curves"
+    }
+    curvesModel.children = new Array();
+    if(!parent.curves) return curvesModel;
+    parent.curves.forEach(function (curve) {
+        curvesModel.children.push(curveToTreeConfig(curve));
+    });
+    return curvesModel;
+}
+
+function createWellsNode(parent) {
+    let wellsModel = new Object();
+    wellsModel.name = 'wells';
+    wellsModel.type = 'wells';
+    wellsModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Wells"
+    }
+    wellsModel.properties = {
+
+    }
+    wellsModel.children = new Array();
+    if(!parent.wells) return wellsModel;
+    parent.wells.forEach(function (well) {
+        wellsModel.children.push(wellToTreeConfig(well));
+    });
+    return wellsModel;
+}
+
+function createHistogramsNode(parent) {
+    let histogramsModel = new Object();
+    histogramsModel.name = 'histograms';
+    histogramsModel.type = 'histograms';
+    histogramsModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Histogram"
+    }
+    histogramsModel.children = new Array();
+    if(!parent.histograms) return histogramsModel;
+    parent.histograms.forEach(function (histogram) {
+        histogramsModel.children.push(histogramToTreeConfig(histogram));
+    });
+    return histogramsModel;
+}
+
+function createCrossplotsNode(parent) {
+    let crossplotsModel = new Object();
+    crossplotsModel.name = 'histograms';
+    crossplotsModel.type = 'histograms';
+    crossplotsModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Cross Plot"
+    }
+    crossplotsModel.children = new Array();
+    if(!parent.crossplots) return crossplotsModel;
+    parent.crossplots.forEach(function (crossplot) {
+        crossplotsModel.children.push(crossplotToTreeConfig(crossplot));
+    });
+    return crossplotsModel;
+}
+
+function createPlotsNode(parent) {
+    let plotsModel = new Object();
+    plotsModel.name = 'histograms';
+    plotsModel.type = 'histograms';
+    plotsModel.data = {
+        childExpanded: false,
+        icon: 'curve-data-16x16',
+        label: "Log Plot"
+    }
+    plotsModel.children = new Array();
+    if(!parent.plots) return plotsModel;
+    parent.plots.forEach(function (plot) {
+        plotsModel.children.push(logplotToTreeConfig(plot));
+    });
+    return plotsModel;
 }
 
 function createZoneSetsNode(well) {
@@ -677,7 +765,12 @@ exports.dustbinToTreeConfig = dustbinToTreeConfig;
 function updateDustbinConfig (dustbin) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let dustbinModel = dustbinToTreeConfig();
+    dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
+    dustbinModel.children.push(createCurvesNode(dustbin));
+    dustbinModel.children.push(createPlotsNode(dustbin));
+    dustbinModel.children.push(createCrossplotsNode(dustbin));
+    dustbinModel.children.push(createHistogramsNode(dustbin));
     return dustbinModel;
 }
 exports.updateDustbinConfig = updateDustbinConfig;
