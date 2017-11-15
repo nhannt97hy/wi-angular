@@ -2,62 +2,60 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"><span class="curve-input-32x32"></span>&nbsp;Add New Curve</h4>
-                <h5 class="modal-infomation-title">&nbsp;Curve Infomation</h5>
-
+                <h4 class="modal-title"><span class="curve-new-32x32"></span>&nbsp;Add New Curve</h4>
             </div>
             <div class="modal-body">
                 <div class="">
+                    <h5 class="modal-infomation-title">&nbsp;Curve Infomation</h5>
                     <form class="form-horizontal" action="" name="modalAddCurve">
                         <div class="form-group">
-                            <label class="control-label col-sm-3">Well</label>
-                            <div class="col-sm-9">
-                                <select ng-model="wiModal.idWell" class="form-control">
-                                    <option ng-repeat="well in wiModal.wells" value="{{well.idWell}}">{{well.name}}</option>
-                                </select>
+                            <label class="col-sm-6">Well:</label>
+                            <div class="col-sm-6">
+                                <select class="form-control wi-form-control" ng-model="wiModal.SelectedWell"
+                                ng-options="well as well.properties.name for well in wiModal.wellArr"
+                                ng-change='wiModal.onWellChanged()'></select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-3">Dataset</label>
-                            <div class="col-sm-9">
-                                <select ng-model="wiModal.idWell" class="form-control">
-                                    <option ng-repeat="well in wiModal.wells" value="{{well.idWell}}">{{well.dataset}}</option>
-                                </select>
+                            <label class="col-sm-6">Datasets:</label>
+                            <div class="col-sm-6">
+                                <select class="form-control wi-form-control"
+                                  ng-model="wiModal.datasetName"
+                                  ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets">
+                                  </select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-3">Family</label>
-                            <div class="col-sm-9">
-                                <select ng-model="wiModal.idWell" class="form-control">
-                                    <option ng-repeat="well in wiModal.wells" value="{{well.idWell}}">{{well.family}}</option>
-                                </select>
+                            <label class="col-sm-6">Family:</label>
+                            <div class="col-sm-6">
+                                <select class="form-control wi-form-control" ng-model="wiModal.selectedFamily"
+                                 ng-options="family as family.name for family in wiModal.families" ng-change='wiModal.onFamilyChanged()'></select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-3" for="name">Curve name</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" value="" id="name" name="name" ng-model="name">
+                            <label class="control-label col-sm-6">Curve name:</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.curveName" ng-change="wiModal.clickBut()">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-3" for="unit">Unit</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" value="" id="unit" name="unit" ng-model="unit">
+                            <label class="control-label col-sm-6">Unit:</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.unit" ng-disabled="true">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-3" for="initValue">Initial Value</label>
-                            <div class="col-sm-9">
-                                <input type="number" class="form-control" value="" id="initValue" name="initValue" ng-model="initValue">
+                            <label class="control-label col-sm-6">Initial Value: </label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control wi-form-control"  ng-model="wiModal.initValue">
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onRunButtonClicked();" ng-disabled="!wiModal.curveName || wiModal.applyingInProgress" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>
