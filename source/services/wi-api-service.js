@@ -76,11 +76,6 @@ const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
 const GET_LOG_TRACK = '/project/well/plot/track/info';
 const EDIT_TRACK = '/project/well/plot/track/edit';
 
-const CREATE_IMAGE  = '/project/well/plot/track/image/new';
-const EDIT_IMAGE = '/project/well/plot/track/image/edit';
-const GET_IMAGE = '/project/well/plot/track/image/info';
-const DELETE_IMAGE = '/project/well/plot/track/image/delete';
-
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
 const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
@@ -121,6 +116,19 @@ const CREATE_ZONE = '/project/well/zone-set/zone/new';
 const EDIT_ZONE = '/project/well/zone-set/zone/edit';
 const GET_ZONE = '/project/well/zone-set/zone/info';
 const DELETE_ZONE = '/project/well/zone-set/zone/delete';
+
+const CREATE_IMAGE_TRACK = '/project/well/plot/image-track/new';
+const EDIT_IMAGE_TRACK = '/project/well/plot/image-track/edit';
+const GET_IMAGE_TRACK = '/project/well/plot/image-track/info';
+const DELETE_IMAGE_TRACK = '/project/well/plot/image-track/delete';
+
+const CREATE_IMAGE  = '/project/well/plot/image-track/image/new';
+const EDIT_IMAGE = '/project/well/plot/image-track/image/edit';
+const GET_IMAGE = '/project/well/plot/image-track/image/info';
+const DELETE_IMAGE = '/project/well/plot/image-track/image/delete';
+const LIST_IMAGE_OF_TRACK = '/project/well/plot/image-track/image/list';
+
+const GET_IMAGE_GALLERY = '/image-list';
 
 const CREATE_CROSSPLOT = '/project/well/cross-plot/new';
 const EDIT_CROSSPLOT = '/project/well/cross-plot/edit';
@@ -174,6 +182,8 @@ function Service(baseUrl, $http, wiComponentService, Upload) {
 
     this.wiApiWorker = new wiApiWorker($http, wiComponentService);
 }
+
+Service.prototype.BASE_URL = BASE_URL;
 
 Service.prototype.GET_PROJECT = GET_PROJECT; //'/project/fullinfo';
 Service.prototype.DATA_CURVE = DATA_CURVE; //'/project/well/dataset/curve/getData';
@@ -906,26 +916,6 @@ Service.prototype.editTrack = function (trackObj, callback) {
     this.post(EDIT_TRACK, dataRequest, callback);
 }
 
-
-Service.prototype.createImage = function (imageObj, callback) {
-    var self = this;
-    this.post(CREATE_IMAGE, imageObj, callback);
-}
-
-Service.prototype.removeImage = function (idImage, callback) {
-    var self = this;
-    let dataRequest = {
-        idImage: idImage
-    };
-    this.delete(DELETE_IMAGE, dataRequest, callback);
-}
-
-Service.prototype.editImage = function (imageObj, callback) {
-    var self = this;
-    let dataRequest = imageObj;
-    this.post(EDIT_IMAGE, dataRequest, callback);
-}
-
 Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     var self = this;
     console.log("createDepthTrack", self);
@@ -1129,6 +1119,62 @@ Service.prototype.removeZone = function (idZone, callback) {
             if(callback) callback();
             // self.getUtils().refreshProjectState();
         });
+}
+
+Service.prototype.getImageGallery = function (callback) {
+    let self = this;
+    this.post(GET_IMAGE_GALLERY, {}, function (data) {
+        if (callback) {
+            callback(data);
+        }
+    });
+}
+
+Service.prototype.createImageTrack = function (data, callback) {
+    let self = this;
+    this.post(CREATE_IMAGE_TRACK, data, callback);
+}
+Service.prototype.editImageTrack = function (data, callback) {
+    let self = this;
+    this.post(EDIT_IMAGE_TRACK, data, callback);
+}
+Service.prototype.getImageTrack = function (idImageTrack, callback) {
+    let self = this;
+    this.post(GET_IMAGE_TRACK, { idImageTrack: idImageTrack }, callback);
+}
+Service.prototype.removeImageTrack = function (idImageTrack, callback) {
+    let self = this;
+    this.delete(DELETE_IMAGE_TRACK, { idImageTrack: idImageTrack }, callback);
+}
+
+Service.prototype.createImage = function (data, callback) {
+    let self = this;
+    this.post(CREATE_IMAGE, data, function (returnData) {
+            if (callback) callback(returnData);
+        });
+}
+Service.prototype.editImage = function (data, callback) {
+    let self = this;
+    this.post(EDIT_IMAGE, data, function (returnData) {
+            callback(returnData);
+        });
+}
+Service.prototype.getImage = function (idImageOfTrack, callback) {
+    let self = this;
+    this.post(GET_IMAGE, { idImageOfTrack: idImageOfTrack }, function (returnData) {
+            callback(returnData);
+        });
+}
+Service.prototype.removeImage = function (idImageOfTrack, callback) {
+    let self = this;
+    this.delete(DELETE_IMAGE, { idImageOfTrack: idImageOfTrack }, function () {
+            callback();
+        });
+}
+
+Service.prototype.getImagesOfTrack = function (idImageTrack, callback) {
+    var self = this;
+    this.post(LIST_IMAGE_OF_TRACK, { idImageTrack: idImageTrack }, callback);
 }
 
 Service.prototype.createCrossplot = function (data, callback) {

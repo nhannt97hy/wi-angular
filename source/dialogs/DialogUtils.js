@@ -3917,6 +3917,213 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
     });
 }
 
+exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imageTrackProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = imageTrackProperties || {
+            showTitle: true,
+            title: "New Image Track",
+            topJustification: "center",
+            trackColor: '#ffffff',
+            width: utils.inchToPixel(2)
+            // parameterSet: null
+        }
+        props.width = utils.pixelToInch(props.width);
+        console.log(props);
+        this.showTitle = props.showTitle;
+        this.title = props.title;
+        this.topJustification = props.topJustification.toLowerCase();
+        this.trackColor = props.trackColor;
+        this.width = props.width;
+
+        this.trackBackground = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
+                self.trackColor = colorStr;
+            });
+        }
+        this.onOkButtonClicked = function () {
+            props = {
+                showTitle: self.showTitle,
+                title: self.title,
+                topJustification: self.topJustification,
+                trackColor: self.trackColor,
+                width: self.width,
+                parameterSet: self.parameterSet
+            }
+            // if (self.error) return;
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "image-track-properties/image-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    });
+}
+
+exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = config || {};
+
+        this.idImageOfTrack = props.idImageOfTrack;
+
+        this.imageFile = null;
+        this.done = props.done || false;
+        this.imageUrl = props.imageUrl || "";
+        this.name = props.name;
+        this.showName = props.showName;
+        this.fill = props.fill || 'white';
+
+        this.uploadedImages = [];
+
+        wiApiService.getImageGallery(function (images) {
+            self.uploadedImages = images.map(function(item) {
+                return {
+                    name: item.match(/\/([^\/]+)\/?$/)[1],
+                    imageUrl: wiApiService.BASE_URL + item
+                }
+            });
+        });
+
+        this.isGalleryOpening = false;
+
+        this.selectedImage = null;
+        this.selected = false;
+
+        this.onUploadButtonClicked = function () {
+            wiApiService.uploadImage({
+                file: self.imageFile
+            }, function (imageUrl) {
+                $scope.$apply(function () {
+                    self.imageUrl = imageUrl;
+                    self.onImageUrlChange();
+                    self.done = true;
+                    let latestImage = {
+                        name: self.imageUrl.match(/\/([^\/]+)\/?$/)[1],
+                        imageUrl: self.imageUrl
+                    }
+                    self.uploadedImages.push(latestImage);
+                });
+            });
+        }
+
+        this.background = function () {
+            dialogUtils.colorPickerDialog(ModalService, self.fill, function (colorStr) {
+                self.fill = colorStr;
+                console.log(colorStr);
+            });
+        }
+
+        this.openGallery = function () {
+            this.isGalleryOpening = !this.isGalleryOpening;
+            console.log("open gallery");
+        }
+
+        this.deleteUploadedImage = function (image) {
+            console.log('image was deleted');
+            console.warn(image);
+        }
+
+        this.selectImage = function (image) {
+            self.selectedImage = image;
+            self.selected = true;
+            self.imageUrl = image.imageUrl;
+            self.done = true;
+        }
+
+        function validateUrl (str) {
+            var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+            if (!(regex.test(str)))
+                return false;
+            return true;
+        }
+
+        this.onImageUrlChange = utils.debounce(function () {
+            if (validateUrl(self.imageUrl))
+                this.done = true;
+            else
+                this.done = false;
+        }, 500)
+
+        function bindProps() {
+            props.idImageOfTrack = self.idImageOfTrack;
+            props.imageUrl = self.imageUrl;
+            props.name = self.name;
+            props.showName = self.showName;
+            props.fill = self.fill;
+            props.done = self.done;
+        }
+
+        this.onOkButtonClicked = function () {
+            bindProps();
+            close(props, 100);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "image-properties/image-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.showImageDialog = function (ModalService, image, callback) {
+    function ModalController ($scope, wiComponentService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let currentImage = image;
+
+        this.currentImageUrl = currentImage.imageUrl;
+        this.currentImageName = currentImage.name;
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "image-view/image-view-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            callback();
+        });
+    });
+}
+
 exports.errorMessageDialog = errorMessageDialog;
 
 function errorMessageDialog(ModalService, errorMessage, callback) {
@@ -8408,7 +8615,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         }
         function refresh() {
             self.wellModel = utils.findWellById(self.idWell);
-            getAllCurve();
+            getInfo();
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.process = false;
@@ -8460,15 +8667,14 @@ exports.splitCurveDialog = function (ModalService, callback) {
                                 idDataset: self.idDataset,
                                 curveName: curve.name,
                                 unit: self.curveModel.properties.unit,
-                                data: curve.data,
-                                idFamily: self.curveModel.properties.idFamily
+                                data: curve.data
                             };
                             wiApiService.processingDataCurve(payload, cb);
                         }, function(err) {
+                            console.log('done');
                             utils.refreshProjectState();
                             self.numberSplit = self.arrayCurve.length;
                         });
-                        utils.refreshProjectState();
                     });
                 });
             }
@@ -8618,19 +8824,19 @@ exports.mergeCurveDialog = function (ModalService) {
                         
                         switch (self.method) {
                             case "min":
-                                if(getAllX(allData).count) dataRes.push(NaN);
+                                if(!getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push(Math.min.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "max":
-                                if(getAllX(allData).count) dataRes.push(NaN);
+                                if(!getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push(Math.max.apply(null, getAllX(allData).tempArr));
                                 break;
                             case "average":
-                                if(getAllX(allData).count) dataRes.push(NaN);
+                                if(!getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push(((getAllX(allData).tempArr).reduce((a, b) => a + b, 0)) / N);
                                 break;
                             case "sum":
-                                if(getAllX(allData).count) dataRes.push(NaN);
+                                if(!getAllX(allData).count) dataRes.push(NaN);
                                 else dataRes.push((getAllX(allData).tempArr).reduce((a, b) => a + b, 0));
                                 break;
                             default:
@@ -9144,54 +9350,79 @@ exports.TVDConversionDialog = function (ModalService) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = wiExplorer.treeConfig[0].children;
-        this.datasets = [];this.idWell; this.idDataset; this.step;
-        this.topDepth; this.bottomDepth; this.wellModel; this.datasetModel;
+        this.wells = angular.copy(wiExplorer.treeConfig[0].children);
+        this.datasets = [];
+        this.curvesArr = [];
+        this.step;this.topDepth; this.bottomDepth;
+        this.SelectedWell; this.SelectedDataset;
+        this.useType = 'curve';
+        this.startData = 0, this.colDepth = 1, this.colDev = 2, this.colAzi = 3;
+        this.tvdMethod = 'off', this.calMethod = '1';
+        this.input = [];
 
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if (selectedNodes && selectedNodes[0].type == 'well')
-            self.wellModel = selectedNodes[0];
+            self.SelectedWell = selectedNodes[0];
         else if (selectedNodes && selectedNodes[0].type == 'curve') {
-            self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+            self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
         }
         else if (selectedNodes && selectedNodes[0].type == 'dataset') {
-            self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+            self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
         }
         else {
-            self.wellModel = angular.copy(self.wells[0]);
+            self.SelectedWell = self.wells[0];
         }
         
-        function getDefaultDepth() {
-            self.step = parseFloat(self.wellModel.properties.step);
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
-        }
         function getDatasets() {
-            self.datasets = [];
-            self.wellModel.children.forEach(function (child) {
-                if (child.type == 'dataset') 
-                    self.datasets.push(child);
-            });
+            self.datasets.length = 0;
+            self.curvesArr.length = 0;
+            if(self.SelectedWell && self.SelectedWell.children.length){
+                self.SelectedWell.children.forEach(function (child, i) {
+                    if (child.type == 'dataset') 
+                        self.datasets.push(child);
+                    if(i == self.SelectedWell.children.length - 1){
+                        if(self.datasets.length){
+                            self.SelectedDataset = self.datasets[0];
+                            self.datasets.forEach(child => {
+                                child.children.forEach(function (item) {
+                                    if (item.type == 'curve') {
+                                        self.curvesArr.push(item);
+                                    }
+                                })
+                            })
+                        }
+                    }
+                });
+            }
         }
        
-        self.idWell = self.wellModel.id;
-        function refresh() {
-            getDefaultDepth();
+        this.onChangeWell = function () {
             getDatasets();
-            self.datasetModel = self.datasets[0];
-            self.idDataset = self.datasetModel.id;
+            if(self.curvesArr.length){
+                self.DevCurve = self.curvesArr[0];
+                self.AziCurve = self.curvesArr[0];
+            }
+            self.step = parseFloat(self.SelectedWell.properties.step);
+            self.topDepth = parseFloat(self.SelectedWell.properties.topDepth);
+            self.bottomDepth = parseFloat(self.SelectedWell.properties.bottomDepth);
         }
-        refresh();
-        
-        this.onChangeWell = function (id) {
-            self.wellModel = utils.findWellById(id);
-            self.idWell = self.wellModel.id;
-            refresh();
+        this.onChangeWell();
+        this.loadFile = function(){
+            let reader = new FileReader();
+            reader.onload = function(event){
+                let lines = this.result.split('\n');
+                for(let i = 0; i < lines.length; i++){
+                    let ele = lines[i].replace(/\(|\)/g,'').replace(/ /g, '').split(/\s+/);
+                    if(i > 0) ele.pop();
+                    if(ele.length) self.input.push(ele);
+                }
+            }
+            reader.readAsText(self.SurveyFile);
         }
-        this.onChangeDataset = function (id) {
-            this.datasetModel = utils.findDatasetById(id);
-            this.idDataset = this.datasetModel.id;
-        }
+
+        $('#inputDiv').scroll(function(){
+            $('#inputTable').width($('#inputDiv').width() + $('#inputDiv').scrollLeft());
+        })
         this.onCancelButtonClicked = function(){
             close(null);
         }

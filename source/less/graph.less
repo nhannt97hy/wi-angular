@@ -13,6 +13,17 @@
     }
 }
 
+.vi-image-zone-track-container {
+
+    .vi-track-plot-container {
+        border: 1px solid black;
+
+        .vi-image-zone-line {
+            cursor: row-resize;
+        }
+    }
+}
+
 .vi-track-header-name {
     cursor: move;
 }
@@ -34,6 +45,29 @@
     }
 
     .vi-zone-header-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
+
+.vi-image-zone-header {
+    position: relative;
+    padding: 2px 0 2px 0;
+
+    .vi-image-zone-header-name {
+        display: inline-block;
+        position: relative;
+        text-align: center;
+        background-color: white;
+        border: 1px solid black;
+        padding: 0 2px 0 2px;
+        font-size: 10px;
+        z-index: 1;
+        cursor: default;
+    }
+
+    .vi-image-zone-header-fill {
         position: absolute;
         top: 0;
         left: 0;

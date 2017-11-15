@@ -45,6 +45,10 @@ Track.prototype.isDepthTrack = function() {
     return this.constructor.name == 'DepthTrack';
 }
 
+Track.prototype.isImageTrack = function () {
+    return this.constructor.name == 'ImageTrack';
+}
+
 /**
  * Check if class of this instance is ZoneTrack
  * @returns {Boolean}
