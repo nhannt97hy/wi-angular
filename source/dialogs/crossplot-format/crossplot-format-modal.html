@@ -21,7 +21,7 @@
                                 </div>
 
                                 <div class="row padding-bottom-0_5em">
-                                    <div class="col-sm-1 top-4px">X</div>
+                                    <div class="col-sm-1 top-8px">X</div>
                                     <div class="col-sm-2">
                                         <select ng-model="wiModal.crossplotModel.properties.pointsets[0].idCurveX"
                                                 class="form-control wi-form-control"
@@ -59,7 +59,7 @@
                                     </div>
                                 </div>
                                 <div class="row padding-bottom-0_5em">
-                                    <div class="col-sm-1 top-4px">Y</div>
+                                    <div class="col-sm-1 top-8px">Y</div>
                                     <div class="col-sm-2">
                                         <select ng-model="wiModal.crossplotModel.properties.pointsets[0].idCurveY"
                                                 class="form-control wi-form-control"
@@ -97,7 +97,7 @@
                                     </div>
                                 </div>
                                 <div class="row padding-bottom-0_5em">
-                                    <div class="col-sm-1 top-4px">Color</div>
+                                    <div class="col-sm-1 top-8px">Color</div>
                                     <div class="col-sm-2">
                                         <select ng-model="wiModal.crossplotModel.properties.pointsets[0].idCurveZ"
                                                 class="form-control wi-form-control"
@@ -197,11 +197,9 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <div class="form-group">
-                                            <div class="checkbox padding-left-4-percent">
-                                                <input type="checkbox">Standalone Pickett Crossplot
-                                            </div>
-                                        </div>
+                                        <label class="font-weight-normal">
+                                            <input type="checkbox">Standalone Pickett Crossplot
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -450,6 +448,30 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <div class="checkbox padding-left-15-percent">
+                                                    <label><input type="checkbox" ng-model="wiModal.crossplotModel.properties.pointsets[0].showLine">Show line</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <div class="col-sm-3 padding-top-1em">
+                                                Line Mode
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="lineMode" ng-model="wiModal.lineMode" ng-value="true" ng-change="wiModal.onLineModeChange()">Horizontal
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="lineMode" ng-model="wiModal.lineMode" ng-value="false" ng-change="wiModal.onLineModeChange()">Vertical
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
                             </form>
                         </div>
                     </wi-tab>
