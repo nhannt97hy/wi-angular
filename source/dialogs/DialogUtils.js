@@ -9143,54 +9143,79 @@ exports.TVDConversionDialog = function (ModalService) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = wiExplorer.treeConfig[0].children;
-        this.datasets = [];this.idWell; this.idDataset; this.step;
-        this.topDepth; this.bottomDepth; this.wellModel; this.datasetModel;
+        this.wells = angular.copy(wiExplorer.treeConfig[0].children);
+        this.datasets = [];
+        this.curvesArr = [];
+        this.step;this.topDepth; this.bottomDepth;
+        this.SelectedWell; this.SelectedDataset;
+        this.useType = 'curve';
+        this.startData = 0, this.colDepth = 1, this.colDev = 2, this.colAzi = 3;
+        this.tvdMethod = 'off', this.calMethod = '1';
+        this.input = [];
 
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if (selectedNodes && selectedNodes[0].type == 'well')
-            self.wellModel = selectedNodes[0];
+            self.SelectedWell = selectedNodes[0];
         else if (selectedNodes && selectedNodes[0].type == 'curve') {
-            self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+            self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
         }
         else if (selectedNodes && selectedNodes[0].type == 'dataset') {
-            self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+            self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
         }
         else {
-            self.wellModel = angular.copy(self.wells[0]);
+            self.SelectedWell = self.wells[0];
         }
         
-        function getDefaultDepth() {
-            self.step = parseFloat(self.wellModel.properties.step);
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
-        }
         function getDatasets() {
-            self.datasets = [];
-            self.wellModel.children.forEach(function (child) {
-                if (child.type == 'dataset') 
-                    self.datasets.push(child);
-            });
+            self.datasets.length = 0;
+            self.curvesArr.length = 0;
+            if(self.SelectedWell && self.SelectedWell.children.length){
+                self.SelectedWell.children.forEach(function (child, i) {
+                    if (child.type == 'dataset') 
+                        self.datasets.push(child);
+                    if(i == self.SelectedWell.children.length - 1){
+                        if(self.datasets.length){
+                            self.SelectedDataset = self.datasets[0];
+                            self.datasets.forEach(child => {
+                                child.children.forEach(function (item) {
+                                    if (item.type == 'curve') {
+                                        self.curvesArr.push(item);
+                                    }
+                                })
+                            })
+                        }
+                    }
+                });
+            }
         }
        
-        self.idWell = self.wellModel.id;
-        function refresh() {
-            getDefaultDepth();
+        this.onChangeWell = function () {
             getDatasets();
-            self.datasetModel = self.datasets[0];
-            self.idDataset = self.datasetModel.id;
+            if(self.curvesArr.length){
+                self.DevCurve = self.curvesArr[0];
+                self.AziCurve = self.curvesArr[0];
+            }
+            self.step = parseFloat(self.SelectedWell.properties.step);
+            self.topDepth = parseFloat(self.SelectedWell.properties.topDepth);
+            self.bottomDepth = parseFloat(self.SelectedWell.properties.bottomDepth);
         }
-        refresh();
-        
-        this.onChangeWell = function (id) {
-            self.wellModel = utils.findWellById(id);
-            self.idWell = self.wellModel.id;
-            refresh();
+        this.onChangeWell();
+        this.loadFile = function(){
+            let reader = new FileReader();
+            reader.onload = function(event){
+                let lines = this.result.split('\n');
+                for(let i = 0; i < lines.length; i++){
+                    let ele = lines[i].replace(/\(|\)/g,'').replace(/ /g, '').split(/\s+/);
+                    if(i > 0) ele.pop();
+                    if(ele.length) self.input.push(ele);
+                }
+            }
+            reader.readAsText(self.SurveyFile);
         }
-        this.onChangeDataset = function (id) {
-            this.datasetModel = utils.findDatasetById(id);
-            this.idDataset = this.datasetModel.id;
-        }
+
+        $('#inputDiv').scroll(function(){
+            $('#inputTable').width($('#inputDiv').width() + $('#inputDiv').scrollLeft());
+        })
         this.onCancelButtonClicked = function(){
             close(null);
         }
