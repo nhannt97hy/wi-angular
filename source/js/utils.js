@@ -748,7 +748,7 @@ function dustbinToTreeConfig (dustbin) {
     dustbinModel.properties = {};
     dustbinModel.data = {
         childExpanded: false,
-        icon: 'well-insight-16x16',
+        icon: 'recycle-bin-empty-16x16',
         label: 'Dustbin',
         selected: false
     };
