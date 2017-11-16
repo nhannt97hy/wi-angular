@@ -845,19 +845,39 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Empty All",
                         icon: "delete-16x16",
                         handler: function() {
-
+                            self.handlers.EmptyAllButtonClicked();
                         }
                     },{
                         name: "Restore All",
                         label: "Restore All",
                         icon: "reverse-16x16-edit",
                         handler: function() {
-
+                            self.handlers.RestoreAllButtonClicked();
                         }
                     },{
                         separator: '1'
                     }
                 ];
+            case String(nodeType.match(/^.*-deleted-child/)):
+                return [
+                    {
+                        name: "Delete Forever",
+                        label: "Delete Forever",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            self.handlers.EmptyButtonClicked();
+                        }
+                    },{
+                        name: "Restore",
+                        label: "Restore",
+                        icon: "reverse-16x16-edit",
+                        handler: function() {
+                            self.handlers.RestoreButtonClicked();
+                        }
+                    },{
+                        separator: '1'
+                    }
+                ]
             default:
                 return [];
         }

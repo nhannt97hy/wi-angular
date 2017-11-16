@@ -69,6 +69,7 @@ function errorMsg(errorMessage, callback) {
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
     DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage, callback);
 }
+
 exports.warning = function (warningMessage) {
     if (!warningMessage) return;
     warningMessage = warningMessage;
@@ -101,6 +102,7 @@ function getCurveFromId(idCurve) {
     });
     return curve;
 }
+
 exports.getCurveFromId = getCurveFromId;
 exports.lineToTreeConfig = lineToTreeConfig;
 
@@ -151,7 +153,8 @@ function lineToTreeConfig(line) {
 
 function shadingToTreeConfig(shading, paletteList) {
     let shadingModel = new Object();
-    function getValPal(palName){
+
+    function getValPal(palName) {
         console.log("getPal", paletteList.palName);
         return paletteList.palName;
     };
@@ -173,15 +176,15 @@ function shadingToTreeConfig(shading, paletteList) {
         showRefLine: shading.showRefLine
         // showRefLine: false
     };
-    if(shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
+    if (shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
         shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palName;
         shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palette];
     }
-    if(shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading && shadingModel.data.positiveFill.varShading.palette) {
+    if (shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading && shadingModel.data.positiveFill.varShading.palette) {
         shadingModel.data.positiveFill.varShading.palName = shadingModel.data.positiveFill.varShading.palName;
         shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palette];
     }
-    if(shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading && shadingModel.data.negativeFill.varShading.palette) {
+    if (shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading && shadingModel.data.negativeFill.varShading.palette) {
         shadingModel.data.negativeFill.varShading.palName = shadingModel.data.negativeFill.varShading.palName;
         shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palette];
     }
@@ -213,6 +216,7 @@ function zoneToTreeConfig(zone) {
     zoneModel.parent = 'zoneset' + zone.idZoneSet;
     return zoneModel;
 }
+
 exports.zoneToTreeConfig = zoneToTreeConfig;
 
 function zoneSetToTreeConfig(zoneSet) {
@@ -237,6 +241,7 @@ function zoneSetToTreeConfig(zoneSet) {
     });
     return zoneSetModel;
 }
+
 exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
 exports.createZoneSet = function (idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -259,7 +264,7 @@ exports.createZoneSet = function (idWell, callback) {
             idWell: idWell
         }
         wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
-            if (!dataReturn || !dataReturn.idZoneSet){
+            if (!dataReturn || !dataReturn.idZoneSet) {
                 DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Zone Set: " + ret + " existed!");
             } else {
                 __GLOBAL.$timeout(function () {
@@ -288,201 +293,347 @@ function trackToModel(track) {
 }
 */
 
-function logplotToTreeConfig(plot) {
-    var plotModel = new Object();
-    plotModel.name = 'logplot';
-    plotModel.type = 'logplot';
-    plotModel.id = plot.idPlot;
-    plotModel.properties = {
-        idWell: plot.idWell,
-        idPlot: plot.idPlot,
-        name: plot.name,
-        referenceCurve: plot.referenceCurve
-    };
-    plotModel.data = {
-        childExpanded: false,
-        icon: 'logplot-blank-16x16',
-        label: plot.name
-    }
-    plotModel.handler = function () {
-        let selectedNode = getSelectedNode();
-        if (selectedNode && selectedNode.type == 'logplot') {
-            openLogplotTab(__GLOBAL.wiComponentService, selectedNode);
+function logplotToTreeConfig(plot, isDeleted) {
+    if (isDeleted) {
+        var plotModel = new Object();
+        plotModel.name = 'logplot-deleted-child';
+        plotModel.type = 'logplot-deleted-child';
+        plotModel.id = plot.idPlot;
+        plotModel.properties = {
+            idWell: plot.idWell,
+            idPlot: plot.idPlot,
+            name: plot.name
+        };
+        plotModel.data = {
+            childExpanded: false,
+            icon: 'logplot-blank-16x16',
+            label: plot.name
         }
-    }
-    plotModel.parent = 'well' + plot.idWell;
-    /*
-    plotModel.tracks = new Array();
-    if (!plot.tracks) return plotModel;
+        plotModel.parent = 'well' + plot.idWell;
+        return plotModel;
+    } else {
+        var plotModel = new Object();
+        plotModel.name = 'logplot';
+        plotModel.type = 'logplot';
+        plotModel.id = plot.idPlot;
+        plotModel.properties = {
+            idWell: plot.idWell,
+            idPlot: plot.idPlot,
+            name: plot.name,
+            referenceCurve: plot.referenceCurve
+        };
+        plotModel.data = {
+            childExpanded: false,
+            icon: 'logplot-blank-16x16',
+            label: plot.name
+        }
+        plotModel.handler = function () {
+            let selectedNode = getSelectedNode();
+            if (selectedNode && selectedNode.type == 'logplot') {
+                openLogplotTab(__GLOBAL.wiComponentService, selectedNode);
+            }
+        }
+        plotModel.parent = 'well' + plot.idWell;
+        /*
+        plotModel.tracks = new Array();
+        if (!plot.tracks) return plotModel;
 
-    plot.tracks.forEach(function (track) {
-        plotModel.tracks.push(trackToModel(track));
-    });
-    //TODO: refactor
-    plot.depth_axes.forEach(function (depthTrack) {
-        plotModel.tracks.push(trackToModel(depthTrack));
-    });
-    */
-    return plotModel;
+        plot.tracks.forEach(function (track) {
+            plotModel.tracks.push(trackToModel(track));
+        });
+        //TODO: refactor
+        plot.depth_axes.forEach(function (depthTrack) {
+            plotModel.tracks.push(trackToModel(depthTrack));
+        });
+        */
+        return plotModel;
+    }
 }
 
 exports.logplotToTreeConfig = logplotToTreeConfig;
 
-function crossplotToTreeConfig(crossplot) {
-    var crossplotModel = new Object();
-    crossplotModel.name = 'crossplot';
-    crossplotModel.type = 'crossplot';
-    crossplotModel.id = crossplot.idCrossPlot;
-    console.log("crossplotToTreeConfig", crossplot.axisColors)
-    crossplotModel.properties = {
-        idWell: crossplot.idWell,
-        idCrossPlot: crossplot.idCrossPlot,
-        name: crossplot.name,
-        discriminator: crossplot.discriminator == 'null' ? null : crossplot.discriminator,
-        axisColors: (!crossplot.axisColors || crossplot.axisColors == 'null') ? null : JSON.parse(crossplot.axisColors),
-        isDefineDepthColors: crossplot.isDefineDepthColors,
-        referenceTopDepth: crossplot.referenceTopDepth,
-        referenceBottomDepth: crossplot.referenceBottomDepth,
-        referenceScale: crossplot.referenceScale,
-        referenceVertLineNumber: crossplot.referenceVertLineNumber,
-        referenceDisplay: crossplot.referenceDisplay,
-        referenceShowDepthGrid: crossplot.referenceShowDepthGrid,
-        reference_curves: crossplot.reference_curves,
-        pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
-    };
-    crossplotModel.data = {
-        childExpanded: false,
-        icon: 'crossplot-blank-16x16',
-        label: crossplot.name
-    }
-    crossplotModel.handler = function () {
-        let selectedNode = getSelectedNode();
-        if (selectedNode && selectedNode.type == 'crossplot') {
-            openCrossplotTab(selectedNode);
+function crossplotToTreeConfig(crossplot, isDeleted) {
+    if (isDeleted) {
+        var crossplotModel = new Object();
+        crossplotModel.name = 'crossplot-deleted-child';
+        crossplotModel.type = 'crossplot-deleted-child';
+        crossplotModel.id = crossplot.idCrossPlot;
+        crossplotModel.properties = {
+            idWell: crossplot.idWell,
+            idCrossPlot: crossplot.idCrossPlot,
+            name: crossplot.name,
+            discriminator: crossplot.discriminator == 'null' ? null : crossplot.discriminator,
+            axisColors: (!crossplot.axisColors || crossplot.axisColors == 'null') ? null : JSON.parse(crossplot.axisColors),
+            isDefineDepthColors: crossplot.isDefineDepthColors,
+            referenceTopDepth: crossplot.referenceTopDepth,
+            referenceBottomDepth: crossplot.referenceBottomDepth,
+            referenceScale: crossplot.referenceScale,
+            referenceVertLineNumber: crossplot.referenceVertLineNumber,
+            referenceDisplay: crossplot.referenceDisplay,
+            referenceShowDepthGrid: crossplot.referenceShowDepthGrid,
+            reference_curves: crossplot.reference_curves,
+            pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
+        };
+        crossplotModel.data = {
+            childExpanded: false,
+            icon: 'crossplot-blank-16x16',
+            label: crossplot.name
         }
+        return crossplotModel;
+    } else {
+        var crossplotModel = new Object();
+        crossplotModel.name = 'crossplot';
+        crossplotModel.type = 'crossplot';
+        crossplotModel.id = crossplot.idCrossPlot;
+        console.log("crossplotToTreeConfig", crossplot.axisColors)
+        crossplotModel.properties = {
+            idWell: crossplot.idWell,
+            idCrossPlot: crossplot.idCrossPlot,
+            name: crossplot.name,
+            discriminator: crossplot.discriminator == 'null' ? null : crossplot.discriminator,
+            axisColors: (!crossplot.axisColors || crossplot.axisColors == 'null') ? null : JSON.parse(crossplot.axisColors),
+            isDefineDepthColors: crossplot.isDefineDepthColors,
+            referenceTopDepth: crossplot.referenceTopDepth,
+            referenceBottomDepth: crossplot.referenceBottomDepth,
+            referenceScale: crossplot.referenceScale,
+            referenceVertLineNumber: crossplot.referenceVertLineNumber,
+            referenceDisplay: crossplot.referenceDisplay,
+            referenceShowDepthGrid: crossplot.referenceShowDepthGrid,
+            reference_curves: crossplot.reference_curves,
+            pointSet: crossplot.pointsets ? crossplot.pointsets[0] : {}
+        };
+        crossplotModel.data = {
+            childExpanded: false,
+            icon: 'crossplot-blank-16x16',
+            label: crossplot.name
+        }
+        crossplotModel.handler = function () {
+            let selectedNode = getSelectedNode();
+            if (selectedNode && selectedNode.type == 'crossplot') {
+                openCrossplotTab(selectedNode);
+            }
+        }
+        crossplotModel.parent = 'well' + crossplot.idWell;
+        return crossplotModel;
     }
-    crossplotModel.parent = 'well' + crossplot.idWell;
-    return crossplotModel;
 }
 
 exports.crossplotToTreeConfig = crossplotToTreeConfig;
 
-function histogramToTreeConfig(histogram) {
-    let histogramModel = new Object();
-    histogramModel.name = 'histogram';
-    histogramModel.type = 'histogram';
-    histogramModel.id = histogram.idHistogram;
-    histogramModel.properties = {
-        idHistogram: histogram.idHistogram,
-        name: histogram.name,
-        histogramTitle: histogram.histogramTitle,
-        hardCopyWidth: histogram.hardCopyWidth,
-        hardCopyHeight: histogram.hardCopyHeight,
-        intervalDepthTop: histogram.intervalDepthTop,
-        intervalDepthBottom: histogram.intervalDepthBottom,
-        activeZone: histogram.activeZone,
-        divisions: histogram.divisions,
-        leftScale: histogram.leftScale,
-        rightScale: histogram.rightScale,
-        showGaussian: histogram.showGaussian,
-        loga: histogram.loga,
-        showGrid: histogram.showGrid,
-        showCumulative: histogram.showCumulative,
-        flipHorizontal: histogram.flipHorizontal,
-        lineStyle: histogram.lineStyle,
-        lineColor: histogram.lineColor,
-        plot: histogram.plot,
-        plotType: histogram.plotType,
-        color: histogram.color,
-        discriminator: histogram.discriminator == 'null'? null : JSON.parse(histogram.discriminator),
-        idWell: histogram.idWell,
-        idCurve: histogram.idCurve,
-        idZoneSet: histogram.idZoneSet,
-        referenceTopDepth: histogram.referenceTopDepth,
-        referenceBottomDepth: histogram.referenceBottomDepth,
-        referenceScale: histogram.referenceScale,
-        referenceVertLineNumber: histogram.referenceVertLineNumber,
-        referenceDisplay: histogram.referenceDisplay,
-        referenceShowDepthGrid: histogram.referenceShowDepthGrid,
-        reference_curves: histogram.reference_curves
-    };
-    histogramModel.data = {
-        childExpanded: false,
-        icon: 'histogram-blank-16x16',
-        label: histogram.name
-    }
-    histogramModel.handler = function () {
-        let selectedNode = getSelectedNode();
-        if (selectedNode && selectedNode.type == 'histogram') {
-            openHistogramTab(selectedNode);
+function histogramToTreeConfig(histogram, isDeleted) {
+    if (isDeleted) {
+        let histogramModel = new Object();
+        histogramModel.name = 'histogram-deleted-child';
+        histogramModel.type = 'histogram-deleted-child';
+        histogramModel.id = histogram.idHistogram;
+        histogramModel.properties = {
+            idHistogram: histogram.idHistogram,
+            name: histogram.name,
+            histogramTitle: histogram.histogramTitle,
+            hardCopyWidth: histogram.hardCopyWidth,
+            hardCopyHeight: histogram.hardCopyHeight,
+            intervalDepthTop: histogram.intervalDepthTop,
+            intervalDepthBottom: histogram.intervalDepthBottom,
+            activeZone: histogram.activeZone,
+            divisions: histogram.divisions,
+            leftScale: histogram.leftScale,
+            rightScale: histogram.rightScale,
+            showGaussian: histogram.showGaussian,
+            loga: histogram.loga,
+            showGrid: histogram.showGrid,
+            showCumulative: histogram.showCumulative,
+            flipHorizontal: histogram.flipHorizontal,
+            lineStyle: histogram.lineStyle,
+            lineColor: histogram.lineColor,
+            plot: histogram.plot,
+            plotType: histogram.plotType,
+            color: histogram.color,
+            discriminator: histogram.discriminator == 'null' ? null : JSON.parse(histogram.discriminator),
+            idWell: histogram.idWell,
+            idCurve: histogram.idCurve,
+            idZoneSet: histogram.idZoneSet,
+            referenceTopDepth: histogram.referenceTopDepth,
+            referenceBottomDepth: histogram.referenceBottomDepth,
+            referenceScale: histogram.referenceScale,
+            referenceVertLineNumber: histogram.referenceVertLineNumber,
+            referenceDisplay: histogram.referenceDisplay,
+            referenceShowDepthGrid: histogram.referenceShowDepthGrid,
+            reference_curves: histogram.reference_curves
+        };
+        histogramModel.data = {
+            childExpanded: false,
+            icon: 'histogram-blank-16x16',
+            label: histogram.name
         }
+        return histogramModel;
+    } else {
+        let histogramModel = new Object();
+        histogramModel.name = 'histogram';
+        histogramModel.type = 'histogram';
+        histogramModel.id = histogram.idHistogram;
+        histogramModel.properties = {
+            idHistogram: histogram.idHistogram,
+            name: histogram.name,
+            histogramTitle: histogram.histogramTitle,
+            hardCopyWidth: histogram.hardCopyWidth,
+            hardCopyHeight: histogram.hardCopyHeight,
+            intervalDepthTop: histogram.intervalDepthTop,
+            intervalDepthBottom: histogram.intervalDepthBottom,
+            activeZone: histogram.activeZone,
+            divisions: histogram.divisions,
+            leftScale: histogram.leftScale,
+            rightScale: histogram.rightScale,
+            showGaussian: histogram.showGaussian,
+            loga: histogram.loga,
+            showGrid: histogram.showGrid,
+            showCumulative: histogram.showCumulative,
+            flipHorizontal: histogram.flipHorizontal,
+            lineStyle: histogram.lineStyle,
+            lineColor: histogram.lineColor,
+            plot: histogram.plot,
+            plotType: histogram.plotType,
+            color: histogram.color,
+            discriminator: histogram.discriminator == 'null' ? null : JSON.parse(histogram.discriminator),
+            idWell: histogram.idWell,
+            idCurve: histogram.idCurve,
+            idZoneSet: histogram.idZoneSet,
+            referenceTopDepth: histogram.referenceTopDepth,
+            referenceBottomDepth: histogram.referenceBottomDepth,
+            referenceScale: histogram.referenceScale,
+            referenceVertLineNumber: histogram.referenceVertLineNumber,
+            referenceDisplay: histogram.referenceDisplay,
+            referenceShowDepthGrid: histogram.referenceShowDepthGrid,
+            reference_curves: histogram.reference_curves
+        };
+        histogramModel.data = {
+            childExpanded: false,
+            icon: 'histogram-blank-16x16',
+            label: histogram.name
+        }
+        histogramModel.handler = function () {
+            let selectedNode = getSelectedNode();
+            if (selectedNode && selectedNode.type == 'histogram') {
+                openHistogramTab(selectedNode);
+            }
+        }
+        histogramModel.parent = 'well' + histogram.idWell;
+        return histogramModel;
     }
-    histogramModel.parent = 'well' + histogram.idWell;
-    return histogramModel;
 }
 
 exports.histogramToTreeConfig = histogramToTreeConfig;
 
-function curveToTreeConfig(curve) {
-    var curveModel = new Object();
-    curveModel.name = curve.name;
-    curveModel.type = 'curve';
-    curveModel.id = curve.idCurve;
-    curveModel.properties = {
-        idDataset: curve.idDataset,
-        idCurve: curve.idCurve,
-        idFamily: curve.idFamily,
-        name: curve.name,
-        unit: curve.unit || "NA",
-        alias: curve.name
-    };
-    curveModel.datasetName = curve.dataset;
-    curveModel.data = {
-        childExpanded: false,
-        icon: 'curve-16x16',
-        label: curve.name,
-        unit: curveModel.properties.unit
-    };
-    curveModel.lineProperties = curve.LineProperty;
-    curveModel.curveData = null;
-    curveModel.parent = curve.dataset;
-    return curveModel;
+function curveToTreeConfig(curve, isDeleted) {
+    if (isDeleted) {
+        var curveModel = new Object();
+        curveModel.name = 'curve-deleted-child';
+        curveModel.type = 'curve-deleted-child';
+        curveModel.id = curve.idCurve;
+        curveModel.properties = {
+            idDataset: curve.idDataset,
+            idCurve: curve.idCurve,
+            idFamily: curve.idFamily,
+            name: curve.name,
+            unit: curve.unit || "NA",
+            alias: curve.name
+        };
+        curveModel.datasetName = curve.dataset;
+        curveModel.data = {
+            childExpanded: false,
+            icon: 'curve-16x16',
+            label: curve.name,
+            unit: curveModel.properties.unit
+        };
+        curveModel.lineProperties = curve.LineProperty;
+        curveModel.curveData = null;
+        curveModel.parent = curve.dataset;
+        return curveModel;
+    } else {
+        var curveModel = new Object();
+        curveModel.name = curve.name;
+        curveModel.type = 'curve';
+        curveModel.id = curve.idCurve;
+        curveModel.properties = {
+            idDataset: curve.idDataset,
+            idCurve: curve.idCurve,
+            idFamily: curve.idFamily,
+            name: curve.name,
+            unit: curve.unit || "NA",
+            alias: curve.name
+        };
+        curveModel.datasetName = curve.dataset;
+        curveModel.data = {
+            childExpanded: false,
+            icon: 'curve-16x16',
+            label: curve.name,
+            unit: curveModel.properties.unit
+        };
+        curveModel.lineProperties = curve.LineProperty;
+        curveModel.curveData = null;
+        curveModel.parent = curve.dataset;
+        return curveModel;
+    }
 }
 
 exports.curveToTreeConfig = curveToTreeConfig;
 
-function datasetToTreeConfig(dataset) {
-    var datasetModel = new Object();
-    datasetModel.name = dataset.name;
-    datasetModel.type = "dataset";
-    datasetModel.id = dataset.idDataset;
-    datasetModel.properties = {
-        idWell: dataset.idWell,
-        idDataset: dataset.idDataset,
-        name: dataset.name,
-        datasetKey: dataset.datasetKey,
-        datasetLabel: dataset.datasetLabel
-    };
-    datasetModel.data = {
-        childExpanded: false,
-        icon: "curve-data-16x16",
-        label: dataset.name
-    };
-    datasetModel.parent = 'well' + dataset.idWell;
-    datasetModel.children = new Array();
-    if (!dataset.curves) return datasetModel;
+function datasetToTreeConfig(dataset, isDeleted) {
+    if (isDeleted) {
+        var datasetModel = new Object();
+        datasetModel.name = "dataset-deleted-child";
+        datasetModel.type = "dataset-deleted-child";
+        datasetModel.id = dataset.idDataset;
+        datasetModel.properties = {
+            idWell: dataset.idWell,
+            idDataset: dataset.idDataset,
+            name: dataset.name,
+            datasetKey: dataset.datasetKey,
+            datasetLabel: dataset.datasetLabel
+        };
+        datasetModel.data = {
+            childExpanded: false,
+            icon: "curve-data-16x16",
+            label: dataset.name
+        };
+        datasetModel.parent = 'well' + dataset.idWell;
+        datasetModel.children = new Array();
+        if (!dataset.curves) return datasetModel;
+        return datasetModel;
+    } else {
+        var datasetModel = new Object();
+        datasetModel.name = dataset.name;
+        datasetModel.type = "dataset";
+        datasetModel.id = dataset.idDataset;
+        datasetModel.properties = {
+            idWell: dataset.idWell,
+            idDataset: dataset.idDataset,
+            name: dataset.name,
+            datasetKey: dataset.datasetKey,
+            datasetLabel: dataset.datasetLabel
+        };
+        datasetModel.data = {
+            childExpanded: false,
+            icon: "curve-data-16x16",
+            label: dataset.name
+        };
+        datasetModel.parent = 'well' + dataset.idWell;
+        datasetModel.children = new Array();
+        if (!dataset.curves) return datasetModel;
 
-    dataset.curves.forEach(function (curve) {
-        curve.dataset = dataset.name;
-        datasetModel.children.push(curveToTreeConfig(curve));
-    });
+        dataset.curves.forEach(function (curve) {
+            curve.dataset = dataset.name;
+            datasetModel.children.push(curveToTreeConfig(curve));
+        });
 
-    return datasetModel;
+        return datasetModel;
+    }
 }
+
 exports.datasetToTreeConfig = datasetToTreeConfig;
 
 
 function createWellsNode(parent) {
+    // console.log("==========", parent);
     let wellsModel = new Object();
     wellsModel.name = 'wells-deleted';
     wellsModel.type = 'wells-deleted';
@@ -492,12 +643,12 @@ function createWellsNode(parent) {
         label: "Well"
     }
     wellsModel.properties = {
-
+        totalItems: parent.wells.length
     }
     wellsModel.children = new Array();
-    if(!parent.wells) return wellsModel;
+    if (!parent.wells) return wellsModel;
     parent.wells.forEach(function (well) {
-        wellsModel.children.push(wellToTreeConfig(well));
+        wellsModel.children.push(wellToTreeConfig(well, true));
     });
     return wellsModel;
 }
@@ -512,12 +663,12 @@ function createDatasetsNode(parent) {
         label: "Dataset"
     };
     datasetsModel.properties = {
-
+        totalItems: parent.datasets.length
     }
     datasetsModel.children = new Array();
     if (!parent.datasets) return datasetsModel;
     parent.datasets.forEach(function (dataset) {
-        datasetsModel.children.push(datasetToTreeConfig(dataset));
+        datasetsModel.children.push(datasetToTreeConfig(dataset, true));
     });
     return datasetsModel;
 }
@@ -531,10 +682,13 @@ function createCurvesNode(parent) {
         icon: 'curve-16x16',
         label: "Curve"
     }
+    curvesModel.properties = {
+        totalItems: parent.curves.length
+    }
     curvesModel.children = new Array();
-    if(!parent.curves) return curvesModel;
+    if (!parent.curves) return curvesModel;
     parent.curves.forEach(function (curve) {
-        curvesModel.children.push(curveToTreeConfig(curve));
+        curvesModel.children.push(curveToTreeConfig(curve, true));
     });
     return curvesModel;
 }
@@ -548,10 +702,13 @@ function createPlotsNode(parent) {
         icon: 'logplot-blank-16x16',
         label: "Log Plot"
     }
+    plotsModel.properties = {
+        totalItems: parent.plots.length
+    }
     plotsModel.children = new Array();
-    if(!parent.plots) return plotsModel;
+    if (!parent.plots) return plotsModel;
     parent.plots.forEach(function (plot) {
-        plotsModel.children.push(logplotToTreeConfig(plot));
+        plotsModel.children.push(logplotToTreeConfig(plot, true));
     });
     return plotsModel;
 }
@@ -565,13 +722,17 @@ function createCrossplotsNode(parent) {
         icon: 'crossplot-blank-16x16',
         label: "Cross Plot"
     }
+    crossplotsModel.properties = {
+        totalItems: parent.crossplots.length
+    }
     crossplotsModel.children = new Array();
-    if(!parent.crossplots) return crossplotsModel;
+    if (!parent.crossplots) return crossplotsModel;
     parent.crossplots.forEach(function (crossplot) {
-        crossplotsModel.children.push(crossplotToTreeConfig(crossplot));
+        crossplotsModel.children.push(crossplotToTreeConfig(crossplot, true));
     });
     return crossplotsModel;
 }
+
 function createHistogramsNode(parent) {
     let histogramsModel = new Object();
     histogramsModel.name = 'histograms-deleted';
@@ -581,10 +742,13 @@ function createHistogramsNode(parent) {
         icon: 'histogram-blank-16x16',
         label: "Histogram"
     }
+    histogramsModel.properties = {
+        totalItems: parent.histograms.length
+    }
     histogramsModel.children = new Array();
-    if(!parent.histograms) return histogramsModel;
+    if (!parent.histograms) return histogramsModel;
     parent.histograms.forEach(function (histogram) {
-        histogramsModel.children.push(histogramToTreeConfig(histogram));
+        histogramsModel.children.push(histogramToTreeConfig(histogram, true));
     });
     return histogramsModel;
 }
@@ -674,42 +838,66 @@ function createHistogramNode(well) {
     return histogramModel;
 }
 
-function wellToTreeConfig(well) {
-    var wellModel = new Object();
-    wellModel.name = "well";
-    wellModel.type = "well";
-    wellModel.id = well.idWell;
-    wellModel.properties = {
-        idProject: well.idProject,
-        idWell: well.idWell,
-        name: well.name,
-        topDepth: parseFloat(well.topDepth),
-        bottomDepth: parseFloat(well.bottomDepth),
-        step: parseFloat(well.step)
-    };
-    wellModel.data = {
-        childExpanded: false,
-        icon: "well-16x16",
-        label: well.name
-    };
-    wellModel.parent = 'project' + well.idProject;
-    wellModel.children = new Array();
+function wellToTreeConfig(well, isDeleted) {
+    if (isDeleted) {
+        var wellModel = new Object();
+        wellModel.name = "well-deleted-child";
+        wellModel.type = "well-deleted-child";
+        wellModel.id = well.idWell;
+        wellModel.properties = {
+            idProject: well.idProject,
+            idWell: well.idWell,
+            name: well.name,
+            topDepth: parseFloat(well.topDepth),
+            bottomDepth: parseFloat(well.bottomDepth),
+            step: parseFloat(well.step)
+        };
+        wellModel.data = {
+            childExpanded: false,
+            icon: "well-16x16",
+            label: well.name
+        };
+        wellModel.children = new Array();
+        wellModel.parent = 'project' + well.idProject;
+        return wellModel;
+    } else {
+        var wellModel = new Object();
+        wellModel.name = "well";
+        wellModel.type = "well";
+        wellModel.id = well.idWell;
+        wellModel.properties = {
+            idProject: well.idProject,
+            idWell: well.idWell,
+            name: well.name,
+            topDepth: parseFloat(well.topDepth),
+            bottomDepth: parseFloat(well.bottomDepth),
+            step: parseFloat(well.step)
+        };
+        wellModel.data = {
+            childExpanded: false,
+            icon: "well-16x16",
+            label: well.name
+        };
+        wellModel.parent = 'project' + well.idProject;
+        wellModel.children = new Array();
 
-    if (well.datasets) {
-        well.datasets.forEach(function (dataset) {
-            wellModel.children.push(datasetToTreeConfig(dataset));
-        });
+        if (well.datasets) {
+            well.datasets.forEach(function (dataset) {
+                wellModel.children.push(datasetToTreeConfig(dataset));
+            });
+        }
+        let zoneSetsNode = createZoneSetsNode(well);
+        let logplotNode = createLogplotNode(well);
+        let crossplotNode = createCrossplotNode(well);
+        let histogramNode = createHistogramNode(well);
+        wellModel.children.push(zoneSetsNode);
+        wellModel.children.push(logplotNode);
+        wellModel.children.push(crossplotNode);
+        wellModel.children.push(histogramNode);
+        return wellModel;
     }
-    let zoneSetsNode = createZoneSetsNode(well);
-    let logplotNode = createLogplotNode(well);
-    let crossplotNode = createCrossplotNode(well);
-    let histogramNode = createHistogramNode(well);
-    wellModel.children.push(zoneSetsNode);
-    wellModel.children.push(logplotNode);
-    wellModel.children.push(crossplotNode);
-    wellModel.children.push(histogramNode);
-    return wellModel;
 }
+
 exports.wellToTreeConfig = wellToTreeConfig;
 
 exports.projectToTreeConfig = function (project) {
@@ -741,7 +929,7 @@ exports.projectToTreeConfig = function (project) {
 }
 
 
-function dustbinToTreeConfig (dustbin) {
+function dustbinToTreeConfig(dustbin) {
     var dustbinModel = new Object();
     dustbinModel.type = 'dustbin';
     dustbinModel.name = 'dustbin';
@@ -749,7 +937,7 @@ function dustbinToTreeConfig (dustbin) {
     dustbinModel.data = {
         childExpanded: false,
         icon: 'recycle-bin-empty-16x16',
-        label: 'Dustbin',
+        label: 'Recycle Bin',
         selected: false
     };
     dustbinModel.children = new Array();
@@ -761,9 +949,10 @@ function dustbinToTreeConfig (dustbin) {
     }
     return dustbinModel;
 }
+
 exports.dustbinToTreeConfig = dustbinToTreeConfig;
 
-function updateDustbinConfig (dustbin) {
+function updateDustbinConfig(dustbin) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let dustbinModel = dustbinToTreeConfig();
     dustbinModel.children.push(createWellsNode(dustbin));
@@ -774,6 +963,7 @@ function updateDustbinConfig (dustbin) {
     dustbinModel.children.push(createHistogramsNode(dustbin));
     return dustbinModel;
 }
+
 exports.updateDustbinConfig = updateDustbinConfig;
 
 
@@ -793,6 +983,7 @@ function visit(node, callback, options) {
     if (options && options.path && options.path.pop)
         options.path.pop();
 }
+
 exports.visit = visit;
 
 exports.getSelectedNode = getSelectedNode;
@@ -898,7 +1089,7 @@ exports.updateWellsProject = function (wiComponentService, wells) {
 exports.getCurveData = getCurveData;
 
 function getCurveData(apiService, idCurve, callback) {
-    apiService.dataCurve(idCurve, function(curve) {
+    apiService.dataCurve(idCurve, function (curve) {
         callback(null, curve);
     });
     /*apiService.post(apiService.DATA_CURVE, {
@@ -966,7 +1157,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             if (wiSlidingBarCtrl) {
                 let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
                 console.log('drop curve into slidingBar', errorCode);
-                if(errorCode > 0) {
+                if (errorCode > 0) {
                     wiSlidingBarCtrl.createPreview(idCurve);
                 }
                 else if (errorCode === 0) {
@@ -1007,9 +1198,9 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         referenceCurve: firstCurve ? firstCurve.properties.idCurve : null,
         plotTemplate: type ? type : null
     };
-    return new Promise(function(resolve, reject){
-        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function(response){
-            if(!response.name){
+    return new Promise(function (resolve, reject) {
+        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function (response) {
+            if (!response.name) {
                 reject(response);
             } else {
                 resolve(response);
@@ -1030,7 +1221,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
     // wiApiService.getPalettes(function(paletteList) {
-    getPalettes(function(paletteList) {
+    getPalettes(function (paletteList) {
         wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id},
             function (plot) {
                 if (logplotModel.properties.referenceCurve) {
@@ -1039,7 +1230,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                 let tracks = new Array();
 
                 if (plot.depth_axes && plot.depth_axes.length) {
-                    plot.depth_axes.forEach(function(depthTrack) {
+                    plot.depth_axes.forEach(function (depthTrack) {
                         tracks.push(depthTrack);
                     });
                 }
@@ -1053,6 +1244,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         tracks.push(zoneTrack);
                     })
                 }
+
 //
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
@@ -1062,11 +1254,11 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         let lineObj1 = null;
                         let lineObj2 = null;
 
-                        if(!shadingModel.idRightLine) return;
-                        if(!shadingModel.idLeftLine) {
+                        if (!shadingModel.idRightLine) return;
+                        if (!shadingModel.idLeftLine) {
                             for (let line of linesOfTrack) {
                                 if (line.id == shading.idRightLine) {
-                                      lineObj1 = line;
+                                    lineObj1 = line;
                                 }
                             }
                             wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
@@ -1074,7 +1266,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         else {
                             for (let line of linesOfTrack) {
                                 if (line.id == shading.idRightLine) {
-                                      lineObj1 = line;
+                                    lineObj1 = line;
                                 }
                                 if (line.id == shading.idLeftLine) {
                                     lineObj2 = line;
@@ -1132,7 +1324,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 eventEmitter.emitEvent('line-drawed', [someTrack]);
                             });
                         });
-                    } else if(aTrack.idZoneTrack) {
+                    } else if (aTrack.idZoneTrack) {
                         let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
                         if (!aTrack.zoneset) {
                             aTrack = tracks.shift();
@@ -1212,9 +1404,11 @@ function getStaticNode(type) {
     });
     return model;
 }
+
 function getHistogramsNode() {
     return getStaticNode('histograms');
 }
+
 exports.getHistogramsNode = getHistogramsNode;
 
 function getModel(type, id) {
@@ -1313,14 +1507,15 @@ exports.findWellByHistogram = function (idHistogram) {
 }
 
 exports.findWellByCurve = findWellByCurve;
-function findWellByCurve (idCurve) {
+
+function findWellByCurve(idCurve) {
     var path = getSelectedPath(function (node) {
         return node.type == 'curve' && node.id == idCurve;
     }) || [];
     return path[1];
 }
 
-exports.findHistogramModelById = function(idHistogram){
+exports.findHistogramModelById = function (idHistogram) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
@@ -1341,36 +1536,37 @@ exports.findHistogramModelById = function(idHistogram){
 
 exports.trackProperties = function (ModalService, wiComponentService) {
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {});
+    DialogUtils.trackPropertiesDialog(this.ModalService, function (ret) {
+    });
 };
 
-function sortProjectData(projectData){
+function sortProjectData(projectData) {
     if (!projectData.wells) return;
-    projectData.wells.sort((a,b)=>{
+    projectData.wells.sort((a, b) => {
         let nameA = a.name.toUpperCase();
         let nameB = b.name.toUpperCase();
         return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
     });
-    projectData.wells.forEach(well=>{
-        well.datasets.sort((a,b)=>{
+    projectData.wells.forEach(well => {
+        well.datasets.sort((a, b) => {
             let nameA = a.name.toUpperCase();
             let nameB = b.name.toUpperCase();
             return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
         });
-        well.datasets.forEach(dataset=>{
-            dataset.curves.sort((a,b)=>{
+        well.datasets.forEach(dataset => {
+            dataset.curves.sort((a, b) => {
                 let nameA = a.name.toUpperCase();
                 let nameB = b.name.toUpperCase();
                 return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
             });
         });
-        well.zonesets.sort((a,b)=>{
+        well.zonesets.sort((a, b) => {
             let nameA = a.name.toUpperCase();
             let nameB = b.name.toUpperCase();
             return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
         });
-        well.zonesets.forEach(function(zoneset){
-            zoneset.zones.sort((a,b)=>{
+        well.zonesets.forEach(function (zoneset) {
+            zoneset.zones.sort((a, b) => {
                 let depthA = parseFloat(a.startDepth);
                 let depthB = parseFloat(b.startDepth);
                 return depthA - depthB;
@@ -1400,6 +1596,7 @@ let refreshProjectState = function () {
 
             wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
             wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
+            wiComponentService.emit(wiComponentService.DUSTBIN_REFRESH_EVENT);
             resolve();
         });
     });
@@ -1569,12 +1766,12 @@ exports.pasteCurve = function () {
     if (Array.isArray(copyingCurves)) {
         async.eachOf(copyingCurves, function (copyingCurve, index, next) {
             let isCurveExist = false;
-            currentDataset.children.forEach(function(curve){
-                if(copyingCurve.properties.name == curve.properties.name) {
+            currentDataset.children.forEach(function (curve) {
+                if (copyingCurve.properties.name == curve.properties.name) {
                     isCurveExist = true;
                 }
             });
-            if(!isCurveExist){
+            if (!isCurveExist) {
                 if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
                 let curveInfo = {
                     idCurve: copyingCurve.properties.idCurve,
@@ -1586,8 +1783,8 @@ exports.pasteCurve = function () {
                 wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
             } else {
                 // curve existed
-                DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", copyingCurve.properties.name +" existed! Override it ?", function(yes){
-                    if(yes){
+                DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", copyingCurve.properties.name + " existed! Override it ?", function (yes) {
+                    if (yes) {
                         if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
                         let curveInfo = {
                             idCurve: copyingCurve.properties.idCurve,
@@ -1613,12 +1810,12 @@ exports.pasteCurve = function () {
     if (Array.isArray(cuttingCurves)) {
         async.eachOf(cuttingCurves, function (cuttingCurve, index, next) {
             let isCurveExist = false;
-            currentDataset.children.forEach(function(curve){
-                if(cuttingCurve.properties.name == curve.properties.name) {
+            currentDataset.children.forEach(function (curve) {
+                if (cuttingCurve.properties.name == curve.properties.name) {
                     isCurveExist = true;
                 }
             });
-            if(!isCurveExist){
+            if (!isCurveExist) {
                 if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
                 let curveInfo = {
                     idCurve: cuttingCurve.properties.idCurve,
@@ -1630,8 +1827,8 @@ exports.pasteCurve = function () {
                 wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
             } else {
                 // curve existed
-                DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", cuttingCurve.properties.name +" existed! Override it ?",function(yes){
-                    if(yes){
+                DialogUtils.confirmDialog(__GLOBAL.ModalService, "WARNING!", cuttingCurve.properties.name + " existed! Override it ?", function (yes) {
+                    if (yes) {
                         if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
                         let curveInfo = {
                             idCurve: cuttingCurve.properties.idCurve,
@@ -1704,7 +1901,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
     }
     else if (shadingObj.shadingStyle == 'variableShading') {
         shadingObj.idControlCurve = variableShadingStyle.idControlCurve;
-        if(!shadingObj.isNegPosFill){
+        if (!shadingObj.isNegPosFill) {
             shadingObj.fill = variableShadingStyle.fill;
         } else {
             shadingObj.positiveFill = variableShadingStyle.positiveFill;
@@ -1798,9 +1995,9 @@ exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, cr
         name: crossplotName,
         option: 'blank-plot'
     };
-    return new Promise(function(resolve, reject){
-        wiApiService.post(route, dataRequest, function(response){
-            if(!response.data){
+    return new Promise(function (resolve, reject) {
+        wiApiService.post(route, dataRequest, function (response) {
+            if (!response.data) {
                 reject(response);
             } else {
                 resolve(response);
@@ -1832,12 +2029,12 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                     openCrossplotTab(crossplotModel, callback);
                 });
                 setTimeout(function () {
-                    if(crossplot.foundCurveX && crossplot.foundCurveY){
+                    if (crossplot.foundCurveX && crossplot.foundCurveY) {
 
                     } else {
                         let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
                         let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
-                        if(crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX +"<br>"+ curveY);
+                        if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
                     }
                 }, 1000);
             } else {
@@ -1885,19 +2082,20 @@ function openCrossplotTab(crossplotModel, callback) {
                             for (let polygon of crossplot.polygons) {
                                 try {
                                     polygon.points = JSON.parse(polygon.points);
-                                } catch (error) {}
+                                } catch (error) {
+                                }
                             }
                         }
                         if (Array.isArray(crossplot.regressionlines) && crossplot.regressionlines.length > 0) {
                             for (let regLine of crossplot.regressionlines) {
                                 try {
                                     let pArr = [];
-                                    regLine.polygons.forEach(function(p, index){
+                                    regLine.polygons.forEach(function (p, index) {
                                         pArr.push(p.idPolygon);
                                     })
                                     regLine.polygons = pArr;
                                     regLine.lineStyle = JSON.parse(regLine.lineStyle);
-                                } catch(e) {
+                                } catch (e) {
                                     console.log(e);
                                 }
                             }
@@ -1906,7 +2104,7 @@ function openCrossplotTab(crossplotModel, callback) {
                             for (let udLine of crossplot.user_define_lines) {
                                 try {
                                     udLine.lineStyle = JSON.parse(udLine.lineStyle);
-                                } catch(e) {
+                                } catch (e) {
                                     console.log(e);
                                 }
                             }
@@ -1918,16 +2116,16 @@ function openCrossplotTab(crossplotModel, callback) {
                             crossplot.axisColors = JSON.parse(crossplot.axisColors);
                         }
 
-                        let viCurveX = graph.buildCurve( curveX, dataX, wellProps.properties);
-                        let viCurveY = graph.buildCurve( curveY, dataY, wellProps.properties);
+                        let viCurveX = graph.buildCurve(curveX, dataX, wellProps.properties);
+                        let viCurveY = graph.buildCurve(curveY, dataY, wellProps.properties);
 
                         let crossplotConfig = angular.copy(crossplot);
-                        crossplotConfig.regressionLines =crossplot.regressionlines;
-                        crossplotConfig.userDefineLines =crossplot.user_define_lines;
+                        crossplotConfig.regressionLines = crossplot.regressionlines;
+                        crossplotConfig.userDefineLines = crossplot.user_define_lines;
 
                         if (Array.isArray(crossplot.ternaries) && crossplot.ternaries.length > 0) {
                             crossplotConfig.ternary = {
-                                vertices: crossplot.ternaries.map(function(vertex) {
+                                vertices: crossplot.ternaries.map(function (vertex) {
                                     return {
                                         idVertex: vertex.idTernary,
                                         x: vertex.xValue,
@@ -1945,7 +2143,7 @@ function openCrossplotTab(crossplotModel, callback) {
                         if (crossplot.discriminator && crossplot.discriminator != 'null' && crossplot.discriminator != {}) {
                             console.log('crossplotDiscrim', crossplot.discriminator);
                             crossplot.discriminator = JSON.parse(crossplot.discriminator);
-                            evaluateExpr(wellProps, crossplot.discriminator, function(result){
+                            evaluateExpr(wellProps, crossplot.discriminator, function (result) {
                                 crossplotConfig.discriminatorData = result;
                                 wiD3CrossplotCtrl.createVisualizeCrossplot(viCurveX, viCurveY, crossplotConfig);
                             });
@@ -1961,7 +2159,7 @@ function openCrossplotTab(crossplotModel, callback) {
                     if (pointSet.idCurveZ) {
                         wiApiService.dataCurve(pointSet.idCurveZ, function (dataZ) {
                             let curveZ = getModel('curve', pointSet.idCurveZ);
-                            let viCurveZ = graph.buildCurve( curveZ, dataZ, wellProps.properties);
+                            let viCurveZ = graph.buildCurve(curveZ, dataZ, wellProps.properties);
                             pointSet.curveZ = viCurveZ;
                             createViCrossplot();
                         });
@@ -1987,7 +2185,7 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
         leftScale: curve.minX,
         rightScale: curve.maxX,
         name: histogramName
-    }: {
+    } : {
         idWell: idWell,
         name: histogramName,
         histogramTemplate: histogramTemplate
@@ -2001,9 +2199,9 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
                     openHistogramTab(histogramModel);
                 });
                 setTimeout(function () {
-                   if(histogram.noCurveFound || histogram.noCurveFound == "true"){
-                       DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
-                   }
+                    if (histogram.noCurveFound || histogram.noCurveFound == "true") {
+                        DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
+                    }
                 }, 1000);
             } else {
                 reject(histogram);
@@ -2099,10 +2297,11 @@ exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
 }
 
-function getValPalette(palName, paletteList){
+function getValPalette(palName, paletteList) {
     console.log("NAME", paletteList.palName);
     return paletteList.palName;
 }
+
 exports.getValPalette = getValPalette;
 
 function triggerWindowResize() {
@@ -2118,14 +2317,16 @@ function putListFamily() {
         __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.LIST_FAMILY, families);
     })
 }
+
 exports.putListFamily = putListFamily;
 
 function getListFamily() {
     return __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.LIST_FAMILY);
 }
+
 exports.getListFamily = getListFamily;
 
-exports.openZonemanager = function(item){
+exports.openZonemanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
@@ -2136,7 +2337,7 @@ exports.openZonemanager = function(item){
     })
 }*/
 
-exports.renameZoneSet = function(zoneSetModel){
+exports.renameZoneSet = function (zoneSetModel) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let promptConfig = {
@@ -2181,7 +2382,7 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
     }
 }
 
-exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted (model) {
+exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted(model) {
     let wiComponentService = __GLOBAL.wiComponentService;
     switch (model.type) {
         case 'curve':
@@ -2206,7 +2407,7 @@ exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted (
     }
 }
 
-function updateLinesOnCurveEdited (curveModel) {
+function updateLinesOnCurveEdited(curveModel) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiApiService = __GLOBAL.wiApiService;
     let idCurve = curveModel.properties.idCurve;
@@ -2228,6 +2429,7 @@ function updateLinesOnCurveEdited (curveModel) {
         })
     });
 }
+
 exports.updateLinesOnCurveEdited = updateLinesOnCurveEdited;
 
 function getPalettes(callback) {
@@ -2238,21 +2440,22 @@ function getPalettes(callback) {
         if (callback) callback(pals);
         return;
     }
-    else  {
-        wiApiService.getPalettes(function(paletteList) {
+    else {
+        wiApiService.getPalettes(function (paletteList) {
             wiComponentService.putComponent(wiComponentService.PALETTES, paletteList);
             if (callback) callback(paletteList);
         });
         return;
     }
 }
+
 exports.getPalettes = getPalettes;
 
 function findFamilyById(idFamily) {
     if (!idFamily) return null;
     let wiComponentService = __GLOBAL.wiComponentService;
     let families = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
-    return families.binarySearch(function(family) {
+    return families.binarySearch(function (family) {
         return family.idFamily === idFamily;
     }, idFamily);
 }
@@ -2260,58 +2463,59 @@ function findFamilyById(idFamily) {
 exports.findFamilyById = findFamilyById;
 
 exports.evaluateExpr = evaluateExpr;
+
 function evaluateExpr(well, discriminator, callback) {
     let result = new Array();
     let wellProps = well.properties;
-    let length = (wellProps.bottomDepth - wellProps.topDepth)/ wellProps.step;
+    let length = (wellProps.bottomDepth - wellProps.topDepth) / wellProps.step;
     let curveSet = new Set();
     let curvesData = new Array();
 
-    function findCurve(condition){
-        if(condition && condition.children && condition.children.length){
-            condition.children.forEach(function(child){
+    function findCurve(condition) {
+        if (condition && condition.children && condition.children.length) {
+            condition.children.forEach(function (child) {
                 findCurve(child);
             })
-        }else if (condition && condition.left && condition.right) {
+        } else if (condition && condition.left && condition.right) {
             curveSet.add(condition.left.value);
-            if(condition.right.type == 'curve'){
+            if (condition.right.type == 'curve') {
                 curveSet.add(condition.right.value);
             }
-        }else {
+        } else {
             return;
         }
     }
 
     findCurve(discriminator);
 
-    function evaluate(condition, index){
-        if(condition && condition.children && condition.children.length){
+    function evaluate(condition, index) {
+        if (condition && condition.children && condition.children.length) {
             let left = evaluate(condition.children[0], index);
             let right = evaluate(condition.children[1], index);
-            switch (condition.operator){
+            switch (condition.operator) {
                 case 'and':
                     return left && right;
                 case 'or':
                     return left || right;
             }
         }
-        else if (condition && condition.left && condition.right){
-            let leftCurve = curvesData.find(function(curve){
+        else if (condition && condition.left && condition.right) {
+            let leftCurve = curvesData.find(function (curve) {
                 return curve.idCurve == condition.left.value;
             });
 
             let left = parseFloat(leftCurve.data[index].x);
 
             let right = condition.right.value;
-            if(condition.right.type == 'curve'){
-                let rightCurve = curvesData.find(function(curve){
+            if (condition.right.type == 'curve') {
+                let rightCurve = curvesData.find(function (curve) {
                     return curve.idCurve == condition.right.value;
                 })
                 right = parseFloat(rightCurve.data[index].x);
             }
 
-            if(left && right){
-                switch (condition.comparison){
+            if (left && right) {
+                switch (condition.comparison) {
                     case '<':
                         return left < right;
                     case '>':
@@ -2323,13 +2527,14 @@ function evaluateExpr(well, discriminator, callback) {
                     case '>=':
                         return left >= right;
                 }
-            }else{
+            } else {
                 return false;
             }
-        }else {
+        } else {
             return true;
         }
     }
+
     let curveArr = Array.from(curveSet);
     async.each(
         curveArr,
@@ -2344,19 +2549,21 @@ function evaluateExpr(well, discriminator, callback) {
         },
         function (err) {
             console.log('done!', curvesData);
-            for (let i = 0; i <= length; i++){
+            for (let i = 0; i <= length; i++) {
                 result.push(evaluate(discriminator, i));
             }
             callback(result);
         }
     );
 }
+
 exports.drawIcon = drawIcon;
-function drawIcon(idIcon, type){
+
+function drawIcon(idIcon, type) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 
-    let icon =  $('#' + idIcon)[0];
+    let icon = $('#' + idIcon)[0];
     console.log("type", type, icon);
 
     let ctx = icon.getContext('2d');
@@ -2368,7 +2575,7 @@ function drawIcon(idIcon, type){
         size: 30
     });
     let funcType = type.toLowerCase();
-    switch(funcType){
+    switch (funcType) {
         case 'circle':
             helper.circle(10, 10);
             break;
@@ -2388,15 +2595,17 @@ function drawIcon(idIcon, type){
             helper.star(10, 10);
             break;
         default:
-        break;
+            break;
     }
 }
-function getDataTopBottomRange (data, topPos, bottomPos) {
+
+function getDataTopBottomRange(data, topPos, bottomPos) {
     let retData = [];
-    for(let i = 0; i < data.length; i++) {
-        if(i < topPos || i > bottomPos) retData.push(null);
+    for (let i = 0; i < data.length; i++) {
+        if (i < topPos || i > bottomPos) retData.push(null);
         else retData.push(data[i]);
     }
     return retData;
 }
+
 exports.getDataTopBottomRange = getDataTopBottomRange;
