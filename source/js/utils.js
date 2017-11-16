@@ -683,9 +683,9 @@ function wellToTreeConfig(well) {
         idProject: well.idProject,
         idWell: well.idWell,
         name: well.name,
-        topDepth: well.topDepth,
-        bottomDepth: well.bottomDepth,
-        step: well.step
+        topDepth: parseFloat(well.topDepth),
+        bottomDepth: parseFloat(well.bottomDepth),
+        step: parseFloat(well.step)
     };
     wellModel.data = {
         childExpanded: false,
