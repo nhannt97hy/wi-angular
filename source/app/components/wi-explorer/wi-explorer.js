@@ -843,14 +843,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     {
                         name: "Empty All",
                         label: "Empty All",
-                        icon: "play-16x16",
+                        icon: "delete-16x16",
                         handler: function() {
 
                         }
                     },{
                         name: "Restore All",
                         label: "Restore All",
-                        icon: "play-16x16",
+                        icon: "reverse-16x16-edit",
                         handler: function() {
 
                         }

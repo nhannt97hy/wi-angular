@@ -488,7 +488,7 @@ function createWellsNode(parent) {
     wellsModel.type = 'wells-deleted';
     wellsModel.data = {
         childExpanded: false,
-        icon: 'well-data-16x16',
+        icon: 'well-16x16',
         label: "Well"
     }
     wellsModel.properties = {
@@ -508,7 +508,7 @@ function createDatasetsNode(parent) {
     datasetsModel.type = 'datasets-deleted';
     datasetsModel.data = {
         childExpanded: false,
-        icon: 'dataset-data-16x16',
+        icon: 'curve-data-16x16',
         label: "Dataset"
     };
     datasetsModel.properties = {
@@ -528,7 +528,7 @@ function createCurvesNode(parent) {
     curvesModel.type = 'curves-deleted';
     curvesModel.data = {
         childExpanded: false,
-        icon: 'curve-data-16x16',
+        icon: 'curve-16x16',
         label: "Curve"
     }
     curvesModel.children = new Array();
@@ -545,7 +545,7 @@ function createPlotsNode(parent) {
     plotsModel.type = 'plots-deleted';
     plotsModel.data = {
         childExpanded: false,
-        icon: 'curve-data-16x16',
+        icon: 'logplot-blank-16x16',
         label: "Log Plot"
     }
     plotsModel.children = new Array();
@@ -562,7 +562,7 @@ function createCrossplotsNode(parent) {
     crossplotsModel.type = 'crossplots-deleted';
     crossplotsModel.data = {
         childExpanded: false,
-        icon: 'curve-data-16x16',
+        icon: 'crossplot-blank-16x16',
         label: "Cross Plot"
     }
     crossplotsModel.children = new Array();
@@ -578,7 +578,7 @@ function createHistogramsNode(parent) {
     histogramsModel.type = 'histograms-deleted';
     histogramsModel.data = {
         childExpanded: false,
-        icon: 'curve-data-16x16',
+        icon: 'histogram-blank-16x16',
         label: "Histogram"
     }
     histogramsModel.children = new Array();
