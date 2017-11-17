@@ -9505,3 +9505,33 @@ exports.addCurveDialog = function (ModalService) {
         });
     });
 }
+exports.autoSizeTrackDialog = function (ModalService, wiLogPlot) {
+    function ModalController(wiComponentService, wiApiService, close) {
+        let self = this;
+        window.auto = this;
+
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        console.log("//", wiLogPlot;
+        this.onApplyButtonClicked = function(){
+        };
+        this.onOkButtonClicked = function(){
+        };
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "auto-size-track/auto-size-track-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
