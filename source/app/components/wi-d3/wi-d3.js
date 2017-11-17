@@ -644,7 +644,47 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.adjustSlidingBarFromDepthRange([low, high]);
     }
 
+    this.makeDepthShift = function(track, curve) {
+        _showToolbarForDepthShift();
+        this.wiLogplotCtrl.depthShift = {
+            sourceTrack: track,
+            sourceCurve: curve,
+            shiftCurveId: curve.idCurve
+        };
+        _openDepthShiftFormatDialog();
+    }
+
     /* Private Begin */
+    function _showToolbarForDepthShift() {
+        self.wiLogplotCtrl.changeMode(self.wiLogplotCtrl.MODES.DEPTH_SHIFT);
+    }
+
+    function _openDepthShiftFormatDialog(track, curve) {
+        DialogUtils.depthShiftPropertiesDialog(ModalService, self.wiLogplotCtrl, function (props) {
+            console.log('DepthShiftFormat-ReturnData', props);
+            _duplicateForDepthShift(props);
+        });
+    }
+
+    function _duplicateForDepthShift(depthShiftProps) {
+        let sourceTrack = this.wiLogplotCtrl.depthShift.sourceTrack;
+        let orderNum = getOrderKey(sourceTrack);
+        let trackProps = sourceTrack.getProperties();
+        trackProps = Object.assign({}, trackProps, {
+            orderNum: orderNum,
+            idTrack: null
+        });
+        let viTrack = self.pushLogTrack(trackProps);
+
+        let sourceCurve = this.wiLogplotCtrl.depthShift.sourceCurve;
+        let curveProps = sourceCurve.getProperties();
+        curveProps = Object.assign({}, curveProps, {
+            name: curveProps.name + '_ds',
+            idLine: null
+        });
+        self.addCurveToTrack(viTrack, sourceCurve.rawData, curveProps);
+    }
+
     function _splitZone(track, zone) {
         let props = Utils.objClone(zone.getProperties());
         let zone1 = self.addZoneToTrack(track, {});
@@ -1394,7 +1434,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Depth Shift",
             icon: "",
             handler: function () {
-
+                self.makeDepthShift(_currentTrack, currentCurve);
             }
         }, {
             name: "RemoveCurve",
@@ -1563,7 +1603,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
     function _trackOnRightClick(track) {
-        if (track.isZoneTrack()) {
+        if (track.isLogTrack() && self.wiLogplotCtrl.mode == self.wiLogplotCtrl.MODES.DEPTH_SHIFT
+            && (track == self.wiLogplotCtrl.sourceTrack || track == self.wiLogplotCtrl.destTrack)) {
+            self.setContextMenu([
+                {
+                    name: "AddShiftPoint",
+                    label: "Add shift point",
+                    icon: '',
+                    handler: function() {
+                        track.setMode('addShiftPoint');
+                    }
+                }
+            ])
+        }
+        else if (track.isZoneTrack()) {
             self.setContextMenu([
                 {
                     name: "TrackProperties",

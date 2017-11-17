@@ -411,6 +411,18 @@ exports.HistogramButtonClicked = function () {
     this.wiLogplot.getwiD3Ctrl().createHistogram();
 };
 
+exports.DepthShiftEndButtonClicked = function () {
+    this.wiLogplot.changeMode(this.wiLogplot.MODES.NORMAL);
+    this.wiLogplot.depthShift = null;
+};
+
+exports.DepthShiftFormatButtonClicked = function () {
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    DialogUtils.depthShiftPropertiesDialog(this.ModalService, this.wiLogplot, function(props) {
+        console.log('DepthShiftFormatButtonClicked', props);
+    });
+};
+
 exports.ExportTrackButtonClicked = function () {
     console.log("EXPORT TRACK");
     const wiApiService = this.wiApiService;

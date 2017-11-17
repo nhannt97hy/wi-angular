@@ -55,6 +55,7 @@ DragLine.prototype.init = function(svgBase) {
         });
 
     this.svgGroup.call(this.dragFunc);
+    return this;
 }
 
 DragLine.prototype.needRePlot = function() {

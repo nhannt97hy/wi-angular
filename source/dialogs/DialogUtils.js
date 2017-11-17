@@ -75,7 +75,7 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                     });
                 } else if(response == "DATABASE_CREATION_FAIL"){
                     authenticationMessage(ModalService, "Login", "Backend Service problem.", function () {
-                    }); 
+                    });
                 } else {
                     let userInfo = {
                         username: self.username,
@@ -7479,6 +7479,84 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
+exports.depthShiftPropertiesDialog = function (ModalService, logplotCtrl, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+        let SHIFT_MODES = this.SHIFT_MODES = logplotCtrl.SHIFT_MODES;
+
+        wellModel = utils.findWellById(logplotCtrl.logplotModel.properties.idWell);
+
+        this.wells = [wellModel.properties];
+        this.curves = getCurvesInDataset();
+        this.selectedRow = -1;
+
+        let props = this.props = {
+            selectedWellId: wellModel.properties.idWell,
+            shiftPoints: angular.copy(logplotCtrl.depthShift.shiftPoints) || [],
+            shiftMode: logplotCtrl.depthShift.shiftMode == null ? SHIFT_MODES.INTERPOLATE : logplotCtrl.depthShift.shiftMode,
+            shiftCurveId: logplotCtrl.depthShift.shiftCurveId,
+            referenceCurveId: logplotCtrl.depthShift.referenceCurveId || logplotCtrl.depthShift.shiftCurveId,
+            isShowOriginalTrack: logplotCtrl.depthShift.isShowOriginalTrack == null ? true : logplotCtrl.depthShift.referenceCurveId
+        };
+
+        function getCurvesInDataset() {
+            let datasets = wellModel.children.filter(function(child) {
+                return child.type == 'dataset';
+            });
+
+            let curves = [];
+            datasets.forEach(function (dataset) {
+                dataset.children.forEach(function (curve) {
+                    if (curve.type == 'curve') {
+                        curves.push({
+                            id: curve.properties.idCurve,
+                            name: dataset.properties.name + "." + curve.properties.name
+                        });
+                    }
+                })
+            });
+            return curves;
+        }
+
+        this.setClickedRow = function(index) {
+            this.selectedRow = index;
+        }
+
+        this.updateDepthShiftChange = function(index) {
+
+        }
+
+        this.updateDepthShiftShiftedDepth = function(index) {
+
+        }
+
+        this.onApplyButtonClicked = function () {
+            callback(props);
+        };
+        this.onOkButtonClicked = function () {
+            close(props, 100);
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: "depth-shift/depth-shift-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (data && callback) callback(data);
+        });
+    });
+}
+
 exports.annotationPropertiesDialog = function (ModalService, annotationProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
@@ -7679,7 +7757,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
             } else {
                 utils.refreshProjectState();
                 self.applyInProgress = false;
-            } 
+            }
         };
 
         this.onRunButtonClicked = function () {
@@ -7984,7 +8062,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
             self.topDepth = parseFloat(self.wellModel.properties.topDepth);
             self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
         }
-        
+
         this.selectedWell = function (idWell) {
             self.curves = [];
             self.wellModel = utils.findWellById(idWell);
@@ -7995,7 +8073,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
             selectZoneSetPara(self.zoneSetParaModel);
             getAllCurvesOnSelectWell(self.wellModel);
         }
-        
+
         function getAllCurvesOnSelectWell(well) {
             let datasets = [];
             well.children.forEach(function (child) {
@@ -8024,12 +8102,12 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
             if(!self.checked && (self.topDepth < self.wellModel.properties.topDepth ||
                                 self.bottomDepth > self.wellModel.properties.bottomDepth))
             {
-                dialogUtils.errorMessageDialog(ModalService, 
-                                    "Input invalid [" + self.wellModel.properties.topDepth + "," + 
+                dialogUtils.errorMessageDialog(ModalService,
+                                    "Input invalid [" + self.wellModel.properties.topDepth + "," +
                                     self.wellModel.properties.bottomDepth+ "]" );
             }
 
-            
+
             async.each(self.curvesComparison, function(comparison, callback){
                 if (comparison.curve1 && comparison.curve2) {
                     wiApiService.dataCurve(comparison.curve1.id, function(dataCurve1){
@@ -8052,9 +8130,9 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                                         /parseFloat(self.wellModel.properties.step));
                                 let N = yEnd - yStart + 1;
                                 for (let i = yStart; i <= yEnd; i++){
-                                    if (data1[i] != null && !isNaN(data1[i]) && 
+                                    if (data1[i] != null && !isNaN(data1[i]) &&
                                         data2[i] != null && !isNaN(data2[i])) {
-                                            S += (data1[i] - data2[i]) * (data1[i] - data2[i]); 
+                                            S += (data1[i] - data2[i]) * (data1[i] - data2[i]);
                                             Sxy += (data1[i] * data2[i]);
                                     };
                                     if (data1[i] != null && !isNaN(data1[i]) ){
@@ -8073,7 +8151,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                 let param = comparisonParam(self.topDepth, self.bottomDepth);
                                 console.log("cpm", param, len);
                                 comparison.difference = (param.S / param.N).toFixed(4);
-                                comparison.correlation = ((param.N * param.Sxy - param.Sx * param.Sy) / 
+                                comparison.correlation = ((param.N * param.Sxy - param.Sx * param.Sy) /
                                                             Math.pow((param.N * param.Sx2 - param.Sx * param.Sx) * (param.N * param.Sy2 - param.Sy * param.Sy), 0.5)).toFixed(4);
                             } else {
                                 let S = null;
@@ -8093,7 +8171,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                 });
                                 if(temp) {
                                     comparison.difference = (S / N).toFixed(4);
-                                    comparison.correlation = ((N * Sxy - Sx * Sy) / 
+                                    comparison.correlation = ((N * Sxy - Sx * Sy) /
                                                                 Math.pow((N * Sx2 - Sx * Sx) * (N * Sy2 - Sy * Sy), 0.5)).toFixed(4);
                                 } else {
                                     comparison.difference = 0;
@@ -8614,7 +8692,7 @@ exports.mergeCurveDialog = function (ModalService) {
                             }
                             return {tempArr: tempArr, count: count };
                         }
-                        
+
                         switch (self.method) {
                             case "min":
                                 if(!getAllX(allData).count) dataRes.push(NaN);
@@ -8862,17 +8940,17 @@ exports.fillDataGapsDialog = function(ModalService){
                         async.each(self.otherCurves, function(curve, cb){
                             let curveModel = self.CurvesData.find(d => {return d.id == curve.id;});
                             if(curveModel){
-                                let data = curveModel.data; 
+                                let data = curveModel.data;
                                 processing2(curve, data, cb);
                             }else{
                                 wiApiService.dataCurve(curve.id, function(dataCurve){
                                     let data = dataCurve;
-                                    processing2(curve, data, cb);                                
+                                    processing2(curve, data, cb);
                                 })
                             }
                         }, function(err){
                             console.log('Done processing other curves');
-                            utils.refreshProjectState();                        
+                            utils.refreshProjectState();
                         })
 
                     }else{
@@ -8880,11 +8958,11 @@ exports.fillDataGapsDialog = function(ModalService){
                         utils.refreshProjectState();
                     }
                 })
-                
+
             });
         }
         function validate(){
-            self.otherCurves = self.curves.filter(curve => {return curve.flag == true;});            
+            self.otherCurves = self.curves.filter(curve => {return curve.flag == true;});
             if(self.otherCurves.length){
                 async.each(self.otherCurves, (curve, cb) => {
                     let newName = curve.name + self.suffix;

@@ -4,6 +4,7 @@ let Shading = require('./visualize-shading');
 let ViImage = require('./visualize-image');
 let Marker = require('./visualize-marker');
 let Annotation = require('./visualize-annotation');
+let ShiftPoint = require('./visualize-shift-point');
 let Utils = require('./visualize-utils');
 
 module.exports = LogTrack;
@@ -186,6 +187,12 @@ LogTrack.prototype.getMarkers = function() {
     return this.drawings.filter(function(d) {
         return d.isMarker();
     });
+}
+
+LogTrack.prototype.getShiftPoints = function() {
+    return this.drawings.filter(function(d) {
+        return d.isShiftPoint();
+    })
 }
 
 /**
@@ -391,6 +398,13 @@ LogTrack.prototype.addAnnotation= function(config) {
     return ann;
 }
 
+LogTrack.prototype.addShiftPoint = function(config) {
+    let shiftPoint = new ShiftPoint(config);
+    shiftPoint.init(this.plotContainer);
+    this.drawings.push(shiftPoint);
+    return shiftPoint;
+}
+
 /**
  * Remove a drawing from track
  * @param {Object} drawing - The curve or shading object to remove
@@ -554,6 +568,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     let windowY = this.getWindowY();
     drawing.minY = windowY[0];
     drawing.maxY = windowY[1];
+
     if (drawing == this.currentDrawing || drawing == this.tmpCurve) {
         drawing.doPlot(true);
         drawing.raise();
@@ -564,6 +579,8 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     this.svgContainer.raise();
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
+
+    this.getShiftPoints().forEach(function(shiftPoint) { shiftPoint.raise(); });
 }
 
 /**

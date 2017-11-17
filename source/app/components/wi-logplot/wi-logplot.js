@@ -8,7 +8,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
     this.cropDisplay = false;
 
+    let MODES = this.MODES = {
+        'NORMAL': 0,
+        'DEPTH_SHIFT': 1
+    };
+
+    this.SHIFT_MODES = {
+        INTERPOLATE: 0,
+        NORMAL: 1,
+        CORE: 2
+    };
+
     this.$onInit = function () {
+        self.mode = MODES.NORMAL;
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
         self.isFitWindow = false;
@@ -57,6 +69,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getwiD3Ctrl = function () {
         return wiComponentService.getComponent(self.wiD3AreaName);
     };
+
+    this.changeMode = function(newMode) {
+        this.mode = newMode;
+    }
 }
 
 let app = angular.module(moduleName, []);

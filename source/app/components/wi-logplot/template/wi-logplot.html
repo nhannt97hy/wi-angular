@@ -1,5 +1,9 @@
-<div class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
+<div ng-if="wiLogplot.mode == wiLogplot.MODES.NORMAL" class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
     @@include('./toolbar/index.html')
+</div>
+<div ng-if="wiLogplot.mode == wiLogplot.MODES.DEPTH_SHIFT" class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
+    <wi-button name="DepthShiftEndButton" icon="close-16x16" type="small" tooltip="End edit" handler="handlers.DepthShiftEndButtonClicked"></wi-button>
+    <wi-button name="DepthShiftFormatButton" icon="properties-16x16" type="small" tooltip="Depth shift settings" handler="handlers.DepthShiftFormatButtonClicked"></wi-button>
 </div>
 <div class="logplot-well-name" ng-bind="wiLogplot.wellName"></div>
 <div class="logplot-main-content">

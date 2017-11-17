@@ -57,6 +57,10 @@ Drawing.prototype.isAnnotation = function(){
     return this.constructor.name == 'Annotation';
 }
 
+Drawing.prototype.isShiftPoint = function() {
+    return this.constructor.name = 'ShiftPoint';
+}
+
 /**
  * Check if the drawing near a point
  * @param {Number} x - x coordinate of the point
@@ -95,7 +99,7 @@ Drawing.prototype.raise = function() {
  */
 Drawing.prototype.lower = function() {
     if (this.canvas) this.canvas.lower();
-    if (this.svgGroup) this.svgGroup.lower();
+    if (this.svgContainer) this.svgContainer.lower();
 }
 
 /**
@@ -122,7 +126,7 @@ Drawing.prototype.adjustSize = function() {
  */
 Drawing.prototype.destroy = function() {
     if (this.canvas) this.canvas.remove();
-    if (this.svgGroup) this.svgGroup.remove();
+    if (this.svgContainer) this.svgContainer.remove();
     if (this.header) this.header.remove();
 }
 

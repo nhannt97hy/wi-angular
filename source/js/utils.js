@@ -789,6 +789,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                         idTrack: track.id,
                         idCurve: idCurve
                     }, function (line) {
+                        console.log('Add curve. Line:', line);
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
                             if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
