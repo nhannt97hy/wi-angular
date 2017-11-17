@@ -159,7 +159,8 @@ exports.DeleteItemButtonClicked = function () {
                             });
                         });
                         break;
-                    default: return;
+                    default:
+                        return;
                 }
             }, function (err) {
                 utils.refreshProjectState();
@@ -176,5 +177,106 @@ exports.BrowseProjectButtonClicked = function () {
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
+    });
+}
+
+exports.EmptyAllButtonClicked = function () {
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    console.log("===============", selectedNodes);
+}
+
+exports.RestoreAllButtonClicked = function () {
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+
+}
+
+exports.EmptyButtonClicked = function () {
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (!Array.isArray(selectedNodes)) return;
+    let selectedNodesName = selectedNodes[0].type + '(s):';
+    selectedNodes.forEach(function (selectedNode) {
+        selectedNodesName += ' ' + selectedNode.data.label;
+    })
+    let ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete forever ${selectedNodesName} ?`, function (yes) {
+        if (yes) {
+            async.eachOf(selectedNodes, function (selectedNode, index, next) {
+                let type = selectedNode.type.substring(0, selectedNode.type.indexOf('-'));
+                wiApiService.deleteObject({type: type, idObject: selectedNode.id}, function (response) {
+                    if (response == "WRONG_TYPE") {
+                        next(response);
+                    } else if (response == "CANT_DELETE") {
+                        next(response);
+                    } else {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                            next();
+                        });
+                    }
+                });
+            }, function (err) {
+                if (err) {
+                    dialogUtils.errorMessageDialog(ModalService, "Can't delete");
+                }
+                utils.refreshProjectState();
+                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+            });
+        }
+    });
+}
+
+exports.RestoreButtonClicked = function () {
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    console.log(selectedNodes);
+    if (!Array.isArray(selectedNodes)) return;
+    let selectedNodesName = selectedNodes[0].type + '(s):';
+    selectedNodes.forEach(function (selectedNode) {
+        selectedNodesName += ' ' + selectedNode.data.label;
+    })
+    let ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore ${selectedNodesName} ?`, function (yes) {
+        if (yes) {
+            async.eachOf(selectedNodes, function (selectedNode, index, next) {
+                let type = selectedNode.type.substring(0, selectedNode.type.indexOf('-'));
+                wiApiService.restoreObject({type: type, idObject: selectedNode.id}, function (response) {
+                    if (response == "WRONG_TYPE") {
+                        next(response);
+                    } else if (response == "CANT_RESTORE") {
+                        next(response);
+                    } else {
+                        $timeout(function () {
+                            selectedNode.data.deleted = true;
+                            next();
+                        });
+                    }
+                });
+            }, function (err) {
+                if (err) {
+                    dialogUtils.errorMessageDialog(ModalService, "Can't restore");
+                }
+                utils.refreshProjectState();
+                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+            });
+        }
     });
 }
