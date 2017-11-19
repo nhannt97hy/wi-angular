@@ -9513,7 +9513,7 @@ exports.autoSizeTrackDialog = function (ModalService, wiLogPlot) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        console.log("//", wiLogPlot;
+        console.log("//", wiLogPlot);
         this.onApplyButtonClicked = function(){
         };
         this.onOkButtonClicked = function(){

@@ -324,6 +324,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
+        track.updateScaleInfo({
+            leftVal:config.minX, 
+            rightVal:config.maxX,
+            scale: config.scale.toLowerCase()
+        });
+        track.updateAxis();
         track.plotCurve(curve);
         track.onCurveHeaderMouseDown(curve, function() {
             if (d3.event.button == 2) {
@@ -2099,7 +2105,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         },
         {
             name: "SwitchToLogarithmic",
-            label: "Switch To Logarithmic",
+            label: "Switch Linear/Logarithmic",
             icon: 'logarithmic-switch-16x16',
             handler: function () {
                 let scale = _currentTrack.scale;
