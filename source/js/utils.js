@@ -2200,9 +2200,9 @@ function evaluateExpr(well, discriminator, callback) {
         }
     }
     let curveArr = Array.from(curveSet);
-    async.each(
+    async.eachOfSeries(
         curveArr,
-        function (curve, done) {
+        function (curve, i, done) {
             __GLOBAL.wiApiService.dataCurve(curve, function (data) {
                 curvesData.push({
                     idCurve: curve,

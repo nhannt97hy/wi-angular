@@ -8339,11 +8339,11 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
     });
 }
 
-exports.curveConvolutionDialog = function(ModalService, deconvolution){
+exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.curveCov = this;
-        this.deconvolution = deconvolution;
+        this.isDeconvolution = isDeconvolution;
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -8414,41 +8414,83 @@ exports.curveConvolutionDialog = function(ModalService, deconvolution){
             }, 0);
         });
 
-        function convolution(input, kernel, out){
+        function convolution(input, kernel, out, callback){
             // check validity of params
-            if(!input || !out || !kernel) return false;
-            if(input.length < 1 || kernel.length < 1) return false;
+            if(!input || !out || !kernel) callback(false);
+            if(input.length < 1 || kernel.length < 1) callback(false);
 
             let inputF = input.filter(d => {return !isNaN(d);});
-            // inputF.length = input.length;
             let inputSize = input.length;
-            kernelF = kernel.filter(d => {return !isNaN(d);});
-            kernelF = kernelF.reverse();
-            // kernelF.length = kernel.length;
-            // kernel = kernel.reverse();
-            let kernelSize = kernel.length;
+            let kernelF = kernel.filter(d => {return !isNaN(d);});
+            let Size = Math.max(kernelF.length, inputF.length);
+            out.length = inputSize;
+            out.fill(NaN);
 
-            for(let n = 0; n < inputSize; n++){
-                kernelF.unshift(kernelF.pop());
+            async.eachOfSeries(input, (data, n, done)=>{
                 if(!isNaN(input[n])){
-                    if(self.deconvolution){
-                        out[n] = input[n];
-                    }else{
                         out[n] = 0;
+                    for(let k = 0; k < Size; k++){
+                        out[n] += (inputF[k] || 0) * (kernelF[(n - k + Size)%Size] || 0);
                     }
-                    for(let k = 0; k < kernelSize; k++){
-                        if(self.deconvolution){
-                            if(kernel[k])
-                                out[n] -= (input[k] || 0) / kernel[k]; // need update
-                        }else{
-                            out[n] += isNaN(inputF[k] * kernelF[k]) ? 0 : (inputF[k] * kernelF[k]);
-                        }
-                    }
-                }else{
-                    out[n] = NaN;
                 }
+                async.setImmediate(done);                    
+            }, function(err){
+                callback(true);
+            })
+        }
+        function calDFT(input) {
+            var N = input.length;
+            var arr = new Array(N);
+            for (var k = 0; k < N; k++) {
+                arr[k] = new math.complex(0,0);
+                if(!isNaN(input[k])){
+                    for (var n = 0; n < N; n++) {
+                            let tmp = (-1) * ((2 * Math.PI * n * k) / N);
+                            arr[k].re += Math.cos(tmp) * (input[n] || 0);
+                            arr[k].im += Math.sin(tmp) * (input[n] || 0);
+                        }
+                }
+        
+                arr[k].re = Math.round(arr[k].re);
+                arr[k].im = Math.round(arr[k].im);
             }
-            return true;
+            return arr;
+        }
+        function calIDFT(input, out) {
+            var N = input.length;
+            var arr = new Array(N);
+            for (var k = 0; k < N; k++) {
+                arr[k] = new math.complex(0,0);
+                for (var n = 0; n < N; n++) {
+                        let tmp = ((2 * Math.PI * n * k) / N);
+                        arr[k].re += Math.cos(tmp) * input[n].re;
+                        arr[k].im += Math.sin(tmp) * input[n].im;
+                    }
+        
+                arr[k].re = Math.round(arr[k].re)/ N;
+                arr[k].im = Math.round(arr[k].im) / N;
+            }
+            out = arr.map(d => {return d.re + d.im * (-1)} );
+        }
+        function deconvolution(input, kernel, out, callback){ // need update
+            // check validity of params
+            if(!input || !out || !kernel) callback(false);
+            if(input.length < 1 || kernel.length < 1) callback(false);
+
+            let a_dft = calDFT(input);
+            // console.log(a_dft);
+            let b_dft = calDFT(kernel);
+            // console.log(b_dft);
+            let c = new Array(input.length);
+            async.eachOfSeries(input,(data, i, done)=>{
+                c[i] = math.divide(a_dft[i], b_dft[i]);
+                async.setImmediate(done);                    
+            }, function(err){
+                console.log(c);
+                calIDFT(c, out);
+                console.log(out);            
+                callback(true);
+            })
         }
 
         function saveCurve(curve){
@@ -8460,28 +8502,44 @@ exports.curveConvolutionDialog = function(ModalService, deconvolution){
             })
         }
 
-        function run(){
+        function run() {
             self.curveData.length = 0;
             let curveSet = new Set();
             curveSet.add(self.inputCurve.id);
             curveSet.add(self.stdCurve.id);
-            async.each(Array.from(curveSet), function(curve, done){
-                wiApiService.dataCurve(curve, function(data){
-                    let dataF = data.map(function(d){
+            async.eachOfSeries(Array.from(curveSet), function (curve, i, done) {
+                wiApiService.dataCurve(curve, function (data) {
+                    let dataF = data.map(function (d) {
                         return parseFloat(d.x);
                     })
                     self.curveData.push(dataF);
                     done();
                 })
-            }, function(err){
+            }, function (err) {
                 let input = angular.copy(self.curveData[0]);
                 let kernel = self.curveData.length == 1 ? angular.copy(self.curveData[0]) : angular.copy(self.curveData[1]);
-                if(convolution(input, kernel, self.ResultCurve.data)){
-                    console.log(self.ResultCurve.data);
-                    // self.applyingInProgress = false;
-                    saveCurve(self.ResultCurve);
-                }else {
-                    console.log('Convolution err!');
+                if (self.isDeconvolution) {
+                    deconvolution(input, kernel, self.ResultCurve.data, function (err) {
+                        if (err) {
+                            // console.log(self.ResultCurve.data);
+                            self.applyingInProgress = false;
+                            // saveCurve(self.ResultCurve);
+                        } else {
+                            console.log("Deconvolution Error!");
+                            self.applyingInProgress = false;
+                        }
+                    })
+                } else {
+                    convolution(input, kernel, self.ResultCurve.data, function (err) {
+                        if (err) {
+                            console.log(self.ResultCurve.data);
+                            // self.applyingInProgress = false;
+                            saveCurve(self.ResultCurve);
+                        } else {
+                            console.log("Convolution Error!");
+                            self.applyingInProgress = false;
+                        }
+                    })
                 }
             })
         }
