@@ -1,0 +1,72 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class="auto-size-32x32"></span>&nbsp;Auto Size Track</h4>
+            </div>
+            <div class="modal-body dialog-style">
+                <div class="container-fluid">
+                    <p></p>
+                    <form class="form-horizontal">
+                        <div class="col-sm-7 border-style">
+                            <div class="form-group">
+                                <label class="col-sm-3" for="majorTicks">Width(s)</label>
+                                <div class="col-sm-9">
+                                    <input type="number" class="form-control wi-form-control"
+                                            ng-model="wiModal.width">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3" for="majorTicks">Unit</label>
+                                <div class="col-sm-9">
+                                    <select ng-model="wiModal.unit"
+                                            class="form-control wi-form-control">
+                                        <option value="inch">Inch</option>
+                                        <option value="meter">Meter</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 padding-left-4em">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox"
+                                           ng-model="wiModal.depth">
+                                    All Depth Track
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox"
+                                           ng-model="wiModal.log">
+                                    All Log Track
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox"
+                                           ng-model="wiModal.image">
+                                    All Image Track
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox"
+                                           ng-model="wiModal.zone">
+                                    All Zone Track
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onApplyButtonClicked()'><span class="apply-16x16"></span>Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

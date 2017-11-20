@@ -890,9 +890,12 @@ exports.MSFLHistogramButtonClicked = function () {
 
     });
 };
-
 exports.AddCurveButtonClicked = function () {
     console.log('AddCurveButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.addCurveDialog(this.ModalService);
 };
 
 exports.EditTextCurveButtonClicked = function () {
