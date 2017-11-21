@@ -9371,7 +9371,7 @@ exports.curveDerivativeDialog = function(ModalService){
 }
 
 exports.TVDConversionDialog = function (ModalService) {
-    function ModalController(wiComponentService, wiApiService, close) {
+    function ModalController(wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         window.tvd = this;
 
@@ -9384,22 +9384,33 @@ exports.TVDConversionDialog = function (ModalService) {
         this.curvesArr = [];
         this.step;this.topDepth; this.bottomDepth;
         this.SelectedWell; this.SelectedDataset;
-        this.useType = 'curve';
-        this.startData = 0, this.colDepth = 1, this.colDev = 2, this.colAzi = 3;
+        this.useType = 'file';
+        this.startData = 2, this.colDepth = 1, this.colDev = 2, this.colAzi = 3;
         this.tvdMethod = 'off', this.calMethod = '1';
         this.input = [];
+        this.curvesData = [];
 
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if (selectedNodes && selectedNodes[0].type == 'well')
-            self.SelectedWell = selectedNodes[0];
-        else if (selectedNodes && selectedNodes[0].type == 'curve') {
-            self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
-        }
-        else if (selectedNodes && selectedNodes[0].type == 'dataset') {
-            self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+        if(selectedNodes && selectedNodes.length){
+            switch (selectedNodes[0].type){
+                case 'well':
+                self.SelectedWell = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+                
+                default:
+                self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;            
+            } 
         }
         else {
-            self.SelectedWell = self.wells[0];
+            self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
         }
 
         function getDatasets() {
@@ -9434,19 +9445,75 @@ exports.TVDConversionDialog = function (ModalService) {
             self.step = parseFloat(self.SelectedWell.properties.step);
             self.topDepth = parseFloat(self.SelectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.SelectedWell.properties.bottomDepth);
+            self.tvdRef = parseFloat(self.SelectedWell.properties.topDepth);
+            let length = Math.round((self.bottomDepth - self.topDepth)/self.step) + 1;
+            self.Size = new Array(length);
         }
         this.onChangeWell();
         this.loadFile = function(){
-            let reader = new FileReader();
-            reader.onload = function(event){
-                let lines = this.result.split('\n');
-                for(let i = 0; i < lines.length; i++){
-                    let ele = lines[i].replace(/\(|\)/g,'').replace(/ /g, '').split(/\s+/);
-                    if(i > 0) ele.pop();
-                    if(ele.length) self.input.push(ele);
+            console.log('Load File');
+            if(self.SurveyFile){
+                self.input.length = 0;
+                if(self.SurveyFile.type.match('text')){
+                    let reader = new FileReader();
+                    reader.onload = function(event){
+                        let lines = this.result.split('\n');
+                        for(let i = 0; i < lines.length; i++){
+                            let ele = lines[i].replace(/\(|\)/g,'').replace(/ /g, '').split(/\s+/);
+                            if(i > 0) ele.pop();
+                            if(ele.length) self.input.push(ele);
+                        }
+                    }
+                    reader.readAsText(self.SurveyFile);
+                }else{
+                    utils.error('File not supported!');
                 }
             }
-            reader.readAsText(self.SurveyFile);
+        }
+        this.loadCurves = function(){
+            console.log('Load Curves');
+            function loadAzi(){
+                let azi = self.curvesData.find(curve => {return curve.id == self.AziCurve.id});
+                if(azi){
+                    self.aziArr = azi.data;
+                }else{
+                    wiApiService.dataCurve(self.AziCurve.id, function(dataCurve){
+                        let data = dataCurve.map(d => {return parseFloat(d.x);});
+                        self.curvesData.push({
+                            id: self.AziCurve.id,
+                            data: data
+                        })
+                        self.aziArr = data;
+                    })
+                }
+            }
+            let dev = self.curvesData.find(curve => {return curve.id == self.DevCurve.id});
+            if(dev){
+                self.devArr = dev.data;
+                loadAzi();
+            }else{
+                wiApiService.dataCurve(self.DevCurve.id, function(dataCurve){
+                    let data = dataCurve.map(d => {return parseFloat(d.x);});
+                    self.curvesData.push({
+                        id: self.DevCurve.id,
+                        data: data
+                    })
+                    self.devArr = data;
+                    loadAzi();
+                })
+            }
+        }
+
+        this.onUseTypeChanged = function(){
+            switch(self.useType){
+                case 'curve':
+                    $timeout(self.loadCurves);
+                    break;
+                
+                case 'file':
+                    $timeout(self.loadFile);
+                    break;
+            }
         }
 
         $('#inputDiv').scroll(function(){

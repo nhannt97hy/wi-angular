@@ -861,8 +861,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             case String(nodeType.match(/^.*-deleted-child/)):
                 return [
                     {
-                        name: "Delete Forever",
-                        label: "Delete Forever",
+                        name: "Permanently Delete",
+                        label: "Permanently Delete",
                         icon: "delete-16x16",
                         handler: function() {
                             self.handlers.EmptyButtonClicked();
