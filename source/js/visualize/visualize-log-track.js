@@ -116,6 +116,34 @@ LogTrack.prototype.setMode = function(newMode) {
     this.svgContainer.style('cursor', newMode == null ? 'crosshair' : 'copy');
 }
 
+LogTrack.prototype.updateScaleInfo = function(scaleOpt) {
+    if (scaleOpt) {
+        this.scale = scaleOpt.scale;
+        this.minX = scaleOpt.leftVal;
+        this.maxX = scaleOpt.rightVal;
+        if (this.scale.toLowerCase() == 'logarithmic') {
+            this.minX = (this.minX <= 0)?0.01:this.minX;
+            this.maxX = (this.maxX <= 0)?0.01:this.maxX;
+        }
+    }
+    if (!this.minX || !this.maxX) {
+        let aCurve = null;
+        for (let drawing of this.drawings) {
+            if (drawing.isCurve() && drawing.scale.toLowerCase() == this.scale) {
+                aCurve = drawing;
+                break;
+            }
+        }
+        if (aCurve) {
+            this.minX = aCurve.minX;
+            this.maxX = aCurve.maxX;
+        }
+        else {
+            this.minX = 1;
+            this.maxX = 2;
+        }
+    }
+}
 /**
  * Get x window of track
  * @returns {Array} Range of actual x values to show
@@ -125,7 +153,6 @@ LogTrack.prototype.getWindowX = function() {
         ? [1, 2]
         : [this.minX, this.maxX];
 }
-
 LogTrack.prototype.getCurrentDrawing = function() {
     return this.currentDrawing;
 }
@@ -233,6 +260,14 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
     this.currentDrawing = drawing;
     this.tmpCurve = null;
     this.plotAllDrawings();
+    if (drawing) {
+        this.updateScaleInfo({
+            leftVal:drawing.minX, 
+            rightVal:drawing.maxX, 
+            scale: drawing.scale.toLowerCase()
+        });
+        this.updateAxis();
+    }
     this.highlightHeader();
 }
 
@@ -276,6 +311,7 @@ LogTrack.prototype.init = function(baseElement) {
 LogTrack.prototype.doPlot = function(highlight) {
     Track.prototype.doPlot.call(this, highlight);
     this.plotAllDrawings();
+    this.updateScaleInfo();
     this.updateAxis();
 }
 
@@ -698,33 +734,40 @@ LogTrack.prototype.onCurveHeaderMouseDown = function(curve, cb) {
         });
 }
 
+function genLogTickValues(minVal, maxVal) {
+    var tickValues = new Array();
+    var leftExponent = Math.floor(Math.log10(minVal));
+    var rightExponent = Math.ceil(Math.log10(maxVal));
+    for (let i = leftExponent; i <= rightExponent; i++) {
+        for (let j = 1; j < 10; j++) {
+            let value = j * Math.pow(10, i);
+            if (value >= minVal && value <= maxVal)
+                tickValues.push(value);
+        }
+    }
+    return tickValues;
+}
+
+LogTrack.prototype.genXTickValues = function() {
+    let self = this;
+    let windowX = this.getWindowX();
+    if (self.scale == 'logarithmic') {
+        if (windowX[0] < windowX[1])
+            return genLogTickValues(windowX[0], windowX[1]);
+        else {
+            return genLogTickValues(windowX[1], windowX[0]).reverse();
+        }
+    }
+    else {
+        return d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0])/(self.xMajorTicks * self.xMinorTicks));
+    }
+}
+
 LogTrack.prototype.getTransformX = function() {
     let self = this;
     let rangeX = this.getViewportX();
     let windowX = this.getWindowX();
-
-    function transformX(x) {
-        let majorStep = (windowX[1] - windowX[0]) / (self.xMajorTicks || 1);
-        let majorTransformX = d3.scaleLinear()
-            .domain(windowX)
-            .range(rangeX);
-        if ((x - windowX[0]) % majorStep < 0.0001) {
-            return majorTransformX(x);
-        }
-        else {
-            let leftSide = windowX[0] + Utils.roundDown(x - windowX[0], majorStep);
-            let minorTransformX = Utils.getScaleFunc(self.scale)
-                .domain([0.01, majorStep + 0.01])
-                .range([0, majorTransformX(windowX[0] + majorStep) - rangeX[0]]);
-            return majorTransformX(leftSide) + minorTransformX(x - leftSide + 0.01);
-        }
-    }
-
-    transformX.range = function() { return rangeX };
-    transformX.domain = function() { return windowX };
-    transformX.copy = function() { return transformX };
-
-    return transformX;
+    return Utils.getScaleFunc(self.scale).domain(windowX).range(rangeX);
 }
 
 /**
@@ -736,13 +779,14 @@ LogTrack.prototype.updateAxis = function() {
     let windowY = this.getWindowY();
     let windowX = this.getWindowX();
     let transformY = this.getTransformY();
+    let transformX = this.getTransformX();
+    let xTickValues = this.genXTickValues();
 
-    let xAxis = d3.axisTop(this.getTransformX())
-        .tickValues(d3.range(windowX[0], windowX[1], (windowX[1] - windowX[0]) / (this.xMajorTicks * this.xMinorTicks || 1)))
+    let majorTest = (this.scale.toLowerCase() == 'logarithmic')?logMajorTest:linearMajorTest;
+    let xAxis = d3.axisTop(transformX)
+        .tickValues(xTickValues)
         .tickFormat('')
         .tickSize(-rect.height);
-
-    // let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
 
     let step = transformY.invert(Utils.getDpcm()) - windowY[0];
     let start = Utils.roundUp(windowY[0], step);
@@ -774,16 +818,18 @@ LogTrack.prototype.updateAxis = function() {
                 return ((i == 0 || i == self.yTicks) && !self.showEndLabels) ? 'none' : 'block';
             });
 
-    this.bodyContainer.selectAll('.tick line')
-        .attr('stroke', this.gridColor)
-        .attr('stroke-dasharray', '20, 2')
-        .attr('stroke-opacity', 0.8)
-        .attr('stroke-width', 1);
-
-    this.xAxisGroup.selectAll('.tick line')
-        .attr('stroke-opacity', function(d, i) {
-            return (!self.xMinorTicks || i % self.xMinorTicks == 0) ? 0.8 : 0.3;
+    this.xAxisGroup.selectAll('.tick')
+        .classed('major', function(d,i) {
+            return majorTest(i);
         });
+
+    function linearMajorTest(i) {
+        return (!self.xMinorTicks || i % self.xMinorTicks == 0) ? true:false;
+    }
+
+    function logMajorTest(i) {
+        return Number.isInteger(Math.log10(xTickValues[i]))?true:false;
+    }
 }
 
 LogTrack.prototype.updateHeader = function() {
