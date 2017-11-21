@@ -263,7 +263,7 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
     if (drawing) {
         this.updateScaleInfo({
             leftVal:drawing.minX, 
-            rightVal:drawing.minY, 
+            rightVal:drawing.maxX, 
             scale: drawing.scale.toLowerCase()
         });
         this.updateAxis();
