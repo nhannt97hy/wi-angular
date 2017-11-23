@@ -188,12 +188,12 @@
                         <div class="form-group">
                             <div class="col-sm-4">
                                 <label>Input</label>
-                                <div style="overflow-x:overlay;" id="inputDiv">
-                                    <table class="table table-bordered" id="inputTable">
+                                <div style="overflow-x:overlay;">
+                                    <table class="table table-bordered">
                                         <thead style="display: table-row;">
                                             <tr ng-if="wiModal.useType == 'file'">
                                                 <th>{{wiModal.input.length ? 'Index': '&nbsp;'}}</th>
-                                                <th ng-repeat="row in wiModal.input[wiModal.input.length - 1] track by $index" style="min-width:100px;text-align:center">Column{{$index + 1}}</th>
+                                                <th ng-repeat="row in wiModal.input[0] track by $index" style="min-width:100px;text-align:center">Column{{$index + 1}}</th>
                                             </tr>
                                             <tr ng-if="wiModal.useType == 'curve'">
                                                 <th>Index</th>
@@ -221,8 +221,8 @@
                             <div class="col-sm-8">
                                 <wi-tabset>
                                     <wi-tab heading='Preview'>
-                                        <div style="overflow-x:overlay;" id="previewDiv">
-                                            <table class="table table-bordered" id="previewTable">
+                                        <div style="overflow-x:overlay;">
+                                            <table class="table table-bordered">
                                                 <thead style="display: table-row;">
                                                     <tr>
                                                         <th style="min-width:100px;text-align:center">MD(Depth)</th>
@@ -232,19 +232,31 @@
                                                         <th style="min-width:100px;text-align:center">Azimuth</th>
                                                         <th style="min-width:100px;text-align:center">North</th>
                                                         <th style="min-width:100px;text-align:center">East</th>
-                                                        <th style="min-width:100px;text-align:center">X</th>
+                                                        <!-- <th style="min-width:100px;text-align:center">X</th>
                                                         <th style="min-width:100px;text-align:center">Y</th>
-                                                        <th style="min-width:100px;text-align:center">Radius</th>
+                                                        <th style="min-width:100px;text-align:center">Radius</th> -->
                                                     </tr>
                                                 </thead>
                                                 <tbody style="height:195px;overflow-y:overlay;overflow-x:hidden;display:block">
+                                                    <tr ng-repeat="row in wiModal.Size track by $index">
+                                                            <td style="min-width:100px">{{wiModal.depthArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.tvdArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.tvdssArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.devArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.aziArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.northArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.eastArr[$index].toFixed(4)}}</td>
+                                                            <!-- <td style="min-width:100px">{{wiModal.xArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.yArr[$index].toFixed(4)}}</td>
+                                                            <td style="min-width:100px">{{wiModal.radiusArr[$index].toFixed(4)}}</td> -->
+                                                        </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                     </wi-tab>
                                     <wi-tab heading='Output'>
-                                        <div style="overflow-x:overlay;" id="outputDiv">
-                                            <table class="table table-bordered" id="outputTable">
+                                        <div style="overflow-x:overlay;">
+                                            <table class="table table-bordered">
                                                 <thead style="display: table-row;">
                                                     <tr>
                                                         <th style="min-width:100px;text-align:center">Depth</th>
@@ -252,11 +264,11 @@
                                                         <th style="min-width:100px;text-align:center">Azimuth</th>
                                                         <th style="min-width:100px;text-align:center">TVD</th>
                                                         <th style="min-width:100px;text-align:center">TVDSS</th>
-                                                        <th style="min-width:100px;text-align:center">X</th>
-                                                        <th style="min-width:100px;text-align:center">Y</th>
+                                                        <!-- <th style="min-width:100px;text-align:center">X</th>
+                                                        <th style="min-width:100px;text-align:center">Y</th> -->
                                                         <th style="min-width:100px;text-align:center">North</th>
                                                         <th style="min-width:100px;text-align:center">East</th>
-                                                        <th style="min-width:100px;text-align:center">Radius</th>
+                                                        <!-- <th style="min-width:100px;text-align:center">Radius</th> -->
                                                     </tr>
                                                     <tr>
                                                         <th style="min-width:100px;text-align:center">Curve Save</th>
@@ -264,14 +276,26 @@
                                                         <th style="min-width:100px;text-align:center">Azimuth</th>
                                                         <th style="min-width:100px;text-align:center">TVD</th>
                                                         <th style="min-width:100px;text-align:center">TVDSS</th>
-                                                        <th style="min-width:100px;text-align:center">X</th>
-                                                        <th style="min-width:100px;text-align:center">Y</th>
+                                                        <!-- <th style="min-width:100px;text-align:center">X</th> -->
+                                                        <!-- <th style="min-width:100px;text-align:center">Y</th> -->
                                                         <th style="min-width:100px;text-align:center">North</th>
                                                         <th style="min-width:100px;text-align:center">East</th>
-                                                        <th style="min-width:100px;text-align:center">Radius</th>
+                                                        <!-- <th style="min-width:100px;text-align:center">Radius</th> -->
                                                     </tr>
                                                 </thead>
                                                 <tbody style="height:160px;overflow-y:overlay;overflow-x:hidden;display:block">
+                                                    <tr ng-repeat="row in wiModal.Size track by $index">
+                                                        <td style="min-width:100px">{{(($index * wiModal.step) + wiModal.topDepth).toFixed(4)}}</td>
+                                                        <td style="min-width:100px">{{wiModal.devArr[$index]}}</td>
+                                                        <td style="min-width:100px">{{wiModal.aziArr[$index]}}</td>
+                                                        <td style="min-width:100px">{{wiModal.tvdArr[$index]}}</td>
+                                                        <td style="min-width:100px">{{wiModal.tvdssArr[$index]}}</td>
+                                                        <!-- <td style="min-width:100px">{{wiModal.xArr[$index]}}</td> -->
+                                                        <!-- <td style="min-width:100px">{{wiModal.yArr[$index]}}</td> -->
+                                                        <td style="min-width:100px">{{wiModal.northArr[$index]}}</td>
+                                                        <td style="min-width:100px">{{wiModal.eastArr[$index]}}</td>
+                                                        <!-- <td style="min-width:100px">{{wiModal.radiusArr[$index]}}</td> -->
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -284,9 +308,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onSaveButtonClicked()'>
-                    <span class="apply-16x16"></span>Save</button>
-                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'>
+                <button class='btn btn-default' ng-click='wiModal.onSaveButtonClicked()' ng-disabled="wiModal.applyingInProgress">
+                    <span class="apply-16x16"></span>&nbsp;Save</button>
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled="wiModal.applyingInProgress">
                     <span class="run-16x16"></span>&nbsp;Run</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>
                     <span class="close-16x16"></span>&nbsp;Cancel</button>
