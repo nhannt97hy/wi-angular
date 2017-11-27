@@ -287,9 +287,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         name: "Group",
                         label: "Group",
-                        icon: "",
+                        icon: "plus-16x16",
                         handler: function () {
-                            DialogUtils.groupManagerDialog(function () {
+                            DialogUtils.groupManagerDialog(ModalService, function () {
                                 utils.refreshProjectState();
                             })
                         }

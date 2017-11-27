@@ -81,6 +81,10 @@ app.factory(wiServiceName, function () {
         SELECTED_NODES: 'selected-nodes',
         DUSTBIN: 'dustbin',
 
+        PROJECT_LOGPLOTS: 'project-logplots',
+        PROJECT_CROSSPLOTS: 'project-crossplots',
+        PROJECT_HISTOGRAMS: 'project-histograms',
+
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',
 
@@ -94,7 +98,10 @@ app.factory(wiServiceName, function () {
         UPDATE_MULTI_WELLS_EVENT: 'update-multi-wells-event',
         UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
         UPDATE_TRACK_EVENT: 'update-track-event',
-        PALETTES: 'PALETTES'
+        PALETTES: 'PALETTES',
+        COLLECT_LOGPLOT_EVENT: 'collect-logplots-event',
+        COLLECT_CROSSPLOT_EVENT: 'collect-crossplots-event',
+        COLLECT_HISTOGRAM_EVENT: 'collect-histogram-event'
     };
 });
 

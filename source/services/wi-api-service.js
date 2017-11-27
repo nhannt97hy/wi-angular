@@ -294,7 +294,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                         location.reload();
                     } else {
                         self.stopWorking();
-                        console.error(job.request);
+                        console.error(err);
                         // job.callback(err);
                         if (err.data && err.data.reason) self.getUtils().error(err.data.reason);
                         else self.getUtils().error(err);

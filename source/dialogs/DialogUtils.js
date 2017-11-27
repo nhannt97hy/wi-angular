@@ -9636,7 +9636,7 @@ exports.TVDConversionDialog = function (ModalService) {
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
-                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
+                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});
             }
         }
         
@@ -9827,6 +9827,7 @@ exports.addCurveDialog = function (ModalService) {
         });
     });
 }
+
 exports.autoSizeTrackDialog = function (ModalService, wiLogplotCtrl) {
     function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
@@ -9924,6 +9925,32 @@ exports.autoSizeTrackDialog = function (ModalService, wiLogplotCtrl) {
         templateUrl: "auto-size-track/auto-size-track-modal.html",
         controller: ModalController,
         controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.groupManagerDialog = function (ModalService, callback) {
+    function ModalController(wiComponentService, wiApiService, close, $timeout) {
+        let self = this;
+
+        this.onOkButtonClicked = function () {
+            close(null);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "group-manager/group-manager-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();

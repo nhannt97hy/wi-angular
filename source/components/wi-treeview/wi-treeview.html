@@ -20,6 +20,7 @@
                 ng-dblclick="wiTreeview.onDoubleClick($index)">
                 <div class="display-inline-block margin-right-0_5em"><span class="{{item.data.icon}}"></span></div>
                 <span>{{item.data.label}}</span>
+                <span ng-if="wiTreeview.isShowParentName && item.data.parent">/ {{item.data.parent.name}}</span>
             </div>
         </div>
 
@@ -31,7 +32,7 @@
     </div>
 
     <div ng-show="item.data.childExpanded">
-        <wi-treeview contextmenuholder={{wiTreeview.contextmenuholder}} 
-            config="item.children" container="wiTreeview.container"></wi-treeview>
+        <wi-treeview contextmenuholder={{wiTreeview.contextmenuholder}}
+            config="item.children" container="wiTreeview.container" is-show-parent-name="item.data.isCollection"></wi-treeview>
     </div>
 </div>
