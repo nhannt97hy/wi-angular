@@ -99,9 +99,6 @@ app.factory(wiServiceName, function () {
         UPDATE_LOGPLOT_EVENT: 'update-logplot-event',
         UPDATE_TRACK_EVENT: 'update-track-event',
         PALETTES: 'PALETTES',
-        COLLECT_LOGPLOT_EVENT: 'collect-logplots-event',
-        COLLECT_CROSSPLOT_EVENT: 'collect-crossplots-event',
-        COLLECT_HISTOGRAM_EVENT: 'collect-histogram-event'
     };
 });
 

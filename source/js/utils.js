@@ -61,22 +61,22 @@ exports.bindFunctions = function (destHandlers, sourceHandlers, thisObj) {
     }
 };
 
-exports.error = errorMsg;
-
-function errorMsg(errorMessage, callback) {
+function error(errorMessage, callback) {
     errorMessage = errorMessage || "Something's wrong!";
     let wics = __GLOBAL.wiComponentService;
     let DialogUtils = wics.getComponent('DIALOG_UTILS');
     DialogUtils.errorMessageDialog(__GLOBAL.ModalService, errorMessage, callback);
 }
+exports.error = error;
 
-exports.warning = function (warningMessage) {
+function warning (warningMessage) {
     if (!warningMessage) return;
     warningMessage = warningMessage;
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.warningMessageDialog(__GLOBAL.ModalService, warningMessage);
 }
+exports.warning = warning;
 
 exports.projectOpen = function (wiComponentService, projectData) {
     sortProjectData(projectData);
@@ -310,13 +310,16 @@ function logplotToTreeConfig(plot, options = {}) {
         icon: 'logplot-blank-16x16',
         label: plot.name
     }
-    if (plot.parent) plotModel.data.parent = plot.parent;
     let wiComponentService = __GLOBAL.wiComponentService;
     plotModel.handler = function () {
         openLogplotTab(wiComponentService, plotModel);
     }
     plotModel.parent = 'well' + plot.idWell;
     wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS).push(plotModel);
+    setTimeout(() => {
+        let wellModel = getModel('well', plot.idWell);
+        plotModel.parentData = wellModel.data;
+    });
     return plotModel;
 }
 
@@ -376,13 +379,16 @@ function crossplotToTreeConfig(crossplot, options = {}) {
         icon: 'crossplot-blank-16x16',
         label: crossplot.name
     }
-    if (crossplot.parent) crossplotModel.data.parent = crossplot.parent;
     crossplotModel.handler = function () {
         openCrossplotTab(crossplotModel);
     }
     crossplotModel.parent = 'well' + crossplot.idWell;
     let wiComponentService = __GLOBAL.wiComponentService;
     wiComponentService.getComponent(wiComponentService.PROJECT_CROSSPLOTS).push(crossplotModel);
+    setTimeout(() => {
+        let wellModel = getModel('well', crosplot.idWell);
+        crossplotModel.parentData = wellModel.data;
+    });
     return crossplotModel;
 }
 
@@ -478,13 +484,16 @@ function histogramToTreeConfig(histogram, options = {}) {
         icon: 'histogram-blank-16x16',
         label: histogram.name
     }
-    if (histogram.parent) histogramModel.data.parent = histogram.parent;
     histogramModel.handler = function () {
         openHistogramTab(histogramModel);
     }
     histogramModel.parent = 'well' + histogram.idWell;
     let wiComponentService = __GLOBAL.wiComponentService;
     wiComponentService.getComponent(wiComponentService.PROJECT_HISTOGRAMS).push(histogramModel);
+    setTimeout(() => {
+        let wellModel = getModel('well', histogram.idWell);
+        histogramModel.parentData = wellModel.data;
+    });
     return histogramModel;
 }
 
@@ -691,7 +700,6 @@ function createLogplotsNode(parent, options = {}) {
         });
     } else {
         parent.plots.forEach(function (plot) {
-            plot.parent = angular.copy(parent);
             plotsModel.children.push(logplotToTreeConfig(plot));
         });
     }
@@ -724,12 +732,10 @@ function createCrossplotsNode(parent, options = {}) {
     }
     if (options.isDeleted) {
         parent.crossplots.forEach(function (crossplot) {
-            crossplot.parent = parent;
             crossplotsModel.children.push(crossplotToTreeConfig(crossplot, { isDeleted: true }));
         });
     } else {
         parent.crossplots.forEach(function (crossplot) {
-            crossplot.parent = parent;
             crossplotsModel.children.push(crossplotToTreeConfig(crossplot));
         });
     }
@@ -762,12 +768,10 @@ function createHistogramsNode(parent, options = {}) {
     }
     if (options.isDeleted) {
         parent.histograms.forEach(function (histogram) {
-            histogram.parent = parent;
             histogramsModel.children.push(histogramToTreeConfig(histogram, {isDeleted: true}));
         });
     } else {
         parent.histograms.forEach(function (histogram) {
-            histogram.parent = parent;
             histogramsModel.children.push(histogramToTreeConfig(histogram));
         });
     }
@@ -923,14 +927,17 @@ exports.projectToTreeConfig = function (project) {
     if (!project.wells) return projectModel;
 
     let wiComponentService = __GLOBAL.wiComponentService;
+    // project logplots
     let projectLogplots = [];
     wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
     let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
     projectLogplotsNode.children = projectLogplots;
+    // project crossplots
     let projectCrossplots = [];
     wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
     let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
     projectCrossplotsNode.children = projectCrossplots;
+    // project histograms
     let projectHistograms = [];
     wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
     let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
@@ -938,6 +945,7 @@ exports.projectToTreeConfig = function (project) {
     project.wells.forEach(function (well) {
         projectModel.children.push(wellToTreeConfig(well));
     });
+
     projectModel.children.push(projectLogplotsNode);
     projectModel.children.push(projectCrossplotsNode);
     projectModel.children.push(projectHistogramsNode);
@@ -1195,9 +1203,13 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 };
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'logplots') return;
-    let well = getModel('well', selectedNode.properties.idWell);
+    let currentWell = getSelectedPath().find(node => node.type == 'well');
+    if (!currentWell) {
+        error('Please choose a well');
+        return;
+    }
+    let logplotsNode = getStaticNode('logplots');
+    let well = getModel('well', logplotsNode.properties.idWell);
     let firstCurve = null;
     for (let child of well.children) {
         if (child.type == "dataset") {
@@ -1208,7 +1220,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         }
     }
     let dataRequest = {
-        idWell: selectedNode.properties.idWell,
+        idWell: logplotsNode.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
         referenceCurve: firstCurve ? firstCurve.properties.idCurve : null,
@@ -1407,13 +1419,21 @@ function findWellProjectById(idWell, project) {
 
     return null;
 }*/
-function getStaticNode(type) {
+function getStaticNode(type, options) {
     if (!type) return;
     let wiComponentService = __GLOBAL.wiComponentService;
+    let currentWell = getSelectedPath().find(node => node.type == 'well');
+    let model = null;
+    if (currentWell) {
+        visit(currentWell, function (node) {
+            if (node.type == type) {
+                model = node;
+            }
+        });
+        if (model) return model;
+    }
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
-    let model = null;
-    console.log(rootNodes[0], type);
     visit(rootNodes[0], function (node) {
         if (node.type == type) {
             model = node;
@@ -1421,12 +1441,7 @@ function getStaticNode(type) {
     });
     return model;
 }
-
-function getHistogramsNode() {
-    return getStaticNode('histograms');
-}
-
-exports.getHistogramsNode = getHistogramsNode;
+exports.getStaticNode = getStaticNode;
 
 function getModel(type, id) {
     if (!type || !id) return;
@@ -2005,10 +2020,14 @@ exports.upperCaseFirstLetter = function (string) {
 exports.editProperty = editProperty;
 
 exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
-    let selectedNode = getSelectedNode();
-    if (selectedNode.type != 'crossplots') return;
+    let currentWell = getSelectedPath().find(node => node.type == 'well');
+    if (!currentWell) {
+        error('Please choose a well');
+        return;
+    }
+    let crossplotsNode = getStaticNode('crossplots');
     let dataRequest = {
-        idWell: selectedNode.properties.idWell,
+        idWell: crossplotsNode.properties.idWell,
         name: crossplotName,
         option: 'blank-plot'
     };
