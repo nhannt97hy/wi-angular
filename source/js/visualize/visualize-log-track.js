@@ -54,8 +54,6 @@ function LogTrack(config) {
     this.drawings = [];
     this.minX = config.minX;
     this.maxX = config.maxX;
-    this.minY = config.minY;
-    this.maxY = config.maxY;
 
     this.xDecimal = (config.xDecimal == null) ? 2 : config.xDecimal;
     this.yDecimal = (config.yDecimal == null) ? 2 : config.yDecimal;
@@ -88,7 +86,8 @@ LogTrack.prototype.getProperties = function() {
         color: this.bgColor,
         showEndLabels: this.showEndLabels,
         displayType: Utils.capitalize(this.scale),
-        labelFormat: this.labelFormat
+        labelFormat: this.labelFormat,
+        zoomFactor: this.zoomFactor
     }
 }
 
@@ -109,11 +108,13 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.color));
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
     Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
+    Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
 }
 
 LogTrack.prototype.setMode = function(newMode) {
     this.mode = newMode;
-    this.svgContainer.style('cursor', newMode == null ? 'crosshair' : 'copy');
+    this.plotContainer.selectAll('.vi-track-drawing')
+        .style('cursor', newMode == null ? 'crosshair' : 'copy');
 }
 
 LogTrack.prototype.updateScaleInfo = function(scaleOpt) {
@@ -262,8 +263,8 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
     this.plotAllDrawings();
     if (drawing) {
         this.updateScaleInfo({
-            leftVal:drawing.minX, 
-            rightVal:drawing.maxX, 
+            leftVal:drawing.minX,
+            rightVal:drawing.maxX,
             scale: drawing.scale.toLowerCase()
         });
         this.updateAxis();
@@ -788,7 +789,7 @@ LogTrack.prototype.updateAxis = function() {
         .tickFormat('')
         .tickSize(-rect.height);
 
-    let step = transformY.invert(Utils.getDpcm()) - windowY[0];
+    let step = (transformY.invert(Utils.getDpcm()) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
     let start = Utils.roundUp(windowY[0], step);
     let end = Utils.roundDown(windowY[1], step);
     let yAxis = d3.axisLeft(transformY)
@@ -837,21 +838,22 @@ LogTrack.prototype.updateHeader = function() {
 }
 
 LogTrack.prototype.updateBody = function() {
-    let rect = this.plotContainer
-        .style('top', this.yPadding + 'px')
-        .style('bottom', this.yPadding + 'px')
-        .style('left', this.xPadding + 'px')
-        .style('right', this.xPadding + 'px')
-        .node()
-        .getBoundingClientRect();
+    Track.prototype.updateBody.call(this);
+    // let rect = this.plotContainer
+    //     .style('top', this.yPadding + 'px')
+    //     .style('bottom', this.yPadding + 'px')
+    //     .style('left', this.xPadding + 'px')
+    //     .style('right', this.xPadding + 'px')
+    //     .node()
+    //     .getBoundingClientRect();
 
-    this.svgContainer
-        .attr('width', rect.width)
-        .attr('height', rect.height);
+    // this.svgContainer
+    //     .attr('width', rect.width)
+    //     .attr('height', rect.height);
 
-    this.axisContainer
-        .attr('width', rect.width)
-        .attr('height', rect.height);
+    // this.axisContainer
+    //     .attr('width', rect.width)
+    //     .attr('height', rect.height);
 }
 
 LogTrack.prototype.addCurveHeader = function(curve) {

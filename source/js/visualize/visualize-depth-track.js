@@ -33,8 +33,6 @@ function DepthTrack(config) {
     this.name = config.name || 'Depth';
     this.width = config.width || 60;
 
-    this.minY = config.minY;
-    this.maxY = config.maxY;
     this.unit = config.unit || 'm';
 
     this.yTicks = config.yTicks || 10;
@@ -116,7 +114,7 @@ DepthTrack.prototype.doPlot = function(highlight) {
 
     // let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
     let dpcm = Utils.getDpcm();
-    let step = transformY.invert(dpcm) - windowY[0];
+    let step = (transformY.invert(dpcm) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
     let start = Utils.roundUp(windowY[0], step);
     let end = Utils.roundDown(windowY[1], step);
     let yAxisRight = d3.axisLeft(transformY)

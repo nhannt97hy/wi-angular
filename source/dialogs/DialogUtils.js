@@ -2912,6 +2912,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.props = {
             general: currentTrack.getProperties()
         }
+
+        let savedZoomFactor = this.props.general.zoomFactor;
+
         this.props.general.width = utils.pixelToInch(this.props.general.width);
         console.log("props", this.props.general);
 
@@ -3374,8 +3377,16 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     let newProps = angular.copy(self.props);
                     newProps.general.width = utils.inchToPixel(self.props.general.width);
                     currentTrack.setProperties(newProps.general);
-                    currentTrack.doPlot(true);
-                    callback();
+
+                    if (newProps.general.zoomFactor != savedZoomFactor) {
+                        savedZoomFactor = newProps.general.zoomFactor;
+                        wiD3Ctrl.processZoomFactor();
+                        wiD3Ctrl.plotAll();
+                    }
+                    else {
+                        currentTrack.doPlot(true);
+                    }
+                    if (callback) callback();
                 })
             } else {
                 console.log("temp");
@@ -3662,7 +3673,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.applyInProgress = false;
         }
         this.onApplyButtonClicked = function () {
-            doApply();
+            doApply(function(){});
         };
         this.onOkButtonClicked = function () {
             doApply(function(result) {
@@ -8404,7 +8415,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                         out[n] += (inputF[k] || 0) * (kernelF[(n - k + Size)%Size] || 0);
                     }
                 }
-                async.setImmediate(done);                    
+                async.setImmediate(done);
             }, function(err){
                 callback(true);
             })
@@ -8421,7 +8432,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                             arr[k].im += Math.sin(tmp) * (input[n] || 0);
                         }
                 }
-        
+
                 arr[k].re = Math.round(arr[k].re);
                 arr[k].im = Math.round(arr[k].im);
             }
@@ -8437,7 +8448,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                         arr[k].re += Math.cos(tmp) * input[n].re;
                         arr[k].im += Math.sin(tmp) * input[n].im;
                     }
-        
+
                 arr[k].re = Math.round(arr[k].re)/ N;
                 arr[k].im = Math.round(arr[k].im) / N;
             }
@@ -8455,11 +8466,11 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
             let c = new Array(input.length);
             async.eachOfSeries(input,(data, i, done)=>{
                 c[i] = math.divide(a_dft[i], b_dft[i]);
-                async.setImmediate(done);                    
+                async.setImmediate(done);
             }, function(err){
                 console.log(c);
                 calIDFT(c, out);
-                console.log(out);            
+                console.log(out);
                 callback(true);
             })
         }
@@ -9405,10 +9416,10 @@ exports.TVDConversionDialog = function (ModalService) {
                 case 'curve':
                 self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
                 break;
-                
+
                 default:
-                self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;            
-            } 
+                self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+            }
         }
         else {
             self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
@@ -9516,7 +9527,7 @@ exports.TVDConversionDialog = function (ModalService) {
                 case 'curve':
                     $timeout(self.loadCurves);
                     break;
-                
+
                 case 'file':
                     $timeout(self.loadFile);
                     break;
