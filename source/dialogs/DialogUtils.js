@@ -9439,18 +9439,37 @@ exports.TVDConversionDialog = function (ModalService) {
 
         this.onChangeWell = function () {
             getDatasets();
-            if(self.curvesArr.length){
-                self.DevCurve = self.curvesArr[0];
-                self.AziCurve = self.curvesArr[0];
-            }
+            // if(self.curvesArr.length){
+                self.DevCurve = null;
+                self.AziCurve = null;
+            // }
             self.step = parseFloat(self.SelectedWell.properties.step);
             self.topDepth = parseFloat(self.SelectedWell.properties.topDepth);
             self.bottomDepth = parseFloat(self.SelectedWell.properties.bottomDepth);
             self.tvdRef = parseFloat(self.SelectedWell.properties.topDepth);
+            let length = Math.round((self.bottomDepth - self.topDepth)/self.step) + 1;
+            self.FullSize = new Array(length);
+            for(let i = 0; i < length; i++){
+                self.FullSize[i] = parseFloat((self.step * i + self.topDepth).toFixed(4));
+            }
+            self.outdevArr = new Array(length);
+            self.outaziArr = new Array(length);
+            self.outtvdArr = new Array(length);
+            self.outtvdssArr = new Array(length);
+            self.outnorthArr = new Array(length);
+            self.outeastArr = new Array(length);
+            self.outxArr = new Array(length);
+            self.outyArr = new Array(length);
         }
         this.onChangeWell();
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.wells = angular.copy(wiExplorer.treeConfig[0].children);
+                self.onChangeWell();
+            }, 0);
+        });
         this.loadFile = function(){
-            console.log('Load File');
             if(self.SurveyFile){
                 self.input.length = 0;
                 if(self.SurveyFile.type.match('text')){
@@ -9476,50 +9495,105 @@ exports.TVDConversionDialog = function (ModalService) {
             }
         }
         this.loadCurves = function(){
-            console.log('Load Curves');
-            let length = Math.round((self.bottomDepth - self.topDepth)/self.step) + 1;
-            self.Size = new Array(length);
             function loadAzi(){
-                let azi = self.curvesData.find(curve => {return curve.id == self.AziCurve.id});
-                if(azi){
-                    self.aziArr = azi.data;
+                if(self.AziCurve){
+                    let azi = self.curvesData.find(curve => {return curve.id == self.AziCurve.id});
+                    if(azi){
+                        self.aziArr = azi.data;
+                    }else{
+                        wiApiService.dataCurve(self.AziCurve.id, function(dataCurve){
+                            let data = dataCurve.map(d => {return parseFloat(d.x);});
+                            self.curvesData.push({
+                                id: self.AziCurve.id,
+                                data: data
+                            })
+                            self.aziArr = data;
+                        })
+                    }
+                }
+            }
+            if(self.DevCurve){
+                let dev = self.curvesData.find(curve => {return curve.id == self.DevCurve.id});
+                if(dev){
+                    self.devArr = dev.data;
+                    loadAzi();
                 }else{
-                    wiApiService.dataCurve(self.AziCurve.id, function(dataCurve){
+                    wiApiService.dataCurve(self.DevCurve.id, function(dataCurve){
                         let data = dataCurve.map(d => {return parseFloat(d.x);});
                         self.curvesData.push({
-                            id: self.AziCurve.id,
+                            id: self.DevCurve.id,
                             data: data
                         })
-                        self.aziArr = data;
+                        self.devArr = data;
+                        loadAzi();
                     })
                 }
             }
-            let dev = self.curvesData.find(curve => {return curve.id == self.DevCurve.id});
-            if(dev){
-                self.devArr = dev.data;
-                loadAzi();
-            }else{
-                wiApiService.dataCurve(self.DevCurve.id, function(dataCurve){
-                    let data = dataCurve.map(d => {return parseFloat(d.x);});
-                    self.curvesData.push({
-                        id: self.DevCurve.id,
-                        data: data
-                    })
-                    self.devArr = data;
-                    loadAzi();
-                })
-            }
         }
 
-        this.onUseTypeChanged = function(){
-            switch(self.useType){
-                case 'curve':
-                    $timeout(self.loadCurves);
-                    break;
-                
-                case 'file':
-                    $timeout(self.loadFile);
-                    break;
+        function calcOutput(){
+            if(self.useType == 'file'){
+                console.log('interpolation begin');
+                for(let i = 0; i < self.Size.length - 1; i++){
+                    let top = self.depthArr[i];
+                    let bottom = self.depthArr[i + 1];
+                    for(let j = 0; j < self.FullSize.length; j++){
+                        if(self.FullSize[j] == top){
+                            self.outtvdArr[j] = self.tvdArr[i];
+                            self.outtvdssArr[j] = self.tvdssArr[i];
+                            self.outdevArr[j] = self.devArr[i];
+                            self.outaziArr[j] = self.aziArr[i];
+                            self.outnorthArr[j] = self.northArr[i];
+                            self.outeastArr[j] = self.eastArr[i];
+                            self.outxArr[j] = self.xArr[i];
+                            self.outyArr[j] = self.yArr[i];
+                        }else if (self.FullSize[j] == bottom){
+                            self.outtvdArr[j] = self.tvdArr[i + 1];
+                            self.outtvdssArr[j] = self.tvdssArr[i + 1];
+                            self.outdevArr[j] = self.devArr[i + 1];
+                            self.outaziArr[j] = self.aziArr[i + 1];
+                            self.outnorthArr[j] = self.northArr[i + 1];
+                            self.outeastArr[j] = self.eastArr[i + 1];
+                            self.outxArr[j] = self.xArr[i + 1];
+                            self.outyArr[j] = self.yArr[i + 1];
+                        }else if(self.FullSize[j] > top && self.FullSize[j] < bottom){
+                            let y = (self.FullSize[j] - top)/(bottom - top);
+                            self.outtvdArr[j] = parseFloat((self.tvdArr[i] + (self.tvdArr[i + 1] - self.tvdArr[i]) * y).toFixed(6));
+                            self.outtvdssArr[j] = parseFloat((self.tvdssArr[i] + (self.tvdssArr[i + 1] - self.tvdssArr[i]) * y).toFixed(6));
+                            self.outdevArr[j] = parseFloat((self.devArr[i] + (self.devArr[i + 1] - self.devArr[i]) * y).toFixed(6));
+                            self.outaziArr[j] = parseFloat((self.aziArr[i] + (self.aziArr[i + 1] - self.aziArr[i]) * y).toFixed(6));
+                            self.outnorthArr[j] = parseFloat((self.northArr[i] + (self.northArr[i + 1] - self.northArr[i]) * y).toFixed(6));
+                            self.outeastArr[j] = parseFloat((self.eastArr[i] + (self.eastArr[i + 1] - self.eastArr[i]) * y).toFixed(6));
+                            self.outxArr[j] = parseFloat((self.xArr[i] + (self.xArr[i + 1] - self.xArr[i]) * y).toFixed(6));
+                            self.outyArr[j] = parseFloat((self.yArr[i] + (self.yArr[i + 1] - self.yArr[i]) * y).toFixed(6));
+                        }
+                    }
+                }
+                if(self.depthArr[self.depthArr.length - 1] < self.FullSize[self.FullSize.length - 1]){
+                    let top = self.depthArr.length - 2;
+                    let bottom = self.depthArr.length - 1;
+                    let init = parseInt(self.depthArr[self.depthArr.length - 1] - self.topDepth/self.step);
+                    for(let j = init + 1; j < self.FullSize.length; j++){
+                        let y = (self.FullSize[j] - self.depthArr[top])/(self.depthArr[bottom] - self.depthArr[top]);
+                        self.outtvdArr[j] = parseFloat((self.tvdArr[top] + (self.tvdArr[bottom] - self.tvdArr[top]) * y).toFixed(6));
+                        self.outtvdssArr[j] = parseFloat((self.tvdssArr[top] + (self.tvdssArr[bottom] - self.tvdssArr[top]) * y).toFixed(6));
+                        self.outdevArr[j] = parseFloat((self.devArr[top] + (self.devArr[bottom] - self.devArr[top]) * y).toFixed(6));
+                        self.outaziArr[j] = parseFloat((self.aziArr[top] + (self.aziArr[bottom] - self.aziArr[top]) * y).toFixed(6));
+                        self.outnorthArr[j] = parseFloat((self.northArr[top] + (self.northArr[bottom] - self.northArr[top]) * y).toFixed(6));
+                        self.outeastArr[j] = parseFloat((self.eastArr[top] + (self.eastArr[bottom] - self.eastArr[top]) * y).toFixed(6));
+                        self.outxArr[j] = parseFloat((self.xArr[top] + (self.xArr[bottom] - self.xArr[top]) * y).toFixed(6));
+                        self.outyArr[j] = parseFloat((self.yArr[top] + (self.yArr[bottom] - self.yArr[top]) * y).toFixed(6));
+                    }
+                }
+            }else{
+                self.outtvdArr = self.tvdArr;
+                self.outtvdssArr = self.tvdssArr;
+                self.outdevArr = self.devArr;
+                self.outaziArr = self.aziArr;
+                self.outnorthArr = self.northArr;
+                self.outeastArr = self.eastArr;
+                self.outxArr = self.xArr;
+                self.outyArr = self.yArr;
             }
         }
 
@@ -9541,14 +9615,15 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.tvdArr[i] = self.tvdArr[i - 1] + tvd;
                 self.northArr[i] = self.northArr[i - 1] + n;
                 self.eastArr[i] = self.eastArr[i - 1] + e;
-                // self.xArr[i] = self.xArr[i - 1] + e;
-                // self.yArr[i] = self.yArr[i - 1] + n;
+                self.xArr[i] = self.xArr[i - 1] + e;
+                self.yArr[i] = self.yArr[i - 1] + n;
             }
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
                 self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
             }
+            calcOutput();
         }
         function formula2(){
             console.log('Balanced Tangential');
@@ -9570,14 +9645,15 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.tvdArr[i] = self.tvdArr[i - 1] + tvd;
                 self.northArr[i] = self.northArr[i - 1] + n;
                 self.eastArr[i] = self.eastArr[i - 1] + e;
-                // self.xArr[i] = self.xArr[i - 1] + e;
-                // self.yArr[i] = self.yArr[i - 1] + n;
+                self.xArr[i] = self.xArr[i - 1] + e;
+                self.yArr[i] = self.yArr[i - 1] + n;
             }
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
                 self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
             }
+            calcOutput();            
         }
         function formula3(){
             console.log('Radius Curvature');
@@ -9599,14 +9675,15 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.tvdArr[i] = self.tvdArr[i - 1] + tvd;
                 self.northArr[i] = self.northArr[i - 1] + n;
                 self.eastArr[i] = self.eastArr[i - 1] + e;
-                // self.xArr[i] = self.xArr[i - 1] + e;
-                // self.yArr[i] = self.yArr[i - 1] + n;
+                self.xArr[i] = self.xArr[i - 1] + e;
+                self.yArr[i] = self.yArr[i - 1] + n;
             }
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
                 self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
             }
+            calcOutput();            
         }
         function formula4(){
             console.log('Minimum Curvature');
@@ -9630,71 +9707,23 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.tvdArr[i] = self.tvdArr[i - 1] + tvd;
                 self.northArr[i] = self.northArr[i - 1] + n;
                 self.eastArr[i] = self.eastArr[i - 1] + e;
-                // self.xArr[i] = self.xArr[i - 1] + e;
-                // self.yArr[i] = self.yArr[i - 1] + n;
+                self.xArr[i] = self.xArr[i - 1] + e;
+                self.yArr[i] = self.yArr[i - 1] + n;
             }
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
                 self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
             }
+            calcOutput();            
         }
-        
-        this.onRunButtonClicked = function(){
-            if(self.applyingInProgress) return;
-            self.applyingInProgress = true;
-            
-            if(self.useType == 'file'){
-                if(self.SurveyFile){
-                    let length = self.input.length - self.startData;
-                    self.Size = new Array(length);
-                    self.depthArr = new Array(length);
-                    self.devArr = new Array(length);
-                    self.aziArr = new Array(length);
-                    self.tvdArr = new Array(length);
-                    self.tvdssArr = new Array(length);
-                    self.northArr = new Array(length);
-                    self.eastArr = new Array(length);
-                    // self.xArr = new Array(length);
-                    // self.yArr = new Array(length);
-                    // self.radiusArr = new Array(length);
 
-                    let first = parseFloat(isNaN(self.input[self.startData][self.colDepth - 1]) ? 0 : self.input[self.startData][self.colDepth - 1]);
-                    self.depthArr[0] = self.tvdRef <  first ? self.tvdRef : first;
-                    for(let i = 1; i < length; i++){
-                        let d = self.input[i + self.startData][self.colDepth - 1];
-                        self.depthArr[i] = parseFloat(d == undefined || isNaN(d) ? 0 : d);
-                    }
-                    for(let j = 0; j < length; j++){
-                        let d = self.input[j + self.startData][self.colDev - 1];
-                        let a = self.input[j + self.startData][self.colAzi - 1];
-                        self.devArr[j] = parseFloat(d == undefined || isNaN(d) ? 0 : d);
-                        self.aziArr[j] = parseFloat(a == undefined || isNaN(a) ? 0 : a);
-                    }
-                }else{
-                    utils.error('Please open supported survey file!');
-                    self.applyingInProgress = false;
-                }
-            }else{
-                let length = self.Size.length;
-                self.depthArr = new Array(length);
-                self.tvdArr = new Array(length);
-                self.tvdssArr = new Array(length);
-                self.northArr = new Array(length);
-                self.eastArr = new Array(length);
-                // self.xArr = new Array(length);
-                // self.yArr = new Array(length);
-                // self.radiusArr = new Array(length);
-                self.depthArr[0] = self.tvdRef < self.topDepth ? self.tvdRef : self.topDepth;
-                for(let i = 1; i < length; i++){
-                    self.depthArr[i] = i * self.step + self.topDepth;
-                }
-            }
+        function processing(){
             self.tvdArr[0] = self.depthArr[0];
             self.northArr[0] = 0;
             self.eastArr[0] = 0;
-            // self.xArr[0] = self.xRef;
-            // self.yArr[0] = self.yRef;
+            self.xArr[0] = self.xRef;
+            self.yArr[0] = self.yRef;
             // self.radiusArr[0] = 0;
 
             switch (self.calMethod){
@@ -9714,6 +9743,181 @@ exports.TVDConversionDialog = function (ModalService) {
                 formula4();
                 break;
             }
+        }
+
+        function saveCurves(){
+            let names = ['TVD', 'TVDSS', 'X', 'Y', 'North', 'East', 'Deviation', 'Azimuth'];
+            let curvesExist = [];
+            self.curvesArr.forEach(curve => {
+                if(names.indexOf(curve.name) != -1 && curve.properties.idDataset == self.SelectedDataset.id){
+                    curvesExist.push(curve.name);
+                }
+            })
+
+            function save(){
+                let payloads = [
+                    {
+                        curveName: 'TVD',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outtvdArr
+                },
+                    {
+                        curveName: 'TVDSS',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outtvdssArr
+                },
+                    {
+                        curveName: 'X',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outxArr
+                },
+                    {
+                        curveName: 'Y',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outyArr
+                },
+                    {
+                        curveName: 'North',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outnorthArr
+                },
+                    {
+                        curveName: 'East',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outeastArr
+                },
+                    {
+                        curveName: 'Deviation',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outdevArr
+                },
+                    {
+                        curveName: 'Azimuth',
+                        idDataset: self.SelectedDataset.id,
+                        isDesCurve: null,
+                        data: self.outaziArr
+                }
+            ];
+            async.eachOfSeries(payloads, (payload, i, callback) => {
+                let overwrite = self.curvesArr.find(curve => {return curve.name == payload.curveName && curve.properties.idDataset == payload.idDataset;});
+                if(overwrite) {
+                    delete payload.curveName;
+                    payload.idDesCurve = overwrite.id;
+                }
+                wiApiService.processingDataCurve(payload, function(){
+                    console.log('Saved', payload.curveName);
+                    callback();
+                })
+            }, function(err){
+                utils.refreshProjectState();
+                console.log('Save successfull!');
+            })
+            }
+
+            if(curvesExist.length){
+                let html  = curvesExist.map(c => {return '</br>' + c;});
+                
+                dialogUtils.confirmDialog(ModalService, "Save Curves", "Curve Exist:" + html,function(ret){
+                    if(ret){
+                        console.log('overwrite');
+                        save();
+                    }else{
+                        self.applyingInProgress = false;
+                        console.log('Cancel Overwrite!');
+                    }
+                })
+            }else{
+                console.log('not exist');
+                save();
+            }
+        }
+        
+        this.onRunButtonClicked = function(save){
+            if(self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            
+            if(self.useType == 'file'){
+                if(self.SurveyFile){
+                    let length = self.input.length - self.startData;
+                    self.Size = new Array(length);
+                    self.depthArr = new Array(length);
+                    self.devArr = new Array(length);
+                    self.aziArr = new Array(length);
+                    self.tvdArr = new Array(length);
+                    self.tvdssArr = new Array(length);
+                    self.northArr = new Array(length);
+                    self.eastArr = new Array(length);
+                    self.xArr = new Array(length);
+                    self.yArr = new Array(length);
+                    // self.radiusArr = new Array(length);
+
+                    let first = parseFloat(isNaN(self.input[self.startData][self.colDepth - 1]) ? 0 : self.input[self.startData][self.colDepth - 1]);
+                    self.depthArr[0] = self.tvdRef <  first ? self.tvdRef : first;
+                    for(let i = 1; i < length; i++){
+                        let d = self.input[i + self.startData][self.colDepth - 1];
+                        self.depthArr[i] = parseFloat(d == undefined || isNaN(d) ? 0 : d);
+                    }
+                    for(let j = 0; j < length; j++){
+                        let d = self.input[j + self.startData][self.colDev - 1];
+                        let a = self.input[j + self.startData][self.colAzi - 1];
+                        self.devArr[j] = parseFloat(d == undefined || isNaN(d) ? 0 : d);
+                        self.aziArr[j] = parseFloat(a == undefined || isNaN(a) ? 0 : a);
+                    }
+                    async.series([function(cb){
+                        processing();
+                        cb();
+                    }], function(err, ret){
+                        console.log('Done Processing!');
+                        if(save){
+                            saveCurves();
+                        }else{
+                            self.applyingInProgress = false;
+                        }
+                    })
+                }else{
+                    utils.error('Please open supported survey file!');
+                    self.applyingInProgress = false;
+                }
+            }else{
+                if(self.DevCurve && self.AziCurve){
+                    let length = self.FullSize.length;
+                    self.Size = new Array(length);                
+                    self.depthArr = new Array(length);
+                    self.tvdArr = new Array(length);
+                    self.tvdssArr = new Array(length);
+                    self.northArr = new Array(length);
+                    self.eastArr = new Array(length);
+                    self.xArr = new Array(length);
+                    self.yArr = new Array(length);
+                    // self.radiusArr = new Array(length);
+                    self.depthArr[0] = self.tvdRef < self.topDepth ? self.tvdRef : self.topDepth;
+                    for(let i = 1; i < length; i++){
+                        self.depthArr[i] = i * self.step + self.topDepth;
+                    }
+                    async.series([function(cb){
+                        processing();
+                        cb();
+                    }], function(err, ret){
+                        console.log('Done Processing!');
+                        if(save){
+                            saveCurves();
+                        }else{
+                            self.applyingInProgress = false;
+                        }
+                    })
+                }else{
+                    utils.error('Please choose Deviation and Azimuth Curve!');
+                    self.applyingInProgress = false;
+                }
+            }
+            
         }
 
         this.onCancelButtonClicked = function(){
