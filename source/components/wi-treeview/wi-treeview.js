@@ -266,7 +266,8 @@ app.component(componentName, {
         name: '@',
         config: '<',
         contextmenuholder: '@',
-        container: '<'
+        container: '<',
+        isShowParentName: '<'
     }
 });
 

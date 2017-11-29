@@ -147,6 +147,16 @@
                                                         ng-model="wiModal.props.general.width">
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3" for="zoomFactor">
+                                                Zoom Factor
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input type="number" step="any" min="0"
+                                                       class="form-control wi-form-control" name="width"
+                                                        ng-model="wiModal.props.general.zoomFactor">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div id="color">
@@ -197,7 +207,7 @@
                                                             name="curveName"
                                                             class="form-control wi-form-control"
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesArr"
-                                                            ng-change="wiModal.onSelectCurve();" 
+                                                            ng-change="wiModal.onSelectCurve();"
                                                             ng-disabled="wiModal.setDisabledCurve(curve._index)"></select>
                                                 </td>
 
@@ -235,14 +245,14 @@
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.lineOptions"
-                                                            type="button" value="Edit..." id="editLine" 
+                                                            type="button" value="Edit..." id="editLine"
                                                             class="form-control wi-form-control"
                                                             ng-click="wiModal.lineStyleButtonClicked($index, $event); wiModal.onChangeCurve();"
                                                             ng-disabled="!wiModal.lineCurve[curve._index].id || (curve.displayMode == 'Symbol' || curve.displayMode == 'None')">
                                                 </td>
                                                 <td>
                                                     <input ng-model="curve.symbolOptions"
-                                                            type="button" value="Edit..." id="editSymbol" 
+                                                            type="button" value="Edit..." id="editSymbol"
                                                             class="form-control wi-form-control"
                                                             ng-click="wiModal.symbolStyleButtonClicked($index, $event); wiModal.onChangeCurve();"
                                                             ng-disabled="!wiModal.lineCurve[curve._index].id || (curve.displayMode == 'Line' || curve.displayMode == 'None')">
@@ -253,7 +263,7 @@
                                                             ng-options="item for item in wiModal.displayAs track by item"
                                                             ng-change="wiModal.onChangeCurve();"
                                                             ng-disabled="!wiModal.lineCurve[curve._index].id"></select>
-                                                </td>       
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -290,12 +300,12 @@
                                                 <td class="text-center"><strong>Shading Style</strong></td>
                                                 <td class="text-center"><strong>Shading Options</strong></td>
                                             </tr>
-                                            <tr ng-repeat="shading in wiModal.getShadings()" 
+                                            <tr ng-repeat="shading in wiModal.getShadings()"
                                                 ng-class="{'selected':$index == selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
                                                 <td>
                                                     <select ng-model="shading.idRightLine" name="curveName"
-                                                            class="form-control wi-form-control" 
+                                                            class="form-control wi-form-control"
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
                                                             ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);">
                                                         <option></option>
@@ -303,35 +313,35 @@
                                                 </td>
                                                 <td>
                                                     <select ng-model="shading.idLeftLine"
-                                                            class="form-control wi-form-control" 
+                                                            class="form-control wi-form-control"
                                                             ng-options="item.id as item.datasetCurve for item in wiModal.leftLimit"
                                                             ng-change="wiModal.onChangeShading($index);
-                                                             shading.leftFixedValue = null; wiModal.validate(shading._index); wiModal.setFillDisplay(shading._index); wiModal.setLimit2(shading._index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);" 
+                                                             shading.leftFixedValue = null; wiModal.validate(shading._index); wiModal.setFillDisplay(shading._index); wiModal.setLimit2(shading._index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);"
                                                             ng-disabled="!shading.idRightLine">
                                                         <!-- <option value="{{item.id}}" ng-repeat="item in wiModal.curvesOnDataset">{{item.datasetCurve}}</option> -->
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <input type="number" ng-model="shading.leftFixedValue" 
-                                                            class="form-control wi-form-control" id="fixedVal" 
+                                                    <input type="number" ng-model="shading.leftFixedValue"
+                                                            class="form-control wi-form-control" id="fixedVal"
                                                             ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index); shading.idLeftLine = -3"
                                                             ng-disabled="!shading.idRightLine"
                                                             step="any">
                                                 </td>
                                                 <!-- <td class="border border-style1-right">
-                                                    <input type="number" ng-model="shading.rightFixedValue" 
+                                                    <input type="number" ng-model="shading.rightFixedValue"
                                                             class="form-control wi-form-control"
                                                             ng-change="wiModal.onChangeShading($index);wiModal.setShadingName();"  step="any"
                                                             disabled>
                                                 </td> -->
                                                 <td>
-                                                    <input type="text" ng-model="shading.name" 
+                                                    <input type="text" ng-model="shading.name"
                                                             class="form-control wi-form-control"
                                                             ng-change="wiModal.onChangeShading($index)"
                                                             ng-disabled="!shading.idRightLine">
                                                 </td>
                                                 <td>
-                                                    <select ng-model="shading.shadingStyle" 
+                                                    <select ng-model="shading.shadingStyle"
                                                             class="form-control wi-form-control"
                                                             ng-change="wiModal.onChangeShading($index)"
                                                             ng-disabled="!shading.idRightLine">
@@ -340,15 +350,15 @@
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <input type="button" value="Define" 
-                                                            ng-model="shading.fillPattern" 
+                                                    <input type="button" value="Define"
+                                                            ng-model="shading.fillPattern"
                                                             class="form-control wi-form-control"
                                                             ng-disabled="!shading.idRightLine"
                                                             ng-click="wiModal.defineButtonClicked($index); wiModal.onChangeShading($index);">
                                                 </td>
                                                 <!-- <td>
-                                                    <input type="button" value="Define" 
-                                                            ng-model="shading.variableShading" 
+                                                    <input type="button" value="Define"
+                                                            ng-model="shading.variableShading"
                                                             class="form-control wi-form-control"
                                                             ng-disabled="!shading.idRightLine"
                                                             ng-click="wiModal.defineVariableButtonClicked($index)">

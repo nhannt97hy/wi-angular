@@ -790,16 +790,19 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let selectedNode = utils.getSelectedNode();
-    if (selectedNode.type != 'histograms') return;
+    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+    if (!currentWell) {
+        utils.error('Please choose a well');
+        return;
+    }
+    let histogramsNode = utils.getStaticNode('histograms');
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
         input: 'BlankHistogram'
     }
-
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(selectedNode.properties.idWell, null, histogramName)
+        utils.createHistogram(histogramsNode.properties.idWell, null, histogramName)
             .then(function (histogram) {
             })
             .catch(function (err) {
@@ -814,16 +817,19 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let selectedNode = utils.getSelectedNode();
-    if (selectedNode.type != 'histograms') return;
+    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+    if (!currentWell) {
+        utils.error('Please choose a well');
+        return;
+    }
+    let histogramsNode = utils.getStaticNode('histograms');
     let promptConfig = {
         title: 'Create New Histogram Template',
         inputName: 'Histogram Name',
         input: name
     }
-
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(selectedNode.properties.idWell, null, histogramName, templateHistogram)
+        utils.createHistogram(histogramsNode.properties.idWell, null, histogramName, templateHistogram)
             .then(function (histogram) {
             })
             .catch(function (err) {
