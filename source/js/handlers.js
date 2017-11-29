@@ -1011,6 +1011,12 @@ exports.CurveAverageButtonClicked = function () {
 
 exports.FormationResistivityButtonClicked = function () {
     console.log('FormationResistivityButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.formationResistivityDialog(this.ModalService, function (data) {
+        console.log("curveAverage");
+    });
 };
 
 exports.Badhole_Coal_SaltButtonClicked = function () {
