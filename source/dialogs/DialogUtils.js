@@ -10175,3 +10175,29 @@ exports.groupManagerDialog = function (ModalService, callback) {
         });
     });
 }
+exports.curveFilterDialog = function(ModalService){
+    function ModalController(wiComponentService, wiApiService, close, $timeout){
+        let self = this;
+        window.CFilter = this;
+        this.applyingInProgress = false;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-filter/curve-filter-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
