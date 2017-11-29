@@ -7422,13 +7422,14 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             self.ref_Curves_Arr.push(newRefCurve);
         }
 
-        this.DeleteRefCurve = function(){
+        this.DeleteRefCurve = function($event){
             if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
             }else{
                 self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
+            $event.stopPropagation();
         }
 
         this.onApplyButtonClicked = function() {
@@ -10150,6 +10151,176 @@ exports.autoSizeTrackDialog = function (ModalService, wiLogplotCtrl) {
     });
 }
 
+exports.formationResistivityDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+
+        let self = this;
+        window.fr = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.wells = wiExplorer.treeConfig[0].children;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+
+        this.applyingInProgress = false;
+
+        this.zoneSets = [];
+        this.zones = [];
+        this.curves = [];
+
+        this.zoneSetModel = {};
+        this.curveModel = {};
+        this.unit = 'DEGC';
+        this.desCurve = {
+            curveName: 'Rw'
+        };
+
+        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
+        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
+            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+            this.zoneSetModel = selectedNodes[0];
+        }
+        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
+            this.zoneSetModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+            this.wellModel = utils.findWellById(this.zoneSetModel.properties.idWell);
+        }
+        else if ( selectedNodes && selectedNodes[0].type == 'curve' ) {
+            this.curveModel = selectedNodes[0];
+            this.wellModel = utils.findWellByCurve(this.curveModel.id);
+        }
+        else this.wellModel = angular.copy(self.wells[0]);
+
+        this.idWell = this.wellModel.id;
+        selectWell (this.idWell);
+        this.selectWell = selectWell;
+        function selectWell (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            self.curves = self.wellModel.children[0].children;
+            self.curveModel = getCurveModel(self.curves).curveModel;
+            self.unit = getCurveModel(self.curves).unit;
+            self.datasets = self.wellModel.children;
+            self.datasetModel = self.datasets[0];
+            // self.zones = [];
+            self.zoneSets = angular.copy(self.wellModel.children[1].children);
+            if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) self.zoneSetModel = self.zoneSets[0];
+            selectZoneSet (self.zoneSetModel);
+        }
+        this.selectZoneSet = selectZoneSet;
+        function selectZoneSet (zoneSetModel) {
+            self.zones = [];
+            if (zoneSetModel && Object.keys(zoneSetModel).length) self.zones = zoneSetModel.children;
+        }
+        function getCurveModel (curves) {
+            let curveModel = {};
+            let unit = 'DEGC';
+            curves.forEach(function(c) {
+                if (c.properties.name == 'TEMP') {
+                    curveModel = c;
+                    unit = c.properties.unit;
+                }
+            });
+            let frCurves = curves.filter(function (c) {
+                return (c.lineProperties && 
+                            (c.lineProperties.name == 'Formation Temperature'  || 
+                            c.lineProperties.name == 'Temperature'))
+            });
+            if ((!curveModel || !Object.keys(curveModel).length) && frCurves.length) {
+                curveModel = frCurves[0];
+                unit = frCurves[0].properties.unit;
+            }
+            return {curveModel : curveModel, unit : unit};
+        }
+
+        this.onRunButtonClicked = function () {
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            
+            let inputData = [];
+            let outputData = [];
+            let yTop = Math.round((
+                            self.topDepth - parseFloat(self.wellModel.properties.topDepth))
+                                        /parseFloat(self.wellModel.properties.step));
+            let yBottom = Math.round((
+                            self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
+                                        /parseFloat(self.wellModel.properties.step));
+            function tempF(unit, temp) {
+                let t = null; 
+                if (temp != null || !isNaN(temp)) {
+                    if (unit == 'DEGC') t = 1.8 * temp + 32;
+                    else if (unit == 'DEGF') t = temp;
+                }
+                return t;
+            }
+            // function rWF (cSP, temp) {
+            //     let t = tempF (self.unit, temp);
+            //     return ( ((1 : (2.74 * Math.pow(10, -4) * Math.pow(cSP, 0.955))) + 0.0123 ) * (81.77 : (t + 6.77)));
+            // }
+            async.parallel([
+                function(callback){
+                    wiApiService.dataCurve(self.curveModel.id, function (dataCurve){
+                        inputData = dataCurve.map(d => parseFloat(d.x));
+                        callback();
+                    });
+                }],
+                function(err, results) {
+                    let len = inputData.length;
+
+                    for(let i = 0; i < len; i++) {
+                        
+                    };
+                    console.log("outputData", inputData, outputData);
+                    let request = {
+                        idDataset: self.outputObj.idDataset,
+                        curveName: self.outputObj.curve,
+                        unit: self.outputObj.unit,
+                        idDesCurve: self.curveModel.id,
+                        data: utils.getDataTopBottomRange(outputData, yTop, yBottom)
+                    }
+                    if(self.outputObj.curve == self.curveModel.properties.name) {
+                        dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
+                            if(ret) {
+                                delete request.curveName;
+                                delete request.unit;
+                                wiApiService.processingDataCurve(request, function(res) {
+                                    console.log("processingDataCurve", res);
+                                    utils.refreshProjectState();
+                                    self.applyingInProgress = false;
+                                })
+                            }
+                        });
+                    }
+                    else {
+                        delete request.idDesCurve;
+                        if (self.curveModel.properties.idFamily)
+                            request.idFamily = self.curveModel.properties.idFamily;
+                        wiApiService.processingDataCurve(request, function(res) {
+                            console.log("processingDataCurve", res);
+                            utils.refreshProjectState();
+                            self.applyingInProgress = false;
+                        })
+                    }
+                })
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+
+    }
+
+    ModalService.showModal({
+        templateUrl: "formation-resistivity/formation-resistivity-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
 exports.groupManagerDialog = function (ModalService, callback) {
     function ModalController(wiComponentService, wiApiService, close, $timeout) {
         let self = this;
