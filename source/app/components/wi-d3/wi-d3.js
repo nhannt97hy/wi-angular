@@ -108,7 +108,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.pushLogTrack = function (logTrack) {
         console.log('pushLogTrack:', logTrack);
-        // track config
         let config = {
             id: logTrack.idTrack,
             idPlot: logTrack.idPlot,
@@ -116,7 +115,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: logTrack.title,
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth),
-            width: Utils.inchToPixel(logTrack.width)
+            width: Utils.inchToPixel(logTrack.width),
+            zoomFactor: logTrack.zoomFactor
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
         graph.rearrangeTracks(self);
@@ -125,6 +125,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _tracks.sort(function(track1, track2) {
             return track1.orderNum.localeCompare(track2.orderNum);
         });
+
+        this.processZoomFactor();
+        if (!track._shouldRescaleWindowY) {
+            _tracks.forEach(function(tr) {
+                if (tr != track) tr.doPlot();
+            })
+        }
+
         _setCurrentTrack(track);
 
         let depthRange = self.getDepthRangeFromSlidingBar();
@@ -325,7 +333,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
         track.updateScaleInfo({
-            leftVal:config.minX, 
+            leftVal:config.minX,
             rightVal:config.maxX,
             scale: config.scale.toLowerCase()
         });
@@ -628,6 +636,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         graph.removeTrack(track);
 
         _tracks.splice(trackIdx, 1);
+
+        let maxZoomFactor = d3.max(_tracks, function(track) {
+            return track.zoomFactor;
+        });
+
+        if (_tracks.length && maxZoomFactor != _tracks[0]._maxZoomFactor && !_tracks[0]._shouldRescaleWindowY) {
+            this.processZoomFactor();
+            this.plotAll();
+        }
     }
 
     this.plot = function (track) {
@@ -655,13 +672,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
     }
 
-    this.setDepthRange = function(depthRange) {
+    this.setDepthRange = function(depthRange, notPlot) {
         _depthRange = depthRange;
         _tracks.forEach(function(track) {
             track.minY = depthRange[0];
             track.maxY = depthRange[1];
         });
-        self.plotAll();
+
+        if (!notPlot)
+            self.plotAll();
         this.updateScale();
     };
 
@@ -715,6 +734,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return parseFloat(wellProps.topDepth) || 0;
     }
 
+    this.processZoomFactor = function() {
+        let maxZoomFactor = d3.max(_tracks, function(track) {
+            return track.zoomFactor;
+        });
+
+        let topDepth = parseFloat(_getWellProps().topDepth);
+        let bottomDepth = parseFloat(_getWellProps().bottomDepth);
+
+        let shouldRescaleWindowY = !(_depthRange[0] == topDepth && _depthRange[1] == bottomDepth);
+        for (let track of _tracks) {
+            track._maxZoomFactor = maxZoomFactor;
+            track._shouldRescaleWindowY = shouldRescaleWindowY;
+        }
+    }
+
     this.scroll = function() {
         /*
         let low = _depthRange[0]
@@ -764,9 +798,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             high = _depthRange[1] - range * 0.2;
         }
         if (low + 2*yStep >= high) return;
+
         low = low < minDepth ? minDepth : low;
         high = high > maxDepth ? maxDepth : high;
-        self.setDepthRange([low, high]);
+
+        self.setDepthRange([low, high], true);
+        self.processZoomFactor();
+        self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
     }
 
@@ -2142,7 +2180,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function () {
                 self.addImageTrack();
             }
-        }, 
+        },
         {
             name: "AddZonationTrack",
             label: "Add Zonation Track",

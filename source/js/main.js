@@ -162,6 +162,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         $timeout
     };
     // UTIL FUNCTIONS
+    window.utils = utils;
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers

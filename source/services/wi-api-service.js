@@ -179,6 +179,11 @@ const DUSTBIN = '/dustbin';
 const RESTORE_OBJECT = '/dustbin/restore';
 const DELETE_OBJECT = '/dustbin/delete';
 
+const CREATE_GROUP = '/project/group/new';
+const EDIT_GROUP = '/project/group/edit';
+const DELETE_GROUP = '/project/group/delete';
+const GET_GROUP = '/project/group/info';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -294,7 +299,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                         location.reload();
                     } else {
                         self.stopWorking();
-                        console.error(job.request);
+                        console.error(err);
                         // job.callback(err);
                         if (err.data && err.data.reason) self.getUtils().error(err.data.reason);
                         else self.getUtils().error(err);
@@ -1360,7 +1365,7 @@ Service.prototype.removeUserDefineLine = function (idUserDefineLine, callback) {
 }
 
 //ternary apis
-Service.prototype.createTernary = function (data, callback) {
+Service.prototype.createGroup = function (data, callback) {
     let self = this;
     this.post(CREATE_TERNARY, data, callback);
 }
@@ -1411,6 +1416,23 @@ Service.prototype.deleteObject = function (payload, callback) {
     this.post(DELETE_OBJECT, payload, callback);
 }
 
+//group apis
+Service.prototype.createGroup = function (data, callback) {
+    let self = this;
+    this.post(CREATE_GROUP, data, callback);
+}
+Service.prototype.editGroup = function (data, callback) {
+    let self = this;
+    this.post(EDIT_GROUP, data, callback);
+}
+Service.prototype.getGroup = function (idGroup, callback) {
+    let self = this;
+    this.post(GET_GROUP, {idGroup: idGroup}, callback);
+}
+Service.prototype.removeGroup = function (idGroup, callback) {
+    let self = this;
+    this.delete(DELETE_GROUP, {idGroup: idGroup}, callback)
+}
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);

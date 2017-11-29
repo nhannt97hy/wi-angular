@@ -35,8 +35,6 @@ function ZoneTrack(config) {
     this.idPlot = config.idPlot;
     this.name = config.name || 'Zone';
     this.width = config.width || this.MIN_WIDTH;
-    this.minY = config.minY;
-    this.maxY = config.maxY;
     this.yDecimal = (config.decimal == null) ? 2 : config.decimal;
 
     this.idZoneSet = config.idZoneSet;
