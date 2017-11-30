@@ -8152,7 +8152,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
 
         this.checkUseZone = function (check) {
             self.style = check ? {} : style;
-            self.zoneSetPara = self.wellModel.children[1].children;
+            self.zoneSetPara = utils.getZoneSetsInWell(self.wellModel);
             if (self.zoneSetPara.length) {
                 self.zoneSetParaModel = Object.keys(zoneSetParaModel).length ? zoneSetParaModel : self.zoneSetPara[0];
                 selectZoneSetPara(self.zoneSetParaModel);
@@ -8180,7 +8180,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
             self.wellModel = utils.findWellById(idWell);
             defaultDepth();
             self.idWell = self.wellModel.id;
-            self.zoneSetPara = self.wellModel.children[1].children;
+            self.zoneSetPara = utils.getZoneSetsInWell(self.wellModel);
             self.zoneSetParaModel = self.zoneSetPara.length ? self.zoneSetPara[0] : {};
             selectZoneSetPara(self.zoneSetParaModel);
             getAllCurvesOnSelectWell(self.wellModel);
@@ -10201,7 +10201,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             self.datasets = self.wellModel.children;
             self.datasetModel = self.datasets[0];
             // self.zones = [];
-            self.zoneSets = angular.copy(self.wellModel.children[1].children);
+            self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
             if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) self.zoneSetModel = self.zoneSets[0];
             selectZoneSet (self.zoneSetModel);
         }
@@ -10335,32 +10335,6 @@ exports.groupManagerDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "group-manager/group-manager-modal.html",
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
-        modal.close.then(function () {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-        });
-    });
-}
-exports.curveFilterDialog = function(ModalService){
-    function ModalController(wiComponentService, wiApiService, close, $timeout){
-        let self = this;
-        window.CFilter = this;
-        this.applyingInProgress = false;
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-        this.onCancelButtonClicked = function(){
-            close(null);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: "curve-filter/curve-filter-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

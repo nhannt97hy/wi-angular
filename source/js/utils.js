@@ -2645,3 +2645,12 @@ function getDataTopBottomRange(data, topPos, bottomPos) {
 }
 
 exports.getDataTopBottomRange = getDataTopBottomRange;
+
+function getZoneSetsInWell (well) {
+    let zoneSets = [];
+    well.children.forEach(function(child) {
+        if(child.type == 'zonesets') zoneSets = angular.copy(child.children);
+    })
+    return zoneSets;
+}
+exports.getZoneSetsInWell = getZoneSetsInWell;
