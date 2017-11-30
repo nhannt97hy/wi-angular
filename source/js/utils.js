@@ -386,7 +386,7 @@ function crossplotToTreeConfig(crossplot, options = {}) {
     let wiComponentService = __GLOBAL.wiComponentService;
     wiComponentService.getComponent(wiComponentService.PROJECT_CROSSPLOTS).push(crossplotModel);
     setTimeout(() => {
-        let wellModel = getModel('well', crosplot.idWell);
+        let wellModel = getModel('well', crossplot.idWell);
         crossplotModel.parentData = wellModel.data;
     });
     return crossplotModel;
