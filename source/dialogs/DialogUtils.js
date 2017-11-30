@@ -7411,6 +7411,17 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             self.ref_Curves_Arr.push(newRefCurve);
         }
 
+        this.Delete = function (index) {
+            self.SelectedRefCurve = index;
+            // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
+            // if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
+            //     self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
+            // } else {
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            // }
+            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
+        }
+
         this.DeleteRefCurve = function(){
             if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
