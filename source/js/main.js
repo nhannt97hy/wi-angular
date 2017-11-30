@@ -250,5 +250,20 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         });
     }else{
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+        let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
+        console.log(lastProject);
+        if(lastProject){
+            console.log(lastProject);            
+            DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name +"</b>.</br>Do you want to open it?", function(ret){
+                if(ret){
+                    wiApiService.getProject({
+                        idProject: lastProject.id
+                    }, function (projectData) {
+                        let utils = wiComponentService.getComponent('UTILS');
+                        utils.projectOpen(wiComponentService, projectData);
+                    });
+                }
+            })
+        }
     }
 });

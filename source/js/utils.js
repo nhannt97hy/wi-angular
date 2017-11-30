@@ -79,12 +79,15 @@ function warning (warningMessage) {
 exports.warning = warning;
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    let LProject = {id:projectData.idProject, name:projectData.name};
+    window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
 
 exports.projectClose = function (wiComponentService) {
+    window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
