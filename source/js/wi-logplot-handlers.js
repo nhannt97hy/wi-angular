@@ -137,8 +137,10 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     let depthHeightM = depthHeightCm / 100;
     depthRange[1] = depthRange[0] + depthHeightM;
     if (depthRange[1] > wiD3Ctrl.getMaxDepth()) depthRange[1] = wiD3Ctrl.getMaxDepth();
-    console.log('SCALE', depthRange);
-    wiD3Ctrl.setDepthRange(depthRange);
+    wiD3Ctrl.setDepthRange(depthRange, true);
+    wiD3Ctrl.processZoomFactor();
+    wiD3Ctrl.plotAll();
+    wiD3Ctrl.updateScale();
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 }
 
@@ -554,6 +556,6 @@ exports.AutoSizeTrackCheckboxClicked = function () {
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
     DialogUtils.autoSizeTrackDialog(this.ModalService, wiLogplot, function () {
-        
+
     });
 };

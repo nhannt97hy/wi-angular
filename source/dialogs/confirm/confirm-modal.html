@@ -6,7 +6,7 @@
 				<h4 style="color: blue">{{wiModal.title}}</h4>
 			</div>
 			<div class="modal-body text-center">
-				<span style="font-style: italic; color: #281D1B">{{wiModal.confirmMsg}}</span>
+				<span style="font-style: italic; color: #281D1B" ng-bind-html="wiModal.confirmMsg"></span>
 			</div>
 			<div class="modal-footer">
 				<button class='btn btn-primary' ng-click='wiModal.close(true)'

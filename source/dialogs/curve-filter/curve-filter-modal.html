@@ -1,0 +1,139 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled="wiModal.applyingInProgress">&times;</button>
+                <h4>
+                    <span class="curve-filter-16x16"></span>&nbsp;Curve Filter</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form class='col-sm-12 form-horizontal form-condensed'>
+                        <div>
+                            <h5>Well</h5>
+                            <div class="container-fluid">
+                                <div class='form-group'>
+                                    <label class="col-sm-2">Select well</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control wi-form-control" ng-model="wiModal.selectedWell" ng-options="well as well.properties.name for well in wiModal.wells "
+                                            ng-change="wiModal.onWellChange()">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Depth Interval</h5>
+                            <div class="container-fluid">
+                                <div class="form-group">
+                                    <label class="col-sm-2">Top Depth</label>
+                                    <div class="col-sm-3">
+                                        <input class="form-control wi-form-control" type="number" ng-model="wiModal.topDepth" step="any" min='{{wiModal.selectedWell.properties.topDepth}}'>
+                                    </div>
+                                    <label class="col-sm-2">Botton Depth</label>
+                                    <div class="col-sm-3">
+                                        <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any" max='{{wiModal.selectedWell.properties.bottomDepth}}'>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <button class="btn btn-default wi-form-control width-100-percent" ng-click="wiModal.clickDefault()">Default</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Curve Options</h5>
+                            <div class="container-fluid">
+                                <div class='form-group'>
+                                    <label class="col-sm-2">Input Curve</label>
+                                    <div class="col-sm-10">
+                                        <select></select>
+                                    </div>
+                                </div>
+                                <div class='form-group'>
+                                    <label class="col-sm-2">Options</label>
+                                    <div class="col-sm-5">
+                                        <input type="radio" name='createOp' value="backup" ng-model="wiModal.createOp">&nbsp;Create Backup Curve
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <input type="radio" name='createOp' value="new" ng-model="wiModal.createOp">&nbsp;Create New/Overwrite Curve
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Filter Options</h5>
+                            <div class="container-fluid">
+                                <label>Select filter method:</label>
+                                <div class="form-group">
+                                    <div class="col-sm-5">
+                                        <input type="radio" name="filterOp" value="1" ng-model="wiModal.filterOp">&nbsp;Square
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <input type="radio" name="filterOp" value="2" ng-model="wiModal.filterOp">&nbsp;Savitsky-Golay
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-5">
+                                        <input type="radio" name="filterOp" value="3" ng-model="wiModal.filterOp">&nbsp;Bell
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <input type="radio" name="filterOp" value="4" ng-model="wiModal.filterOp">&nbsp;Fast Fourie transform
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-5">
+                                        <input type="radio" name="filterOp" value="5" ng-model="wiModal.filterOp">&nbsp;Median
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <input type="radio" name="filterOp" value="6" ng-model="wiModal.filterOp">&nbsp;User define(Compelete Table)
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-if="wiModal.filterOp!='2'">
+                                    <label class="col-sm-5">Number of levels (must be odd):</label>
+                                    <div class="col-sm-5">
+                                        <input type="number" ng-model="wiModal.numLevel" step="1" min='1'>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-if="wiModal.filterOp=='2'">
+                                    <label class="col-sm-2">Polynomial Order:</label>
+                                    <div class="col-sm-2">
+                                        <input type="number" ng-model="wiModal.polyOder" step="1">
+                                    </div>
+                                    <label class="col-sm-2">Derivative Order:</label>
+                                    <div class="col-sm-2">
+                                        <input type="number" ng-model="wiModal.devOrder" step="1">
+                                    </div>
+                                    <label class="col-sm-2">Number Points:</label>
+                                    <div class="col-sm-2">
+                                        <input type="number" ng-model="wiModal.numPoints" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Output</h5>
+                            <div class="container-fluid">
+                                <div class="form-group">
+                                    <label class="col-sm-2">Dataset</label>
+                                    <div class="col-sm-4">
+                                        <select name="" id=""></select>
+                                    </div>
+                                    <label class="col-sm-2">Name</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" ng-model="wiModal.curveName">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled="wiModal.validate();">
+                    <span class="run-16x16"></span>&nbsp;Run</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()' ng-disabled="wiModal.applyingInProgress">
+                    <span class="close-16x16"></span>&nbsp;Close</button>
+            </div>
+        </div>
+    </div>
+</div>

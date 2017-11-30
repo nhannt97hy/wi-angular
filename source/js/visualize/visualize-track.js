@@ -25,9 +25,18 @@ function Track(config) {
     this.justification = config.justification || 'center';
     this.showTitle = (config.showTitle == null) ? true : config.showTitle;
 
-    this.xPadding = config.xPadding || 1;
-    this.yPadding = config.yPadding || 5;
+    this.xPadding = config.xPadding || this.DEFAULT_X_PADDING;
+    this.yPadding = config.yPadding || this.DEFAULT_Y_PADDING;
+
+    this.zoomFactor = config.zoomFactor || 1.0;
+    this._shouldRescaleWindowY = true;
+
+    this.minY = config.minY;
+    this.maxY = config.maxY;
 }
+
+Track.prototype.DEFAULT_X_PADDING = 1;
+Track.prototype.DEFAULT_Y_PADDING = 5;
 
 /**
  * Check if class of this instance is LogTrack
@@ -403,17 +412,37 @@ Track.prototype.updateHeader = function() {
         .text(this.name);
 }
 
+Track.prototype.shouldRescaleWindowY = function() {
+    return this._shouldRescaleWindowY;
+}
+
 /**
  * Update body container
  */
 Track.prototype.updateBody = function() {
-    let rect = this.plotContainer
-        .style('top', this.yPadding + 'px')
-        .style('bottom', this.yPadding + 'px')
-        .style('left', this.xPadding + 'px')
-        .style('right', this.xPadding + 'px')
-        .node()
-        .getBoundingClientRect();
+    let bodyRect = visUtils.getBoundingClientDimension(this.bodyContainer.node());
+
+    let top = this.yPadding;
+    let bottom = this.yPadding;
+    let left = this.xPadding;
+    let right = this.xPadding;
+
+    if (!this.shouldRescaleWindowY()) {
+        let middleY = bodyRect.height / 2;
+        let vpY = [this.yPadding, bodyRect.height - this.yPadding];
+        let newVpY0 = middleY - (middleY - vpY[0]) * this.zoomFactor / this._maxZoomFactor;
+        let newVpY1 = middleY + (vpY[1] - middleY) * this.zoomFactor / this._maxZoomFactor;
+        top = newVpY0;
+        bottom = bodyRect.height - newVpY1;
+    }
+    let rect = visUtils.getBoundingClientDimension(
+            this.plotContainer
+                .style('top', top + 'px')
+                .style('bottom', bottom + 'px')
+                .style('left', left + 'px')
+                .style('right', right + 'px')
+                .node()
+        );
 
     this.plotContainer.selectAll('.vi-track-drawing')
         .attr('width', rect.width)
@@ -424,11 +453,22 @@ Track.prototype.updateBody = function() {
  * Get y window of the track
  * @returns {Array} Range of x values to show
  */
-Track.prototype.getWindowY = function() {
-    let windowY = (this.minY != null && this.maxY != null)
+Track.prototype.getWindowY = function(lazy) {
+    if (lazy && this._windowY) {
+        return this._windowY;
+    }
+
+    let wdY = (this.minY != null && this.maxY != null)
         ? [this.minY, this.maxY]
         : [0, 10000];
-    return windowY;
+
+    if (this.shouldRescaleWindowY()) {
+        let middleY = wdY[0] + (wdY[1] - wdY[0]) / 2;
+        wdY[0] = middleY - (middleY - wdY[0]) / this.zoomFactor;
+        wdY[1] = middleY + (wdY[1] - middleY) / this.zoomFactor;
+    }
+    this._windowY = wdY;
+    return wdY;
 }
 
 
@@ -437,7 +477,9 @@ Track.prototype.getWindowY = function() {
  * @returns {Array} Range of transformed y values to show
  */
 Track.prototype.getViewportY = function() {
-    return [0, visUtils.getBoundingClientDimension(this.plotContainer.node()).height];
+    let vpY = [0, visUtils.getBoundingClientDimension(this.plotContainer.node()).height];
+
+    return vpY;
 }
 
 /**

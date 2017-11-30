@@ -79,12 +79,15 @@ function warning (warningMessage) {
 exports.warning = warning;
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    let LProject = {id:projectData.idProject, name:projectData.name};
+    window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
 
 exports.projectClose = function (wiComponentService) {
+    window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
@@ -386,7 +389,7 @@ function crossplotToTreeConfig(crossplot, options = {}) {
     let wiComponentService = __GLOBAL.wiComponentService;
     wiComponentService.getComponent(wiComponentService.PROJECT_CROSSPLOTS).push(crossplotModel);
     setTimeout(() => {
-        let wellModel = getModel('well', crosplot.idWell);
+        let wellModel = getModel('well', crossplot.idWell);
         crossplotModel.parentData = wellModel.data;
     });
     return crossplotModel;
@@ -2645,3 +2648,12 @@ function getDataTopBottomRange(data, topPos, bottomPos) {
 }
 
 exports.getDataTopBottomRange = getDataTopBottomRange;
+
+function getZoneSetsInWell (well) {
+    let zoneSets = [];
+    well.children.forEach(function(child) {
+        if(child.type == 'zonesets') zoneSets = angular.copy(child.children);
+    })
+    return zoneSets;
+}
+exports.getZoneSetsInWell = getZoneSetsInWell;
