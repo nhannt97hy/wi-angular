@@ -570,3 +570,35 @@ input[type=checkbox].input-check {
 	}
 
 }
+
+.pane-table{
+	overflow-x:overlay;
+	position: relative;
+	table{
+		thead{
+			display: table-row;
+		}
+
+		tbody{
+			overflow-y:hidden;
+			overflow-x:hidden;
+			display:block;
+		}
+
+		thead>tr>th{
+			min-width:100px;
+			&:first-child{
+				min-width: 50px;
+			}
+		}
+		tbody>tr>td{
+			min-width:100px;
+		}
+		tbody>tr>th{
+			min-width: 50px;
+		}
+		thead>tr>th{
+			text-align:center;
+		}
+	}
+}

@@ -125,7 +125,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100;
         let high = low + (max - min) * self.slidingBarState.range / 100;
-        wiD3Controller.setDepthRange([low, high]);
+        wiD3Controller.setDepthRange([low, high], true);
+        wiD3Controller.processZoomFactor();
+        wiD3Controller.plotAll();
         wiD3Controller.updateScale();
     }
 
@@ -297,7 +299,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let newTop = (self.slidingBarState.top * newParentHeight) / 100;
         //let newParentHeight = Math.round(currentParentHeight * scale);
         //let newTop = Math.round((self.slidingBarState.top * newParentHeight) / 100);
-        
+
         $(self.contentId).height(newParentHeight);
         _offsetTop = newTop;
         $(self.contentId).css('top', '-' + newTop + 'px');

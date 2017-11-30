@@ -61,11 +61,12 @@
                                     <tr>
                                         <th width="2%"></th>
                                         <th width="25%">Curve Name</th>
-                                        <th width="25%">Left</th>
-                                        <th width="25%">Right</th>
+                                        <th width="22%">Left</th>
+                                        <th width="22%">Right</th>
                                         <th width="7%">Vis.</th>
                                         <th width="7%">Log</th>
-                                        <th>Color</th>
+                                        <th width="9%">Color</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -84,12 +85,12 @@
                                             </ui-select-choices>
                                             </ui-select>
                                         </td>
-                                        <td width="25%">
+                                        <td width="22%">
                                             <input type="number" class="form-control wi-form-control"
                                             ng-model="ref_curve.left" step='1'
                                             ng-change="wiModal.onRefCurveChange($index)">
                                         </td>
-                                        <td width="25%">
+                                        <td width="22%">
                                             <input type="number" class="form-control wi-form-control"
                                             ng-model="ref_curve.right" step='1'
                                             ng-change="wiModal.onRefCurveChange($index)">
@@ -110,8 +111,14 @@
                                                     ng-change="wiModal.onRefCurveChange($index)">
                                             </div>
                                         </td>
-                                        <td>
+                                        <td width="9%">
                                             <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" class="form-control wi-form-control width-80px thick-border" type="button">
+                                        </td>
+                                        <td ng-click="wiModal.DeleteRefCurve($event)">
+                                            <i class="fa fa-times" aria-hidden="true"></i>
+                                            <!-- <button type="button" class="btn" ng-click="wiModal.DeleteRefCurve()">
+                                                <i class="fa fa-times" aria-hidden="true"></i>
+                                            </button> -->
                                         </td>
                                     </tr>
                                 </tbody>
