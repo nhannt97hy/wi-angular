@@ -107,9 +107,14 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
         return (!isNaN(d.y) && ( tempDepth >= zone.properties.startDepth ) && 
                 ( tempDepth < zone.properties.endDepth ) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
     }
-
-    return (!isNaN(d.y) && ( tempDepth >= this.histogramModel.properties.intervalDepthTop ) && 
-            ( tempDepth < this.histogramModel.properties.intervalDepthBottom ) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
+    let xFloat = parseFloat(d.x);
+    return (
+        !isNaN(d.y) && 
+        ( tempDepth >= this.histogramModel.properties.intervalDepthTop ) && 
+        ( tempDepth < this.histogramModel.properties.intervalDepthBottom ) && 
+        (xFloat >= left) && 
+        (xFloat <= right)
+    );
 }
 
 Histogram.prototype.getZoneData = function(idx) {
@@ -169,6 +174,9 @@ Histogram.prototype.doPlot = function() {
 }
 Histogram.prototype._doPlot = function() {
     var self = this;
+
+    if($(this.container.node()).width() < 0 || $(this.container.node()).height() < 0)
+        return;
     // Adjust svgContainer size
     self.svgContainer
         .attr('width', $(this.container.node()).width())
@@ -205,8 +213,12 @@ Histogram.prototype._doPlot = function() {
     let domain = this.getNormalizedWindowX();
     let step = (wdX[1] - wdX[0]) / nBins;
 
+    let jumpFactorSeed = 20;
+    if(vpX[1] <= 200) {
+        jumpFactorSeed = 5;
+    }
     let realStep = step;
-    let jumpFactor = Math.ceil(nBins/20);
+    let jumpFactor = Math.ceil(nBins/jumpFactorSeed);
     if (jumpFactor > 1) realStep = jumpFactor * step;
 
     let tickCountX = (vpX[1] - vpX[0])/40;
@@ -401,7 +413,7 @@ Histogram.prototype._doPlot = function() {
                     return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
                 })
                 .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue')
-                .on('mousemove', showTooltip)
+                .on('mousemove', function(d, i) { showTooltip(self.intervalBins[i]);})
                 .on('mouseout', hideTooltip);
         }
         else {
@@ -450,24 +462,29 @@ Histogram.prototype._doPlot = function() {
 
     function drawCurveHistogram() {
         var line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+        var path = self.svgContainer.append('path')
+            .attr('class', 'curves');
         
         if (self.intervalBins) {
             line
                 .x(function(d, i) {
                     var width = Math.abs(transformX(self.fullBins[i].x1) - transformX(self.fullBins[i].x0));
-                    return transformX(d.x0) + width;
+                    return transformX(d.x0) + width / 2;
                 })
                 .y(function(d, i) {
-                    if(self.histogramModel.properties.plotType != 'Frequency') {
-                        return transformY(d.length*100/self.fullData.length);
+                    if (self.histogramModel.properties.plotType != 'Frequency') {
+                        return transformY(d.length*100/self.fullData.length) + (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(d.length * 100 / self.fullData.length));
                     }
-                    return transformY(d.length);    
+                    return transformY(d.length) + (transformY(self.intervalBins[i].length) - transformY(d.length ));    
                 });
+
+                path.attr('stroke', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue');
+
         } else {
             line
                 .x(function(d, i) {
                     var width = Math.abs(transformX(self.fullBins[i].x1) - transformX(self.fullBins[i].x0));
-                    return transformX(d.x0) + width;
+                    return transformX(d.x0) + width / 2;
                 })
                 .y(function(d, i) {
                     let binsHeight = 0;
@@ -482,11 +499,11 @@ Histogram.prototype._doPlot = function() {
                         return transformY(binsHeight*100/self.fullData.length);
                     }
                     return transformY(binsHeight);    
-                });   
+                });
+                path.attr('stroke', self.zoneSet[self.zoneSet.length-1].properties.background ? self.zoneSet[self.zoneSet.length-1].properties.background:'blue');
         }
 
-        self.svgContainer.append('path').datum(self.fullBins)
-            .attr('class', 'curves')
+        path.datum(self.fullBins)
             .attr('d', line);
     }
 
@@ -692,7 +709,7 @@ Histogram.prototype.init = function(domElem) {
 
     this.container.append('div').attr('class', 'vi-histogram-tooltip').style('opacity', 0);
 
-    new ResizeSensor( $(this.container.node()), function(param) {
+    this.resizeSensor = new ResizeSensor( $(this.container.node()), function(param) {
         console.log("On resize", param, this);
         self.doPlot();
     } );

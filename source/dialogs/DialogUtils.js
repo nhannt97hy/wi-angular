@@ -9978,7 +9978,7 @@ exports.TVDConversionDialog = function (ModalService) {
         }
 
         this.onCancelButtonClicked = function(){
-            close(null);
+                close(null);
         }
     }
     ModalService.showModal({
@@ -10639,6 +10639,7 @@ exports.groupManagerDialog = function (ModalService, callback) {
         });
     });
 }
+
 exports.curveFilterDialog = function(ModalService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
@@ -10660,7 +10661,277 @@ exports.curveFilterDialog = function(ModalService){
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
-            $('.modal-backdrop').last().remove();
+        $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, callback) {
+    function ModalController(close, wiComponentService, wiApiService, $timeout) {
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let self = this;
+        
+        this.curvesArr = objectConfig.curves;
+        this.histogramProps = angular.copy(objectConfig.properties);
+        this.histogramProps.dragToCreate = objectConfig.dragToCreate;
+        this.SelectedCurve = this.histogramProps.curve;
+        if(this.curvesArr && !this.SelectedCurve && this.histogramProps.curveId) {
+            for(let curve of this.curvesArr) {
+                if(curve.idCurve == this.histogramProps.curveId) {
+                    this.SelectedCurve = curve;
+                }
+            }
+        }
+
+        this.histogramProps.background = objectConfig.background;
+
+        if(this.SelectedCurve != null) {
+            self.histogramProps.idCurve = self.SelectedCurve.id;
+            self.histogramProps.leftScale = this.histogramProps.leftScale || self.SelectedCurve.minX;
+            self.histogramProps.rightScale = this.histogramProps.rightScale || self.SelectedCurve.maxX;
+            if(!self.histogramProps.intervalDepthTop) {
+                self.histogramProps.intervalDepthTop = self.SelectedCurve.minY;
+            }
+            if(!self.histogramProps.intervalDepthBottom) {
+                self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
+            }
+        }
+
+        if(!this.histogramProps.name) {
+            this.histogramProps.name = "Histogram " + (this.SelectedCurve ? this.SelectedCurve.alias:"");
+        }
+
+        this.onSelectCurveChange = function () {
+            self.histogramProps.curveId = self.SelectedCurve.id;
+            self.histogramProps.leftScale = self.SelectedCurve.minX;
+            self.histogramProps.rightScale = self.SelectedCurve.maxX;
+            if(!self.histogramProps.intervalDepthTop) {
+                self.histogramProps.intervalDepthTop = self.SelectedCurve.minY;
+            }
+            if(!self.histogramProps.intervalDepthBottom) {
+                self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
+            }
+            self.histogramProps.curve = self.SelectedCurve;
+            self.histogramProps.name = "Histogram " + this.SelectedCurve.alias;
+        }
+
+        this.chooseChartColor = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
+                self.histogramProps.color = colorStr;
+            });
+        }
+
+        this.chooseBackground = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.histogramProps.background, function (colorStr) {
+                self.histogramProps.background = colorStr;
+            });   
+        }
+
+        this.isNotValid = function () {
+            var inValid = false;
+            if (!self.histogramProps.idZoneSet) {
+                if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
+                    inValid = true;
+                }
+            }
+
+            if (self.histogramProps.leftScale == null || self.histogramProps.rightScale == null || self.histogramProps.leftScale == self.histogramProps.rightScale) {
+                inValid = true;
+            }
+
+            return inValid;
+        }
+
+        this.onOKButtonClicked = function () {
+            if(callback) {
+                callback(self.histogramProps);
+            }
+            close(null);
+        }
+        this.onCancelButtonClicked = function () {
+                close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "histogram-for-object-track/histogram-for-object-track-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.objectTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, objectTrackProperties, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+        let self = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let props = objectTrackProperties || {
+            showTitle: true,
+            title: "New Object",
+            topJustification: "center",
+            width: utils.inchToPixel(2),
+        }
+        props.width = utils.pixelToInch(props.width);
+        console.log(props);
+        this.isShowTitle = props.showTitle;
+        this.title = props.title;
+        this.topJustification = props.topJustification.toLowerCase();
+        this.width = props.width;
+
+        this.onOkButtonClicked = function () {
+            self.error = null;
+            props = {
+                showTitle: self.isShowTitle,
+                title: self.title,
+                topJustification: self.topJustification,
+                width: self.width,
+            }
+            if (self.error) return;
+            close(props, 100);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "object-track-properties/object-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (data) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            if(data) callback(data);
+        });
+    });
+}
+
+exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, callback) {
+    function ModalController(close, wiComponentService, wiApiService, $timeout) {
+        var utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let self = this;
+        this.crossplotProps = angular.copy(objectConfig.properties);
+        this.curvesArr = objectConfig.curves;
+        this.background = objectConfig.background;
+        this.SelectedCurveX = null;
+        this.SelectedCurveY = null;
+        this.depthType = "intervalDepth";
+        this.dragToCreate = objectConfig.dragToCreate;
+        this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.overlayLine = "----------------";
+        this.selectOverlayLines = ["----------------"];
+
+
+        if(this.curvesArr && !this.SelectedCurveX && this.crossplotProps.idCurveX) {
+            self.SelectedCurveX = findCurveById(this.crossplotProps.idCurveX);
+        }
+        if(this.curvesArr && !this.SelectedCurveY && this.crossplotProps.idCurveY) {
+            self.SelectedCurveY = findCurveById(this.crossplotProps.idCurveY);
+        }
+        if(this.curvesArr && !this.SelectedCurveZ && this.crossplotProps.idCurveZ) {
+            self.SelectedCurveZ = findCurveById(this.crossplotProps.idCurveZ);
+        }
+
+
+        function getScaleKeys(symbol) {
+            return {
+                'X': ['scaleLeft', 'scaleRight'],
+                'Y': ['scaleBottom', 'scaleTop'],
+                'Z': ['scaleMin', 'scaleMax']
+            }[symbol];
+        }
+
+        function findCurveById (idCurve) {
+            for(let curve of self.curvesArr) {
+                if(curve.idCurve == idCurve) {
+                    return curve;
+                }
+            }
+            return null;
+        }
+
+        function onSelectedCurveChange(symbol) {
+            let curve = self['SelectedCurve' + symbol]
+            // let idCurve = self.crossplotProps['idCurve' + symbol];
+            if (curve) {
+                let scaleKeys = getScaleKeys(symbol);
+                let key1 = scaleKeys[0], key2 = scaleKeys[1];
+                self.crossplotProps[key1] = curve.minX;
+                self.crossplotProps[key2] = curve.maxX;
+                self.crossplotProps['idCurve' + symbol] = curve.idCurve;
+            }
+        }
+
+        this.onselectedCurveXChange = function() {
+            onSelectedCurveChange('X');
+        }
+        this.onselectedCurveYChange = function() {
+            onSelectedCurveChange('Y');
+        }
+        this.onselectedCurveZChange = function() {
+            onSelectedCurveChange('Z');
+        }
+
+        this.pointColorSymbol = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.crossplotProps.pointColor, function (colorStr) {
+                self.crossplotProps.pointColor = colorStr;
+            });
+        };
+
+        this.backgroundColorSymbol = function() {
+            DialogUtils.colorPickerDialog(ModalService, self.background, function (colorStr) {
+                self.background = colorStr;
+            });
+        }
+
+        this.drawIcon = utils.drawIcon;
+
+        this.isNotValid = function () {
+            var inValid = false;
+            if(!self.SelectedCurveX || !self.SelectedCurveY) {
+                inValid = true;
+            }
+            return inValid;
+        }
+
+        this.onOkButtonClicked = function () {
+            self.crossplotProps.curveX = this.SelectedCurveX;
+            self.crossplotProps.labelX = this.SelectedCurveX.name;
+            self.crossplotProps.curveY = this.SelectedCurveY;
+            self.crossplotProps.labelY = this.SelectedCurveY.name;
+            self.crossplotProps.curveZ = this.SelectedCurveZ;
+            self.crossplotProps.background = this.background;
+
+            if(callback) {
+                callback(self.crossplotProps);
+            }
+            close(null);
+        }
+        this.onCancelButtonClicked = function () {
+                close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "crossplot-for-object-track/crossplot-for-object-track-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
         });
     });

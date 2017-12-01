@@ -448,8 +448,8 @@ Crossplot.prototype.init = function(domElem) {
         .attr('class', 'vi-crossplot-ternary');
 
 
-    new ResizeSensor( $(this.root.node()), function(param) {
-        self.doPlot();
+    this.resizeSensor = new ResizeSensor( $(this.root.node()), function(param) {
+        self._doPlot();
     } );
     /*
     d3.select(window)
@@ -505,6 +505,17 @@ Crossplot.prototype.adjustSize = function() {
         .attr('width', rect.width)
         .attr('height', rect.height);
 }
+
+Crossplot.prototype._doPlot = function(){
+    var self = this;
+    if (self.timerHandle) {
+        clearTimeout(self.timerHandle)
+    }
+    self.timerHandle = setTimeout(function() {
+        self.timerHandle = null;
+        self.doPlot();
+    }, 1000);
+};
 
 Crossplot.prototype.doPlot = function() {
     console.log('PLOT CROSSPLOT', this.getProperties());
