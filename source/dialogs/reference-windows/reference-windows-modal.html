@@ -61,15 +61,16 @@
                                     <tr>
                                         <th width="2%"></th>
                                         <th width="25%">Curve Name</th>
-                                        <th width="22%">Left</th>
-                                        <th width="22%">Right</th>
-                                        <th width="7%">Vis.</th>
-                                        <th width="7%">Log</th>
-                                        <th width="9%">Color</th>
-                                        <th></th>
+                                        <th width="20%">Left</th>
+                                        <th width="20%">Right</th>
+                                        <th width="9%">Vis.</th>
+                                        <th width="9%">Log</th>
+                                        <th width="10%">Color</th>
+                                        <th width="5%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                     
                                     <tr ng-repeat="ref_curve in wiModal.ref_Curves_Arr"
                                     ng-click="wiModal.setClickedRow($index)"
                                     ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}" >
@@ -85,17 +86,17 @@
                                             </ui-select-choices>
                                             </ui-select>
                                         </td>
-                                        <td width="22%">
+                                        <td width="20%">
                                             <input type="number" class="form-control wi-form-control"
                                             ng-model="ref_curve.left" step='1'
                                             ng-change="wiModal.onRefCurveChange($index)">
                                         </td>
-                                        <td width="22%">
+                                        <td width="20%">
                                             <input type="number" class="form-control wi-form-control"
                                             ng-model="ref_curve.right" step='1'
                                             ng-change="wiModal.onRefCurveChange($index)">
                                         </td>
-                                        <td width="7%">
+                                        <td width="9%">
                                             <div class='checkbox'>
                                                 <input style='margin-left:-10px;' 
                                                     type="checkbox" 
@@ -103,7 +104,7 @@
                                                     ng-change="wiModal.onRefCurveChange($index)">
                                             </div>
                                         </td>
-                                        <td width="7%">
+                                        <td width="9%">
                                             <div class='checkbox'>
                                                 <input style='margin-left:-10px;' 
                                                     type="checkbox" 
@@ -111,23 +112,20 @@
                                                     ng-change="wiModal.onRefCurveChange($index)">
                                             </div>
                                         </td>
-                                        <td width="9%">
+                                        <td width="10%">
                                             <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" class="form-control wi-form-control width-80px thick-border" type="button">
                                         </td>
-                                        <td ng-click="wiModal.DeleteRefCurve($event)">
-                                            <i class="fa fa-times" aria-hidden="true"></i>
-                                            <!-- <button type="button" class="btn" ng-click="wiModal.DeleteRefCurve()">
-                                                <i class="fa fa-times" aria-hidden="true"></i>
-                                            </button> -->
+                                        <td width="5%">
+                                            <button type="button" class="btn btn-default" ng-click="wiModal.Delete($index)"
+                                                    style="padding: 0">
+                                                <i class="delete-16x16"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="col-sm-1 padding-0">
-                            <button type="button" class="btn btn-default" ng-click="wiModal.DeleteRefCurve()">
-                                <i class="delete-16x16"></i>
-                            </button>
                             <button type="button" class="btn btn-default" ng-click="wiModal.AddRefCurve()">
                                 <i class="plus-16x16"></i>
                             </button>

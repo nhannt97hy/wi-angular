@@ -7422,7 +7422,20 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             self.ref_Curves_Arr.push(newRefCurve);
         }
 
-        this.DeleteRefCurve = function($event){
+        this.Delete = function (index) {
+            self.SelectedRefCurve = index;
+            // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
+            if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
+                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            } else {
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            }
+            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
+            // $event.stopPropagation();
+        }
+
+        this.DeleteRefCurve = function(){
             if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
             }else{
@@ -10352,6 +10365,32 @@ exports.groupManagerDialog = function (ModalService, callback) {
 
     ModalService.showModal({
         templateUrl: "group-manager/group-manager-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+exports.curveFilterDialog = function(ModalService){
+    function ModalController(wiComponentService, wiApiService, close, $timeout){
+        let self = this;
+        window.CFilter = this;
+        this.applyingInProgress = false;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "curve-filter/curve-filter-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
