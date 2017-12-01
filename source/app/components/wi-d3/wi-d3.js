@@ -949,16 +949,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _drawTooltip(track) {
         if (!_tooltip) return;
-        let svg = document.getElementById(self.svgId);
-        track.drawTooltipText(svg);
-        graph.createTooltipLines(svg);
+        track.drawTooltipText();
+
+        let plotMouse = d3.mouse(track.plotContainer.node());
+        let depth = track.getTransformY().invert(plotMouse[1]);
+
+        _tracks.forEach(function(tr) {
+            if (tr.drawTooltipLines) tr.drawTooltipLines(depth, tr == track);
+        })
+        // graph.createTooltipLines(svg);
     }
 
     function _removeTooltip(track) {
         if (!_tooltip) return;
-        let svg = document.getElementById(self.svgId);
-        track.removeTooltipText(svg);
-        graph.removeTooltipLines(svg);
+        track.removeTooltipText();
+        _tracks.forEach(function(tr) {
+            if (tr.removeTooltipLines) tr.removeTooltipLines();
+        })
+
+        // graph.removeTooltipLines(svg);
     }
 
     function _setCurrentTrack(track) {
