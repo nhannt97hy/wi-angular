@@ -3,12 +3,13 @@ const moduleName = 'wi-treeview';
 
 function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     let self = this;
+    if (!window.exTree) window.exTree = [];
+    window.exTree.push(this);
 
     this.$onInit = function () {
         // if it is rootview
-        if (self.name) {
+        if (self.isRoot) {
             wiComponentService.putComponent(self.name, self);
-
             wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
                 self.updateWellItem(well);
             });
@@ -19,11 +20,54 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
                 self.updateLogplotItem(logplot);
             });
         }
+        if (!self.onClick) self.onClick = function ($index, $event, node) {
+            if (!this.container && !this.container.selectHandler) return;
+            node.$index = $index;
+            if (!node) {
+                this.container.unselectAllNodes();
+                return;
+            }
+            wiComponentService.emit('update-properties', node);
+            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            if (!Array.isArray(selectedNodes)) selectedNodes = [];
+            if (!$event.shiftKey) {
+                if (selectedNodes.length) {
+                    if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                        this.container.unselectAllNodes();
+                    }
+                }
+                this.container.selectHandler(node);
+            } else {
+                // shift key
+                if (selectedNodes.length) {
+                    if (selectedNodes.includes(node)) return;
+                    if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                        this.container.unselectAllNodes();
+                        this.container.selectHandler(node);
+                    } else {
+                        if (node.$index < selectedNodes[0].$index) {
+                            let fromIndex = node.$index;
+                            let toIndex = selectedNodes[0].$index;
+                            this.container.unselectAllNodes();
+                            for (let i = fromIndex; i <= toIndex; i++) {
+                                this.container.selectHandler(this.config[i]);
+                            }
+                        } else {
+                            let fromIndex = selectedNodes[0].$index;
+                            let toIndex = node.$index;
+                            this.container.unselectAllNodes();
+                            for (let i = fromIndex; i <= toIndex; i++) {
+                                this.container.selectHandler(this.config[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     };
 
     this.onReady = function () {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
         let typeItemDragable = 'curve';
         let element = $('.wi-parent-node' + `[type='${typeItemDragable}']`);
         utils.setupCurveDraggable(element, wiComponentService, wiApiService);
@@ -33,55 +77,9 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         self.config[$index].data.childExpanded = !self.config[$index].data.childExpanded;
     };
 
-    this.onClick = function ($index, $event) {
-        if (!self.container && !self.container.selectHandler) return;
-        let node = self.config[$index];
-        node.$index = $index;
-        if (!node) {
-            self.container.unselectAllNodes();
-            return;
-        }
-        wiComponentService.emit('update-properties', node);
-        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if (!Array.isArray(selectedNodes)) selectedNodes = [];
-        if (!$event.shiftKey) {
-            if (selectedNodes.length) {
-                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
-                    self.container.unselectAllNodes();
-                }
-            }
-            self.container.selectHandler(node);
-        } else {
-            // shift key
-            if (selectedNodes.length) {
-                if (selectedNodes.includes(node)) return;
-                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
-                    self.container.unselectAllNodes();
-                    self.container.selectHandler(node);
-                } else {
-                    if (node.$index < selectedNodes[0].$index) {
-                        let fromIndex = node.$index;
-                        let toIndex = selectedNodes[0].$index;
-                        self.container.unselectAllNodes();
-                        for (let i = fromIndex; i <= toIndex; i++) {
-                            self.container.selectHandler(self.config[i]);
-                        }
-                    } else {
-                        let fromIndex = selectedNodes[0].$index;
-                        let toIndex = node.$index;
-                        self.container.unselectAllNodes();
-                        for (let i = fromIndex; i <= toIndex; i++) {
-                            self.container.selectHandler(self.config[i]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     this.onDoubleClick = function ($index) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let selectedNode = utils.getSelectedNode();
+        let selectedNode = self.config[$index];
         if (selectedNode.children && selectedNode.children.length) {
             selectedNode.data.childExpanded = !selectedNode.data.childExpanded;
             return;
@@ -245,13 +243,16 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     }
 
     this.showContextMenu = function ($event, $index) {
-        console.log('self.name', self.name);
-        console.log('$index', $index);
-        console.log('self.config', self.config);
-        let nodeType = self.config[$index].type;
-        let contextMenuHolderCtrl = wiComponentService.getComponent(self.contextmenuholder);
-        let defaultContextMenu = contextMenuHolderCtrl.getDefaultTreeviewCtxMenu($index, self);
-        let itemContextMenu = contextMenuHolderCtrl.getItemTreeviewCtxMenu(nodeType, self);
+        console.log('node', self.config[$index]);
+        let container = self.container;
+        let defaultContextMenu = [], itemContextMenu = [];
+        if (container.getDefaultTreeviewCtxMenu) {
+            defaultContextMenu = container.getDefaultTreeviewCtxMenu($index, self);
+        }
+        if (container.getItemTreeviewCtxMenu) {
+            let nodeType = self.config[$index].type;
+            itemContextMenu = container.getItemTreeviewCtxMenu(nodeType, self);
+        }
         let contextMenu = itemContextMenu.concat(defaultContextMenu);
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
@@ -263,11 +264,12 @@ app.component(componentName, {
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        name: '@',
+        isRoot: '<',
+        name: '<',
         config: '<',
-        contextmenuholder: '@',
         container: '<',
-        isShowParentName: '<'
+        isShowParentName: '<',
+        onClick: '<'
     }
 });
 
