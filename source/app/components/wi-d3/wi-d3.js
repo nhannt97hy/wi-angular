@@ -457,6 +457,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.addObjectToTrack = function (track, config) {
+        let self = this;
         if(!track || !track.addObject) return;
         if(!config) {
             console.log('there are no configurations of object');
@@ -472,6 +473,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         track.onObjectHeaderMouseDown(object, function() {
             _setCurrentTrack(track);
+            let depthRange = object.getDepthRange();
+            let rangeValue = depthRange[1] - depthRange[0];
+            depthRange[0] -= rangeValue * 0.20;
+            depthRange[1] += rangeValue * 0.20;
+
+            self.setDepthRange(depthRange);
+            self.adjustSlidingBarFromDepthRange(depthRange);
             if (d3.event.button == 2) {
                 _objectOnRightClick();
             }
