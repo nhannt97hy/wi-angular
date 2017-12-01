@@ -1,0 +1,47 @@
+<div class="wi-treeview-container"
+     ng-class='{"rootview": wiBaseTreeview.name}'
+     ng-repeat="item in wiBaseTreeview.config track by $index"
+     ng-if='!item.data.deleted'>
+    <div class="wi-parent-node" type="{{wiBaseTreeview.config[$index].type}}"
+        ng-class='{"item-active": item.data.selected}'
+        data="{{wiBaseTreeview.config[$index].id}}"
+        wi-right-click="wiBaseTreeview.onclickfunction($index, $event); wiBaseTreeview.showcontextmenufunction($event, $index)"
+        wi-element-ready="wiBaseTreeview.onReady()">
+        <div class="wi-parent-content">
+            <div class="icon-expanded"
+                ng-click="wiBaseTreeview.onCollapse($index)">
+                <i aria-hidden="true" class="fa"
+                ng-class="
+            {'fa-caret-down': item.data.childExpanded,
+            'fa-caret-right': !item.data.childExpanded,
+            'wi-hidden': item.children == null || item.children.length == 0}"></i>
+            </div>
+            <div ng-click="wiBaseTreeview.onclickfunction($index, $event)"
+                ng-dblclick="wiBaseTreeview.ondoubleclickfunction($index)">
+                <div class="display-inline-block margin-right-0_5em"><span class="{{item.data.icon}}"></span></div>
+                <span>{{item.data.label}}</span>
+                <span ng-if="wiBaseTreeview.isShowParentName && item.parentData">/ {{item.parentData.label}}</span>                
+            </div>
+        </div>
+
+        <div class="wi-parent-unit" ng-show="item.data.unit"
+            ng-click="wiBaseTreeview.onclickfunction($index, $event)"
+            ng-dblclick="wiBaseTreeview.ondoubleclickfunction($index)">
+            <span class='display-inline-block' style='text-indent:10px;'>{{item.data.unit}}</span>
+        </div>
+    </div>
+
+    <div ng-show="item.data.childExpanded">
+        <wi-base-treeview 
+            contextmenuholder="{{wiBaseTreeview.contextmenuholder}}" 
+            config="item.children" 
+            container="wiBaseTreeview.container"
+            onclickfunction='wiBaseTreeview.onclickfunction',
+            ondoubleclickfunction='wiBaseTreeview.ondoubleclickfunction',
+            showcontextmenufunction='wiBaseTreeview.showcontextmenufunction',
+            getitemactivenamefunction='wiBaseTreeview.getitemactivenamefunction'
+            is-show-parent-name="item.data.isCollection"
+            >
+        </wi-base-treeview>
+    </div>
+</div>

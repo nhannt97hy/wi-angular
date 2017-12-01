@@ -1,0 +1,29 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href='css/main.css' rel='stylesheet'>
+    <link href='css/wi-base-treeview.css' rel='stylesheet'>
+
+    <link rel="stylesheet" href="css/sprite_16.css">
+    <link rel="stylesheet" href="css/sprite_32.css">
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src='js/main-explorer-treeview.js.bundle.js'></script>
+
+    <title>Test inventory treeview</title>
+</head>
+
+<body ng-app="helloapp">
+<div ng-controller="WiDummy">
+    <div style="width: 50%; margin: 3em 0;">
+        <wi-explorer-treeview name="LocalTreeviewName" config="myConfig"></wi-explorer-treeview>
+    </div>
+    <button ng-click='addItem("item11000")'>add item to item 11000</button>
+    <button ng-click=addItem("item11")>add item to item 1.1</button>
+</div>
+</body>
+</html>

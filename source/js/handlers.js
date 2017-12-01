@@ -179,6 +179,13 @@ exports.ImportMultiLASButtonClicked = function () {
     })
 };
 
+exports.ImportFromInventoryButtonClicked = function () {
+    let self = this;
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importFromInventoryDialog(this.ModalService)
+};
+
 exports.OpenTemplateButtonClicked = function () {
     let self = this;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);

@@ -153,6 +153,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     self.handlers.ImportMultiLASButtonClicked();
                 }
             }, {
+                name: "ImportFromInventory",
+                label: "Import From Inventory",
+                // icon: "las-import-16x16",
+                handler: function () {
+                    self.handlers.ImportFromInventoryButtonClicked();
+                }
+            },{
                 name: "ImportDLIS",
                 label: "Import DLIS",
                 icon: "",

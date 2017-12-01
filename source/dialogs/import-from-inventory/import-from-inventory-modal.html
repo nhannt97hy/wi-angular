@@ -1,0 +1,35 @@
+<div class='modal fade' id="inventory-modal" data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">
+                    &times;
+                </button>
+                <h4>Load file from inventory</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div id="left-inventory" class="col-sm-5">
+                            <wi-inventory-treeview name="{{wiModal.treeviewName}}" config="wiModal.treeConfig"></wi-inventory-treeview>
+                        </div>
+                        <div id="center-inventory" class="col-sm-2">
+                            <button class="btn btn-default" ng-click=''>btn1</button>
+                            <button class="btn btn-default" ng-click=''>btn2</button>
+                        </div>
+                        <div id="right-inventory" class="col-sm-5">
+                            <p>right</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onLoadButtonClicked()'><span class="ok-16x16"></span>&nbsp;Load
+                </button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span
+                    class="close-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

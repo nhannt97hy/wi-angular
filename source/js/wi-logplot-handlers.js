@@ -335,6 +335,9 @@ exports.DeleteTrackButtonClicked = function () {
             wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
         } else if (currentTrack.type == 'image-track') {
             wiApiService.removeImageTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.type == 'object-track') {
+            console.log("deleting track with id: ", currentTrack.id);
+            wiApiService.removeObjectTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
         }
     });
 };

@@ -44,6 +44,7 @@ const GET_PROJECT_INFO = '/project/info';
 const CREATE_WELL = '/project/well/new';
 const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
+const INFO_WELL = '/project/well/info';
 
 const CREATE_DATASET = '/project/well/dataset/new';
 const EDIT_DATASET = '/project/well/dataset/edit';
@@ -184,6 +185,16 @@ const CREATE_GROUP = '/project/group/new';
 const EDIT_GROUP = '/project/group/edit';
 const DELETE_GROUP = '/project/group/delete';
 const GET_GROUP = '/project/group/info';
+
+const CREATE_OBJECT_TRACK = '/project/well/plot/object-track/new/';
+const GET_OBJECT_TRACK = '/project/well/plot/object-track/info/';
+const EDIT_OBJECT_TRACK = '/project/well/plot/object-track/edit/';
+const DELETE_OBJECT_TRACK = '/project/well/plot/object-track/delete/';
+
+const CREATE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/new/';
+const GET_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/info/';
+const EDIT_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/edit/';
+const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/delete/';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -750,6 +761,11 @@ Service.prototype.removeWell = function (idWell, callback) {
     }
     this.delete(DELETE_WELL, dataRequest, callback);
 }
+
+Service.prototype.getWell = function (idWell, callback) {
+    this.post(INFO_WELL, {idWell : idWell}, callback);
+}
+
 Service.prototype.createDataset = function (infoDataset, callback) {
     let self = this;
     let dataRequest = infoDataset;
@@ -1444,3 +1460,45 @@ app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
 });
 exports.name = moduleName;
 
+
+Service.prototype.createObjectTrack = function (data, callback) {
+    let self = this;
+    this.post(CREATE_OBJECT_TRACK, data, callback);
+}
+Service.prototype.editObjectTrack = function (data, callback) {
+    let self = this;
+    this.post(EDIT_OBJECT_TRACK, data, callback);
+}
+Service.prototype.getObjectTrack = function (idObjectTrack, callback) {
+    let self = this;
+    this.post(GET_OBJECT_TRACK, { idObjectTrack: idObjectTrack }, callback);
+}
+Service.prototype.removeObjectTrack = function (idObjectTrack, callback) {
+    let self = this;
+    this.delete(DELETE_OBJECT_TRACK, { idObjectTrack: idObjectTrack }, callback);
+}
+
+Service.prototype.createObjectOfObjectTrack = function (data, callback) {
+    let self = this;
+    this.post(CREATE_OBJECT_OF_OBJECT_TRACK, data, function (returnData) {
+            if (callback) callback(returnData);
+        });
+}
+Service.prototype.editObjectOfObjectTrack = function (data, callback) {
+    let self = this;
+    this.post(EDIT_OBJECT_OF_OBJECT_TRACK, data, function (returnData) {
+            if(callback) callback();
+        });
+}
+Service.prototype.getObjectOfObjectTrack = function (idObjectOfTrack, callback) {
+    let self = this;
+    this.post(GET_OBJECT_OF_OBJECT_TRACK, { idObjectOfTrack: idObjectOfTrack }, function (returnData) {
+            if(callback) callback(returnData);
+        });
+}
+Service.prototype.removeObjectOfObjectTrack = function (idObjectOfTrack, callback) {
+    let self = this;
+    this.delete(DELETE_OBJECT_OF_OBJECT_TRACK, { idObjectOfTrack: idObjectOfTrack }, function (returnData) {
+            if(callback) callback();
+        });
+}

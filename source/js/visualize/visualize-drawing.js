@@ -38,6 +38,17 @@ Drawing.prototype.isZone = function() {
 }
 
 /**
+<<<<<<< Updated upstream
+=======
+ * Check if class of this instance is Object
+ * @returns {Boolean}
+ */
+Drawing.prototype.isObject = function() {
+    return this.constructor.name == 'ObjectOfTrack';
+}
+
+/**
+>>>>>>> Stashed changes
  * Check if class of this instance is ViImage
  * @returns {Boolean}
  */

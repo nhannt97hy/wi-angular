@@ -8,6 +8,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         if (self.name) wiComponentService.putComponent(self.name, self);
 
         wiComponentService.on('update-properties', function doUpdateListConfig(currentItem) {
+            console.log('on update-properties event item', currentItem);
             toListConfig(currentItem).then(function (listConfig) {
                 $timeout(function () {
                     self.listConfig = listConfig;

@@ -1135,6 +1135,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     element.draggable({
         start: function (event, ui) {
             dragMan.dragging = true;
+            d3.selectAll('.vi-track-plot-container').style('z-index', 1);
         },
         stop: function (event, ui) {
             dragMan.dragging = false;
@@ -1144,6 +1145,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
             let idCurve = parseInt(ui.helper.attr('data'));
+            d3.selectAll('.vi-track-plot-container').style('z-index', 'unset');
             if (wiD3Ctrl && track) {
                 let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
                 if (errorCode > 0) {
@@ -1243,6 +1245,40 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
     });
 };
 
+var createPointSet = function (pointSetData, callback) {
+    __GLOBAL.wiApiService.createPointSet(pointSetData, function (pointSet) {
+        console.log(pointSet);
+        callback(pointSet);
+    })
+}
+exports.createPointSet = createPointSet;
+function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet, objectProps, wiApiService) {
+    wiApiService.getWell(objectProps.idWell, function(wellProps) {
+        curveX.minX = pointSet.scaleLeft;
+        curveX.maxX = pointSet.scaleRight;
+        curveY.minX = pointSet.scaleBottom;
+        curveY.maxX = pointSet.scaleTop;
+        pointSet.intervalDepthTop = objectProps.intervalDepthTop;
+        pointSet.intervalDepthBottom = objectProps.intervalDepthBottom;
+
+        let crossplotConfig = {
+            curve1 : curveX,
+            curve2 : curveY,
+            config : {
+                name : objectProps.name,
+                idCrossPlot: objectProps.idCrossPlot,
+                idWell : wellProps.idWell,
+                topDepth : parseFloat(wellProps.topDepth),
+                bottomDepth : parseFloat(wellProps.bottomDepth),
+                pointSet : pointSet,
+            },
+            background : objectProps.background
+        }
+        console.log("Crossplot configurations: ", crossplotConfig);
+        objectOfTrack.createCrossplotToForeignObject(crossplotConfig, wellProps);
+    });
+};
+
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(logplotModel);
@@ -1262,6 +1298,8 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                 }
                 let tracks = new Array();
 
+                console.log("Plot received: ", plot);
+
                 if (plot.depth_axes && plot.depth_axes.length) {
                     plot.depth_axes.forEach(function (depthTrack) {
                         tracks.push(depthTrack);
@@ -1278,7 +1316,17 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     })
                 }
 
-//
+                if (plot.image_tracks && plot.image_tracks.length) {
+                    plot.image_tracks.forEach(function (imageTrack) {
+                        tracks.push(imageTrack);
+                    })
+                }
+                if(plot.object_tracks && plot.object_tracks.length) {
+                    plot.object_tracks.forEach(function (objectTrack) {
+                        tracks.push(objectTrack);
+                    })
+                }
+
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
                         let shadingModel = shadingToTreeConfig(shading, paletteList);
@@ -1368,6 +1416,73 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 wiD3Ctrl.addZoneToTrack(viTrack, zone);
                             }
                         })
+
+                    } else if(aTrack.idImageTrack) {
+                        let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
+                        wiApiService.getImagesOfTrack(aTrack.idImageTrack, function (images) {
+                            for (let img of images) {
+                                wiD3Ctrl.addImageZoneToTrack(viTrack, img);
+                            }
+                        })
+                    } else if(aTrack.idObjectTrack) {
+                        let viTrack = wiD3Ctrl.pushObjectTrack(aTrack);
+                        if(!aTrack.object_of_tracks || !aTrack.object_of_tracks.length) {
+                            aTrack = tracks.shift;
+                            continue;
+                        } else {
+                            for (let objectOfTrack of aTrack.object_of_tracks) {
+                                objectOfTrack.minY = viTrack.minY;
+                                objectOfTrack.maxY = viTrack.maxY;
+                                let anObject = wiD3Ctrl.addObjectToTrack(viTrack, objectOfTrack);
+                                
+                                let objectProps = JSON.parse(objectOfTrack.object);
+                                
+                                switch(objectProps.type) {
+                                    case 'Histogram' :
+                                        objectProps.intervalDepthTop = objectOfTrack.topDepth;
+                                        objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
+                                        objectProps.curve = new Object();
+                                        objectProps.curve.yStep = objectProps.yStep;
+                                        objectProps.curve.idCurve = objectProps.curveId;
+                                        
+                                        let wellProps = {
+                                            topDepth : objectProps.topDepth,
+                                            bottomDepth : objectProps.bottomDepth
+                                        }
+
+                                        wiApiService.dataCurve(objectProps.curveId, function(returnedCurve) {
+                                            objectProps.curve.rawData = returnedCurve;
+                                            console.log("Histogram Props: ", objectProps);
+                                            anObject.createHistogramToForeignObject(objectProps, wellProps);
+                                        })
+                                        break;
+                                    case 'Crossplot':
+                                        objectProps.intervalDepthTop = objectOfTrack.topDepth;
+                                        objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
+                                        wiApiService.getPointSet(objectProps.idPointSet, function(pointSet) {
+                                            wiApiService.infoCurve(pointSet.idCurveX, function(curveX) {
+                                                wiApiService.dataCurve(pointSet.idCurveX, function(dataCurveX) {
+                                                    curveX.rawData = dataCurveX;
+                                                    if(pointSet.idCurveX == pointSet.idCurveY) {
+                                                        let curveY = curveX;
+                                                        createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
+                                                    } else {
+                                                        wiApiService.infoCurve(pointSet.idCurveY, function(curveY) {
+                                                            wiApiService.dataCurve(pointSet.idCurveY, function(dataCurveY) {
+                                                                curveY.rawData = dataCurveY;
+                                                                createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
+                                                            })
+                                                        })
+                                                    }
+                                                })
+                                            })
+                                        })
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
                     }
                     aTrack = tracks.shift();
                 }
@@ -2047,13 +2162,6 @@ exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, cr
         });
     });
 };
-
-exports.createPointSet = function (pointSetData, callback) {
-    __GLOBAL.wiApiService.createPointSet(pointSetData, function (pointSet) {
-        console.log(pointSet);
-        callback(pointSet);
-    })
-}
 
 exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
