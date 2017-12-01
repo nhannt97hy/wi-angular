@@ -2643,9 +2643,15 @@ function getDataTopBottomRange(data, topPos, bottomPos) {
     }
     return retData;
 }
-
 exports.getDataTopBottomRange = getDataTopBottomRange;
 
+function convertRangeDepthToIndex (depth, well) {
+    let d = Math.round((
+                depth - parseFloat(well.properties.topDepth))
+                            /parseFloat(well.properties.step));
+    return d;
+}
+exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
 function getZoneSetsInWell (well) {
     let zoneSets = [];
     well.children.forEach(function(child) {

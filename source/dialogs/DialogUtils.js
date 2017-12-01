@@ -7746,6 +7746,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
             self.availableCurves = [];
             self.datasets = [];
             getAllCurvesOnSelectWell(self.wellModel);
+
         };
         function getAllCurvesOnSelectWell(well) {
             well.children.forEach(function (child) {
@@ -10171,10 +10172,8 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         this.zoneSetModel = {};
         this.curveModel = {};
         this.unit = 'DEGC';
-        this.desCurve = {
-            curveName: 'Rw'
-        };
-
+        this.desCurve = null
+        
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
             this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
@@ -10202,8 +10201,22 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             self.datasetModel = self.datasets[0];
             // self.zones = [];
             self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
-            if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) self.zoneSetModel = self.zoneSets[0];
+            console.log("zoneSet", self.zoneSetModel);
+            // if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) {
+            //         self.zoneSetModel = self.zoneSets[0];
+            // }
+            if (selectedNodes && selectedNodes[0].type == 'zoneset') {
+                    self.zoneSetModel = selectedNodes[0];
+            }
+            else self.zoneSetModel = self.zoneSets[0];
             selectZoneSet (self.zoneSetModel);
+
+            self.desCurve = {
+                idDataset: self.datasetModel.id,
+                curveName: 'Rw',
+                idDesCurve: null,
+                data: []
+            };
         }
         this.selectZoneSet = selectZoneSet;
         function selectZoneSet (zoneSetModel) {
@@ -10237,12 +10250,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             
             let inputData = [];
             let outputData = [];
-            let yTop = Math.round((
-                            self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-                                        /parseFloat(self.wellModel.properties.step));
-            let yBottom = Math.round((
-                            self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-                                        /parseFloat(self.wellModel.properties.step));
+            
             function tempF(unit, temp) {
                 let t = null; 
                 if (temp != null || !isNaN(temp)) {
@@ -10251,10 +10259,10 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                 }
                 return t;
             }
-            // function rWF (cSP, temp) {
-            //     let t = tempF (self.unit, temp);
-            //     return ( ((1 : (2.74 * Math.pow(10, -4) * Math.pow(cSP, 0.955))) + 0.0123 ) * (81.77 : (t + 6.77)));
-            // }
+            function rWF (cSP, temp) {
+                let t = tempF (self.unit, temp);
+                return ( ((1 / (2.74 * Math.pow(10, -4) * Math.pow(cSP, 0.955))) + 0.0123 ) * (81.77 / (t + 6.77)) );
+            }
             async.parallel([
                 function(callback){
                     wiApiService.dataCurve(self.curveModel.id, function (dataCurve){
@@ -10264,23 +10272,33 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                 }],
                 function(err, results) {
                     let len = inputData.length;
-
                     for(let i = 0; i < len; i++) {
-                        
+                        self.zones.forEach(function(z) {
+                            if (!isNaN(outputData[i])) return;
+
+                            if(z.hasOwnProperty('use') && z.use && z.hasOwnProperty('sanility') && z.sanility 
+                                && (i >= utils.convertRangeDepthToIndex(z.properties.startDepth, self.wellModel)) 
+                                && (i <= utils.convertRangeDepthToIndex(z.properties.endDepth, self.wellModel))) {
+                                    outputData[i] = rWF(z.sanility, inputData[i]);
+                                }
+
+                            else outputData[i] = NaN;
+                        });
                     };
                     console.log("outputData", inputData, outputData);
                     let request = {
-                        idDataset: self.outputObj.idDataset,
-                        curveName: self.outputObj.curve,
-                        unit: self.outputObj.unit,
-                        idDesCurve: self.curveModel.id,
-                        data: utils.getDataTopBottomRange(outputData, yTop, yBottom)
+                        idDataset: self.desCurve.idDataset,
+                        curveName: self.desCurve.curveName,
+                        unit: 'OHM.M',
+                        idDesCurve: self.desCurve.idDesCurve,
+                        data: outputData
                     }
-                    if(self.outputObj.curve == self.curveModel.properties.name) {
+                    if(self.desCurve.hasOwnProperty('idDesCurve') && self.desCurve.idDesCurve != null) {
                         dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
                             if(ret) {
                                 delete request.curveName;
                                 delete request.unit;
+                                console.log("request", request);
                                 wiApiService.processingDataCurve(request, function(res) {
                                     console.log("processingDataCurve", res);
                                     utils.refreshProjectState();
@@ -10291,8 +10309,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                     }
                     else {
                         delete request.idDesCurve;
-                        if (self.curveModel.properties.idFamily)
-                            request.idFamily = self.curveModel.properties.idFamily;
+                        request.idFamily = 66;
                         wiApiService.processingDataCurve(request, function(res) {
                             console.log("processingDataCurve", res);
                             utils.refreshProjectState();
