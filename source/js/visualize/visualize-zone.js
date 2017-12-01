@@ -200,6 +200,10 @@ Zone.prototype.updateHeader = function() {
     let width = rect.width - headerBorderWidth;
     let height = rect.height - headerBorderWidth;
 
+    if(width < 0 || height < 0) {
+        return;
+    }
+
     let fillArea = this.header.select('.vi-drawing-header-fill')
         .attr('width', width)
         .attr('height', height);
