@@ -69,22 +69,25 @@ function error(errorMessage, callback) {
 }
 exports.error = error;
 
-function warning (warningMessage) {
+function warning (warningMessage, callback) {
     if (!warningMessage) return;
     warningMessage = warningMessage;
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.warningMessageDialog(__GLOBAL.ModalService, warningMessage);
+    DialogUtils.warningMessageDialog(__GLOBAL.ModalService, warningMessage, callback);
 }
 exports.warning = warning;
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    let LProject = {id:projectData.idProject, name:projectData.name};
+    window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
 
 exports.projectClose = function (wiComponentService) {
+    window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
@@ -778,7 +781,6 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-
 function createZoneSetsNode(well) {
     let zoneSetsModel = new Object();
     zoneSetsModel.name = 'zonesets';
@@ -798,50 +800,7 @@ function createZoneSetsNode(well) {
     });
     return zoneSetsModel;
 }
-/*
-function createCrossplotNode(well) {
-    let crossplotModel = new Object();
-    crossplotModel.name = 'crossplots';
-    crossplotModel.type = 'crossplots';
-    crossplotModel.data = {
-        childExpanded: false,
-        icon: 'crossplot-blank-16x16',
-        label: 'Crossplot'
-    };
-    crossplotModel.properties = {
-        idWell: well.idWell
-    };
 
-    if (!well.crossplots) return crossplotModel;
-    crossplotModel.children = new Array();
-    well.crossplots.forEach(function (crossplot) {
-        crossplotModel.children.push(crossplotToTreeConfig(crossplot));
-    });
-
-    return crossplotModel;
-}
-
-function createHistogramNode(well) {
-    let histogramModel = new Object();
-    histogramModel.name = 'histograms';
-    histogramModel.type = 'histograms';
-    histogramModel.data = {
-        childExpanded: false,
-        icon: 'histogram-blank-16x16',
-        label: 'Histogram'
-    };
-    histogramModel.properties = {
-        idWell: well.idWell
-    };
-
-    if (!well.histograms) return histogramModel;
-    histogramModel.children = new Array();
-    well.histograms.forEach(function (histogram) {
-        histogramModel.children.push(histogramToTreeConfig(histogram));
-    });
-    return histogramModel;
-}
- */
 function wellToTreeConfig(well, isDeleted) {
     if (isDeleted) {
         var wellModel = new Object();
@@ -875,13 +834,17 @@ function wellToTreeConfig(well, isDeleted) {
             name: well.name,
             topDepth: parseFloat(well.topDepth),
             bottomDepth: parseFloat(well.bottomDepth),
-            step: parseFloat(well.step)
+            step: parseFloat(well.step),
+            idGroup: well.idGroup
         };
         wellModel.data = {
             childExpanded: false,
             icon: "well-16x16",
             label: well.name
         };
+        if (well.idGroup) {
+            wellModel.parent = 'group' + well.idGroup;
+        }
         wellModel.parent = 'project' + well.idProject;
         wellModel.children = new Array();
 
@@ -901,8 +864,40 @@ function wellToTreeConfig(well, isDeleted) {
         return wellModel;
     }
 }
-
 exports.wellToTreeConfig = wellToTreeConfig;
+
+function groupToTreeConfig (group) {
+    let groupModel = {};
+    groupModel.name = 'group';
+    groupModel.type = 'group';
+    groupModel.data = {
+        childExpanded: false,
+        icon: 'group-16x16',
+        label: group.name
+    };
+    groupModel.id = group.idGroup;
+    groupModel.properties = group;
+    groupModel.children = [];
+    return groupModel;
+}
+exports.groupToTreeConfig = groupToTreeConfig;
+
+function getGroupModel (idGroup, allGroups, rootNode) {
+    let groupModel = getModel('group', idGroup, rootNode);
+    if (!groupModel) {
+        let group = allGroups.find(g => g.idGroup == idGroup);
+        let parentGroupModel;
+        if (!group.idParent) {
+            parentGroupModel = rootNode;
+        } else {
+            parentGroupModel = getGroupModel(group.idParent, allGroups, rootNode);
+        }
+        groupModel = groupToTreeConfig(group);
+        parentGroupModel.children.push(groupModel);
+    }
+    return groupModel;
+}
+exports.getGroupModel = getGroupModel;
 
 exports.projectToTreeConfig = function (project) {
     var projectModel = new Object();
@@ -923,32 +918,41 @@ exports.projectToTreeConfig = function (project) {
         selected: false
     };
     projectModel.children = new Array();
+    setTimeout(() => {
+        let wiComponentService = __GLOBAL.wiComponentService;
+        // project logplots
+        let projectLogplots = [];
+        wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
+        let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
+        projectLogplotsNode.children = projectLogplots;
+        // project crossplots
+        let projectCrossplots = [];
+        wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
+        let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
+        projectCrossplotsNode.children = projectCrossplots;
+        // project histograms
+        let projectHistograms = [];
+        wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
+        let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
+        projectHistogramsNode.children = projectHistograms;
+        // well groups
+        project.groups.forEach(function (group) {
+            getGroupModel(group.idGroup, project.groups, projectModel);
+        });
+        // wells
+        project.wells.forEach(function (well) {
+            if (well.idGroup) {
+                let groupModel = getGroupModel(well.idGroup, project.groups, projectModel);
+                groupModel.children.push(wellToTreeConfig(well));
+            } else {
+                projectModel.children.push(wellToTreeConfig(well));
+            }
+        });
 
-    if (!project.wells) return projectModel;
-
-    let wiComponentService = __GLOBAL.wiComponentService;
-    // project logplots
-    let projectLogplots = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
-    let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
-    projectLogplotsNode.children = projectLogplots;
-    // project crossplots
-    let projectCrossplots = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
-    let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
-    projectCrossplotsNode.children = projectCrossplots;
-    // project histograms
-    let projectHistograms = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
-    let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
-    projectHistogramsNode.children = projectHistograms;
-    project.wells.forEach(function (well) {
-        projectModel.children.push(wellToTreeConfig(well));
+        projectModel.children.push(projectLogplotsNode);
+        projectModel.children.push(projectCrossplotsNode);
+        projectModel.children.push(projectHistogramsNode);
     });
-
-    projectModel.children.push(projectLogplotsNode);
-    projectModel.children.push(projectCrossplotsNode);
-    projectModel.children.push(projectHistogramsNode);
     return projectModel;
 }
 
@@ -1443,13 +1447,15 @@ function getStaticNode(type, options) {
 }
 exports.getStaticNode = getStaticNode;
 
-function getModel(type, id) {
+function getModel(type, id, rootNode) {
     if (!type || !id) return;
     let wiComponentService = __GLOBAL.wiComponentService;
-    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
-    if (!rootNodes || !rootNodes.length) return;
+    if (!rootNode) {
+        rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+    }
+    if (!rootNode) return;
     let model = null;
-    visit(rootNodes[0], function (node) {
+    visit(rootNode, function (node) {
         if (node.type == type && node.id == id) {
             model = node;
         }
@@ -2643,9 +2649,15 @@ function getDataTopBottomRange(data, topPos, bottomPos) {
     }
     return retData;
 }
-
 exports.getDataTopBottomRange = getDataTopBottomRange;
 
+function convertRangeDepthToIndex (depth, well) {
+    let d = Math.round((
+                depth - parseFloat(well.properties.topDepth))
+                            /parseFloat(well.properties.step));
+    return d;
+}
+exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
 function getZoneSetsInWell (well) {
     let zoneSets = [];
     well.children.forEach(function(child) {

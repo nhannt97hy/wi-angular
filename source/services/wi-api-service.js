@@ -39,6 +39,7 @@ const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
 const CREATE_PROJECT = '/project/new';
 const GET_PROJECT_LIST = '/project/list';
+const GET_PROJECT_INFO = '/project/info';
 
 const CREATE_WELL = '/project/well/new';
 const EDIT_WELL = '/project/well/edit';
@@ -721,6 +722,10 @@ Service.prototype.createProject = function (infoProject, callback) {
 Service.prototype.getProject = function (infoProject, callback) {
     console.log('infoProject', infoProject);
     this.post(GET_PROJECT, infoProject, callback);
+}
+
+Service.prototype.getProjectInfo = function (idProject, callback) {
+    this.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {

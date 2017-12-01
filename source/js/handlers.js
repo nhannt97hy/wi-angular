@@ -9,7 +9,9 @@ exports.NewProjectButtonClicked = function () {
                 DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!");
             }else{
                 let utils = self.wiComponentService.getComponent('UTILS');
-                utils.projectOpen(self.wiComponentService, response);
+                self.wiApiService.getProject({ idProject: response.idProject }, function (response) {
+                    utils.projectOpen(self.wiComponentService, response);
+                });
             }
         });
     });
@@ -175,6 +177,13 @@ exports.ImportMultiLASButtonClicked = function () {
             }
         }
     })
+};
+
+exports.ImportFromInventoryButtonClicked = function () {
+    let self = this;
+    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
+    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.importFromInventoryDialog(this.ModalService)
 };
 
 exports.OpenTemplateButtonClicked = function () {

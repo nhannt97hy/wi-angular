@@ -22,6 +22,11 @@ let wiTabs = require('./wi-tabs.js');
 let wiCanvasRect = require('./wi-canvas-rect.js');
 
 let wiTreeview = require('./wi-treeview');
+let wiBaseTreeview = require('./wi-base-treeview');
+
+let wiExplorerTreeview = require('./wi-explorer-treeview');
+let wiInventoryTreeview = require('./wi-inventory-treeview');
+
 let wiStatusBar = require('./wi-status-bar');
 let wiSlidingbar = require('./wi-slidingbar');
 
@@ -92,6 +97,11 @@ let app = angular.module('wiapp',
         wiToolbar.name,
         wiTabs.name,
         wiTreeview.name,
+        wiBaseTreeview.name,
+
+        wiExplorerTreeview.name,
+        wiInventoryTreeview.name,
+
         wiStatusBar.name,
         wiSlidingbar.name,
         wiList.name,
@@ -162,7 +172,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         $timeout
     };
     // UTIL FUNCTIONS
-    window.utils = utils;
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
@@ -250,5 +259,26 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         });
     }else{
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+        let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
+        if(lastProject){
+            $timeout(function(){
+                wiApiService.getProjectInfo(lastProject.id, function(project){
+                    if(project.name){
+                        DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name +"</b>.</br>Do you want to open it?", function(ret){
+                            if(ret){
+                                wiApiService.getProject({
+                                    idProject: lastProject.id
+                                }, function (projectData) {
+                                    let utils = wiComponentService.getComponent('UTILS');
+                                    utils.projectOpen(wiComponentService, projectData);
+                                });
+                            }
+                        })
+                    }else{
+                        window.localStorage.removeItem('LProject');
+                    }
+                })
+            },100);
+        }
     }
 });
