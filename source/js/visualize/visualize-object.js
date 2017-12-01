@@ -305,8 +305,8 @@ ObjectOfTrack.prototype.updateHeader = function() {
     let rect = this.header.node().getBoundingClientRect();
     let headerBorderWidth = parseInt(this.header.style('border-width'));
 
-    let width = rect.width - headerBorderWidth;
-    let height = rect.height - headerBorderWidth;
+    let width = rect.width - headerBorderWidth - 1;
+    let height = rect.height - headerBorderWidth - 1;
 
     if(width < 0 || height < 0) {
         return;
@@ -364,7 +364,7 @@ ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellPr
         this.endDepth = config.intervalDepthBottom;
     }
     if(!config.background) {
-        config.background = getRandomColor(0.8);
+        config.background = "rgba(255, 255, 255, 1)";
     }
 
     let histogramModel = {
@@ -405,7 +405,7 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
     }
 
     if(!crossplotConfig.background) {
-        crossplotConfig.background = getRandomColor(0.8);
+        crossplotConfig.background = "rgba(255, 255, 255, 1)";
     }
 
     if(!crossplotConfig.curve1.data) {

@@ -158,8 +158,8 @@ ImageZone.prototype.updateHeader = function() {
     let rect = this.header.node().getBoundingClientRect();
     let headerBorderWidth = parseInt(this.header.style('border-width'));
 
-    let width = rect.width - headerBorderWidth;
-    let height = rect.height - headerBorderWidth;
+    let width = rect.width - headerBorderWidth - 1;
+    let height = rect.height - headerBorderWidth - 1;
 
     let fillArea = this.header.select('.vi-drawing-header-fill')
         .attr('width', width)

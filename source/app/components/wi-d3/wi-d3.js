@@ -2140,8 +2140,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         curve: curve,
                         intervalDepthTop: _currentTrack.getWindowY()[0],
                         intervalDepthBottom: _currentTrack.getWindowY()[1],
+                        color: 'blue'
                     },
-                    curves : getAllCurves()
+                    curves : getAllCurves(),
                 }
                 DialogUtils.histogramForObjectTrackDialog(ModalService, histogramModel, function (histogramProps) {
                     let quest = {
@@ -2396,7 +2397,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let histogramConfig = {
                         properties: {
                             divisions: 10,
-                            plot: 'Bar'
+                            plot: 'Bar',
+                            color: 'blue'
                         },
                         curves : curveArr,
                         dragToCreate : true
