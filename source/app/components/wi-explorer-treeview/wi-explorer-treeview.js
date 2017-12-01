@@ -10,7 +10,7 @@ function WiExpTreeController($controller, wiComponentService) {
         // self = angular.extend(self, $controller(wiBaseTreeview.controller,{}));
         // wiComponentService.putComponent(self.name, self);
         // console.log('wiExplorerTreeview onInit self', self);
-        // window.__WIEXPTREE = self;
+        window.__WIEXPTREE = self;
 
         if (self.isRoot) {
             wiComponentService.putComponent(self.name, self);
@@ -23,50 +23,6 @@ function WiExpTreeController($controller, wiComponentService) {
             wiComponentService.on(wiComponentService.UPDATE_LOGPLOT_EVENT, function (logplot) {
                 self.updateLogplotItem(logplot);
             });
-        }
-        if (!self.onClick) self.onClick = function ($index, $event, node) {
-            if (!this.container && !this.container.selectHandler) return;
-            node.$index = $index;
-            if (!node) {
-                this.container.unselectAllNodes();
-                return;
-            }
-            wiComponentService.emit('update-properties', node);
-            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-            if (!Array.isArray(selectedNodes)) selectedNodes = [];
-            if (!$event.shiftKey) {
-                if (selectedNodes.length) {
-                    if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
-                        this.container.unselectAllNodes();
-                    }
-                }
-                this.container.selectHandler(node);
-            } else {
-                // shift key
-                if (selectedNodes.length) {
-                    if (selectedNodes.includes(node)) return;
-                    if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
-                        this.container.unselectAllNodes();
-                        this.container.selectHandler(node);
-                    } else {
-                        if (node.$index < selectedNodes[0].$index) {
-                            let fromIndex = node.$index;
-                            let toIndex = selectedNodes[0].$index;
-                            this.container.unselectAllNodes();
-                            for (let i = fromIndex; i <= toIndex; i++) {
-                                this.container.selectHandler(this.config[i]);
-                            }
-                        } else {
-                            let fromIndex = selectedNodes[0].$index;
-                            let toIndex = node.$index;
-                            this.container.unselectAllNodes();
-                            for (let i = fromIndex; i <= toIndex; i++) {
-                                this.container.selectHandler(this.config[i]);
-                            }
-                        }
-                    }
-                }
-            }
         }
     };
 
@@ -125,6 +81,7 @@ function WiExpTreeController($controller, wiComponentService) {
     }
 
      this.onDoubleClick = function ($index) {
+        console.log('wi-explorer-treeview onDoubleClick function');
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let selectedNode = self.config[$index];
         if (selectedNode.children && selectedNode.children.length) {
@@ -164,8 +121,7 @@ app.component(componentName, {
         contextmenuholder: '@',
         baseTreeviewName: '<',
         container: '<',
-        isShowParentName: '<',
-        onClick: '<'
+        isShowParentName: '<'
     }
 });
 exports.name = moduleName;

@@ -17,15 +17,16 @@
             'wi-hidden': item.children == null || item.children.length == 0}"></i>
             </div>
             <div ng-click="wiBaseTreeview.onclickfunction($index, $event)"
-                ng-dblclick="wiBaseTreeview.onDoubleClick($index)">
+                ng-dblclick="wiBaseTreeview.ondoubleclickfunction($index)">
                 <div class="display-inline-block margin-right-0_5em"><span class="{{item.data.icon}}"></span></div>
                 <span>{{item.data.label}}</span>
+                <span ng-if="wiBaseTreeview.isShowParentName && item.parentData">/ {{item.parentData.label}}</span>                
             </div>
         </div>
 
         <div class="wi-parent-unit" ng-show="item.data.unit"
             ng-click="wiBaseTreeview.onclickfunction($index, $event)"
-            ng-dblclick="wiBaseTreeview.onDoubleClick($index)">
+            ng-dblclick="wiBaseTreeview.ondoubleclickfunction($index)">
             <span class='display-inline-block' style='text-indent:10px;'>{{item.data.unit}}</span>
         </div>
     </div>
@@ -36,7 +37,10 @@
             config="item.children" 
             container="wiBaseTreeview.container"
             onclickfunction='wiBaseTreeview.onclickfunction',
-            showcontextmenufunction='wiBaseTreeview.showcontextmenufunction'
+            ondoubleclickfunction='wiBaseTreeview.ondoubleclickfunction',
+            showcontextmenufunction='wiBaseTreeview.showcontextmenufunction',
+            getitemactivenamefunction='wiBaseTreeview.getitemactivenamefunction'
+            is-show-parent-name="item.data.isCollection"
             >
         </wi-base-treeview>
     </div>

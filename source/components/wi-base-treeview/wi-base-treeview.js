@@ -5,7 +5,7 @@ function WiBaseTreeController() {
     let self = this;
 
     this.$onInit = function () {
-        // console.log('WiBaseTreeController oninit self', self);    
+        console.log('WiBaseTreeController oninit self', self);    
     };
 
     this.onReady = function () {
@@ -16,10 +16,10 @@ function WiBaseTreeController() {
         this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
     };
 
-    this.onDoubleClick = function ($index) {
-        console.log('double click');
-        this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
-    };
+    // this.onDoubleClick = function ($index) {
+    //     console.log('double click');
+    //     this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
+    // };
 
     this.addItem = function (parentName, item) {
         let parentItem = this.getItemByName(parentName);
@@ -178,7 +178,8 @@ app.component(componentName, {
         container: '<',
         showcontextmenufunction: '<',
         ondoubleclickfunction: '<',
-        getactiveitemfunction: '<'
+        getitemactivenamefunction: '<',
+        isShowParentName: '<'
     }
 });
 exports.controller = WiBaseTreeController;
