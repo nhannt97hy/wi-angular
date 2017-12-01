@@ -253,8 +253,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
             let nodeType = self.config[$index].type;
             itemContextMenu = container.getItemTreeviewCtxMenu(nodeType, self);
         }
-        let contextMenu = itemCo
-        ntextMenu.concat(defaultContextMenu);
+        let contextMenu = itemContextMenu.concat(defaultContextMenu);
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 }

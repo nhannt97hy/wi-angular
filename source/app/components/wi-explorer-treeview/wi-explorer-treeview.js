@@ -158,11 +158,14 @@ app.component(componentName, {
     controller: WiExpTreeController,
     controllerAs: componentName,
     bindings: {
+        isRoot: '<',
         name: '@',
         config: '<',
         contextmenuholder: '@',
         baseTreeviewName: '<',
-        container: '<'
+        container: '<',
+        isShowParentName: '<',
+        onClick: '<'
     }
 });
 exports.name = moduleName;

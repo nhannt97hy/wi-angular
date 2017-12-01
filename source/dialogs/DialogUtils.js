@@ -7317,56 +7317,56 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this.curvesArr = [];
 
         this.scaleOpt = [
-        {
-            value: 20,
-            label: '1:20'
-        },
-        {
-            value: 50,
-            label: '1:50'
-        },
-        {
-            value: 100,
-            label: '1:100'
-        },
-        {
-            value: 200,
-            label: '1:200'
-        },
-        {
-            value: 300,
-            label: '1:300'
-        },
-        {
-            value: 500,
-            label: '1:500'
-        },
-        {
-            value: 1000,
-            label: '1:1000'
-        },
-        {
-            value: 2000,
-            label: '1:2000'
-        },
-        {
-            value: 3000,
-            label: '1:3000'
-        },
-        {
-            value: 5000,
-            label: '1:5000'
-        },
-        {
-            value: -1,
-            label: 'Full'
-        },
+            {
+                value: 20,
+                label: '1:20'
+            },
+            {
+                value: 50,
+                label: '1:50'
+            },
+            {
+                value: 100,
+                label: '1:100'
+            },
+            {
+                value: 200,
+                label: '1:200'
+            },
+            {
+                value: 300,
+                label: '1:300'
+            },
+            {
+                value: 500,
+                label: '1:500'
+            },
+            {
+                value: 1000,
+                label: '1:1000'
+            },
+            {
+                value: 2000,
+                label: '1:2000'
+            },
+            {
+                value: 3000,
+                label: '1:3000'
+            },
+            {
+                value: 5000,
+                label: '1:5000'
+            },
+            {
+                value: -1,
+                label: 'Full'
+            },
         ]
         this.well.children.forEach(function(child, i){
             switch (child.type){
                 case 'dataset':
-                self.datasets.push(child);
-                break;
+                    self.datasets.push(child);
+                    break;
             }
             if (i == self.well.children.length - 1) {
                 self.datasets.forEach(function (child) {
@@ -7420,127 +7420,141 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 else if(!self.ref_Curves_Arr[index].curve.minScale
                     && !self.ref_Curves_Arr[index].curve.maxScale != null ) {
                     self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
-                self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
-                self.ref_Curves_Arr[index].color = 'black';
+                    self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
+                    self.ref_Curves_Arr[index].color = 'black';
+                }
+                else {
+                    wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
+                        console.log('scale curve');
+                        $timeout(function(){
+                            self.ref_Curves_Arr[index].left = scale.minScale;
+                            self.ref_Curves_Arr[index].right = scale.maxScale;
+                            self.ref_Curves_Arr[index].right = 'black';
+                        });
+                    })
+                }
+
+            }
+        }
+
+        this.AddRefCurve = function(){
+            let newRefCurve = {
+                color: "rgb(0,0,0)",
+                idHistogram: self.props.idHistogram ? self.props.idHistogram : null,
+                idCrossPlot: self.props.idCrossPlot ? self.props.idCrossPlot : null,
+                left: 0,
+                right: 0,
+                visiable: true,
+                log: true,
+                flag: self._FNEW
+            }
+
+            self.ref_Curves_Arr.push(newRefCurve);
+        }
+
+        this.Delete = function (index) {
+            self.SelectedRefCurve = index;
+            // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
+            if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
+                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            } else {
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            }
+            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
+            // $event.stopPropagation();
+        }
+
+        this.DeleteRefCurve = function(){
+            if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
+                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
+            }else{
+                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+            }
+            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
+            $event.stopPropagation();
+        }
+
+        this.onApplyButtonClicked = function() {
+            console.log("on Apply clicked");
+            if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
+                async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
+                    switch(self.ref_Curves_Arr[idx].flag){
+                        case self._FDEL:
+                            wiApiService.removeRefCurve(self.ref_Curves_Arr[idx].idReferenceCurve, function(){
+                                console.log('removeRefCurve');
+                                callback();
+                            });
+                            break;
+
+                        case self._FNEW:
+                            wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
+                                self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
+                                console.log('createRefCurve');
+                                callback();
+                            });
+                            break;
+
+                        case self._FEDIT:
+                            wiApiService.editRefCurve(self.ref_Curves_Arr[idx], function(){
+                                console.log('editRefCurve');
+                                callback();
+                            })
+                            break;
+
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function(err) {
+                    for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--) {
+                        switch(self.ref_Curves_Arr[i].flag){
+                            case self._FDEL:
+                                self.ref_Curves_Arr.splice(i, 1);
+                                break;
+                            case self._FNEW:
+                            case self._FEDIT:
+                                delete self.ref_Curves_Arr[i].flag;
+                                break;
+                        }
+                    }
+                    console.log("plotModel:", plotModel.properties);
+                    self.props.reference_curves = self.ref_Curves_Arr;
+                    plotModel.properties = self.props;
+                    if (callback) callback();
+                });
             }
             else {
-                wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
-                    console.log('scale curve');
-                    $timeout(function(){
-                        self.ref_Curves_Arr[index].left = scale.minScale;
-                        self.ref_Curves_Arr[index].right = scale.maxScale;
-                        self.ref_Curves_Arr[index].right = 'black';
-                    });
-                })
+                self.props.reference_curves = self.ref_Curves_Arr;
+                plotModel.properties = self.props;
             }
 
         }
-    }
 
-    this.AddRefCurve = function(){
-        let newRefCurve = {
-            color: "rgb(0,0,0)",
-            idHistogram: self.props.idHistogram ? self.props.idHistogram : null,
-            idCrossPlot: self.props.idCrossPlot ? self.props.idCrossPlot : null,
-            left: 0,
-            right: 0,
-            visiable: true,
-            log: true,
-            flag: self._FNEW
+        this.onOKButtonClicked = function () {
+            self.onApplyButtonClicked();
+            console.log("on OK clicked");
+            close(null);
         }
-
-        self.ref_Curves_Arr.push(newRefCurve);
-    }
-
-    this.DeleteRefCurve = function($event){
-        if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
-            self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-        }else{
-            self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+        this.onCancelButtonClicked = function () {
+            close(null);
         }
-        self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-        $event.stopPropagation();
     }
-
-    this.onApplyButtonClicked = function() {
-        console.log("on Apply clicked");
-        if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
-            async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
-                switch(self.ref_Curves_Arr[idx].flag){
-                    case self._FDEL:
-                    wiApiService.removeRefCurve(self.ref_Curves_Arr[idx].idReferenceCurve, function(){
-                        console.log('removeRefCurve');
-                        callback();
-                    });
-                    break;
-
-                    case self._FNEW:
-                    wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
-                        self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
-                        console.log('createRefCurve');
-                        callback();
-                    });
-                    break;
-
-                    case self._FEDIT:
-                    wiApiService.editRefCurve(self.ref_Curves_Arr[idx], function(){
-                        console.log('editRefCurve');
-                        callback();
-                    })
-                    break;
-
-                    default:
-                    callback();
-                    break;
-                }
-            }, function(err) {
-                for (let i = self.ref_Curves_Arr.length - 1; i >= 0; i--) {
-                    switch(self.ref_Curves_Arr[i].flag){
-                        case self._FDEL:
-                        self.ref_Curves_Arr.splice(i, 1);
-                        break;
-                        case self._FNEW:
-                        case self._FEDIT:
-                        delete self.ref_Curves_Arr[i].flag;
-                        break;
-                    }
-                }
-                console.log("plotModel:", plotModel.properties);
-                self.props.reference_curves = self.ref_Curves_Arr;
-                plotModel.properties = self.props;
-                if (callback) callback();
-            });
-        }
-        else {
-            self.props.reference_curves = self.ref_Curves_Arr;
-            plotModel.properties = self.props;
-        }
-
-    }
-
-    this.onOKButtonClicked = function () {
-        self.onApplyButtonClicked();
-        console.log("on OK clicked");
-        close(null);
-    }
-    this.onCancelButtonClicked = function () {
-        close(null);
-    }
-}
-ModalService.showModal({
-    templateUrl: "reference-windows/reference-windows-modal.html",
-    controller: ModalController,
-    controllerAs: 'wiModal'
-}).then(function (modal) {
-    modal.element.modal();
-    $(modal.element[0].children[0]).draggable();
-    modal.close.then(function (ret) {
-        $('.modal-backdrop').last().remove();
-        $('body').removeClass('modal-open');
-        if (!ret) return;
-    })
-});
+    ModalService.showModal({
+        templateUrl: "reference-windows/reference-windows-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    });
 };
+
 exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
@@ -7776,6 +7790,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
             self.availableCurves = [];
             self.datasets = [];
             getAllCurvesOnSelectWell(self.wellModel);
+
         };
         function getAllCurvesOnSelectWell(well) {
             well.children.forEach(function (child) {
@@ -10201,10 +10216,8 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         this.zoneSetModel = {};
         this.curveModel = {};
         this.unit = 'DEGC';
-        this.desCurve = {
-            curveName: 'Rw'
-        };
-
+        this.desCurve = null
+        
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
             this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
@@ -10232,8 +10245,22 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             self.datasetModel = self.datasets[0];
             // self.zones = [];
             self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
-            if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) self.zoneSetModel = self.zoneSets[0];
+            console.log("zoneSet", self.zoneSetModel);
+            // if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) {
+            //         self.zoneSetModel = self.zoneSets[0];
+            // }
+            if (selectedNodes && selectedNodes[0].type == 'zoneset') {
+                    self.zoneSetModel = selectedNodes[0];
+            }
+            else self.zoneSetModel = self.zoneSets[0];
             selectZoneSet (self.zoneSetModel);
+
+            self.desCurve = {
+                idDataset: self.datasetModel.id,
+                curveName: 'Rw',
+                idDesCurve: null,
+                data: []
+            };
         }
         this.selectZoneSet = selectZoneSet;
         function selectZoneSet (zoneSetModel) {
@@ -10267,12 +10294,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             
             let inputData = [];
             let outputData = [];
-            let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
-            let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+            
             function tempF(unit, temp) {
                 let t = null; 
                 if (temp != null || !isNaN(temp)) {
@@ -10281,10 +10303,10 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                 }
                 return t;
             }
-            // function rWF (cSP, temp) {
-            //     let t = tempF (self.unit, temp);
-            //     return ( ((1 : (2.74 * Math.pow(10, -4) * Math.pow(cSP, 0.955))) + 0.0123 ) * (81.77 : (t + 6.77)));
-            // }
+            function rWF (cSP, temp) {
+                let t = tempF (self.unit, temp);
+                return ( ((1 / (2.74 * Math.pow(10, -4) * Math.pow(cSP, 0.955))) + 0.0123 ) * (81.77 / (t + 6.77)) );
+            }
             async.parallel([
                 function(callback){
                     wiApiService.dataCurve(self.curveModel.id, function (dataCurve){
@@ -10294,23 +10316,33 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                 }],
                 function(err, results) {
                     let len = inputData.length;
-
                     for(let i = 0; i < len; i++) {
+                        self.zones.forEach(function(z) {
+                            if (!isNaN(outputData[i])) return;
 
+                            if(z.hasOwnProperty('use') && z.use && z.hasOwnProperty('sanility') && z.sanility 
+                                && (i >= utils.convertRangeDepthToIndex(z.properties.startDepth, self.wellModel)) 
+                                && (i <= utils.convertRangeDepthToIndex(z.properties.endDepth, self.wellModel))) {
+                                    outputData[i] = rWF(z.sanility, inputData[i]);
+                                }
+
+                            else outputData[i] = NaN;
+                        });
                     };
                     console.log("outputData", inputData, outputData);
                     let request = {
-                        idDataset: self.outputObj.idDataset,
-                        curveName: self.outputObj.curve,
-                        unit: self.outputObj.unit,
-                        idDesCurve: self.curveModel.id,
-                        data: utils.getDataTopBottomRange(outputData, yTop, yBottom)
+                        idDataset: self.desCurve.idDataset,
+                        curveName: self.desCurve.curveName,
+                        unit: 'OHM.M',
+                        idDesCurve: self.desCurve.idDesCurve,
+                        data: outputData
                     }
-                    if(self.outputObj.curve == self.curveModel.properties.name) {
+                    if(self.desCurve.hasOwnProperty('idDesCurve') && self.desCurve.idDesCurve != null) {
                         dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
                             if(ret) {
                                 delete request.curveName;
                                 delete request.unit;
+                                console.log("request", request);
                                 wiApiService.processingDataCurve(request, function(res) {
                                     console.log("processingDataCurve", res);
                                     utils.refreshProjectState();
@@ -10321,8 +10353,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                     }
                     else {
                         delete request.idDesCurve;
-                        if (self.curveModel.properties.idFamily)
-                            request.idFamily = self.curveModel.properties.idFamily;
+                        request.idFamily = 66;
                         wiApiService.processingDataCurve(request, function(res) {
                             console.log("processingDataCurve", res);
                             utils.refreshProjectState();
@@ -10352,11 +10383,242 @@ exports.formationResistivityDialog = function (ModalService, callback) {
     });
 }
 exports.groupManagerDialog = function (ModalService, callback) {
+    function createRootNode() {
+        let rootNode = {};
+        rootNode.type = 'rootGroup';
+        rootNode.data = {
+            childExpanded: true,
+            icon: 'well-insight-16x16',
+            label: 'Project',
+            selected: true
+        };
+        rootNode.properties = {
+            idGroup: null
+        }
+        rootNode.children = [];
+        return rootNode;
+    }
+    const states = {
+        unchanged: '0',
+        created: '1',
+        changed: '2',
+        deleted: '3',
+        uncreated: '4'
+    }
     function ModalController(wiComponentService, wiApiService, close, $timeout) {
+        window.groupdialog = this;
         let self = this;
-
+        let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let groupToTreeConfig = utils.groupToTreeConfig;
+        let rootNode = createRootNode();
+        this.treeConfig = [rootNode];
+        let groups = projectLoaded.groups;
+        groups.forEach(function (group) {
+            let groupModel = utils.getGroupModel(group.idGroup, groups, rootNode);
+            groupModel.data.childExpanded = true;
+        })
+        let selectedGroup = rootNode;
+        this.onSelectGroup = function ($index, $event, groupModel) {
+            selectedGroup.data.selected = false;
+            groupModel.data.selected = true;
+            selectedGroup = groupModel;
+        }
+        this.selectGroup = function (groupModel) {
+            self.onSelectGroup(null, null, groupModel);
+        }
+        this.getItemTreeviewCtxMenu = function (nodeType, treeviewCtrl) {
+            switch (nodeType) {
+                case 'rootGroup':
+                    return [
+                        {
+                            name: "Add",
+                            label: "Add",
+                            icon: "plus-16x16",
+                            handler: function () {
+                                self.onAddButtonClicked();
+                            }
+                        }
+                    ]
+                    break;
+                case 'group':
+                    return [
+                        {
+                            name: "Add",
+                            label: "Add",
+                            icon: "plus-16x16",
+                            handler: function () {
+                                self.onAddButtonClicked();
+                            }
+                        }, {
+                            name: "Delete",
+                            label: "Delete",
+                            icon: "close-16x16-edit",
+                            handler: function () {
+                                self.onRemoveButtonClicked();
+                            }
+                        }, {
+                            name: "Rename",
+                            label: "Rename",
+                            icon: "annotation-16x16-edit",
+                            handler: function () {
+                                // doing
+                            }
+                        }
+                    ]
+                    break;
+                default:
+                    break;
+            }
+        }
+        function isGroupNameValid(groupName, groupModel) {
+            if (!groupModel) groupModel = rootNode;
+            let isValid = true;
+            if (groupModel.properties.name == groupName) isValid = false;
+            if (Array.isArray(groupModel.children) && groupModel.children.length) {
+                groupModel.children.forEach(child => {
+                    if (child.data.deleted) return;
+                    if (!isGroupNameValid(groupName, child)) isValid = false;
+                });
+            }
+            return isValid;
+        }
+        function groupNameDialog(groupName, callback) {
+            let promptConfig = { title: 'New Group', inputName: 'Group Name', input: groupName || 'new_group' }
+            dialogUtils.promptDialog(ModalService, promptConfig, function (newGroupName) {
+                if (isGroupNameValid(newGroupName)) callback(newGroupName);
+                else {
+                    utils.error('Group name is existed!', function () {
+                        groupNameDialog(groupName, callback);
+                    })
+                }
+            })
+        }
+        this.onAddButtonClicked = function () {
+            groupNameDialog('new_group', function (groupName) {
+                let newGroup = {
+                    idProject: projectLoaded.idProject,
+                    idParent: selectedGroup.properties.idGroup,
+                    name: groupName
+                }
+                let newGroupModel = groupToTreeConfig(newGroup);
+                newGroupModel.data.childExpanded = true;
+                newGroupModel.state = states.created;
+                selectedGroup.children.push(newGroupModel);
+                self.selectGroup(newGroupModel);
+            });
+        }
+        this.onRemoveButtonClicked = function () {
+            if (selectedGroup.type == 'rootGroup') return;
+            if (selectedGroup.state == states.created) {
+                selectedGroup.state = states.uncreated;
+            } else {
+                selectedGroup.state = states.deleted;
+            }
+            selectedGroup.data.deleted = true;
+            self.selectGroup(rootNode);
+        }
+        function handleGroupApi(groupModel) {
+            let promises = [];
+            switch (groupModel.state) {
+                case states.created:
+                    promises.push(new Promise(function (resolve, reject) {
+                        wiApiService.createGroup(groupModel.properties, function (groupRes) {
+                            groupModel.properties = groupRes;
+                            if (Array.isArray(groupModel.children)) {
+                                groupModel.children.forEach(function (child) {
+                                    child.properties.idParent = groupModel.properties.idGroup;
+                                    let childPromises = handleGroupApi(child);
+                                    promises.push.apply(promises, childPromises);
+                                })
+                            }
+                            resolve();
+                        })
+                    }));
+                    break;
+                case states.changed:
+                    promises.push(new Promise(function (resolve, reject) {
+                        wiApiService.editGroup(groupModel.properties, function (groupRes) {
+                            groupModel.properties = groupRes;
+                            if (Array.isArray(groupModel.children)) {
+                                groupModel.children.forEach(function (child) {
+                                    child.properties.idParent = groupModel.properties.idGroup;
+                                    let childPromises = handleGroupApi(child);
+                                    promises.push.apply(promises, childPromises);
+                                })
+                            }
+                            resolve();
+                        })
+                    }));
+                    break;
+                case states.deleted:
+                    promises.push(new Promise(function (resolve, reject) {
+                        wiApiService.removeGroup(groupModel.properties.idGroup, function () {
+                            if (Array.isArray(groupModel.children)) {
+                                groupModel.children.forEach(function (child) {
+                                    let childPromises = handleGroupApi(child);
+                                    promises.push.apply(promises, childPromises);
+                                })
+                            }
+                            resolve();
+                        })
+                    }));
+                    break;
+                case states.uncreated:
+                    break;
+                case states.unchanged:
+                default:
+                    if (Array.isArray(groupModel.children)) {
+                        groupModel.children.forEach(function (child) {
+                            let childPromises = handleGroupApi(child);
+                            promises.push.apply(promises, childPromises);
+                        })
+                    }
+                    break;
+            }
+            return promises;
+        }
+        function handleWellApi () {
+            let selectedWells = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            let promises = [];
+            if (Array.isArray(selectedWells) && selectedWells[0].type == 'well') {
+                selectedWells.forEach(wellModel => {
+                    if (wellModel.properties.idGroup != selectedGroup.properties.idGroup) {
+                        wellModel.properties.idGroup = selectedGroup.properties.idGroup;
+                        promises.push(new Promise((resolve, reject) => {
+                            wiApiService.editWell(wellModel.properties, () => {
+                                resolve();
+                            })
+                        }));
+                    }
+                });
+            }
+            return promises;
+        }
         this.onOkButtonClicked = function () {
-            close(null);
+            let groupPromises = handleGroupApi(rootNode);
+            if (groupPromises.length){
+                Promise.all(groupPromises)
+                    .then(function () {
+                        let wellPromises = handleWellApi();
+                        Promise.all(wellPromises).then(() => {
+                            close(true);
+                        })
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                    })
+            } else {
+                let wellPromises = handleWellApi();
+                if (wellPromises.length) {
+                    Promise.all(wellPromises).then(() => {
+                        close(true);
+                    });
+                } else {
+                    close(false);
+                }
+            }
         }
         this.onCancelButtonClicked = function () {
             close(null);
@@ -10370,7 +10632,8 @@ exports.groupManagerDialog = function (ModalService, callback) {
     }).then(function (modal) {
         modal.element.modal();
         $(modal.element[0].children[0]).draggable();
-        modal.close.then(function () {
+        modal.close.then(function (updated) {
+            updated && callback && callback();
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
