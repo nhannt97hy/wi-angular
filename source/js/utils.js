@@ -79,12 +79,15 @@ function warning (warningMessage, callback) {
 exports.warning = warning;
 
 exports.projectOpen = function (wiComponentService, projectData) {
+    let LProject = {id:projectData.idProject, name:projectData.name};
+    window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
 
 exports.projectClose = function (wiComponentService) {
+    window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
 };
 
@@ -2646,5 +2649,20 @@ function getDataTopBottomRange(data, topPos, bottomPos) {
     }
     return retData;
 }
-
 exports.getDataTopBottomRange = getDataTopBottomRange;
+
+function convertRangeDepthToIndex (depth, well) {
+    let d = Math.round((
+                depth - parseFloat(well.properties.topDepth))
+                            /parseFloat(well.properties.step));
+    return d;
+}
+exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
+function getZoneSetsInWell (well) {
+    let zoneSets = [];
+    well.children.forEach(function(child) {
+        if(child.type == 'zonesets') zoneSets = angular.copy(child.children);
+    })
+    return zoneSets;
+}
+exports.getZoneSetsInWell = getZoneSetsInWell;
