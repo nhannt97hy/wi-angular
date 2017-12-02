@@ -5,11 +5,10 @@ function WiBaseTreeController() {
     let self = this;
 
     this.$onInit = function () {
-        console.log('WiBaseTreeController oninit self', self);    
     };
 
     this.onReady = function () {
-    };  
+    };
 
     this.onCollapse = function ($index) {
         console.log('collapse');

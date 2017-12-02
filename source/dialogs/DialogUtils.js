@@ -1,3 +1,23 @@
+function initModal(modal) {
+    modal.element.modal();
+    $(modal.element).prop('tabindex', 1);
+    $(modal.element[0].children[0]).draggable();
+    $(modal.element).keyup(function (e) {
+        let okButton, cancelButton;
+        let buttonElems = $(modal.element).find('.modal-footer > button');
+        for (let i = 0; i < buttonElems.length; i++) {
+            if (buttonElems[i].innerText.toLowerCase().trim() == 'ok') {
+                okButton = buttonElems[i];
+            }
+            if (buttonElems[i].innerText.toLowerCase().trim() == 'cancel') {
+                cancelButton = buttonElems[i];
+            }
+        }
+        if (e.keyCode == $.ui.keyCode.ENTER && okButton) okButton.click();
+        if (e.keyCode == $.ui.keyCode.ESCAPE && cancelButton) cancelButton.click();
+    });
+}
+
 exports.authenticationDialog = function (ModalService, wiComponentService,callback) {
     function ModalController($scope, close, wiApiService) {
         let self = this;
@@ -96,9 +116,8 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         $('.modal-backdrop').css({'opacity': 1, 'background-color': '#ffffff'});
-        $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -121,8 +140,7 @@ function authenticationMessage(ModalService, type, message, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             if (callback) callback();
             $('.modal-backdrop').last().remove();
@@ -160,8 +178,7 @@ exports.newProjectDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -224,8 +241,7 @@ exports.openProjectDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -251,8 +267,7 @@ exports.confirmDialog = function (ModalService, titleMessage, confirmMessage, ca
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -286,7 +301,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modal.element.modal('show');
-        $(modal.element[0].children[0]).draggable();
+
         window.TESTMODAL = modal.element;
         setTimeout(function() {
             $(modal.element[0]).find('input').focus();
@@ -500,8 +515,7 @@ exports.unitSettingDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -551,8 +565,7 @@ exports.addNewDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -574,8 +587,7 @@ exports.wellHeaderDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -621,8 +633,7 @@ exports.depthConversionDialog = function (ModalService, DialogUtils, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -652,7 +663,7 @@ exports.curveAliasDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -673,8 +684,7 @@ exports.familyEditDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -705,8 +715,7 @@ exports.newBlankLogplotDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         setTimeout(function() {
             $(modal.element[0]).find('input').focus();
         }, 500);
@@ -739,8 +748,7 @@ exports.tripleComboDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -768,8 +776,7 @@ exports.densityNeutronDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -796,8 +803,7 @@ exports.resistivitySonicDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -824,8 +830,7 @@ exports.threeTracksBlankDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -852,8 +857,7 @@ exports.inputCurveDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -880,8 +884,7 @@ exports.lithoSynCurveDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -925,8 +928,7 @@ exports.lineStyleDialog = function (ModalService, wiComponentService, callback, 
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -984,8 +986,7 @@ exports.symbolStyleDialog = function (ModalService, wiComponentService, callback
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -1065,8 +1066,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (lineOptions, symbolOptions) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -1361,8 +1361,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         thisModalController.drawSample();
         switch (thisModalController.curveOptions.displayMode) {
             case "Line":
@@ -1442,7 +1441,7 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -1605,7 +1604,7 @@ exports.importLASDialog = function (ModalService) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -1797,7 +1796,7 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -1828,7 +1827,7 @@ exports.importFromInventoryDialog = function (ModalService) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -1948,7 +1947,7 @@ exports.importFromInventoryDialog = function (ModalService) {
         // controller: ModalController,
         // controllerAs: "wiModal"
     // }).then(function (modal) {
-        // modal.element.modal();
+        // initModal(modal);
         // modal.close.then(function (data) {
             // $('.modal-backdrop').last().remove();
             // $('body').removeClass('modal-open');
@@ -2057,9 +2056,8 @@ exports.fillPatternSettingDialog = function (ModalService, callback, options, sh
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         thisModal.enableFill("positiveNegative", false);
-        $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -2124,8 +2122,7 @@ exports.variableShadingDialog = function (ModalService, callback, options, selec
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -2644,9 +2641,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         thisModal.enableFill("positiveNegative", false);
-        $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -3723,7 +3719,7 @@ ModalService.showModal({
     controller: ModalController,
     controllerAs: "wiModal"
 }).then(function (modal) {
-    modal.element.modal();
+    initModal(modal);
     if (options.shadingOnly) { wiModal.shadingOnly = true };
     $(modal.element[0].children[0]).draggable();
     modal.close.then(function (data) {
@@ -3776,8 +3772,7 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -3860,8 +3855,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -3919,8 +3913,7 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -3977,8 +3970,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -4097,8 +4089,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -4126,8 +4117,7 @@ exports.showImageDialog = function (ModalService, image, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -4152,8 +4142,7 @@ function errorMessageDialog(ModalService, errorMessage, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -4176,8 +4165,7 @@ function warningMessageDialog (ModalService, warningMessage, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             if (callback) callback();
             $('.modal-backdrop').last().remove();
@@ -4203,8 +4191,7 @@ exports.aboutDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -4238,8 +4225,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -4268,8 +4254,7 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (newPlot) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -4309,8 +4294,7 @@ exports.colorPickerDialog1 = function (ModalService, currentColor, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         $('#cp').colorpicker({
             format: 'rgba',
             inline: true,
@@ -4514,8 +4498,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         modalCtrl.CpCustoms = modalCtrl.loadColorCustom();
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         const cpOptions = {
             customClass: 'cp-custom',
             container: '#cp-container',
@@ -4628,9 +4611,8 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
+        initModal(modal);
         thisModal.enableFill("positiveNegative", false);
-        $(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -5053,8 +5035,7 @@ this.onApplyButtonClicked = function () {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal({backdrop:'static', keyboard:false});
-        $(modal.element[0].children[0]).draggable();
+
         modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
@@ -5497,8 +5478,7 @@ exports.crossplotFormatDialog1 = function (ModalService, wiCrossplotCtrl, callba
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -5581,8 +5561,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -5759,8 +5738,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('.modal').remove();
@@ -5794,8 +5772,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         setTimeout(function() {
             $(modal.element[0]).find('input').focus();
         }, 500);
@@ -5988,7 +5965,7 @@ ModalService.showModal({
     controller: ModalController,
     controllerAs: 'wiModal'
 }).then(function (modal) {
-    modal.element.modal();
+    initModal(modal);
     $(modal.element[0].children[0]).draggable();
     modal.close.then(function (ret) {
         $('.modal-backdrop').last().remove();
@@ -6054,8 +6031,7 @@ exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -6148,8 +6124,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -6361,8 +6336,7 @@ exports.regressionLineDialog = function (ModalService, wiD3Crossplot, callback){
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('.modal').remove();
@@ -6790,7 +6764,7 @@ ModalService.showModal({
     controller: ModalController,
     controllerAs: 'wiModal'
 }).then(function (modal) {
-    modal.element.modal();
+    initModal(modal);
     $(modal.element[0].children[0]).draggable();
     modal.close.then(function (ret) {
         $('.modal-backdrop').last().remove();
@@ -7039,8 +7013,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -7291,8 +7264,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('.modal').remove();
@@ -7545,8 +7517,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -7702,8 +7673,7 @@ exports.userDefineLineDialog = function (ModalService, wiD3Crossplot, callback){
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('.modal').remove();
@@ -7744,8 +7714,7 @@ exports.annotationPropertiesDialog = function (ModalService, annotationPropertie
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -7931,8 +7900,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -8147,7 +8115,7 @@ ModalService.showModal({
     controller: ModalController,
     controllerAs: 'wiModal'
 }).then(function (modal) {
-    modal.element.modal();
+    initModal(modal);
     $(modal.element[0].children[0]).draggable();
     modal.close.then(function (ret) {
         $('.modal-backdrop').last().remove();
@@ -8357,7 +8325,7 @@ ModalService.showModal({
     controller: ModalController,
     controllerAs: 'wiModal'
 }).then(function (modal) {
-    modal.element.modal();
+    initModal(modal);
     $(modal.element[0].children[0]).draggable();
     modal.close.then(function (ret) {
         $('.modal-backdrop').last().remove();
@@ -8599,8 +8567,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -8775,8 +8742,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -8971,8 +8937,7 @@ exports.mergeCurveDialog = function (ModalService) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -9229,8 +9194,7 @@ exports.fillDataGapsDialog = function(ModalService){
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -9418,8 +9382,7 @@ exports.curveDerivativeDialog = function(ModalService){
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -9986,8 +9949,7 @@ exports.TVDConversionDialog = function (ModalService) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -10080,8 +10042,7 @@ exports.addCurveDialog = function (ModalService) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -10187,8 +10148,7 @@ exports.autoSizeTrackDialog = function (ModalService, wiLogplotCtrl) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -10373,8 +10333,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -10630,8 +10589,7 @@ exports.groupManagerDialog = function (ModalService, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (updated) {
             updated && callback && callback();
             $('.modal-backdrop').last().remove();
@@ -10658,8 +10616,7 @@ exports.curveFilterDialog = function(ModalService){
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
         $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -10759,8 +10716,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -10807,8 +10763,7 @@ exports.objectTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, obj
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (data) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
@@ -10928,8 +10883,7 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');

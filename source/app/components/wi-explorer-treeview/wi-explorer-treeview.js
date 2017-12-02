@@ -80,10 +80,9 @@ function WiExpTreeController($controller, wiComponentService) {
         }
     }
 
-     this.onDoubleClick = function ($index) {
-        console.log('wi-explorer-treeview onDoubleClick function');
+    this.onDoubleClick = function ($index) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let selectedNode = self.config[$index];
+        let selectedNode = this.config[$index];
         if (selectedNode.children && selectedNode.children.length) {
             selectedNode.data.childExpanded = !selectedNode.data.childExpanded;
             return;
