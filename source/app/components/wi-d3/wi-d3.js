@@ -1164,6 +1164,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
         });
+        track.onPlotMouseWheel(function () {
+            _onPlotMouseWheelCallback();
+        });
         _registerTrackCallback(track);
     }
 
@@ -1249,6 +1252,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
         });
+        track.onPlotMouseWheel(function () {
+            _onPlotMouseWheelCallback();
+        });
         _registerTrackCallback(track);
     }
 
@@ -1314,6 +1320,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         );
         track.on('keydown', function() {
             _onTrackKeyPressCallback(track);
+        });
+        track.onPlotMouseWheel(function () {
+            _onPlotMouseWheelCallback();
         });
         _registerTrackCallback(track);
     }

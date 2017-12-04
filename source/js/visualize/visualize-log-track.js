@@ -654,11 +654,11 @@ LogTrack.prototype.onPlotMouseLeave = function(cb) {
 
 /**
  * Register event when mouse wheel on the plot area
- */
 LogTrack.prototype.onPlotMouseWheel = function(cb) {
     this.plotContainer
         .on('mousewheel', cb);
 }
+ */
 
 /**
  * Register event when mouse down the plot area

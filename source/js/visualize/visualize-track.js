@@ -536,3 +536,9 @@ Track.prototype.genColor = function() {
     }
     return color;
 }
+// TUNG: move onPlotMouseWheel from subclass LogTrack to superclass Track, 
+//    so that other kinds of track can be scrollable
+Track.prototype.onPlotMouseWheel = function(cb) {
+    this.plotContainer
+        .on('mousewheel', cb);
+}
