@@ -10379,18 +10379,23 @@ exports.groupManagerDialog = function (ModalService, callback) {
             groupModel.data.childExpanded = true;
         })
         let selectedGroup = rootNode;
-        this.onSelectGroup = function ($index, $event, groupModel) {
+        this.onSelectGroup = function ($index, $event) {
             selectedGroup.data.selected = false;
+            let groupModel = this.config[$index]; // this: base treeview controller
             groupModel.data.selected = true;
             selectedGroup = groupModel;
         }
         this.selectGroup = function (groupModel) {
-            self.onSelectGroup(null, null, groupModel);
+            selectedGroup.data.selected = false;
+            groupModel.data.selected = true;
+            selectedGroup = groupModel;
         }
-        this.getItemTreeviewCtxMenu = function (nodeType, treeviewCtrl) {
-            switch (nodeType) {
+        this.showContextMenu = function ($event, $index) {
+            console.log('group model', selectedGroup);
+            let contextMenu;
+            switch (selectedGroup.type) {
                 case 'rootGroup':
-                    return [
+                    contextMenu = [
                         {
                             name: "Add",
                             label: "Add",
@@ -10402,7 +10407,7 @@ exports.groupManagerDialog = function (ModalService, callback) {
                     ]
                     break;
                 case 'group':
-                    return [
+                    contextMenu = [
                         {
                             name: "Add",
                             label: "Add",
@@ -10422,7 +10427,12 @@ exports.groupManagerDialog = function (ModalService, callback) {
                             label: "Rename",
                             icon: "annotation-16x16-edit",
                             handler: function () {
-                                // doing
+                                groupNameDialog(selectedGroup.properties.name, function (newGroupName) {
+                                    if (selectedGroup.properties.name == newGroupName) return;
+                                    selectedGroup.properties.name = newGroupName;
+                                    selectedGroup.state = states.changed;
+                                    selectedGroup.data.label = newGroupName;
+                                });
                             }
                         }
                     ]
@@ -10430,6 +10440,7 @@ exports.groupManagerDialog = function (ModalService, callback) {
                 default:
                     break;
             }
+            wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
         }
         function isGroupNameValid(groupName, groupModel) {
             if (!groupModel) groupModel = rootNode;
@@ -10514,12 +10525,6 @@ exports.groupManagerDialog = function (ModalService, callback) {
                 case states.deleted:
                     promises.push(new Promise(function (resolve, reject) {
                         wiApiService.removeGroup(groupModel.properties.idGroup, function () {
-                            if (Array.isArray(groupModel.children)) {
-                                groupModel.children.forEach(function (child) {
-                                    let childPromises = handleGroupApi(child);
-                                    promises.push.apply(promises, childPromises);
-                                })
-                            }
                             resolve();
                         })
                     }));
@@ -10618,7 +10623,7 @@ exports.curveFilterDialog = function(ModalService){
     }).then(function (modal) {
         initModal(modal);
         modal.close.then(function () {
-        $('.modal-backdrop').last().remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });

@@ -7,19 +7,6 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
     window.exTree.push(this);
 
     this.$onInit = function () {
-        // if it is rootview
-        if (self.isRoot) {
-            wiComponentService.putComponent(self.name, self);
-            wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
-                self.updateWellItem(well);
-            });
-            wiComponentService.on(wiComponentService.UPDATE_MULTI_WELLS_EVENT, function (wells) {
-                self.updateWellsItem(wells);
-            });
-            wiComponentService.on(wiComponentService.UPDATE_LOGPLOT_EVENT, function (logplot) {
-                self.updateLogplotItem(logplot);
-            });
-        }
         if (!self.onClick) self.onClick = function ($index, $event, node) {
             if (!this.container && !this.container.selectHandler) return;
             node.$index = $index;

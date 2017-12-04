@@ -1,11 +1,8 @@
-<wi-base-treeview 
-	name={{wiExplorerTreeview.baseTreeviewName}} 
-	contextmenuholder="{{wiExplorerTreeview.contextmenuholder}}"
-	config='wiExplorerTreeview.config'
-	onclickfunction='wiExplorerTreeview.onClick'
-	ondoubleclickfunction='wiExplorerTreeview.onDoubleClick'
+<wi-base-treeview
+	name={{wiExplorerTreeview.name}}
 	container='wiExplorerTreeview.container'
-	showcontextmenufunction='wiExplorerTreeview.showContextMenu'
-	getitemactivenamefunction='wiExplorerTreeview.getItemActiveName'
-	>
+	config='wiExplorerTreeview.config'
+	on-ready-function='wiExplorerTreeview.onReady'
+	on-click-function='wiExplorerTreeview.onClick'
+	show-context-menu-function='wiExplorerTreeview.showContextMenu'>
 </wi-base-treeview>

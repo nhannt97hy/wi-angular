@@ -2,28 +2,12 @@ const componentName = 'wiExplorerTreeview';
 const moduleName = 'wi-explorer-treeview';
 const wiBaseTreeview = require('./wi-base-treeview');
 
-function WiExpTreeController($controller, wiComponentService) {
+function WiExpTreeController($controller, wiComponentService, wiApiService) {
 
     let self = this;
 
     this.$onInit = function () {
-        // self = angular.extend(self, $controller(wiBaseTreeview.controller,{}));
-        // wiComponentService.putComponent(self.name, self);
-        // console.log('wiExplorerTreeview onInit self', self);
         window.__WIEXPTREE = self;
-
-        if (self.isRoot) {
-            wiComponentService.putComponent(self.name, self);
-            wiComponentService.on(wiComponentService.UPDATE_WELL_EVENT, function (well) {
-                self.updateWellItem(well);
-            });
-            wiComponentService.on(wiComponentService.UPDATE_MULTI_WELLS_EVENT, function (wells) {
-                self.updateWellsItem(wells);
-            });
-            wiComponentService.on(wiComponentService.UPDATE_LOGPLOT_EVENT, function (logplot) {
-                self.updateLogplotItem(logplot);
-            });
-        }
     };
 
     this.onReady = function () {
@@ -34,7 +18,6 @@ function WiExpTreeController($controller, wiComponentService) {
     };
 
     this.onClick = function ($index, $event) {
-        console.log('wi-explorer-treeview onclick $index', $index);
         if (!this.container && this.container.selectHandler) return;
         let node = this.config[$index];
         node.$index = $index;
@@ -80,33 +63,22 @@ function WiExpTreeController($controller, wiComponentService) {
         }
     }
 
-    this.onDoubleClick = function ($index) {
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let selectedNode = this.config[$index];
-        if (selectedNode.children && selectedNode.children.length) {
-            selectedNode.data.childExpanded = !selectedNode.data.childExpanded;
-            return;
-        }
-        if (selectedNode.handler) {
-            selectedNode.handler();
-        }
-    }
-
-    this.getItemActiveName = function () {
-        return wiComponentService.getState(wiComponentService.ITEM_ACTIVE_STATE);
-    };
-
     this.showContextMenu = function ($event, $index) {
         let nodeType = this.config[$index].type;
-        let contextMenuHolderCtrl = wiComponentService.getComponent(this.contextmenuholder);
-        let defaultContextMenu = contextMenuHolderCtrl.getDefaultTreeviewCtxMenu($index, this);
-        let itemContextMenu = contextMenuHolderCtrl.getItemTreeviewCtxMenu(nodeType,this);
+        let container = this.container;
+        let defaultContextMenu = container.getDefaultTreeviewCtxMenu($index, this);
+        let itemContextMenu = container.getItemTreeviewCtxMenu(nodeType,this);
         let contextMenu = itemContextMenu.concat(defaultContextMenu);
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
-}
 
-WiExpTreeController.prototype = new wiBaseTreeview.controller();
+    // let WiBaseTreeController = new wiBaseTreeview.controller();
+    // for (const key in WiBaseTreeController) {
+    //     if (WiBaseTreeController.hasOwnProperty(key) && !this[key]) {
+    //         this[key] = WiBaseTreeController[key];
+    //     }
+    // }
+}
 
 let app = angular.module(moduleName, [wiBaseTreeview.name]);
 app.component(componentName, {
@@ -114,13 +86,9 @@ app.component(componentName, {
     controller: WiExpTreeController,
     controllerAs: componentName,
     bindings: {
-        isRoot: '<',
         name: '@',
         config: '<',
-        contextmenuholder: '@',
-        baseTreeviewName: '<',
-        container: '<',
-        isShowParentName: '<'
+        container: '<'
     }
 });
 exports.name = moduleName;

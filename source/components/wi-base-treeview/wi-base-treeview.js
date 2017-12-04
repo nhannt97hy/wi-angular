@@ -1,24 +1,16 @@
 const componentName = 'wiBaseTreeview';
 const moduleName = 'wi-base-treeview';
 
-function WiBaseTreeController() {
+function WiBaseTreeController(wiComponentService) {
     let self = this;
 
     this.$onInit = function () {
-    };
-
-    this.onReady = function () {
+        wiComponentService.putComponent(self.name, self);
     };
 
     this.onCollapse = function ($index) {
-        console.log('collapse');
         this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
     };
-
-    // this.onDoubleClick = function ($index) {
-    //     console.log('double click');
-    //     this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
-    // };
 
     this.addItem = function (parentName, item) {
         let parentItem = this.getItemByName(parentName);
@@ -33,97 +25,6 @@ function WiBaseTreeController() {
             parentItem.children.unshift(item);
         }
     };
-
-    this.updateWellItem = function (well) {
-        let wellSelected = this.findWellById(well.idWell);
-
-        let newWell = new WiWell(well);
-
-        if (wellSelected) {
-            angular.copy(newWell, wellSelected);
-        } else {
-            let wells = this.getItemByName('wells');
-
-            if (wells) wells.children.unshift(newWell);
-        }
-    };
-
-    this.updateWellsItem = function(wells) {
-        for(let well of wells) {
-            this.updateWellItem(well);
-        }
-    };
-
-    this.updateLogplotItem = function (logplot) {
-        let plotSelected = this.findWellById(logplot.idPlot);
-
-        let newPlotItem = new WiLogplotModel();
-
-        let newWell = new WiWell(well);
-
-        if (wellSelected) {
-            angular.copy(newWell, wellSelected);
-        } else {
-            let wells = this.getItemByName('wells');
-
-            if (wells) wells.children.unshift(newWell);
-        }
-    };
-
-    // item has id to identify
-    this.updateChildItem = function (parentItemName, item) {
-
-    };
-
-    this.findWellById = function (idWell) {
-        let wells = this.getItemByName('wells');
-        let wellName = idWell + 'well';
-
-        if (!wells) return null;
-
-        for (let itemTree of wells.children) {
-            if (itemTree.type === 'well' && itemTree.name === wellName) {
-                return itemTree;
-            }
-        }
-
-        return null;
-    };
-    
-    this.getItemByName = function (name) {
-        let itemSelect = null;
-        console.log('getItemByName this', this);
-        console.log('getItemByName this.config', this.config);
-        for (let item of this.config) {
-            if (item.name === name) {
-                return item;
-            }
-
-            itemSelect = this.findChildItemByName(item, name);
-            if (itemSelect) {
-                return itemSelect;
-            }
-        }
-
-        return itemSelect;
-    }
-
-    this.findChildItemByName = function (item, name) {
-        if (!item || !item.children) return;
-
-        let childSelect = null;
-        for (let child of item.children) {
-            if (child.name === name) {
-                return child;
-            } else if (child.children.length !== 0) {
-                childSelect = this.findChildItemByName(child, name);
-                if (childSelect) {
-                    return childSelect;
-                }
-            }
-        }
-        return childSelect;
-    }
 
     this.expand = function ($index) {
         this.config[$index].data.childExpanded = true;
@@ -162,6 +63,23 @@ function WiBaseTreeController() {
             collapseAll(child.children);
         }
     }
+
+    this.onClick = function ($index, $event) {
+        this.onClickFunction && this.onClickFunction($index, $event);
+    }
+
+    this.onDoubleClick = function ($index) {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let selectedNode = this.config[$index];
+        if (selectedNode.children && selectedNode.children.length) {
+            selectedNode.data.childExpanded = !selectedNode.data.childExpanded;
+            return;
+        }
+        if (selectedNode.handler) {
+            selectedNode.handler();
+        }
+        this.onDoubleClickFunction && this.onDoubleClickFunction();
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -171,13 +89,12 @@ app.component(componentName, {
     controllerAs: componentName,
     bindings: {
         name: '@',
-        config: '<',
-        contextmenuholder: '@',
-        onclickfunction: '<', 
         container: '<',
-        showcontextmenufunction: '<',
-        ondoubleclickfunction: '<',
-        getitemactivenamefunction: '<',
+        config: '<',
+        onReadyFunction: '<',
+        onClickFunction: '<',
+        onDoubleClickFunction: '<',
+        showContextMenuFunction: '<',
         isShowParentName: '<'
     }
 });

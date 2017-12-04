@@ -1102,7 +1102,6 @@ function updateWellProject(wiComponentService, well) {
         }
     }
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
-    //wiComponentService.emit(wiComponentService.UPDATE_WELL_EVENT, well);
     wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
 };
 
@@ -1524,7 +1523,6 @@ exports.openLogplotTab = openLogplotTab;
         selectWellProject.plots.push(logplot);
     }
 
-    wiComponentService.emit(wiComponentService.UPDATE_LOGPLOT_EVENT, logplot);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
 }
 
@@ -1743,8 +1741,6 @@ let refreshProjectState = function () {
         let ScrollTmp = dom.scrollTop;
         window.localStorage.setItem('scrollTmp', ScrollTmp);
         wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
-            console.log("Refresh");
-            console.log(projectRefresh);
             sortProjectData(projectRefresh);
 
             wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);

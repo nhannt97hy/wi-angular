@@ -11,8 +11,15 @@
                     <button class="btn btn-default" ng-click="wiModal.onRemoveButtonClicked()"><span class="close-16x16-edit"></span>&nbsp;Remove</button>
                 </div>
                 <div class="row">
-                    <wi-treeview name="groupManagerTreeView" config="wiModal.treeConfig"
-                        container="wiModal" on-click="wiModal.onSelectGroup"></wi-treeview>
+                    <!-- <wi-treeview name="groupManagerTreeView" config="wiModal.treeConfig"
+                        container="wiModal" on-click="wiModal.onSelectGroup"></wi-treeview> -->
+                    <wi-base-treeview
+                        name="groupManagerTreeView"
+                        container='wiModal'
+                        config="wiModal.treeConfig"
+                        on-click-function='wiModal.onSelectGroup'
+                        show-context-menu-function='wiModal.showContextMenu'>
+                    </wi-base-treeview>
                 </div>
             </div>
             <div class="modal-footer">
