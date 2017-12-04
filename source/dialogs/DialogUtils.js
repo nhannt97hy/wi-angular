@@ -10377,6 +10377,14 @@ exports.groupManagerDialog = function (ModalService, callback) {
         groups.forEach(function (group) {
             let groupModel = utils.getGroupModel(group.idGroup, groups, rootNode);
             groupModel.data.childExpanded = true;
+            groupModel.actions = [
+                {
+                    icon: 'close-16x16-edit',
+                    handler: function () {
+                        self.onRemoveButtonClicked(groupModel);
+                    }
+                }
+            ];
         })
         let selectedGroup = rootNode;
         this.onSelectGroup = function ($index, $event) {
@@ -10474,19 +10482,28 @@ exports.groupManagerDialog = function (ModalService, callback) {
                 }
                 let newGroupModel = groupToTreeConfig(newGroup);
                 newGroupModel.data.childExpanded = true;
+                newGroupModel.actions = [
+                    {
+                        icon: 'close-16x16-edit',
+                        handler: function () {
+                            self.onRemoveButtonClicked(newGroupModel);
+                        }
+                    }
+                ];
                 newGroupModel.state = states.created;
                 selectedGroup.children.push(newGroupModel);
                 self.selectGroup(newGroupModel);
             });
         }
-        this.onRemoveButtonClicked = function () {
-            if (selectedGroup.type == 'rootGroup') return;
-            if (selectedGroup.state == states.created) {
-                selectedGroup.state = states.uncreated;
+        this.onRemoveButtonClicked = function (groupModel) {
+            if (!groupModel) groupModel = selectedGroup;
+            if (groupModel.type == 'rootGroup') return;
+            if (groupModel.state == states.created) {
+                groupModel.state = states.uncreated;
             } else {
-                selectedGroup.state = states.deleted;
+                groupModel.state = states.deleted;
             }
-            selectedGroup.data.deleted = true;
+            groupModel.data.deleted = true;
             self.selectGroup(rootNode);
         }
         function handleGroupApi(groupModel) {

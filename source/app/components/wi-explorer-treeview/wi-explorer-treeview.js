@@ -64,6 +64,7 @@ function WiExpTreeController($controller, wiComponentService, wiApiService) {
     }
 
     this.showContextMenu = function ($event, $index) {
+        console.log(this.config[$index]);
         let nodeType = this.config[$index].type;
         let container = this.container;
         let defaultContextMenu = container.getDefaultTreeviewCtxMenu($index, this);
