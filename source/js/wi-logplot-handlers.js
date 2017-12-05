@@ -549,13 +549,35 @@ exports.ImportTrackButtonClicked = function () {
         });
     }, true);
 }
-exports.AutoSizeTrackCheckboxClicked = function () {
+exports.AutoSizeTrackButtonClicked = function () {
     console.log("AutoSizeTrackCheckboxClicked");
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
     DialogUtils.autoSizeTrackDialog(this.ModalService, wiLogplot, function () {
+
+    });
+};
+
+exports.TrackBolkUpdateButtonClicked = function () {
+    console.log("TrackBolkUpdateButtonClicked");
+    let self = this;
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let wiLogplot = this.wiLogplot;
+    let timeoutFunc = this.$timeout;
+    DialogUtils.trackBolkUpdateDialog(this.ModalService, wiLogplot, function () {
+
+    });
+};
+
+exports.CurveBolkUpdateButtonClicked = function () {
+    console.log("TrackBolkUpdateButtonClicked");
+    let self = this;
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let wiLogplot = this.wiLogplot;
+    let timeoutFunc = this.$timeout;
+    DialogUtils.curveBolkUpdateDialog(this.ModalService, wiLogplot, function () {
 
     });
 };

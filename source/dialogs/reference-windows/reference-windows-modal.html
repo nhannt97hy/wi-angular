@@ -72,8 +72,8 @@
                                 <tbody>
                                      
                                     <tr ng-repeat="ref_curve in wiModal.ref_Curves_Arr"
-                                    ng-click="wiModal.setClickedRow($index)"
-                                    ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}" >
+                                        ng-click="wiModal.setClickedRow($index)"
+                                        ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}" >
                                         <td ng-class="{'color-navy': $index == wiModal.SelectedRefCurve}" width="2%">
                                         </td>
                                         <td width="25%">

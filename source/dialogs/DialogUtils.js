@@ -10402,3 +10402,158 @@ exports.curveFilterDialog = function(ModalService){
         });
     });
 }
+
+exports.userFormulaDialog = function (ModalService, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+
+        let self = this;
+        window.uf = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.wells = wiExplorer.treeConfig[0].children;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+
+        this.applyingInProgress = false;
+        
+
+        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
+        else this.wellModel = this.wells[0];
+
+        this.idWell = this.wellModel.id;
+        selectWell(this.idWell);
+
+        this.selectWell = selectWell;
+        function selectWell (idWell) {
+            self.wellModel = utils.findWellById(idWell);
+            self.curves = [];
+            self.datasets = [];
+            getAllCurvesOnSelectWell(self.wellModel);
+        }
+
+        function getAllCurvesOnSelectWell(well) {
+            well.children.forEach(function (child) {
+                if (child.type == 'dataset') self.datasets.push(child);
+            });
+            self.datasets.forEach(function (child) {
+                child.children.forEach(function (item) {
+                    if (item.type == 'curve') {
+                        self.curves.push(item);
+                    }
+                })
+            });
+            self.selectedDataset = self.datasets[0];
+            self.desCurve = {
+                idDataset: self.curves[0].properties.idDataset,
+                curveName: self.curves[0].name,
+                idDesCurve: self.curves[0].id,
+                data: []
+            };
+        }
+        
+        this.onRunButtonClicked = function () {
+            
+        }
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+
+    }
+
+    ModalService.showModal({
+        templateUrl: "user-formula/user-formula-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
+    });
+}
+
+exports.trackBolkUpdateDialog = function (ModalService, wiLogplotCtrl) {
+    function ModalController(wiComponentService, wiApiService, close) {
+        let self = this;
+        window.tBolk = this;
+
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
+        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+
+        // let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
+        // let depthTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'depth-track');
+        // let imageTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'image-track');
+        // let zoneTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'zone-track');
+
+        this.tracks = angular.copy(wiD3Ctrl.getTracks());
+        console.log("tracks", this.tracks);
+        
+        this.onApplyButtonClicked = function(){
+        };
+        this.onOkButtonClicked = function(){
+            close(self);
+        };
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "track-bolk-update/track-bolk-update-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}
+exports.curveBolkUpdateDialog = function (ModalService, wiLogplotCtrl) {
+    function ModalController(wiComponentService, wiApiService, close) {
+        let self = this;
+        window.tBolk = this;
+
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
+        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+
+        // let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
+        // let depthTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'depth-track');
+        // let imageTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'image-track');
+        // let zoneTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'zone-track');
+
+        // this.tracks = wiD3Ctrl.getTracks();
+        // console.log("tracks", this.tracks);
+        
+        this.onApplyButtonClicked = function(){
+        };
+        this.onOkButtonClicked = function(){
+            close(self);
+        };
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: "curve-bolk-update/curve-bolk-update-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function () {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
+}

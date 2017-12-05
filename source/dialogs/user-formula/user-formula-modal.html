@@ -1,0 +1,185 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;User Formula</h4>
+            </div>
+            <div class="modal-body dialog-style">
+                <p></p>
+                <form class='form-horizontal form-condensed'>
+                    <div class="row">
+                        <h5>Select Well</h5>
+                        <div class="form-group padding-left-1em">
+                            <label class="control-label col-sm-1">Well</label>
+                            <div class="col-sm-6">
+                                <select ng-model="wiModal.idWell"
+                                        class="form-control wi-form-control"
+                                        ng-options="well.id as well.properties.name for well in wiModal.wells"
+                                        ng-change="wiModal.selectWell(wiModal.idWell)">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h5>Formula</h5>
+                        <div class="form-group padding-left-1em">
+                            <label class="control-label col-sm-1">If</label>
+                            <div class="col-sm-2">
+                                <select ng-model="wiModal.curve1"
+                                        ng-options="curve as curve.properties.name for curve in wiModal.curves"
+                                        class="form-control wi-form-control">
+                                </select>
+                            </div>
+                            <div class="col-sm-1 padding-0">
+                                <select class="form-control wi-form-control">
+                                    <option value="blank"></option>
+                                    <option value="greater">&gt;</option>
+                                    <option value="less">&lt;</option>
+                                    <option value="equals">&#61;</option>
+                                    <option value="gEquals">&ge;</option>
+                                    <option value="lEquals">&le;</option>
+                                    <option value="nEquals">&lt;&gt;</option>
+                                    <option value="isNull">Is Null</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <select ng-model="wiModal.curve2"
+                                        ng-options="curve as curve.properties.name for curve in wiModal.curves"
+                                        class="form-control wi-form-control">
+                                </select>
+                            </div>
+                            <div class="col-sm-1 padding-0">
+                                <select class="form-control wi-form-control">
+                                    <option value="blank"></option>
+                                    <option value="and">AND</option>
+                                    <option value="or">OR</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <select ng-model="wiModal.curve3"
+                                        ng-options="curve as curve.properties.name for curve in wiModal.curves"
+                                        class="form-control wi-form-control">
+                                </select>
+                            </div>
+                            <div class="col-sm-1 padding-0">
+                                <select class="form-control wi-form-control">
+                                    <option value="blank"></option>
+                                    <option value="greater">&gt;</option>
+                                    <option value="less">&lt;</option>
+                                    <option value="equals">&#61;</option>
+                                    <option value="gEquals">&ge;</option>
+                                    <option value="lEquals">&le;</option>
+                                    <option value="nEquals">&lt;&gt;</option>
+                                    <option value="isNull">Is Null</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <select ng-model="wiModal.curve4"
+                                        ng-options="curve as curve.properties.name for curve in wiModal.curves"
+                                        class="form-control wi-form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group padding-left-1em">
+                            <label class="control-label col-sm-1">Then</label>
+                            <div class="col-sm-11">
+                                <select ng-model="wiModal.thenCurve"
+                                        ng-options="curve as curve.properties.name for curve in wiModal.curves"
+                                        class="form-control wi-form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group padding-left-1em">
+                            <label class="control-label col-sm-1">Else</label>
+                            <div class="col-sm-11">
+                                <select ng-model="wiModal.elseCurve"
+                                        ng-options="curve as curve.properties.name for curve in wiModal.curves"
+                                        class="form-control wi-form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h5>Clip Resultant Curves</h5>
+                        <div class="form-group padding-left-1em">
+                            <label class="col-sm-4">
+                                <input type="checkbox">
+                                Clip Resultant Curves
+                            </label>
+                            <label class="control-label col-sm-1 padding-right-0">Min Value</label>
+                            <div class="col-sm-3">
+                                <select class="form-control wi-form-control">
+                                </select>
+                            </div>
+                            <label class="control-label col-sm-1 padding-right-0">Max Value</label>
+                            <div class="col-sm-3">
+                                <select class="form-control wi-form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h5>Result Curve</h5>
+
+                        <div class="col-sm-6 padding-0">
+                            <div class="form-group padding-left-1em">
+                                <label class="control-label col-sm-4 padding-right-0">Dataset</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control wi-form-control">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group padding-left-1em">
+                                <label class="control-label col-sm-4 padding-right-0">Result Curve</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control wi-form-control">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group padding-left-1em">
+                                <label class="control-label col-sm-4 padding-right-0">Family</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control wi-form-control">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 padding-0">
+                            <div class="form-group padding-left-1em">
+                                <label class="control-label col-sm-4 padding-right-0">Top Depth</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control wi-form-control">
+                                </div>
+                            </div>
+                            <div class="form-group padding-left-1em">
+                                <label class="control-label col-sm-4 padding-right-0">Bottom Depth</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control wi-form-control">
+                                </div>
+                            </div>
+                            <div class="form-group padding-left-1em">
+                                <label class="control-label col-sm-4 padding-right-0">Unit</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control wi-form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <span class="zonation-track-add-32x32"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onRunButtonClicked();" 
+                        ng-disabled="wiModal.applyingInProgress" class="btn btn-default">
+                    <span class="run-16x16"></span>&nbsp;Run
+                </button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
+                    <span class="close-16x16"></span>&nbsp;Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

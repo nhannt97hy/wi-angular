@@ -1025,7 +1025,7 @@ exports.FormationResistivityButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.formationResistivityDialog(this.ModalService, function (data) {
-        console.log("curveAverage");
+        console.log("formationResistivityDialog");
     });
 };
 
@@ -1035,6 +1035,12 @@ exports.Badhole_Coal_SaltButtonClicked = function () {
 
 exports.UserFormulaButtonClicked = function () {
     console.log('UserFormulaButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.userFormulaDialog(this.ModalService, function (data) {
+        console.log("userFormula");
+    });
 };
 
 exports.UserProgramButtonClicked = function () {

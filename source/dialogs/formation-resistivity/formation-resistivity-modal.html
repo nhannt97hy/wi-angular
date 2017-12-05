@@ -68,7 +68,7 @@
                         <table class="text-on-table table table-bordered availableCurve">
                             <thead>
                                 <tr>    
-                                    <th width="10%"></th>
+                                    <th width="10%">Use</th>
                                     <th width="25%">Zone name</th>
                                     <th width="20%">Top</th>
                                     <th width="20%">Bottom</th>
@@ -130,7 +130,8 @@
                 <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default">
                     <span class="apply-16x16"></span>&nbsp;Apply
                 </button>
-                <button type="button" ng-click="wiModal.onRunButtonClicked();" class="btn btn-default">
+                <button type="button" ng-click="wiModal.onRunButtonClicked();" 
+                        ng-disabled="!wiModal.desCurve.curveName || wiModal.applyingInProgress" class="btn btn-default">
                     <span class="run-16x16"></span>&nbsp;Run
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
