@@ -243,6 +243,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }
                 ]);
             case 'group':
+            let groupModel = utils.getSelectedNode();
                 return [
                     {
                         label: "Group Manager",
@@ -253,23 +254,39 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             });
                         }
                     }, {
+                        label: "Delete Group",
+                        icon: "close-16x16-edit",
+                        handler: function () {
+                            wiApiService.removeGroup(groupModel.properties.idGroup, function () {
+                                utils.refreshProjectState();
+                            })
+                        }
+                    }, {
                         separator: '1'
                     }
                 ];
             case 'well':
                 let groups = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).groups;
                 let groupsContextMenu = [];
-                let wellModel = utils.getSelectedNode();
+                let wellModels = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
                 groups.forEach(group => {
-                    if (wellModel.properties.idGroup == group.idGroup) return;
+                    if (wellModels[0].properties.idGroup == group.idGroup) return;
                     groupsContextMenu.push({
                         label: group.name,
                         icon: 'group-16x16',
                         handler: function () {
-                            wellModel.properties.idGroup = group.idGroup;
-                            wiApiService.editWell(wellModel.properties, function () {
-                                utils.refreshProjectState();
+                            let promises = [];
+                            wellModels.forEach(wellModel => {
+                                wellModel.properties.idGroup = group.idGroup;
+                                promises.push(new Promise((resolve, reject) => {
+                                    wiApiService.editWell(wellModel.properties, function () {
+                                        resolve();
+                                    });
+                                }));
                             });
+                            Promise.all(promises).then(() => {
+                                utils.refreshProjectState();
+                            })
                         }
                     })
                 })
@@ -305,7 +322,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         }
                     }, {
                         name: "AddToGroup",
-                        label: "Add To Group",
+                        label: wellModels[0].properties.idGroup? "Move To Group": "Add To Group",
                         icon: "plus-16x16",
                         class: 'has-more',
                         handler: function () {
@@ -316,15 +333,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         childContextMenu: groupsContextMenu
                     }
                 ];
-                if (wellModel.properties.idGroup) {
+                if (wellModels[0].properties.idGroup) {
                     wellContextMenu.push({
                         label: 'Ungroup',
                         icon: 'clear-16x16',
                         handler: function () {
-                            wellModel.properties.idGroup = null;
-                            wiApiService.editWell(wellModel.properties, function () {
-                                utils.refreshProjectState();
+                            let promises = [];
+                            wellModels.forEach(wellModel => {
+                                wellModel.properties.idGroup = null;
+                                promises.push(new Promise((resolve, reject) => {
+                                    wiApiService.editWell(wellModel.properties, function () {
+                                        resolve();
+                                    });
+                                }));
                             });
+                            Promise.all(promises).then(() => {
+                                utils.refreshProjectState();
+                            })
                         }
                     });
                 }
