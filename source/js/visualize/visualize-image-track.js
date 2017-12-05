@@ -228,6 +228,7 @@ ImageTrack.prototype.onImageZoneHeaderMouseDown = function(imgzone, cb) {
     let self = this;
     imgzone.header.on('mousedown', function() {
         self.drawingHeaderMouseDownCallback(imgzone);
+        self.plotImageZone(imgzone);
         cb();
     });
 }

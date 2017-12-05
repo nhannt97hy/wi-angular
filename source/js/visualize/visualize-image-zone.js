@@ -224,6 +224,10 @@ ImageZone.prototype.onLineDragEnd = function(cb) {
     );
 }
 
+ImageZone.prototype.getDepthRange = function(){
+    return [this.topDepth, this.bottomDepth];
+};
+
 ImageZone.prototype.onViewportChange = function(minX, maxX, minY, maxY) {
     let viewportY = this.getViewportY()[1];
     // get out of viewport
