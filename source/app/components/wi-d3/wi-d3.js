@@ -475,8 +475,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _setCurrentTrack(track);
             let depthRange = object.getDepthRange();
             let rangeValue = depthRange[1] - depthRange[0];
-            depthRange[0] -= rangeValue * 0.20;
-            depthRange[1] += rangeValue * 0.20;
+            depthRange[0] -= rangeValue * 0.5;
+            depthRange[1] += rangeValue * 0.5;
 
             self.setDepthRange(depthRange);
             self.adjustSlidingBarFromDepthRange(depthRange);
@@ -494,19 +494,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addImageZoneToTrack = function (track, config) {
         if (!track || !track.addImageZone) return;
         let imgzone = track.addImageZone(config, track);
-        console.log(imgzone);
+
         track.plotImageZone(imgzone);
         track.rearrangeHeaders();
         track.onImageZoneMouseDown(imgzone, function() {
+            _setCurrentTrack(track);
             if (d3.event.button == 2) {
                 _imageZoneOnRightClick();
             }
         });
         track.onImageZoneHeaderMouseDown(imgzone, function() {
+            _setCurrentTrack(track);
+            let depthRange = imgzone.getDepthRange();
+            let rangeValue = depthRange[1] - depthRange[0];
+            depthRange[0] -= rangeValue * 0.5;
+            depthRange[1] += rangeValue * 0.5;
+
+            self.setDepthRange(depthRange);
+            self.adjustSlidingBarFromDepthRange(depthRange);
             if (d3.event.button == 2) {
                 _imageZoneOnRightClick();
             }
         });
+
         imgzone.on('dblclick', _imageZoneOnDoubleClick);
         imgzone.header.on('dblclick', _imageZoneOnDoubleClick);
         imgzone.onLineDragEnd(function() {
