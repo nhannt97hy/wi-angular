@@ -841,6 +841,59 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         separator: '1'
                     }
                 ];
+            case 'comboviews':
+                return [
+                    {
+                        name: "NewCombinedPlot",
+                        label: "New Combined Plot",
+                        // icon: "link-view-16x16",
+                        class: "has-more",
+                        handler: function () {
+
+                        },
+                        childContextMenu: [
+                            {
+                                name: "BlankCombinedPlot",
+                                label: "Blank Combined Plot",
+                                icon: "link-view-16x16",
+                                handler: function () {
+                                    globalHandlers.BlankComboviewButtonClicked();
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        separator: "1"
+                    }
+                ]
+            case 'comboview':
+                return [
+                    {
+                        name: "Open",
+                        label: "Open",
+                        icon: "play-16x16",
+                        handler: function() {
+                            let comboviewModel = utils.getSelectedNode();
+                            utils.openComboviewTab(comboviewModel);
+                        }
+                    }, {
+                        name: "Rename",
+                        label: "Rename",
+                        icon: "annotation-16x16-edit",
+                        handler: function() {
+
+                        }
+                    }, {
+                        name: "Delete",
+                        label: "Delete",
+                        icon: "delete-16x16",
+                        handler: function() {
+                            self.handlers.DeleteItemButtonClicked();
+                        }
+                    }, {
+                        separator: '1'
+                    }
+                ];
             case String(nodeType.match(/^.*-deleted/)):
                 return [
                     {

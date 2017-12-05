@@ -102,8 +102,7 @@ ImageTrack.prototype.doPlot = function(highlight) {
 
 ImageTrack.prototype.rearrangeHeaders = function() {
     d3.select('.vi-track-drawing-header-container').selectAll('.vi-image-zone-header').sort(function (a, b) {
-        return a.dataset.topdepth - b.dataset.topdepth;
-        // return d3.select(a).attr('data-topdepth') - d3.select(b).attr('data-topdepth');
+        return a.dataset.topdepth.localeCompare(b.dataset.topdepth);
     });
 }
 
