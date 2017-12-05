@@ -766,6 +766,7 @@ LogTrack.prototype.genXTickValues = function() {
 
 LogTrack.prototype.getTransformX = function() {
     let self = this;
+    if (!self.scale) self.scale = 'linear';
     let rangeX = this.getViewportX();
     let windowX = this.getWindowX();
     return Utils.getScaleFunc(self.scale).domain(windowX).range(rangeX);
