@@ -261,7 +261,7 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
     this.currentDrawing = drawing;
     this.tmpCurve = null;
     this.plotAllDrawings();
-    if (drawing) {
+    if (drawing && drawing.isCurve()) {
         this.updateScaleInfo({
             leftVal:drawing.minX,
             rightVal:drawing.maxX,
