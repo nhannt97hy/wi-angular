@@ -229,7 +229,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function onMouseWheel(event) {
-        let sign = (event.deltaY<0)?"-":"";
+        //let sign = (event.deltaY<0)?"-":"";
+        let sign = (event.deltaY<0)?"":"-";
         let absDelta = Math.abs(event.deltaY);
         let value = ( absDelta > 4) ? (absDelta / 3) : absDelta;
         scroll(parseInt(sign + value));
