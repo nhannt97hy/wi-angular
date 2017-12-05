@@ -1641,20 +1641,20 @@ exports.findWellByLogplot = function (idLogplot) {
     var path = getSelectedPath(function (node) {
         return node.type == "logplot" && node.id == idLogplot;
     }) || [];
-    return path[1];
+    return path.find(p => p.type == 'well');
 };
 exports.findWellByCrossplot = function (idCrossPlot) {
     var path = getSelectedPath(function (node) {
         return node.type == 'crossplot' && node.id == idCrossPlot;
     }) || [];
-    return path[1];
+    return path.find(p => p.type == 'well');
 }
 
 exports.findWellByHistogram = function (idHistogram) {
     var path = getSelectedPath(function (node) {
         return node.type == 'histogram' && node.id == idHistogram;
     }) || [];
-    return path[1];
+    return path.find(p => p.type == 'well');
 }
 
 exports.findWellByCurve = findWellByCurve;
@@ -1663,7 +1663,7 @@ function findWellByCurve(idCurve) {
     var path = getSelectedPath(function (node) {
         return node.type == 'curve' && node.id == idCurve;
     }) || [];
-    return path[1];
+    return path.find(p => p.type == 'well');
 }
 
 exports.findHistogramModelById = function (idHistogram) {
