@@ -225,14 +225,12 @@ ObjectOfTrack.prototype.raise = function () {
         case "Histogram" : 
             self.viHistogram.resizeSensor.detach();
             self.viHistogram.resizeSensor = new ResizeSensor($(self.viHistogram.container.node()), function(param) {
-                console.log("On resize", param, self.viHistogram);
                 self.viHistogram.doPlot();
             } )
             break;
         case "Crossplot" :
             self.viCrossplot.resizeSensor.detach();
             self.viCrossplot.resizeSensor = new ResizeSensor($(self.viCrossplot.root.node()), function(param) {
-                console.log("On resize", param, self.viCrossplot);
                 self.viCrossplot._doPlot();
             } )
             break;

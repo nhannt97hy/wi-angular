@@ -799,19 +799,16 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
-    if (!currentWell) {
-        utils.error('Please choose a well');
-        return;
-    }
-    let histogramsNode = utils.getStaticNode('histograms');
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'histograms') return;
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
         input: 'BlankHistogram'
     }
+
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(histogramsNode.properties.idWell, null, histogramName)
+        utils.createHistogram(selectedNode.properties.idWell, null, histogramName)
             .then(function (histogram) {
             })
             .catch(function (err) {
@@ -826,19 +823,16 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
-    if (!currentWell) {
-        utils.error('Please choose a well');
-        return;
-    }
-    let histogramsNode = utils.getStaticNode('histograms');
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'histograms') return;
     let promptConfig = {
         title: 'Create New Histogram Template',
         inputName: 'Histogram Name',
         input: name
     }
+
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(histogramsNode.properties.idWell, null, histogramName, templateHistogram)
+        utils.createHistogram(selectedNode.properties.idWell, null, histogramName, templateHistogram)
             .then(function (histogram) {
             })
             .catch(function (err) {
@@ -967,10 +961,6 @@ exports.FillDataGapsButtonClicked = function () {
 
 exports.CurveFilterButtonClicked = function () {
     console.log('CurveFilterButton is clicked');
-    let self = this;
-    let wiComponentService = this.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.curveFilterDialog(this.ModalService);
 };
 
 exports.CurveConvolutionButtonClicked = function () {
@@ -1183,3 +1173,33 @@ exports.AboutButtonClicked = function () {
 exports.UnlockButtonClicked = function () {
     console.log('UnlockButton is clicked');
 };
+
+exports.BlankComboviewButtonClicked = function () {
+    const self = this;
+    console.log('BlankComboviewButtonClicked');
+    const wiComponentService = this.wiComponentService;
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+
+    let selectedNode = utils.getSelectedNode();
+    if (selectedNode.type != 'comboviews') return;
+    let promptConfig = {
+        title: 'Create New Combined Plot',
+        inputName: 'Combined Plot Name',
+        input: 'NewCombinedPlot'
+    }
+
+    DialogUtils.promptDialog(ModalService, promptConfig, function (combinedPlotName) {
+        utils.createComboview(selectedNode.properties.idWell, combinedPlotName, null)
+            .then(function (combinedPlot) {
+            })
+            .catch(function (err) {
+                utils.error(combinedPlotName + " existed!", function () {
+                    exports.BlankComboviewButtonClicked.call(self);
+                });
+            });
+    });
+}

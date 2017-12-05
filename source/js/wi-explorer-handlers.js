@@ -93,6 +93,7 @@ exports.DeleteItemButtonClicked = function () {
                                 modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'logplots').children);
                                 modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'crossplots').children);
                                 modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'histograms').children);
+                                modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'comboviews').children);
                                 modelsWithTab.forEach(function (model) {
                                     if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
                                 });
@@ -160,6 +161,15 @@ exports.DeleteItemButtonClicked = function () {
                         wiApiService.removeHistogram(selectedNode.properties.idHistogram, function () {
                             $timeout(function () {
                                 selectedNode.data.deleted = true;
+                                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
+                                next();
+                            });
+                        });
+                        break;
+                    case 'comboview':
+                        wiApiService.removeCombinedBox(selectedNode.properties.idCombinedBox, function () {
+                            $timeout(function () {
+                                // selectedNode.data.deleted = true;
                                 wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
                                 next();
                             });

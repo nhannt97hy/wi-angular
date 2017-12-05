@@ -212,12 +212,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
                 let dataRequest = {
                     idPlot: self.logPlotCtrl.id,
-                    title: defaultImageTrackProp.title,
-                    showTitle: defaultImageTrackProp.showTitle,
-                    topJustification: defaultImageTrackProp.topJustification,
-                    bottomJustification: defaultImageTrackProp.bottomJustification,
-                    color: defaultImageTrackProp.trackColor,
-                    width: 1,
+                    title: imageTrackProperties.title,
+                    showTitle: imageTrackProperties.showTitle,
+                    topJustification: imageTrackProperties.topJustification,
+                    bottomJustification: imageTrackProperties.bottomJustification,
+                    color: imageTrackProperties.trackColor,
+                    width: imageTrackProperties.width,
                     orderNum: trackOrder
                 }
                 wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
@@ -238,6 +238,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         config.yStep = parseFloat(_getWellProps().step);
         config.offsetY = parseFloat(_getWellProps().topDepth);
         config.width = Utils.inchToPixel(imageTrack.width);
+        config.wiComponentService = wiComponentService;
         console.log(config);
 
         let track = graph.createImageTrack(config, document.getElementById(self.plotAreaId));
@@ -255,7 +256,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackHorizontalResizerDragCallback();
         _registerTrackDragCallback(track);
         wiComponentService.putComponent('vi-image-zone-track-' + config.id, track);
-
         return track;
     }
 
@@ -1651,6 +1651,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     $timeout(function () {
                 		imgzone.setProperties(imgProps);
                 		self.changeImageZone(imgzone, imgProps);
+                        imgzone.doPlot();
                     });
                 }
             });
@@ -2608,6 +2609,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function getLogplotCtrl() {
         let logPlotName = self.name.replace("D3Area", "");
+        // let logPlotName = self.name.slice(0, 8);
         return wiComponentService.getComponent(logPlotName);
     }
 
@@ -2654,9 +2656,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     props.idImageTrack = _currentTrack.id;
                     console.log(props);
                     wiApiService.editImageTrack(props, function () {
-                        props.width = Utils.inchToPixel(props.width);
-                        _currentTrack.setProperties(props);
-                        _currentTrack.doPlot(true);
+                        $timeout(function () {
+                            props.width = Utils.inchToPixel(props.width);
+                            _currentTrack.setProperties(props);
+                            _currentTrack.doPlot(true);
+                        });
                     });
                 }
             });
@@ -2911,3 +2915,4 @@ app.component(componentName, {
 });
 
 exports.name = moduleName;
+exports.controller = Controller;

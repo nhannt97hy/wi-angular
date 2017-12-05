@@ -99,7 +99,6 @@ module.exports.putComponentRight = function (text, title) {
             componentName: 'wi-block',
             componentState: { text: text }
         });
-
 };
 module.exports.putTabRightWithModel = function (model) {
     LAYOUT = layoutManager;
@@ -125,7 +124,12 @@ module.exports.putTabRightWithModel = function (model) {
             tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
             name = 'histogram' + model.properties.idHistogram;
             htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
-
+            break;
+        case 'comboview':
+            itemId = 'comboview' + model.id;
+            tabTitle = '<span class="link-view-16x16"></span> &nbsp;' + model.properties.name;
+            name = 'comboview' + model.id;
+            htmlTemplate = '<wi-comboview name="' + name + '" id="' + model.properties.idCombinedBox + '"></wi-comboview>'
             break;
         default:
             console.log('model type is not valid');
@@ -156,6 +160,9 @@ module.exports.putTabRightWithModel = function (model) {
         case 'histogram':
             console.log(tabContainer);
             break;
+        case 'comboview':
+            console.log(tabContainer);
+            break;
         default:
             return;
     }
@@ -176,6 +183,10 @@ module.exports.removeTabWithModel = function (model) {
         case 'histogram':
             item = layoutManager.root.getItemsById('histogram' + model.id)[0];
             wiComponentService.dropComponent('histogram' + model.id);
+            break;
+        case 'comboview':
+            item = layoutManager.root.getItemsById('comboview' + model.id)[0];
+            wiComponentService.dropComponent('comboview' + model.id);
             break;
         default:
             return;

@@ -1,0 +1,47 @@
+<div class="comboview-toolbar-wrapper">
+    
+    <wi-toolbar name="ComboviewToolbar1">
+    		<wi-dropdown name="SelectorsButton" icon="selector-tool-16x16" type="small" tooltip="Selectors">
+                <wi-button ng-repeat="tool in wiComboview.toolBox" 
+                    icon="rect-16x16"
+                    style="{{tool.color}}" 
+                    label="{{tool.name}}" 
+                    layout="icon-left" class="height-auto"
+                    handler="handlers.SelectorButtonClicked(tool.name)">
+                </wi-button>
+
+                <wi-button label="Edit Tool" layout="icon-left" class="height-auto" handler="handlers.EditToolComboboxButtonClicked">
+                </wi-button>
+
+            </wi-dropdown>
+
+    		<wi-dropdown name="ErasersButton" icon="eraser-tool-16x16" type="small" tooltip="Erasers">
+                <wi-button ng-repeat="tool in wiComboview.toolBox" 
+                    icon="rect-16x16"
+                    style="{{tool.color}}"
+                    label="{{tool.name}}" 
+                    layout="icon-left" class="height-auto"
+                    handler="handlers.EraserButtonClicked(tool.name)">
+                </wi-button>
+
+                <wi-button label="Edit Tool" layout="icon-left" class="height-auto" handler="handlers.EditToolComboboxButtonClicked">
+                </wi-button>
+
+            </wi-dropdown>
+    </wi-toolbar>
+
+    <wi-toolbar name="ComboviewToolbar2">
+            <wi-button name="AddLogplotButton" label="Logplot" type="small" tooltip="Logplot" handler="handlers.AddLogplotButtonClicked">
+            </wi-button>
+            
+            <wi-button name="AddHistogramButton" label="Histogram" type="small" tooltip="Histogram" handler="handlers.AddHistogramButtonClicked">
+            </wi-button>
+            
+            <wi-button name="AddCrossplotButton" label="Crossplot" type="small" tooltip="Crossplot" handler="handlers.AddCrossplotButtonClicked">
+            </wi-button>
+    </wi-toolbar>
+    
+</div>
+<div class="comboview-main-content">
+    <wi-d3-comboview name='{{wiComboview.wiD3AreaName}}' wi-comboview-ctrl='wiComboview'></wi-d3-comboview>
+</div>

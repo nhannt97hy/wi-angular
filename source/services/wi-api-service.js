@@ -177,6 +177,17 @@ const DELETE_TERNARY = '/project/well/cross-plot/ternary/delete';
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
 
+const CREATE_COMBINED_BOX = '/project/well/combined-box/new';
+const EDIT_COMBINED_BOX = '/project/well/combined-box/edit';
+const GET_COMBINED_BOX = '/project/well/combined-box/info';
+const DELETE_COMBINED_BOX = '/project/well/combined-box/delete';
+
+const CREATE_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/new';
+const EDIT_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/edit';
+const GET_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/info';
+const DELETE_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/delete';
+const LIST_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/list';
+
 const DUSTBIN = '/dustbin';
 const RESTORE_OBJECT = '/dustbin/restore';
 const DELETE_OBJECT = '/dustbin/delete';
@@ -1384,6 +1395,47 @@ Service.prototype.removeUserDefineLine = function (idUserDefineLine, callback) {
     let self = this;
     this.delete(DELETE_USER_DEFINE_LINE, {idUserDefineLine: idUserDefineLine}, callback);
 }
+
+// combinedbox
+Service.prototype.createCombinedBox = function (data, callback) {
+    let self = this;
+    this.post(CREATE_COMBINED_BOX, data, callback);
+}
+Service.prototype.editCombinedBox = function (data, callback) {
+    let self = this;
+    this.post(EDIT_COMBINED_BOX, data, callback);
+}
+Service.prototype.getCombinedBox = function (idCombinedBox, callback) {
+    let self = this;
+    this.post(GET_COMBINED_BOX, {idCombinedBox: idCombinedBox}, callback);
+}
+Service.prototype.removeCombinedBox = function (idCombinedBox, callback) {
+    let self = this;
+    this.delete(DELETE_COMBINED_BOX, {idCombinedBox: idCombinedBox}, callback);
+}
+
+// combinedbox tool
+Service.prototype.createCombinedBoxTool = function (data, callback) {
+    let self = this;
+    this.post(CREATE_COMBINED_BOX_TOOL, data, callback);
+}
+Service.prototype.editCombinedBoxTool = function (data, callback) {
+    let self = this;
+    this.post(EDIT_COMBINED_BOX_TOOL, data, callback);
+}
+Service.prototype.getCombinedBoxTool = function (idCombinedBoxTool, callback) {
+    let self = this;
+    this.post(GET_COMBINED_BOX_TOOL, {idCombinedBoxTool: idCombinedBoxTool}, callback);
+}
+Service.prototype.removeCombinedBoxTool = function (idCombinedBoxTool, callback) {
+    let self = this;
+    this.delete(DELETE_COMBINED_BOX_TOOL, {idCombinedBoxTool: idCombinedBoxTool}, callback);
+}
+Service.prototype.listCombinedBoxTool = function (idCombinedBox, callback) {
+    let self = this;
+    this.post(LIST_COMBINED_BOX_TOOL, {idCombinedBox: idCombinedBox}, callback);
+}
+
 
 //ternary apis
 Service.prototype.createGroup = function (data, callback) {
