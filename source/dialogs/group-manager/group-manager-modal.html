@@ -7,8 +7,16 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <button class="btn btn-default"><span class="plus-16x16"></span>&nbsp;Add</button>
-                    <button class="btn btn-default"><span class="close-16x16-edit"></span>&nbsp;Remove</button>
+                    <button class="btn btn-default" ng-click="wiModal.onAddButtonClicked()"><span class="plus-16x16"></span>&nbsp;Add</button>
+                </div>
+                <div class="row">
+                    <wi-base-treeview
+                        name="groupManagerTreeView"
+                        container='wiModal'
+                        config="wiModal.treeConfig"
+                        on-click-function='wiModal.onSelectGroup'
+                        show-context-menu-function='wiModal.showContextMenu'>
+                    </wi-base-treeview>
                 </div>
             </div>
             <div class="modal-footer">

@@ -387,7 +387,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // if (!self.viCrossplot) {
         let domElem = document.getElementById(self.crossplotAreaId);
         config.well = getWell().properties;
+
+        console.log('Crossplot create with params: ', curveX, curveY, config, domElem);
         self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
+        console.log("crossplot created: ", self.viCrossplot);
         self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
         // }
         return self.viCrossplot;

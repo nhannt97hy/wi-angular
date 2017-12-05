@@ -51,6 +51,48 @@
     }
 }
 
+.vi-object-track-container {
+
+    .vi-track-plot-container {
+        border: 1px solid black;
+
+        .object-container {
+            border-top: 1px solid blue;
+            border-bottom: 1px solid blue;
+        }
+
+        .vi-object-horizontal-line {
+            cursor: row-resize;
+        }
+        .vi-object-horizontal-line:hover {
+            stroke-width: 5px;
+            stroke: #999;
+        }
+        .ui-resizable-handle:hover {
+            background-color: #999;
+        }
+
+        .vi-object-tooltip {
+            width: inherit;
+            height: inherit;
+            position: absolute;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            span {
+                flex: 1;
+                border-radius: 5px;
+                background-color: rgba(0, 0, 0, 0.9);
+                font-size: 120%;
+                color: white;
+                position: absolute;
+                padding: 0.2em 0.5em;
+            }
+        }
+    }
+}
+
 .vi-image-zone-header {
     position: relative;
     padding: 2px 0 2px 0;
@@ -68,6 +110,29 @@
     }
 
     .vi-image-zone-header-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
+
+.vi-object-header {
+    position: relative;
+    padding: 2px 0 2px 0;
+
+    .vi-object-header-name {
+        display: inline-block;
+        position: relative;
+        text-align: center;
+        background-color: white;
+        border: 1px solid black;
+        padding: 0 2px 0 2px;
+        font-size: 10px;
+        z-index: 1;
+        cursor: default;
+    }
+
+    .vi-object-header-fill {
         position: absolute;
         top: 0;
         left: 0;
@@ -192,7 +257,6 @@
         }
         .curves {
             fill: none;
-            stroke: purple;
             stroke-width: 2px;
         }
     }

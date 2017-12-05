@@ -125,15 +125,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 handler: function () {
                     let handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
                     handlers.AddNewButtonClicked();
-                    /*
-                    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
-                    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-                    DialogUtils.addNewDialog(ModalService, function (newWell) {
-                        console.log(newWell);
-                        if (newWell) utils.updateWellProject(wiComponentService, newWell);
-                    });*/
                 }
             }, {
                 name: "ImportASCII",
@@ -162,6 +153,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     self.handlers.ImportMultiLASButtonClicked();
                 }
             }, {
+                name: "ImportFromInventory",
+                label: "Import From Inventory",
+                // icon: "las-import-16x16",
+                handler: function () {
+                    self.handlers.ImportFromInventoryButtonClicked();
+                }
+            },{
                 name: "ImportDLIS",
                 label: "Import DLIS",
                 icon: "",
@@ -202,8 +200,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     {
                         name: "GroupManager",
                         label: "Group Manager",
-                        icon: "",
+                        icon: "dataset-new-16x16",
                         handler: function () {
+                            DialogUtils.groupManagerDialog(ModalService, function () {
+                                utils.refreshProjectState();
+                            });
                         }
                     }, {
                         separator: '1'
@@ -247,10 +248,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Group Manager",
                         icon: "dataset-new-16x16",
                         handler: function () {
-                            DialogUtils.groupManagerDialog(function () {
+                            DialogUtils.groupManagerDialog(ModalService, function () {
                                 utils.refreshProjectState();
-                            })
+                            });
                         }
+                    }, {
+                        separator: '1'
                     }
                 ];
             case 'well':

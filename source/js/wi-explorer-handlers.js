@@ -16,6 +16,12 @@ exports.ImportMultiLASButtonClicked = function () {
     handlers.ImportMultiLASButtonClicked();
 }
 
+
+exports.ImportFromInventoryButtonClicked = function () {
+    let handlers = this.wiComponentService.getComponent(this.wiComponentService.GLOBAL_HANDLERS);
+    handlers.ImportFromInventoryButtonClicked();
+}
+
 exports.ImportDLISButtonClicked = function () {
     console.log('ImportDLISButton is clicked');
 }

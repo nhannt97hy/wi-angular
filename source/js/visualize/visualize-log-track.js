@@ -265,7 +265,7 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
         this.updateScaleInfo({
             leftVal:drawing.minX,
             rightVal:drawing.maxX,
-            scale: drawing.scale.toLowerCase()
+            scale: Utils.lowercase(drawing.scale)
         });
         this.updateAxis();
     }
@@ -598,9 +598,9 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     else {
         drawing.doPlot();
     }
-    this.svgContainer.raise();
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
+    this.svgContainer.raise();
 }
 
 /**
@@ -654,11 +654,11 @@ LogTrack.prototype.onPlotMouseLeave = function(cb) {
 
 /**
  * Register event when mouse wheel on the plot area
- */
 LogTrack.prototype.onPlotMouseWheel = function(cb) {
     this.plotContainer
         .on('mousewheel', cb);
 }
+ */
 
 /**
  * Register event when mouse down the plot area
@@ -1003,33 +1003,71 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     }
 }
 
-LogTrack.prototype.drawTooltipText = function(svgDom) {
+LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
+    let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
+    let svg = this.svgContainer;
+    let y = this.getTransformY()(depth);
+    let x = d3.mouse(this.plotContainer.node())[0];
+
+    let lineData = drawVertical ? [
+        {x1: x, y1: 0, x2: x, y2: plotRect.height},
+        {x1: 0, y1: y, x2: plotRect.width, y2: y}
+    ] : [
+        {x1: 0, y1: y, x2: plotRect.width, y2: y}
+    ];
+
+    let lines = svg.selectAll('line.tooltip-line')
+        .data(lineData);
+
+    lines.enter().append('line')
+        .attr('class', 'tooltip-line');
+
+    lines
+        .attr('x1', function(d) { return d.x1; })
+        .attr('x2', function(d) { return d.x2; })
+        .attr('y1', function(d) { return d.y1; })
+        .attr('y2', function(d) { return d.y2; })
+        .style('stroke', 'black')
+        .style('stroke-dasharray', '2, 1')
+        .style('stroke-width', '1px');
+}
+
+LogTrack.prototype.removeTooltipLines = function() {
+    this.svgContainer.selectAll('line.tooltip-line').remove();
+}
+
+LogTrack.prototype.drawTooltipText = function() {
+
     let plotMouse = d3.mouse(this.plotContainer.node());
-    let svgMouse = d3.mouse(svgDom);
-    let plotX = plotMouse[0];
-    let plotY = plotMouse[1];
-    let svgX = svgMouse[0];
-    let svgY = svgMouse[1];
-    let svg = d3.select(svgDom);
+    let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
+    let x = plotMouse[0];
+    let y = plotMouse[1];
+    let svg = this.svgContainer;
 
     svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 
     let tooltip = svg.append('text')
         .attr('class', 'tooltip-text')
-        .attr('y', svgY)
+        .attr('y', y)
         .attr('font-size', '10');
 
     let xFormatter = this.getDecimalFormatter(this.xDecimal);
     let yFormatter = this.getDecimalFormatter(this.yDecimal);
 
-    let textData = ['Depth: ' + yFormatter(this.getTransformY().invert(plotY))];
+    let textData = [{
+        text: 'Depth: ' + yFormatter(this.getTransformY().invert(y)),
+        color: 'black'
+    }];
     this.getCurves().forEach(function(curve) {
-        let curveY = curve.getTransformY().invert(plotY);
+        let curveY = curve.getTransformY().invert(y);
         curveY = curve.offsetY + Utils.round(curveY - curve.offsetY, curve.yStep);
 
         let value = curve.dataMap[curveY];
         value = value == null ? null : xFormatter(value);
-        textData.push(curve.alias + ': ' + value);
+        textData.push({
+            text: curve.alias + ': ' + value,
+            color: curve.line ? curve.line.color : (curve.symbol ? curve.symbol.fillStyle : 'black')
+        });
     })
 
     tooltip.selectAll('tspan')
@@ -1037,17 +1075,18 @@ LogTrack.prototype.drawTooltipText = function(svgDom) {
         .enter()
         .append('tspan')
             .attr('dy', '1.2em')
-            .attr('x', svgX)
-            .text(function(d) { return d; });
+            .attr('x', x)
+            .style('fill', function(d) { return d.color; })
+            .text(function(d) { return d.text; });
 
     let bbox = tooltip.node().getBBox();
     let offset = 10;
     let rectX = bbox.x + offset;
-    let rectY = bbox.y - offset - bbox.height;
+    let rectY = bbox.y - offset - bbox.height - 2;
 
-    if (rectY - this.headerContainer.node().clientHeight < 0)
+    if (rectY < 0)
         rectY = bbox.y + 2;
-    if (rectX + bbox.width > svgDom.clientWidth)
+    if (rectX + bbox.width > plotRect.width)
         rectX = bbox.x - offset - bbox.width;
 
     tooltip.attr('y', rectY).selectAll('tspan').attr('x', rectX);
@@ -1058,16 +1097,16 @@ LogTrack.prototype.drawTooltipText = function(svgDom) {
         .attr('class', 'tooltip-rect')
         .attr('x', bbox.x - padding)
         .attr('y', bbox.y - padding)
-        .attr('width', bbox.width + padding)
-        .attr('height', bbox.height + padding)
+        .attr('width', bbox.width + padding*2)
+        .attr('height', bbox.height + padding*2)
         .style('stroke', '#666')
         .style('stroke-width', '1px')
         .style('fill', 'ffffa0');
     tooltip.raise();
 }
 
-LogTrack.prototype.removeTooltipText = function(svgDom) {
-    d3.select(svgDom).selectAll('text.tooltip-text, rect.tooltip-rect').remove();
+LogTrack.prototype.removeTooltipText = function() {
+    this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
 
 // const trackerLifetime = 1 * 1000; // 1 seconds

@@ -54,6 +54,10 @@ Track.prototype.isDepthTrack = function() {
     return this.constructor.name == 'DepthTrack';
 }
 
+/**
+ * Check if class of this instance is ImageTrack
+ * @returns {Boolean}
+ */
 Track.prototype.isImageTrack = function () {
     return this.constructor.name == 'ImageTrack';
 }
@@ -64,6 +68,14 @@ Track.prototype.isImageTrack = function () {
  */
 Track.prototype.isZoneTrack = function() {
     return this.constructor.name == 'ZoneTrack';
+}
+
+/**
+ * Check if class of this instance is ObjectTrack
+ * @returns {Boolean}
+ */
+Track.prototype.isObjectTrack = function() {
+    return this.constructor.name == 'ObjectTrack';
 }
 
 /**
@@ -130,7 +142,7 @@ Track.prototype.createHeaderContainer = function() {
         .attr('class', 'vi-track-header-container')
         .style('background-color', 'white')
         .style('position', 'relative')
-        .style('z-index', 11)
+        // .style('z-index', 11)
         .style('width', '100%')
         .style('flex', 1)
         .style('overflow', 'hidden')
@@ -188,8 +200,8 @@ Track.prototype.createBodyContainer = function() {
 
     this.plotContainer = this.bodyContainer.append('div')
         .attr('class', 'vi-track-plot-container')
-        .style('position', 'absolute')
-        .style('z-index', 1);
+        .style('position', 'absolute');
+        // .style('z-index', 1);
 
     if (!existedPlot.empty()) {
         this.bodyContainer
@@ -523,4 +535,10 @@ Track.prototype.genColor = function() {
         if (usedColors.indexOf(color) < 0) break;
     }
     return color;
+}
+// TUNG: move onPlotMouseWheel from subclass LogTrack to superclass Track, 
+//    so that other kinds of track can be scrollable
+Track.prototype.onPlotMouseWheel = function(cb) {
+    this.plotContainer
+        .on('mousewheel', cb);
 }
