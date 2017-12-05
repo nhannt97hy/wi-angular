@@ -243,6 +243,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }
                 ]);
             case 'group':
+            let groupModel = utils.getSelectedNode();
                 return [
                     {
                         label: "Group Manager",
@@ -253,11 +254,43 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             });
                         }
                     }, {
+                        label: "Delete Group",
+                        icon: "close-16x16-edit",
+                        handler: function () {
+                            wiApiService.removeGroup(groupModel.properties.idGroup, function () {
+                                utils.refreshProjectState();
+                            })
+                        }
+                    }, {
                         separator: '1'
                     }
                 ];
             case 'well':
-                return defaultWellCtxMenu.concat([
+                let groups = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).groups;
+                let groupsContextMenu = [];
+                let wellModels = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                groups.forEach(group => {
+                    if (wellModels[0].properties.idGroup == group.idGroup) return;
+                    groupsContextMenu.push({
+                        label: group.name,
+                        icon: 'group-16x16',
+                        handler: function () {
+                            let promises = [];
+                            wellModels.forEach(wellModel => {
+                                wellModel.properties.idGroup = group.idGroup;
+                                promises.push(new Promise((resolve, reject) => {
+                                    wiApiService.editWell(wellModel.properties, function () {
+                                        resolve();
+                                    });
+                                }));
+                            });
+                            Promise.all(promises).then(() => {
+                                utils.refreshProjectState();
+                            })
+                        }
+                    })
+                })
+                let wellContextMenu = [
                     {
                         name: "NewDataset",
                         label: "New Dataset",
@@ -288,18 +321,42 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
-                        name: "Group",
-                        label: "Group",
+                        name: "AddToGroup",
+                        label: wellModels[0].properties.idGroup? "Move To Group": "Add To Group",
                         icon: "plus-16x16",
+                        class: 'has-more',
                         handler: function () {
                             DialogUtils.groupManagerDialog(ModalService, function () {
                                 utils.refreshProjectState();
                             })
-                        }
-                    }, {
-                        separator: '1'
+                        },
+                        childContextMenu: groupsContextMenu
                     }
-                ]);
+                ];
+                if (wellModels[0].properties.idGroup) {
+                    wellContextMenu.push({
+                        label: 'Ungroup',
+                        icon: 'clear-16x16',
+                        handler: function () {
+                            let promises = [];
+                            wellModels.forEach(wellModel => {
+                                wellModel.properties.idGroup = null;
+                                promises.push(new Promise((resolve, reject) => {
+                                    wiApiService.editWell(wellModel.properties, function () {
+                                        resolve();
+                                    });
+                                }));
+                            });
+                            Promise.all(promises).then(() => {
+                                utils.refreshProjectState();
+                            })
+                        }
+                    });
+                }
+                wellContextMenu.push({
+                    separator: '1'
+                })
+                return defaultWellCtxMenu.concat(wellContextMenu);
             case 'data':
             case 'dataset':
                 let datasetCtx = [];
