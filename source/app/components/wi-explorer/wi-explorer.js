@@ -257,7 +257,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }
                 ];
             case 'well':
-                return defaultWellCtxMenu.concat([
+                let groups = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).groups;
+                let groupsContextMenu = [];
+                let wellModel = utils.getSelectedNode();
+                groups.forEach(group => {
+                    if (wellModel.properties.idGroup == group.idGroup) return;
+                    groupsContextMenu.push({
+                        label: group.name,
+                        icon: 'group-16x16',
+                        handler: function () {
+                            wellModel.properties.idGroup = group.idGroup;
+                            wiApiService.editWell(wellModel.properties, function () {
+                                utils.refreshProjectState();
+                            });
+                        }
+                    })
+                })
+                let wellContextMenu = [
                     {
                         name: "NewDataset",
                         label: "New Dataset",
@@ -288,18 +304,34 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
-                        name: "Group",
-                        label: "Group",
+                        name: "AddToGroup",
+                        label: "Add To Group",
                         icon: "plus-16x16",
+                        class: 'has-more',
                         handler: function () {
                             DialogUtils.groupManagerDialog(ModalService, function () {
                                 utils.refreshProjectState();
                             })
-                        }
-                    }, {
-                        separator: '1'
+                        },
+                        childContextMenu: groupsContextMenu
                     }
-                ]);
+                ];
+                if (wellModel.properties.idGroup) {
+                    wellContextMenu.push({
+                        label: 'Ungroup',
+                        icon: 'clear-16x16',
+                        handler: function () {
+                            wellModel.properties.idGroup = null;
+                            wiApiService.editWell(wellModel.properties, function () {
+                                utils.refreshProjectState();
+                            });
+                        }
+                    });
+                }
+                wellContextMenu.push({
+                    separator: '1'
+                })
+                return defaultWellCtxMenu.concat(wellContextMenu);
             case 'data':
             case 'dataset':
                 let datasetCtx = [];
