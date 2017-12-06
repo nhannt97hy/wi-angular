@@ -10863,11 +10863,75 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
             }
             return props;
         }
+        this.onOkButtonClicked = function(cb){
+            async.eachOfSeries(self.tracks, function(track, idx, callback){
+                    switch(track.type) {
+                        case 'log-track':
+                            if( track.check ) {
+                                wiApiService.editTrack(track, function(res) {
+                                    console.log("log", res);
+                                    // track.width = utils.inchToPixel(track.width);
+                                    // track.setProperties(newProps.general);
 
-        this.onApplyButtonClicked = function(){
-        };
-        this.onOkButtonClicked = function(){
-            close(self);
+                                    // if (track.zoomFactor != savedZoomFactor) {
+                                    //     savedZoomFactor = newProps.general.zoomFactor;
+                                    //     wiD3Ctrl.processZoomFactor();
+                                    //     wiD3Ctrl.plotAll();
+                                    // }
+                                    // else {
+                                    //     currentTrack.doPlot(true);
+                                    // }
+                                    if (callback) callback();
+                                })
+                            } else {
+                                if (callback) callback();
+
+                            }
+                            break;
+                        case 'depth-track':
+                            if( track.check ) {
+                                wiApiService.editDepthTrack(track, function(res) {
+                                    console.log("depth", res);
+                                    // track.width = utils.inchToPixel(track.width);
+                                    if (callback) callback();
+                                })
+                            } else {
+                                if (callback) callback();
+
+                            }
+                            break;
+                        case 'zone-track':
+                            if( track.check ) {
+                                wiApiService.editZoneTrack(track, function(res) {
+                                    console.log("zone", res);
+                                    // track.width = utils.inchToPixel(track.width);
+                                    if (callback) callback();
+                                })
+                            } else {
+                                if (callback) callback();
+
+                            }
+                            break;
+                        case 'image-track':
+                            if( track.check ) {
+                                wiApiService.editImageTrack(track, function(res) {
+                                    console.log("image", res);
+                                    // track.width = utils.inchToPixel(track.width);
+                                    if (callback) callback();
+                                })
+                            } else {
+                                if (callback) callback();
+
+                            }
+                            break;
+                        default:
+                            if (callback) callback();
+                            break;
+                    }
+                }, function(err) {
+                    // if(callback) callback();
+                    // cb();
+                });
         };
         this.onCancelButtonClicked = function(){
             close(null);
