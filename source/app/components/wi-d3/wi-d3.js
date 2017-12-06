@@ -396,7 +396,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.updateScaleInfo({
             leftVal:config.minX,
             rightVal:config.maxX,
-            scale: config.scale.toLowerCase()
+            scale: config.scale
         });
         track.updateAxis();
         track.plotCurve(curve);
