@@ -119,7 +119,7 @@ LogTrack.prototype.setMode = function(newMode) {
 
 LogTrack.prototype.updateScaleInfo = function(scaleOpt) {
     if (scaleOpt) {
-        this.scale = scaleOpt.scale;
+        this.scale = scaleOpt.scale? scaleOpt.scale.toLowerCase() : this.scale.toLowerCase();
         this.minX = scaleOpt.leftVal;
         this.maxX = scaleOpt.rightVal;
         if (this.scale.toLowerCase() == 'logarithmic') {
