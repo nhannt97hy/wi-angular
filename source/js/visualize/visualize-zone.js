@@ -204,6 +204,8 @@ Zone.prototype.updateHeader = function() {
         return;
     }
 
+    if (width < 0 || height < 0) return;
+
     let fillArea = this.header.select('.vi-drawing-header-fill')
         .attr('width', width)
         .attr('height', height);

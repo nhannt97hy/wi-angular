@@ -502,6 +502,33 @@ function histogramToTreeConfig(histogram, options = {}) {
 
 exports.histogramToTreeConfig = histogramToTreeConfig;
 
+function comboviewToTreeConfig(comboview, isDeleted) {
+    let comboviewModel = new Object();
+    comboviewModel.name = 'combinedPlot';
+    comboviewModel.type = 'comboview';
+    comboviewModel.id = comboview.idCombinedBox;
+    comboviewModel.properties = {
+        idWell: comboview.idWell,
+        idCombinedBox: comboview.idCombinedBox,
+        name: comboview.name
+    };
+    comboviewModel.data = {
+        childExpanded: false,
+        icon: 'link-view-16x16',
+        label: comboview.name
+    };
+
+    comboviewModel.handler = function () {
+        openComboviewTab(comboviewModel);
+    }
+
+    comboviewModel.parent = 'well' + comboview.idWell;
+
+    return comboviewModel;
+}
+
+exports.comboviewToTreeConfig = comboviewToTreeConfig;
+
 function curveToTreeConfig(curve, isDeleted) {
     if (isDeleted) {
         var curveModel = new Object();
@@ -612,7 +639,6 @@ exports.datasetToTreeConfig = datasetToTreeConfig;
 
 
 function createWellsNode(parent) {
-    // console.log("==========", parent);
     let wellsModel = new Object();
     wellsModel.name = 'wells-deleted';
     wellsModel.type = 'wells-deleted';
@@ -801,6 +827,30 @@ function createZoneSetsNode(well) {
     return zoneSetsModel;
 }
 
+function createComboviewsNode(parent) {
+    let comboviewsModel = new Object();
+    comboviewsModel.data = {
+        childExpanded: false,
+        icon: 'link-view-16x16',
+        label: "Combined Plots"
+    }
+    comboviewsModel.name = 'comboviews';
+    comboviewsModel.type = 'comboviews';
+
+    comboviewsModel.children = new Array();
+    if (!parent) return comboviewsModel;
+    if (!parent.combined_boxes) return comboviewsModel;
+    comboviewsModel.properties = {
+        totalItems: parent.combined_boxes.length,
+        idWell: parent.idWell
+    }
+    parent.combined_boxes.forEach(function (comboview) {
+        comboview.parent = parent;
+        comboviewsModel.children.push(comboviewToTreeConfig(comboview));
+    });
+    return comboviewsModel;
+}
+
 function wellToTreeConfig(well, isDeleted) {
     if (isDeleted) {
         var wellModel = new Object();
@@ -857,10 +907,12 @@ function wellToTreeConfig(well, isDeleted) {
         let logplotNode = createLogplotsNode(well);
         let crossplotNode = createCrossplotsNode(well);
         let histogramNode = createHistogramsNode(well);
+        let comboviewNode = createComboviewsNode(well);
         wellModel.children.push(zoneSetsNode);
         wellModel.children.push(logplotNode);
         wellModel.children.push(crossplotNode);
         wellModel.children.push(histogramNode);
+        wellModel.children.push(comboviewNode);
         return wellModel;
     }
 }
@@ -1314,7 +1366,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         tracks.push(zoneTrack);
                     })
                 }
-
                 if (plot.image_tracks && plot.image_tracks.length) {
                     plot.image_tracks.forEach(function (imageTrack) {
                         tracks.push(imageTrack);
@@ -1416,7 +1467,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 wiD3Ctrl.addZoneToTrack(viTrack, zone);
                             }
                         })
-
                     } else if(aTrack.idImageTrack) {
                         let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
                         wiApiService.getImagesOfTrack(aTrack.idImageTrack, function (images) {
@@ -1658,6 +1708,13 @@ exports.findWellByHistogram = function (idHistogram) {
     return path.find(p => p.type == 'well');
 }
 
+exports.findWellByComboview = function (idCombinedBox) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'comboview' && node.id == idCombinedBox;
+    }) || [];
+    return path[1];
+}
+
 exports.findWellByCurve = findWellByCurve;
 
 function findWellByCurve(idCurve) {
@@ -1678,6 +1735,19 @@ exports.findHistogramModelById = function (idHistogram) {
         }
     });
     return his;
+}
+
+exports.findComboviewModelById = function (idComboview) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let comboview = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'comboview' && node.id == idComboview) {
+            comboview = node;
+        }
+    });
+    return comboview;
 }
 // exports.parseTime = function (wiComponentService, time) {
 //     let moment = wiComponentService.getComponent(wiComponentService.MOMENT);
@@ -2209,7 +2279,7 @@ function openCrossplotTab(crossplotModel, callback) {
     wiApiService.getCrossplot(crossplotModel.properties.idCrossPlot, function (crossplot) {
         if (crossplot.pointsets && crossplot.pointsets.length) {
             let pointSet = crossplot.pointsets[0];
-            console.log("crosplot", crossplot);
+            console.log("crossplot", crossplot);
             if (!pointSet.idCurveX || !pointSet.idCurveY) {
                 wiD3CrossplotCtrl.loading = false;
                 return;
@@ -2367,6 +2437,41 @@ function openHistogramTab(histogramModel) {
 };
 exports.openHistogramTab = openHistogramTab;
 
+exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
+    let dataRequest = {
+        idWell: idWell,
+        name: comboviewName,
+        selection: '',
+        idLogPlots: null,
+        idCrossPlots: null,
+        idHistogram: null
+    };
+
+    return new Promise (function (resolve, reject) {
+        __GLOBAL.wiApiService.createCombinedBox(dataRequest, function (combinedBox) {
+            if (combinedBox.name) {
+                resolve(combinedBox);
+                let comboviewModel = comboviewToTreeConfig(combinedBox);
+                refreshProjectState().then(function () {
+                    openComboviewTab(comboviewModel);
+                });
+            } else {
+                reject(combinedBox);
+            }
+        });
+    });
+}
+
+function openComboviewTab(comboviewModel) {
+    console.log('openComboviewTab button clicked');
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRightWithModel(comboviewModel);
+    if (comboviewModel.data.opened) return;
+    comboviewModel.data.opened = true;
+}
+
+exports.openComboviewTab = openComboviewTab;
 
 function getDpi() {
     let inch = document.createElement('inch');

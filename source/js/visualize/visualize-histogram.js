@@ -710,7 +710,6 @@ Histogram.prototype.init = function(domElem) {
     this.container.append('div').attr('class', 'vi-histogram-tooltip').style('opacity', 0);
 
     this.resizeSensor = new ResizeSensor( $(this.container.node()), function(param) {
-        console.log("On resize", param, this);
         self.doPlot();
     } );
 

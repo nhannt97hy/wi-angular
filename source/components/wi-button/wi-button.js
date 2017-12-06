@@ -61,6 +61,7 @@ app.component(wiButtonName, {
     controllerAs: wiButtonName,
     bindings: {
         config: '<',
+        style: '@',
         type: '@',
         isCheckType: '<',
         name: '@',

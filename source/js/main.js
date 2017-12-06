@@ -49,6 +49,9 @@ let wiProperties = require('./wi-properties');
 let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
 
+let wiComboview = require('./wi-comboview');
+let wiD3Comboview = require('./wi-d3-comboview');
+
 let layoutManager = require('./layout');
 
 let handlers = require('./handlers');
@@ -57,6 +60,8 @@ let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
 let crossplotHanders = require('./wi-crossplot-handlers');
 let histogramHandlers = require('./wi-histogram-handlers');
+
+let comboviewHandlers = require('./wi-comboview-handlers');
 
 let graph = require('./visualize/visualize');
 let dragMan = {
@@ -118,6 +123,9 @@ let app = angular.module('wiapp',
         wiProperties.name,
         wiMultiInput.name,
         wiCustomInput.name,
+
+        wiComboview.name,
+        wiD3Comboview.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -190,6 +198,8 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
+    wiComponentService.putComponent(wiComponentService.COMBOVIEW_HANDLERS, comboviewHandlers);
+
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
     window.__HANDLERS = globalHandlers;
@@ -197,7 +207,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // config explorer block - treeview
     // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     $scope.myTreeviewConfig = {};
-    //wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
+    // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
@@ -270,7 +280,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                             utils.error("Project not exist!");
                         }
                     })
-                },100)
+                },100);
             }
         }else{
             let lastProject = JSON.parse(window.localStorage.getItem('LProject'));

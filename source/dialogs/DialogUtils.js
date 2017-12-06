@@ -3955,8 +3955,8 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                 title: self.title,
                 topJustification: self.topJustification,
                 trackColor: self.trackColor,
-                width: self.width,
-                parameterSet: self.parameterSet
+                width: self.width
+                // parameterSet: self.parameterSet
             }
             // if (self.error) return;
             close(props, 100);
@@ -3987,6 +3987,9 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         let props = config || {};
 
         this.idImageOfTrack = props.idImageOfTrack;
+
+        this.topDepth = Math.round(props.topDepth * 10000) / 10000;
+        this.bottomDepth = Math.round(props.bottomDepth * 10000) / 10000;
 
         this.imageFile = null;
         this.done = props.done || false;
@@ -4054,22 +4057,19 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         function validateUrl (str) {
             var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
-            if (!(regex.test(str)))
-                return false;
-            return true;
+            return regex.test(str);
         }
 
         this.onImageUrlChange = utils.debounce(function () {
-            if (validateUrl(self.imageUrl))
-                this.done = true;
-            else
-                this.done = false;
-        }, 500)
+            self.done = validateUrl(self.imageUrl);
+        }, 500);
 
         function bindProps() {
             props.idImageOfTrack = self.idImageOfTrack;
+            props.topDepth = self.topDepth;
+            props.bottomDepth = self.bottomDepth;
             props.imageUrl = self.imageUrl;
-            props.name = self.name;
+            self.showName ? props.name = self.name : props.name = "";
             props.showName = self.showName;
             props.fill = self.fill;
             props.done = self.done;
@@ -11090,6 +11090,159 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
         modal.close.then(function () {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCombinedBox, callback) {
+    function ModalController(wiComponentService, wiApiService, close) {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let self = this;
+
+        const _NEW = 'created';
+        const _EDIT = 'edited';
+        const _DEL = 'deleted';
+        const _DEFAULT = 'default';
+
+        let nameCounter = 0;
+
+        this._DEL = _DEL;
+        this.tools = angular.copy(toolBox);
+        this.selectedRow = self.tools && self.tools.length ? 0 : -1;
+        this.toolCounter = this.tools.length;
+
+        console.log('tools', this.tools);
+        console.log('toolCounter', this.toolCounter);
+
+        this.addTool = function (index) {
+            let newTool = {
+                name: 'New Tool ' + ++nameCounter,
+                color: self.genColor(),
+                flag: _NEW
+            };
+
+            self.tools.splice(index, 0, newTool);
+            self.selectedRow = self.tools.length - 1;
+        }
+
+        this.onAddButtonClicked = function () {
+            self.toolCounter++;
+            self.addTool(self.tools.length);
+        }
+
+        this.onToolChanged = function(index) {
+            if (typeof self.tools[index].flag === 'undefined') {
+                self.tools[index].flag = _EDIT;
+            }
+        }
+
+        this.onDeleteButtonClicked = function () {
+            self.toolCounter--;
+            if (self.tools[self.selectedRow].flag != _NEW) {
+                self.tools[self.selectedRow].flag = _DEL;
+            } else {
+                self.tools.splice(self.selectedRow, 1);
+            }
+            self.selectedRow = self.selectedRow > 0 ? self.selectedRow - 1 : 0;
+        }
+
+        this.setClickedRow = function (indexRow) {
+            self.selectedRow = indexRow;
+        }
+
+        this.selectColor = function (index) {
+            dialogUtils.colorPickerDialog(ModalService, self.tools[index].color, function (colorStr) {
+                self.tools[index].color = colorStr;
+                self.onToolChanged(index);
+            });
+        }
+
+        this.genColor = function () {
+            var rand = function () {
+                return Math.floor(Math.random() * 255);
+            }
+            return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+        }
+
+        function doApply (callback) {
+            if (self.tools && self.tools.length) {
+                wiComponentService.getComponent('SPINNER').show();
+                async.eachOfSeries(self.tools, function(tool, i, callback) {
+                    switch (self.tools[i].flag) {
+                        case _NEW:
+                        case _DEFAULT:
+                            delete self.tools[i].flag;
+                            self.tools[i].idCombinedBox = idCombinedBox;
+                            wiApiService.createCombinedBoxTool(self.tools[i], function(data) {
+                                self.tools[i] = data;
+                                callback();
+                            });
+                            break;
+
+                        case _EDIT:
+                            delete self.tools[i].flag;
+                            self.tools[i].idCombinedBox = idCombinedBox;
+                            wiApiService.editCombinedBoxTool(self.tools[i], function(data) {
+                                self.tools[i] = data;
+                                callback();
+                            });
+                            break;
+
+                        case _DEL:
+                            wiApiService.removeCombinedBoxTool(self.tools[i].idCombinedBoxTool, function() {
+                                callback();
+                            });
+                            break;
+
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function (err) {
+                    for (let i = self.tools.length - 1; i >= 0; i--) {
+                        switch (self.tools[i].flag) {
+                            case _DEL:
+                                    self.tools.splice(i, 1);
+                                break;
+
+                            case _NEW:
+                            case _EDIT:
+                                delete self.tools[i].flag;
+                                break;
+                        }
+                    }
+                    utils.refreshProjectState().then(function() {
+                        if (callback) callback();
+                    });
+                });
+            } else {
+                if (callback) callback();
+            }
+        }
+
+        this.onOkButtonClicked = function () {
+            doApply(function () {
+                close(self.tools);
+            });
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "combobox-selection/combobox-selection-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
         });
     });
 }

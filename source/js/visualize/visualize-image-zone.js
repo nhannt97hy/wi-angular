@@ -90,7 +90,6 @@ ImageZone.prototype.doPlot = function(highlight) {
     let transformY = this.getTransformY();
 
     let viewportX = this.getViewportX();
-    let viewportY = this.getViewportY()[1];
 
     let minY = transformY(this.topDepth);
     let maxY = transformY(this.bottomDepth);
@@ -119,7 +118,7 @@ ImageZone.prototype.doPlot = function(highlight) {
 
     this.updateHeader();
 
-    self.onViewportChange(minX, maxX, minY, maxY, viewportY);    
+    self.onViewportChange(minX, maxX, minY, maxY);    
 }
 
 ImageZone.prototype.on = function(type, cb) {
@@ -161,6 +160,8 @@ ImageZone.prototype.updateHeader = function() {
     let width = rect.width - headerBorderWidth - 1;
     let height = rect.height - headerBorderWidth - 1;
 
+    if (width < 0 || height < 0) return;
+
     let fillArea = this.header.select('.vi-drawing-header-fill')
         .attr('width', width)
         .attr('height', height);
@@ -185,7 +186,6 @@ ImageZone.prototype.lineDragCallback = function(line) {
     let transformY = this.getTransformY();
 
     let viewportX = this.getViewportX();
-    let viewportY = this.getViewportY()[1];
 
     let minX = d3.min(viewportX);
     let maxX = d3.max(viewportX);
@@ -209,7 +209,7 @@ ImageZone.prototype.lineDragCallback = function(line) {
     this.topDepth = transformY.invert(minY);
     this.bottomDepth = transformY.invert(maxY);
 
-    self.onViewportChange(minX, maxX, minY, maxY, viewportY);
+    self.onViewportChange(minX, maxX, minY, maxY);
 }
 
 ImageZone.prototype.onLineDragEnd = function(cb) {
@@ -224,9 +224,27 @@ ImageZone.prototype.onLineDragEnd = function(cb) {
     );
 }
 
-ImageZone.prototype.onViewportChange = function(minX, maxX, minY, maxY, viewportY) {
+ImageZone.prototype.getDepthRange = function(){
+    return [this.topDepth, this.bottomDepth];
+};
+
+ImageZone.prototype.onViewportChange = function(minX, maxX, minY, maxY) {
+    let viewportY = this.getViewportY()[1];
+    // get out of viewport
     if(maxY > viewportY && minY > viewportY && minY < 0 && maxY < 0) { return; }
-    if ((minY >= 0 && minY <= viewportY)
+
+    // handle cases
+    if ((minY == maxY)
+        || (minY == viewportY)
+        || (maxY == viewportY)) {
+        this.foreignObject
+            .attr('x', minX)
+            .attr('y', minY + 2)
+            .attr('width', maxX - minX)
+            .attr('height', 0)
+            .style('position', 'relative');
+        return;
+    } else if ((minY >= 0 && minY <= viewportY)
         && (maxY >= 0 && maxY <= viewportY)) {
         if (maxY - minY - 4 < 0) return;
         this.foreignObject
