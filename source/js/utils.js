@@ -1394,6 +1394,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.lines.forEach(function (line) {
                             getCurveData(wiApiService, line.idCurve, function (err, data) {
                                 let lineModel = lineToTreeConfig(line);
+
                                 if (!err) {
                                     wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
                                 }

@@ -564,23 +564,23 @@ exports.AutoSizeTrackButtonClicked = function () {
 };
 
 exports.TrackBolkUpdateButtonClicked = function () {
-    console.log("TrackBolkUpdateButtonClicked");
+    console.log("TrackBulkUpdateButtonClicked");
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
-    DialogUtils.trackBolkUpdateDialog(this.ModalService, wiLogplot, function () {
+    DialogUtils.trackBulkUpdateDialog(this.ModalService, wiLogplot, function () {
 
     });
 };
 
 exports.CurveBolkUpdateButtonClicked = function () {
-    console.log("TrackBolkUpdateButtonClicked");
+    console.log("CurveBulkUpdateButtonClicked");
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
-    DialogUtils.curveBolkUpdateDialog(this.ModalService, wiLogplot, function () {
+    DialogUtils.curveBulkUpdateDialog(this.ModalService, wiLogplot, function () {
 
     });
 };
