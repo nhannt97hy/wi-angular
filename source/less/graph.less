@@ -146,6 +146,25 @@
 
     .vi-track-svg-container {
         border: 1px solid black;
+
+        .tooltip-line {
+            stroke: black;
+            stroke-dasharray: 2, 1;
+            stroke-width: 1px;
+        }
+
+        .tooltip-rect {
+            stroke: #666;
+            stroke-width: 1px;
+            fill: #ffffa0;
+            font-size: 10;
+        }
+
+        .tooltip-text {
+            tspan {
+                dy: 1.2em;
+            }
+        }
     }
 
     .vi-track-drawing {
@@ -287,7 +306,7 @@
         stroke-opacity: 0.3;
     }
 }
-.tick.major { 
+.tick.major {
     line {
         stroke: rgba(0,118,118,1);
         stroke-dasharray: 0;

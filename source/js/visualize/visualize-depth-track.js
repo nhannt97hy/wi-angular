@@ -129,6 +129,13 @@ DepthTrack.prototype.doPlot = function(highlight) {
 
     this.yAxisGroupRight.call(yAxisRight);
     this.yAxisGroupLeft.call(yAxisLeft);
+
+    let plotDim = Utils.getBoundingClientDimension(this.plotContainer.node());
+    this.yAxisGroupRight.selectAll('text')
+        .attr('x', function() {
+            let textDim = this.getBBox();
+            return -plotDim.width / 2 + textDim.width / 2;
+        })
 }
 
 /**

@@ -1027,30 +1027,25 @@ LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
         .attr('x1', function(d) { return d.x1; })
         .attr('x2', function(d) { return d.x2; })
         .attr('y1', function(d) { return d.y1; })
-        .attr('y2', function(d) { return d.y2; })
-        .style('stroke', 'black')
-        .style('stroke-dasharray', '2, 1')
-        .style('stroke-width', '1px');
+        .attr('y2', function(d) { return d.y2; });
 }
 
 LogTrack.prototype.removeTooltipLines = function() {
     this.svgContainer.selectAll('line.tooltip-line').remove();
 }
 
-LogTrack.prototype.drawTooltipText = function() {
+LogTrack.prototype.drawTooltipText = function(depth) {
 
     let plotMouse = d3.mouse(this.plotContainer.node());
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
-    let x = plotMouse[0];
-    let y = plotMouse[1];
+    let y = this.getTransformY()(depth);
     let svg = this.svgContainer;
 
     svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 
     let tooltip = svg.append('text')
         .attr('class', 'tooltip-text')
-        .attr('y', y)
-        .attr('font-size', '10');
+        .attr('y', y);
 
     let xFormatter = this.getDecimalFormatter(this.xDecimal);
     let yFormatter = this.getDecimalFormatter(this.yDecimal);
@@ -1075,9 +1070,8 @@ LogTrack.prototype.drawTooltipText = function() {
         .data(textData)
         .enter()
         .append('tspan')
-            .attr('dy', '1.2em')
-            .attr('x', x)
             .style('fill', function(d) { return d.color; })
+            .attr('dy', '1.2em')
             .text(function(d) { return d.text; });
 
     let bbox = tooltip.node().getBBox();
@@ -1085,10 +1079,7 @@ LogTrack.prototype.drawTooltipText = function() {
     let rectX = bbox.x + offset;
     let rectY = bbox.y - offset - bbox.height - 2;
 
-    if (rectY < 0)
-        rectY = bbox.y + 2;
-    if (rectX + bbox.width > plotRect.width)
-        rectX = bbox.x - offset - bbox.width;
+    if (rectY < 0) rectY = bbox.y + 2;
 
     tooltip.attr('y', rectY).selectAll('tspan').attr('x', rectX);
 
@@ -1096,22 +1087,18 @@ LogTrack.prototype.drawTooltipText = function() {
     let padding = 2;
     let rect = svg.append('rect')
         .attr('class', 'tooltip-rect')
-        .attr('x', bbox.x - padding)
         .attr('y', bbox.y - padding)
         .attr('width', bbox.width + padding*2)
-        .attr('height', bbox.height + padding*2)
-        .style('stroke', '#666')
-        .style('stroke-width', '1px')
-        .style('fill', 'ffffa0');
+        .attr('height', bbox.height + padding*2);
+
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.CENTER_X);
+    let x = parseFloat(rect.attr('x')) + padding;
+    tooltip.selectAll('tspan')
+        .attr('x', x);
+
     tooltip.raise();
 }
 
 LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
-
-// const trackerLifetime = 1 * 1000; // 1 seconds
-// this.periodicTask = function() {
-//     if( Date.now() - freshness > trackerLifetime )
-//         svg.selectAll('.wi-tooltip, .tooltipBg, .tooltipLine').remove();
-// }
