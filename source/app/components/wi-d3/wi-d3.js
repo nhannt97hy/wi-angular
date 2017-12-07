@@ -882,12 +882,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.adjustSlidingBarFromDepthRange([low, high]);
         */
 
+    /*
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let sign = (d3.event.deltaY<0)?"":"-";
         //let sign = (d3.event.deltaY<0)?"-":"";
         let absDelta = Math.abs(d3.event.deltaY);
         let value = ( absDelta > 4) ? (absDelta / 3) : absDelta;
         slidingBar.scroll(parseInt(sign + value));
+    */
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        //let sign = (d3.event.deltaY<0)?"":"-";
+        let value = (d3.event.deltaY<0)? 2 : -2;
+        slidingBar.scroll(value);
     }
 
     this.zoom = function(zoomOut) {

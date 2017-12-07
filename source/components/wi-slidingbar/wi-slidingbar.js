@@ -229,13 +229,18 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function onMouseWheel(event) {
+        let value = ( event.deltaY<0) ? -2 : 2;
+        scroll(value);
+    }
+/*
+    function onMouseWheel(event) {
         let sign = (event.deltaY<0)?"-":"";
         //let sign = (event.deltaY<0)?"":"-";
         let absDelta = Math.abs(event.deltaY);
         let value = ( absDelta > 4) ? (absDelta / 3) : absDelta;
         scroll(parseInt(sign + value));
     }
-
+*/
     function updateSlidingHandler(top, height) {
         $(self.handleId).css('top', (top - _offsetTop) + 'px');
         $(self.handleId).css('height', height + 'px');
