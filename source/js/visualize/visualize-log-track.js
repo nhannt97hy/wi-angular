@@ -790,11 +790,13 @@ LogTrack.prototype.updateAxis = function() {
         .tickFormat('')
         .tickSize(-rect.height);
 
-    let step = (transformY.invert(Utils.getDpcm()) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
-    let start = Utils.roundUp(windowY[0], step);
-    let end = Utils.roundDown(windowY[1], step);
+    // let step = (transformY.invert(Utils.getDpcm()) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
+    // let start = Utils.roundUp(windowY[0], step);
+    // let end = Utils.roundDown(windowY[1], step);
+    let yTickValues = this.prepareTicks()[0];
+
     let yAxis = d3.axisLeft(transformY)
-        .tickValues(d3.range(start, end + step/2, step))
+        .tickValues(yTickValues)
         .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
         .tickSize(-rect.width);
 
@@ -819,6 +821,9 @@ LogTrack.prototype.updateAxis = function() {
             .style('display', function(d, i) {
                 return ((i == 0 || i == self.yTicks) && !self.showEndLabels) ? 'none' : 'block';
             });
+
+    this.yAxisGroup.selectAll('.tick line')
+        .style('display', function(d) { return d < windowY[0] ? 'none' : 'block' });
 
     this.xAxisGroup.selectAll('.tick')
         .classed('major', function(d,i) {
