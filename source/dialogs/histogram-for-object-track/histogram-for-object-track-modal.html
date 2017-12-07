@@ -11,13 +11,17 @@
                     <div class="row">
                         <form class='col-sm-12 form-horizontal form-condensed'>
                             <div id="histogramname">
-                                <h5>Histogram Title</h5>
+                                <h5>Histogram Name</h5>
                                 <div class="col-sm-offset-1 col-sm-11 container-fluid">
                                     <div class='form-group'>
-                                        <label class="col-sm-3">Title</label>
+                                        <label class="col-sm-3">Name</label>
                                         <div class="col-sm-9">
-                                            <input class="form-control wi-form-control" type="text" ng-model="wiModal.histogramProps.name" ng-disabled="false"
-                                                required>
+                                            <div class="input-group has-cuccess has-feedback">
+                                                <input type="text" class="form-control" placeholder="Auto named" ng-model="wiModal.histogramProps.name">
+                                                <span class="input-group-btn">
+                                                    <button ng-disabled="!wiModal.histogramProps.name" ng-click="wiModal.checkNameAvailable()" class="btn btn-default" type="button">Check Available</button>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
