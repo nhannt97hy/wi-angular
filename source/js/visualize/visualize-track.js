@@ -536,9 +536,41 @@ Track.prototype.genColor = function() {
     }
     return color;
 }
-// TUNG: move onPlotMouseWheel from subclass LogTrack to superclass Track, 
+// TUNG: move onPlotMouseWheel from subclass LogTrack to superclass Track,
 //    so that other kinds of track can be scrollable
 Track.prototype.onPlotMouseWheel = function(cb) {
     this.plotContainer
         .on('mousewheel', cb);
+}
+
+Track.prototype.prepareTicks = function() {
+    let windowY = this.getWindowY();
+    let transformY = this.getTransformY();
+
+    let range = windowY[1] - windowY[0];
+    let log10Step = Math.log((windowY[1] - windowY[0]) / 10) / Math.log(10);
+    let numDigits = Math.ceil(log10Step);
+    let mainStep = Math.pow(10, numDigits);
+    let ratio = range / mainStep;
+
+    while (ratio > 3) {
+        mainStep = mainStep * 2;
+        ratio = range / mainStep;
+    }
+    if (ratio < 1.5) {
+        mainStep = mainStep / 2;
+        ratio = range / mainStep;
+    }
+
+    let zoomFactor = this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor;
+    mainStep *= zoomFactor;
+
+    let start = visUtils.roundDown(windowY[0], mainStep * 10);
+    let end = windowY[1];
+    let mainTicks = d3.range(start, end + mainStep / 2, mainStep);
+
+    let inchStep = (transformY.invert(utils.getDpcm()) - windowY[0]) * zoomFactor;
+    let step = mainStep / Math.round(mainStep / inchStep)
+
+    return [d3.range(start, end + step / 2, step), mainTicks];
 }
