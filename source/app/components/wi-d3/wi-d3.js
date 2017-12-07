@@ -331,7 +331,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addObjectTrack = function() {
         let trackOrder = getOrderKey();
         if(trackOrder) {
-            
+
             const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
             const defaultObjectTrackProp = {
                 showTitle: true,
@@ -966,22 +966,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _drawTooltip(track) {
         if (!_tooltip) return;
-        track.drawTooltipText();
 
         let plotMouse = d3.mouse(track.plotContainer.node());
         let depth = track.getTransformY().invert(plotMouse[1]);
 
         _tracks.forEach(function(tr) {
-            if (tr.drawTooltipLines) tr.drawTooltipLines(depth, tr == track);
+            if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
+            if (tr.drawTooltipText) tr.drawTooltipText(depth);
         })
         // graph.createTooltipLines(svg);
     }
 
     function _removeTooltip(track) {
         if (!_tooltip) return;
-        track.removeTooltipText();
+
         _tracks.forEach(function(tr) {
             if (tr.removeTooltipLines) tr.removeTooltipLines();
+            if (tr.removeTooltipText) tr.removeTooltipText();
         })
 
         // graph.removeTooltipLines(svg);
@@ -1134,7 +1135,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (track.mode != 'AddObject') return;
                 let y1 = track.startY;
                 let y2 = d3.mouse(track.plotContainer.node())[1];
-                
+
                 let minY = d3.min([y1, y2]);
                 let maxY = d3.max([y1, y2]);
 
@@ -1166,7 +1167,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if(object && track.getCurrentQuest && track.getCurrentQuest() && track.setCurrentQuest) {
                     let currQuest = track.getCurrentQuest();
                     track.setCurrentQuest(null);
-                    object.handleQuest(currQuest, _getWellProps());                    
+                    object.handleQuest(currQuest, _getWellProps());
                 }
                 let dataRequest = object.exportsProperties();
 
@@ -1553,7 +1554,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         _plotZoneSet(track);
                         Utils.refreshProjectState();
                     })
-                } 
+                }
                 else if (drawing.isAnnotation()) {
                     // Send api before deleting
                     wiApiService.removeAnnotation(drawing.idAnnotation, function () {
@@ -1565,7 +1566,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     wiApiService.removeImage(drawing.idImageOfTrack, function () {
                         track.removeDrawing(drawing);
                     })
-                } 
+                }
                 else if (drawing.isObjectOfTrack()) {
                     // Send api before deleting
                     wiApiService.removeObjectOfObjectTrack(drawing.id, function() {
@@ -1849,7 +1850,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     console.log("Removing: ", object);
                     wiApiService.removeObjectOfObjectTrack(object.id, function() {
                         switch(object.currentDraw) {
-                            case "Crossplot": 
+                            case "Crossplot":
                                 wiApiService.removeCrossplot(object.viCrossplot.idCrossPlot, function() {
                                     // THANG
                                     // wiApiService.deleteObject({
@@ -1948,7 +1949,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         self.setContextMenu(contextMenu);
     }
-    
+
     function _imageZoneOnRightClick() {
         let imgzone = _currentTrack.getCurrentImageZone();
         self.setContextMenu([
@@ -2193,7 +2194,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         name: 'addHistogram',
                         config: histogramProps
                     }
-                    
+
                     let trackOrder = getOrderKey();
                     if(trackOrder) {
                         const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
@@ -2536,7 +2537,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         })
                     })
 
-                    
+
                 }
             }, {
                 name: "DeleteTrack",

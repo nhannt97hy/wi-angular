@@ -723,3 +723,17 @@ exports.getDpcm = getDpcm;
 function getDpcm() {
     return getDpi() / 2.54;
 }
+
+let ALIGN = exports.ALIGN = {
+    CENTER_X: 1
+};
+
+let alignSvg = exports.alignSvg = function(element, container, type) {
+    let elemDim = element.node().getBBox();
+    let containerDim = getBoundingClientDimension(container.node());
+
+    if (type == ALIGN.CENTER_X) {
+        element.attr('x', containerDim.width / 2 - elemDim.width / 2);
+    }
+    return element;
+}
