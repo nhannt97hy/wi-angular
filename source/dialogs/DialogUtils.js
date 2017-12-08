@@ -5012,15 +5012,14 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 }
             });
+        }
 
-
-};
-this.onOkButtonClicked = function () {
-    updateCrossplot(function (crossplotProps) {
-        close(crossplotProps);
-    });
-};
-this.onApplyButtonClicked = function () {
+        this.onOkButtonClicked = function () {
+            updateCrossplot(function (crossplotProps) {
+                close(crossplotProps);
+            });
+        };
+        this.onApplyButtonClicked = function () {
             // updateCrossplot();
             updateCrossplot(function (crossplotProps) {
                 if (callback) callback(crossplotProps);
@@ -5028,14 +5027,16 @@ this.onApplyButtonClicked = function () {
         };
         this.onCancelButtonClicked = function () {
             close(null);
-        }
-    }
+        };
+    };
+
     ModalService.showModal({
         templateUrl: "crossplot-format/crossplot-format-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-
+        modal.element.modal({backdrop:'static', keyboard:false});
+        $(modal.element[0].children[0]).draggable();
         modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
