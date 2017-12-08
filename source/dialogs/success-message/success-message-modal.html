@@ -1,0 +1,16 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-sm'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCloseButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Success</h4>
+            </div>
+            <div class="modal-body text-center padding-2em">
+                <span class="margin-left-0_5em" style="color:#4caf50; font-weight: bold" ng-bind-html="wiModal.message"></span>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onCloseButtonClicked()'>Close</button>
+            </div>
+        </div>
+    </div>
+</div>

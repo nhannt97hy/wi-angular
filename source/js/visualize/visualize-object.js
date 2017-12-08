@@ -9,9 +9,9 @@ module.exports = ObjectOfTrack;
 Utils.extend(Drawing, ObjectOfTrack);
 
 function ObjectOfTrack(config) {
-	Drawing.call(this, config);
-	this.id = config.idObjectOfTrack || config.id;
-	this.idObjectTrack = config.idObjectTrack;
+    Drawing.call(this, config);
+    this.id = config.idObjectOfTrack || config.id;
+    this.idObjectTrack = config.idObjectTrack;
     this.startDepth = config.startDepth || config.topDepth;
     this.endDepth = config.endDepth || config.bottomDepth;
     this.name = "Object " + this.id;
@@ -65,7 +65,11 @@ ObjectOfTrack.prototype.exportsProperties = function() {
         case 'Histogram':
             objectToSave.type = "Histogram";
             let histogramProps = this.viHistogram.histogramModel.properties;
+            objectToSave.idHistogram = histogramProps.idHistogram;
+            objectToSave.background = this.background;
 
+            /*
+            objectToSave.idWell = histogramProps.idWell;
             objectToSave.leftScale = histogramProps.leftScale;
             objectToSave.rightScale = histogramProps.rightScale;
             objectToSave.plot = histogramProps.plot;
@@ -76,13 +80,12 @@ ObjectOfTrack.prototype.exportsProperties = function() {
             objectToSave.showGrid = histogramProps.showGrid;
             objectToSave.showCumulative = histogramProps.showCumulative;
             objectToSave.name = histogramProps.name;
-            objectToSave.background = this.background;
             objectToSave.color = histogramProps.color;
             objectToSave.divisions = histogramProps.divisions;
             objectToSave.loga = histogramProps.loga;
             objectToSave.topDepth = this.viHistogram.startDepth;
             objectToSave.bottomDepth = this.viHistogram.endDepth;
-
+            */
             break;
         case 'Crossplot':
             objectToSave.type = "Crossplot";
@@ -117,8 +120,8 @@ ObjectOfTrack.prototype.exportsProperties = function() {
     return properties;
 }
 
-ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService) {
-	Drawing.prototype.init.call(this, plotContainer);
+ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService, __Utils) {
+    Drawing.prototype.init.call(this, plotContainer);
     this.scopeObj = $scope;
     let self = this;
 
@@ -171,7 +174,9 @@ ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService) {
                 default :
                     break;
             }
-            self.refreshObjectOfTrack(newProps, wiApiService);
+            self.refreshObjectOfTrack(newProps, wiApiService, function () {
+                __Utils.refreshProjectState();
+            });
             self.hideTooltip();
         })
         .on('resizestop', function(event, ui) {
@@ -192,7 +197,9 @@ ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService) {
                 default :
                     break;
             }
-            self.refreshObjectOfTrack(null, wiApiService);
+            self.refreshObjectOfTrack(null, wiApiService, function () {
+                __Utils.refreshProjectState();
+            });
             self.hideTooltip();
         });
     this.updateHeader();
@@ -246,10 +253,7 @@ ObjectOfTrack.prototype.updateDepth = function(event, ui){
     let minY = transformY(this.startDepth);
     let maxY = transformY(this.endDepth);
     let originalHeight = maxY - minY;
-    /*
-    console.log("before change: ", minY, maxY);
-    console.log("depth: ", self.startDepth, self.endDepth);
-    */
+
     if(event.type == "dragstop" || event.type == "drag") {
         if(ui.position.top < 0) {
             ui.position.top = 0;
@@ -261,25 +265,17 @@ ObjectOfTrack.prototype.updateDepth = function(event, ui){
         let yChanged = ui.position.top - ui.originalPosition.top;
 
         if(yChanged) {
-            // minY = maxY - ui.size.height;
             self.startDepth = transformY.invert(ui.position.top);
         } else {
-            // maxY = minY + ui.size.height;
             self.endDepth = transformY.invert(ui.position.top + ui.size.height);
         }
-
-        // self.startDepth = transformY.invert(minY);
-        // self.endDepth = transformY.invert(maxY);
     }
-    /*
-    console.log("after change: ", minY, maxY);
-    console.log("depth: ", self.startDepth, self.endDepth);
-    */
+
     return [self.startDepth, self.endDepth];
 };
 
 ObjectOfTrack.prototype.doPlot = function(highlight, forcePlot) {
-	if (this.startDepth == null || this.endDepth == null) return;
+    if (this.startDepth == null || this.endDepth == null) return;
     
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
@@ -329,8 +325,10 @@ ObjectOfTrack.prototype.on = function(type, cb) {
     this.svgGroup.on(type, cb);
 }
 
-function buildHistogramProps(config) {
+function buildHistogramProps(config, wellProps) {
     var histogramProps = {
+        idHistogram: config.idHistogram,
+        idWell: config.idWell,
         name: config.name || "BlankHistogram",
         intervalDepthTop: config.intervalDepthTop,
         intervalDepthBottom: config.intervalDepthBottom,
@@ -347,7 +345,7 @@ function buildHistogramProps(config) {
         color: config.color || "Blue",
         discriminator: config.discriminator || null,
         curveId: config.curve.idCurve,
-        yStep: config.curve.yStep,
+        yStep: config.curve.yStep || parseFloat(wellProps.step),
     };
     return histogramProps;
 }
@@ -366,7 +364,7 @@ ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellPr
     }
 
     let histogramModel = {
-        properties: buildHistogramProps(config)
+        properties: buildHistogramProps(config, wellProp)
     }
 
     var domEle = this.objectContainer
@@ -377,7 +375,7 @@ ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellPr
             .style('height', '100%')
             .node();
 
-    this.viHistogram = graph.createHistogram(histogramModel, parseFloat(config.curve.yStep), parseFloat(wellProp.topDepth), parseFloat(wellProp.bottomDepth), domEle);
+    this.viHistogram = graph.createHistogram(histogramModel, (parseFloat(config.curve.yStep) || parseFloat(wellProp.step)), parseFloat(wellProp.topDepth), parseFloat(wellProp.bottomDepth), domEle);
 
     this.viHistogram.setCurve(config.curve.rawData);
     this.currentDraw = "Histogram";
@@ -541,6 +539,14 @@ ObjectOfTrack.prototype.refreshObjectOfTrack = function(newProp, wiApiService, c
 
             wiApiService.editObjectOfObjectTrack(self.exportsProperties(), function() {
                 console.log("Object edited");
+                let histogramPropsToRequest = angular.copy(self.viHistogram.histogramModel.properties);
+                histogramPropsToRequest.idCurve = self.viHistogram.histogramModel.properties.curveId;
+                delete histogramPropsToRequest.curve;
+                delete histogramPropsToRequest.curveId;
+                wiApiService.editHistogram(histogramPropsToRequest, function(histogramEdited) {
+                    console.log("Histogram edited", histogramEdited);
+                    if(callback) callback();
+                })
             });
             break;
         case 'Crossplot': 

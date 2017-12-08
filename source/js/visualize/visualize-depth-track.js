@@ -103,32 +103,45 @@ DepthTrack.prototype.doPlot = function(highlight) {
     let windowY = this.getWindowY();
     let transformY = this.getTransformY();
 
-    // let start = windowY[0];
-    // let end = windowY[1];
-    // let step = (end - start) / this.yTicks;
-    // let yAxisRight = d3.axisLeft(transformY)
-    //     .tickValues(d3.range(start, end + step / 2, step))
-    //     .tickFormat(self.getDecimalFormatter(self.yDecimal))
-    //     .tickSize(5);
+    let ticks = this.prepareTicks();
+    let allTicks = ticks[0];
+    let mainTicks = ticks[1];
 
-
-    // let step = Math.pow(10, Math.round(Math.log((windowY[1] - windowY[0]) / this.yTicks) / Math.log(10))) * 2;
-    let dpcm = Utils.getDpcm();
-    let step = (transformY.invert(dpcm) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
-    let start = Utils.roundUp(windowY[0], step);
-    let end = Utils.roundDown(windowY[1], step);
     let yAxisRight = d3.axisLeft(transformY)
-        .tickValues(d3.range(start, end + step / 2, step))
-        .tickFormat(self.getDecimalFormatter(self.yDecimal))
-        .tickSize(5);
+        .tickValues(allTicks)
+        .tickFormat(function(d) {
+            return (mainTicks.indexOf(d) > -1 && d > windowY[0]) ? self.getDecimalFormatter(self.yDecimal)(d) : '';
+        })
+        .tickSize(-5);
 
     let yAxisLeft = d3.axisRight(transformY)
-        .tickValues(d3.range(start, end + step, step))
+        .tickValues(allTicks)
         .tickFormat('')
         .tickSize(5);
 
     this.yAxisGroupRight.call(yAxisRight);
     this.yAxisGroupLeft.call(yAxisLeft);
+
+    let plotDim = Utils.getBoundingClientDimension(this.plotContainer.node());
+    this.yAxisGroupRight.selectAll('text')
+        .attr('x', function() {
+            let textDim = this.getBBox();
+            return -plotDim.width / 2 + textDim.width / 2;
+        });
+
+    this.yAxisGroupRight.selectAll('g.tick line')
+        .attr('x2', function(d) {
+            if (d < windowY[0]) return 0;
+            if (mainTicks.indexOf(d) > -1) return -10;
+            return -5;
+        });
+
+    this.yAxisGroupLeft.selectAll('g.tick line')
+        .attr('x2', function(d) {
+            if (d < windowY[0]) return 0;
+            if (mainTicks.indexOf(d) > -1) return 10;
+            return 5;
+        });
 }
 
 /**
