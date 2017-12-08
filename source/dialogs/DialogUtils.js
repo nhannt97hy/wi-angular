@@ -10733,7 +10733,6 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 }
             }
         }
-
         this.histogramProps.background = objectConfig.background;
 
         if(this.SelectedCurve != null) {
@@ -10747,11 +10746,11 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
             }
         }
-
+        /*
         if(!this.histogramProps.name) {
             this.histogramProps.name = "Histogram " + (this.SelectedCurve ? this.SelectedCurve.alias:"");
         }
-
+        */
         this.onSelectCurveChange = function () {
             self.histogramProps.curveId = self.SelectedCurve.id;
             self.histogramProps.leftScale = self.SelectedCurve.minX;
@@ -10763,7 +10762,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
             }
             self.histogramProps.curve = self.SelectedCurve;
-            self.histogramProps.name = "Histogram " + this.SelectedCurve.alias;
+            //self.histogramProps.name = "Histogram " + this.SelectedCurve.alias;
         }
 
         this.chooseChartColor = function () {
@@ -10791,6 +10790,24 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
             }
 
             return inValid;
+        }
+
+        this.checkNameAvailable = function () {
+            var isAvailable = true;
+            wiApiService.getWell(self.histogramProps.idWell, function(wellReturned) {
+                if(wellReturned && wellReturned.histograms.length) {
+                    wellReturned.histograms.forEach(function (histogramItem) {
+                        if(self.histogramProps.name == histogramItem.name) {
+                            isAvailable = false;
+                        }
+                    })
+                }
+                if(isAvailable) {
+                    DialogUtils.successMessageDialog(ModalService, "histogram name is available!");
+                } else {
+                    DialogUtils.warningMessageDialog(ModalService, "histogram name existed!");
+                }
+            })
         }
 
         this.onOKButtonClicked = function () {
@@ -11128,6 +11145,24 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
             return inValid;
         }
 
+        this.checkNameAvailable = function () {
+            var isAvailable = true;
+            wiApiService.getWell(self.crossplotProps.idWell, function(wellReturned) {
+                if(wellReturned && wellReturned.crossplots.length) {
+                    wellReturned.crossplots.forEach(function (crossplotItem) {
+                        if(self.crossplotProps.name == crossplotItem.name) {
+                            isAvailable = false;
+                        }
+                    })
+                }
+                if(isAvailable) {
+                    DialogUtils.successMessageDialog(ModalService, "crossplot name is available");
+                } else {
+                    DialogUtils.warningMessageDialog(ModalService, "crossplot name existed!");
+                }
+            })
+        }
+
         this.onOkButtonClicked = function () {
             self.crossplotProps.curveX = this.SelectedCurveX;
             self.crossplotProps.labelX = this.SelectedCurveX.name;
@@ -11310,3 +11345,26 @@ exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCo
         });
     });
 }
+
+exports.successMessageDialog = successMessageDialog;
+function successMessageDialog (ModalService, successfulMessage, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.message = successfulMessage;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: 'success-message/success-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (data) {
+            if (callback) callback();
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        })
+    });
+};

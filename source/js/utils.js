@@ -1491,6 +1491,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                     case 'Histogram' :
                                         objectProps.intervalDepthTop = objectOfTrack.topDepth;
                                         objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
+                                        /*
                                         objectProps.curve = new Object();
                                         objectProps.curve.yStep = objectProps.yStep;
                                         objectProps.curve.idCurve = objectProps.curveId;
@@ -1505,28 +1506,55 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                             console.log("Histogram Props: ", objectProps);
                                             anObject.createHistogramToForeignObject(objectProps, wellProps);
                                         })
+                                        */
+
+                                        wiApiService.getHistogram(objectProps.idHistogram, function (histogramProps) {
+                                            if(histogramProps.idHistogram) {
+                                                histogramProps.background = objectProps.background;
+                                                histogramProps.intervalDepthTop = objectProps.intervalDepthTop;
+                                                histogramProps.intervalDepthBottom = objectProps.intervalDepthBottom;
+                                                wiApiService.infoCurve(histogramProps.idCurve, function (curveInfo) {
+                                                    histogramProps.curve = curveInfo;
+                                                    wiApiService.dataCurve(histogramProps.idCurve, function (dataCurve) {
+                                                        histogramProps.curve.rawData = dataCurve;
+                                                        wiApiService.getWell(histogramProps.idWell, function (wellProps) {
+                                                            anObject.createHistogramToForeignObject(histogramProps, wellProps);
+                                                        })
+                                                    })
+                                                })
+                                            } else {
+                                                wiD3Ctrl.removeAnObjectOfObjectTrack(viTrack, anObject);
+                                            }
+                                        })
+
                                         break;
                                     case 'Crossplot':
                                         objectProps.intervalDepthTop = objectOfTrack.topDepth;
                                         objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
-                                        wiApiService.getPointSet(objectProps.idPointSet, function(pointSet) {
-                                            wiApiService.infoCurve(pointSet.idCurveX, function(curveX) {
-                                                wiApiService.dataCurve(pointSet.idCurveX, function(dataCurveX) {
-                                                    curveX.rawData = dataCurveX;
-                                                    if(pointSet.idCurveX == pointSet.idCurveY) {
-                                                        let curveY = curveX;
-                                                        createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
-                                                    } else {
-                                                        wiApiService.infoCurve(pointSet.idCurveY, function(curveY) {
-                                                            wiApiService.dataCurve(pointSet.idCurveY, function(dataCurveY) {
-                                                                curveY.rawData = dataCurveY;
+                                        wiApiService.getCrossplot(objectProps.idCrossPlot, function(crossplot) {
+                                            if(crossplot.idCrossPlot) {
+                                                wiApiService.getPointSet(objectProps.idPointSet, function(pointSet) {
+                                                    wiApiService.infoCurve(pointSet.idCurveX, function(curveX) {
+                                                        wiApiService.dataCurve(pointSet.idCurveX, function(dataCurveX) {
+                                                            curveX.rawData = dataCurveX;
+                                                            if(pointSet.idCurveX == pointSet.idCurveY) {
+                                                                let curveY = curveX;
                                                                 createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
-                                                            })
+                                                            } else {
+                                                                wiApiService.infoCurve(pointSet.idCurveY, function(curveY) {
+                                                                    wiApiService.dataCurve(pointSet.idCurveY, function(dataCurveY) {
+                                                                        curveY.rawData = dataCurveY;
+                                                                        createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
+                                                                    })
+                                                                })
+                                                            }
                                                         })
-                                                    }
-                                                })
-                                            })
-                                        })
+                                                    })
+                                                });
+                                            } else {
+                                                wiD3Ctrl.removeAnObjectOfObjectTrack(viTrack, anObject);
+                                            }
+                                        });
                                         break;
                                     default:
                                         break;
