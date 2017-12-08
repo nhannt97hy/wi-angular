@@ -10816,7 +10816,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
     });
 }
 
-exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
+exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
     function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
         window.tBulk = this;
@@ -10825,23 +10825,53 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
         this.tracks = [];
+        this.sumWidth = 0;
 
-        let allTracks = angular.copy(wiD3Ctrl.getTracks());
-        // this.tracks = allTracks;
         allTracks.forEach(function(t) {
             self.tracks.push(getTrackProps(t));
-        })
+        });
+
+        this.tracks.forEach(function(track) {
+            self.colorTrack = function (track) {
+                dialogUtils.colorPickerDialog(ModalService, track.bgColor, function (colorStr) {
+                    track.bgColor = colorStr;
+                });
+            };
+            self.sumWidth += track.width;
+        });
+        this.getSum = function () {
+            self.sumWidth = 0;
+            this.tracks.forEach(function(track) {
+                self.sumWidth += track.width;
+            });
+        };
+        
         console.log("tracks", this.tracks);
+        function getLogTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idTrack))[0];
+        };
+        function getDepthTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idDepthAxis))[0];
+        };
+        function getZoneTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idZoneTrack))[0];
+        };
+        function getImageTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idImageTrack))[0];
+        };
+        // console.log("allTracks", allTracks);
         function getTrackProps (track) {
             let props =  {
                 type : track.type,
                 title : track.name,
-                showTitle : track.showTitle,
-                justification : track.justification,
+                showXGrids : track.showXGrids ? track.showXGrids : false,
+                showYGrids : track.showYGrids ? track.showYGrids : false,
+                xMajorTicks : track.xMajorTicks ? track.xMajorTicks : null,
+                xMinorTicks : track.xMinorTicks ? track.xMinorTicks : null,
                 width : utils.pixelToInch(track.width),
                 zoomFactor : track.zoomFactor,
+                bgColor : track.bgColor,
                 check : false
             }
             switch (track.type) {
@@ -10863,24 +10893,20 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
             }
             return props;
         }
+
         this.onOkButtonClicked = function(cb){
             async.eachOfSeries(self.tracks, function(track, idx, callback){
                     switch(track.type) {
                         case 'log-track':
                             if( track.check ) {
                                 wiApiService.editTrack(track, function(res) {
-                                    console.log("log", res);
-                                    // track.width = utils.inchToPixel(track.width);
-                                    // track.setProperties(newProps.general);
+                                    let l = angular.copy(track);
+                                    l.width = utils.inchToPixel(l.width);
+                                    let logTrack = getLogTrack(l);
+                                    console.log("log", res, l, logTrack);
+                                    logTrack.setProperties(l);
 
-                                    // if (track.zoomFactor != savedZoomFactor) {
-                                    //     savedZoomFactor = newProps.general.zoomFactor;
-                                    //     wiD3Ctrl.processZoomFactor();
-                                    //     wiD3Ctrl.plotAll();
-                                    // }
-                                    // else {
-                                    //     currentTrack.doPlot(true);
-                                    // }
+                                    logTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {
@@ -10892,7 +10918,12 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
                             if( track.check ) {
                                 wiApiService.editDepthTrack(track, function(res) {
                                     console.log("depth", res);
-                                    // track.width = utils.inchToPixel(track.width);
+                                    let d = angular.copy(track);
+                                    d.width = utils.inchToPixel(d.width);
+                                    let depthTrack = getDepthTrack(d);
+                                    depthTrack.setProperties(d);
+
+                                    depthTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {
@@ -10904,7 +10935,12 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
                             if( track.check ) {
                                 wiApiService.editZoneTrack(track, function(res) {
                                     console.log("zone", res);
-                                    // track.width = utils.inchToPixel(track.width);
+                                    let z = angular.copy(track);
+                                    z.width = utils.inchToPixel(z.width);
+                                    let zoneTrack = getZoneTrack(z);
+                                    zoneTrack.setProperties(z);
+
+                                    zoneTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {
@@ -10916,7 +10952,12 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
                             if( track.check ) {
                                 wiApiService.editImageTrack(track, function(res) {
                                     console.log("image", res);
-                                    // track.width = utils.inchToPixel(track.width);
+                                    let i = angular.copy(track);
+                                    i.width = utils.inchToPixel(i.width);
+                                    let imageTrack = getImageTrack(i);
+                                    imageTrack.setProperties(i);
+
+                                    imageTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {

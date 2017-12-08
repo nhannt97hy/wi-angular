@@ -8,6 +8,28 @@
             <div class="modal-body dialog-style">
                 <p></p>
                 <form class='form-horizontal form-condensed'>
+                    <div class="row">
+                        <div style="width : 5%" class="display-inline-block">Use</div>
+                        <div style="width : 10%"  class="display-inline-block">Track</div>
+                        <div style="width : 10%"  class="display-inline-block">Curve</div>
+                        <div style="width : 15%"  class="display-inline-block">Left Scale</div>
+                        <div style="width : 15%"  class="display-inline-block">Right Scale</div>
+                        <div style="width : 10%"  class="display-inline-block">Auto Scale</div>
+                        <div style="width : 20%"  class="display-inline-block">Display Mode</div>
+                        <div style="width : 10%"  class="display-inline-block">Use All Curve</div>
+                    </div>
+                    <div ng-repeat="track in wiModal.tracks">
+                        <div class="row">
+                            <div style="width : 5%" class="display-inline-block">Use</div>
+                            <div style="width : 10%"  class="display-inline-block">Track</div>
+                            <div style="width : 10%"  class="display-inline-block">Curve</div>
+                            <div style="width : 15%"  class="display-inline-block">Left Scale</div>
+                            <div style="width : 15%"  class="display-inline-block">Right Scale</div>
+                            <div style="width : 10%"  class="display-inline-block">Auto Scale</div>
+                            <div style="width : 20%"  class="display-inline-block">Display Mode</div>
+                            <div style="width : 10%"  class="display-inline-block">Use All Curve</div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">

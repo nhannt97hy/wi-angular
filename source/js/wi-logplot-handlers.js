@@ -568,8 +568,9 @@ exports.TrackBolkUpdateButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
-    let timeoutFunc = this.$timeout;
-    DialogUtils.trackBulkUpdateDialog(this.ModalService, wiLogplot, function () {
+    let allTracks = wiLogplot.getwiD3Ctrl().getTracks();
+    console.log("allTracks", allTracks);
+    DialogUtils.trackBulkUpdateDialog(this.ModalService, allTracks, function () {
 
     });
 };
