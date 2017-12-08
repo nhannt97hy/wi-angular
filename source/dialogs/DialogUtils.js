@@ -9472,6 +9472,8 @@ exports.TVDConversionDialog = function (ModalService) {
             for(let i = 0; i < length; i++){
                 self.FullSize[i] = parseFloat((self.step * i + self.topDepth).toFixed(4));
             }
+            self.FullSizeLoaded = self.FullSize.slice(0,10);
+            self.FullSizeCurve = self.FullSize.slice(0,10);
             self.outdevArr = new Array(length);
             self.outaziArr = new Array(length);
             self.outtvdArr = new Array(length);
@@ -9489,6 +9491,20 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.onChangeWell();
             }, 0);
         });
+        this.LoadMoreInputCurve = () => {
+            let len = self.FullSizeCurve.length;
+            self.FullSizeCurve.push(...self.FullSize.slice(len, len + 10));
+        }
+        this.LoadMorePreview = () => {
+            if(self.SizeLoaded){
+                let len = self.SizeLoaded.length;
+                self.SizeLoaded.push(...self.Size.slice(len, len + 10));
+            }
+        }
+        this.LoadMoreOutPut = () => {
+            let len = self.FullSizeLoaded.length;
+            self.FullSizeLoaded.push(...self.FullSize.slice(len, len + 10));
+        }
         this.loadFile = function(){
             if(self.SurveyFile){
                 self.input.length = 0;
@@ -9895,6 +9911,7 @@ exports.TVDConversionDialog = function (ModalService) {
                         cb();
                     }], function(err, ret){
                         console.log('Done Processing!');
+                        self.SizeLoaded = self.Size.slice(0,10);
                         if(save){
                             saveCurves();
                         }else{

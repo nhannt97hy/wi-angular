@@ -10,7 +10,7 @@ Object.defineProperty(Array.prototype, "binarySearch", {
     }        
 });
 let queryString = require('query-string');
-// let appConfig = require('./app.config');
+let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
 
 let DialogUtils = require('./DialogUtils');
@@ -155,6 +155,7 @@ let app = angular.module('wiapp',
         wiMultiselect.name,
 
         wiConditionNode.name,
+        ngInfiniteScroll,
 
         'angularModalService',
         'angularResizable',
