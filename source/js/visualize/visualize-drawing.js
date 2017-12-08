@@ -40,7 +40,7 @@ Drawing.prototype.isZone = function() {
 /**
 <<<<<<< Updated upstream
 =======
- * Check if class of this instance is Object
+ * Check if class of this instance is Object of Object Track
  * @returns {Boolean}
  */
 Drawing.prototype.isObject = function() {

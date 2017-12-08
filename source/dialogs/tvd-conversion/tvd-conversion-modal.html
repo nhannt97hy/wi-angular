@@ -185,44 +185,59 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-4">
-                                <label>Input</label>
-                                <div class="pane-table" style="height:200px;">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr ng-if="wiModal.useType == 'file'">
-                                                <th>{{wiModal.input.length ? 'Index': '&nbsp;'}}</th>
-                                                <th ng-repeat="row in wiModal.input[0] track by $index">Column{{$index + 1}}</th>
-                                            </tr>
-                                            <tr ng-if="wiModal.useType == 'curve'">
-                                                <th>Index</th>
-                                                <th>Depth</th>
-                                                <th>Deviation</th>
-                                                <th>Azimuth</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="row in wiModal.input" ng-if="wiModal.useType == 'file'">
-                                                <th>{{$index}}</th>
-                                                <td ng-repeat="col in row track by $index">{{col}}</td>
-                                            </tr>
-                                            <tr ng-if="wiModal.useType == 'curve'"
-                                            ng-repeat="row in wiModal.FullSize track by $index">
-                                                <th>{{$index}}</th>
-                                                <td>{{(wiModal.FullSize[$index]).toFixed(4)}}</td>
-                                                <td>{{wiModal.devArr[$index]}}</td>
-                                                <td>{{wiModal.aziArr[$index]}}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="col-sm-8">
+                        <div style="display:flex; flex-direction:row">
+                            <div resizable r-directions="['right']" r-flex="true" style="min-width:20%;max-width:50%">
                                 <wi-tabset>
-                                    <wi-tab heading='Preview'>
-                                        <div class="pane-table" style="height:195px;">
+                                    <wi-tab heading='Input'>
+                                        <div class="pane-table" style="height:200px;" ng-if="wiModal.useType == 'file'">
                                             <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>{{wiModal.input.length ? 'Index': '&nbsp;'}}</th>
+                                                        <th ng-repeat="row in wiModal.input[0] track by $index">Column{{$index + 1}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="row in wiModal.input">
+                                                        <th>{{$index}}</th>
+                                                        <td ng-repeat="col in row track by $index">{{col}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="pane-table" style="height:200px;" ng-if="wiModal.useType == 'curve'" id="inputCurve">
+                                            <table class="table table-bordered"
+                                            infinite-scroll="wiModal.LoadMoreInputCurve()" infinite-scroll-distance="0"
+                                            infinite-scroll-container='"#inputCurve"'>
+                                                <thead>
+                                                    <tr ng-if="wiModal.useType == 'curve'">
+                                                        <th>Index</th>
+                                                        <th>Depth</th>
+                                                        <th>Deviation</th>
+                                                        <th>Azimuth</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-if="wiModal.useType == 'curve'"
+                                                    ng-repeat="row in wiModal.FullSizeCurve track by $index">
+                                                        <th>{{$index}}</th>
+                                                        <td>{{(wiModal.FullSize[$index]).toFixed(4)}}</td>
+                                                        <td>{{wiModal.devArr[$index]}}</td>
+                                                        <td>{{wiModal.aziArr[$index]}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </wi-tab>
+                                </wi-tabset>
+                            </div>
+                            <div style="margin-left:14px;display:flex;flex:1;overflow:overlay">
+                                <wi-tabset style="width:100%">
+                                    <wi-tab heading='Preview'>
+                                        <div class="pane-table" style="height:200px;" id="preview">
+                                            <table class="table table-bordered"
+                                            infinite-scroll="wiModal.LoadMorePreview()" infinite-scroll-distance="0"
+                                            infinite-scroll-container='"#preview"'>
                                                 <thead>
                                                     <tr>
                                                         <th>Index</th>
@@ -238,7 +253,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr ng-repeat="row in wiModal.Size track by $index">
+                                                    <tr ng-repeat="row in wiModal.SizeLoaded track by $index">
                                                         <th>{{$index}}</th>
                                                         <td>{{wiModal.depthArr[$index].toFixed(4)}}</td>
                                                         <td>{{wiModal.tvdArr[$index].toFixed(4)}}</td>
@@ -255,8 +270,9 @@
                                         </div>
                                     </wi-tab>
                                     <wi-tab heading='Output'>
-                                        <div class="pane-table" style="height:195px;">
-                                            <table class="table table-bordered">
+                                        <div class="pane-table" style="height:200px;" id="output">
+                                            <table class="table table-bordered"                                        infinite-scroll="wiModal.LoadMoreOutPut()" infinite-scroll-distance="0"
+                                            infinite-scroll-container='"#output"'>
                                                 <thead>
                                                     <tr>
                                                         <th>Index</th>
@@ -272,7 +288,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr ng-repeat="row in wiModal.FullSize track by $index">
+                                                    <tr ng-repeat="row in wiModal.FullSizeLoaded track by $index">
                                                         <th>{{$index}}</th>
                                                         <td>{{(wiModal.FullSize[$index])}}</td>
                                                         <td>{{wiModal.outdevArr[$index]}}</td>

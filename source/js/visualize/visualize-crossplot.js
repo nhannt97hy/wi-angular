@@ -537,6 +537,7 @@ Crossplot.prototype.doPlot = function() {
     this.plotTernary();
     this.plotArea();
     this.plotUserLine();
+    window._CROSSPLOT = this;
 }
 
 Crossplot.prototype.updateClipPath = function() {

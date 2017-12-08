@@ -5012,15 +5012,14 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 }
             });
+        }
 
-
-};
-this.onOkButtonClicked = function () {
-    updateCrossplot(function (crossplotProps) {
-        close(crossplotProps);
-    });
-};
-this.onApplyButtonClicked = function () {
+        this.onOkButtonClicked = function () {
+            updateCrossplot(function (crossplotProps) {
+                close(crossplotProps);
+            });
+        };
+        this.onApplyButtonClicked = function () {
             // updateCrossplot();
             updateCrossplot(function (crossplotProps) {
                 if (callback) callback(crossplotProps);
@@ -5028,14 +5027,16 @@ this.onApplyButtonClicked = function () {
         };
         this.onCancelButtonClicked = function () {
             close(null);
-        }
-    }
+        };
+    };
+
     ModalService.showModal({
         templateUrl: "crossplot-format/crossplot-format-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-
+        modal.element.modal({backdrop:'static', keyboard:false});
+        $(modal.element[0].children[0]).draggable();
         modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
@@ -9472,6 +9473,8 @@ exports.TVDConversionDialog = function (ModalService) {
             for(let i = 0; i < length; i++){
                 self.FullSize[i] = parseFloat((self.step * i + self.topDepth).toFixed(4));
             }
+            self.FullSizeLoaded = self.FullSize.slice(0,10);
+            self.FullSizeCurve = self.FullSize.slice(0,10);
             self.outdevArr = new Array(length);
             self.outaziArr = new Array(length);
             self.outtvdArr = new Array(length);
@@ -9489,6 +9492,20 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.onChangeWell();
             }, 0);
         });
+        this.LoadMoreInputCurve = () => {
+            let len = self.FullSizeCurve.length;
+            self.FullSizeCurve.push(...self.FullSize.slice(len, len + 10));
+        }
+        this.LoadMorePreview = () => {
+            if(self.SizeLoaded){
+                let len = self.SizeLoaded.length;
+                self.SizeLoaded.push(...self.Size.slice(len, len + 10));
+            }
+        }
+        this.LoadMoreOutPut = () => {
+            let len = self.FullSizeLoaded.length;
+            self.FullSizeLoaded.push(...self.FullSize.slice(len, len + 10));
+        }
         this.loadFile = function(){
             if(self.SurveyFile){
                 self.input.length = 0;
@@ -9895,6 +9912,7 @@ exports.TVDConversionDialog = function (ModalService) {
                         cb();
                     }], function(err, ret){
                         console.log('Done Processing!');
+                        self.SizeLoaded = self.Size.slice(0,10);
                         if(save){
                             saveCurves();
                         }else{
@@ -10733,7 +10751,6 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 }
             }
         }
-
         this.histogramProps.background = objectConfig.background;
 
         if(this.SelectedCurve != null) {
@@ -10747,11 +10764,11 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
             }
         }
-
+        /*
         if(!this.histogramProps.name) {
             this.histogramProps.name = "Histogram " + (this.SelectedCurve ? this.SelectedCurve.alias:"");
         }
-
+        */
         this.onSelectCurveChange = function () {
             self.histogramProps.curveId = self.SelectedCurve.id;
             self.histogramProps.leftScale = self.SelectedCurve.minX;
@@ -10763,7 +10780,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
             }
             self.histogramProps.curve = self.SelectedCurve;
-            self.histogramProps.name = "Histogram " + this.SelectedCurve.alias;
+            //self.histogramProps.name = "Histogram " + this.SelectedCurve.alias;
         }
 
         this.chooseChartColor = function () {
@@ -10791,6 +10808,24 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
             }
 
             return inValid;
+        }
+
+        this.checkNameAvailable = function () {
+            var isAvailable = true;
+            wiApiService.getWell(self.histogramProps.idWell, function(wellReturned) {
+                if(wellReturned && wellReturned.histograms.length) {
+                    wellReturned.histograms.forEach(function (histogramItem) {
+                        if(self.histogramProps.name == histogramItem.name) {
+                            isAvailable = false;
+                        }
+                    })
+                }
+                if(isAvailable) {
+                    DialogUtils.successMessageDialog(ModalService, "histogram name is available!");
+                } else {
+                    DialogUtils.warningMessageDialog(ModalService, "histogram name existed!");
+                }
+            })
         }
 
         this.onOKButtonClicked = function () {
@@ -11169,6 +11204,24 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
             return inValid;
         }
 
+        this.checkNameAvailable = function () {
+            var isAvailable = true;
+            wiApiService.getWell(self.crossplotProps.idWell, function(wellReturned) {
+                if(wellReturned && wellReturned.crossplots.length) {
+                    wellReturned.crossplots.forEach(function (crossplotItem) {
+                        if(self.crossplotProps.name == crossplotItem.name) {
+                            isAvailable = false;
+                        }
+                    })
+                }
+                if(isAvailable) {
+                    DialogUtils.successMessageDialog(ModalService, "crossplot name is available");
+                } else {
+                    DialogUtils.warningMessageDialog(ModalService, "crossplot name existed!");
+                }
+            })
+        }
+
         this.onOkButtonClicked = function () {
             self.crossplotProps.curveX = this.SelectedCurveX;
             self.crossplotProps.labelX = this.SelectedCurveX.name;
@@ -11351,3 +11404,26 @@ exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCo
         });
     });
 }
+
+exports.successMessageDialog = successMessageDialog;
+function successMessageDialog (ModalService, successfulMessage, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.message = successfulMessage;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: 'success-message/success-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (data) {
+            if (callback) callback();
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        })
+    });
+};

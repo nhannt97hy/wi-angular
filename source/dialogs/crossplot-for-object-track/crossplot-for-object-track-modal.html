@@ -11,14 +11,14 @@
                     <form class="form-horizontal form-condensed">
                         <p></p>
                         <div class="row">
-                            <div class="col-sm-3"></div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label class="control-label col-sm-4 font-weight-normal">
-                                        Crossplot Name
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <input placeholder="auto named" class="form-control wi-form-control" type="text" ng-model="wiModal.crossplotProps.name">
+                            <div class='container-fluid form-group'>
+                                <label class="col-sm-3">Crossplot Name: </label>
+                                <div class="col-sm-9">
+                                    <div class="input-group has-cuccess has-feedback">
+                                        <input type="text" class="form-control" placeholder="Auto named" ng-model="wiModal.crossplotProps.name">
+                                        <span class="input-group-btn">
+                                            <button ng-disabled="!wiModal.crossplotProps.name" ng-click="wiModal.checkNameAvailable()" class="btn btn-default" type="button">Check Available</button>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
