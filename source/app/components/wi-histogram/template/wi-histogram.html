@@ -2,7 +2,102 @@
     @@include('./toolbar/index.html')
 </div>
 <div class="histogram-main-content" style="flex: 1; display: flex; flex-direction: row;">
-    <wi-d3-histogram style="width: 100%; flex: 1; display: flex;"
-    name='{{wiHistogram.wiD3AreaName}}'
-    wi-histogram-ctrl='wiHistogram'></wi-d3-histogram>
+    <div style="display:flex; flex-direction:row;width:100%;background-color:white;">
+        <div resizable r-directions="['right']" r-flex="true" ng-show="wiHistogram.isShowWiZone" style="min-width:10%;max-width:20%">
+            <wi-container title='Zone' close-handler='wiHistogram.CloseZone'>
+                <wi-zone name="{{wiHistogram.getWiZoneCtrlName()}}" zones="wiHistogram.zoneArr" active-zone="wiHistogram.histogramModel.properties.activeZone"
+                    on-zone-ctrl-ready="wiHistogram.onZoneCtrlReady">
+                </wi-zone>
+            </wi-container>
+        </div>
+        
+
+        <div style='flex:1; display: flex;flex-direction:column;margin:0px 14px'>
+            <!--<div style="width: 100%; flex: 1; display: flex;">-->
+                <wi-d3-histogram style="width: 100%; flex: 1; display: flex;"
+                    name='{{wiHistogram.wiD3AreaName}}'
+                    wi-histogram-ctrl='wiHistogram'></wi-d3-histogram>
+            <!--</div>-->
+            <div resizable r-directions="['top']" r-flex="true" class="statistic-pane">
+                <h5 class='text-left statistic-header'>
+                    <label>Statistics</label>
+                </h5>
+                <div class="scroll-content" ng-show="wiHistogram.histogramModel.properties.idCurve">
+                    <div>
+                        <div class="row">
+                            <div class="col-sm-3"><label>Variables</label></div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3"></div>
+                        </div>
+                        <div class="row wi-small text-color-steelblue">
+                            <div class="col-sm-3 text-right"><label>{{wiHistogram.curveModel.properties.name}}:</label></div>
+                            <div class="col-sm-3">
+                                <span ng-show="!wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.histogramModel.properties.intervalDepthTop}}-{{wiHistogram.histogramModel.properties.intervalDepthBottom}}]</span>
+                                <span ng-show="wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.zoneSetModel.properties.name}}-Zonation]</span>
+                            </div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3"><label>Statistics</label></div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3"></div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>Number Of Values:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.length}}</div>
+                            <div class="col-sm-3 text-right"><label>Min Value:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.min}}</div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>Max Value:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.max}}</div>
+                            <div class="col-sm-3 text-right"><label>Average:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.avg}}</div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>Average Deviation:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.avg_dev}}</div>
+                            <div class="col-sm-3 text-right"><label>Standard Deviation:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.std_dev}}</div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>Variance:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.var}}</div>
+                            <div class="col-sm-3 text-right"><label>Skewness:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.skew}}</div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>Kurtosis:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.kur}}</div>
+                            <div class="col-sm-3 text-right"><label>Median:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.med}}</div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>P10:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.p10}}</div>
+                            <div class="col-sm-3 text-right"><label>P50:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.p50}}</div>
+                        </div>
+                        <div class="row wi-small text-color-lightgray">
+                            <div class="col-sm-3 text-right"><label>P90:</label></div>
+                            <div class="col-sm-3">{{wiHistogram.statistics.p90}}</div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div resizable r-directions="['left']" r-flex="true" ng-if="wiHistogram.histogramModel.properties.referenceDisplay" style="min-width:20%;max-width:30%">
+            <wi-container title='Reference Curve' close-handler='wiHistogram.CloseReferenceWindow'>
+                <wi-reference-window 
+                    name='{{wiHistogram.getWiRefWindCtrlName()}}'
+                    on-ref-wind-ctrl-ready="wiHistogram.onRefWindCtrlReady"></wi-reference-window>
+            </wi-container>
+        </div>
+    </div>
 </div>

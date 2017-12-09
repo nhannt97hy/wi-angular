@@ -5786,7 +5786,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
     });
 } */
 
-exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
+exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         window.hisFormat = this;
@@ -5795,14 +5795,14 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this._FDEL = 3;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
+        var histogramModel = utils.getModel('histogram', wiHistogramId);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
         this.ref_Curves_Arr = histogramModel.properties.reference_curves?angular.copy(histogramModel.properties.reference_curves):[];
         this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
-        this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
+        this.well = utils.findWellByHistogram(wiHistogramId);
         this.datasets = [];
         this.zoneSetList = [];
         this.curvesArr = [];
@@ -6364,9 +6364,18 @@ exports.zoneManagerDialog = function (ModalService, item) {
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = this.project.children;
-
+        //this.wellArr = this.project.children;
+        this.wellArr = utils.findWells();
+/*
+        let selectedNode = utils.getSelectedNode();
+        let idWell = null;
+        if (selectedNode && selectedNode.type == 'zonesets') {
+            idWell = selectedNode.properties.idWell;
+        }
+        if (!idWell) return;
+*/
         this.SelectedWell = this.wellArr[0];
+        //this.SelectedWell = utils.findWellById(idWell);
         this.zonesetsArr = self.SelectedWell.children.find(function (child) {
             return child.name == 'zonesets';
         }).children;
@@ -6744,35 +6753,36 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onOkButtonClicked = function(){
-         console.log('Ok');
-         if(self.verify()) {
-            doApply(function(){
-                close(null);
-            });
-        }else{
-            utils.error(errorMessage);
-            return;
+            console.log('Ok');
+            if(self.verify()) {
+               doApply(function(){
+                   close(null);
+               });
+            }else{
+                utils.error(errorMessage);
+                return;
+            }
+        }
+
+        this.onCancelButtonClicked = function () {
+            console.log('OnCancelButtonClicked');
+            close(null);
         }
     }
 
-    this.onCancelButtonClicked = function () {
-        close(null);
-    }
-}
-
-ModalService.showModal({
-    templateUrl: 'zone-manager/zone-manager-modal.html',
-    controller: ModalController,
-    controllerAs: 'wiModal'
-}).then(function (modal) {
-    initModal(modal);
-    $(modal.element[0].children[0]).draggable();
-    modal.close.then(function (ret) {
-        $('.modal-backdrop').last().remove();
-        $('body').removeClass('modal-open');
-        if (!ret) return;
-    })
-})
+    ModalService.showModal({
+        templateUrl: 'zone-manager/zone-manager-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    });
 };
 
 exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
@@ -7430,7 +7440,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
             if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+                //self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             } else {
                 self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             }

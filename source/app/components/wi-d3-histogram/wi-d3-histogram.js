@@ -17,7 +17,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     self.histogramModel = null;
     self.curveModel = null;
-    let zoneCtrl = null, refWindCtrl;
+    let zoneCtrl = null, refWindCtrl = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
@@ -34,7 +34,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (callback) callback();
         });
     }
-
+/*
     this.statistics = {
         length: null,
         min: null,
@@ -50,9 +50,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         p50: null,
         p90: null
     }
-    this.zoneArr = null;
+*/
+//    this.zoneArr = null;
 
-    this.isShowWiZone = true;
+    //this.isShowWiZone = true;
     // this.isShowReferenceWindow = true;
 
     function getIdHistogram() {
@@ -62,13 +63,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getWell = getWell;
     function getWell() {
         if (!_well) {
-            _well = utils.findWellByHistogram(self.wiHistogramCtrl.id);
+            _well = utils.findWellByHistogram(self.wiHistogramCtrl.id || self.idHistogram);
         }
         return _well;
     }
 
     this.getModel = function(){
-        return self.wiHistogramCtrl.getModel();
+        return utils.findHistogramModelById(self.wiHistogramCtrl.id || self.idHistogram);
     }
     function getHistogramTitle() {
         let well = getWell();
@@ -97,16 +98,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!self.curveModel) return false;
         return (idCurve == self.curveModel.properties.idCurve);
     }
+    function setWiHistogramZoneArr(zoneArray) {
+        if (self.wiHistogramCtrl) self.wiHistogramCtrl.zoneArr = zoneArray;
+    }
+
     this.linkModels = function () {
-        self.zoneArr = null;
+        setWiHistogramZoneArr(null);
         self.histogramModel = self.getModel();
         if (self.histogramModel.properties.idZoneSet) {
             self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
             if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
                 self.visHistogram.setHistogramModel(self.histogramModel);
-            self.zoneArr = self.zoneSetModel.children;
-            self.getZoneCtrl().zones = self.zoneArr;
-
+            if (self.getZoneCtrl()) zoneCtrl.zones = self.zoneSetModel.children;
+            //self.zoneArr = self.zoneSetModel.children;
+            setWiHistogramZoneArr(self.zoneSetModel.children);
         }
         else {
             self.zoneSetModel = null;
@@ -116,7 +121,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (Object.keys(self.visHistogram).length !==0) {
                 if(self.visHistogram.discriminator != self.histogramModel.properties.discriminator){
                     self.visHistogram.discriminator = self.histogramModel.properties.discriminator;
-                    utils.evaluateExpr(self.getWell(), self.visHistogram.discriminator, function(result){
+                    utils.evaluateExpr(getWell(), self.visHistogram.discriminator, function(result){
                         self.visHistogram.discriminatorArr = result;
                         console.log('link models');
 
@@ -140,7 +145,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.refreshHistogram = function() {
         if (self.visHistogram) {
-            let activeZones = self.getZoneCtrl().getActiveZones();
+            let activeZones = null;
+            if (self.getZoneCtrl()) activeZones = zoneCtrl.getActiveZones();
             console.warn("---", activeZones);
             if ( isFunction(self.visHistogram.setHistogramModel) )
                 self.visHistogram.setHistogramModel(self.histogramModel);
@@ -190,10 +196,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
 
+/*
     this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
     }
-
     this.CloseZone = function () {
         self.isShowWiZone = false;
     }
@@ -201,20 +207,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.CloseReferenceWindow = function () {
         self.histogramModel.properties.referenceDisplay = false;
     }
+*/
 
     this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl, function(histogramProperties) {
-            self.linkModels();
-            self.getZoneCtrl().zoneUpdate();
-            //self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves, histogramProperties.referenceScale);
-        });
+        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl.id||self.idHistogram, 
+            function(histogramProperties) {
+                self.linkModels();
+                if (self.getZoneCtrl()) zoneCtrl.zoneUpdate();
+                //self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves, histogramProperties.referenceScale);
+            }
+        );
     }
 
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
             console.log('Discriminator', data);
             self.linkModels();
-        })
+        });
     }
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
@@ -299,7 +308,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ReferenceWindow",
             label: "Reference Window",
             handler: function () {
-                DialogUtils.referenceWindowsDialog(ModalService, _well, self.histogramModel, function() {
+                DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
                     saveHistogramNow(function() {
                         self.getWiRefWindCtrl().update(getWell(), 
                             self.histogramModel.properties.reference_curves, 
@@ -404,7 +413,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
 
         if(self.visHistogram.discriminator){
-            utils.evaluateExpr(self.getWell(), self.visHistogram.discriminator, function(result){
+            utils.evaluateExpr(getWell(), self.visHistogram.discriminator, function(result){
                 console.log(result);
                 self.visHistogram.discriminatorArr = result;
                 console.log('createVisualizeHistogram');
@@ -441,21 +450,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function loadStatistics() {
-        $timeout(function () {
-            self.statistics.length = self.visHistogram.getLength();
-            self.statistics.min = self.visHistogram.getMin();
-            self.statistics.max = self.visHistogram.getMax();
-            self.statistics.avg = self.visHistogram.getAverage();
-            self.statistics.avg_dev = self.visHistogram.getAverageDeviation();
-            self.statistics.std_dev = self.visHistogram.getStandardDeviation();
-            self.statistics.var = self.visHistogram.getVariance();
-            self.statistics.skew = self.visHistogram.getSkewness();
-            self.statistics.kur = self.visHistogram.getKurtosis();
-            self.statistics.med = self.visHistogram.getMedian();
-            self.statistics.p10 = self.visHistogram.getPercentile(0.1);
-            self.statistics.p50 = self.visHistogram.getPercentile(0.5);
-            self.statistics.p90 = self.visHistogram.getPercentile(0.9);
-        });
+        if (self.wiHistogramCtrl) {
+            $timeout(function () {
+                self.wiHistogramCtrl.loadStatistics(self.visHistogram);
+                /*
+                self.statistics.length = self.visHistogram.getLength();
+                self.statistics.min = self.visHistogram.getMin();
+                self.statistics.max = self.visHistogram.getMax();
+                self.statistics.avg = self.visHistogram.getAverage();
+                self.statistics.avg_dev = self.visHistogram.getAverageDeviation();
+                self.statistics.std_dev = self.visHistogram.getStandardDeviation();
+                self.statistics.var = self.visHistogram.getVariance();
+                self.statistics.skew = self.visHistogram.getSkewness();
+                self.statistics.kur = self.visHistogram.getKurtosis();
+                self.statistics.med = self.visHistogram.getMedian();
+                self.statistics.p10 = self.visHistogram.getPercentile(0.1);
+                self.statistics.p50 = self.visHistogram.getPercentile(0.5);
+                self.statistics.p90 = self.visHistogram.getPercentile(0.9);
+                */
+            });
+        }
     }
 }
 
@@ -467,7 +481,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiHistogramCtrl: '<'
+        wiHistogramCtrl: '<',
+        idHistogram: '<'
     }
 });
 

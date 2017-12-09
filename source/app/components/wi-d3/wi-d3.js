@@ -2541,20 +2541,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             dragToCreate: true
                         }
                         DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (histogramProps) {
-                            /*
-                            let quest = {
-                                name: 'addHistogram',
-                                config: histogramProps
-                            }
-                            track.setCurrentQuest(quest);
-                            track.setMode('AddObject');
-                            */
                             histogramProps.plotType = "Frequency";
                             let dataRequest = angular.copy(histogramProps);
                             dataRequest.idWell = _getWellProps().idWell;
                             dataRequest.idCurve = histogramProps.curve.idCurve;
                             if(!dataRequest.name) {
-                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - " + (Math.random().toString(36).substr(2, 3));
+                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - " 
+                                    + (Math.random().toString(36).substr(2, 3));
                             }
                             delete dataRequest.curve;
                             wiApiService.createHistogram(dataRequest, function(createdHistogram) {
@@ -2571,10 +2564,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                                 track.setCurrentQuest(quest);
                                 track.setMode("AddObject");
-
-                                // Utils.refreshProjectState();
-                            })
-                        })
+                            });
+                        });
                     }
                 }, {
                     name: 'AddCrossplot',

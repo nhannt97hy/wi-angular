@@ -68,24 +68,6 @@ ObjectOfTrack.prototype.exportsProperties = function() {
             objectToSave.idHistogram = histogramProps.idHistogram;
             objectToSave.background = this.background;
 
-            /*
-            objectToSave.idWell = histogramProps.idWell;
-            objectToSave.leftScale = histogramProps.leftScale;
-            objectToSave.rightScale = histogramProps.rightScale;
-            objectToSave.plot = histogramProps.plot;
-            objectToSave.curveId = histogramProps.curveId;
-            objectToSave.yStep = histogramProps.yStep;
-            objectToSave.plotType = histogramProps.plotType;
-            objectToSave.showGaussian = histogramProps.showGaussian;
-            objectToSave.showGrid = histogramProps.showGrid;
-            objectToSave.showCumulative = histogramProps.showCumulative;
-            objectToSave.name = histogramProps.name;
-            objectToSave.color = histogramProps.color;
-            objectToSave.divisions = histogramProps.divisions;
-            objectToSave.loga = histogramProps.loga;
-            objectToSave.topDepth = this.viHistogram.startDepth;
-            objectToSave.bottomDepth = this.viHistogram.endDepth;
-            */
             break;
         case 'Crossplot':
             objectToSave.type = "Crossplot";
@@ -96,19 +78,6 @@ ObjectOfTrack.prototype.exportsProperties = function() {
             objectToSave.name = this.name;
             objectToSave.background = this.background;
             objectToSave.idWell = this.viCrossplot.idWell;
-            /*
-            objectToSave.idCurveX = pointSet.idCurveX;
-            objectToSave.idCurveY = pointSet.idCurveY;
-            objectToSave.majorX = pointSet.majorX;
-            objectToSave.minorX = pointSet.minorX;
-            objectToSave.majorY = pointSet.majorY;
-            objectToSave.minorY = pointSet.minorY;
-            objectToSave.scaleLeft = pointSet.scaleLeft;
-            objectToSave.scaleRight = pointSet.scaleRight;
-            objectToSave.scaleTop = pointSet.scaleTop;
-            objectToSave.scaleBottom = pointSet.scaleBottom;
-            objectToSave.numColor = pointSet.numColor;
-            */
             break;
         default:
             objectToSave = {
@@ -612,7 +581,7 @@ ObjectOfTrack.prototype.handleQuest = function(quest, wellProp) {
     switch(quest.name) {
         case 'addHistogram':
             console.log("Well properties: ", wellProp);
-            console.log("Histogram Props: ", quest.config);
+            console.log("Quest config: ", quest.config);
             this.createHistogramToForeignObject(quest.config, wellProp);
             break;
         case 'addCrossplot':

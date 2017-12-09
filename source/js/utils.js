@@ -1752,6 +1752,30 @@ function findWellByCurve(idCurve) {
     return path.find(p => p.type == 'well');
 }
 
+
+function restrictedVisit(node, depth, callback) {
+    if (!depth) return;
+    if (callback) callback(node);
+    if (node.children) {
+        for (let child of node.children) 
+            restrictedVisit(child, depth - 1, callback);
+    }
+}
+exports.findWells = findWells;
+function findWells() {
+    let wells = new Array();
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let prjNode = rootNodes[0];
+    restrictedVisit(prjNode, 3, function(node) {
+        if (node.type == 'well') {
+            wells.push(node);
+        }
+    });
+    return wells;
+}
+
 exports.findHistogramModelById = function (idHistogram) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;

@@ -16,59 +16,6 @@ wi-d3-histogram {
     }
     //display:flex;
     overflow: hidden;
-    .rg-left, .rg-right {
-        & > span {
-            cursor: col-resize;
-        }
-    }
-    .rg-top, .rg-down {
-        & > span {
-            cursor: row-resize;
-        }
-    }
-    .statistic-header {
-        padding:1px;
-        padding-left: 0.5em;
-        position: relative;
-        overflow: hidden;
-    }
-    .statistic-header:after {
-        position: absolute;
-        content: "";
-        height: 1px;
-        background-color: #e5e5e5;
-        width: 100%;
-        margin-left: 10px;
-        top: 50%;
-    }
-    .statistic-pane {
-        padding-top:14px;
-        height: 30%;
-        max-height:70%; 
-        min-height:10%;
-        display:flex;
-        flex-direction:column;
-    }
-    .rg-top {
-        margin-top: 0;
-    }
-    
-    .scroll-content {
-        flex: 1;
-        padding-left: 1.5em;
-        overflow-y:auto;
-        overflow-x:hidden
-    }
-    .histogram-container {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-    .wi-small{
-        font-size: 85%;
-    }
-
-    
 }
 .hide-grid svg .tick line {
     display: none;
