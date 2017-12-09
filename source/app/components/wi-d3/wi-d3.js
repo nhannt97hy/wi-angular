@@ -224,9 +224,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     orderNum: trackOrder
                 }
                 wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
-                    let imageTrack = dataRequest;
-                    imageTrack.idImageTrack = returnImageTrack.idImageTrack;
-                    let viTrack = self.pushImageTrack(dataRequest);
+                    let viTrack = self.pushImageTrack(returnImageTrack);
                 })
             })
         } else {
@@ -629,7 +627,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return marker;
     }
 
-    this.addImageZone = function (imgzone, props) {
+    this.drawImageZone = function (imgzone, props, isNewDraw) {
         if (!imgzone) return;
         let imageConfig = {
             idImageTrack: props.idImageTrack,
@@ -638,19 +636,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             width: 'inherit',
             height: 'inherit'
         };
-        imgzone.addImage(imageConfig);
-    }
-
-    this.changeImageZone = function (imgzone, props) {
-        if (!imgzone) return;
-        let imageConfig = {
-            idImageTrack: props.idImageTrack,
-            fill: props.fill,
-            imageUrl: props.imageUrl,
-            width: 'inherit',
-            height: 'inherit'
-        };
-        imgzone.changeImage(imageConfig);
+        imgzone.drawImage(imageConfig, isNewDraw);
     }
 
     this.addImageToTrack = function (track, config) {
@@ -1342,7 +1328,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         if (imgProps) {
                             $timeout(function () {
                                 imgzone.setProperties(imgProps);
-                                self.addImageZone(imgzone, imgProps);
+                                self.drawImageZone(imgzone, imgProps, true);
                             });
                         }
                     });
@@ -1712,7 +1698,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (imgProps) {
                     $timeout(function () {
                 		imgzone.setProperties(imgProps);
-                		self.changeImageZone(imgzone, imgProps);
+                		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
                     });
                 }
@@ -2954,14 +2940,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: 'annotation-16x16',
             handler: function () {
                 self.addAnnotation();
-            }
-        },
-        {
-            name: "RemoveImage",
-            label: "Remove Image",
-            icon: 'image-delete-16x16',
-            handler: function () {
-                logplotHandlers.RemoveImageButtonClicked();
             }
         },
         {

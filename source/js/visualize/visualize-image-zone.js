@@ -15,7 +15,7 @@ function ImageZone(config) {
     this.fill = config.fill || 'white';
 
     this.name = config.name || '';
-    this.showName = config.showName == null ? false : config.showName;
+    this.showName = config.showName == null ? true : config.showName;
 
     this.imageUrl = config.imageUrl || '';
     this.done = config.done || false;
@@ -125,30 +125,29 @@ ImageZone.prototype.on = function(type, cb) {
     this.svgGroup.on(type, cb);
 }
 
-ImageZone.prototype.changeImage = function(config) {
+ImageZone.prototype.drawImage = function(config, isNewDraw) {
     if (!config) return;
-    this.rect
-        .style('fill', config.fill);
-    this.foreignObject
-        .select('img')
-        .attr('class', 'img-responsive')
-        .attr('src', config.imageUrl)
-        .style('object-fit', 'contain')
-        .style('width', '100%')
-        .style('height', '100%');
-}
-
-ImageZone.prototype.addImage = function(config) {
-    if (!config) return;
-    this.rect
-        .style('fill', config.fill);
-    this.foreignObject
-        .append('xhtml:img')
-        .attr('class', 'img-responsive')
-        .attr('src', config.imageUrl)
-        .style('object-fit', 'contain')
-        .style('width', '100%')
-        .style('height', '100%');
+    if (isNewDraw) {
+        this.rect
+            .style('fill', config.fill);
+        this.foreignObject
+            .append('xhtml:img')
+            .attr('class', 'img-responsive')
+            .attr('src', config.imageUrl)
+            .style('object-fit', 'contain')
+            .style('width', '100%')
+            .style('height', '100%');
+    } else {
+        this.rect
+            .style('fill', config.fill);
+        this.foreignObject
+            .select('img')
+            .attr('class', 'img-responsive')
+            .attr('src', config.imageUrl)
+            .style('object-fit', 'contain')
+            .style('width', '100%')
+            .style('height', '100%');
+    } 
 }
 
 ImageZone.prototype.updateHeader = function() {

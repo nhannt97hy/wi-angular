@@ -3924,6 +3924,10 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
 
 exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imageTrackProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+        const _NEW = 'created';
+        const _EDIT = 'edited';
+        const _DEL = 'deleted';
+
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
@@ -3937,29 +3941,165 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             // parameterSet: null
         }
         props.width = utils.pixelToInch(props.width);
-        console.log(props);
+
+        this.tabName = wiLogplotModel.properties.name;
+
         this.showTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
         this.trackColor = props.trackColor;
         this.width = props.width;
 
+        this._DEL = _DEL;
+        this.imagesOfCurrentTrack = [];
+        this.status = false;
+
+        this.isPropsChanged = false;
+
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
                 self.trackColor = colorStr;
             });
         }
+
+        if (props.idImageTrack) {
+            self.status = true;
+            wiApiService.getImageTrack(props.idImageTrack, function (data) {
+                self.imagesOfCurrentTrack = data.image_of_tracks;
+            });
+
+            this.selectedRow = this.imagesOfCurrentTrack && this.imagesOfCurrentTrack.length ? 0 : -1;
+
+            this.setClickedRow = function (indexRow) {
+                self.selectedRow = indexRow;
+            }
+            this.selectColor = function (index) {
+                DialogUtils.colorPickerDialog(ModalService, self.imagesOfCurrentTrack[index].fill, function (colorStr) {
+                    self.imagesOfCurrentTrack[index].fill = colorStr;
+                    self.onImageChanged(index);
+                });
+            }
+            this.configImage = function (index) {
+                self.imagesOfCurrentTrack[index].done = true;
+                DialogUtils.imageZonePropertiesDialog(ModalService, self.imagesOfCurrentTrack[index], function (data) {
+                    if (!data) return;
+                    self.imagesOfCurrentTrack[index] = data;
+                    self.onImageChanged(index);
+                });
+            }
+
+            this.addImage = function (index) {
+                let newImage = {
+                    // name: 'New Image',
+                    fill: 'white',
+                    flag: _NEW
+                };
+
+                self.imagesOfCurrentTrack.splice(index, 0, newImage);
+                self.selectedRow = self.imagesOfCurrentTrack.length - 1;
+            }
+            this.onAddButtonClicked = function () {
+                self.addImage(self.imagesOfCurrentTrack.length);
+                self.isPropsChanged = true;
+            }
+            this.onImageChanged = function(index) {
+                if (typeof self.imagesOfCurrentTrack[index].flag === 'undefined') {
+                    self.imagesOfCurrentTrack[index].flag = _EDIT;
+                }
+                self.isPropsChanged = true;
+            }
+            this.onDeleteButtonClicked = function () {
+                if (self.imagesOfCurrentTrack[self.selectedRow].flag != _NEW) {
+                    self.imagesOfCurrentTrack[self.selectedRow].flag = _DEL;
+                } else {
+                    self.imagesOfCurrentTrack.splice(self.selectedRow, 1);
+                }
+                self.selectedRow = self.selectedRow > 0 ? self.selectedRow - 1 : 0;
+                self.isPropsChanged = true;
+            }
+            this.onClearAllButtonClicked = function () {
+                self.imagesOfCurrentTrack.map(function(i){
+                    i.flag = _DEL;
+                })
+                self.selectedRow = -1;
+                self.isPropsChanged = true;
+            }
+        }
+
+        function doApply (callback) {
+            if (self.imagesOfCurrentTrack && self.imagesOfCurrentTrack.length) {
+                wiComponentService.getComponent('SPINNER').show();
+                async.eachOfSeries(self.imagesOfCurrentTrack, function(image, i, callback) {
+                    switch (self.imagesOfCurrentTrack[i].flag) {
+                        case _NEW:
+                            delete self.imagesOfCurrentTrack[i].flag;
+                            self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
+                            self.imagesOfCurrentTrack[i].showName = true;
+                            wiApiService.createImage(self.imagesOfCurrentTrack[i], function(data) {
+                                self.imagesOfCurrentTrack[i] = data;
+                                callback();
+                            });
+                            break;
+
+                        case _EDIT:
+                            delete self.imagesOfCurrentTrack[i].flag;
+                            self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
+                            self.imagesOfCurrentTrack[i].showName = true;
+                            wiApiService.editImage(self.imagesOfCurrentTrack[i], function(data) {
+                                self.imagesOfCurrentTrack[i] = data;
+                                callback();
+                            });
+                            break;
+
+                        case _DEL:
+                            wiApiService.removeImage(self.imagesOfCurrentTrack[i].idImageOfTrack, function() {
+                                callback();
+                            });
+                            break;
+
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function (err) {
+                    for (let i = self.imagesOfCurrentTrack.length - 1; i >= 0; i--) {
+                        switch (self.imagesOfCurrentTrack[i].flag) {
+                            case _DEL:
+                                    self.imagesOfCurrentTrack.splice(i, 1);
+                                break;
+
+                            case _NEW:
+                            case _EDIT:
+                                delete self.imagesOfCurrentTrack[i].flag;
+                                break;
+                        }
+                    }
+                    utils.refreshProjectState().then(function() {
+                        if (callback) callback();
+                    });
+                });
+            } else {
+                if (callback) callback();
+            }
+        }
+
         this.onOkButtonClicked = function () {
             props = {
                 showTitle: self.showTitle,
                 title: self.title,
                 topJustification: self.topJustification,
                 trackColor: self.trackColor,
-                width: self.width
+                width: self.width,
+                image_of_tracks: self.imagesOfCurrentTrack
                 // parameterSet: self.parameterSet
             }
-            // if (self.error) return;
-            close(props, 100);
+            if (self.status) {
+                doApply(function() {
+                    close(props);
+                });
+            } else {
+                close(props);
+            }
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -4069,8 +4209,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             props.topDepth = self.topDepth;
             props.bottomDepth = self.bottomDepth;
             props.imageUrl = self.imageUrl;
-            self.showName ? props.name = self.name : props.name = "";
-            props.showName = self.showName;
+            props.name = self.name;
+            // props.showName = self.showName;
             props.fill = self.fill;
             props.done = self.done;
         }

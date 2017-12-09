@@ -146,7 +146,7 @@ ImageTrack.prototype.addImageZone = function(config, track) {
     imgzone.init(this.plotContainer);
     if (config.imageUrl) {
         imgzone.doPlot(true);
-        imgzone.addImage(config);
+        imgzone.drawImage(config, true);
     }
     imgzone.header = this.addImageZoneHeader(imgzone);
     imgzone.on('mousedown', function() {
