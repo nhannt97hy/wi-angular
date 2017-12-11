@@ -52,7 +52,7 @@ ImageTrack.prototype.setMode = function(newMode) {
     this.trackContainer.style('cursor', newMode == null ? 'default' : 'copy');
 }
 
-ImageTrack.prototype.getImageZones = function () {
+ImageTrack.prototype.getImages = function () {
     return this.drawings.filter(function (d) {
         return d.isImageZone();
     });
@@ -172,8 +172,15 @@ ImageTrack.prototype.removeDrawing = function(drawing) {
         this.currentDrawing = null;
 }
 
+ImageTrack.prototype.removeAllDrawings = function() {
+    let self = this;
+    this.getImages().forEach(function (img) {
+        self.removeImage(img);
+    })
+}
+
 ImageTrack.prototype.removeImage = function(imgzone) {
-    if (!imgzone || !imgzone.isImageZone()) return;
+    if (!imgzone || !imgzone.isImageZone || !imgzone.isImageZone()) return;
     this.removeDrawing(imgzone);
 }
 

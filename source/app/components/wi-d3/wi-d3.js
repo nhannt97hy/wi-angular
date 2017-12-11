@@ -2765,15 +2765,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         } else if (_currentTrack.isImageTrack()) {
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
                 if (props) {
+                    _currentTrack.removeAllDrawings();
                     props.idImageTrack = _currentTrack.id;
                     console.log(props);
-                    wiApiService.editImageTrack(props, function () {
+                    wiApiService.editImageTrack(props, function (data) {
                         $timeout(function () {
-                            props.width = Utils.inchToPixel(props.width);
-                            _currentTrack.setProperties(props);
-                            _currentTrack.doPlot(true);
+                            for (let img of data.image_of_tracks) {
+                                self.addImageZoneToTrack(_currentTrack, img);
+                            }
+                            data.width = Utils.inchToPixel(data.width);
+                            _currentTrack.setProperties(data);
                         });
                     });
+                    _currentTrack.doPlot(true);
                 }
             });
         } else if (_currentTrack.isObjectTrack()) {
