@@ -280,8 +280,12 @@ exports.createZoneSet = function (idWell, callback) {
 }
 
 function logplotToTreeConfig(plot, options = {}) {
+    let plotModel = new Object();
+    setTimeout(() => {
+        let wellModel = getModel('well', plot.idWell);
+        plotModel.parentData = wellModel.data;
+    });
     if (options.isDeleted) {
-        var plotModel = new Object();
         plotModel.name = 'logplot-deleted-child';
         plotModel.type = 'logplot-deleted-child';
         plotModel.id = plot.idPlot;
@@ -298,7 +302,6 @@ function logplotToTreeConfig(plot, options = {}) {
         plotModel.parent = 'well' + plot.idWell;
         return plotModel;
     }
-    var plotModel = new Object();
     plotModel.name = 'logplot';
     plotModel.type = 'logplot';
     plotModel.id = plot.idPlot;
@@ -319,18 +322,18 @@ function logplotToTreeConfig(plot, options = {}) {
     }
     plotModel.parent = 'well' + plot.idWell;
     wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS).push(plotModel);
-    setTimeout(() => {
-        let wellModel = getModel('well', plot.idWell);
-        plotModel.parentData = wellModel.data;
-    });
     return plotModel;
 }
 
 exports.logplotToTreeConfig = logplotToTreeConfig;
 
 function crossplotToTreeConfig(crossplot, options = {}) {
+    let crossplotModel = new Object();
+    setTimeout(() => {
+        let wellModel = getModel('well', crossplot.idWell);
+        crossplotModel.parentData = wellModel.data;
+    });
     if (options.isDeleted) {
-        var crossplotModel = new Object();
         crossplotModel.name = 'crossplot-deleted-child';
         crossplotModel.type = 'crossplot-deleted-child';
         crossplotModel.id = crossplot.idCrossPlot;
@@ -357,7 +360,6 @@ function crossplotToTreeConfig(crossplot, options = {}) {
         }
         return crossplotModel;
     }
-    var crossplotModel = new Object();
     crossplotModel.name = 'crossplot';
     crossplotModel.type = 'crossplot';
     crossplotModel.id = crossplot.idCrossPlot;
@@ -388,18 +390,18 @@ function crossplotToTreeConfig(crossplot, options = {}) {
     crossplotModel.parent = 'well' + crossplot.idWell;
     let wiComponentService = __GLOBAL.wiComponentService;
     wiComponentService.getComponent(wiComponentService.PROJECT_CROSSPLOTS).push(crossplotModel);
-    setTimeout(() => {
-        let wellModel = getModel('well', crossplot.idWell);
-        crossplotModel.parentData = wellModel.data;
-    });
     return crossplotModel;
 }
 
 exports.crossplotToTreeConfig = crossplotToTreeConfig;
 
 function histogramToTreeConfig(histogram, options = {}) {
+    let histogramModel = new Object();
+    setTimeout(() => {
+        let wellModel = getModel('well', histogram.idWell);
+        histogramModel.parentData = wellModel.data;
+    });
     if (options.isDeleted) {
-        let histogramModel = new Object();
         histogramModel.name = 'histogram-deleted-child';
         histogramModel.type = 'histogram-deleted-child';
         histogramModel.id = histogram.idHistogram;
@@ -444,7 +446,6 @@ function histogramToTreeConfig(histogram, options = {}) {
         }
         return histogramModel;
     }
-    let histogramModel = new Object();
     histogramModel.name = 'histogram';
     histogramModel.type = 'histogram';
     histogramModel.id = histogram.idHistogram;
@@ -493,10 +494,6 @@ function histogramToTreeConfig(histogram, options = {}) {
     histogramModel.parent = 'well' + histogram.idWell;
     let wiComponentService = __GLOBAL.wiComponentService;
     wiComponentService.getComponent(wiComponentService.PROJECT_HISTOGRAMS).push(histogramModel);
-    setTimeout(() => {
-        let wellModel = getModel('well', histogram.idWell);
-        histogramModel.parentData = wellModel.data;
-    });
     return histogramModel;
 }
 
@@ -530,8 +527,13 @@ function comboviewToTreeConfig(comboview, isDeleted) {
 exports.comboviewToTreeConfig = comboviewToTreeConfig;
 
 function curveToTreeConfig(curve, isDeleted) {
+    let curveModel = new Object();
+    setTimeout(() => {
+        let datasetModel = getModel('dataset', curve.idDataset);
+        let wellModel = getModel('well', datasetModel.properties.idWell);
+        curveModel.parentDataArr = [datasetModel.data, wellModel.data];
+    });
     if (isDeleted) {
-        var curveModel = new Object();
         curveModel.name = 'curve-deleted-child';
         curveModel.type = 'curve-deleted-child';
         curveModel.id = curve.idCurve;
@@ -555,7 +557,6 @@ function curveToTreeConfig(curve, isDeleted) {
         curveModel.parent = curve.dataset;
         return curveModel;
     } else {
-        var curveModel = new Object();
         curveModel.name = curve.name;
         curveModel.type = 'curve';
         curveModel.id = curve.idCurve;
@@ -584,8 +585,12 @@ function curveToTreeConfig(curve, isDeleted) {
 exports.curveToTreeConfig = curveToTreeConfig;
 
 function datasetToTreeConfig(dataset, isDeleted) {
+    let datasetModel = new Object();
+    setTimeout(() => {
+        let wellModel = getModel('well', dataset.idWell);
+        datasetModel.parentData = wellModel.data;
+    });
     if (isDeleted) {
-        var datasetModel = new Object();
         datasetModel.name = "dataset-deleted-child";
         datasetModel.type = "dataset-deleted-child";
         datasetModel.id = dataset.idDataset;
@@ -606,7 +611,6 @@ function datasetToTreeConfig(dataset, isDeleted) {
         if (!dataset.curves) return datasetModel;
         return datasetModel;
     } else {
-        var datasetModel = new Object();
         datasetModel.name = dataset.name;
         datasetModel.type = "dataset";
         datasetModel.id = dataset.idDataset;
@@ -630,7 +634,6 @@ function datasetToTreeConfig(dataset, isDeleted) {
             curve.dataset = dataset.name;
             datasetModel.children.push(curveToTreeConfig(curve));
         });
-
         return datasetModel;
     }
 }
@@ -665,7 +668,8 @@ function createDatasetsNode(parent) {
     datasetsModel.data = {
         childExpanded: false,
         icon: 'curve-data-16x16',
-        label: "Datasets"
+        label: "Datasets",
+        isCollection: true
     };
     datasetsModel.properties = {
         totalItems: parent.datasets.length
@@ -685,7 +689,8 @@ function createCurvesNode(parent) {
     curvesModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
-        label: "Curves"
+        label: "Curves",
+        isCollection: true
     }
     curvesModel.properties = {
         totalItems: parent.curves.length
@@ -708,7 +713,7 @@ function createLogplotsNode(parent, options = {}) {
     if (options.isDeleted) {
         plotsModel.name = 'logplots-deleted';
         plotsModel.type = 'logplots-deleted';
-
+        plotsModel.data.isCollection = true;
     } else if (options.isCollection) {
         plotsModel.type = 'project-logplots';
         plotsModel.data.isCollection = true;
@@ -745,6 +750,7 @@ function createCrossplotsNode(parent, options = {}) {
     if (options.isDeleted) {
         crossplotsModel.name = 'crossplots-deleted';
         crossplotsModel.type = 'crossplots-deleted';
+        crossplotsModel.data.isCollection = true;
     } else if (options.isCollection) {
         crossplotsModel.type = 'project-crossplots';
         crossplotsModel.data.isCollection = true;
@@ -781,6 +787,7 @@ function createHistogramsNode(parent, options = {}) {
     if (options.isDeleted) {
         histogramsModel.name = 'histograms-deleted';
         histogramsModel.type = 'histograms-deleted';
+        histogramsModel.data.isCollection = true;
     } else if (options.isCollection) {
         histogramsModel.type = 'project-histograms';
         histogramsModel.data.isCollection = true;
@@ -1023,7 +1030,6 @@ function dustbinToTreeConfig(dustbin) {
     dustbinModel.children = new Array();
 
     let wiComponentService = __GLOBAL.wiComponentService;
-    wiComponentService.putComponent(wiComponentService.DUSTBIN, dustbinModel);
     if (dustbin) {
         updateDustbinConfig(dustbin);
     }
@@ -1040,7 +1046,7 @@ function updateDustbinConfig(dustbin) {
     dustbinModel.children.push(createCurvesNode(dustbin));
     dustbinModel.children.push(createLogplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createCrossplotsNode(dustbin, { isDeleted: true }));
-    dustbinModel.children.push(createHistogramsNode(dustbin));
+    dustbinModel.children.push(createHistogramsNode(dustbin, { isDeleted: true }));
     return dustbinModel;
 }
 
@@ -1629,8 +1635,9 @@ function getStaticNode(type, options) {
         if (model) return model;
     }
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    let tmp = {children: rootNodes};
     if (!rootNodes || !rootNodes.length) return;
-    visit(rootNodes[0], function (node) {
+    visit(tmp, function (node) {
         if (node.type == type) {
             model = node;
         }
@@ -1713,7 +1720,6 @@ function findWellById(idWell) {
     });
     return well;
 }
-
 exports.findWellById = findWellById;
 
 exports.findWellByLogplot = function (idLogplot) {
@@ -1757,7 +1763,7 @@ function restrictedVisit(node, depth, callback) {
     if (!depth) return;
     if (callback) callback(node);
     if (node.children) {
-        for (let child of node.children) 
+        for (let child of node.children)
             restrictedVisit(child, depth - 1, callback);
     }
 }

@@ -53,17 +53,22 @@ exports.OpenTemplateButtonClicked = function () {
 }
 
 exports.CollapseProjectButtonClicked = function () {
-    let rootTreeviewCtrl = this.wiComponentService.getComponent('WiExplorertreeview');
-    let rootConfig = rootTreeviewCtrl.config;
+    const wiComponentService = this.wiComponentService;
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    let rootTreeviewCtrl = wiComponentService.getComponent('WiExplorertreeview');
+    if (!selectedNodes) {
+        let rootConfig = rootTreeviewCtrl.config;
+        selectedNodes = rootConfig
+    }
     var expaned = false;
-    for (let child of rootConfig) {
+    for (let child of selectedNodes) {
         expaned = child.data.childExpanded;
         if (!expaned) break;
     }
     if (expaned) {
-        rootTreeviewCtrl.collapseAll(rootConfig);
+        rootTreeviewCtrl.collapseAll(selectedNodes);
     } else {
-        rootTreeviewCtrl.expandAll(rootConfig);
+        rootTreeviewCtrl.expandAll(selectedNodes);
     }
 }
 
@@ -74,7 +79,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-    const removables = ['well', 'dataset', 'curve', 'zoneset', 'zone', 'logplot', 'crossplot', 'histogram', 'comboview'];
+    const removables = ['group', 'well', 'dataset', 'curve', 'zoneset', 'zone', 'logplot', 'crossplot', 'histogram', 'comboview'];
     let isValid = false;
     removables.forEach(t => {
         if (selectedNodes[0].type == t) {
@@ -89,11 +94,11 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     })
     let message = '';
     if (selectedNodes.length > 1) {
-        message = isPermanently ? `Are you sure to delete following ${selectedNodes[0].type}s permanently?:<br> ${selectedNodesName}`
-            : `Are you sure to move following ${selectedNodes[0].type}s to recycle bin?:<br> ${selectedNodesName}?`;
+        message = isPermanently ? `Are you sure to delete following ${selectedNodes[0].type}s <b>permanently</b>?:<br> ${selectedNodesName}`
+            : `Are you sure to delete following ${selectedNodes[0].type}s?:<br> ${selectedNodesName}?`;
     } else {
-        message = isPermanently ? `Are you sure to delete ${selectedNodes[0].type} <b>${selectedNodesName}</b> permanently?:`
-            : `Are you sure to move ${selectedNodes[0].type} <b>${selectedNodesName}</b> to recycle bin?`;
+        message = isPermanently ? `Are you sure to delete ${selectedNodes[0].type} <b>${selectedNodesName} permanently</b>?:`
+            : `Are you sure to delete ${selectedNodes[0].type} <b>${selectedNodesName}</b>?`;
     }
     dialogUtils.confirmDialog(this.ModalService, "Delete confirmation", message, function (yes) {
         if (yes) {
@@ -101,6 +106,9 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                 let deleteFunction = function () { },
                     cleanUpFunction = function () { };
                 switch (selectedNode.type) {
+                    case 'group':
+                        deleteFunction = wiApiService.removeGroup;
+                        break;
                     case 'well':
                         deleteFunction = wiApiService.removeWell;
                         cleanUpFunction = function () {
@@ -171,7 +179,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         });
                     })
                 } else {
-                    deleteFunction(selectedNode.id, function () {
+                    deleteFunction.call(wiApiService, selectedNode.id, function () {
                         $timeout(function () {
                             cleanUpFunction();
                             next();
