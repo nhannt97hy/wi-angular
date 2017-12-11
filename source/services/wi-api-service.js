@@ -21,7 +21,8 @@ const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://192.168.0.223';
 // const BASE_URL = 'http://192.168.1.17:3000';
 
-
+// const PROCESSING_SERVICE = 'http://54.169.13.92'
+const PROCESSING_SERVICE = 'http://localhost:5000'
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 // route: GET, CREATE, UPDATE, DELETE
@@ -371,10 +372,10 @@ wiApiWorker.prototype.stopWorking = function () {
 wiApiWorker.prototype.getUtils = Service.prototype.getUtils;
 
 //add authenService parameter for using authenticate service
-Service.prototype.post = function (route, payload, callback, authenService) {
+Service.prototype.post = function (route, payload, callback, option) {
     var self = this;
     let requestObj = {
-        url: authenService ? AUTHENTICATION_SERVICE + route : self.baseUrl + route,
+        url: option ? (option == 'auth' ? AUTHENTICATION_SERVICE + route: PROCESSING_SERVICE + route) : self.baseUrl + route,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -482,13 +483,13 @@ Service.prototype.delete = function (route, payload) {
 Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
-    this.post(LOGIN, data, callback, true);
+    this.post(LOGIN, data, callback, 'auth');
 }
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     console.log(data);
-    this.post(REGISTER, data, callback, true);
+    this.post(REGISTER, data, callback, 'auth');
 }
 Service.prototype.postWithTemplateFile = function (dataPayload) {
     var self = this;
@@ -1557,4 +1558,7 @@ Service.prototype.removeObjectOfObjectTrack = function (idObjectOfTrack, callbac
     this.delete(DELETE_OBJECT_OF_OBJECT_TRACK, { idObjectOfTrack: idObjectOfTrack }, function (returnData) {
             if(callback) callback();
         });
+}
+Service.prototype.convolution = function (data, callback){
+    this.post('/convolution', data, callback, 'processing');
 }
