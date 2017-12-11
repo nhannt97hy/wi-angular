@@ -6648,8 +6648,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.refreshZoneSets = function(){
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wellArr = self.project.children;
+            self.wellArr = utils.findWells();
             var tmp = self.SelectedWell.id;
             self.SelectedWell = self.wellArr.find(function(well){
                 return well.id == tmp;
@@ -7882,7 +7881,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         this.applyingInProgress = false;
 
         this.availableCurves = [];
@@ -7892,7 +7891,6 @@ exports.curveAverageDialog = function (ModalService, callback) {
         this.selectedDataset = {};
         this.idSelectedDataset = null;
         this.desCurve = null;
-        self.wells = wiExplorer.treeConfig[0].children;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if( selectedNodes && selectedNodes[0].type == 'well') self.wellModel = selectedNodes[0];
         else self.wellModel = angular.copy(self.wells[0]);
@@ -8068,9 +8066,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.curves = [];
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         console.log("selectedNodes", selectedNodes);
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
@@ -8282,8 +8279,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         window.compa = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
@@ -8495,8 +8491,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function(cb){
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wellArr = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+            self.wellArr = utils.findWells().filter(well => {
+                return well.children.find(c => c.type == 'dataset');
+            });
             if(!self.SelectedWell){
                 self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
             }else{
@@ -8732,12 +8729,11 @@ exports.splitCurveDialog = function (ModalService, callback) {
         window.split = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         this.process = false;
 
         this.disable = true;
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         this.idWell; this.idCurve; this.idDataset;
         this.datasetModel;
         this.curves = [];
@@ -8907,9 +8903,8 @@ exports.mergeCurveDialog = function (ModalService) {
         window.merge = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         this.applyingInProgress = false;
 
         this.availableCurves = [];
@@ -9104,8 +9099,9 @@ exports.fillDataGapsDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         function refresh(cb) {
-            self.project = angular.copy(wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0]);
-            self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+            self.wells = utils.findWells().filter(well => {
+                return well.children.find(c => c.type == 'dataset');
+            });
             if(!self.selectedWell){
                 self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
 
@@ -9361,8 +9357,9 @@ exports.curveDerivativeDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function (cb) {
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+            self.wells = utils.findWells().filter(well => {
+                return well.children.find(c => c.type == 'dataset');
+            });
             if(!self.selectedWell){
                 self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
 
@@ -9548,9 +9545,8 @@ exports.TVDConversionDialog = function (ModalService) {
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = angular.copy(wiExplorer.treeConfig[0].children);
+        this.wells = angular.copy(utils.findWells());
         this.datasets = [];
         this.curvesArr = [];
         this.step;this.topDepth; this.bottomDepth;
@@ -9638,7 +9634,7 @@ exports.TVDConversionDialog = function (ModalService) {
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
             $timeout(function(){
-                self.wells = angular.copy(wiExplorer.treeConfig[0].children);
+                self.wells = angular.copy(utils.findWells());
                 self.onChangeWell();
             }, 0);
         });
@@ -10131,8 +10127,9 @@ exports.addCurveDialog = function (ModalService) {
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+        this.wellArr = utils.findWells().filter(well => {
+            return well.children.find(c => c.type == 'dataset');
+        });
         if(!self.SelectedWell){
             self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
         }else{
@@ -10332,7 +10329,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
@@ -10822,7 +10819,7 @@ exports.userFormulaDialog = function (ModalService, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
