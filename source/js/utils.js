@@ -977,41 +977,39 @@ exports.projectToTreeConfig = function (project) {
         selected: false
     };
     projectModel.children = new Array();
-    setTimeout(() => {
-        let wiComponentService = __GLOBAL.wiComponentService;
-        // project logplots
-        let projectLogplots = [];
-        wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
-        let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
-        projectLogplotsNode.children = projectLogplots;
-        // project crossplots
-        let projectCrossplots = [];
-        wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
-        let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
-        projectCrossplotsNode.children = projectCrossplots;
-        // project histograms
-        let projectHistograms = [];
-        wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
-        let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
-        projectHistogramsNode.children = projectHistograms;
-        // well groups
-        project.groups.forEach(function (group) {
-            getGroupModel(group.idGroup, project.groups, projectModel);
-        });
-        // wells
-        project.wells.forEach(function (well) {
-            if (well.idGroup) {
-                let groupModel = getGroupModel(well.idGroup, project.groups, projectModel);
-                groupModel.children.push(wellToTreeConfig(well));
-            } else {
-                projectModel.children.push(wellToTreeConfig(well));
-            }
-        });
-
-        projectModel.children.push(projectLogplotsNode);
-        projectModel.children.push(projectCrossplotsNode);
-        projectModel.children.push(projectHistogramsNode);
+    let wiComponentService = __GLOBAL.wiComponentService;
+    // project logplots
+    let projectLogplots = [];
+    wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
+    let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
+    projectLogplotsNode.children = projectLogplots;
+    // project crossplots
+    let projectCrossplots = [];
+    wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
+    let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
+    projectCrossplotsNode.children = projectCrossplots;
+    // project histograms
+    let projectHistograms = [];
+    wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
+    let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
+    projectHistogramsNode.children = projectHistograms;
+    // well groups
+    project.groups.forEach(function (group) {
+        getGroupModel(group.idGroup, project.groups, projectModel);
     });
+    // wells
+    project.wells.forEach(function (well) {
+        if (well.idGroup) {
+            let groupModel = getGroupModel(well.idGroup, project.groups, projectModel);
+            groupModel.children.push(wellToTreeConfig(well));
+        } else {
+            projectModel.children.push(wellToTreeConfig(well));
+        }
+    });
+
+    projectModel.children.push(projectLogplotsNode);
+    projectModel.children.push(projectCrossplotsNode);
+    projectModel.children.push(projectHistogramsNode);
     return projectModel;
 }
 
@@ -2265,28 +2263,28 @@ exports.upperCaseFirstLetter = function (string) {
 }
 exports.editProperty = editProperty;
 
-exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
-    let currentWell = getSelectedPath().find(node => node.type == 'well');
-    if (!currentWell) {
-        error('Please choose a well');
-        return;
-    }
-    let crossplotsNode = getStaticNode('crossplots');
-    let dataRequest = {
-        idWell: crossplotsNode.properties.idWell,
-        name: crossplotName,
-        option: 'blank-plot'
-    };
-    return new Promise(function (resolve, reject) {
-        wiApiService.post(route, dataRequest, function (response) {
-            if (!response.data) {
-                reject(response);
-            } else {
-                resolve(response);
-            }
-        });
-    });
-};
+// exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
+//     let currentWell = getSelectedPath().find(node => node.type == 'well');
+//     if (!currentWell) {
+//         error('Please choose a well');
+//         return;
+//     }
+//     let crossplotsNode = getStaticNode('crossplots');
+//     let dataRequest = {
+//         idWell: crossplotsNode.properties.idWell,
+//         name: crossplotName,
+//         option: 'blank-plot'
+//     };
+//     return new Promise(function (resolve, reject) {
+//         wiApiService.post(route, dataRequest, function (response) {
+//             if (!response.data) {
+//                 reject(response);
+//             } else {
+//                 resolve(response);
+//             }
+//         });
+//     });
+// };
 
 exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
@@ -2301,7 +2299,9 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                 resolve(crossplot);
                 let crossplotModel = crossplotToTreeConfig(crossplot);
                 refreshProjectState().then(function () {
-                    openCrossplotTab(crossplotModel, callback);
+                    setTimeout(() => {
+                        openCrossplotTab(crossplotModel, callback);
+                    });
                 });
                 setTimeout(function () {
                     if (crossplot.foundCurveX && crossplot.foundCurveY) {
