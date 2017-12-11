@@ -8527,15 +8527,20 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                         }
                     })
                 } else {
-                    convolution(input, kernel, self.ResultCurve.data, function (err) {
-                        if (err) {
-                            console.log(self.ResultCurve.data);
-                            // self.applyingInProgress = false;
-                            saveCurve(self.ResultCurve);
-                        } else {
-                            console.log("Convolution Error!");
-                            self.applyingInProgress = false;
-                        }
+                    // convolution(input, kernel, self.ResultCurve.data, function (err) {
+                    //     if (err) {
+                    //         console.log(self.ResultCurve.data);
+                    //         // self.applyingInProgress = false;
+                    //         saveCurve(self.ResultCurve);
+                    //     } else {
+                    //         console.log("Convolution Error!");
+                    //         self.applyingInProgress = false;
+                    //     }
+                    // })
+                    let a = [2,1,2,1,5];
+                    let b = [1,2,3,4];
+                    wiApiService.convolution({input: a, kernel: b}, (result) => {
+                        console.log(result.curve);
                     })
                 }
             })
