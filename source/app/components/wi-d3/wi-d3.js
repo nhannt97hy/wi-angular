@@ -224,9 +224,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     orderNum: trackOrder
                 }
                 wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
-                    let imageTrack = dataRequest;
-                    imageTrack.idImageTrack = returnImageTrack.idImageTrack;
-                    let viTrack = self.pushImageTrack(dataRequest);
+                    let viTrack = self.pushImageTrack(returnImageTrack);
                 })
             })
         } else {
@@ -629,7 +627,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return marker;
     }
 
-    this.addImageZone = function (imgzone, props) {
+    this.drawImageZone = function (imgzone, props, isNewDraw) {
         if (!imgzone) return;
         let imageConfig = {
             idImageTrack: props.idImageTrack,
@@ -638,19 +636,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             width: 'inherit',
             height: 'inherit'
         };
-        imgzone.addImage(imageConfig);
-    }
-
-    this.changeImageZone = function (imgzone, props) {
-        if (!imgzone) return;
-        let imageConfig = {
-            idImageTrack: props.idImageTrack,
-            fill: props.fill,
-            imageUrl: props.imageUrl,
-            width: 'inherit',
-            height: 'inherit'
-        };
-        imgzone.changeImage(imageConfig);
+        imgzone.drawImage(imageConfig, isNewDraw);
     }
 
     this.addImageToTrack = function (track, config) {
@@ -1342,7 +1328,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         if (imgProps) {
                             $timeout(function () {
                                 imgzone.setProperties(imgProps);
-                                self.addImageZone(imgzone, imgProps);
+                                self.drawImageZone(imgzone, imgProps, true);
                             });
                         }
                     });
@@ -1712,7 +1698,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (imgProps) {
                     $timeout(function () {
                 		imgzone.setProperties(imgProps);
-                		self.changeImageZone(imgzone, imgProps);
+                		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
                     });
                 }
@@ -2541,20 +2527,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             dragToCreate: true
                         }
                         DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (histogramProps) {
-                            /*
-                            let quest = {
-                                name: 'addHistogram',
-                                config: histogramProps
-                            }
-                            track.setCurrentQuest(quest);
-                            track.setMode('AddObject');
-                            */
                             histogramProps.plotType = "Frequency";
                             let dataRequest = angular.copy(histogramProps);
                             dataRequest.idWell = _getWellProps().idWell;
                             dataRequest.idCurve = histogramProps.curve.idCurve;
                             if(!dataRequest.name) {
-                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - " + (Math.random().toString(36).substr(2, 3));
+                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - " 
+                                    + (Math.random().toString(36).substr(2, 3));
                             }
                             delete dataRequest.curve;
                             wiApiService.createHistogram(dataRequest, function(createdHistogram) {
@@ -2571,10 +2550,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                                 track.setCurrentQuest(quest);
                                 track.setMode("AddObject");
-
-                                // Utils.refreshProjectState();
-                            })
-                        })
+                            });
+                        });
                     }
                 }, {
                     name: 'AddCrossplot',
@@ -2963,14 +2940,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: 'annotation-16x16',
             handler: function () {
                 self.addAnnotation();
-            }
-        },
-        {
-            name: "RemoveImage",
-            label: "Remove Image",
-            icon: 'image-delete-16x16',
-            handler: function () {
-                logplotHandlers.RemoveImageButtonClicked();
             }
         },
         {

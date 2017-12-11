@@ -29,9 +29,12 @@ exports.EditFormatButtonClicked = function() {
 }
 
 exports.ActiveZoneButtonClicked = function() {
+/*
     console.log('ActiveZoneButton is clicked', this.Histogram);
     let wiD3Ctrl = this.wiHistogram.getwiD3Ctrl();
     wiD3Ctrl.toggleShowWiZone();
+*/
+    this.wiHistogram.toggleShowWiZone();
 }
 
 exports.FrequencyInfoButtonClicked = function() {
@@ -43,6 +46,11 @@ exports.FrequencyInfoButtonClicked = function() {
         dialogUtils.histogramFrequencyInfoDialog(ModalService, wiD3Ctrl);
     }
     console.log('FrequencyInfoButton is clicked');
+}
+
+exports.ZoneButtonClicked = function() {
+    console.log('ZoneButton is clicked');
+    this.wiHistogram.isShowWiZone = !this.wiHistogram.isShowWiZone;
 }
 
 exports.GaussianButtonClicked = function() {

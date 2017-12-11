@@ -3924,6 +3924,10 @@ exports.zonePropertiesDialog = function (ModalService, zoneTrackProperties, call
 
 exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imageTrackProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+        const _NEW = 'created';
+        const _EDIT = 'edited';
+        const _DEL = 'deleted';
+
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
@@ -3937,29 +3941,165 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             // parameterSet: null
         }
         props.width = utils.pixelToInch(props.width);
-        console.log(props);
+
+        this.tabName = wiLogplotModel.properties.name;
+
         this.showTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
         this.trackColor = props.trackColor;
         this.width = props.width;
 
+        this._DEL = _DEL;
+        this.imagesOfCurrentTrack = [];
+        this.status = false;
+
+        this.isPropsChanged = false;
+
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
                 self.trackColor = colorStr;
             });
         }
+
+        if (props.idImageTrack) {
+            self.status = true;
+            wiApiService.getImageTrack(props.idImageTrack, function (data) {
+                self.imagesOfCurrentTrack = data.image_of_tracks;
+            });
+
+            this.selectedRow = this.imagesOfCurrentTrack && this.imagesOfCurrentTrack.length ? 0 : -1;
+
+            this.setClickedRow = function (indexRow) {
+                self.selectedRow = indexRow;
+            }
+            this.selectColor = function (index) {
+                DialogUtils.colorPickerDialog(ModalService, self.imagesOfCurrentTrack[index].fill, function (colorStr) {
+                    self.imagesOfCurrentTrack[index].fill = colorStr;
+                    self.onImageChanged(index);
+                });
+            }
+            this.configImage = function (index) {
+                self.imagesOfCurrentTrack[index].done = true;
+                DialogUtils.imageZonePropertiesDialog(ModalService, self.imagesOfCurrentTrack[index], function (data) {
+                    if (!data) return;
+                    self.imagesOfCurrentTrack[index] = data;
+                    self.onImageChanged(index);
+                });
+            }
+
+            this.addImage = function (index) {
+                let newImage = {
+                    // name: 'New Image',
+                    fill: 'white',
+                    flag: _NEW
+                };
+
+                self.imagesOfCurrentTrack.splice(index, 0, newImage);
+                self.selectedRow = self.imagesOfCurrentTrack.length - 1;
+            }
+            this.onAddButtonClicked = function () {
+                self.addImage(self.imagesOfCurrentTrack.length);
+                self.isPropsChanged = true;
+            }
+            this.onImageChanged = function(index) {
+                if (typeof self.imagesOfCurrentTrack[index].flag === 'undefined') {
+                    self.imagesOfCurrentTrack[index].flag = _EDIT;
+                }
+                self.isPropsChanged = true;
+            }
+            this.onDeleteButtonClicked = function () {
+                if (self.imagesOfCurrentTrack[self.selectedRow].flag != _NEW) {
+                    self.imagesOfCurrentTrack[self.selectedRow].flag = _DEL;
+                } else {
+                    self.imagesOfCurrentTrack.splice(self.selectedRow, 1);
+                }
+                self.selectedRow = self.selectedRow > 0 ? self.selectedRow - 1 : 0;
+                self.isPropsChanged = true;
+            }
+            this.onClearAllButtonClicked = function () {
+                self.imagesOfCurrentTrack.map(function(i){
+                    i.flag = _DEL;
+                })
+                self.selectedRow = -1;
+                self.isPropsChanged = true;
+            }
+        }
+
+        function doApply (callback) {
+            if (self.imagesOfCurrentTrack && self.imagesOfCurrentTrack.length) {
+                wiComponentService.getComponent('SPINNER').show();
+                async.eachOfSeries(self.imagesOfCurrentTrack, function(image, i, callback) {
+                    switch (self.imagesOfCurrentTrack[i].flag) {
+                        case _NEW:
+                            delete self.imagesOfCurrentTrack[i].flag;
+                            self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
+                            self.imagesOfCurrentTrack[i].showName = true;
+                            wiApiService.createImage(self.imagesOfCurrentTrack[i], function(data) {
+                                self.imagesOfCurrentTrack[i] = data;
+                                callback();
+                            });
+                            break;
+
+                        case _EDIT:
+                            delete self.imagesOfCurrentTrack[i].flag;
+                            self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
+                            self.imagesOfCurrentTrack[i].showName = true;
+                            wiApiService.editImage(self.imagesOfCurrentTrack[i], function(data) {
+                                self.imagesOfCurrentTrack[i] = data;
+                                callback();
+                            });
+                            break;
+
+                        case _DEL:
+                            wiApiService.removeImage(self.imagesOfCurrentTrack[i].idImageOfTrack, function() {
+                                callback();
+                            });
+                            break;
+
+                        default:
+                            callback();
+                            break;
+                    }
+                }, function (err) {
+                    for (let i = self.imagesOfCurrentTrack.length - 1; i >= 0; i--) {
+                        switch (self.imagesOfCurrentTrack[i].flag) {
+                            case _DEL:
+                                    self.imagesOfCurrentTrack.splice(i, 1);
+                                break;
+
+                            case _NEW:
+                            case _EDIT:
+                                delete self.imagesOfCurrentTrack[i].flag;
+                                break;
+                        }
+                    }
+                    utils.refreshProjectState().then(function() {
+                        if (callback) callback();
+                    });
+                });
+            } else {
+                if (callback) callback();
+            }
+        }
+
         this.onOkButtonClicked = function () {
             props = {
                 showTitle: self.showTitle,
                 title: self.title,
                 topJustification: self.topJustification,
                 trackColor: self.trackColor,
-                width: self.width
+                width: self.width,
+                image_of_tracks: self.imagesOfCurrentTrack
                 // parameterSet: self.parameterSet
             }
-            // if (self.error) return;
-            close(props, 100);
+            if (self.status) {
+                doApply(function() {
+                    close(props);
+                });
+            } else {
+                close(props);
+            }
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -4069,8 +4209,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             props.topDepth = self.topDepth;
             props.bottomDepth = self.bottomDepth;
             props.imageUrl = self.imageUrl;
-            self.showName ? props.name = self.name : props.name = "";
-            props.showName = self.showName;
+            props.name = self.name;
+            // props.showName = self.showName;
             props.fill = self.fill;
             props.done = self.done;
         }
@@ -5786,7 +5926,7 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
     });
 } */
 
-exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callback) {
+exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         window.hisFormat = this;
@@ -5795,14 +5935,14 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramCtrl, callbac
         this._FDEL = 3;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        var histogramModel = utils.getModel('histogram', wiHistogramCtrl.id);
+        var histogramModel = utils.getModel('histogram', wiHistogramId);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
         this.ref_Curves_Arr = histogramModel.properties.reference_curves?angular.copy(histogramModel.properties.reference_curves):[];
         this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
-        this.well = utils.findWellByHistogram(wiHistogramCtrl.id);
+        this.well = utils.findWellByHistogram(wiHistogramId);
         this.datasets = [];
         this.zoneSetList = [];
         this.curvesArr = [];
@@ -6364,9 +6504,18 @@ exports.zoneManagerDialog = function (ModalService, item) {
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = this.project.children;
-
+        //this.wellArr = this.project.children;
+        this.wellArr = utils.findWells();
+/*
+        let selectedNode = utils.getSelectedNode();
+        let idWell = null;
+        if (selectedNode && selectedNode.type == 'zonesets') {
+            idWell = selectedNode.properties.idWell;
+        }
+        if (!idWell) return;
+*/
         this.SelectedWell = this.wellArr[0];
+        //this.SelectedWell = utils.findWellById(idWell);
         this.zonesetsArr = self.SelectedWell.children.find(function (child) {
             return child.name == 'zonesets';
         }).children;
@@ -6499,8 +6648,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.refreshZoneSets = function(){
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wellArr = self.project.children;
+            self.wellArr = utils.findWells();
             var tmp = self.SelectedWell.id;
             self.SelectedWell = self.wellArr.find(function(well){
                 return well.id == tmp;
@@ -6744,35 +6892,36 @@ exports.zoneManagerDialog = function (ModalService, item) {
         }
 
         this.onOkButtonClicked = function(){
-         console.log('Ok');
-         if(self.verify()) {
-            doApply(function(){
-                close(null);
-            });
-        }else{
-            utils.error(errorMessage);
-            return;
+            console.log('Ok');
+            if(self.verify()) {
+               doApply(function(){
+                   close(null);
+               });
+            }else{
+                utils.error(errorMessage);
+                return;
+            }
+        }
+
+        this.onCancelButtonClicked = function () {
+            console.log('OnCancelButtonClicked');
+            close(null);
         }
     }
 
-    this.onCancelButtonClicked = function () {
-        close(null);
-    }
-}
-
-ModalService.showModal({
-    templateUrl: 'zone-manager/zone-manager-modal.html',
-    controller: ModalController,
-    controllerAs: 'wiModal'
-}).then(function (modal) {
-    initModal(modal);
-    $(modal.element[0].children[0]).draggable();
-    modal.close.then(function (ret) {
-        $('.modal-backdrop').last().remove();
-        $('body').removeClass('modal-open');
-        if (!ret) return;
-    })
-})
+    ModalService.showModal({
+        templateUrl: 'zone-manager/zone-manager-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    });
 };
 
 exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
@@ -7430,7 +7579,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
             if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
+                //self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             } else {
                 self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             }
@@ -7732,7 +7881,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         this.applyingInProgress = false;
 
         this.availableCurves = [];
@@ -7742,7 +7891,6 @@ exports.curveAverageDialog = function (ModalService, callback) {
         this.selectedDataset = {};
         this.idSelectedDataset = null;
         this.desCurve = null;
-        self.wells = wiExplorer.treeConfig[0].children;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if( selectedNodes && selectedNodes[0].type == 'well') self.wellModel = selectedNodes[0];
         else self.wellModel = angular.copy(self.wells[0]);
@@ -7918,9 +8066,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
         this.curves = [];
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         console.log("selectedNodes", selectedNodes);
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
@@ -8132,8 +8279,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         window.compa = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
@@ -8345,8 +8491,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function(cb){
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wellArr = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+            self.wellArr = utils.findWells().filter(well => {
+                return well.children.find(c => c.type == 'dataset');
+            });
             if(!self.SelectedWell){
                 self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
             }else{
@@ -8587,12 +8734,11 @@ exports.splitCurveDialog = function (ModalService, callback) {
         window.split = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         this.process = false;
 
         this.disable = true;
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         this.idWell; this.idCurve; this.idDataset;
         this.datasetModel;
         this.curves = [];
@@ -8762,9 +8908,8 @@ exports.mergeCurveDialog = function (ModalService) {
         window.merge = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         this.applyingInProgress = false;
 
         this.availableCurves = [];
@@ -8959,8 +9104,9 @@ exports.fillDataGapsDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         function refresh(cb) {
-            self.project = angular.copy(wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0]);
-            self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+            self.wells = utils.findWells().filter(well => {
+                return well.children.find(c => c.type == 'dataset');
+            });
             if(!self.selectedWell){
                 self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
 
@@ -9216,8 +9362,9 @@ exports.curveDerivativeDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function (cb) {
-            self.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-            self.wells = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+            self.wells = utils.findWells().filter(well => {
+                return well.children.find(c => c.type == 'dataset');
+            });
             if(!self.selectedWell){
                 self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
 
@@ -9403,9 +9550,8 @@ exports.TVDConversionDialog = function (ModalService) {
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        this.wells = angular.copy(wiExplorer.treeConfig[0].children);
+        this.wells = angular.copy(utils.findWells());
         this.datasets = [];
         this.curvesArr = [];
         this.step;this.topDepth; this.bottomDepth;
@@ -9493,7 +9639,7 @@ exports.TVDConversionDialog = function (ModalService) {
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
             $timeout(function(){
-                self.wells = angular.copy(wiExplorer.treeConfig[0].children);
+                self.wells = angular.copy(utils.findWells());
                 self.onChangeWell();
             }, 0);
         });
@@ -9986,8 +10132,9 @@ exports.addCurveDialog = function (ModalService) {
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.project = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
-        this.wellArr = self.project.children.length ? self.project.children.filter(well => { return well.children.length > 4}) : null;
+        this.wellArr = utils.findWells().filter(well => {
+            return well.children.find(c => c.type == 'dataset');
+        });
         if(!self.SelectedWell){
             self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
         }else{
@@ -10187,7 +10334,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
@@ -10677,7 +10824,7 @@ exports.userFormulaDialog = function (ModalService, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-        this.wells = wiExplorer.treeConfig[0].children;
+        this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
@@ -10856,7 +11003,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
     });
 }
 
-exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
+exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
     function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
         window.tBulk = this;
@@ -10865,23 +11012,53 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
         this.tracks = [];
+        this.sumWidth = 0;
 
-        let allTracks = angular.copy(wiD3Ctrl.getTracks());
-        // this.tracks = allTracks;
         allTracks.forEach(function(t) {
             self.tracks.push(getTrackProps(t));
-        })
+        });
+
+        this.tracks.forEach(function(track) {
+            self.colorTrack = function (track) {
+                dialogUtils.colorPickerDialog(ModalService, track.bgColor, function (colorStr) {
+                    track.bgColor = colorStr;
+                });
+            };
+            self.sumWidth += track.width;
+        });
+        this.getSum = function () {
+            self.sumWidth = 0;
+            this.tracks.forEach(function(track) {
+                self.sumWidth += track.width;
+            });
+        };
+        
         console.log("tracks", this.tracks);
+        function getLogTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idTrack))[0];
+        };
+        function getDepthTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idDepthAxis))[0];
+        };
+        function getZoneTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idZoneTrack))[0];
+        };
+        function getImageTrack (track) { 
+            return (allTracks.filter(t => t.id == track.idImageTrack))[0];
+        };
+        // console.log("allTracks", allTracks);
         function getTrackProps (track) {
             let props =  {
                 type : track.type,
                 title : track.name,
-                showTitle : track.showTitle,
-                justification : track.justification,
+                showXGrids : track.showXGrids ? track.showXGrids : false,
+                showYGrids : track.showYGrids ? track.showYGrids : false,
+                xMajorTicks : track.xMajorTicks ? track.xMajorTicks : null,
+                xMinorTicks : track.xMinorTicks ? track.xMinorTicks : null,
                 width : utils.pixelToInch(track.width),
                 zoomFactor : track.zoomFactor,
+                bgColor : track.bgColor,
                 check : false
             }
             switch (track.type) {
@@ -10903,24 +11080,20 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
             }
             return props;
         }
+
         this.onOkButtonClicked = function(cb){
             async.eachOfSeries(self.tracks, function(track, idx, callback){
                     switch(track.type) {
                         case 'log-track':
                             if( track.check ) {
                                 wiApiService.editTrack(track, function(res) {
-                                    console.log("log", res);
-                                    // track.width = utils.inchToPixel(track.width);
-                                    // track.setProperties(newProps.general);
+                                    let l = angular.copy(track);
+                                    l.width = utils.inchToPixel(l.width);
+                                    let logTrack = getLogTrack(l);
+                                    console.log("log", res, l, logTrack);
+                                    logTrack.setProperties(l);
 
-                                    // if (track.zoomFactor != savedZoomFactor) {
-                                    //     savedZoomFactor = newProps.general.zoomFactor;
-                                    //     wiD3Ctrl.processZoomFactor();
-                                    //     wiD3Ctrl.plotAll();
-                                    // }
-                                    // else {
-                                    //     currentTrack.doPlot(true);
-                                    // }
+                                    logTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {
@@ -10932,7 +11105,12 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
                             if( track.check ) {
                                 wiApiService.editDepthTrack(track, function(res) {
                                     console.log("depth", res);
-                                    // track.width = utils.inchToPixel(track.width);
+                                    let d = angular.copy(track);
+                                    d.width = utils.inchToPixel(d.width);
+                                    let depthTrack = getDepthTrack(d);
+                                    depthTrack.setProperties(d);
+
+                                    depthTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {
@@ -10944,7 +11122,12 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
                             if( track.check ) {
                                 wiApiService.editZoneTrack(track, function(res) {
                                     console.log("zone", res);
-                                    // track.width = utils.inchToPixel(track.width);
+                                    let z = angular.copy(track);
+                                    z.width = utils.inchToPixel(z.width);
+                                    let zoneTrack = getZoneTrack(z);
+                                    zoneTrack.setProperties(z);
+
+                                    zoneTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {
@@ -10956,7 +11139,12 @@ exports.trackBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
                             if( track.check ) {
                                 wiApiService.editImageTrack(track, function(res) {
                                     console.log("image", res);
-                                    // track.width = utils.inchToPixel(track.width);
+                                    let i = angular.copy(track);
+                                    i.width = utils.inchToPixel(i.width);
+                                    let imageTrack = getImageTrack(i);
+                                    imageTrack.setProperties(i);
+
+                                    imageTrack.doPlot(true);
                                     if (callback) callback();
                                 })
                             } else {

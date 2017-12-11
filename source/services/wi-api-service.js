@@ -1183,7 +1183,11 @@ Service.prototype.editImageTrack = function (data, callback) {
 }
 Service.prototype.getImageTrack = function (idImageTrack, callback) {
     let self = this;
-    this.post(GET_IMAGE_TRACK, {idImageTrack: idImageTrack}, callback);
+    this.post(GET_IMAGE_TRACK, {idImageTrack: idImageTrack}, function(data) {
+        if (callback) {
+            callback(data);
+        }
+    });
 }
 Service.prototype.removeImageTrack = function (idImageTrack, callback) {
     let self = this;
