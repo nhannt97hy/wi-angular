@@ -264,7 +264,33 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!self.crossplotModel || !self.pointSet) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
-                openDialog();
+                if (!self.pointSet) {
+                    let pointSetProps = {
+                        idCrossPlot: self.crossplotModel.properties.idCrossPlot,
+                        idWell: self.getWell().properties.idWell,
+                        idCurveX: null,
+                        idCurveY: null,
+                        majorX: 5,
+                        minorX: 5,
+                        majorY: 5,
+                        minorY: 5,
+                        numColor: 5,
+                        scaleLeft: null,
+                        scaleRight: null,
+                        scaleBottom: null,
+                        scaleTop: null,
+                        pointSymbol: "Circle",
+                        pointSize: 5,
+                        pointColor: 'blue'
+                    };
+                    wiApiService.createPointSet(pointSetProps, function(pointSet) {
+                        self.pointSet = pointSet;
+                        openDialog();
+                    });
+                }
+                else {
+                    openDialog();
+                }
             });
         } else {
             openDialog();
