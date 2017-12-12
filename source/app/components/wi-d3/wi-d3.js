@@ -397,11 +397,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             leftVal:config.minX,
             rightVal:config.maxX,
             scale: config.scale
-/*=======
-            leftVal: config.minX,
-            rightVal: config.maxX,
-            scale: config.scale.toLowerCase()
->>>>>>> Stashed changes*/
         });
         track.updateAxis();
         track.plotCurve(curve);
@@ -1128,7 +1123,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (track.mode != 'AddObject') return;
                 track.startY = d3.mouse(track.plotContainer.node())[1];
             })
-            .on('drag', function () {
+            .on('drag', function (event, ui) {
                 if (track.mode != 'AddObject') return;
                 let y1 = track.startY;
                 let y2 = d3.mouse(track.plotContainer.node())[1];
@@ -1156,8 +1151,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     startDepth: startDepth,
                     endDepth: endDepth
                 });
-
                 track.plotObject(object);
+                object.showTooltip(event, ui);
             })
             .on('end', function () {
                 if (track.mode != 'AddObject') return;
@@ -1173,6 +1168,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     object.setProperties(returnedObject);
                     object.refreshObjectOfTrack(null, wiApiService, function() {
                         Utils.refreshProjectState();
+                        object.hideTooltip();
                     })
                 });
 
@@ -1582,26 +1578,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
                 else if (drawing.isObject()) {
                     // Send api before deleting
-                    /*wiApiService.removeObjectOfObjectTrack(drawing.id, function () {
-                        track.removeObject(drawing);
-                        switch (drawing.currentDraw) {
-                            case "Crossplot":
-                                wiApiService.removeCrossplot(drawing.viCrossplot.idCrossPlot, function () {
-                                    console.log("crossplot removed");
-                                    Utils.refreshProjectState();
-                                });
-                                break;
-                            case "Histogram" :
-                                wiApiService.removeHistogram(drawing.viHistogram.histogramModel.properties.idHistogram, function () {
-                                    console.log("histogram removed");
-                                    Utils.refreshProjectState();
-                                });
-                                break;
-                            default:
-                                break;
-                        }
-                        console.log("Remove complete");
-                    })*/
                     removeAnObjectOfObjectTrack();
                 }
 
