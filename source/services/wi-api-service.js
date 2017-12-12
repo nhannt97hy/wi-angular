@@ -21,8 +21,8 @@ const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://192.168.0.223';
 // const BASE_URL = 'http://192.168.1.17:3000';
 
-// const PROCESSING_SERVICE = 'http://54.169.13.92'
-const PROCESSING_SERVICE = 'http://localhost:5000'
+// const PROCESSING_SERVICE = 'http://54.169.13.92';
+const PROCESSING_SERVICE = 'http://localhost:5000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 // route: GET, CREATE, UPDATE, DELETE
