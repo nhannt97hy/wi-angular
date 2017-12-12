@@ -13,14 +13,15 @@
 								<th style="width: 5%"></th>
 								<th style="width: 50%">Name</th>
 								<th style="width: 20%; text-align: center;">Color</th>
+								<th style="width: 5%"></th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr ng-repeat="tool in wiModal.tools"
 								ng-click="wiModal.setClickedRow($index)"
 								ng-class="{selected: $index == wiModal.selectedRow, 'display-none': tool.flag === wiModal._DEL}">
-								<td style="width: 5%">
-									<i style="text-align: center; transform: translateY(50%); top: -50%"
+								<td style="width: 5%; text-align: center;">
+									<i style="transform: translateY(50%); top: -50%"
 										ng-class="{'fa fa-chevron-circle-right': $index == wiModal.selectedRow}"></i>
 								</td>
 								<td style="width: 50%">
@@ -29,6 +30,11 @@
 								<td style="width: 20%; text-align: center;">
 									<button ng-click="wiModal.selectColor($index)" ng-style="{'background-color': tool.color}" class="form-control wi-form-control width-80px thick-border"></button>
 								</td>
+								<td style="width: 3%; text-align: center;">
+	                                <button ng-show="$index == wiModal.selectedRow" ng-click="wiModal.onDeleteButtonClicked()" style="transform: translateY(50%); top: -50%; background: transparent; border: 0">
+	                                    <i class="fa fa-window-close" aria-hidden="true"></i>
+	                                </button>
+	                            </td>
 							</tr>
 						</tbody>
 					</table>
@@ -40,9 +46,9 @@
 							</button>
 						</div>
 						<div class="col-xs-3">
-							<button class="btn btn-default display-block width-100-percent text-ellipsis" ng-click="wiModal.onDeleteButtonClicked()" ng-disabled="wiModal.toolCounter <= 0">
+							<button class="btn btn-default display-block width-100-percent text-ellipsis" ng-click="wiModal.onClearAllButtonClicked()" ng-disabled="wiModal.toolCounter <= 0">
 								<i class="delete-16x16"></i>                                                    
-								<span>Delete</span>
+								<span>Clear All</span>
 							</button>
 						</div>
 					</div>

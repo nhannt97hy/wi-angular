@@ -11423,6 +11423,12 @@ exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCo
             }
             self.selectedRow = self.selectedRow > 0 ? self.selectedRow - 1 : 0;
         }
+        this.onClearAllButtonClicked = function () {
+            self.tools.map(function(t){
+                t.flag = _DEL;
+            })
+            self.selectedRow = -1;
+        }
 
         this.setClickedRow = function (indexRow) {
             self.selectedRow = indexRow;
