@@ -3,18 +3,21 @@ function initModal(modal) {
     $(modal.element).prop('tabindex', 1);
     $(modal.element[0].children[0]).draggable();
     $(modal.element).keyup(function (e) {
-        let okButton, cancelButton;
-        let buttonElems = $(modal.element).find('.modal-footer > button');
-        for (let i = 0; i < buttonElems.length; i++) {
-            if (buttonElems[i].innerText.toLowerCase().trim() == 'ok') {
-                okButton = buttonElems[i];
+        if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.ESCAPE) {
+            let okButton, cancelButton;
+            let buttonElems = $(modal.element).find('.modal-footer > button');
+            for (let i = 0; i < buttonElems.length; i++) {
+                if (buttonElems[i].innerText.toLowerCase().trim() == 'ok') {
+                    okButton = buttonElems[i];
+                }
+                if (buttonElems[i].innerText.toLowerCase().trim() == 'cancel') {
+                    cancelButton = buttonElems[i];
+                }
             }
-            if (buttonElems[i].innerText.toLowerCase().trim() == 'cancel') {
-                cancelButton = buttonElems[i];
-            }
+            if (e.keyCode == $.ui.keyCode.ENTER && okButton) okButton.click();
+            if (e.keyCode == $.ui.keyCode.ESCAPE && cancelButton) cancelButton.click();
+            e.stopPropagation();
         }
-        if (e.keyCode == $.ui.keyCode.ENTER && okButton) okButton.click();
-        if (e.keyCode == $.ui.keyCode.ESCAPE && cancelButton) cancelButton.click();
     });
 }
 
@@ -3721,7 +3724,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
     }).then(function (modal) {
         initModal(modal);
         if (options.shadingOnly) { wiModal.shadingOnly = true };
-        $(modal.element[0].children[0]).draggable();
         modal.close.then(function (data) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -11547,8 +11549,7 @@ exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCo
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');

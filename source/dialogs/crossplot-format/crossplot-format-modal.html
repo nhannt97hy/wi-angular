@@ -172,7 +172,7 @@
                                             </label>
                                             <div class="col-sm-9">
                                                 <div class="float-left">
-                                                    <button ng-click="wiModal.colorSymbol();"
+                                                    <button type="button" ng-click="wiModal.colorSymbol();"
                                                             ng-style="{'background-color':wiModal.crossplotModel.properties.pointsets[0].pointColor}"
                                                             class="form-control wi-form-control width-80px thick-border">
                                                     </button>
@@ -307,7 +307,7 @@
                                                         type="text" class="form-control wi-form-control valign-middle pull-left" />
                                             </td>
                                             <td>
-                                                <button ng-click="selectAxisColor($index)"
+                                                <button type="button" ng-click="selectAxisColor($index)"
                                                         ng-style="{'background-color':item.color}"
                                                         ng-disabled="isDefineDepthColors == false"
                                                         class="form-control wi-form-control width-80px thick-border">
@@ -321,10 +321,10 @@
 
                             <div class="col-sm-1">
                                 <br><br>
-                                <button class="btn btn-default" type="button" ng-click="removeAxisColorRow();">
+                                <button type="button" class="btn btn-default" type="button" ng-click="removeAxisColorRow();">
                                     <span class="delete-16x16"></span>
                                 </button>
-                                <button class="btn btn-default" type="button" ng-click="addAxisColorRow();">
+                                <button type="button" class="btn btn-default" type="button" ng-click="addAxisColorRow();">
                                     <span class="plus-16x16"></span>
                                 </button>
                             </div>

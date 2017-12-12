@@ -17,7 +17,7 @@
                                     <div class="input-group has-cuccess has-feedback">
                                         <input type="text" class="form-control" placeholder="Auto named" ng-model="wiModal.crossplotProps.name">
                                         <span class="input-group-btn">
-                                            <button ng-disabled="!wiModal.crossplotProps.name" ng-click="wiModal.checkNameAvailable()" class="btn btn-default" type="button">Check Available</button>
+                                            <button type="button" ng-disabled="!wiModal.crossplotProps.name" ng-click="wiModal.checkNameAvailable()" class="btn btn-default" type="button">Check Available</button>
                                         </span>
                                     </div>
                                 </div>
@@ -216,7 +216,7 @@
                                     </label>
                                     <div class="col-sm-6">
                                         <div class="float-left">
-                                            <button ng-click="wiModal.pointColorSymbol();"
+                                            <button type="button" ng-click="wiModal.pointColorSymbol();"
                                                     ng-style="{'background-color':wiModal.crossplotProps.pointColor}"
                                                     class="form-control wi-form-control width-80px thick-border">
                                             </button>
@@ -231,7 +231,7 @@
                                     </label>
                                     <div class="col-sm-6">
                                         <div class="float-left">
-                                            <button ng-click="wiModal.backgroundColorSymbol();"
+                                            <button type="button" ng-click="wiModal.backgroundColorSymbol();"
                                                     ng-style="{'background-color':wiModal.background}"
                                                     class="form-control wi-form-control width-80px thick-border">
                                             </button>
