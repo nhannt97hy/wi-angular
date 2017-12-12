@@ -318,7 +318,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let defaultParentHeight = $(self.contentId).parent().parent().height();
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);
-        _viCurve.doPlot();
+        if (_viCurve) _viCurve.doPlot();
     }
 }
 
