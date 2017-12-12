@@ -2949,7 +2949,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
-        this.displayAs = ["Normal", "Culmulative", "Mirror", "Pid"];
+        this.displayAs = ["Normal", "Cumulative", "Mirror", "Pid"];
 
         this.__idx = 0;
         this.setClickedRowCurve = function (index) {
