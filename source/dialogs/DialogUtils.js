@@ -3085,472 +3085,474 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.shadingChanged[self.__idx].change = '3';
                 break;
                 case '2':
-                            self.shadingChanged[self.__idx].change = '-1'; // xoa
-                            _removeRowFromShadingsTable(self.__idx);
+                    self.shadingChanged[self.__idx].change = '-1'; // xoa
+                    _removeRowFromShadingsTable(self.__idx);
+                    break;
+            }
+
+            /*
+            if (!self.shadingChanged[self.__idx]) return;
+            if (self.shadingChanged[self.__idx].change == 2) {
+                self.shadingChanged[self.__idx] = 4;
+            } else {
+                self.shadingChanged[self.__idx].change = 3;
+            }
+            */
+        }
+        this.setShadingName = function(leftPart, rightPart, idx) {
+            let left = null;
+            let right = null;
+            if(!leftPart) return;
+            else {
+                for (curve of self.curvesOnDataset) {
+                    if (curve.id == parseInt(leftPart)) {
+                        left = curve.name;
+                        break;
+                    }
+                }
+                if (rightPart == -1) right = 'left';
+                else if (rightPart == -2) right = 'right';
+                else if (rightPart == -3) {
+                    right = self.shadingArr[idx].leftFixedValue;
+                }
+                else if(rightPart > 0) {
+                    for (curve of self.curvesOnDataset) {
+                        if (curve.id == parseInt(rightPart)) {
+                            right = curve.name;
                             break;
                         }
-
-        /*
-                    if (!self.shadingChanged[self.__idx]) return;
-                    if (self.shadingChanged[self.__idx].change == 2) {
-                        self.shadingChanged[self.__idx] = 4;
-                    } else {
-                        self.shadingChanged[self.__idx].change = 3;
-                    }
-                    */
-                }
-                this.setShadingName = function(leftPart, rightPart, idx) {
-                    let left = null;
-                    let right = null;
-                    if(!leftPart) return;
-                    else {
-                        for (curve of self.curvesOnDataset) {
-                            if (curve.id == parseInt(leftPart)) {
-                                left = curve.name;
-                                break;
-                            }
-                        }
-                        if (rightPart == -1) right = 'left';
-                        else if (rightPart == -2) right = 'right';
-                        else if (rightPart == -3) {
-                            right = self.shadingArr[idx].leftFixedValue;
-                        }
-                        else if(rightPart > 0) {
-                            for (curve of self.curvesOnDataset) {
-                                if (curve.id == parseInt(rightPart)) {
-                                    right = curve.name;
-                                    break;
-                                }
-                            }
-                        }
-                        self.shadingArr[idx].name = left + '-' + right;
                     }
                 }
+                self.shadingArr[idx].name = left + '-' + right;
+            }
+        }
 
-                this.addRowShading = function() {
-                    var shadingItem = {
-                        idTrack: currentTrack.id,
-                        name: 'xx_yy',
-                        shadingStyle: "fillPattern",
-                        isNegPosFill: false,
-                        type: 'left',
-                        _index: self.shadingArr.length
-                    };
-                    var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFill);
-                    var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFill);
-                    var condition3 = (shadingItem.shadingStyle == "variableShading" && !shadingItem.isNegPosFill);
-                    var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFill);
+        this.addRowShading = function() {
+            var shadingItem = {
+                idTrack: currentTrack.id,
+                name: 'xx_yy',
+                shadingStyle: "fillPattern",
+                isNegPosFill: false,
+                type: 'left',
+                _index: self.shadingArr.length
+            };
+            var condition1 = (shadingItem.shadingStyle == "fillPattern" && !shadingItem.isNegPosFill);
+            var condition2 = (shadingItem.shadingStyle == "fillPattern" && shadingItem.isNegPosFill);
+            var condition3 = (shadingItem.shadingStyle == "variableShading" && !shadingItem.isNegPosFill);
+            var condition4 = (shadingItem.shadingStyle == "variableShading" && shadingItem.isNegPosFill);
 
-                    var fillPatternItem = {
-                        fill: {
-                            display: condition1,
-                            pattern: {
-                                name: "none",
-                                background: "blue"
-                            }
+            var fillPatternItem = {
+                fill: {
+                    display: condition1,
+                    pattern: {
+                        name: "none",
+                        background: "blue"
+                    }
+                },
+                positiveFill: {
+                    display: condition2,
+                    pattern: {
+                        name: "none",
+                        background: "blue"
+                    }
+                },
+                negativeFill: {
+                    display: condition2,
+                    pattern: {
+                        name: "none",
+                        background: "blue"
+                    }
+                },
+                _index: self.fillPatternOptions.length
+            };
+            var variableShadingItem = {
+                fill: {
+                    display: condition3,
+                    varShading: {
+                        startX: null,
+                        endX: null,
+                        gradient: {
+                            startColor: "transparent",
+                            endColor: "transparent"
                         },
-                        positiveFill: {
-                            display: condition2,
-                            pattern: {
-                                name: "none",
-                                background: "blue"
-                            }
+                        palette: null,
+                        palName: null,
+                        customFills: null
+                    }
+                },
+                positiveFill: {
+                    display: condition4,
+                    varShading: {
+                        startX: null,
+                        endX: null,
+                        gradient: {
+                            startColor: "transparent",
+                            endColor: "transparent"
                         },
-                        negativeFill: {
-                            display: condition2,
-                            pattern: {
-                                name: "none",
-                                background: "blue"
-                            }
+                        palette: null,
+                        palName: null,
+                        customFills: null
+                    }
+                },
+                negativeFill: {
+                    display: condition4,
+                    varShading: {
+                        startX: null,
+                        endX: null,
+                        gradient: {
+                            startColor: "transparent",
+                            endColor: "transparent"
                         },
-                        _index: self.fillPatternOptions.length
-                    };
-                    var variableShadingItem = {
-                        fill: {
-                            display: condition3,
-                            varShading: {
-                                startX: null,
-                                endX: null,
-                                gradient: {
-                                    startColor: "transparent",
-                                    endColor: "transparent"
-                                },
-                                palette: null,
-                                palName: null,
-                                customFills: null
-                            }
-                        },
-                        positiveFill: {
-                            display: condition4,
-                            varShading: {
-                                startX: null,
-                                endX: null,
-                                gradient: {
-                                    startColor: "transparent",
-                                    endColor: "transparent"
-                                },
-                                palette: null,
-                                palName: null,
-                                customFills: null
-                            }
-                        },
-                        negativeFill: {
-                            display: condition4,
-                            varShading: {
-                                startX: null,
-                                endX: null,
-                                gradient: {
-                                    startColor: "transparent",
-                                    endColor: "transparent"
-                                },
-                                palette: null,
-                                palName: null,
-                                customFills: null
-                            }
-                        },
+                        palette: null,
+                        palName: null,
+                        customFills: null
+                    }
+                },
 
-                        _index: self.variableShadingOptions.length
-                    };
-                    var shadingChangedItem = {
-                        change: '2',
-                        _index: self.shadingArr.length
-                    };
-                    self.shadingArr.push(shadingItem);
-                    self.fillPatternOptions.push(fillPatternItem);
-                    self.variableShadingOptions.push(variableShadingItem);
-                    self.shadingChanged.push(shadingChangedItem);
-                    console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions, self.shadingChanged);
+                _index: self.variableShadingOptions.length
+            };
+            var shadingChangedItem = {
+                change: '2',
+                _index: self.shadingArr.length
+            };
+            self.shadingArr.push(shadingItem);
+            self.fillPatternOptions.push(fillPatternItem);
+            self.variableShadingOptions.push(variableShadingItem);
+            self.shadingChanged.push(shadingChangedItem);
+            console.log(self.shadingArr, self.fillPatternOptions, self.variableShadingOptions, self.shadingChanged);
+        }
+        this.validate = function(index) {
+            if(self.shadingArr[index].idLeftLine == self.shadingArr[index].idRightLine) {
+                DialogUtils.errorMessageDialog(ModalService, "leftCurve and rightCurve cannot be the same!");
+                self.shadingArr[index].idLeftLine = null;
+                self.shadingArr[index].leftFixedValue = 0;
+            };
+        }
+
+        function updateShading(idx) {
+            console.log("111",self.shadingArr[index],
+                self.fillPatternOptions[index],
+                self.variableShadingOptions[index]);
+            let shadingObj = utils.mergeShadingObj(self.shadingArr[index],
+                self.fillPatternOptions[index],
+                self.variableShadingOptions[index]);
+            if(shadingObj.idLeftLine == -3) {
+                shadingObj.type = 'custom';
+                shadingObj.idLeftLine = null;
+            };
+            if(shadingObj.idLeftLine == -2) {
+                shadingObj.type = 'right';
+                shadingObj.idLeftLine = null;
+            };
+            if(shadingObj.idLeftLine == -1) {
+                shadingObj.type = 'left';
+                shadingObj.idLeftLine = null;
+            };
+            if(shadingObj.idLeftLine > 0) {
+                shadingObj.type = 'pair';
+                shadingObj.leftFixedValue = null;
+                shadingObj.idLeftLine = parseInt(shadingObj.idLeftLine);
+            }
+            console.log(shadingObj);
+            console.log('visualize-+-shading', shadingList[idx]);
+            wiApiService.editShading(shadingObj, function (result) {
+                console.log(result, shadingObj);
+                let shadingObjToSet = angular.copy(shadingObj);
+                // wiApiService.getPalettes(function(paletteList){
+                    utils.getPalettes(function(paletteList){
+
+                        wiApiService.dataCurve(shadingObj.idControlCurve, function (curveData) {
+                            shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
+                            shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
+                            shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData, self.well.properties);
+                            if(!shadingObj.isNegPosFill) {
+                                if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette)
+                                    shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
+                            }
+                            else {
+                                if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette)
+                                    shadingObjToSet.positiveFill.varShading.palette = paletteList[shadingObjToSet.positiveFill.varShading.palName];
+                                if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette)
+                                    shadingObjToSet.negativeFill.varShading.palette = paletteList[shadingObjToSet.negativeFill.varShading.palName];
+                            }
+                            console.log("LEFT/RIGHT CURVE", shadingObjToSet);
+                            shadingList[idx].setProperties(shadingObjToSet);
+                            $timeout(function() {
+                                currentTrack.plotAllDrawings();
+                            });
+                        });
+                    });
+                });
+        }
+        function updateShadings(){
+            console.log("update shadings");
+            self.shadingChanged.forEach(function(item, index){
+                if(item.change == "1") {
+                    updateShading(index);
                 }
-                this.validate = function(index) {
-                    if(self.shadingArr[index].idLeftLine == self.shadingArr[index].idRightLine) {
-                        DialogUtils.errorMessageDialog(ModalService, "leftCurve and rightCurve cannot be the same!");
-                        self.shadingArr[index].idLeftLine = null;
-                        self.shadingArr[index].leftFixedValue = 0;
-                    };
-                }
+            });
+        }
 
-                function updateShading(idx) {
-                    console.log("111",self.shadingArr[index],
-                        self.fillPatternOptions[index],
-                        self.variableShadingOptions[index]);
+        function findInVisCurveListByIdLine(idLine) {
+            for (let line of self.curveList) {
+                if (line.id == idLine) {
+                    return line;
+                }
+            }
+            return null;
+        }
+
+        function findInVisCurveListByIdCurve(idCurve) {
+            for (let line of self.curveList) {
+                if (line.idCurve == idCurve) {
+                    return line;
+                }
+            }
+            return null;
+        }
+
+        function createNewShadings() {
+            self.shadingChanged.forEach(function (item, index) {
+                if (item.change == '2') {
                     let shadingObj = utils.mergeShadingObj(self.shadingArr[index],
                         self.fillPatternOptions[index],
                         self.variableShadingOptions[index]);
-                    if(shadingObj.idLeftLine == -3) {
-                        shadingObj.type = 'custom';
-                        shadingObj.idLeftLine = null;
-                    };
-                    if(shadingObj.idLeftLine == -2) {
-                        shadingObj.type = 'right';
-                        shadingObj.idLeftLine = null;
-                    };
-                    if(shadingObj.idLeftLine == -1) {
-                        shadingObj.type = 'left';
-                        shadingObj.idLeftLine = null;
-                    };
-                    if(shadingObj.idLeftLine > 0) {
-                        shadingObj.type = 'pair';
-                        shadingObj.leftFixedValue = null;
-                        shadingObj.idLeftLine = parseInt(shadingObj.idLeftLine);
-                    }
-                    console.log(shadingObj);
-                    console.log('visualize-+-shading', shadingList[idx]);
-                    wiApiService.editShading(shadingObj, function (result) {
-                        console.log(result, shadingObj);
-                        let shadingObjToSet = angular.copy(shadingObj);
+                    console.log("shadingObj", shadingObj);
+                    if(shadingObj.idLeftLine < 0) shadingObj.idLeftLine = null;
+                    if(shadingObj.idLeftLine > 0) shadingObj.leftFixedValue = null;
+                    wiApiService.createShading(shadingObj, function(shading) {
                         // wiApiService.getPalettes(function(paletteList){
                             utils.getPalettes(function(paletteList){
-
-                                wiApiService.dataCurve(shadingObj.idControlCurve, function (curveData) {
-                                    shadingObjToSet.leftCurve = findInVisCurveListByIdLine(shadingObj.idLeftLine);
-                                    shadingObjToSet.rightCurve = findInVisCurveListByIdLine(shadingObj.idRightLine);
-                                    shadingObjToSet.controlCurve = graph.buildCurve({ idCurve: shadingObj.idControlCurve }, curveData, self.well.properties);
-                                    if(!shadingObj.isNegPosFill) {
-                                        if(shadingObjToSet.fill.varShading && shadingObjToSet.fill.varShading.palette)
-                                            shadingObjToSet.fill.varShading.palette = paletteList[shadingObjToSet.fill.varShading.palName];
-                                    }
+                                let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
+                                let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                                let lineObj1 = null;
+                                let lineObj2 = null;
+                                if(!shadingModel.idRightLine) return;
+                                if(!shadingModel.idLeftLine) {
+                                    lineObj1 = findInVisCurveListByIdLine(shading.idRightLine);
+                                    wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                                } else {
+                                    lineObj1 = findInVisCurveListByIdLine(shading.idLeftLine);
+                                    lineObj2 = findInVisCurveListByIdLine(shading.idRightLine);
+                                    if (lineObj1 && lineObj2)
+                                        wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
                                     else {
-                                        if(shadingObjToSet.positiveFill.varShading && shadingObjToSet.positiveFill.varShading.palette)
-                                            shadingObjToSet.positiveFill.varShading.palette = paletteList[shadingObjToSet.positiveFill.varShading.palName];
-                                        if(shadingObjToSet.negativeFill.varShading && shadingObjToSet.negativeFill.varShading.palette)
-                                            shadingObjToSet.negativeFill.varShading.palette = paletteList[shadingObjToSet.negativeFill.varShading.palName];
+                                        console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
                                     }
-                                    console.log("LEFT/RIGHT CURVE", shadingObjToSet);
-                                    shadingList[idx].setProperties(shadingObjToSet);
-                                    $timeout(function() {
-                                        currentTrack.plotAllDrawings();
-                                    });
-                                });
-                            });
-                        });
-                }
-                function updateShadings(){
-                    console.log("update shadings");
-                    self.shadingChanged.forEach(function(item, index){
-                        if(item.change == "1") {
-                            updateShading(index);
-                        }
-                    });
-                }
-
-                function findInVisCurveListByIdLine(idLine) {
-                    for (let line of self.curveList) {
-                        if (line.id == idLine) {
-                            return line;
-                        }
-                    }
-                    return null;
-                }
-
-                function findInVisCurveListByIdCurve(idCurve) {
-                    for (let line of self.curveList) {
-                        if (line.idCurve == idCurve) {
-                            return line;
-                        }
-                    }
-                    return null;
-                }
-
-                function createNewShadings() {
-                    self.shadingChanged.forEach(function (item, index) {
-                        if (item.change == '2') {
-                            let shadingObj = utils.mergeShadingObj(self.shadingArr[index],
-                                self.fillPatternOptions[index],
-                                self.variableShadingOptions[index]);
-                            console.log("shadingObj", shadingObj);
-                            if(shadingObj.idLeftLine < 0) shadingObj.idLeftLine = null;
-                            if(shadingObj.idLeftLine > 0) shadingObj.leftFixedValue = null;
-                            wiApiService.createShading(shadingObj, function(shading) {
-                                // wiApiService.getPalettes(function(paletteList){
-                                    utils.getPalettes(function(paletteList){
-                                        let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
-                                        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-                                        let lineObj1 = null;
-                                        let lineObj2 = null;
-                                        if(!shadingModel.idRightLine) return;
-                                        if(!shadingModel.idLeftLine) {
-                                            lineObj1 = findInVisCurveListByIdLine(shading.idRightLine);
-                                            wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                                        } else {
-                                            lineObj1 = findInVisCurveListByIdLine(shading.idLeftLine);
-                                            lineObj2 = findInVisCurveListByIdLine(shading.idRightLine);
-                                            if (lineObj1 && lineObj2)
-                                                wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
-                                            else {
-                                                console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
-                                            }
-                                        }
-                                    })
-                                })
-                        }
-                    })
-                }
-                // Dialog buttons
-                this.defineButtonClicked = function (index) {
-                    var shading = self.shadingArr[index];
-                    console.log("shadingAttributeOri88888", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
-
-                    DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(fillPatternOptions, variableShadingOptions, shadingOptions, curvesOnDataset, leftLimit){
-                        console.log("shadingAttribute", fillPatternOptions, variableShadingOptions, shadingOptions);
-                        // console.log("shadingAttributeOri", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
-                        if(fillPatternOptions) self.fillPatternOptions[index] = fillPatternOptions;
-                        if(variableShadingOptions) self.variableShadingOptions[index] = variableShadingOptions;
-                        if(shadingOptions) self.shadingArr[index] = shadingOptions;
-
-                    }, self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index], self.curvesArr, self.curvesOnDataset, self.leftLimit);
-
-                }
-                this.lineStyleButtonClicked = function (index, $event) {
-                    self.setClickedRowCurve(index);
-                    DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesLineOptions[self.__idx]);
-                    $event.stopPropagation();
-                };
-                this.symbolStyleButtonClicked = function (index, $event) {
-                    self.setClickedRowCurve(index);
-                    DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesSymbolOptions[self.__idx]);
-                    $event.stopPropagation();
-                };
-                this.colorTrack = function () {
-                    DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
-                        self.props.general.color = colorStr;
-                    });
-                };
-
-                function getCurveFromCurveListById(idLine) {
-                    lineObjs = self.curveList.filter(function (item, index) {
-                        return (item.idCurve == idLine);
-                    });
-                    return lineObjs[0];
-                }
-
-                function updateLine(index) {
-                    let curveOptions = self.curves[index];
-                    let lineOptions = self.curvesLineOptions[index].lineStyle;
-                    let symbolOptions = self.curvesSymbolOptions[index].symbolStyle;
-                    let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
-                    utils.changeLine(lineObj, wiApiService, function () {
-                        self.curveList[index].setProperties(lineObj);
-                        currentTrack.plotCurve(self.curveList[index]);
-
-                        if (callback) callback();
-                    });
-                }
-
-                function updateGeneralTab(callback) {
-                    let temp = true;
-                    // utils.changeTrack(self.props.general, wiApiService);
-                    console.log('general', self.props.general);
-                    if(self.props.general.width >= 0.5 ) {
-                        wiApiService.editTrack(self.props.updateGeneralTab, function(res) {
-                            console.log("res", res);
-                            let newProps = angular.copy(self.props);
-                            newProps.general.width = utils.inchToPixel(self.props.general.width);
-                            currentTrack.setProperties(newProps.general);
-
-                            if (newProps.general.zoomFactor != savedZoomFactor) {
-                                savedZoomFactor = newProps.general.zoomFactor;
-                                wiD3Ctrl.processZoomFactor();
-                                wiD3Ctrl.plotAll();
-                            }
-                            else {
-                                currentTrack.doPlot(true);
-                            }
-                            if (callback) callback();
-                        })
-                    } else {
-                        console.log("temp");
-                        temp = false;
-                        DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
-                        callback();
-                    }
-                    return temp;
-                }
-
-                function updateCurvesTab(updateCurvesTabCb) {
-                    console.log("updateCurvesTab");
-                    async.eachOfSeries(self.curvesChanged, function(item, idx, callback) {
-                        switch(item.change) {
-                            case '0':
-                            callback();
-                            break;
-                            case '1': {
-                                let curveOptions = self.curves[idx];
-                                let lineOptions = self.curvesLineOptions[idx].lineStyle;
-                                let symbolOptions = self.curvesSymbolOptions[idx].symbolStyle;
-                                let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
-                                utils.changeLine(lineObj, wiApiService, function () {
-                                    self.curveList[idx].setProperties(lineObj);
-                                    currentTrack.plotCurve(self.curveList[idx]);
-                                    callback();
-                                });
-                                item.change = 0;
-                                break;
-                            }
-
-                            case '2': {
-                                let lineObj = {
-                                    idCurve: self.lineCurve[idx].id,
-                                    idTrack: currentTrack.id
                                 }
-                                console.log("new curves", lineObj);
-                                wiApiService.createLine(lineObj, function (line) {
-                                    console.log("CREATE:", line);
-                                    utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
-                                        let lineModel = utils.lineToTreeConfig(line);
-                                        if (!err) {
-                                            wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
-                                            self.curveList = currentTrack.getCurves();
-                                            self.curves[idx].idLine = line.idLine;
-                                            item.change = '1';
-                                        } else {
-                                            console.error(err);
-                                        }
+                            })
+                        })
+                }
+            })
+        }
+        // Dialog buttons
+        this.defineButtonClicked = function (index) {
+            var shading = self.shadingArr[index];
+            console.log("shadingAttributeOri88888", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
 
-                                        callback();
-                                    });
-                                });
-                                break;
-                            }
-                            case '3':
-                            wiApiService.removeLine(self.curves[idx].idLine, function () {
-                                currentTrack.removeCurveById(self.curves[idx].idLine);
-                                self.curveList = currentTrack.getCurves();
+            DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(fillPatternOptions, variableShadingOptions, shadingOptions, curvesOnDataset, leftLimit){
+                console.log("shadingAttribute", fillPatternOptions, variableShadingOptions, shadingOptions);
+                // console.log("shadingAttributeOri", self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index]);
+                if(fillPatternOptions) self.fillPatternOptions[index] = fillPatternOptions;
+                if(variableShadingOptions) self.variableShadingOptions[index] = variableShadingOptions;
+                if(shadingOptions) self.shadingArr[index] = shadingOptions;
+
+            }, self.fillPatternOptions[index], self.variableShadingOptions[index], self.shadingArr[index], self.curvesArr, self.curvesOnDataset, self.leftLimit);
+
+        }
+        this.lineStyleButtonClicked = function (index, $event) {
+            self.setClickedRowCurve(index);
+            DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesLineOptions[self.__idx]);
+            $event.stopPropagation();
+        };
+        this.symbolStyleButtonClicked = function (index, $event) {
+            self.setClickedRowCurve(index);
+            DialogUtils.symbolStyleDialog(ModalService, wiComponentService, function (options) {}, self.curvesSymbolOptions[self.__idx]);
+            $event.stopPropagation();
+        };
+        this.colorTrack = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        };
+
+        function getCurveFromCurveListById(idLine) {
+            lineObjs = self.curveList.filter(function (item, index) {
+                return (item.idCurve == idLine);
+            });
+            return lineObjs[0];
+        }
+
+        function updateLine(index) {
+            let curveOptions = self.curves[index];
+            let lineOptions = self.curvesLineOptions[index].lineStyle;
+            let symbolOptions = self.curvesSymbolOptions[index].symbolStyle;
+            let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
+            utils.changeLine(lineObj, wiApiService, function () {
+                self.curveList[index].setProperties(lineObj);
+                currentTrack.plotCurve(self.curveList[index]);
+
+                if (callback) callback();
+            });
+        }
+
+        function updateGeneralTab(callback) {
+            let temp = true;
+            // utils.changeTrack(self.props.general, wiApiService);
+            console.log('general', self.props.general);
+            if(self.props.general.width >= 0.5 ) {
+                wiApiService.editTrack(self.props.updateGeneralTab, function(res) {
+                    console.log("res", res);
+                    let newProps = angular.copy(self.props);
+                    newProps.general.width = utils.inchToPixel(self.props.general.width);
+                    currentTrack.setProperties(newProps.general);
+
+                    if (newProps.general.zoomFactor != savedZoomFactor) {
+                        savedZoomFactor = newProps.general.zoomFactor;
+                        wiD3Ctrl.processZoomFactor();
+                        wiD3Ctrl.plotAll();
+                    }
+                    else {
+                        currentTrack.doPlot(true);
+                    }
+                    if (callback) callback();
+                })
+            } else {
+                console.log("temp");
+                temp = false;
+                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
+                callback();
+            }
+            return temp;
+        }
+
+        function updateCurvesTab(updateCurvesTabCb) {
+            console.log("updateCurvesTab");
+            async.eachOfSeries(self.curvesChanged, function(item, idx, callback) {
+                switch(item.change) {
+                    case '0':
+                    callback();
+                    break;
+                    case '1': {
+                        let curveOptions = self.curves[idx];
+                        let lineOptions = self.curvesLineOptions[idx].lineStyle;
+                        let symbolOptions = self.curvesSymbolOptions[idx].symbolStyle;
+                        let lineObj = utils.mergeLineObj(curveOptions, lineOptions, symbolOptions);
+                        utils.changeLine(lineObj, wiApiService, function () {
+                            self.curveList[idx].setProperties(lineObj);
+                            currentTrack.plotCurve(self.curveList[idx]);
+                            callback();
+                        });
+                        item.change = 0;
+                        break;
+                    }
+
+                    case '2': {
+                        let lineObj = {
+                            idCurve: self.lineCurve[idx].id,
+                            idTrack: currentTrack.id
+                        }
+                        console.log("new curves", lineObj);
+                        wiApiService.createLine(lineObj, function (line) {
+                            console.log("CREATE:", line);
+                            utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
+                                let lineModel = utils.lineToTreeConfig(line);
+                                if (!err) {
+                                    wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
+                                    self.curveList = currentTrack.getCurves();
+                                    self.curves[idx].idLine = line.idLine;
+                                    item.change = '1';
+                                } else {
+                                    console.error(err);
+                                }
+
                                 callback();
                             });
-                            break;
-                            default:
-                                // break;
-                                callback('unknown change code:', item.change);
-
-                            }
-                        }, function(err) {
-                            if (err) {
-                                DialogUtils.errorMessageDialog(ModalService, err);
-                            }
-                        //_cleanUpCurvesTable();
-                        if (updateCurvesTabCb) updateCurvesTabCb(err);
+                        });
+                        break;
+                    }
+                    case '3':
+                    wiApiService.removeLine(self.curves[idx].idLine, function () {
+                        currentTrack.removeCurveById(self.curves[idx].idLine);
+                        self.curveList = currentTrack.getCurves();
+                        callback();
                     });
-                }
+                    break;
+                    default:
+                        // break;
+                        callback('unknown change code:', item.change);
+
+                    }
+                }, function(err) {
+                    if (err) {
+                        setTimeout(() => {
+                            DialogUtils.errorMessageDialog(ModalService, err);
+                        });
+                    }
+                //_cleanUpCurvesTable();
+                if (updateCurvesTabCb) updateCurvesTabCb(err);
+            });
+        }
 
 
-                this.getShadings = function () {
-                    return self.shadingArr.filter(function (c, index) {
-                        return (self.shadingChanged[index].change == '0' ||
-                            self.shadingChanged[index].change == '1' ||
-                            self.shadingChanged[index].change == '2');
-                    });
-                }
-                function _removeRowFromShadingsTable (index) {
-                    self.shadingChanged.splice(index, 1);
-                    self.shadingArr.splice(index, 1);
-                    self.fillPatternOptions.splice(index, 1);
-                    self.variableShadingOptions.splice(index, 1);
-                }
-                function removeShadings() {
-                    self.shadingChanged.forEach(function (item, index) {
-                        if (item.change == '3') {
-                            wiApiService.removeShading(self.shadingArr[index].idShading, function (result) {
-                                console.log("removeShading");
-                                let currentShading = currentTrack.findShadingById(result.idShading);
-                                wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
-                                self.shadingChanged.splice(1, index);
-                                self.shadingArr.slice(1, index);
-                                self.fillPatternOptions.slice(1, index);
-                                self.variableShadingOptions.slice(1, index);
-                            });
-                        };
-                        if (item.change == '4') {
-                            _removeRowFromShadingsTable(index);
-                        }
+        this.getShadings = function () {
+            return self.shadingArr.filter(function (c, index) {
+                return (self.shadingChanged[index].change == '0' ||
+                    self.shadingChanged[index].change == '1' ||
+                    self.shadingChanged[index].change == '2');
+            });
+        }
+        function _removeRowFromShadingsTable (index) {
+            self.shadingChanged.splice(index, 1);
+            self.shadingArr.splice(index, 1);
+            self.fillPatternOptions.splice(index, 1);
+            self.variableShadingOptions.splice(index, 1);
+        }
+        function removeShadings() {
+            self.shadingChanged.forEach(function (item, index) {
+                if (item.change == '3') {
+                    wiApiService.removeShading(self.shadingArr[index].idShading, function (result) {
+                        console.log("removeShading");
+                        let currentShading = currentTrack.findShadingById(result.idShading);
+                        wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
+                        self.shadingChanged.splice(1, index);
+                        self.shadingArr.slice(1, index);
+                        self.fillPatternOptions.slice(1, index);
+                        self.variableShadingOptions.slice(1, index);
                     });
                 };
-                this.setLimit2 = function(index) {
-                    if(self.shadingArr[index].idLeftLine == -1) {
-                        self.shadingArr[index].leftFixedValue = findInVisCurveListByIdLine(self.shadingArr[index].idRightLine).minX;
-                    }
-                    if(self.shadingArr[index].idLeftLine == -2) {
-                        self.shadingArr[index].leftFixedValue = findInVisCurveListByIdLine(self.shadingArr[index].idRightLine).maxX;
-                    }
-                    if(self.shadingArr[index].idLeftLine > 0) self.shadingArr[index].leftFixedValue = null;
+                if (item.change == '4') {
+                    _removeRowFromShadingsTable(index);
                 }
-                this.matchIdLeftLine = function(index) {
-                    if(self.shadingArr[index].idLeftLine > 0) {
-                        self.shadingArr[index].leftFixedValue = null;
-                        $('#fixedVal').prop('disabled', true);
-                    }
+            });
+        };
+        this.setLimit2 = function(index) {
+            if(self.shadingArr[index].idLeftLine == -1) {
+                self.shadingArr[index].leftFixedValue = findInVisCurveListByIdLine(self.shadingArr[index].idRightLine).minX;
+            }
+            if(self.shadingArr[index].idLeftLine == -2) {
+                self.shadingArr[index].leftFixedValue = findInVisCurveListByIdLine(self.shadingArr[index].idRightLine).maxX;
+            }
+            if(self.shadingArr[index].idLeftLine > 0) self.shadingArr[index].leftFixedValue = null;
+        }
+        this.matchIdLeftLine = function(index) {
+            if(self.shadingArr[index].idLeftLine > 0) {
+                self.shadingArr[index].leftFixedValue = null;
+                $('#fixedVal').prop('disabled', true);
+            }
+        }
+        function validateAll() {
+            // return true;
+            for (var index in self.shadingChanged) {
+                if (!self.shadingArr[index].idRightLine) {
+                    return false;
+                } else if (!self.shadingArr[index].idLeftLine && isNaN(parseInt(self.shadingArr[index].leftFixedValue))) {
+                    return false;
                 }
-                function validateAll() {
-                    // return true;
-                    for (var index in self.shadingChanged) {
-                        if (!self.shadingArr[index].idRightLine) {
-                            return false;
-                        } else if (!self.shadingArr[index].idLeftLine && isNaN(parseInt(self.shadingArr[index].leftFixedValue))) {
-                            return false;
-                        }
-                    };
-                    return true;
-                }
-                function updateShadingsTab(updateShadingsTabCb) {
+            };
+            return true;
+        }
+        function updateShadingsTab(updateShadingsTabCb) {
                     console.log("updateShadingTab");
                     async.eachOfSeries(self.shadingChanged, function(item, idx, callback) {
                         switch(item.change) {
@@ -3676,10 +3678,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 return;
             }
             async.series([
-                function(callback) {
-                    updateGeneralTab(function (err) {
-                        callback();
-                    });
+                        function(callback) {
+                            updateGeneralTab(function (err) {
+                                callback();
+                            });
                             // async.setImmediate(function() {
                             //     callback();
                             // });
@@ -4233,7 +4235,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
     }).then(function (modal) {
         initModal(modal);
         modal.close.then(function (ret) {
-            $('.modal-backdrop').remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback(ret);
         });
@@ -4261,7 +4263,7 @@ exports.showImageDialog = function (ModalService, image, callback) {
     }).then(function (modal) {
         initModal(modal);
         modal.close.then(function () {
-            $('.modal-backdrop').remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             callback();
         });
@@ -10966,7 +10968,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
     }).then(function (modal) {
         initModal(modal);
         modal.close.then(function () {
-            $('.modal-backdrop').remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });
@@ -11229,7 +11231,7 @@ exports.objectTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, obj
     }).then(function (modal) {
         initModal(modal);
         modal.close.then(function (data) {
-            $('.modal-backdrop').remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if(data) callback(data);
         });
@@ -11367,7 +11369,7 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
     }).then(function (modal) {
         initModal(modal);
         modal.close.then(function () {
-            $('.modal-backdrop').remove();
+            $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
         });
     });

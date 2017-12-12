@@ -330,6 +330,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             self.handlers.DeleteItemButtonClicked(true);
                         }
                     }, {
+                        label: "Group Manager",
+                        icon: "dataset-new-16x16",
+                        handler: function () {
+                            DialogUtils.groupManagerDialog(ModalService, function () {
+                                utils.refreshProjectState();
+                            });
+                        }
+                    }
+                ];
+                if (groupsContextMenu.length) {
+                    wellContextMenu.push({
                         name: "AddToGroup",
                         label: wellModels[0].properties.idGroup? "Move To Group": "Add To Group",
                         icon: "plus-16x16",
@@ -340,8 +351,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             })
                         },
                         childContextMenu: groupsContextMenu
-                    }
-                ];
+                    });
+                }
                 if (wellModels[0].properties.idGroup) {
                     wellContextMenu.push({
                         label: 'Ungroup',
