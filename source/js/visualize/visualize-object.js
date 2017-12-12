@@ -3,6 +3,11 @@ let Drawing = require('./visualize-drawing');
 let CanvasHelper = require('./visualize-canvas-helper');
 let graph = require('./visualize');
 
+const _OVERFLOW_VIEWPORT_TOP = 1;
+const _OVERFLOW_VIEWPORT_BOTTOM = 2;
+const _INSIDE_VIEWPORT = 3;
+const _OVERFLOW_VIEWPORT_TOP_BOTTOM = 4;
+const _OUT_OF_VIEWPORT = 5;
 
 module.exports = ObjectOfTrack;
 
@@ -103,24 +108,34 @@ ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService, __U
     this.objectContainer = this.foreignObject.append('xhtml:div')
                                 .attr('class', 'object-container')
                                 .style('position', 'relative');
+    
     this.tooltip = this.objectContainer.append('div')
                             .attr('class', 'vi-object-tooltip');
 
     $(self.objectContainer.node())
         .draggable({
-            containment: self.svgContainer.node().parentNode,
+            // containment: self.svgContainer.node().parentNode,
             axis: 'y',
         })
         .resizable({
+            // containment: self.svgContainer.node().parentNode,
             minHeight: 30,
-            containment: self.svgContainer.node().parentNode,
             handles: "n, s",
         })
         .on('resize', function(event, ui) {
-            self.showTootip(event, ui);
+            self.showTooltip(event, ui);
+            
+            let newDepth = self.updateDepth(event, ui);
+            let transformY = self.getTransformY();
+            self.onViewportChange(null, null, transformY(newDepth[0]), transformY(newDepth[1]), false, true, true);
+            
         })
         .on('drag', function(event, ui) {
-            self.showTootip(event, ui);
+            self.showTooltip(event, ui);
+
+            let newDepth = self.updateDepth(event, ui);
+            let transformY = self.getTransformY();
+            self.onViewportChange(null, null, transformY(newDepth[0]), transformY(newDepth[1]), false, true);
         })
         .on('dragstop', function(event, ui) {
             event.stopPropagation();
@@ -174,7 +189,7 @@ ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService, __U
     this.updateHeader();
 }
 
-ObjectOfTrack.prototype.showTootip = function(event, ui) {
+ObjectOfTrack.prototype.showTooltip = function(event, ui) {
     let self = this;
     let newDepth = self.updateDepth(event, ui);
     self.objectContainer.selectAll("div:not(.vi-object-tooltip):not(.ui-resizable-handle)").style('filter', "blur(3px)");
@@ -223,20 +238,49 @@ ObjectOfTrack.prototype.updateDepth = function(event, ui){
     let maxY = transformY(this.endDepth);
     let originalHeight = maxY - minY;
 
-    if(event.type == "dragstop" || event.type == "drag") {
-        if(ui.position.top < 0) {
-            ui.position.top = 0;
-        }
-        let intervalDepth = self.endDepth - self.startDepth;
-        self.startDepth = transformY.invert(ui.position.top);
-        self.endDepth = self.startDepth + intervalDepth;
-    } else if(event.type == "resizestop" || event.type == "resize") {
-        let yChanged = ui.position.top - ui.originalPosition.top;
+    let viewportStatus = self.getStatusOfViewport();
 
-        if(yChanged) {
-            self.startDepth = transformY.invert(ui.position.top);
-        } else {
-            self.endDepth = transformY.invert(ui.position.top + ui.size.height);
+    if(event.type == "dragstop" || event.type == "drag") {
+        let intervalDepth = self.endDepth - self.startDepth;
+
+        switch (viewportStatus) {
+            case _OVERFLOW_VIEWPORT_TOP:
+            case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
+                self.endDepth = transformY.invert(ui.position.top + self.objectContainer.node().getBoundingClientRect().height);
+                self.startDepth = self.endDepth - intervalDepth;
+                break;
+            case _INSIDE_VIEWPORT:
+            case _OVERFLOW_VIEWPORT_BOTTOM:
+                self.startDepth = transformY.invert(ui.position.top);
+                self.endDepth = self.startDepth + intervalDepth;
+                break;
+            default:
+                break;
+        }
+    } else if(event.type == "resizestop" || event.type == "resize") {
+        switch(viewportStatus) {
+            case _OVERFLOW_VIEWPORT_TOP:
+                if (!(ui.originalPosition.top + ui.size.height > self.getViewportY()[1])) {
+                    self.endDepth = transformY.invert(ui.originalPosition.top + ui.size.height);
+                }
+                break;
+            case _OVERFLOW_VIEWPORT_BOTTOM:
+                if (ui.position.top > 0) {
+                    self.startDepth = transformY.invert(ui.position.top);
+                }
+                break;
+            case _INSIDE_VIEWPORT:
+                if(ui.position.top != ui.originalPosition.top) {
+                    self.startDepth = transformY.invert(ui.position.top);
+                } else {
+                    self.endDepth = transformY.invert(ui.position.top + ui.size.height);
+                }
+                break;
+            case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
+
+                break;
+            default:
+                break;
         }
     }
 
@@ -340,6 +384,7 @@ ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellPr
             .append("div")
             .style('position', 'absolute')
             .style('overflow', 'hidden')
+            .attr('class', 'vi-object-histogram')
             .style('width', '100%')
             .style('height', '100%')
             .node();
@@ -382,8 +427,10 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
 
     var domEle = this.objectContainer
         .append("div")
+            .style('overflow', 'hidden')
             .style("height", "100%")
             .style('display', 'flex')
+            .attr('class', 'vi-object-crossplot')
             .node();
     
     d3.select(domEle)
@@ -404,56 +451,90 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
     this.doPlot(true, false);
 }
 
-ObjectOfTrack.prototype.onViewportChange = function(minX, maxX, minY, maxY, forcePlot, highlight) {
+ObjectOfTrack.prototype.getStatusOfViewport = function(minY, maxY){
+    let self = this;
+    let viewportY = self.getViewportY();
+    let transformY = self.getTransformY();
+    minY = minY ? minY:transformY(self.startDepth);
+    maxY = maxY ? maxY:transformY(self.endDepth);
+
+    if(minY < viewportY[0] && maxY <= (viewportY[1]) && maxY >= viewportY[0]) {
+        return _OVERFLOW_VIEWPORT_TOP;
+    } else if(minY >= viewportY[0] && minY <= viewportY[1] && maxY >= viewportY[0] && maxY <= (viewportY[1])) {
+        return _INSIDE_VIEWPORT;
+    } else if(minY >= viewportY[0] && minY <= viewportY[1] && maxY > (viewportY[1])) {
+        return _OVERFLOW_VIEWPORT_BOTTOM;
+    } else if(minY < viewportY[0] && maxY > (viewportY[1])) {
+        return _OVERFLOW_VIEWPORT_TOP_BOTTOM;
+    } else {
+        return _OUT_OF_VIEWPORT;
+    }
+};
+
+ObjectOfTrack.prototype.onViewportChange = function(minX, maxX, minY, maxY, forcePlot, highlight, isResizing) {
     //console.log('onViewportChange');
     let self = this;
     let viewportX = this.getViewportX();
     let maxViewportY = this.getViewportY()[1];
-
+    let transformY = this.getTransformY();
 
     minX = minX || d3.min(viewportX);
     maxX = maxX || d3.max(viewportX);
-
-    // get out of the viewport
-    if(maxY > maxViewportY && minY > maxViewportY &&
-        minY < 0 && maxY < 0) {
-        return;
-    }
-
-    // special case
-    if(( minY < 0 && maxY > 0 ) || ( maxY > maxViewportY + 1 && minY < maxViewportY )) {
-        self.enableAllState();
-        // change states
-        if(minY < 0 && maxY > 0) {
-            minY = 0;
-            self.objectContainer.style('border-top', 'none');
-            if(self.objectContainer.classed('ui-resizable')) {
-                $(self.objectContainer.node()).resizable("option", "handles", "s");
-            }
-        }
-        if(maxY > maxViewportY + 1 && minY < maxViewportY) {
-            maxY = maxViewportY;
-            self.objectContainer.style('border-bottom', 'none');
-            if(self.objectContainer.classed('ui-resizable')) {
-                if($(self.objectContainer.node()).resizable("option", "handles") == "s") {
-                    $(self.objectContainer.node()).resizable("disable");
-                } else {
-                    $(self.objectContainer.node()).resizable("option", "handles", "n");
-                }
-            }
-        }
-        if(self.objectContainer.classed('ui-draggable')) {
-            $(self.objectContainer.node()).draggable("disable");
-        }
-    } else {
-        self.enableAllState();
-    }
 
     this.objectContainer
             .style('x', minX)
             .style('top', minY)
             .style('width', maxX - minX)
             .style('height', maxY - minY);
+
+    let viewportStatus = self.getStatusOfViewport();
+    self.changeStatusOfViewport(viewportStatus, isResizing);
+
+    let top = minY;
+    let height = maxY - minY;
+    switch(viewportStatus) {
+        case _OVERFLOW_VIEWPORT_TOP:
+            top = -minY;
+            height = maxY;
+            break;
+        case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
+            top = -minY;
+            height = maxViewportY;
+            break;
+        case _OVERFLOW_VIEWPORT_BOTTOM:
+            top = 0;
+            height = maxViewportY - minY;
+            break;
+        case _INSIDE_VIEWPORT:
+            top = 0;
+            height = maxY - minY;
+            break;
+        case _OUT_OF_VIEWPORT: 
+            top = 0;
+            height = 0;
+            break;
+    }
+
+    switch(self.currentDraw) {
+        case 'Histogram':
+            self.objectContainer
+                    .select('.vi-object-histogram')
+                        .style('overflow', 'hidden')
+                        .style('top', top)
+                        .style('height', height);
+            break;
+        case 'Crossplot':
+            self.objectContainer
+                    .select('.vi-object-crossplot')
+                        .style('overflow', 'hidden')
+                        .style('top', top)
+                        .style('height', height);
+            break;
+    }
+
+    self.tooltip
+        .style('top', top)
+        .style('height', height);
 
     if(forcePlot) {
         if (this.viHistogram) {
@@ -464,15 +545,45 @@ ObjectOfTrack.prototype.onViewportChange = function(minX, maxX, minY, maxY, forc
     }
 }
 
+ObjectOfTrack.prototype.changeStatusOfViewport = function(newStatus, isResizing){
+    let self = this;
+    if(!self.lastViewportSatus || self.lastViewportSatus != newStatus) {
+        self.lastViewportSatus = newStatus;
+        self.enableAllState();
+        switch (newStatus) {
+            case _OVERFLOW_VIEWPORT_TOP:
+                self.objectContainer.style('border-top', 'none');
+                if(self.objectContainer.classed('ui-resizable') && !isResizing) {
+                    $(self.objectContainer.node()).resizable("option", "handles", "s");
+                }
+                break;
+            case _INSIDE_VIEWPORT:
+                
+                break;
+            case _OVERFLOW_VIEWPORT_BOTTOM:
+                self.objectContainer.style('border-bottom', 'none');
+                if(self.objectContainer.classed('ui-resizable') && !isResizing) {
+                    $(self.objectContainer.node()).resizable("option", "handles", "n");
+                }
+                break;
+            case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
+                self.objectContainer.style('border-top', 'none');
+                self.objectContainer.style('border-bottom', 'none');
+                if(self.objectContainer.classed('ui-resizable') && !isResizing) {
+                    $(self.objectContainer.node()).resizable("disable");
+                }
+                break;
+            case _OUT_OF_VIEWPORT:
+                break;
+        }
+    } else {
+        return;
+    }
+};
+
 ObjectOfTrack.prototype.enableAllState = function(){
     this.objectContainer.style('border-top', '1px solid blue');
     this.objectContainer.style('border-bottom', '1px solid blue');
-
-    if(this.objectContainer.classed('ui-draggable')) {
-        if($(this.objectContainer.node()).draggable( "option", "disabled" )) {
-            $(this.objectContainer.node()).draggable("enable");
-        }
-    }
     if(this.objectContainer.classed('ui-resizable')) {
         if($(this.objectContainer.node()).resizable( "option", "disabled" )) {
             $(this.objectContainer.node()).resizable("enable");
@@ -512,6 +623,7 @@ ObjectOfTrack.prototype.refreshObjectOfTrack = function(newProp, wiApiService, c
                 histogramPropsToRequest.idCurve = self.viHistogram.histogramModel.properties.curveId;
                 delete histogramPropsToRequest.curve;
                 delete histogramPropsToRequest.curveId;
+                delete histogramPropsToRequest.discriminator;
                 wiApiService.editHistogram(histogramPropsToRequest, function(histogramEdited) {
                     console.log("Histogram edited", histogramEdited);
                     if(callback) callback();
@@ -592,13 +704,6 @@ ObjectOfTrack.prototype.handleQuest = function(quest, wellProp) {
         default:
             console.log('unknown quest.');
     }
-}
-
-function getRandomColor(alpha) {
-    let red = Math.round(Math.random()*255);
-    let green = Math.round(Math.random()*255);
-    let blue = Math.round(Math.random()*255);
-    return "rgba(" + red + ", " + green + ", " + blue + ", "+ alpha + ")";
 }
 
 function processingData(rawData, well) {

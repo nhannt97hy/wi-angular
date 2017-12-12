@@ -4067,7 +4067,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                     for (let i = self.imagesOfCurrentTrack.length - 1; i >= 0; i--) {
                         switch (self.imagesOfCurrentTrack[i].flag) {
                             case _DEL:
-                                    self.imagesOfCurrentTrack.splice(i, 1);
+                                self.imagesOfCurrentTrack.splice(i, 1);
                                 break;
 
                             case _NEW:
@@ -8565,59 +8565,31 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
             if(!input || !out || !kernel) callback(false);
             if(input.length < 1 || kernel.length < 1) callback(false);
 
-            let inputF = input.filter(d => {return !isNaN(d);});
-            let inputSize = input.length;
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < input.length; i++){
+                if(!isNaN(input[i])){
+                    inputF.push(input[i]);
+                    lstIndex.push(i);
+                }
+            }
             let kernelF = kernel.filter(d => {return !isNaN(d);});
-            let Size = Math.max(kernelF.length, inputF.length);
-            out.length = inputSize;
+            out.length = input.length;
             out.fill(NaN);
 
-            async.eachOfSeries(input, (data, n, done)=>{
-                if(!isNaN(input[n])){
-                    out[n] = 0;
-                    for(let k = 0; k < Size; k++){
-                        out[n] += (inputF[k] || 0) * (kernelF[(n - k + Size)%Size] || 0);
+            wiApiService.convolution({input: inputF, kernel: kernelF}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        callback(true);
                     }
                 }
-                async.setImmediate(done);
-            }, function(err){
-                callback(true);
             })
         }
-        function calDFT(input) {
-            var N = input.length;
-            var arr = new Array(N);
-            for (var k = 0; k < N; k++) {
-                arr[k] = new math.complex(0,0);
-                if(!isNaN(input[k])){
-                    for (var n = 0; n < N; n++) {
-                        let tmp = (-1) * ((2 * Math.PI * n * k) / N);
-                        arr[k].re += Math.cos(tmp) * (input[n] || 0);
-                        arr[k].im += Math.sin(tmp) * (input[n] || 0);
-                    }
-                }
 
-                arr[k].re = Math.round(arr[k].re);
-                arr[k].im = Math.round(arr[k].im);
-            }
-            return arr;
-        }
-        function calIDFT(input, out) {
-            var N = input.length;
-            var arr = new Array(N);
-            for (var k = 0; k < N; k++) {
-                arr[k] = new math.complex(0,0);
-                for (var n = 0; n < N; n++) {
-                    let tmp = ((2 * Math.PI * n * k) / N);
-                    arr[k].re += Math.cos(tmp) * input[n].re;
-                    arr[k].im += Math.sin(tmp) * input[n].im;
-                }
-
-                arr[k].re = Math.round(arr[k].re)/ N;
-                arr[k].im = Math.round(arr[k].im) / N;
-            }
-            out = arr.map(d => {return d.re + d.im * (-1)} );
-        }
         function deconvolution(input, kernel, out, callback){ // need update
             // check validity of params
             if(!input || !out || !kernel) callback(false);
@@ -8667,7 +8639,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                 if (self.isDeconvolution) {
                     deconvolution(input, kernel, self.ResultCurve.data, function (err) {
                         if (err) {
-                            // console.log(self.ResultCurve.data);
+                            console.log(self.ResultCurve.data);
                             self.applyingInProgress = false;
                             // saveCurve(self.ResultCurve);
                         } else {
@@ -8676,20 +8648,15 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                         }
                     })
                 } else {
-                    // convolution(input, kernel, self.ResultCurve.data, function (err) {
-                    //     if (err) {
-                    //         console.log(self.ResultCurve.data);
-                    //         // self.applyingInProgress = false;
-                    //         saveCurve(self.ResultCurve);
-                    //     } else {
-                    //         console.log("Convolution Error!");
-                    //         self.applyingInProgress = false;
-                    //     }
-                    // })
-                    let a = [2,1,2,1,5];
-                    let b = [1,2,3,4];
-                    wiApiService.convolution({input: a, kernel: b}, (result) => {
-                        console.log(result.curve);
+                    convolution(input, kernel, self.ResultCurve.data, function (err) {
+                        if (err) {
+                            console.log(self.ResultCurve.data);
+                            self.applyingInProgress = false;
+                            // saveCurve(self.ResultCurve);
+                        } else {
+                            console.log("Convolution Error!");
+                            self.applyingInProgress = false;
+                        }
                     })
                 }
             })
@@ -11457,6 +11424,12 @@ exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCo
                 self.tools.splice(self.selectedRow, 1);
             }
             self.selectedRow = self.selectedRow > 0 ? self.selectedRow - 1 : 0;
+        }
+        this.onClearAllButtonClicked = function () {
+            self.tools.map(function(t){
+                t.flag = _DEL;
+            })
+            self.selectedRow = -1;
         }
 
         this.setClickedRow = function (indexRow) {

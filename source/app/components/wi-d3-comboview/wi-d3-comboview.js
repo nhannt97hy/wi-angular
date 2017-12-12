@@ -41,6 +41,9 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 	this.onReady = function () {
 		self.createLayout(self.comboviewAreaId);
+		$('wi-d3-comboview').on('click', function() {
+			console.log($('wi-d3-comboview'));
+		});
 	}
 
 	this.getModel = function () {

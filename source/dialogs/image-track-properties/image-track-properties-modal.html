@@ -6,7 +6,7 @@
                 <h4 class="modal-title">Image Track Properties - {{wiModal.title}}</h4>
             </div>
             <div class="modal-body">
-                <form action="" class="form-horizontal dialog-style">
+                <form name="myForm" action="" class="form-horizontal dialog-style" novalidate>
                     <h5 class="normal-text">General</h5>
                     <div class="form-group">
                         <div class="col-sm-5">
@@ -42,62 +42,63 @@
                     <div class="form-group">
                         <label class="control-label col-sm-5 padding-left-3em" for="width">Width (inchs)</label>
                         <div class="col-sm-7">
-                            <input type="number" min="1" step="1" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
+                            <input type="number" min="1" step="0.0001" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
                         </div>
                     </div>
                     <div ng-if="wiModal.status">
                         <h5 class="normal-text">Image Manager</h5>
-                        <div class="row" style="height: 40%">
-                            <div class='col-sm-9 height-100-percent' style='overflow-x: auto; overflow-y: auto;'>
-                                <i ng-if="wiModal.isPropsChanged" style="color: red">Properties changed. Re-open '{{wiModal.tabName}}' tab to take effects</i>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 3%"></th>
-                                            <th style="width: 20%; text-align: center">Name</th>
-                                            <th style="width: 16%; text-align: center">Top Depth</th>
-                                            <th style="width: 16%; text-align: center">Bottom Depth</th>
-                                            <th style="width: 9%; text-align: center">Color</th>
-                                            <th style="width: 9%; text-align: center">Image</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="image in wiModal.imagesOfCurrentTrack"
-                                            ng-click="wiModal.setClickedRow($index)"
-                                            ng-class="{selected: $index == wiModal.selectedRow, 'display-none': image.flag === wiModal._DEL}">
-                                            <td style="width: 3%">
-                                                <i style="text-align: center; transform: translateY(50%); top: -50%"
-                                                    ng-class="{'fa fa-chevron-circle-right': $index == wiModal.selectedRow}"></i>
-                                            </td>
-                                            <td style="width: 20%">
-                                                <input type="text" placeholder="Auto named" ng-model="image.name" class="form-control wi-form-control">
-                                            </td>
-                                            <td style="width: 16%">
-                                                <input type="number" min="0" step="0.0001" ng-change="wiModal.onImageChanged($index)" ng-model="image.topDepth" class="form-control wi-form-control">
-                                            </td>
-                                            <td style="width: 16%">
-                                                <input type="number" min="0" step="0.0001" ng-change="wiModal.onImageChanged($index)" ng-model="image.bottomDepth" class="form-control wi-form-control">
-                                            </td>
-                                            <td style="width: 9%">
-                                                <button ng-click="wiModal.selectColor($index)" ng-style="{'background-color': image.fill}" class="form-control wi-form-control width-80px thick-border"></button>
-                                            </td>
-                                            <td style="width: 9%">
-                                                <button ng-click="wiModal.configImage($index)" class="form-control wi-form-control width-80px thick-border">Image</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class='col-sm-3' style='position:relative;'>
-                                <div style='margin-top:5em;'>
+                        <div>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 3%"></th>
+                                        <th style="width: 20%; text-align: center">Name</th>
+                                        <th style="width: 16%; text-align: center">Start (depth)</th>
+                                        <th style="width: 16%; text-align: center">End (depth)</th>
+                                        <th style="width: 9%; text-align: center">Background Color</th>
+                                        <th style="width: 9%; text-align: center">Image</th>
+                                        <th style="width: 3%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="image in wiModal.imagesOfCurrentTrack"
+                                        ng-click="wiModal.setClickedRow($index)"
+                                        ng-class="{selected: $index == wiModal.selectedRow, 'display-none': image.flag === wiModal._DEL}">
+                                        <td style="width: 3%; text-align: center;">
+                                            <i style="transform: translateY(50%); top: -50%"
+                                                ng-class="{'fa fa-chevron-circle-right': $index == wiModal.selectedRow}"></i>
+                                        </td>
+                                        <td style="width: 20%">
+                                            <input type="text" ng-model="image.name" class="form-control wi-form-control">
+                                        </td>
+                                        <td style="width: 16%">
+                                            <input type="number" min="0" step="0.0001" ng-change="wiModal.onImageChanged($index)" ng-model="image.topDepth" class="form-control wi-form-control">
+                                        </td>
+                                        <td style="width: 16%">
+                                            <input type="number" min="0" step="0.0001" ng-change="wiModal.onImageChanged($index)" ng-model="image.bottomDepth" class="form-control wi-form-control">
+                                        </td>
+                                        <td style="width: 9%; text-align: center;">
+                                            <button ng-click="wiModal.selectColor($index)" ng-style="{'background-color': image.fill}" class="form-control wi-form-control width-80px thick-border"></button>
+                                        </td>
+                                        <td style="width: 9%; text-align: center;">
+                                            <button ng-click="wiModal.configImage($index)" class="form-control wi-form-control width-80px thick-border">Image</button>
+                                        </td>
+                                        <td style="width: 2%; text-align: center;">
+                                            <button ng-show="$index == wiModal.selectedRow" ng-click="wiModal.onDeleteButtonClicked()" style="transform: translateY(50%); top: -50%; background: transparent; border: 0">
+                                                <i class="fa fa-window-close" aria-hidden="true"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col-xs-3">
                                     <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddButtonClicked()">
                                         <i class="plus-16x16"></i>
                                         <span>Add</span>
                                     </button>
-                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onDeleteButtonClicked()" ng-disabled="wiModal.imagesOfCurrentTrack.length == 0">
-                                        <i class="delete-16x16"></i>                                                    
-                                        <span>Delete</span>
-                                    </button>
+                                </div>
+                                <div class="col-xs-3">
                                     <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onClearAllButtonClicked()" ng-disabled="wiModal.imagesOfCurrentTrack.length == 0">
                                         <i class="delete-16x16"></i>
                                         <span>Clear All</span>
