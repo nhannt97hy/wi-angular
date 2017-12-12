@@ -3443,7 +3443,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                     currentTrack.plotCurve(self.curveList[idx]);
                                     callback();
                                 });
-                                item.change = 0;
+                                item.change = '0';
                                 break;
                             }
 
