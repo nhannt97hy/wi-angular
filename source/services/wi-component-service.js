@@ -74,14 +74,13 @@ app.factory(wiServiceName, function () {
         COPYING_CURVE: 'copying-curve',
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
-        
+
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
         ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
         LIST_FAMILY: 'list-family',
         SELECTED_NODES: 'selected-nodes',
-        DUSTBIN: 'dustbin',
 
         PROJECT_LOGPLOTS: 'project-logplots',
         PROJECT_CROSSPLOTS: 'project-crossplots',

@@ -4065,7 +4065,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                     for (let i = self.imagesOfCurrentTrack.length - 1; i >= 0; i--) {
                         switch (self.imagesOfCurrentTrack[i].flag) {
                             case _DEL:
-                                    self.imagesOfCurrentTrack.splice(i, 1);
+                                self.imagesOfCurrentTrack.splice(i, 1);
                                 break;
 
                             case _NEW:

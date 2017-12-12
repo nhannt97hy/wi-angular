@@ -38,11 +38,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         });
         wiComponentService.on(wiComponentService.DUSTBIN_REFRESH_EVENT, function () {
             wiApiService.getDustbin(self.treeConfig[0].id, function (dustbin) {
-                self.treeConfig[1] = utils.updateDustbinConfig(dustbin);
                 let backupConfig = [self.treeConfig[1]];
                 let ScrollTmp = window.localStorage.getItem('scrollTmp');
-                let dustbinModel = wiComponentService.getComponent(wiComponentService.DUSTBIN);
-                self.treeConfig[1] = dustbinModel;
+                self.treeConfig[1] = utils.updateDustbinConfig(dustbin);
                 $timeout(function() {
                     self.backupConfig(backupConfig, [self.treeConfig[1]]);
                 });
@@ -62,13 +60,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             for (let item of currConfig) {
                 if (preItem.type === item.type && preItem.id === item.id) {
                     self.backupItemState(preItem, item);
-
                     if (Array.isArray(preItem.children) && Array.isArray(item.children)) {
                         self.backupConfig(preItem.children, item.children);
                     }
                 }
             }
         }
+        let backupSelectedNodes = angular.copy(wiComponentService.getComponent(wiComponentService.SELECTED_NODES));
+        let selectedNodes = [];
+        backupSelectedNodes.forEach(function(selectedNode) {
+            let node = utils.getModel(selectedNode.type, selectedNode.id) || utils.getStaticNode(selectedNode.type);
+            if (node) selectedNodes.push(node);
+        })
+        wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
     };
 
     this.backupItemState = function(preItem, currItem) {
@@ -257,9 +261,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Delete Group",
                         icon: "close-16x16-edit",
                         handler: function () {
-                            wiApiService.removeGroup(groupModel.properties.idGroup, function () {
-                                utils.refreshProjectState();
-                            })
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         separator: '1'
