@@ -13,18 +13,22 @@ __USERINFO.token = window.localStorage.getItem('token');
 
 let app = angular.module(moduleName, []);
 
-//const BASE_URL = 'http://54.169.109.34';
-// const BASE_URL = 'http://sflow.me';
-// const BASE_URL = 'http://localhost:3000';
+//dev
 const BASE_URL = 'http://dev.sflow.me';
-// const BASE_URL = 'http://wi.i2g.cloud';
-// const BASE_URL = 'http://192.168.0.223';
-// const BASE_URL = 'http://192.168.1.17:3000';
-
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
-const PROCESSING_SERVICE = 'http://localhost:5000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+const PROCESSING_SERVICE = 'http://54.169.13.92';
+
+//production
+// const BASE_URL = 'http://wi.i2g.cloud';
+// const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
+// const PROCESSING_SERVICE = 'http://54.169.13.92';
+
+//local
+// const BASE_URL = 'http://localhost:3000';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
+// const PROCESSING_SERVICE = 'http://localhost:5000';
+
+
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
