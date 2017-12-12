@@ -301,9 +301,9 @@ exports.TrippleComboButtonClicked = function () {
                         logplot.familiesWithoutCurve.forEach(function(r){
                             message += r + "<br>";
                         });
-                        setTimeout(function(){
-                            DialogUtils.warningMessageDialog(ModalService, message);
-                        }, 1000);
+                        // setTimeout(function(){
+                        //     DialogUtils.warningMessageDialog(ModalService, message);
+                        // }, 1000);
                     }
                 });
             })
@@ -342,9 +342,9 @@ exports.DensityNeutronButtonClicked = function () {
                         logplot.familiesWithoutCurve.forEach(function(r){
                             message += r + "<br>";
                         });
-                        setTimeout(function(){
-                            DialogUtils.warningMessageDialog(ModalService, message);
-                        }, 1000);
+                        // setTimeout(function(){
+                        //     DialogUtils.warningMessageDialog(ModalService, message);
+                        // }, 1000);
                     }
                 });
             })
@@ -383,9 +383,9 @@ exports.ResistivitySonicButtonClicked = function () {
                         logplot.familiesWithoutCurve.forEach(function(r){
                             message += r + "<br>";
                         });
-                        setTimeout(function(){
-                            DialogUtils.warningMessageDialog(ModalService, message);
-                        }, 1000);
+                        // setTimeout(function(){
+                        //     DialogUtils.warningMessageDialog(ModalService, message);
+                        // }, 1000);
                     }
                 });
             })
