@@ -146,7 +146,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         break;
                     case 'logplot':
                         deleteFunction = wiApiService.removeLogplot;
-                        cleanFunction = function () {
+                        cleanUpFunction = function () {
                             wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(selectedNode);
                         }
                         break;
