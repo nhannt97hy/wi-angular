@@ -548,29 +548,83 @@ Track.prototype.prepareTicks = function() {
     let transformY = this.getTransformY();
 
     let range = windowY[1] - windowY[0];
-    let log10Step = Math.log((windowY[1] - windowY[0]) / 10) / Math.log(10);
-    let numDigits = Math.ceil(log10Step);
-    let mainStep = Math.pow(10, numDigits);
-    let ratio = range / mainStep;
+    let lower = Math.pow(10, Math.floor(Math.log(windowY[0]) / Math.log(10))); // 200 -> 100
+    let higher = Math.pow(10, Math.ceil(Math.log(windowY[1]) / Math.log(10))); // 200 -> 1000
 
-    while (ratio > 3) {
-        mainStep = mainStep * 2;
-        ratio = range / mainStep;
+    let properMainTickNo = 3;
+    let multiplyByFive = false;
+    let mainTickNo, mainStep = higher;
+
+    do {
+        mainStep /= 10;
+        mainTickNo = range / mainStep;
     }
-    if (ratio < 1.5) {
-        mainStep = mainStep / 2;
-        ratio = range / mainStep;
+    while (mainTickNo < properMainTickNo);
+
+    if (mainTickNo > properMainTickNo + 2) {
+        mainStep *= 5;
+        mainTickNo = range / mainStep;
+        multiplyByFive = true;
     }
 
     let zoomFactor = this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor;
     mainStep *= zoomFactor;
 
-    let start = visUtils.roundDown(windowY[0], mainStep * 10);
-    let end = windowY[1];
-    let mainTicks = d3.range(start, end + mainStep / 2, mainStep);
+    let mainTicks = d3.range(lower, higher, mainStep);
+
+    // let log10Step = Math.log((windowY[1] - windowY[0]) / 10) / Math.log(10);
+    // let numDigits = Math.ceil(log10Step);
+    // let mainStep = Math.pow(10, numDigits);
+    // let ratio = range / mainStep;
+
+    // while (ratio > 3) {
+    //     mainStep = mainStep * 2;
+    //     ratio = range / mainStep;
+    // }
+    // if (ratio < 1.5) {
+    //     mainStep = mainStep / 2;
+    //     ratio = range / mainStep;
+    // }
+
+    // let zoomFactor = this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor;
+    // mainStep *= zoomFactor;
+
+    // let start = visUtils.roundDown(windowY[0], mainStep * 10);
+    // let end = windowY[1];
+    // let mainTicks = d3.range(start, end + mainStep / 2, mainStep);
 
     let inchStep = (transformY.invert(utils.getDpcm()) - windowY[0]) * zoomFactor;
-    let step = mainStep / Math.round(mainStep / inchStep)
+    // // let step = mainStep / Math.round(mainStep / inchStep)
 
-    return [d3.range(start, end + step / 2, step), mainTicks];
+    let anchor, candidate1, candidate2;
+    for (let i = 0; i < mainTicks.length; i ++) {
+        if (mainTicks[i] > windowY[0]) {
+            candidate1 = mainTicks[i];
+            candidate2 = mainTicks[i+1];
+            break;
+        }
+    }
+
+    if (!multiplyByFive)
+        anchor = candidate1;
+    else {
+        if ((candidate1 - lower) % (mainStep * 2) == 0) {
+            anchor = candidate1;
+        }
+        else
+            anchor = candidate2;
+    }
+
+    let leftHalf = d3.range(anchor, visUtils.roundDown(windowY[0], inchStep), -inchStep).reverse();
+    let rightHalf = d3.range(anchor + inchStep, visUtils.roundUp(windowY[1], inchStep) + inchStep / 2, inchStep);
+
+    return [
+        leftHalf.concat(rightHalf).map(function(x) {
+            return x.toFixed(6);
+        }),
+        mainTicks.map(function(x) {
+            return x.toFixed(6);
+        })
+    ];
+    // return [d3.range(end + step / 2, step), mainTicks];
 }

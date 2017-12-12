@@ -1488,9 +1488,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 objectOfTrack.minY = viTrack.minY;
                                 objectOfTrack.maxY = viTrack.maxY;
                                 let anObject = wiD3Ctrl.addObjectToTrack(viTrack, objectOfTrack);
-                                
+
                                 let objectProps = JSON.parse(objectOfTrack.object);
-                                
+
                                 switch(objectProps.type) {
                                     case 'Histogram' :
                                         objectProps.intervalDepthTop = objectOfTrack.topDepth;
@@ -1499,7 +1499,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                         objectProps.curve = new Object();
                                         objectProps.curve.yStep = objectProps.yStep;
                                         objectProps.curve.idCurve = objectProps.curveId;
-                                        
+
                                         let wellProps = {
                                             topDepth : objectProps.topDepth,
                                             bottomDepth : objectProps.bottomDepth
@@ -1568,6 +1568,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     }
                     aTrack = tracks.shift();
                 }
+                logplotCtrl.handlers.Scale100ButtonClicked();
                 if (callback) callback();
             });
     });
