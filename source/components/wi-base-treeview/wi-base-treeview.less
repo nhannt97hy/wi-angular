@@ -10,18 +10,23 @@ wi-base-treeview {
             border: none;
         }
         .wi-parent-node {
-            position: relative;
+            // position: relative;
+            display: flex;
             
             .wi-parent-unit {
-                position: absolute;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                width: 100px; // use fixed width here!
+                // position: absolute;
+                // right: 0;
+                // top: 0;
+                // bottom: 0;
+                // width: 100px; // use fixed width here!
                 overflow:hidden;
-                padding-right: 0.5em;
+                // padding-right: 1.5em;
                 line-height: 22px;
                 //border-left: 1px dotted #ddd;
+                flex: 1;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
             }
             .icon-expanded {
                 width: 20px;
@@ -30,6 +35,10 @@ wi-base-treeview {
 
             .wi-parent-content {
                 display: flex;
+                flex: 3;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
 
                 &>div>i {
                     color: #333;
@@ -38,8 +47,11 @@ wi-base-treeview {
 
                 &>div:nth-child(2) {
                     flex: 1;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
                     span{
                         vertical-align: -webkit-baseline-middle;
+                        white-space: nowrap;
                     }
                 }
 

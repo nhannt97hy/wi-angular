@@ -20,7 +20,7 @@ let layoutConfig = {
                     type: 'column',
                     id: 'left',
                     isClosable: false,
-                    width: 30,
+                    width: 15,
                     content: []
                 },
                 {
