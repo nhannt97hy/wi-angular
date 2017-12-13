@@ -1215,7 +1215,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     });
                 }
                 else if (errorCode === 0) {
-                    errorMsg("Cannot drop curve from another well");
+                    error("Cannot drop curve from another well");
                 }
                 return;
             }
@@ -1235,7 +1235,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     })
                 }
                 else if (errorCode === 0) {
-                    errorMsg("Cannot drop curve from another well");
+                    error("Cannot drop curve from another well");
                 }
                 return;
             }
@@ -1246,7 +1246,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     wiSlidingBarCtrl.createPreview(idCurve);
                 }
                 else if (errorCode === 0) {
-                    errorMsg("Cannot drop curve from another well");
+                    error("Cannot drop curve from another well");
                 }
             }
         },
