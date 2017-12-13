@@ -2673,7 +2673,6 @@ exports.renameZoneSet = function (zoneSetModel) {
 
 exports.updateWiHistogramOnModelDeleted = function (model) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    console.error("mark");
     switch (model.type) {
         case 'curve':
             let idCurve = model.properties.idCurve;
@@ -2708,8 +2707,10 @@ exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted(m
                 let viTracks = wiD3Ctrl.getTracks();
                 viTracks.forEach(function (viTrack) {
                     if (!viTrack.isLogTrack()) return;
-                    let curve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
-                    viTrack.removeCurve(curve);
+                    let curves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
+                    curves.forEach(curve => {
+                        viTrack.removeCurve(curve);
+                    })
                 })
             });
             break;
@@ -2732,11 +2733,12 @@ function updateLinesOnCurveEdited(curveModel) {
         let viTracks = wiD3Ctrl.getTracks();
         viTracks.forEach(function (viTrack) {
             if (!viTrack.isLogTrack()) return;
-            let viCurve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
-            if (!viCurve) return;
-            wiApiService.infoLine(viCurve.id, function (line) {
-                viCurve.setProperties(line);
-                viCurve.doPlot();
+            let viCurves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
+            viCurves.forEach(viCurve => {
+                wiApiService.infoLine(viCurve.id, function (line) {
+                    viCurve.setProperties(line);
+                    viCurve.doPlot();
+                })
             })
         })
     });
