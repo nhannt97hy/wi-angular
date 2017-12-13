@@ -2828,7 +2828,7 @@ function evaluateExpr(well, discriminator, callback) {
                 right = parseFloat(rightCurve.data[index].x);
             }
 
-            if (left && right) {
+            if (left!= null && right!= null) {
                 switch (condition.comparison) {
                     case '<':
                         return left < right;
