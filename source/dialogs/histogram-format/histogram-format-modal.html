@@ -16,8 +16,10 @@
                                         <h5>Choose Depth</h5>
                                         <div class="col-sm-offset-1 col-sm-11 container-fluid">
                                             <div class="form-group">
-                                                <input class="col-sm-1" type="radio" name="depth" ng-model="wiModal.depthType" ng-change="wiModal.onDepthTypeChanged()" value="intervalDepth">
-                                                <label>Interval Depths</label>
+                                                <label>
+                                                    <input type="radio" name="depth" ng-model="wiModal.depthType" ng-change="wiModal.onDepthTypeChanged()" value="intervalDepth">
+                                                    Interval Depths
+                                                </label>
                                             </div>
                                             <div class='form-group'>
                                                 <label class="col-sm-3">Top(m)</label>
@@ -32,9 +34,11 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <input class="col-sm-1" type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType"
-                                                    ng-disabled="!wiModal.zoneSetList.length">
-                                                <label>Zone Depths</label>
+                                                <label>
+                                                    <input type="radio" name="depth" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-model="wiModal.depthType"
+                                                        ng-disabled="!wiModal.zoneSetList.length">
+                                                    Zone Depths
+                                                </label>
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-sm-3">Zones</label>
