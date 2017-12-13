@@ -795,11 +795,12 @@ LogTrack.prototype.updateAxis = function() {
     // let start = Utils.roundUp(windowY[0], step);
     // let end = Utils.roundDown(windowY[1], step);
     let yTicks = this.prepareTicks();
-    let yTickValues = yTicks[0];
-    let yMajorTickValues = yTicks[1];
+    let yShownTicks = yTicks.filter(function(d) {
+        return d >= windowY[0];
+    });
 
     let yAxis = d3.axisLeft(transformY)
-        .tickValues(yTickValues)
+        .tickValues(yShownTicks)
         .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
         .tickSize(-rect.width);
 
@@ -822,11 +823,8 @@ LogTrack.prototype.updateAxis = function() {
                 return x;
             })
             .style('display', function(d, i) {
-                return ((i == 0 || i == self.yTicks) && !self.showEndLabels) ? 'none' : 'block';
+                return ((i == 0 || i == yShownTicks.length-1) && !self.showEndLabels) ? 'none' : 'block';
             });
-
-    this.yAxisGroup.selectAll('.tick line')
-        .style('display', function(d) { return d < windowY[0] ? 'none' : 'block' });
 
     this.xAxisGroup.selectAll('.tick')
         .classed('major', function(d,i) {
@@ -834,8 +832,8 @@ LogTrack.prototype.updateAxis = function() {
         });
 
     this.yAxisGroup.selectAll('.tick')
-        .classed('major', function(d,i) {
-            return yMajorTickValues.indexOf(d) > -1;
+        .classed('major', function(d) {
+            return yTicks.indexOf(d) % 5 == 0;
         });
 
     function linearMajorTest(i) {

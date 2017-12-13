@@ -107,18 +107,19 @@ DepthTrack.prototype.doPlot = function(highlight) {
     let transformY = this.getTransformY();
 
     let ticks = this.prepareTicks();
-    let allTicks = ticks[0];
-    let mainTicks = ticks[1];
+    let shownTicks = ticks.filter(function(d) {
+        return d >= windowY[0];
+    })
 
     let yAxisRight = d3.axisLeft(transformY)
-        .tickValues(allTicks)
+        .tickValues(shownTicks)
         .tickFormat(function(d) {
-            return (mainTicks.indexOf(d) > -1 && d > windowY[0]) ? self.getDecimalFormatter(self.yDecimal)(d) : '';
+            return majorTest(d) ? self.getDecimalFormatter(self.yDecimal)(d) : '';
         })
         .tickSize(-5);
 
     let yAxisLeft = d3.axisRight(transformY)
-        .tickValues(allTicks)
+        .tickValues(shownTicks)
         .tickFormat('')
         .tickSize(5);
 
@@ -134,17 +135,19 @@ DepthTrack.prototype.doPlot = function(highlight) {
 
     this.yAxisGroupRight.selectAll('g.tick line')
         .attr('x2', function(d) {
-            if (d < windowY[0]) return 0;
-            if (mainTicks.indexOf(d) > -1) return -7;
+            if (majorTest(d)) return -7;
             return -5;
         });
 
     this.yAxisGroupLeft.selectAll('g.tick line')
         .attr('x2', function(d) {
-            if (d < windowY[0]) return 0;
-            if (mainTicks.indexOf(d) > -1) return 7;
+            if (majorTest(d)) return 7;
             return 5;
         });
+
+    function majorTest(d) {
+        return ticks.indexOf(d) % 5 == 0;
+    }
 }
 
 /**

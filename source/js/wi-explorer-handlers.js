@@ -133,7 +133,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         break;
                     case 'curve':
                         deleteFunction = wiApiService.removeCurve;
-                        cleanFunction = function () {
+                        cleanUpFunction = function () {
                             utils.updateWiLogplotOnModelDeleted(selectedNode);
                             utils.updateWiHistogramOnModelDeleted(selectedNode);
                         }
