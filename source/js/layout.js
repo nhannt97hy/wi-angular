@@ -65,6 +65,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     })
 
     layoutManager.init();
+    LAYOUT = layoutManager;
 }
 
 module.exports.putLeft = function (templateId, title) {
@@ -79,6 +80,7 @@ module.exports.putLeft = function (templateId, title) {
     });
 }
 
+/*
 module.exports.putRight = function (templateId, title) {
     layoutManager.root.getItemsById('right')[0].addChild({
         type: 'component',
@@ -100,8 +102,9 @@ module.exports.putComponentRight = function (text, title) {
             componentState: { text: text }
         });
 };
+*/
+
 module.exports.putTabRightWithModel = function (model) {
-    LAYOUT = layoutManager;
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
     let itemType, itemId, tabTitle, name, htmlTemplate;
