@@ -174,7 +174,7 @@ function shadingToTreeConfig(shading, paletteList) {
         isNegPosFill: shading.isNegPosFill,
         positiveFill: shading.positiveFill ? JSON.parse(shading.positiveFill) : null,
         negativeFill: shading.negativeFill ? JSON.parse(shading.negativeFill) : null,
-        refLineWidth: shading.refLineWidth || 5,
+        refLineWidth: shading.refLineWidth || 2,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
         // showRefLine: false

@@ -48,6 +48,9 @@ function DepthTrack(config) {
 DepthTrack.prototype.init = function(baseElement) {
     Track.prototype.init.call(this, baseElement);
 
+    this.trackContainer
+        .classed('vi-depth-track-container', true);
+
     this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing')
         .style('overflow', 'visible');
@@ -132,14 +135,14 @@ DepthTrack.prototype.doPlot = function(highlight) {
     this.yAxisGroupRight.selectAll('g.tick line')
         .attr('x2', function(d) {
             if (d < windowY[0]) return 0;
-            if (mainTicks.indexOf(d) > -1) return -10;
+            if (mainTicks.indexOf(d) > -1) return -7;
             return -5;
         });
 
     this.yAxisGroupLeft.selectAll('g.tick line')
         .attr('x2', function(d) {
             if (d < windowY[0]) return 0;
-            if (mainTicks.indexOf(d) > -1) return 10;
+            if (mainTicks.indexOf(d) > -1) return 7;
             return 5;
         });
 }

@@ -368,6 +368,7 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     let leftName = leftCurve ? leftCurve.name : 'left';
     let rightName = rightCurve ? rightCurve.name : 'right';
     config.name = config.name || (leftName + ' - ' + rightName);
+    config.yStep = config.yStep || this.yStep;
 
 //    if (config.isNegPosFilling == null && !config.fill) {
     if (config.isNegPosFill == null && !config.fill) {
@@ -391,7 +392,7 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     shading.onRefLineDrag(function() {
         let rWidth = shading.refLineWidth;
         let leftMost = rWidth / 2;
-        let rightMost = self.plotContainer.node().clientWidth - rWidth / 2;
+        let rightMost = self.plotContainer.node().clientWidth - rWidth;
         let vpRefX = d3.event.x;
         vpRefX = vpRefX > rightMost ? rightMost : vpRefX;
         vpRefX = vpRefX < leftMost ? leftMost : vpRefX;
@@ -793,7 +794,9 @@ LogTrack.prototype.updateAxis = function() {
     // let step = (transformY.invert(Utils.getDpcm()) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
     // let start = Utils.roundUp(windowY[0], step);
     // let end = Utils.roundDown(windowY[1], step);
-    let yTickValues = this.prepareTicks()[0];
+    let yTicks = this.prepareTicks();
+    let yTickValues = yTicks[0];
+    let yMajorTickValues = yTicks[1];
 
     let yAxis = d3.axisLeft(transformY)
         .tickValues(yTickValues)
@@ -828,6 +831,11 @@ LogTrack.prototype.updateAxis = function() {
     this.xAxisGroup.selectAll('.tick')
         .classed('major', function(d,i) {
             return majorTest(i);
+        });
+
+    this.yAxisGroup.selectAll('.tick')
+        .classed('major', function(d,i) {
+            return yMajorTickValues.indexOf(d) > -1;
         });
 
     function linearMajorTest(i) {
@@ -906,6 +914,8 @@ LogTrack.prototype.addCurveHeader = function(curve) {
                 return i == 1 ? 1 : 0;
             })
             .text(function(d) { return d; });
+
+    this.drawingHeaderContainer.selectAll('.vi-shading-header').raise();
     return curveHeader;
 }
 
@@ -1039,7 +1049,7 @@ LogTrack.prototype.removeTooltipLines = function() {
     this.svgContainer.selectAll('line.tooltip-line').remove();
 }
 
-LogTrack.prototype.drawTooltipText = function(depth) {
+LogTrack.prototype.drawTooltipText = function(depth, showDepth) {
 
     let plotMouse = d3.mouse(this.plotContainer.node());
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
@@ -1047,7 +1057,7 @@ LogTrack.prototype.drawTooltipText = function(depth) {
     let svg = this.svgContainer;
 
     svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
-
+    if (!this.getCurves().length) return;
     let tooltip = svg.append('text')
         .attr('class', 'tooltip-text')
         .attr('y', y);
@@ -1055,10 +1065,10 @@ LogTrack.prototype.drawTooltipText = function(depth) {
     let xFormatter = this.getDecimalFormatter(this.xDecimal);
     let yFormatter = this.getDecimalFormatter(this.yDecimal);
 
-    let textData = [{
+    let textData = showDepth ? [{
         text: 'Depth: ' + yFormatter(this.getTransformY().invert(y)),
         color: 'black'
-    }];
+    }] : [];
     this.getCurves().forEach(function(curve) {
         let curveY = curve.getTransformY().invert(y);
         curveY = curve.offsetY + Utils.round(curveY - curve.offsetY, curve.yStep);
@@ -1080,11 +1090,11 @@ LogTrack.prototype.drawTooltipText = function(depth) {
             .text(function(d) { return d.text; });
 
     let bbox = tooltip.node().getBBox();
-    let offset = 10;
+    let offset = 20;
     let rectX = bbox.x + offset;
-    let rectY = bbox.y - offset - bbox.height - 2;
+    let rectY = bbox.y - offset - bbox.height;
 
-    if (rectY < 0) rectY = bbox.y + 2;
+    if (rectY < 0) rectY = bbox.y + offset - 10;
 
     tooltip.attr('y', rectY).selectAll('tspan').attr('x', rectX);
 
