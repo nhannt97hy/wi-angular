@@ -52,9 +52,14 @@
 }
 
 .vi-depth-track-container {
-    .tick line {
-        stroke: gray;
-        stroke-width: 1;
+    .tick  {
+        line {
+            stroke: gray;
+            stroke-width: 1;
+        }
+        text {
+            font-weight: bold;
+        }
     }
 }
 
@@ -324,3 +329,20 @@
     height: 100%;
 }
 
+.tick {
+    line {
+        //stroke: rgba(0,118,118,1);
+        stroke: LightGray;
+        //stroke-dasharray: 20, 2;
+        stroke-width: 1;
+        stroke-opacity: 0.3;
+    }
+}
+.tick.major {
+    line {
+        //stroke: rgba(0,118,118,1);
+        stroke: LightGray;
+        //stroke-dasharray: 0;
+        stroke-opacity: 0.8;
+    }
+}

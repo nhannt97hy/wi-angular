@@ -15,7 +15,7 @@
                 <div class='vi-crossplot-header-row vi-crossplot-header-reference'></div>
             </div>
             <div style="display:flex;flex-direction:column;flex:1;">
-                <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram" 
+                <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram"
                     style="flex-basis: 25%;display: flex;flex-direction:row;">
                     <div style='flex-basis: 20%'></div>
                     <div id="{{wiD3Crossplot.name + 'HistogramX'}}" style='flex:1;'
@@ -23,13 +23,13 @@
                     </div>
                 </div>
                 <div style='flex: 1; display:flex;flex-direction:row;'>
-                    <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram" 
-                        style='flex-basis:20%;position:relative;' 
+                    <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram"
+                        style='flex-basis:20%;position:relative;'
                         id="{{wiD3Crossplot.name + 'HistogramY'}}"
                         wi-element-ready="wiD3Crossplot.histogramYReady();">
                         <div class='transform-group'></div>
                     </div>
-                    <div ng-dblclick="wiD3Crossplot.propertiesDialog();" style='flex:1' class='vi-crossplot-container' 
+                    <div ng-dblclick="wiD3Crossplot.propertiesDialog();" style='flex:1' class='vi-crossplot-container'
                         wi-element-ready='wiD3Crossplot.onReady()'>
                         <div ng-if='wiD3Crossplot.loading' wi-element-ready="wiD3Crossplot.onLoading();" style="position:absolute;top:0;left:0;bottom:0;right:0" id="{{wiD3Crossplot.name + '-spinner'}}"></div>
                     </div>
@@ -40,9 +40,9 @@
         </div>
     </div>
   </div>
-  <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.crossplotModel.properties.referenceDisplay" style="min-width:20%;max-width:30%">
-    <wi-container name='RefCrossplotContainer' 
-        title='Reference Curve' 
+  <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
+    <wi-container name='RefCrossplotContainer'
+        title='Reference Curve'
         close-handler='wiD3Crossplot.CloseReferenceWindow'>
       <wi-reference-window
         name='{{wiD3Crossplot.getWiRefWindCtrlName()}}'

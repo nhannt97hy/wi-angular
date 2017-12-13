@@ -10,7 +10,7 @@
                 </wi-zone>
             </wi-container>
         </div>
-        
+
 
         <div style='flex:1; display: flex;flex-direction:column;margin:0px 14px'>
             <!--<div style="width: 100%; flex: 1; display: flex;">-->
@@ -91,10 +91,10 @@
                 </div>
             </div>
         </div>
-        
-        <div resizable r-directions="['left']" r-flex="true" ng-if="wiHistogram.histogramModel.properties.referenceDisplay" style="min-width:20%;max-width:30%">
+
+        <div resizable r-directions="['left']" r-flex="true" ng-if="wiHistogram.histogramModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
             <wi-container title='Reference Curve' close-handler='wiHistogram.CloseReferenceWindow'>
-                <wi-reference-window 
+                <wi-reference-window
                     name='{{wiHistogram.getWiRefWindCtrlName()}}'
                     on-ref-wind-ctrl-ready="wiHistogram.onRefWindCtrlReady"></wi-reference-window>
             </wi-container>
