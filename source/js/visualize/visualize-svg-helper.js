@@ -6,7 +6,7 @@ function SvgHelper(svgGroup, config) {
     this.strokeStyle = config.strokeStyle || 'transparent';
     this.lineWidth = config.lineWidth || 1;
     this.lineDash = config.lineDash || '';
-    this.size = config.size/5 || 2;
+    this.size = config.size/2 || 2;
 }
 
 SvgHelper.prototype.line = function(x1, y1, x2, y2) {

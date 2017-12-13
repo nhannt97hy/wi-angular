@@ -8,7 +8,7 @@ function CanvasHelper(ctx, config) {
     this.strokeStyle = config.strokeStyle || 'blue';
     this.lineWidth = config.lineWidth || 1;
     this.lineDash = config.lineDash || null;
-    this.size = config.size/5 || 2;
+    this.size = config.size/2 || 2;
 }
 
 CanvasHelper.prototype.circle = function(x, y) {

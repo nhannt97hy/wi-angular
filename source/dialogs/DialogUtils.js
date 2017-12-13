@@ -1192,9 +1192,9 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                     context.beginPath();
                     context.strokeStyle = style.symbolStyle.symbolFillStyle;
                     context.fillStyle = style.symbolStyle.symbolFillStyle;
-                    context.lineWidth = style.symbolStyle.symbolLineWidth / 10;
+                    context.lineWidth = style.symbolStyle.symbolLineWidth;
                     context.setLineDash(style.symbolStyle.symbolLineDash);
-                    context.arc(x, y, style.symbolStyle.symbolSize, 0, 2 * Math.PI);
+                    context.arc(x, y, style.symbolStyle.symbolSize / 2, 0, 2 * Math.PI);
                     context.closePath();
                     context.stroke();
                     context.fill();
