@@ -2460,7 +2460,8 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
         idCurve: curve.idCurve,
         leftScale: curve.minX,
         rightScale: curve.maxX,
-        name: histogramName
+        name: histogramName,
+        color:curve.line.color
     } : {
         idWell: idWell,
         name: histogramName,

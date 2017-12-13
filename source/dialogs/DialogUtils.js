@@ -5893,43 +5893,6 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-/* exports.newBlankHistogramDialog = function(ModalService, callback){
-    function ModalController($scope, close, $timeout, wiComponentService, wiApiService) {
-        let self = this;
-        self.name = "BlankHistogram";
-        self.error = null;
-        self.disabled = false;
-        this.onBlur = function(args) {
-            console.log('onBlur', args);
-        }
-        this.onOkButtonClicked = function () {
-            close(self.name);
-        }
-
-        this.onCancelButtonClicked = function () {
-            close(null);
-        }
-
-    }
-
-    ModalService.showModal({
-        templateUrl: "blank-histogram/blank-histogram-modal.html",
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        initModal(modal);
-        setTimeout(function() {
-            $(modal.element[0]).find('input').focus();
-        }, 500);
-        modal.close.then(function (newPlot) {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-
-            if (callback) callback(newPlot);
-        });
-    });
-} */
-
 exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
@@ -5942,8 +5905,6 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
         var histogramModel = utils.getModel('histogram', wiHistogramId);
         this.histogramProps = angular.copy(histogramModel.properties);
         this.depthType = histogramModel.properties.idZoneSet != null ? "zonalDepth" : "intervalDepth";
-        this.ref_Curves_Arr = histogramModel.properties.reference_curves?angular.copy(histogramModel.properties.reference_curves):[];
-        this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.selectedZoneSet = null;
         this.SelectedActiveZone = self.histogramProps.activeZone != null ? self.histogramProps.activeZone : "All";
         this.well = utils.findWellByHistogram(wiHistogramId);
@@ -5951,15 +5912,15 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
         this.zoneSetList = [];
         this.curvesArr = [];
         this.SelectedCurve = {};
-        this.well.children.forEach(function(child, i){
-            switch (child.type){
+        this.well.children.forEach(function (child, i) {
+            switch (child.type) {
                 case 'dataset':
-                self.datasets.push(child);
-                break;
+                    self.datasets.push(child);
+                    break;
 
                 case 'zonesets':
-                self.zoneSetList = angular.copy(child.children);
-                break;
+                    self.zoneSetList = angular.copy(child.children);
+                    break;
             }
 
             if (i == self.well.children.length - 1) {
@@ -5987,7 +5948,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
                         if (self.zoneSetList[i].properties.idZoneSet == self.histogramProps.idZoneSet) {
                             self.selectedZoneSet = self.zoneSetList[i];
                         }
-                        if ( !self.zoneSetList[i].children || !self.zoneSetList[i].children.length ) {
+                        if (!self.zoneSetList[i].children || !self.zoneSetList[i].children.length) {
                             self.zoneSetList.splice(i, 1);
                         }
                     }
@@ -6009,115 +5970,95 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
-            let family = utils.findFamilyById(self.SelectedCurve.properties.idFamily);
-            console.log(self.SelectedCurve, family);
-            if (family) {
-                self.histogramProps.leftScale = family.minScale;
-                self.histogramProps.rightScale = family.maxScale;
+            if (self.SelectedCurve.lineProperties) {
+                self.histogramProps.leftScale = self.SelectedCurve.lineProperties.minScale;
+                self.histogramProps.rightScale = self.SelectedCurve.lineProperties.maxScale;
+                self.histogramProps.color = self.SelectedCurve.lineProperties.lineColor;
+            } else {
+                wiApiService.infoCurve(self.SelectedCurve.id, function (info) {
+                    $timeout(function () {
+                        self.histogramProps.leftScale = info.LineProperty.minScale;
+                        self.histogramProps.rightScale = info.LineProperty.maxScale;
+                        self.histogramProps.color = info.LineProperty.lineColor;
+                    });
+                })
             }
-            else if(self.SelectedCurve.properties.minScale != null &&
-                self.SelectedCurve.properties.maxScale != null ) {
-                self.histogramProps.leftScale = self.SelectedCurve.properties.minScale;
-            self.histogramProps.rightScale = self.SelectedCurve.properties.maxScale;
         }
-        else {
-            wiApiService.scaleCurve(self.SelectedCurve.id, function(scale){
-                console.log('scale curve');
-                $timeout(function(){
-                    self.histogramProps.leftScale = scale.minScale;
-                    self.histogramProps.rightScale = scale.maxScale;
-                });
-            })
-        }
-    }
 
-    function getTopFromWell() {
-        return parseFloat(self.well.properties.topDepth);
-    }
-    function getBottomFromWell() {
-        return parseFloat(self.well.properties.bottomDepth);
-    }
-    this.onDepthTypeChanged = function () {
-        switch (self.depthType) {
-            case "intervalDepth":
-            self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop: getTopFromWell();
-            self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
-            self.histogramProps.idZoneSet = null;
-            break;
-            case "zonalDepth":
-            if(self.selectedZoneSet){
-                self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+        function getTopFromWell() {
+            return parseFloat(self.well.properties.topDepth);
+        }
+
+        function getBottomFromWell() {
+            return parseFloat(self.well.properties.bottomDepth);
+        }
+        this.onDepthTypeChanged = function () {
+            switch (self.depthType) {
+                case "intervalDepth":
+                    self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop : getTopFromWell();
+                    self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
+                    self.histogramProps.idZoneSet = null;
+                    break;
+                case "zonalDepth":
+                    if (self.selectedZoneSet) {
+                        self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                    }
+                    break;
             }
-            break;
         }
-    }
 
-    this.defaultDepthButtonClick = function(){
-        self.histogramProps.referenceTopDepth = getTopFromWell();
-        self.histogramProps.referenceBottomDepth = getBottomFromWell();
-    }
+        this.chooseChartColor = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
+                self.histogramProps.color = colorStr;
+            });
+        }
 
-    this.chooseChartColor = function () {
-        DialogUtils.colorPickerDialog(ModalService, self.histogramProps.color, function (colorStr) {
-            self.histogramProps.color = colorStr;
-        });
-    }
+        this.isNotValid = function () {
+            var inValid = false;
+            if (!self.histogramProps.idZoneSet) {
+                if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
+                    inValid = true;
+                }
+            }
 
-    this.chooseRefCurveColor = function(index){
-        DialogUtils.colorPickerDialog(ModalService, self.ref_Curves_Arr[index].color, function (colorStr) {
-            self.ref_Curves_Arr[index].color = colorStr;
-        });
-    }
-
-    this.setClickedRow = function(index){
-        self.SelectedRefCurve = index;
-    }
-    this.isNotValid = function () {
-        var inValid = false;
-        if (!self.histogramProps.idZoneSet) {
-            if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
+            if (self.histogramProps.leftScale == null || self.histogramProps.rightScale == null || self.histogramProps.leftScale == self.histogramProps.rightScale) {
                 inValid = true;
             }
+
+            return inValid;
         }
 
-        if (self.histogramProps.leftScale == null || self.histogramProps.rightScale == null || self.histogramProps.leftScale == self.histogramProps.rightScale) {
-            inValid = true;
+        this.onApplyButtonClicked = function () {
+            console.log("on Apply clicked");
+            histogramModel.properties = self.histogramProps;
+            wiApiService.editHistogram(histogramModel.properties, function (returnData) {
+                console.log('Return Data', returnData);
+                if (callback) callback(histogramModel.properties);
+            });
         }
 
-        return inValid;
+        this.onOKButtonClicked = function () {
+            self.onApplyButtonClicked();
+            console.log("on OK clicked");
+            close(null);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
     }
-
-    this.onApplyButtonClicked = function() {
-        console.log("on Apply clicked");
-        histogramModel.properties = self.histogramProps;
-        wiApiService.editHistogram(histogramModel.properties, function(returnData) {
-            console.log('Return Data', returnData);
-            if (callback) callback(histogramModel.properties);
-        });
-    }
-
-    this.onOKButtonClicked = function () {
-        self.onApplyButtonClicked();
-        console.log("on OK clicked");
-        close(null);
-    }
-    this.onCancelButtonClicked = function () {
-        close(null);
-    }
-}
-ModalService.showModal({
-    templateUrl: "histogram-format/histogram-format-modal.html",
-    controller: ModalController,
-    controllerAs: 'wiModal'
-}).then(function (modal) {
-    initModal(modal);
-    $(modal.element[0].children[0]).draggable();
-    modal.close.then(function (ret) {
-        $('.modal-backdrop').last().remove();
-        $('body').removeClass('modal-open');
-        if (!ret) return;
-    })
-});
+    ModalService.showModal({
+        templateUrl: "histogram-format/histogram-format-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (!ret) return;
+        })
+    });
 };
 
 exports.histogramFrequencyInfoDialog = function (ModalService, wiD3Ctrl) {
