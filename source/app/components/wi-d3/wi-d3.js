@@ -965,7 +965,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         _tracks.forEach(function(tr) {
             if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
-            if (tr.drawTooltipText) tr.drawTooltipText(depth);
+            if (tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
         // graph.createTooltipLines(svg);
     }
@@ -1857,12 +1857,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _currentTrack.setCurrentDrawing(object);
         removeAnObjectOfObjectTrack();
     }
-    
+
     function removeAnObjectOfObjectTrack() {
         if(!_currentTrack.isObjectTrack() || (_currentTrack.isObjectTrack() && !_currentTrack.getCurrentDrawing)) {
             return;
         }
-        let object = _currentTrack.getCurrentDrawing(); 
+        let object = _currentTrack.getCurrentDrawing();
         console.log("Removing: ", object);
         wiApiService.removeObjectOfObjectTrack(object.id, function () {
             switch (object.currentDraw) {
@@ -2508,7 +2508,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             dataRequest.idWell = _getWellProps().idWell;
                             dataRequest.idCurve = histogramProps.curve.idCurve;
                             if(!dataRequest.name) {
-                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - " 
+                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - "
                                     + (Math.random().toString(36).substr(2, 3));
                             }
                             delete dataRequest.curve;
