@@ -9068,6 +9068,7 @@ exports.fillDataGapsDialog = function(ModalService){
         this.onWellChange();
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.CurvesData.length = 0;
             $timeout(function(){
                 refresh(function(){
                     self.onWellChange();
@@ -9324,6 +9325,9 @@ exports.curveDerivativeDialog = function(ModalService){
         this.onWellChange();
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            if(self.firstCurve.idDesCurve || (self.checked && self.secondCurve.idDesCurve)){
+                delete self.lastCurve;
+            }
             $timeout(function(){
                 self.refresh(function(){
                     self.onWellChange();
@@ -9535,6 +9539,7 @@ exports.TVDConversionDialog = function (ModalService) {
         this.onChangeWell();
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.curvesData.length = 0;
             $timeout(function(){
                 self.wells = angular.copy(utils.findWells());
                 self.onChangeWell();
