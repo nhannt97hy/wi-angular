@@ -2663,7 +2663,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let self = this;
         wiModal = self;
         this.applyInProgress = false;
-        console.log("logPlot", wiLogplotCtrl);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
@@ -2684,7 +2683,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.shadingArr = new Array();
 
         this.curveList = currentTrack.getCurves();
-        console.log("curveList", this.curveList);
 
         let idCurveNew = null;
         this.well.children.forEach(function (child) {
@@ -2695,12 +2693,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 if (item.type == 'curve') self.curvesArr.push(item);
             })
         });
-        console.log("curvesArr", this.curvesArr);
-        // this.curvesArr.forEach(function (curve, index) {
-        //     let dataset = utils.findDatasetById(curve.properties.idDataset);
-        //     curve.properties.datasetName = dataset.properties.name;
-        //     console.log("curveObj", curve);
-        // })
 
         this.lineCurve = [];
         this.fillPatternOptions = new Array();
@@ -2715,11 +2707,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             item.datasetCurve = selectedCurve;
         });
 
-        console.log("curveDataset", this.curvesOnDataset, this.arr);
         let customLimit = [{"id": -1, "datasetCurve": "left"}, {"id": -2, "datasetCurve": "right"}, {"id": -3, "datasetCurve": "custom"}];
         this.leftLimit = customLimit.concat(self.curvesOnDataset);
         let shadingList = currentTrack.getShadings();
-        console.log("shadingList", shadingList);
 
         function getShadingStyle(fillObj) {
             if (fillObj.pattern) return "fillPattern";
@@ -2741,7 +2731,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             var variableShadingItem = new Object();
             var shadingChangedItem = new Object();
 
-            console.log("shadingProps", shadingProps);
             shadingItem.idTrack = shadingProps.idTrack;
             shadingItem.idShading = shadingProps.idShading;
             shadingItem.idLeftLine = shadingProps.idLeftLine?shadingProps.idLeftLine:setIdLeftLineIfNull(shadingProps.type);
@@ -2852,7 +2841,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.fillPatternOptions.push(fillPatternItem);
             self.variableShadingOptions.push(variableShadingItem);
             self.shadingChanged.push(shadingChangedItem);
-            console.log("variableShadingOptions", self.variableShadingOptions, self.shadingArr);
         });
         function setIdLeftLineIfNull(type) {
             var temp = null;
@@ -2932,12 +2920,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     self.curvesSymbolOptions.push(symbolOptions);
 
                 });
-        console.log("LINECURVE", this.lineCurve, this.curves, this.curvesLineOptions, this.curvesSymbolOptions);
 
         this.well.children.forEach(function (child) {
             if (child.type == 'dataset') self.datasets.push(child);
         });
-        console.log("Current Track", currentTrack);
         this.props = {
             general: currentTrack.getProperties()
         }
@@ -2945,7 +2931,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let savedZoomFactor = this.props.general.zoomFactor;
 
         this.props.general.width = utils.pixelToInch(this.props.general.width);
-        console.log("props", this.props.general);
 
         this.logLinear = ["Logarithmic", "Linear"];
         this.displayMode = ["Line", "Symbol", "Both", "None"];
@@ -3052,9 +3037,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     self.curvesChanged[index].change == '2');
             });
         }
-        this.onChangeCurve = function () {
-            if (self.curvesChanged[self.__idx].change == '0') self.curvesChanged[self.__idx].change = '1';
-            console.log(self.curvesChanged[self.__idx]);
+        this.onChangeCurve = function (index) {
+            if (self.curvesChanged[index].change == '0') self.curvesChanged[index].change = '1';
+            console.log(self.curvesChanged[index]);
         }
         this.addRowCurve = function () {
             self.curves.push({ _index: self.curves.length });
