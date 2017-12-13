@@ -1134,7 +1134,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 display: false,
                 symbolStyle: {
                     symbolName: "circle", // cross, diamond, star, triangle, dot, plus
-                    symbolSize: 4,
+                    symbolSize: 5,
                     symbolStrokeStyle: "blue",
                     symbolFillStyle: "blue",
                     symbolLineWidth: 1,
@@ -1192,7 +1192,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                     context.beginPath();
                     context.strokeStyle = style.symbolStyle.symbolFillStyle;
                     context.fillStyle = style.symbolStyle.symbolFillStyle;
-                    context.lineWidth = style.symbolStyle.symbolLineWidth;
+                    context.lineWidth = style.symbolStyle.symbolLineWidth / 10;
                     context.setLineDash(style.symbolStyle.symbolLineDash);
                     context.arc(x, y, style.symbolStyle.symbolSize, 0, 2 * Math.PI);
                     context.closePath();
@@ -1813,12 +1813,12 @@ exports.importFromInventoryDialog = function (ModalService) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         self.treeviewName = "inventoryTreeview";
-        
+
         let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         let projectModel = utils.projectToTreeConfig(projectLoaded);
         let dustbinModel = utils.dustbinToTreeConfig();
         self.treeConfig = [projectModel, dustbinModel];
-        
+
         this.onCancelButtonClicked = function () {
             console.log("onCancelButtonClicked");
             close(null, 100);
@@ -9706,7 +9706,7 @@ exports.TVDConversionDialog = function (ModalService) {
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
-                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
+                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});
             }
             calcOutput();
         }
@@ -9736,9 +9736,9 @@ exports.TVDConversionDialog = function (ModalService) {
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
-                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
+                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});
             }
-            calcOutput();            
+            calcOutput();
         }
         function formula3(){
             console.log('Radius Curvature');
@@ -9766,9 +9766,9 @@ exports.TVDConversionDialog = function (ModalService) {
             if(self.tvdMethod == 'off'){
                 self.tvdssArr = self.tvdArr.map(d => {return d - self.elevation;});
             }else{
-                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});                
+                self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});
             }
-            calcOutput();            
+            calcOutput();
         }
         function formula4(){
             console.log('Minimum Curvature');
@@ -9800,7 +9800,7 @@ exports.TVDConversionDialog = function (ModalService) {
             }else{
                 self.tvdssArr = self.tvdArr.map(d => {return self.elevation - d;});
             }
-            calcOutput();            
+            calcOutput();
         }
 
         function processing(){
@@ -9908,7 +9908,7 @@ exports.TVDConversionDialog = function (ModalService) {
 
             if(curvesExist.length){
                 let html  = curvesExist.map(c => {return '</br>' + c;});
-                
+
                 dialogUtils.confirmDialog(ModalService, "Save Curves", "Curve Exist:" + html,function(ret){
                     if(ret){
                         console.log('overwrite');
@@ -9923,11 +9923,11 @@ exports.TVDConversionDialog = function (ModalService) {
                 save();
             }
         }
-        
+
         this.onRunButtonClicked = function(save){
             if(self.applyingInProgress) return;
             self.applyingInProgress = true;
-            
+
             if(self.useType == 'file'){
                 if(self.SurveyFile){
                     let length = self.input.length - self.startData;
@@ -9974,7 +9974,7 @@ exports.TVDConversionDialog = function (ModalService) {
             }else{
                 if(self.DevCurve && self.AziCurve){
                     let length = self.FullSize.length;
-                    self.Size = new Array(length);                
+                    self.Size = new Array(length);
                     self.depthArr = new Array(length);
                     self.tvdArr = new Array(length);
                     self.tvdssArr = new Array(length);
@@ -10003,7 +10003,7 @@ exports.TVDConversionDialog = function (ModalService) {
                     self.applyingInProgress = false;
                 }
             }
-            
+
         }
 
         this.onCancelButtonClicked = function(){
@@ -10244,7 +10244,7 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         this.curveModel = {};
         this.unit = 'DEGC';
         this.desCurve = null
-        
+
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
             this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
@@ -10304,8 +10304,8 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                 }
             });
             let frCurves = curves.filter(function (c) {
-                return (c.lineProperties && 
-                    (c.lineProperties.name == 'Formation Temperature'  || 
+                return (c.lineProperties &&
+                    (c.lineProperties.name == 'Formation Temperature'  ||
                         c.lineProperties.name == 'Temperature'))
             });
             if ((!curveModel || !Object.keys(curveModel).length) && frCurves.length) {
@@ -10318,12 +10318,12 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            
+
             let inputData = [];
             let outputData = [];
-            
+
             function tempF(unit, temp) {
-                let t = null; 
+                let t = null;
                 if (temp != null || !isNaN(temp)) {
                     if (unit == 'DEGC') t = 1.8 * temp + 32;
                     else if (unit == 'DEGF') t = temp;
@@ -10347,8 +10347,8 @@ exports.formationResistivityDialog = function (ModalService, callback) {
                         self.zones.forEach(function(z) {
                             if (!isNaN(outputData[i])) return;
 
-                            if(z.hasOwnProperty('use') && z.use && z.hasOwnProperty('sanility') && z.sanility 
-                                && (i >= utils.convertRangeDepthToIndex(z.properties.startDepth, self.wellModel)) 
+                            if(z.hasOwnProperty('use') && z.use && z.hasOwnProperty('sanility') && z.sanility
+                                && (i >= utils.convertRangeDepthToIndex(z.properties.startDepth, self.wellModel))
                                 && (i <= utils.convertRangeDepthToIndex(z.properties.endDepth, self.wellModel))) {
                                     outputData[i] = rWF(z.sanility, inputData[i]);
                                 }
@@ -10725,7 +10725,7 @@ exports.userFormulaDialog = function (ModalService, callback) {
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
 
         this.applyingInProgress = false;
-        
+
 
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else this.wellModel = this.wells[0];
@@ -10760,9 +10760,9 @@ exports.userFormulaDialog = function (ModalService, callback) {
                 data: []
             };
         }
-        
+
         this.onRunButtonClicked = function () {
-            
+
         }
         this.onCancelButtonClicked = function () {
             close(null, 100);
@@ -10788,7 +10788,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let self = this;
-        
+
         this.curvesArr = objectConfig.curves;
         this.histogramProps = angular.copy(objectConfig.properties);
         this.histogramProps.dragToCreate = objectConfig.dragToCreate;
@@ -10841,7 +10841,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
         this.chooseBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.histogramProps.background, function (colorStr) {
                 self.histogramProps.background = colorStr;
-            });   
+            });
         }
 
         this.isNotValid = function () {
@@ -10930,18 +10930,18 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
                 self.sumWidth += track.width;
             });
         };
-        
+
         console.log("tracks", this.tracks);
-        function getLogTrack (track) { 
+        function getLogTrack (track) {
             return (allTracks.filter(t => t.id == track.idTrack))[0];
         };
-        function getDepthTrack (track) { 
+        function getDepthTrack (track) {
             return (allTracks.filter(t => t.id == track.idDepthAxis))[0];
         };
-        function getZoneTrack (track) { 
+        function getZoneTrack (track) {
             return (allTracks.filter(t => t.id == track.idZoneTrack))[0];
         };
-        function getImageTrack (track) { 
+        function getImageTrack (track) {
             return (allTracks.filter(t => t.id == track.idImageTrack))[0];
         };
         // console.log("allTracks", allTracks);
@@ -11093,7 +11093,7 @@ exports.curveBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
 
         // this.tracks = wiD3Ctrl.getTracks();
         // console.log("tracks", this.tracks);
-        
+
         this.onApplyButtonClicked = function(){
         };
         this.onOkButtonClicked = function(){
