@@ -7359,6 +7359,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this._FNEW = 1;
         this._FEDIT = 2;
         this._FDEL = 3;
+        window.refW = this;
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.props = angular.copy(plotModel.properties);
@@ -7430,16 +7431,16 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 });
             }
         })
-        function getTopFromWell() {
+        this.getTopFromWell = function() {
             return parseFloat(self.well.properties.topDepth);
         }
-        function getBottomFromWell() {
+        this.getBottomFromWell = function() {
             return parseFloat(self.well.properties.bottomDepth);
         }
 
         this.defaultDepthButtonClick = function(){
-            self.props.referenceTopDepth = getTopFromWell();
-            self.props.referenceBottomDepth = getBottomFromWell();
+            self.props.referenceTopDepth = self.getTopFromWell();
+            self.props.referenceBottomDepth = self.getBottomFromWell();
         }
 
         this.chooseRefCurveColor = function(index){
@@ -7526,6 +7527,9 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
             $event.stopPropagation();
         }
+        this.IsNotValid = function(){
+            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth;
+        }
 
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
@@ -7570,9 +7574,9 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                                 break;
                         }
                     }
-                    console.log("plotModel:", plotModel.properties);
                     self.props.reference_curves = self.ref_Curves_Arr;
                     plotModel.properties = self.props;
+                    console.log("plotModel:", plotModel.properties);
                     if (callback) callback();
                 });
             }

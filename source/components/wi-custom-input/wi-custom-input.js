@@ -5,6 +5,7 @@ function Controller($scope) {
     let self = this;
 
     this.onClick = function(val){
+        console.log(val);
         self.model = val;
     }
         $scope.$watch(() => {
@@ -38,7 +39,7 @@ app.component(name, {
     controller: Controller,
     controllerAs: name,
     bindings: {
-        model: '<',
+        model: '=',
         options: '<',
         type: '@',
         disabled: '<'
