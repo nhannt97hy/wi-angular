@@ -191,7 +191,9 @@ exports.OpenTemplateButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     let selectedNode = utils.getSelectedNode();
-    DialogUtils.OpenTemplateDialog(this.ModalService, selectedNode);
+    DialogUtils.OpenTemplateDialog(this.ModalService, selectedNode, function (plot) {
+        utils.openLogplotTab(self.wiComponentService, utils.getModel('logplot', plot.idPlot));
+    });
 };
 
 
