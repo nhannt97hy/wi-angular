@@ -24,7 +24,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.$onInit = function () {
         if (self.name) {
-            console.log('crossplot-reference-window', self.name);
+            // console.log('crossplot-reference-window', self.name);
             wiComponentService.putComponent(self.name, self);
         }
     }
