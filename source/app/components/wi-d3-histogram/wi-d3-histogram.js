@@ -161,12 +161,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.refreshHistogram();
         });
     }
-    this.onRefWindCtrlReady = function(refWindCtrl) {
-        refWindCtrl.update(getWell(), 
-            self.histogramModel.properties.reference_curves, 
-            self.histogramModel.properties.referenceScale,
-            self.histogramModel.properties.referenceVertLineNumber);
-    }
+    // this.onRefWindCtrlReady = function(refWindCtrl) {
+    //     console.log('RefWindCtrlReady');
+    //     refWindCtrl.update(getWell(), 
+    //         self.histogramModel.properties.reference_curves, 
+    //         self.histogramModel.properties.referenceScale,
+    //         self.histogramModel.properties.referenceVertLineNumber,
+    //         self.histogramModel.properties.referenceTopDepth,
+    //         self.histogramModel.properties.referenceBottomDepth);
+    // }
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
@@ -249,6 +252,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.discriminator();
             }
         }, {
+            name: "ReferenceWindow",
+            label: "Reference Window",
+            icon: "ti-layout-tab-window",
+            handler: function () {
+                DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
+                    saveHistogramNow(function() {
+                        self.getWiRefWindCtrl().update(getWell(), 
+                            self.histogramModel.properties.reference_curves, 
+                            self.histogramModel.properties.referenceScale,
+                            self.histogramModel.properties.referenceVertLineNumber,
+                            self.histogramModel.properties.referenceTopDepth,
+                            self.histogramModel.properties.referenceBottomDepth);
+                    });
+                });
+            }
+        },{
             name: "FlipHorizontalAxis",
             label: "Flip Horizontal Axis",
             "isCheckType": "true",
@@ -298,24 +317,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowReferenceWindow",
             label: "Show Reference Window",
             "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,            
+            checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,
             handler: function (index) {
-                // self.toogleShowReferenceWindow();
                 self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
                 self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-            }
-        },{
-            name: "ReferenceWindow",
-            label: "Reference Window",
-            handler: function () {
-                DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
-                    saveHistogramNow(function() {
-                        self.getWiRefWindCtrl().update(getWell(), 
-                            self.histogramModel.properties.reference_curves, 
-                            self.histogramModel.properties.referenceScale,
-                            self.histogramModel.properties.referenceVertLineNumber);
-                    });
-                });
             }
         },{
             name: "ShowCumulative",
@@ -332,7 +337,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowTooltip",
             label: "Show/Hide Tooltip",
             handler: function () {
-
             }
         }, {
             name: "FrequencyInfor",

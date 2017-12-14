@@ -1392,7 +1392,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
     });
 };
 
-exports.OpenTemplateDialog = function (ModalService, selectedNode) {
+exports.OpenTemplateDialog = function (ModalService, selectedNode, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         const utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -1414,7 +1414,7 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
                 if (response.length == 0) {
                     utils.refreshProjectState()
                     .then(function () {
-                        close(null, 500);
+                        close(response, 500);
                     })
                     .catch(function (err) {
                         utils.error(err);
@@ -1422,14 +1422,16 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
                     });
                 } else {
                     utils.refreshProjectState().then(function(){
-                        close(null, 500);
+                        close(response, 500);
                         let message = "";
-                        response.forEach(function(r){
-                            message += "Curve: " + r.dataset + "." + r.curve + " Not exist! <br>";
-                        });
-                        setTimeout(function(){
-                            DialogUtils.warningMessageDialog(ModalService, message);
-                        }, 1000);
+                        if(!response.idPlot){
+                            response.forEach(function(r){
+                                message += "Curve: " + r.dataset + "." + r.curve + " Not exist! <br>";
+                            });
+                            setTimeout(function(){
+                                DialogUtils.warningMessageDialog(ModalService, message);
+                            }, 1000);
+                        }
                     });
                 }
             })
@@ -1449,6 +1451,7 @@ exports.OpenTemplateDialog = function (ModalService, selectedNode) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
             if (data) console.log("imported", data);
+            if(callback && data) callback(data);
         });
     });
 }

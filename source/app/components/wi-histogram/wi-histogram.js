@@ -90,10 +90,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         });
     }
     this.onRefWindCtrlReady = function(refWindCtrl) {
+        console.log('RefWindCtrlReady');
         refWindCtrl.update(getWell(), 
             self.histogramModel.properties.reference_curves, 
             self.histogramModel.properties.referenceScale,
-            self.histogramModel.properties.referenceVertLineNumber);
+            self.histogramModel.properties.referenceVertLineNumber,
+            self.histogramModel.properties.referenceTopDepth,
+            self.histogramModel.properties.referenceBottomDepth);
     }
     this.getWell = getWell;
     function getWell() {

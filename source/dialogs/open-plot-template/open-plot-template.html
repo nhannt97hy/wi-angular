@@ -21,7 +21,9 @@
                                     <input id="selected" class="display-none" type="file"
                                            ngf-select
                                            ng-model="wiModal.tplFile"
-                                           ngf-max-size="100MB" required/>
+                                           ngf-max-size="100MB" required
+                                           ng-change="wiModal.plotName = wiModal.tplFile.name.replace('.plot', '') || 'Logplot Template'"
+                                    />
                                 </div>
                             </div>
                             <div class="form-group">

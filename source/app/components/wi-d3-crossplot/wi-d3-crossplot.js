@@ -155,7 +155,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             getWell(),
             self.crossplotModel.properties.reference_curves,
             self.crossplotModel.properties.referenceScale,
-            self.crossplotModel.properties.referenceVertLineNumber);
+            self.crossplotModel.properties.referenceVertLineNumber,
+            self.crossplotModel.properties.referenceTopDepth,
+            self.crossplotModel.properties.referenceBottomDepth);
     }
 
     this.getWiRefWindCtrlName = function () {
@@ -328,6 +330,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.discriminator();
             }
         }, {
+            name: "ReferenceWindow",
+            label: "Reference Window",
+            icon: "ti-layout-tab-window",            
+            handler: function () {
+                let well = getWell();
+                DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
+                    saveCrossplotNow(function() {
+                        self.getWiRefWindCtrl().update(_well,
+                            self.crossplotModel.properties.reference_curves,
+                            self.crossplotModel.properties.referenceScale,
+                            self.crossplotModel.properties.referenceVertLineNumber,
+                            self.crossplotModel.properties.referenceTopDepth,
+                            self.crossplotModel.properties.referenceBottomDepth);
+                    });
+                });
+            }
+        }, {
             name: "ShowOverlay",
             label: "Show Overlay",
             icon: "",
@@ -358,20 +377,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 //utils.triggerWindowResize();
             }
         },{
-            name: "ReferenceWindow",
-            label: "Reference Window",
-            handler: function () {
-                let well = getWell();
-                DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
-                    saveCrossplotNow(function() {
-                        self.getWiRefWindCtrl().update(_well,
-                            self.crossplotModel.properties.reference_curves,
-                            self.crossplotModel.properties.referenceScale,
-                            self.crossplotModel.properties.referenceVertLineNumber);
-                    });
-                });
-            }
-        }, {
             name: "ShowTooltip",
             label: "Show Tooltip",
             handler: function () {
