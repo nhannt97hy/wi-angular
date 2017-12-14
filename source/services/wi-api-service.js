@@ -838,6 +838,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
     let dataRequest = {
         idCurve: idCurve
     }
+    self.wiComponentService.getComponent('SPINNER').show();
     self.$http({
         url: self.baseUrl + EXPORT_CURVE,
         method: 'POST',
@@ -849,9 +850,12 @@ Service.prototype.exportCurve = function (idCurve, callback) {
         responseType: "arraybuffer",
         data: dataRequest
     }).then(function (res) {
+        self.wiComponentService.getComponent('SPINNER').hide();
         callback(res.data, res.headers('Content-Type'));
+
     }, function (err) {
         console.error(err);
+        self.wiComponentService.getComponent('SPINNER').hide();
         self.getUtils().error("File not found!");
     });
 }
@@ -1333,6 +1337,7 @@ Service.prototype.exportLogPlot = function (idPlot, callback) {
     let dataRequest = {
         idPlot: idPlot
     }
+    self.wiComponentService.getComponent('SPINNER').show();
     self.$http({
         url: self.baseUrl + EXPORT_PLOT,
         method: 'POST',
@@ -1344,15 +1349,18 @@ Service.prototype.exportLogPlot = function (idPlot, callback) {
         responseType: "arraybuffer",
         data: dataRequest
     }).then(function (res) {
+        self.wiComponentService.getComponent('SPINNER').hide();
         callback(res.data, res.headers('Content-Type'));
     }, function (err) {
         console.error(err);
+        self.wiComponentService.getComponent('SPINNER').hide();
         self.getUtils().error("File not found!");
     });
 }
 Service.prototype.exportLogTrack = function (data, callback) {
     let self = this;
     let dataRequest = data
+    self.wiComponentService.getComponent('SPINNER').show();
     self.$http({
         url: self.baseUrl + EXPORT_PLOT_TRACK,
         method: 'POST',
@@ -1364,9 +1372,11 @@ Service.prototype.exportLogTrack = function (data, callback) {
         responseType: "arraybuffer",
         data: dataRequest
     }).then(function (res) {
+        self.wiComponentService.getComponent('SPINNER').hide();
         callback(res.data, res.headers('Content-Type'));
     }, function (err) {
         console.error(err);
+        self.wiComponentService.getComponent('SPINNER').hide();
         self.getUtils().error("File not found!");
     });
 }
