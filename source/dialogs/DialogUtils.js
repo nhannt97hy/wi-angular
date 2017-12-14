@@ -4110,6 +4110,8 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
 exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
+        const _DEL = 'deleted';
+
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -4131,8 +4133,14 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
+                let _DIVIDER;
+                if (item.match('/') != null) {
+                    _DIVIDER = '/';
+                } else {
+                    _DIVIDER = '\\';
+                }
                 return {
-                    name: item.match(/\/([^\/]+)\/?$/)[1],
+                    name: item.split(_DIVIDER).pop(),
                     imageUrl: wiApiService.BASE_URL + item
                 }
             });
@@ -4174,7 +4182,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         this.deleteUploadedImage = function (image) {
             console.log('image was deleted');
-            console.warn(image);
+            image.flag = _DEL;
         }
 
         this.selectImage = function (image) {
@@ -4184,14 +4192,46 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             self.done = true;
         }
 
+        this.onImageUrlChange = utils.debounce(function () {
+            self.done = validateUrl(self.imageUrl);
+        }, 500);
+
         function validateUrl (str) {
             var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
             return regex.test(str);
         }
 
-        this.onImageUrlChange = utils.debounce(function () {
-            self.done = validateUrl(self.imageUrl);
-        }, 500);
+        function doApply(callback) {
+            if (self.uploadedImages && self.uploadedImages.length) {
+                wiComponentService.getComponent("SPINNER").show();
+                async.eachOfSeries(self.uploadedImages, function(img, i, callback){
+                    switch (self.uploadedImages[i].flag) {
+                        case _DEL:
+                            wiApiService.removeImage(self.uploadedImages[i].id, function(){
+                                console.log('removeZone');
+                                callback();
+                            });
+                            break;
+
+                        default:
+                            callback();
+                            break;
+                    }
+
+                }, function(err) {
+                    for (let i = self.uploadedImages.length - 1; i >= 0; i--){
+                        switch (self.uploadedImages[i].flag) {
+                            case _FDEL:
+                                self.uploadedImages.splice(i, 1);
+                                break;
+                        }
+                    }
+                });
+            } else {
+                if (callback) callback();
+            }
+
+        }
 
         function bindProps() {
             props.idImageOfTrack = self.idImageOfTrack;
