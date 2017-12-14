@@ -14,7 +14,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let _viCurves = new Array();
     let _wiD3CrossplotCtrl = null;
     self.loading = false;
-    //this._viCurves = _viCurves;
+    // this._viCurves = _viCurves;
+    this.referenceCurves = new Array();
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 
@@ -231,10 +232,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.update = update;
-    function update(well, referenceCurves, scale, vertLineNo) {
+    function update(well, referenceCurves, scale, vertLineNo, top, bottom) {
+        self.referenceCurves.length = 0;
         let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
-        _minY = parseFloat(well.properties.topDepth);
-        _maxY = parseFloat(well.properties.bottomDepth);
+        _minY = top;
+        _maxY = bottom;
         //if (!_top || _top < _minY)
         _top = _minY;
         if (scale) _scale = scale;
@@ -245,37 +247,43 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let stepY = parseFloat(well.properties.step);
 
         var refWindCtrl = self;
-        if (!referenceCurves || !referenceCurves.length) {
-            refWindCtrl.removeAllRefCurves();
-        }
-        else {
-            for (let i = _viCurves.length - 1; i >= 0; i--) {
-                if (!referenceCurves.find(
-                        function(curve) {
-                            return _viCurves[i].id == curve.idCurve;
-                        }
-                    )
-                ) {
-                    _viCurves[i].destroy();
-                    _viCurves.splice(i, 1);
-                }
-            }
+        refWindCtrl.removeAllRefCurves();
+        if (referenceCurves && referenceCurves.length) {
+        // }
+        // else {
+            // for (let i = _viCurves.length - 1; i >= 0; i--) {
+            //     let notExisted = !referenceCurves.find(
+            //         function(curve) {
+            //             return _viCurves[i].id == curve.idCurve;
+            //         }
+            //     )
+            //     if (notExisted) {
+            //         _viCurves[i].destroy();
+            //         _viCurves.splice(i, 1);
+            //     }
+            // }
             getRefCurveContainer().on('mousewheel', null);
             self.loading = true;
             async.eachOf(referenceCurves, function(refCurve, idx, callback) {
-                let config = {
-                    minX: refCurve.left,
-                    maxX: refCurve.right,
-                    minY: _top,
-                    maxY: _bottom,
-                    yStep: stepY,
-                    offsetY: _top,
-                    line: {
-                        color: refCurve.color
+                if(refCurve.visiable){
+                    refCurve.datasetName = utils.findDatasetById(refCurve.curve.idDataset).properties.name;
+                    self.referenceCurves.push(refCurve);
+                    let config = {
+                        minX: refCurve.left,
+                        maxX: refCurve.right,
+                        minY: _top,
+                        maxY: _bottom,
+                        yStep: stepY,
+                        offsetY: _top,
+                        line: {
+                            color: refCurve.color
+                        }
                     }
+    
+                    refWindCtrl.addRefCurve(refCurve.idCurve, config, callback);
+                }else{
+                    callback();
                 }
-
-                refWindCtrl.addRefCurve(refCurve.idCurve, config, callback);
             }, function(err) {
                 refresh();
                 self.loading = false;

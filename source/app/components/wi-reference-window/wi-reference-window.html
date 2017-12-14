@@ -1,7 +1,7 @@
 <div>
     <div class='plot' id="{{wiReferenceWindow.name}}" wi-element-ready="wiReferenceWindow.onReady();"></div>
     <div class='info'>
-        information pane
+        <div ng-repeat="ref in wiReferenceWindow.referenceCurves" ng-style="{'color': ref.color}">{{ref.datasetName}}.{{ref.curve.name}}: {{ref.left}} - {{ref.right}}</div>
     </div>
     <div ng-show="wiReferenceWindow.loading" style="background-color:white;position:absolute; top: -2; bottom:-2; left:-2;right:-2;z-index:10" id="{{wiReferenceWindow.name}}-spinner"></div>
 </div>
