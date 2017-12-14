@@ -1517,6 +1517,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 orderTrack(originalOrderNum);
             })
         });
+        if (viTrack.isLogTrack() && viTrack.onTrackPlotDrag) {
+            viTrack.onTrackPlotDrag();
+        }
     }
 
     function _onPlotMouseWheelCallback(track) {

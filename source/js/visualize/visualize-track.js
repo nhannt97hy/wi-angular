@@ -35,8 +35,8 @@ function Track(config) {
     this.maxY = config.maxY;
 }
 
-Track.prototype.DEFAULT_X_PADDING = 1;
-Track.prototype.DEFAULT_Y_PADDING = 5;
+Track.prototype.DEFAULT_X_PADDING = 0;
+Track.prototype.DEFAULT_Y_PADDING = 2;
 
 /**
  * Check if class of this instance is LogTrack
@@ -222,6 +222,8 @@ Track.prototype.createVerticalResizer = function() {
         .attr('class', 'vi-track-vertical-resizer')
         .attr('data-order-num', function(d) {return d;})
         .style('width', '5px')
+        .style('margin-left', '-5px')
+        .style('z-index', '1')
         .style('cursor', 'col-resize');
 }
 
@@ -258,7 +260,6 @@ Track.prototype.createHorizontalResizer = function() {
         .attr('class', 'vi-track-horizontal-resizer')
         .style('height', '5px')
         .style('background-color', 'lightgray')
-        .style('border-radius', '3px')
         .style('width', '100%')
         .style('cursor', 'row-resize')
         .call(d3.drag()
@@ -338,7 +339,7 @@ Track.prototype.onTrackDrag = function(callbackDrag, callbackDrop) {
             self.width = width;
             self.doPlot();
             function onTrackDragHandler(event) {
-                document.removeEventListener('ontrackdrop', onTrackDragHandler);
+                document.removeEventListener('ontrackdrag', onTrackDragHandler);
                 if (self == event.desTrack) return;
                 callbackDrag(event.desTrack);
             }

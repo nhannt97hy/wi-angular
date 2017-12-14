@@ -10,7 +10,7 @@ function initModal(modal) {
                 if (buttonElems[i].innerText.toLowerCase().trim() == 'ok') {
                     okButton = buttonElems[i];
                 }
-                if (buttonElems[i].innerText.toLowerCase().trim() == 'cancel') {
+                if (buttonElems[i].innerText.toLowerCase().trim() == 'cancel' || buttonElems[i].innerText.toLowerCase().trim() == 'close') {
                     cancelButton = buttonElems[i];
                 }
             }
