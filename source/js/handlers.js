@@ -867,21 +867,21 @@ exports.NeutronButtonClicked = function () {
 
 exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
-    newTemplateHistogram("DT Histogram" ,"Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("RHOB Histogram" ,"Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.SonicButtonClicked = function () {
     console.log('SonicButton is clicked');
-    newTemplateHistogram("RHBO Histogram","Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("DT Histogram","Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.SallowResistivityButtonClicked = function () {
     console.log('SallowResistivityButton is clicked');
-    newTemplateHistogram("MSFL Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("LLS Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
