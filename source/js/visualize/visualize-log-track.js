@@ -1116,39 +1116,54 @@ LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
 
-// LogTrack.prototype.onTrackPlotDrag = function onTrackPlotDrag(callbackDrag, callbackDrop) {
-//     let self = this;
-//     let desTrack;
-//     $(this.plotContainer.node()).draggable({
-//         axis: 'x',
-//         containment: self.root.node(),
-//         helper: function () {
-//             if (self.getCurrentCurve()) {
-//                 let currentCurve = self.getCurrentCurve();
-//                 return $(currentCurve.canvas.node()).clone().css('z-index', '9999').css('border', '10px solid black');
-//                 // return self.plotContainer.node();
-//             }
-//             return document.createElement('span');
-//         },
-//         // revert: true,
-//         // revertDuration: 0,
-//         opacity: 0.7,
-//         distance: 10,
-//         snap: '.vi-track-plot-container',
-//         scope: 'track-plot',
-//         start: function (event, ui) {
-//         },
-//         stop: function (event, ui) {
-//             self.doPlot();
-//         }
-//     });
-//     // $(this.plotContainer.node()).droppable({
-//     //     accept: '.vi-track-plot-container',
-//     //     scope: 'track-plot',
-//     //     over: function (event, ui) {
-//     //     },
-//     //     drop: function (event, ui) {
-//     //         console.log('drop', event, ui);
-//     //     }
-//     // });
-// }
+/**
+ * Register event when drag curve
+ */
+LogTrack.prototype.onCurveDrag = function (callbackDrop) {
+    let self = this;
+    function triggerClickPlot (event) {
+        d3.event = event;
+        self.plotContainer.on("mousedown")();
+        self.trackContainer.node().focus();
+    }
+    $(this.plotContainer.node()).draggable({
+        axis: 'x',
+        containment: self.root.node(),
+        helper: function () {
+            if (self.getCurrentCurve()) {
+                let currentCurve = self.getCurrentCurve();
+                return $('<img></img>').prop({src: currentCurve.canvas.node().toDataURL()});
+            }
+            return $('<span></span>');
+        },
+        distance: 10,
+        scope: 'curve',
+        drag: function (event, ui) {
+            if (!self.getCurrentCurve()) {
+                return false;
+            }
+        },
+        start: function (event, ui) {
+            triggerClickPlot(event);
+            document.addEventListener('oncurverop', onCurveDropHandler, false);
+            function onCurveDropHandler(event) {
+                document.removeEventListener('oncurverop', onCurveDropHandler);
+                if (self == event.desTrack) return;
+                callbackDrop && callbackDrop(event.desTrack);
+            }
+        }
+    })
+    .click(function (event) {
+        triggerClickPlot(event);
+    });
+    $(this.plotContainer.node()).droppable({
+        accept: '.vi-track-plot-container',
+        scope: 'curve',
+        tolerance: 'pointer',
+        drop: function (event, ui) {
+            let onCurveDrop = new Event('oncurverop');
+            onCurveDrop.desTrack = self;
+            document.dispatchEvent(onCurveDrop);
+        }
+    });
+}

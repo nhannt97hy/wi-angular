@@ -31,19 +31,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function getOrderKey(track) {
         if (_tracks.length <= 0) {
-            return 'a';
+            return 'm';
         }
         if (!track) track = _currentTrack;
         var currentIdx = _tracks.indexOf(track);
         if (currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
             currentIdx = _tracks.length - 1;
             let currentOrderKey = _tracks[currentIdx].orderNum;
-            if (currentOrderKey < 'z') {
-                var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
-                console.log(key);
-                return key;
-            }
-            return null; // ERROR
+            var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+            console.log(key);
+            return key;
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
@@ -1075,6 +1072,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
+        track.onCurveDrag(function (desTrack) {
+            let currentCurve = track.getCurrentCurve();
+            let curve = currentCurve.getProperties();
+            curve.idTrack = desTrack.id;
+            wiApiService.editLine(curve, function (res) {
+                track.removeCurve(currentCurve);
+                self.addCurveToTrack(desTrack, currentCurve.rawData, Utils.lineToTreeConfig(res).data);
+                track.doPlot();
+                desTrack.doPlot();
+            });
+        });
         _registerTrackCallback(track);
     }
 
@@ -1455,7 +1463,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         for (var i = 0; i < _tracks.length; i++) {
             let viTrack = _tracks[i];
             let orderNum;
-            if (i == 0) orderNum = 'a';
+            if (i == 0) orderNum = 'm';
             else orderNum = String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(0) + 1);
             viTrack.orderNum = orderNum;
             promises.push(new Promise((resolve, reject) => {
@@ -1490,6 +1498,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     return track1.orderNum.localeCompare(track2.orderNum);
                 });
                 graph.rearrangeTracks(self);
+                console.log(_tracks.map(t => t.orderNum));
             }).catch(function (err) {
             if (err) {
                 _tracks = backupTracks;
@@ -1501,25 +1510,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _registerTrackDragCallback(viTrack) {
         let originalOrderNum = viTrack.orderNum;
-        viTrack.onTrackDrag(function (desTrack) {
-            // let desTrackIndex = _tracks.findIndex(track => track == desTrack);
-            // if (_tracks[desTrackIndex + 1] == viTrack || desTrack == viTrack) return;
-            // let orderNum = getOrderKey(desTrack);
-            // orderTrack(viTrack, orderNum);
-        }, function (desTrack) {
-            let desTrackIndex = _tracks.findIndex(track => track == desTrack);
-            if (_tracks[desTrackIndex + 1] == viTrack || desTrack == viTrack) return;
-            let orderNum = getOrderKey(desTrack);
-            editOrderNum(viTrack, orderNum).then(function () {
-                if (orderNum.length < 50) return;
-                reindexAllTracks();
-            }).catch(function () {
-                orderTrack(originalOrderNum);
-            })
-        });
-        if (viTrack.isLogTrack() && viTrack.onTrackPlotDrag) {
-            viTrack.onTrackPlotDrag();
-        }
+        viTrack.onTrackDrag(
+            function (desTrack) {
+                let orderNum = getOrderKey(desTrack);
+                if (viTrack.orderNum > desTrack.orderNum) {
+                    let desTrackIndex = _tracks.findIndex(track => track == desTrack);
+                    if (desTrackIndex == 0) {
+                        orderNum = String.fromCharCode(_tracks[0].orderNum.charCodeAt(0) - 1);
+                    } else {
+                        desTrack = _tracks[desTrackIndex - 1];
+                        orderNum = getOrderKey(desTrack);
+                    }
+                }
+                editOrderNum(viTrack, orderNum).then(function () {
+                    console.log(_tracks.map(t => t.orderNum));
+                    if (orderNum.length > 50 || _tracks[0].orderNum < 'a' || _tracks[_tracks.length - 1].orderNum > 'z') {
+                        reindexAllTracks();
+                    }
+                }).catch(function (err) {
+                    console.log(err);
+                    orderTrack(viTrack, originalOrderNum);
+                })
+            });
     }
 
     function _onPlotMouseWheelCallback(track) {

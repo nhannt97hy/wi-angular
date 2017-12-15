@@ -112,7 +112,8 @@ Track.prototype.createContainer = function() {
         .style('width', this.width + 'px')
         .style('display', 'flex')
         .style('flex-direction', 'column')
-        .style('outline', 'none');
+        .style('outline', 'none')
+        .style('margin-left', '-1px');
     let self = this;
     new ResizeSensor( $(this.root.node()), function(param) {
         self.doPlot();
@@ -317,35 +318,22 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 /**
  * Register event when drag track
  */
-Track.prototype.onTrackDrag = function(callbackDrag, callbackDrop) {
+Track.prototype.onTrackDrag = function(callbackDrop) {
     let self = this;
     let width;
     $(this.trackContainer.node()).draggable({
         axis: 'x',
         containment: 'parent',
         helper: function () {
-            width = self.width;
-            self.width = 60;
-            self.doPlot();
             return $(self.trackContainer.node()).clone().css('z-index', 99);
         },
         opacity: 0.7,
         distance: 10,
         handle: '.vi-track-header-name',
-        snap: '.vi-track-vertical-resizer',
+        snap: '.vi-track-container',
         scope: 'tracks',
         start: function (event, ui) {
-            document.addEventListener('ontrackdrag', onTrackDragHandler, false);
-            self.width = width;
-            self.doPlot();
-            function onTrackDragHandler(event) {
-                document.removeEventListener('ontrackdrag', onTrackDragHandler);
-                if (self == event.desTrack) return;
-                callbackDrag(event.desTrack);
-            }
             document.addEventListener('ontrackdrop', onTrackDropHandler, false);
-            self.width = width;
-            self.doPlot();
             function onTrackDropHandler(event) {
                 document.removeEventListener('ontrackdrop', onTrackDropHandler);
                 if (self == event.desTrack) return;
@@ -353,15 +341,10 @@ Track.prototype.onTrackDrag = function(callbackDrag, callbackDrop) {
             }
         },
     });
-    $(this.verticalResizer.node()).droppable({
+    $(this.trackContainer.node()).droppable({
         accept: '.vi-track-container',
-        tolerance: "touch",
+        tolerance: 'pointer',
         scope: 'tracks',
-        over: function (event, ui) {
-            let onTrackDrag = new Event('ontrackdrag');
-            onTrackDrag.desTrack = self;
-            document.dispatchEvent(onTrackDrag);
-        },
         drop: function (event, ui) {
             let onTrackDrop = new Event('ontrackdrop');
             onTrackDrop.desTrack = self;
@@ -412,6 +395,7 @@ Track.prototype.getDecimalFormatter = function(decimal) {
  * Register event for track container
  */
 Track.prototype.on = function(type, cb) {
+    if (!cb) return this.trackContainer.on(type);
     this.trackContainer.on(type, cb);
 }
 

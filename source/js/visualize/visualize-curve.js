@@ -127,7 +127,7 @@ Curve.prototype.getProperties = function() {
         ignoreMissingValues: false,
         displayType: Utils.capitalize(this.scale),
         displayAs: 'Normal',
-        lineStyle: line.dash,
+        lineStyle: line.dash ? line.dash.toString() : null,
         lineWidth: line.width,
         lineColor: line.color,
         symbolName: Utils.capitalize(symbol.style),
