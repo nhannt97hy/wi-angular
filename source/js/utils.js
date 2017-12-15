@@ -1315,7 +1315,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
         curveY.maxX = pointSet.scaleTop;
         pointSet.intervalDepthTop = objectProps.intervalDepthTop;
         pointSet.intervalDepthBottom = objectProps.intervalDepthBottom;
-
+        
         let crossplotConfig = {
             curve1 : curveX,
             curve2 : curveY,
@@ -1336,6 +1336,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
 
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    let graph = wiComponentService.getComponent('GRAPH');
     layoutManager.putTabRightWithModel(logplotModel);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
@@ -1495,33 +1496,16 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                     case 'Histogram' :
                                         objectProps.intervalDepthTop = objectOfTrack.topDepth;
                                         objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
-                                        /*
-                                        objectProps.curve = new Object();
-                                        objectProps.curve.yStep = objectProps.yStep;
-                                        objectProps.curve.idCurve = objectProps.curveId;
-
-                                        let wellProps = {
-                                            topDepth : objectProps.topDepth,
-                                            bottomDepth : objectProps.bottomDepth
-                                        }
-
-                                        wiApiService.dataCurve(objectProps.curveId, function(returnedCurve) {
-                                            objectProps.curve.rawData = returnedCurve;
-                                            console.log("Histogram Props: ", objectProps);
-                                            anObject.createHistogramToForeignObject(objectProps, wellProps);
-                                        })
-                                        */
-
+                                        
                                         wiApiService.getHistogram(objectProps.idHistogram, function (histogramProps) {
                                             if(histogramProps.idHistogram) {
                                                 histogramProps.background = objectProps.background;
                                                 histogramProps.intervalDepthTop = objectProps.intervalDepthTop;
                                                 histogramProps.intervalDepthBottom = objectProps.intervalDepthBottom;
                                                 wiApiService.infoCurve(histogramProps.idCurve, function (curveInfo) {
-                                                    histogramProps.curve = curveInfo;
                                                     wiApiService.dataCurve(histogramProps.idCurve, function (dataCurve) {
-                                                        histogramProps.curve.rawData = dataCurve;
                                                         wiApiService.getWell(histogramProps.idWell, function (wellProps) {
+                                                            histogramProps.curve = graph.buildCurve(curveInfo, dataCurve, wellProps);
                                                             anObject.createHistogramToForeignObject(histogramProps, wellProps);
                                                         })
                                                     })
