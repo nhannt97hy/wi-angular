@@ -1079,7 +1079,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiApiService.editLine(curve, function (res) {
                 track.removeCurve(currentCurve);
                 self.addCurveToTrack(desTrack, currentCurve.rawData, Utils.lineToTreeConfig(res).data);
-                track.doPlot();
+                track.doPlot(true);
                 desTrack.doPlot();
             });
         });
