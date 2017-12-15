@@ -337,6 +337,7 @@ exports.DuplicateButtonClicked = function (type) {
                         $timeout(function () {
                             utils.refreshProjectState();
                             wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            // utils.openLogplotTab(wiComponentService, utils.getModel('logplot', response.idPlot));
                             next();
                         });
                     });
