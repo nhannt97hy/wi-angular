@@ -10964,6 +10964,13 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
             }
             close(null);
         }
+
+        this.onApplyButtonClicked = function () {
+            if(callback) {
+                callback(self.histogramProps);
+            }
+        }
+
         this.onCancelButtonClicked = function () {
                 close(null);
         }
@@ -11384,6 +11391,21 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
             }
             close(null);
         }
+
+        this.onApplyButtonClicked = function () {
+            self.crossplotProps.curveX = this.SelectedCurveX;
+            self.crossplotProps.labelX = this.SelectedCurveX.name;
+            self.crossplotProps.curveY = this.SelectedCurveY;
+            self.crossplotProps.labelY = this.SelectedCurveY.name;
+            self.crossplotProps.curveZ = this.SelectedCurveZ;
+            self.crossplotProps.well = this.well;
+            self.crossplotProps.background = this.background;
+
+            if(callback) {
+                callback(self.crossplotProps);
+            }
+        }
+
         this.onCancelButtonClicked = function () {
                 close(null);
         }
