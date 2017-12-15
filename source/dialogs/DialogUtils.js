@@ -4075,16 +4075,18 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             }
         }
 
+        function bindProps () {
+            props.showTitle = self.showTitle;
+            props.stitle = self.title;
+            props.topJustification = self.topJustification;
+            props.trackColor = self.trackColor;
+            props.width = self.width;
+            props.image_of_tracks = self.imagesOfCurrentTrack;
+            // parameterSet: self.parameterSet
+        }
+
         this.onOkButtonClicked = function () {
-            props = {
-                showTitle: self.showTitle,
-                title: self.title,
-                topJustification: self.topJustification,
-                trackColor: self.trackColor,
-                width: self.width,
-                image_of_tracks: self.imagesOfCurrentTrack
-                // parameterSet: self.parameterSet
-            }
+            bindProps();
             if (self.status) {
                 doApply(function() {
                     close(props);
@@ -4092,10 +4094,20 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             } else {
                 close(props);
             }
-        };
+        }
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            if (self.status) {
+                doApply(function() {
+                    callback(props);
+                });
+            } else {
+                callback(props);
+            }
+        }
         this.onCancelButtonClicked = function () {
             close(null, 100);
-        };
+        }
     }
     ModalService.showModal({
         templateUrl: "image-track-properties/image-track-properties-modal.html",
@@ -4250,6 +4262,11 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.onOkButtonClicked = function () {
             bindProps();
             close(props, 100);
+        }
+
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
         }
 
         this.onCancelButtonClicked = function () {
