@@ -4075,16 +4075,18 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             }
         }
 
+        function bindProps () {
+            props.showTitle = self.showTitle;
+            props.stitle = self.title;
+            props.topJustification = self.topJustification;
+            props.trackColor = self.trackColor;
+            props.width = self.width;
+            props.image_of_tracks = self.imagesOfCurrentTrack;
+            // parameterSet: self.parameterSet
+        }
+
         this.onOkButtonClicked = function () {
-            props = {
-                showTitle: self.showTitle,
-                title: self.title,
-                topJustification: self.topJustification,
-                trackColor: self.trackColor,
-                width: self.width,
-                image_of_tracks: self.imagesOfCurrentTrack
-                // parameterSet: self.parameterSet
-            }
+            bindProps();
             if (self.status) {
                 doApply(function() {
                     close(props);
@@ -4092,10 +4094,20 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             } else {
                 close(props);
             }
-        };
+        }
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            if (self.status) {
+                doApply(function() {
+                    callback(props);
+                });
+            } else {
+                callback(props);
+            }
+        }
         this.onCancelButtonClicked = function () {
             close(null, 100);
-        };
+        }
     }
     ModalService.showModal({
         templateUrl: "image-track-properties/image-track-properties-modal.html",
@@ -4250,6 +4262,11 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.onOkButtonClicked = function () {
             bindProps();
             close(props, 100);
+        }
+
+        this.onApplyButtonClicked = function () {
+            bindProps();
+            callback(props);
         }
 
         this.onCancelButtonClicked = function () {
@@ -10841,18 +10858,34 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let self = this;
 
+        this.datasets = [];
+        this.well = utils.findWellById(objectConfig.properties.idWell);
         this.curvesArr = objectConfig.curves;
         this.histogramProps = angular.copy(objectConfig.properties);
         this.histogramProps.dragToCreate = objectConfig.dragToCreate;
+        this.histogramProps.background = objectConfig.background;
         this.SelectedCurve = this.histogramProps.curve;
-        if(this.curvesArr && !this.SelectedCurve && this.histogramProps.curveId) {
-            for(let curve of this.curvesArr) {
-                if(curve.idCurve == this.histogramProps.curveId) {
-                    this.SelectedCurve = curve;
+        
+        this.well.children.forEach(function (child, i) {
+            switch (child.type) {
+                case 'dataset':
+                    self.datasets.push(child);
+                    break;
+            }
+
+            if (i == self.well.children.length - 1) {
+                for(let j = 0; j < self.curvesArr.length; ++j) {
+                    let dataset = self.datasets.find(function (item) {
+                        return item.id == self.curvesArr[j].idDataset;
+                    });
+                    self.curvesArr[j].datasetName = dataset.name;
+                    if((self.SelectedCurve && self.SelectedCurve.id == self.curvesArr[j].idCurve) || (self.histogramProps.curveId == self.curvesArr[j].idCurve)) {
+                        self.SelectedCurve = self.curvesArr[j];
+                    }
                 }
             }
-        }
-        this.histogramProps.background = objectConfig.background;
+        });
+
 
         if(this.SelectedCurve != null) {
             self.histogramProps.idCurve = self.SelectedCurve.id;
@@ -10865,11 +10898,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
             }
         }
-        /*
-        if(!this.histogramProps.name) {
-            this.histogramProps.name = "Histogram " + (this.SelectedCurve ? this.SelectedCurve.alias:"");
-        }
-        */
+        
         this.onSelectCurveChange = function () {
             self.histogramProps.curveId = self.SelectedCurve.id;
             self.histogramProps.leftScale = self.SelectedCurve.minX;
@@ -10899,7 +10928,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
         this.isNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
-                if (self.histogramProps.intervalDepthTop == null || self.histogramProps.intervalDepthBottom == null || self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
+                if (self.histogramProps.intervalDepthTop > self.histogramProps.intervalDepthBottom) {
                     inValid = true;
                 }
             }
@@ -11221,8 +11250,8 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
         var utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let self = this;
-        this.crossplotProps = angular.copy(objectConfig.properties);
         this.curvesArr = objectConfig.curves;
+        this.crossplotProps = angular.copy(objectConfig.properties);
         this.background = objectConfig.background;
         this.SelectedCurveX = null;
         this.SelectedCurveY = null;
@@ -11231,7 +11260,25 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
         this.overlayLine = "----------------";
         this.selectOverlayLines = ["----------------"];
+        this.datasets = [];
+        this.well = utils.findWellById(this.crossplotProps.idWell);
 
+        this.well.children.forEach(function (child, i) {
+            switch (child.type) {
+                case 'dataset':
+                    self.datasets.push(child);
+                    break;
+            }
+
+            if (i == self.well.children.length - 1) {
+                for(let j = 0; j < self.curvesArr.length; ++j) {
+                    let dataset = self.datasets.find(function (item) {
+                        return item.id == self.curvesArr[j].idDataset;
+                    });
+                    self.curvesArr[j].datasetName = dataset.name;
+                }
+            }
+        });
 
         if(this.curvesArr && !this.SelectedCurveX && this.crossplotProps.idCurveX) {
             self.SelectedCurveX = findCurveById(this.crossplotProps.idCurveX);
@@ -11254,7 +11301,7 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
 
         function findCurveById (idCurve) {
             for(let curve of self.curvesArr) {
-                if(curve.idCurve == idCurve) {
+                if(curve.idCurve == idCurve || curve.id == idCurve) {
                     return curve;
                 }
             }
@@ -11329,6 +11376,7 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
             self.crossplotProps.curveY = this.SelectedCurveY;
             self.crossplotProps.labelY = this.SelectedCurveY.name;
             self.crossplotProps.curveZ = this.SelectedCurveZ;
+            self.crossplotProps.well = this.well;
             self.crossplotProps.background = this.background;
 
             if(callback) {

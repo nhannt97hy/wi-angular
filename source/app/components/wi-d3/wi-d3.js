@@ -1715,32 +1715,49 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         switch (object.currentDraw) {
             case "Histogram" :
-                let histogramConfig = {
-                    properties: object.viHistogram.histogramModel.properties,
-                    curves: getAllCurves(),
-                    background: object.background
-                }
-                DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (props) {
-                    object.refreshObjectOfTrack(props, wiApiService, function() {
-                        Utils.refreshProjectState();
-                    });
-                });
-                break;
-            case "Crossplot" :
-                object.viCrossplot.pointSet.name = object.name;
-                let crossplotConfig = {
-                    properties: object.viCrossplot.pointSet,
-                    curves: getAllCurves(),
-                    background: object.background,
-                }
-                if(!crossplotConfig.properties.idWell) {
-                    crossplotConfig.properties.idWell = _getWellProps().idWell;
-                }
-                DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (props) {
-                    object.refreshObjectOfTrack(props, wiApiService, function () {
-                        Utils.refreshProjectState();
+                getAllCurvesOfWell().then(function(allCurves) {
+                    let histogramConfig = {
+                        properties: object.viHistogram.histogramModel.properties,
+                        curves: allCurves,
+                        background: object.background
+                    }
+                    DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (props) {
+                        prepareCurveData(props.curve).then(function (curve) {
+                            props.curve = curve;
+                            object.refreshObjectOfTrack(props, wiApiService, function() {
+                                Utils.refreshProjectState();
+                            });
+                        })
                     });
                 })
+                break;
+            case "Crossplot" :
+                getAllCurvesOfWell().then(function (allCurves) {
+                    object.viCrossplot.pointSet.name = object.name;
+                    let crossplotConfig = {
+                        properties: object.viCrossplot.pointSet,
+                        curves: allCurves,
+                        background: object.background,
+                    }
+                    if(!crossplotConfig.properties.idWell) {
+                        crossplotConfig.properties.idWell = _getWellProps().idWell;
+                    }
+                    DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (props) {
+                        prepareCurveData(props.curveX).then(function (curveX) {
+                            prepareCurveData(props.curveY).then(function (curveY) {
+                                prepareCurveData(props.curveZ).then(function (curveZ) {
+                                    props.curveX = curveX;
+                                    props.curveY = curveY;
+                                    props.curveZ = curveZ;
+
+                                    object.refreshObjectOfTrack(props, wiApiService, function () {
+                                        Utils.refreshProjectState();
+                                    });
+                                });
+                            });
+                        });                        
+                    });
+                });
                 break;
             default:
                 console.log('nothing drawing here!');
@@ -1875,6 +1892,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function removeAnObjectOfObjectTrack() {
         if(!_currentTrack.isObjectTrack() || (_currentTrack.isObjectTrack() && !_currentTrack.getCurrentDrawing)) {
+            console.log('not an object track');
             return;
         }
         let object = _currentTrack.getCurrentDrawing();
@@ -2229,70 +2247,78 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Create Histogram Track",
             icon: "",
             handler: function () {
-                let curve = _currentTrack.getCurrentCurve();
-                let histogramModel = {
-                    properties: {
-                        divisions: 10,
-                        plot: "Bar",
-                        curve: curve,
-                        intervalDepthTop: _currentTrack.getWindowY()[0],
-                        intervalDepthBottom: _currentTrack.getWindowY()[1],
-                        color: 'blue',
-                        showGrid: true,
-                        idWell: _getWellProps().idWell
-                    },
-                    curves: getAllCurves(),
-                }
-                DialogUtils.histogramForObjectTrackDialog(ModalService, histogramModel, function (histogramProps) {
-                    histogramProps.plotType = "Frequency";
-                    let dataRequest = angular.copy(histogramProps);
-                    dataRequest.idWell = _getWellProps().idWell;
-                    dataRequest.idCurve = histogramProps.curve.idCurve;
-                    delete dataRequest.curve;
-                    wiApiService.createHistogram(dataRequest, function(createdHistogram) {
-                        if(!createdHistogram.idHistogram) {
-                            DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
-                            return;
-                        }
-                        createdHistogram.curve = histogramProps.curve;
-                        let quest = {
-                            name: 'addHistogram',
-                            config: createdHistogram
-                        }
-                        let trackOrder = getOrderKey();
+                getAllCurvesOfWell().then(function (allCurves) {
+                    let curve = _currentTrack.getCurrentCurve();
+                    let objectConfig = {
+                        properties: {
+                            divisions: 10,
+                            plot: "Bar",
+                            curve: curve,
+                            intervalDepthTop: _currentTrack.getWindowY()[0],
+                            intervalDepthBottom: _currentTrack.getWindowY()[1],
+                            color: 'blue',
+                            showGrid: true,
+                            idWell: _getWellProps().idWell
+                        },
+                        curves: allCurves,
+                    }
+                    DialogUtils.histogramForObjectTrackDialog(ModalService, objectConfig, function (histogramProps) {
+                        prepareCurveData(histogramProps.curve).then(function (curve) {
+                            histogramProps.plotType = "Frequency";
+                            let dataRequest = angular.copy(histogramProps);
+                            dataRequest.idWell = _getWellProps().idWell;
+                            dataRequest.idCurve = histogramProps.curve.idCurve;
+                            if(!dataRequest.name) {
+                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - "
+                                    + (Math.random().toString(36).substr(2, 3));
+                            }
+                            delete dataRequest.curve;
+                            wiApiService.createHistogram(dataRequest, function(createdHistogram) {
+                                if(!createdHistogram.idHistogram) {
+                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
+                                    return;
+                                }
+                                createdHistogram.curve = histogramProps.curve;
+                                let quest = {
+                                    name: 'addHistogram',
+                                    config: createdHistogram
+                                }
+                                let trackOrder = getOrderKey();
 
-                        if (trackOrder) {
-                            const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
-                            let dataRequest = {
-                                idPlot: self.logPlotCtrl.id,
-                                title: 'Object Track',
-                                showTitle: true,
-                                topJustification: 'center',
-                                bottomJustification: 'center',
-                                color: '#fff',
-                                width: 2.5,
-                                orderNum: trackOrder
-                            };
-                            wiApiService.createObjectTrack(dataRequest, function (returnObjectTrack) {
-                                console.log("returned object track: ", returnObjectTrack);
-                                let viTrack = self.pushObjectTrack(returnObjectTrack);
+                                if (trackOrder) {
+                                    const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
+                                    let dataRequest = {
+                                        idPlot: self.logPlotCtrl.id,
+                                        title: 'Object Track',
+                                        showTitle: true,
+                                        topJustification: 'center',
+                                        bottomJustification: 'center',
+                                        color: '#fff',
+                                        width: 2.5,
+                                        orderNum: trackOrder
+                                    };
+                                    wiApiService.createObjectTrack(dataRequest, function (returnObjectTrack) {
+                                        console.log("returned object track: ", returnObjectTrack);
+                                        let viTrack = self.pushObjectTrack(returnObjectTrack);
 
-                                let object = self.addObjectToTrack(viTrack, {
-                                    minY: viTrack.minY,
-                                    maxY: viTrack.maxY,
-                                });
-                                if (object) {
-                                    object.handleQuest(quest, _getWellProps());
-                                    wiApiService.createObjectOfObjectTrack(object.exportsProperties(), function (returnedObject) {
-                                        console.log('object returned: ', returnedObject);
-                                        object.setProperties(returnedObject);
-                                    })
+                                        let object = self.addObjectToTrack(viTrack, {
+                                            minY: viTrack.minY,
+                                            maxY: viTrack.maxY,
+                                        });
+                                        if (object) {
+                                            object.handleQuest(quest, _getWellProps());
+                                            wiApiService.createObjectOfObjectTrack(object.exportsProperties(), function (returnedObject) {
+                                                console.log('object returned: ', returnedObject);
+                                                object.setProperties(returnedObject);
+                                            })
+                                        }
+                                    });
+                                } else {
+                                    //console.error('Cannot add new Histogram Object Track');
+                                    DialogUtils.errorMessageDialog(ModalService, "Error! cannot get track order");
                                 }
                             });
-                        } else {
-                            //console.error('Cannot add new Histogram Object Track');
-                            DialogUtils.errorMessageDialog(ModalService, "Error! cannot get track order");
-                        }
+                        });
                     });
                 });
             }
@@ -2373,6 +2399,51 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return _tracks[i].getCurves();
             }
         }
+    }
+
+    function getAllCurvesOfWell() {
+        return new Promise(function(resolve, reject) {
+            let availableCurves = getAllCurves();
+            wiApiService.getWell(_getWellProps().idWell, function (wellInfo) {
+                let allCurves = [];
+                wellInfo.datasets.forEach(function (dataset) {
+                    allCurves = allCurves.concat(dataset.curves);
+                });
+                let unAvailableCurves = allCurves.filter(function (curve) {
+                    return availableCurves.filter(function (avaiCurve) { return avaiCurve.idCurve == curve.idCurve}).length == 0;
+                });
+                if(unAvailableCurves.length == 0) {
+                    resolve(availableCurves);
+                } else {
+                    for(let i = 0; i < unAvailableCurves.length; ++i) {
+                        wiApiService.infoCurve(unAvailableCurves[i].idCurve, function(infoCurve) {
+
+                            unAvailableCurves[i].minX = infoCurve.LineProperty.minScale;
+                            unAvailableCurves[i].maxX = infoCurve.LineProperty.maxScale;
+
+                            if(i == unAvailableCurves.length - 1) {
+                                resolve(availableCurves.concat(unAvailableCurves));
+                            }
+                        });
+                    }
+                }
+
+            });
+        });
+    }
+
+    function prepareCurveData(curve) {
+        return new Promise(function(resolve, reject) {
+            if(!curve) {
+                resolve(curve);
+            } else if(curve && curve.rawData) {
+                resolve(curve);
+            } else {
+                wiApiService.dataCurve(curve.idCurve, function(curveData) {
+                    resolve(graph.buildCurve(curve, curveData, _getWellProps()));
+                });
+            }
+        });
     }
 
     function _trackOnRightClick(track) {
@@ -2501,46 +2572,51 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: 'Add Histogram',
                     icon: 'histogram-new-16x16',
                     handler: function () {
-                        var curveArr = getAllCurves();
-                        if (!curveArr || !curveArr.length) {
-                            console.error('no curve');
-                            return;
-                        }
-                        let histogramConfig = {
-                            properties: {
-                                divisions: 10,
-                                plot: 'Bar',
-                                color: 'blue',
-                                showGrid: true,
-                                idWell: _getWellProps().idWell
-                            },
-                            curves: curveArr,
-                            dragToCreate: true
-                        }
-                        DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (histogramProps) {
-                            histogramProps.plotType = "Frequency";
-                            let dataRequest = angular.copy(histogramProps);
-                            dataRequest.idWell = _getWellProps().idWell;
-                            dataRequest.idCurve = histogramProps.curve.idCurve;
-                            if(!dataRequest.name) {
-                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - "
-                                    + (Math.random().toString(36).substr(2, 3));
+                        getAllCurvesOfWell().then(function (curveArr) {
+                            if (!curveArr || !curveArr.length) {
+                                console.error('no curve');
+                                return;
                             }
-                            delete dataRequest.curve;
-                            wiApiService.createHistogram(dataRequest, function(createdHistogram) {
-                                if(!createdHistogram.idHistogram) {
-                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
-                                    return;
+                            let histogramConfig = {
+                                properties: {
+                                    divisions: 10,
+                                    plot: 'Bar',
+                                    color: 'blue',
+                                    showGrid: true,
+                                    idWell: _getWellProps().idWell
+                                },
+                                curves: curveArr,
+                                dragToCreate: true
+                            }
+                            DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (histogramProps) {
+                                histogramProps.plotType = "Frequency";
+                                let dataRequest = angular.copy(histogramProps);
+                                dataRequest.idWell = _getWellProps().idWell;
+                                dataRequest.idCurve = histogramProps.curve.idCurve;
+                                if(!dataRequest.name) {
+                                    dataRequest.name = "Histogram " + dataRequest.curve.name + " - "
+                                        + (Math.random().toString(36).substr(2, 3));
                                 }
-                                createdHistogram.curve = histogramProps.curve;
-                                createdHistogram.dragToCreate = true;
-                                let quest = {
-                                    name: 'addHistogram',
-                                    config: createdHistogram
-                                }
+                                delete dataRequest.curve;
+                                wiApiService.createHistogram(dataRequest, function(createdHistogram) {
+                                    if(!createdHistogram.idHistogram) {
+                                        DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
+                                        return;
+                                    }
 
-                                track.setCurrentQuest(quest);
-                                track.setMode("AddObject");
+                                    prepareCurveData(histogramProps.curve)
+                                        .then(function(curve) {
+                                            createdHistogram.curve = curve;
+                                            createdHistogram.dragToCreate = true;
+                                            let quest = {
+                                                name: 'addHistogram',
+                                                config: createdHistogram
+                                            }
+
+                                            track.setCurrentQuest(quest);
+                                            track.setMode("AddObject");
+                                        });
+                                });
                             });
                         });
                     }
@@ -2549,81 +2625,88 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: 'Add Crossplot',
                     icon: 'crossplot-new-16x16',
                     handler: function () {
-                        let allCurves = getAllCurves();
-                        let wellProps = _getWellProps();
+                        getAllCurvesOfWell().then(function (allCurves) {
 
-                        let crossplotConfig = {
-                            properties: {
-                                idCrossPlot: 1,
-                                idWell: wellProps.idWell,
-                                idCurveX: null,
-                                idCurveY: null,
-                                majorX: 5,
-                                minorX: 5,
-                                majorY: 5,
-                                minorY: 5,
-                                numColor: 5,
-                                scaleLeft: null,
-                                scaleRight: null,
-                                scaleBottom: null,
-                                scaleTop: null,
-                                pointSymbol: "Circle",
-                                pointSize: 5,
-                                pointColor: 'blue',
-                            },
-                            curves: allCurves,
-                            dragToCreate: true
-                        }
+                            let wellProps = _getWellProps();
+                            let crossplotConfig = {
+                                properties: {
+                                    idCrossPlot: 1,
+                                    idWell: wellProps.idWell,
+                                    idCurveX: null,
+                                    idCurveY: null,
+                                    majorX: 5,
+                                    minorX: 5,
+                                    majorY: 5,
+                                    minorY: 5,
+                                    numColor: 5,
+                                    scaleLeft: null,
+                                    scaleRight: null,
+                                    scaleBottom: null,
+                                    scaleTop: null,
+                                    pointSymbol: "Circle",
+                                    pointSize: 5,
+                                    pointColor: 'blue',
+                                },
+                                curves: allCurves,
+                                dragToCreate: true
+                            }
 
-                        DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (pointSetRaw) {
-                            let pointSetObj = angular.copy(pointSetRaw);
-                            delete pointSetObj.curveX;
-                            delete pointSetObj.curveY;
-                            delete pointSetObj.curveZ;
-                            delete pointSetObj.name;
-                            pointSetRaw.name = pointSetRaw.name || "Crossplot " + pointSetRaw.curveX.name + "_" + pointSetRaw.curveY.name + " - " + (Math.random().toString(36).substr(2, 3));
-                            wiApiService.createCrossplot({
-                                idWell: wellProps.idWell,
-                                name: pointSetRaw.name
-                            }, function (crossplot) {
-                                if (!crossplot.idCrossPlot) {
-                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + crossplot);
-                                    return;
-                                }
+                            DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (pointSetRaw) {
+                                prepareCurveData(pointSetRaw.curveX).then(function (curveX) {
+                                    prepareCurveData(pointSetRaw.curveY).then(function (curveY) {
+                                        prepareCurveData(pointSetRaw.curveZ).then(function(curveZ) {
+                                            pointSetRaw.curveX = curveX;
+                                            pointSetRaw.curveY = curveY;
+                                            pointSetRaw.curveZ = curveZ;
+                                            let pointSetObj = angular.copy(pointSetRaw);
+                                            delete pointSetObj.curveX;
+                                            delete pointSetObj.curveY;
+                                            delete pointSetObj.curveZ;
+                                            delete pointSetObj.name;
+                                            pointSetRaw.name = pointSetRaw.name || "Crossplot " + pointSetRaw.curveX.name + "_" + pointSetRaw.curveY.name + " - " + (Math.random().toString(36).substr(2, 3));
+                                            wiApiService.createCrossplot({
+                                                idWell: wellProps.idWell,
+                                                name: pointSetRaw.name
+                                            }, function (crossplot) {
+                                                if (!crossplot.idCrossPlot) {
+                                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + crossplot);
+                                                    return;
+                                                }
 
-                                pointSetObj.idCrossPlot = crossplot.idCrossPlot;
-                                Utils.createPointSet(pointSetObj, function (pointSet) {
-                                    if (!pointSet.idPointSet) {
-                                        DialogUtils.errorMessageDialog(ModalService, "Error when create pointSet!");
-                                        return;
-                                    }
-                                    let objectConfig = {
-                                        curve1: pointSetRaw.curveX,
-                                        curve2: pointSetRaw.curveY,
-                                        config: {
-                                            name: pointSetRaw.name,
-                                            idCrossPlot: crossplot.idCrossPlot,
-                                            idWell: wellProps.idWell,
-                                            topDepth: wellProps.topDepth,
-                                            bottomDepth: wellProps.bottomDepth,
-                                            pointSet: pointSet,
-                                        },
-                                        dragToCreate: true,
-                                        background: pointSetRaw.background
-                                    }
-                                    console.log("Crossplot configurations: ", objectConfig);
-                                    let quest = {
-                                        name: 'addCrossplot',
-                                        config: objectConfig
-                                    }
-                                    track.setCurrentQuest(quest);
-                                    track.setMode('AddObject');
-
-                                    // Utils.refreshProjectState();
+                                                pointSetObj.idCrossPlot = crossplot.idCrossPlot;
+                                                Utils.createPointSet(pointSetObj, function (pointSet) {
+                                                    if (!pointSet.idPointSet) {
+                                                        DialogUtils.errorMessageDialog(ModalService, "Error when create pointSet!");
+                                                        return;
+                                                    }
+                                                    let objectConfig = {
+                                                        curve1: pointSetRaw.curveX,
+                                                        curve2: pointSetRaw.curveY,
+                                                        config: {
+                                                            name: pointSetRaw.name,
+                                                            idCrossPlot: crossplot.idCrossPlot,
+                                                            idWell: wellProps.idWell,
+                                                            topDepth: wellProps.topDepth,
+                                                            bottomDepth: wellProps.bottomDepth,
+                                                            pointSet: pointSet,
+                                                        },
+                                                        dragToCreate: true,
+                                                        background: pointSetRaw.background
+                                                    }
+                                                    console.log("Crossplot configurations: ", objectConfig);
+                                                    let quest = {
+                                                        name: 'addCrossplot',
+                                                        config: objectConfig
+                                                    }
+                                                    track.setCurrentQuest(quest);
+                                                    track.setMode('AddObject');
+                                                });
+                                            });
+                                        });
+                                    });
                                 });
-                            })
-                        })
-
+                            });
+                        });
                     }
                 }, {
                     name: "DeleteTrack",

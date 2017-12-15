@@ -52,10 +52,10 @@
                                             <ui-select ng-model="wiModal.SelectedCurve"
                                                 ng-change="wiModal.onSelectCurveChange()"
                                                 class="normal-text">
-                                                <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.alias}}</ui-select-match>
-                                                <ui-select-choices
-                                                repeat='curve in wiModal.curvesArr | filter:{ alias : $select.search } track by curve.id'>
-                                                    <div class="padding-left-20px">{{curve.alias}}</div>
+                                                <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.name}}</ui-select-match>
+                                                <ui-select-choices group-by="'datasetName'"
+                                                repeat='curve in wiModal.curvesArr | filter:{ name : $select.search } track by curve.idCurve'>
+                                                    <div class="padding-left-20px">{{curve.name}}</div>
                                                 </ui-select-choices>
                                             </ui-select>
                                         </div>

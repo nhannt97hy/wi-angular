@@ -53,15 +53,18 @@ exports.OpenTemplateButtonClicked = function () {
 }
 
 exports.CollapseProjectButtonClicked = function () {
+    var rootConfig;
+    var expaned;
+    var child;
     const wiComponentService = this.wiComponentService;
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     let rootTreeviewCtrl = wiComponentService.getComponent('WiExplorertreeview');
     if (!selectedNodes) {
-        let rootConfig = rootTreeviewCtrl.config;
+        rootConfig = rootTreeviewCtrl.config;
         selectedNodes = rootConfig
     }
-    var expaned = false;
-    for (let child of selectedNodes) {
+    expaned = false;
+    for (child of selectedNodes) {
         expaned = child.data.childExpanded;
         if (!expaned) break;
     }
@@ -73,6 +76,8 @@ exports.CollapseProjectButtonClicked = function () {
 }
 
 exports.DeleteItemButtonClicked = function (isPermanently = false) {
+    var selectedNodesName;
+    var message;
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     const wiComponentService = this.wiComponentService;
@@ -88,11 +93,11 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     });
     if (selectedNodes[0].type)
         if (!Array.isArray(selectedNodes) || !isValid) return;
-    let selectedNodesName = '';
+    selectedNodesName = '';
     selectedNodes.forEach(function (selectedNode, index) {
         selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
-    let message = '';
+    message = '';
     if (selectedNodes.length > 1) {
         message = isPermanently ? `Are you sure to delete following ${selectedNodes[0].type}s <b>permanently</b>?:<br> ${selectedNodesName}`
             : `Are you sure to delete following ${selectedNodes[0].type}s?:<br> ${selectedNodesName}?`;
@@ -225,6 +230,8 @@ exports.RestoreAllButtonClicked = function () {
 }
 
 exports.EmptyButtonClicked = function () {
+    var selectedNodesName;
+    var ModalService;
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     const wiComponentService = this.wiComponentService;
@@ -232,11 +239,11 @@ exports.EmptyButtonClicked = function () {
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     if (!Array.isArray(selectedNodes)) return;
-    let selectedNodesName = selectedNodes[0].type + '(s):';
+    selectedNodesName = selectedNodes[0].type + '(s):';
     selectedNodes.forEach(function (selectedNode) {
         selectedNodesName += ' ' + selectedNode.data.label;
     })
-    let ModalService = this.ModalService;
+    ModalService = this.ModalService;
     dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete forever ${selectedNodesName} ?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
@@ -265,6 +272,8 @@ exports.EmptyButtonClicked = function () {
 }
 
 exports.RestoreButtonClicked = function () {
+    var selectedNodesName;
+    var ModalService;
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     const wiComponentService = this.wiComponentService;
@@ -273,11 +282,11 @@ exports.RestoreButtonClicked = function () {
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     console.log(selectedNodes);
     if (!Array.isArray(selectedNodes)) return;
-    let selectedNodesName = selectedNodes[0].type + '(s):';
+    selectedNodesName = selectedNodes[0].type + '(s):';
     selectedNodes.forEach(function (selectedNode) {
         selectedNodesName += ' ' + selectedNode.data.label;
     })
-    let ModalService = this.ModalService;
+    ModalService = this.ModalService;
     dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore ${selectedNodesName} ?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
@@ -303,4 +312,59 @@ exports.RestoreButtonClicked = function () {
             });
         }
     });
+}
+
+exports.DuplicateButtonClicked = function (type) {
+    var selectedNodesName;
+    var ModalService;
+    const wiApiService = this.wiApiService;
+    const $timeout = this.$timeout;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (!Array.isArray(selectedNodes)) return;
+    selectedNodesName = selectedNodes[0].type + '(s):';
+    selectedNodes.forEach(function (selectedNode) {
+        selectedNodesName += ' ' + selectedNode.data.label;
+    })
+    ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Duplicate Confirm", `Are you sure to duplicate ${selectedNodesName} ?`, function (yes) {
+        if (yes) {
+            async.eachOf(selectedNodes, function (selectedNode, index, next) {
+                if(type === 'plot'){
+                    wiApiService.duplicateLogplot(selectedNode.properties.idPlot, selectedNode.properties.idWell, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            next();
+                        });
+                    });
+                } else if (type === 'crossplot'){
+                    wiApiService.duplicateCrossPlot(selectedNode.properties.idCrossPlot, selectedNode.properties.idWell, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            next();
+                        });
+                    });
+                } else if (type === 'histogram'){
+                    wiApiService.duplicateHistogram(selectedNode.properties.idHistogram, selectedNode.properties.idWell, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            next();
+                        });
+                    });
+                }
+            }, function (err) {
+                if (err) {
+                    dialogUtils.errorMessageDialog(ModalService, "Can't duplicate");
+                }
+                utils.refreshProjectState();
+                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+            });
+        }
+    });
+
 }

@@ -687,6 +687,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
                         }
                     }, {
+                        name: "DuplicatePlot",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('plot');
+                        }
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -831,6 +838,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
                         }
                     }, {
+                        name: "DuplicatePlot",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('crossplot');
+                        }
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -948,6 +962,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "annotation-16x16-edit",
                         handler: function() {
 
+                        }
+                    }, {
+                        name: "DuplicatePlot",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('histogram');
                         }
                     }, {
                         name: "Delete",

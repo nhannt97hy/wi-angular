@@ -418,12 +418,16 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
         crossplotConfig.background = "rgba(255, 255, 255, 1)";
     }
 
+    /*
     if(!crossplotConfig.curve1.data) {
         crossplotConfig.curve1.data = processingData(crossplotConfig.curve1.rawData, wellProp);
     }
     if(!crossplotConfig.curve2.data) {
         crossplotConfig.curve2.data = processingData(crossplotConfig.curve2.rawData, wellProp);
     }
+    */
+    crossplotConfig.curve1 = graph.buildCurve(crossplotConfig.curve1, crossplotConfig.curve1.rawData, wellProp);
+    crossplotConfig.curve2 = graph.buildCurve(crossplotConfig.curve2, crossplotConfig.curve2.rawData, wellProp);
 
     var domEle = this.objectContainer
         .append("div")
@@ -633,8 +637,19 @@ ObjectOfTrack.prototype.refreshObjectOfTrack = function(newProp, wiApiService, c
         case 'Crossplot': 
             var __props = newProp;
             if(__props) {
-                self.viCrossplot.pointSet = __props;
+                if(!__props.curveX.data) {
+                    __props.curveX.data = processingData(__props.curveX.rawData, __props.well.properties);
+                }
+                if(!__props.curveY.data) {
+                    __props.curveY.data = processingData(__props.curveZ.rawData, __props.well.properties);
+                }
+                if(__props.curveZ && !__props.curveZ.data) {
+                    __props.curveZ.data = processingData(__props.curveZ.rawData, __props.well.properties);
+                }
+            }
 
+            if(__props) {
+                self.viCrossplot.pointSet = __props;
             } else {
                 __props = self.viCrossplot.pointSet;
             }
@@ -649,9 +664,10 @@ ObjectOfTrack.prototype.refreshObjectOfTrack = function(newProp, wiApiService, c
                 }
                 console.log("crossplot edited ", returnedCrossplot);
                 self.viCrossplot.setProperties(returnedCrossplot);
-                            self.setProperties({
+                self.setProperties({
                     name: __props.name
                 })
+
                 if(__props.intervalDepthTop != self.startDepth || 
                     __props.intervalDepthBottom != self.endDepth ||
                     (__props.background && __props.background != self.background)) {
@@ -673,6 +689,7 @@ ObjectOfTrack.prototype.refreshObjectOfTrack = function(newProp, wiApiService, c
                     delete pointSetProps.curveZ;
                     delete pointSetProps.background;
                     delete pointSetProps.name;
+                    delete pointSetProps.well;
 
                     wiApiService.editPointSet(pointSetProps, function(returnedPointSet) {
                         console.log("pointSet edited ", returnedPointSet);
