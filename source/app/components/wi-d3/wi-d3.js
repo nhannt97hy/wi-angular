@@ -754,15 +754,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.updateScale = function () {
-        let track = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container`);
-        if (!track.length) return;
-        let trackHeight = track.height();
+        let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
+        if (!trackPlot) return;
+        let trackPlotHeight = trackPlot.getAttribute('height');
         let dpCm = Utils.getDpcm();
-        let heightCm = trackHeight / dpCm;
+        let heightCm = trackPlotHeight / dpCm;
         let depthRange = this.getDepthRange();
         let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
         this.scale = scale.toFixed(0);
-        // console.log(depthRange, heightCm);
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
         })
