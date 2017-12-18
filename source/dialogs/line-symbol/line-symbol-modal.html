@@ -1,0 +1,158 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Attribute</h4>
+            </div>
+            <div class="modal-body small-text">
+                <wi-tabset>
+                    <wi-tab heading="Line" ng-if="wiModal.lineOptions.display">
+                        <div class="container-fluid">
+                            <form action="" class="form-horizontal">
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3" for="style">Line Style</label>
+                                            <div class="col-sm-9">
+                                                <ui-select theme="bootstrap" ng-model="wiModal.lineOptions.lineStyle.lineStyle">
+                                                    <ui-select-match>
+                                                        <svg height="10" width="100%" class="col-sm-12">
+                                                            <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{$select.selected.join(',')}}"
+                                                                style="stroke: {{wiModal.lineOptions.lineStyle.lineColor}}; stroke-width: 1}"></line>
+                                                        </svg>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="style in wiModal.lineStyles" class="text-left">
+                                                        <div class="container-fluid">
+                                                            <svg height="10" width="100%" class="col-sm-12">
+                                                                <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{style.join(',')}}"
+                                                                    style="stroke: {{wiModal.lineOptions.lineStyle.lineColor}}; stroke-width: 1"></line>
+                                                            </svg>
+                                                        </div>
+
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-6" for="line-width">Line Width</label>
+                                            <div class="col-sm-6">
+                                                <input type="number" id="line-width" min="1" max="10" class="form-control wi-form-control" ng-model="wiModal.lineOptions.lineStyle.lineWidth">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2">Line Color</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.lineOptions.lineStyle.lineColor}"></div>
+                                                <button type="button" ng-click="wiModal.lineColor();" class="wi-form-control">...</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Symbol" ng-if="wiModal.symbolOptions.display">
+                        <div class="container-fluid">
+                            <form class="form-horizontal">
+                                <br>
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Symbol Type</label>
+                                            <div class="col-sm-8">
+                                                <!-- <select ng-model="wiModal.symbolOptions.symbolStyle.symbolName"
+                                                        class="form-control wi-form-control"
+                                                        ng-options="item for item in wiModal.symbolType">
+                                                </select> -->
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
+                                                    <ui-select-match>
+                                                        <div ng-repeat="type in wiModal.symbolType"
+                                                             ng-if="wiModal.symbolOptions.symbolStyle.symbolName==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="type in wiModal.symbolType" position="down">
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-6 padding-right-0">Symbol Size</label>
+                                            <div class="col-sm-6">
+                                                <input type="number" id="symbol-size" min="1" max="30" class="form-control wi-form-control" ng-model="wiModal.symbolOptions.symbolStyle.symbolSize">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2">Fill Color</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%; border: 1px solid #000;" ng-style="{'background-color':wiModal.symbolOptions.symbolStyle.symbolFillStyle}"></div>
+                                                <button type="button" ng-click="wiModal.fillColor();" class="wi-form-control">...</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+                                <hr>
+                                <div class="row" ng-if="wiModal.symbolOptions.patternFill">
+                                    <div class="col-sm-12">
+                                        <div class="form-group" ng-if="wiModal.symbolOptions.patternFill">
+                                            <label class="control-label col-sm-3">Pattern</label>
+                                            <div class="col-sm-9">
+                                                <ui-select theme="bootstrap" ng-model="wiModal.symbolOptions.patternFill.pattern">
+                                                    <ui-select-match>
+                                                        <wi-canvas-rect name="_selectedPatternFill" pattern="{{wiModal.symbolOptions.patternFill.pattern}}" width="270" height="20" foreground="{{wiModal.symbolOptions.patternFill.foreground}}" background='{{wiModal.symbolOptions.patternFill.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="symbolPattern in wiModal.symbolPatterns">
+                                                        <wi-canvas-rect name="{{symbolPattern}}" pattern="{{symbolPattern}}" width="270" height="20" foreground="{{wiModal.symbolOptions.patternFill.foreground}}" background='{{wiModal.symbolOptions.patternFill.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3">Foreground</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.symbolOptions.patternFill.foreground}"></div>
+                                                <button type="button" ng-click="wiModal.foregroundColor();" class="wi-form-control">...</button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3">Background</label>
+                                            <div class="col-sm-9">
+                                                <div class="valign-middle pull-left" style="height: 23px; width: 90%;" ng-style="{'background-color':wiModal.symbolOptions.patternFill.foreground}"></div>
+                                                <button type="button" ng-click="wiModal.backgroundColor();" class="wi-form-control">...</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                </wi-tabset>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

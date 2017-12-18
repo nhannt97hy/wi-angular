@@ -1018,8 +1018,8 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         [8, 2],
         [1, 0]
         ];
-
-        this.symbolOptions.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.symbolOptions.symbolStyle.symbolName);
+        if (this.symbolOptions.symbolStyle.symbolName)
+            this.symbolOptions.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.symbolOptions.symbolStyle.symbolName);
 
         this.lineWidthes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.symbolPatterns = ['basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'sandstone', 'shale', 'siltstone'];
@@ -1055,7 +1055,8 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
             });*/
         }
         this.onOkButtonClicked = function () {
-            self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
+            if (self.symbolOptions.symbolStyle.symbolName)
+                self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
             self.symbolOptions.symbolStyle.symbolStrokeStyle = self.symbolOptions.symbolStyle.symbolFillStyle;
             close(self.lineOptions, self.symbolOptions);
         };
@@ -1065,7 +1066,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
     }
 
     ModalService.showModal({
-        templateUrl: "curve-attribute/curve-attribute-modal.html",
+        templateUrl: "line-symbol/line-symbol-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
@@ -2659,7 +2660,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         });
     });
 }
-exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
+exports.logTrackPropertiesDialog1 = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
     let wiModal = null;
     function ModalController($scope, wiComponentService, $timeout, close, $compile, $http) {
         let error = null;
@@ -3389,7 +3390,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if(self.props.general.width >= 0.5 ) {
-                wiApiService.editTrack(self.props.updateGeneralTab, function(res) {
+                wiApiService.editTrack(self.props.general, function(res) {
                     console.log("res", res);
                     let newProps = angular.copy(self.props);
                     newProps.general.width = utils.inchToPixel(self.props.general.width);
@@ -3721,7 +3722,402 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         });
     });
 };
+exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
+    let wiModal = null;
+    function ModalController($scope, wiComponentService, $timeout, close, $compile, $http) {
+        let error = null;
+        let self = this;
+        wiModal = self;
 
+        window.logTrack = this;
+
+        this.applyInProgress = false;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let graph = wiComponentService.getComponent('GRAPH');
+        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+
+        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        this.tabFlags = options.tabs;
+
+        const changed = {
+            unchanged: 0,
+            created: 1,
+            updated: 2,
+            deleted: 3
+        };
+
+        this.logLinear = ["Logarithmic", "Linear"];
+        this.displayMode = ["Line", "Symbol", "Both", "None"];
+        this.displayAs = ["Normal", "Cumulative", "Mirror", "Pid"];
+
+        this.datasets = new Array();
+
+        this.curves = new Array();
+        this.shadings = new Array();
+        // general tab
+        this.props = {
+            general: currentTrack.getProperties()
+        }
+
+        let savedZoomFactor = this.props.general.zoomFactor;
+
+        this.props.general.width = utils.pixelToInch(this.props.general.width);
+        function updateGeneralTab(callback) {
+            let temp = true;
+            // utils.changeTrack(self.props.general, wiApiService);
+            console.log('general', self.props.general);
+            if(self.props.general.width >= 0.5 ) {
+                wiApiService.editTrack(self.props.general, function(res) {
+                    console.log("res", res);
+                    let newProps = angular.copy(self.props);
+                    newProps.general.width = utils.inchToPixel(self.props.general.width);
+                    currentTrack.setProperties(newProps.general);
+
+                    if (newProps.general.zoomFactor != savedZoomFactor) {
+                        savedZoomFactor = newProps.general.zoomFactor;
+                        wiD3Ctrl.processZoomFactor();
+                        wiD3Ctrl.plotAll();
+                    }
+                    else {
+                        currentTrack.doPlot(true);
+                    }
+                    if (callback) callback();
+                })
+            } else {
+                console.log("temp");
+                temp = false;
+                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
+                callback();
+            }
+            return temp;
+        }
+
+        // curve tab
+        this.datasets = [];
+        this.curvesArr = [];
+        this.well.children.forEach(function (child) {
+            if (child.type == 'dataset') self.datasets.push(child);
+        });
+        this.datasets.forEach(function (child) {
+            child.children.forEach(function (item) {
+                if (item.type == 'curve') self.curvesArr.push(item);
+            })
+        });
+        this.curveList = currentTrack.getCurves();
+        this.curveList.forEach(function(c) {
+            self.curves.push(c.getProperties());
+        });
+
+        this.curves.forEach(function(c, index) {
+            c.changed = changed.unchanged;
+            c._index = index;
+            c.lineCurve = utils.getCurveFromId(c.idCurve);
+            c.lineOptions = {
+                display: (c.displayMode == 'Line' || c.displayMode == 'Both'),
+                lineStyle: {
+                    lineColor: c.lineColor,
+                    lineStyle: c.lineStyle,
+                    lineWidth: c.lineWidth
+                }
+            };
+            c.symbolOptions = {
+                display: (c.displayMode == 'Symbol' || c.displayMode == 'Both'),
+                symbolStyle: {
+                    symbolFillStyle: c.symbolFillStyle,
+                    symbolLineDash: c.symbolLineDash,
+                    symbolLineWidth: c.symbolLineWidth,
+                    symbolName: c.symbolName,
+                    symbolSize: c.symbolSize,
+                    symbolStrokeStyle: c.symbolStrokeStyle
+                }
+            }
+        });
+        this.onSelectCurve = function () {
+            idCurveNew = self.curves[self.__idx].lineCurve.id;
+            let temp = false;
+            if (self.curves[self.__idx].changed == changed.unchanged) temp = true;
+            wiApiService.infoCurve(idCurveNew, function (curveInfo) {
+                let lineProps = curveInfo.LineProperty;
+                console.log("curveInfo", curveInfo, self.curves[self.__idx], temp);
+                if (!lineProps) {
+                    console.log("idFamily is not detected!");
+                } else {
+                    $timeout(function () {
+                        self.curves[self.__idx] = {
+                            _index: self.__idx,
+                            alias: curveInfo.name,
+                            autoValueScale: temp ? self.curves[self.__idx].autoValueScale : false,
+                            blockPosition: lineProps.blockPosition,
+                            displayAs: temp ? self.curves[self.__idx].displayAs : 'Normal',
+                            displayMode: lineProps.displayMode,
+                            displayType: lineProps.displayType,
+                            idLine: temp ? self.curves[self.__idx].idLine : null,
+                            idTrack: currentTrack.id,
+                            idCurve: curveInfo.idCurve,
+                            ignoreMissingValues: temp ? self.curves[self.__idx].ignoreMissingValues : true,
+                            maxValue: lineProps.maxScale,
+                            minValue: lineProps.minScale,
+                            showDataset: temp ? self.curves[self.__idx].showDataset : true,
+                            showHeader: temp ? self.curves[self.__idx].showHeader : true,
+                            wrapMode: temp ? self.curves[self.__idx].wrapMode : 'None',
+                            lineOptions: {
+                                display: true,
+                                lineStyle: {
+                                    lineColor: lineProps.lineColor,
+                                    lineStyle: eval(lineProps.lineStyle),
+                                    lineWidth: lineProps.lineWidth
+                                }
+                            },
+                            symbolOptions: {
+                                display: false,
+                                symbolStyle: {
+                                    symbolFillStyle: "transparent",
+                                    symbolLineDash: [10, 0],
+                                    symbolLineWidth: 1,
+                                    symbolName: "circle",
+                                    symbolSize: 4,
+                                    symbolStrokeStyle: "blue"
+                                }
+                            },
+                            lineCurve: utils.getCurveFromId(curveInfo.idCurve),
+                            changed : temp ? changed.updated : self.curves[self.__idx].changed
+                        };
+                    });
+                }
+                
+            });
+            console.log("self.curves", self.curves);
+        }
+        this.getCurves = function () {
+            return self.curves.filter(function (c, index) {
+                return (self.curves[index].changed == changed.unchanged ||
+                    self.curves[index].changed == changed.updated ||
+                    self.curves[index].changed == changed.created);
+            });
+        }
+        this.__idx = 0;
+        this.setClickedRowCurve = function (index) {
+            $scope.selectedRowCurve = index;
+            self.__idx = self.getCurves()[index]._index;
+
+        };
+        this.onChangeCurve = function (index) {
+            if (self.curves[self.__idx].changed == changed.unchanged) self.curves[self.__idx].changed = changed.updated;
+        }
+        this.addRowCurve = function () {
+            self.curves.push({ _index: self.curves.length, changed: changed.created });
+            console.log(self.curves);
+            if(self.getCurves().length) {
+                self.setClickedRowCurve(self.getCurves().length-1);
+            }
+        };
+        this.removeRowCurve = function (index) {
+            if (!self.curves[index]) return;
+            if(self.curves[index].changed == changed.created) 
+                self.curves.splice(index, 1);
+            else 
+                self.curves[index].changed = changed.deleted;
+        };
+        this.onEditDisplayModeButtonClicked = function (index, $event) {
+            self.setClickedRowCurve(index);
+            DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, 
+                                                self.curves[self.__idx].lineOptions, self.curves[self.__idx].symbolOptions, 
+                                                function (lineStyle, symbolStyle) {
+                if (lineOptions) self.curves[self.__idx].lineOptions = lineOptions;
+                if (symbolOptions) self.curves[self.__idx].symbolOptions = symbolOptions;
+            });
+            $event.stopPropagation();
+        };
+        function preUpdate (lineProps) {
+            let line = lineProps;
+            line.lineColor = lineProps.lineOptions.lineStyle.lineColor;
+            line.lineStyle = lineProps.lineOptions.lineStyle.lineStyle;
+            line.lineWidth = lineProps.lineOptions.lineStyle.lineWidth;
+            line.symbolFillStyle = lineProps.symbolOptions.symbolStyle.symbolFillStyle;
+            line.symbolLineDash = lineProps.symbolOptions.symbolStyle.symbolLineDash;
+            line.symbolLineWidth = lineProps.symbolOptions.symbolStyle.symbolLineWidth;
+            line.symbolName = lineProps.symbolOptions.symbolStyle.symbolName;
+            line.symbolSize = lineProps.symbolOptions.symbolStyle.symbolSize;
+            line.symbolStrokeStyle = lineProps.symbolOptions.symbolStyle.symbolStrokeStyle;
+            return line;
+
+        }
+        function updateCurvesTab(updateCurvesTabCb) {
+            async.eachOfSeries(self.curves, function(item, idx, callback) {
+                switch(item.changed) {
+                    case changed.unchanged:
+                    callback();
+                    break;
+                    case changed.created: {
+                        item = preUpdate(item);
+                        wiApiService.createLine(item, function (line) {
+                            console.log("CREATE:", line);
+                            utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
+                                let lineModel = utils.lineToTreeConfig(line);
+                                if (!err) {
+                                    wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
+                                    self.curveList = currentTrack.getCurves();
+                                    self.curves[idx].idLine = line.idLine;
+                                    item.changed = changed.created;
+                                } else {
+                                    console.error(err);
+                                }
+
+                                callback();
+                            });
+                        });
+                        break;
+                    }
+
+                    case changed.updated: {
+                        item = preUpdate(item);
+                        console.log("updateLine", item);
+                        wiApiService.editLine(item, function () {
+                            self.curveList[idx].setProperties(item);
+                            currentTrack.plotCurve(self.curveList[idx]);
+                            if (callback) callback();
+                        });
+                        item.changed = changed.unchanged;
+                        break;
+                    }
+                    case changed.deleted:
+                    wiApiService.removeLine(item.idLine, function () {
+                        currentTrack.removeCurveById(item.idLine);
+                        self.curveList = currentTrack.getCurves();
+                        callback();
+                    });
+                    break;
+                    default:
+                        // break;
+                        callback('unknown change code:', item.change);
+                    }
+                }, function(err) {
+                    if (err) {
+                        setTimeout(() => {
+                            DialogUtils.errorMessageDialog(ModalService, err);
+                        });
+                    }
+                    self.curveList = currentTrack.getCurves();
+
+                    if (updateCurvesTabCb) updateCurvesTabCb(err);
+            });
+        }
+
+        // shading tab
+
+        this.shadingList = currentTrack.getShadings();
+        this.shadingList.forEach(function(s) {
+            self.shadings.push(s.getProperties());
+        });
+
+        this.shadings.forEach(function(s, index) {
+            s.changed = changed.unchanged;
+            s._index = index;
+            s.rightLine = getLine(s.idRightLine);
+            s.leftLine = getLine(s.idLeftLine);
+            s.shadingStyle = getShadingStyle(s.isNegPosFill ? s.positiveFill : s.fill);
+            s.shadingOptions = {
+                controlCurve : utils.getCurveFromId(s.idControlCurve),
+                isNegPosFill : s.isNegPosFill,
+                fill : s.fill,
+                positiveFill : s.positiveFill,
+                negativeFill : s.negativeFill
+            }
+        });
+        this.getShadings = function () {
+            return self.shadings.filter(function (s, index) {
+                return (s.changed == changed.unchanged ||
+                    s.changed == changed.updated ||
+                    s.changed == changed.created);
+            });
+        };
+        function getLine (idLine) {
+            let line = null;
+            if (idLine != null && !isNaN(idLine)) {
+                line = self.curveList.filter(function(c) {
+                    return (c.id == idLine);
+                })[0];
+            };
+            return line;
+        }
+        function getShadingStyle(fillObj) {
+            if (fillObj.pattern) return "fillPattern";
+
+            if (fillObj.varShading) return "variableShading";
+
+            fillObj.pattern = {
+                name: 'none',
+                background: "white",
+                foreground: 'black'
+            };
+            return "fillPattern";
+        }
+
+        function doApply(callback) {
+            if( self.applyInProgress) return;
+            self.applyInProgress = true;
+
+            // if (!validateAll()) {
+            //     DialogUtils.errorMessageDialog(ModalService, "Shading setting is not valid");
+            //     return;
+            // }
+            async.series([
+                        function(callback) {
+                            updateGeneralTab(function (err) {
+                                callback();
+                            });
+                            // async.setImmediate(function() {
+                            //     callback();
+                            // });
+                        },
+                        function(callback) {
+                            updateCurvesTab(function(err) {
+                                callback(err);
+                            });
+                        }/*,
+                        function(callback) {
+                            updateShadingsTab(function(err) {
+                                callback(err);
+                            });
+                        }*/
+                        ], function(err, results) {
+                            console.log(err, results);
+                            console.log("applyInProgress", self.applyInProgress);
+                            if (!self.applyInProgress) callback(true);
+                        });
+            self.applyInProgress = false;
+        }
+        this.onApplyButtonClicked = function () {
+            doApply(function(){});
+        };
+        this.onOkButtonClicked = function () {
+            doApply(function(result) {
+                if(result) {
+                    close(self.props);
+                }
+            });
+
+        };
+        this.onCancelButtonClicked = function () {
+            close(null, 100);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "log-track-properties/log-track-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        initModal(modal);
+        if (options.shadingOnly) { wiModal.shadingOnly = true };
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (data) callback(data);
+        });
+    });
+};
 exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApiService, callback) {
     function ModalController($scope, wiComponentService, close) {
         let self = this;
@@ -11166,7 +11562,7 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
 exports.curveBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
     function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
-        window.tBolk = this;
+        window.cBulk = this;
 
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -11174,16 +11570,20 @@ exports.curveBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
 
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
-        // let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
-        // let depthTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'depth-track');
-        // let imageTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'image-track');
-        // let zoneTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'zone-track');
+        let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
 
         // this.tracks = wiD3Ctrl.getTracks();
-        // console.log("tracks", this.tracks);
 
-        this.onApplyButtonClicked = function(){
-        };
+        // console.log("tracks", logTracks);
+        let tracks = [];
+        logTracks.forEach(function(l) {
+            tracks.push({
+                use : false,
+                name : l.name,
+                lines : (l.drawings).filter(d => d.type == 'curve')
+            });
+        });
+        console.log("log: ", tracks);
         this.onOkButtonClicked = function(){
             close(self);
         };
