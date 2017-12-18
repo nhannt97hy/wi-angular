@@ -8,34 +8,60 @@
             <div class="modal-body dialog-style">
                 <p></p>
                 <form class='form-horizontal form-condensed'>
-                    <div class="row">
-                        <div style="width : 5%" class="display-inline-block">Use</div>
-                        <div style="width : 10%"  class="display-inline-block">Track</div>
-                        <div style="width : 10%"  class="display-inline-block">Curve</div>
-                        <div style="width : 15%"  class="display-inline-block">Left Scale</div>
-                        <div style="width : 15%"  class="display-inline-block">Right Scale</div>
-                        <div style="width : 10%"  class="display-inline-block">Auto Scale</div>
-                        <div style="width : 20%"  class="display-inline-block">Display Mode</div>
-                        <div style="width : 10%"  class="display-inline-block">Use All Curve</div>
-                    </div>
-                    <div ng-repeat="track in wiModal.tracks">
-                        <div class="row">
-                            <div style="width : 5%" class="display-inline-block">Use</div>
-                            <div style="width : 10%"  class="display-inline-block">Track</div>
-                            <div style="width : 10%"  class="display-inline-block">Curve</div>
-                            <div style="width : 15%"  class="display-inline-block">Left Scale</div>
-                            <div style="width : 15%"  class="display-inline-block">Right Scale</div>
-                            <div style="width : 10%"  class="display-inline-block">Auto Scale</div>
-                            <div style="width : 20%"  class="display-inline-block">Display Mode</div>
-                            <div style="width : 10%"  class="display-inline-block">Use All Curve</div>
-                        </div>
-                    </div>
+                    <table class="text-on-table table table-bordered">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" width="5%">Use</th>
+                                <th rowspan="2" width="10%">Track</th>
+                                <th colspan="4" width="40%">Header</th>
+                                <th colspan="2" width="20%">Scale</th>
+                                <th colspan="2" width="25%">Display Type</th>
+                            </tr>
+                            <tr>
+                                <th width="10%">Curve Name</th>
+                                <th width="10%">Display Name</th>
+                                <th width="10%">Family</th>
+                                <th width="10%">Unit</th>
+                                <th width="10%">Left</th>
+                                <th width="10%">Right</th>
+                                <th width="15%">Display Mode</th>
+                                <th width="10%">Log/Linear</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="track in wiModal.tracks">
+                                <th width="5%" rowspan="{{track.lines.length}}">
+                                    <input type="checkbox" 
+                                            ng-model="track.use">
+                                </th>
+                                <th width="10%" rowspan="{{track.lines.length}}">
+                                    {{track.name}}
+                                </th>
+                                <th width="10%">
+                                    <input type="text"
+                                            class="form-control wi-form-control"
+                                            ng-model="track.lines[0].name">
+                                </th>
+                                <th width="10%">
+                                    <input type="text"
+                                            class="form-control wi-form-control"
+                                            ng-model="track.lines[0].name">
+                                </th>
+                                <th width="10%"></th>
+                                <th width="10%"></th>
+                                <th width="10%"></th>
+                                <th width="10%"></th>
+                                <th width="15%"></th>
+                                <th width="10%"></th>
+                            </tr>
+                        </tbody>
+                    </table>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onRunButtonClicked();" 
+                <button type="button" ng-click="wiModal.onOkButtonClicked();" 
                         ng-disabled="wiModal.applyingInProgress" class="btn btn-default">
-                    <span class="run-16x16"></span>&nbsp;Run
+                    <span class="ok-16x16"></span>&nbsp;Ok
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
                     <span class="close-16x16"></span>&nbsp;Close
