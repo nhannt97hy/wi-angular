@@ -158,6 +158,7 @@ Track.prototype.createHeaderContainer = function() {
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('z-index', 1)
+        .style('margin', '0 1px')
         .text(this.name)
         .on('mousedown', function(d) {
         })
@@ -168,7 +169,8 @@ Track.prototype.createHeaderContainer = function() {
         .attr('class', 'vi-track-drawing-header-container')
         .style('position', 'absolute')
         .style('top', this.headerNameBlock.node().clientHeight + this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
-        .style('width', '100%')
+        .style('width', 'calc(100% - 2px)')
+        .style('margin', '0 1px')
         .lower()
         .on('mousewheel', function() {
             if (d3.event.shiftKey) {
