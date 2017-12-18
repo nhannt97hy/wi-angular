@@ -84,32 +84,28 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-    const removables = ['group', 'well', 'dataset', 'curve', 'zoneset', 'zone', 'logplot', 'crossplot', 'histogram', 'comboview'];
+    const removables = ['group', 'zoneset', 'zone', 'comboview'];
+    const recyclables = ['well', 'dataset', 'curve', 'logplot', 'crossplot', 'histogram'];
     let isValid = false;
-    removables.forEach(t => {
-        if (selectedNodes[0].type == t) {
-            isValid = true;
-        }
-    });
-    if (selectedNodes[0].type)
-        if (!Array.isArray(selectedNodes) || !isValid) return;
+    if (removables.includes(selectedNodes[0].type) || recyclables.includes(selectedNodes[0].type)) isValid = true;
+    if (!Array.isArray(selectedNodes) || !isValid) return;
+    if (!recyclables.includes(selectedNodes[0].type)) isPermanently = false;
     selectedNodesName = '';
     selectedNodes.forEach(function (selectedNode, index) {
         selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     message = '';
     if (selectedNodes.length > 1) {
-        message = isPermanently ? `Are you sure to delete following ${selectedNodes[0].type}s <b>permanently</b>?:<br> ${selectedNodesName}`
+        message = isPermanently ? `Are you sure to delete following ${selectedNodes[0].type}s <b>permanently</b>?<br> ${selectedNodesName}`
             : `Are you sure to delete following ${selectedNodes[0].type}s?:<br> ${selectedNodesName}?`;
     } else {
-        message = isPermanently ? `Are you sure to delete ${selectedNodes[0].type} <b>${selectedNodesName} permanently</b>?:`
+        message = isPermanently ? `Are you sure to delete ${selectedNodes[0].type} <b>${selectedNodesName} permanently</b>?`
             : `Are you sure to delete ${selectedNodes[0].type} <b>${selectedNodesName}</b>?`;
     }
     dialogUtils.confirmDialog(this.ModalService, "Delete confirmation", message, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
-                let deleteFunction = function () { },
-                    cleanUpFunction = function () { };
+                let deleteFunction, cleanUpFunction;
                 switch (selectedNode.type) {
                     case 'group':
                         deleteFunction = wiApiService.removeGroup;
@@ -176,17 +172,17 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                     default:
                         return;
                 }
-                if (isPermanently) {
+                if (isPermanently && recyclables.includes(selectedNode.type)) {
                     wiApiService.deleteObject({ idObject: selectedNode.id, type: selectedNode.type }, function () {
                         $timeout(function () {
-                            cleanUpFunction();
+                            cleanUpFunction && cleanUpFunction();
                             next();
                         });
                     })
                 } else {
                     deleteFunction.call(wiApiService, selectedNode.id, function () {
                         $timeout(function () {
-                            cleanUpFunction();
+                            cleanUpFunction && cleanUpFunction();
                             next();
                         });
                     });
