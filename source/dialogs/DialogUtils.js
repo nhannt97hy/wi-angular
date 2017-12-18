@@ -6686,8 +6686,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             name: 'none'
                         }
                     },
-                    startDepth: parseFloat(top.toFixed(2)),
-                    endDepth: parseFloat(bottom.toFixed(2)),
+                    startDepth: parseFloat(top.toFixed(4)),
+                    endDepth: parseFloat(bottom.toFixed(4)),
                     idZoneSet: self.SelectedZoneSet.id,
                     name: Math.round(top)
                 },
