@@ -527,16 +527,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         name: "Delete",
                         label: "Delete",
-                        icon: "recycle-bin-empty-16x16",
-                        handler: function() {
-                            self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        name: "DeletePermanently",
-                        label: "Delete Permanently",
                         icon: "delete-16x16",
                         handler: function () {
-                            self.handlers.DeleteItemButtonClicked(true);
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         name: "ZoneManager",
@@ -555,16 +548,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     {
                         name: "Delete",
                         label: "Delete",
-                        icon: "recycle-bin-empty-16x16",
-                        handler: function() {
-                            self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        name: "DeletePermanently",
-                        label: "Delete Permanently",
                         icon: "delete-16x16",
                         handler: function () {
-                            self.handlers.DeleteItemButtonClicked(true);
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         name: "ZoneManager",
@@ -1033,16 +1019,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         name: "Delete",
                         label: "Delete",
-                        icon: "recycle-bin-empty-16x16",
-                        handler: function() {
-                            self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        name: "DeletePermanently",
-                        label: "Delete Permanently",
                         icon: "delete-16x16",
                         handler: function () {
-                            self.handlers.DeleteItemButtonClicked(true);
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         separator: '1'

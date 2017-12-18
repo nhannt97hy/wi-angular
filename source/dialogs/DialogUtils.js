@@ -303,9 +303,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal('show');
-
-        window.TESTMODAL = modal.element;
+        initModal(modal);
         setTimeout(function() {
             $(modal.element[0]).find('input').focus();
         }, 500);
@@ -7087,7 +7085,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     startDepth: parseFloat(top.toFixed(2)),
                     endDepth: parseFloat(bottom.toFixed(2)),
                     idZoneSet: self.SelectedZoneSet.id,
-                    name: parseInt(top)
+                    name: Math.round(top)
                 },
                 flag: _FNEW
             };
