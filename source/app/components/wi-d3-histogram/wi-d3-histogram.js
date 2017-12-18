@@ -87,9 +87,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function getXLabel() {
         if (self.curveModel) {
-            let idDataset = self.curveModel.properties.idDataset;
-            let datasetModel = utils.getModel('dataset', idDataset);
-            return datasetModel.properties.name + "." + self.curveModel.properties.name;
+            return self.curveModel.datasetName + "." + self.curveModel.properties.name;
         }
         return "";
     }
