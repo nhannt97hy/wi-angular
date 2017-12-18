@@ -303,9 +303,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal('show');
-
-        window.TESTMODAL = modal.element;
+        initModal(modal);
         setTimeout(function() {
             $(modal.element[0]).find('input').focus();
         }, 500);
