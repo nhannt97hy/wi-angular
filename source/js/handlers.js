@@ -780,7 +780,7 @@ exports.SonicRtButtonClicked = function () {
 
 exports.RtRx0ButtonClicked = function () {
     console.log('RtRx0Button is clicked');
-    newCrossPlotTemplate("DeepResistivityShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newCrossPlotTemplate("DeepResistivityInvadedZoneResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
