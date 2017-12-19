@@ -306,7 +306,7 @@ Shading.prototype.doPlot = function(highlight) {
         ctx.restore();
         drawHeader(self);
         drawRefLine(self);
-        self.canvas.lower();
+        // self.canvas.lower();
     });
     return this;
 }
