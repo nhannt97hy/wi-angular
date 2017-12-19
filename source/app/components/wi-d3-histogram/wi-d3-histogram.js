@@ -71,18 +71,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getModel = function(){
         return utils.findHistogramModelById(self.wiHistogramCtrl.id || self.idHistogram);
     }
-    function getHistogramTitle() {
-        let well = getWell();
-        if (!self.histogramModel.properties.idCurve) return "Empty";
-        let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-        if (!curve) return "Empty";
-        let datasetId = curve.properties.idDataset;
-        for (let dataset of well.children) {
-            if (dataset.type == 'dataset' && dataset.id == datasetId) {
-                return well.properties.name + "." + dataset.properties.name;
+    function getHistogramTitle(log) {
+        if(!!self.histogramModel.properties.histogramTitle){
+            return;
+        }else{
+            let well = getWell();
+            if (!self.histogramModel.properties.idCurve) {
+                self.histogramModel.properties.histogramTitle = "Empty";
+            }else{
+                let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+                if (!curve) self.histogramModel.properties.histogramTitle = "Empty";
+                else self.histogramModel.properties.histogramTitle = well.properties.name + '.' + curve.datasetName;
             }
+            saveHistogramNow(function(){
+                console.log('change title');
+            });
         }
-        return "Empty";
     }
 
     function getXLabel() {
@@ -138,7 +142,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         }
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
+        getHistogramTitle();
         self.histogramModel.properties.xLabel = getXLabel();
     }
     this.refreshHistogram = function() {
@@ -186,7 +190,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.linkModels();
         let domElem = document.getElementById(self.histogramAreaId);
         self.createVisualizeHistogram(self.histogramModel, domElem);
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
