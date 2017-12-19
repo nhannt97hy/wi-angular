@@ -65,7 +65,7 @@ function Shading(config) {
 
     this.yStep = config.yStep || 1;
 
-    this.refLineWidth = config.refLineWidth || 2;
+    this.refLineWidth = config.refLineWidth || 1;
     this.refLineColor = config.refLineColor || '#3e3e3e';
 
     this.vpX = {

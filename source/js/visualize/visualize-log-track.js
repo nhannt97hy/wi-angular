@@ -1022,7 +1022,6 @@ LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let svg = this.svgContainer;
     let y = this.getTransformY()(depth);
     let x = d3.mouse(this.plotContainer.node())[0];
-
     let lineData = drawVertical ? [
         {x1: x, y1: 0, x2: x, y2: plotRect.height},
         {x1: 0, y1: y, x2: plotRect.width, y2: y}
@@ -1104,10 +1103,13 @@ LogTrack.prototype.drawTooltipText = function(depth, showDepth) {
         .attr('width', bbox.width + padding*2)
         .attr('height', bbox.height + padding*2);
 
-    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.CENTER_X);
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.RIGHT);
     let x = parseFloat(rect.attr('x')) + padding;
     tooltip.selectAll('tspan')
         .attr('x', x);
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.TOP);
+    y = parseFloat(rect.attr('y'));
+    tooltip.attr('y', y)
 
     tooltip.raise();
 }
