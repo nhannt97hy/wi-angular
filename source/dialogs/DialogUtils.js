@@ -7411,7 +7411,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         });
     });
 };
-exports.referenceWindowsDialog = function (ModalService, well, plotModel, callback) {
+exports.referenceWindowsDialog = function (ModalService, well, plotModel, callback, callbackFinal) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         this._FNEW = 1;
@@ -7663,6 +7663,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
+            callbackFinal && callbackFinal();
             if (!ret) return;
         })
     });
