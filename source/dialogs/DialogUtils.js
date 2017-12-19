@@ -4341,6 +4341,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
         this.status = false;
 
         this.isPropsChanged = false;
+        this.isCreated = props.isCreated;
 
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
@@ -4471,7 +4472,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         function bindProps () {
             props.showTitle = self.showTitle;
-            props.stitle = self.title;
+            props.title = self.title;
             props.topJustification = self.topJustification;
             props.trackColor = self.trackColor;
             props.width = self.width;
@@ -4539,6 +4540,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.fill = props.fill || 'white';
 
         this.uploadedImages = [];
+
+        this.isCreated = props.isCreated;
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {

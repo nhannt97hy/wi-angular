@@ -1681,8 +1681,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         imgzone.setProperties({
             done: true
         });
-
-        DialogUtils.imageZonePropertiesDialog(ModalService, imgzone, function (props) {
+        let _currentImage = imgzone.getProperties();
+        _currentImage.isCreated = true;
+        DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
             if (!props) return;
             wiApiService.editImage(props, function (imgProps) {
                 if (imgProps) {
@@ -2836,7 +2837,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         } else if (_currentTrack.isImageTrack()) {
-            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
+            let track = _currentTrack.getProperties();
+            track.isCreated = true;
+            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, track, function (props) {
                 if (props) {
                     _currentTrack.removeAllDrawings();
                     props.idImageTrack = _currentTrack.id;
@@ -2848,9 +2851,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             }
                             data.width = Utils.inchToPixel(data.width);
                             _currentTrack.setProperties(data);
+                            _currentTrack.doPlot(true);
                         });
                     });
-                    _currentTrack.doPlot(true);
                 }
             });
         } else if (_currentTrack.isObjectTrack()) {
