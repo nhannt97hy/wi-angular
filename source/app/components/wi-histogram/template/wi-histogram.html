@@ -31,10 +31,10 @@
                             <div class="col-sm-3"></div>
                         </div>
                         <div class="row wi-small text-color-steelblue">
-                            <div class="col-sm-3 text-right"><label>{{wiHistogram.curveModel.properties.name}}:</label></div>
+                            <div class="col-sm-3 text-right"><label>{{wiHistogram.getwiD3Ctrl().curveModel.properties.name}}:</label></div>
                             <div class="col-sm-3">
                                 <span ng-show="!wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.histogramModel.properties.intervalDepthTop}}-{{wiHistogram.histogramModel.properties.intervalDepthBottom}}]</span>
-                                <span ng-show="wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.zoneSetModel.properties.name}}-Zonation]</span>
+                                <span ng-show="wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.getwiD3Ctrl().zoneSetModel.properties.name}}-Zonation]</span>
                             </div>
                             <div class="col-sm-3"></div>
                             <div class="col-sm-3"></div>

@@ -419,8 +419,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
+        if (self.viCrossplot && self.viCrossplot.pointSet) return;
         if (!config) config = {};
-        // if (!self.viCrossplot) {
+
         let domElem = document.getElementById(self.crossplotAreaId);
         config.well = getWell().properties;
 
@@ -428,7 +429,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
         console.log("crossplot created: ", self.viCrossplot);
         self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
-        // }
+
         return self.viCrossplot;
     }
     this.initPolygons = function (polygons) {

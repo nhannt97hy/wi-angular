@@ -282,6 +282,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
         _registerTrackDragCallback(track);
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         self.updateScale();
     };
 
@@ -971,6 +974,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //let sign = (d3.event.deltaY<0)?"":"-";
         let value = (d3.event.deltaY<0)? 2 : -2;
         slidingBar.scroll(value);
+        _drawTooltip(_currentTrack);
     }
 
     this.zoom = function (zoomOut) {
@@ -996,6 +1000,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
+        _drawTooltip(_currentTrack);
     }
 
     this.updateTrack = function (viTrack) {
@@ -1068,6 +1073,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!_tooltip) return;
 
         let plotMouse = d3.mouse(track.plotContainer.node());
+        let x = plotMouse[0];
+        let y = plotMouse[1];
+        let plotDim = track.plotContainer.node().getBoundingClientRect();
+
+        if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
+
         let depth = track.getTransformY().invert(plotMouse[1]);
 
         _tracks.forEach(function(tr) {
@@ -1164,9 +1175,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         track.onPlotMouseDown(function () {
             _onPlotMouseDownCallback(track);
         });
@@ -1294,9 +1305,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         _registerTrackCallback(track);
     }
 
@@ -1384,9 +1395,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         _registerTrackCallback(track);
     }
 
@@ -1453,9 +1464,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         _registerTrackCallback(track);
     }
 
@@ -1643,6 +1654,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _onPlotMouseWheelCallback(track) {
+        if (!_tracks || !_tracks.length) return;
+        let mouse = d3.mouse(_tracks[0].plotContainer.node());
+        if (mouse[1] < 0) return;
+
         if (d3.event.ctrlKey) {
             self.zoom(d3.event.deltaY < 0);
             d3.event.preventDefault();
@@ -1790,8 +1805,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         imgzone.setProperties({
             done: true
         });
-
-        DialogUtils.imageZonePropertiesDialog(ModalService, imgzone, function (props) {
+        let _currentImage = imgzone.getProperties();
+        _currentImage.isCreated = true;
+        DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
             if (!props) return;
             wiApiService.editImage(props, function (imgProps) {
                 if (imgProps) {
@@ -1863,7 +1879,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     });
                                 });
                             });
-                        });                        
+                        });
                     });
                 });
                 break;
@@ -2945,7 +2961,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         } else if (_currentTrack.isImageTrack()) {
-            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
+            let track = _currentTrack.getProperties();
+            track.isCreated = true;
+            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, track, function (props) {
                 if (props) {
                     _currentTrack.removeAllDrawings();
                     props.idImageTrack = _currentTrack.id;
@@ -2957,9 +2975,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             }
                             data.width = Utils.inchToPixel(data.width);
                             _currentTrack.setProperties(data);
+                            _currentTrack.doPlot(true);
                         });
                     });
-                    _currentTrack.doPlot(true);
                 }
             });
         } else if (_currentTrack.isObjectTrack()) {
@@ -3019,7 +3037,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
-        self.svgId = self.plotAreaId + 'SVG';
+        // self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
         wiComponentService.on('tab-changed', function (logplotModel) {
             if (!logplotModel || logplotModel.type != 'logplot' || self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
@@ -3039,7 +3057,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+
         $timeout(function () {
+            d3.select('#' + self.plotAreaId).on('mousewheel', function() {
+                _onPlotMouseWheelCallback();
+            });
             graph.sheetDraggable(document.getElementById(self.plotAreaId));
             let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
             let domElement = $(`wi-d3[name=${self.name}]`);

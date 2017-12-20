@@ -109,7 +109,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;OK</button>
-                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;Apply</button>
+                <button ng-if="wiModal.isCreated" type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;Apply</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

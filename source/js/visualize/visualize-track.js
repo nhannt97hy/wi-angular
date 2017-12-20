@@ -407,10 +407,12 @@ Track.prototype.on = function(type, cb) {
  * Update header container
  */
 Track.prototype.updateHeader = function() {
+    let name = this.name + (this.zoomFactor == 1 ? '' : (' (' + this.zoomFactor + 'x)'));
+
     this.headerNameBlock
         .style('display', this.showTitle ? 'block': 'none')
         .style('text-align', this.justification)
-        .text(this.name);
+        .text(name);
 }
 
 Track.prototype.shouldRescaleWindowY = function() {

@@ -725,7 +725,9 @@ function getDpcm() {
 }
 
 let ALIGN = exports.ALIGN = {
-    CENTER_X: 1
+    CENTER_X: 1,
+    RIGHT: 2,
+    TOP: 3
 };
 
 let alignSvg = exports.alignSvg = function(element, container, type) {
@@ -734,6 +736,12 @@ let alignSvg = exports.alignSvg = function(element, container, type) {
 
     if (type == ALIGN.CENTER_X) {
         element.attr('x', containerDim.width / 2 - elemDim.width / 2);
+    }
+    else if (type == ALIGN.RIGHT) {
+        element.attr('x', containerDim.width - elemDim.width);
+    }
+    else if (type == ALIGN.TOP) {
+        element.attr('y', 0);
     }
     return element;
 }
