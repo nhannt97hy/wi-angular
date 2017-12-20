@@ -11,10 +11,10 @@
             <div class="icon-expanded"
                 ng-click="wiBaseTreeview.onCollapse($index)">
                 <i aria-hidden="true" class="fa"
-                ng-class="
-                    {'fa-caret-down': item.data.childExpanded,
-                    'fa-caret-right': !item.data.childExpanded,
-                    'wi-hidden': item.children == null || item.children.length == 0}"></i>
+                    ng-class="
+                        {'fa-caret-down': item.data.childExpanded,
+                        'fa-caret-right': !item.data.childExpanded,
+                        'wi-hidden': item.children == null || item.children.length == 0}"></i>
             </div>
             <div ng-click="wiBaseTreeview.onClick($index, $event)"
                 ng-dblclick="wiBaseTreeview.onDoubleClick($index);">

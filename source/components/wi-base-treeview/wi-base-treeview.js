@@ -9,7 +9,9 @@ function WiBaseTreeController(wiComponentService) {
     };
 
     this.onCollapse = function ($index) {
-        this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
+        if (this.config[$index].children) {
+            this.config[$index].data.childExpanded = !this.config[$index].data.childExpanded;
+        }
     };
 
     this.addItem = function (parentName, item) {
