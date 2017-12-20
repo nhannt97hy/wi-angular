@@ -216,6 +216,12 @@ LogTrack.prototype.getMarkers = function() {
     });
 }
 
+LogTrack.prototype.getAnnotations = function() {
+    return this.drawings.filter(function(d) {
+        return d.isAnnotation();
+    })
+}
+
 /**
  * Get temporary curve to create pair shading
  */
@@ -1126,6 +1132,10 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         self.plotContainer.on("mousedown")();
         self.trackContainer.node().focus();
     }
+    function onCurveDropHandler(event) {
+        if (self == event.desTrack) return;
+        callbackDrop && callbackDrop(event.desTrack);
+    }
     $(this.plotContainer.node()).draggable({
         axis: 'x',
         containment: self.root.node(),
@@ -1145,12 +1155,10 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         },
         start: function (event, ui) {
             triggerClickPlot(event);
-            document.addEventListener('oncurverop', onCurveDropHandler, false);
-            function onCurveDropHandler(event) {
-                document.removeEventListener('oncurverop', onCurveDropHandler);
-                if (self == event.desTrack) return;
-                callbackDrop && callbackDrop(event.desTrack);
-            }
+            document.addEventListener('oncurvedrop', onCurveDropHandler);
+        },
+        stop: function () {
+            document.removeEventListener('oncurvedrop', onCurveDropHandler);
         }
     })
     .click(function (event) {
@@ -1161,7 +1169,7 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         scope: 'curve',
         tolerance: 'pointer',
         drop: function (event, ui) {
-            let onCurveDrop = new Event('oncurverop');
+            let onCurveDrop = new Event('oncurvedrop');
             onCurveDrop.desTrack = self;
             document.dispatchEvent(onCurveDrop);
         }

@@ -1423,10 +1423,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.markers.forEach(function (marker) {
                             wiD3Ctrl.addMarkerToTrack(trackObj, marker);
                         });
-                        aTrack.images.forEach(function (image) {
-                            image.src = image.location;
-                            wiD3Ctrl.addImageToTrack(trackObj, image);
-                        })
+                        // aTrack.images.forEach(function (image) {
+                        //     image.src = image.location;
+                        //     wiD3Ctrl.addImageToTrack(trackObj, image);
+                        // })
                         aTrack.annotations.forEach(function (anno) {
                             wiD3Ctrl.addAnnotationToTrack(trackObj, anno);
                         })

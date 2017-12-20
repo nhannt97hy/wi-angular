@@ -116,7 +116,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth),
             width: Utils.inchToPixel(logTrack.width),
-            zoomFactor: logTrack.zoomFactor
+            zoomFactor: logTrack.zoomFactor,
+            xMajorTicks: logTrack.majorTicks,
+            xMinorTicks: logTrack.minorTicks
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
         graph.rearrangeTracks(self);
@@ -143,6 +145,92 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackDragCallback(track);
         return track;
     };
+
+    this.updateLogTrack = function (viTrack) {
+        if (!viTrack.isLogTrack()) return;
+        let trackProps = viTrack.getProperties();
+        let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+        function _addShadingToTrack (shading) {
+            let shadingModel = Utils.shadingToTreeConfig(shading, palettes);
+            if (!shadingModel.idRightLine) return;
+            if (!shadingModel.idLeftLine) {
+                let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
+                if (!lineObj1) return;
+                self.addCustomShadingToTrack(viTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+            }
+            else {
+                let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
+                let lineObj2 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idLeftLine);
+                if (!lineObj1 || ! lineObj2) return;
+                self.addPairShadingToTrack(viTrack, lineObj2, lineObj1, shadingModel.data);
+            }
+        }
+        wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
+            viTrack.getMarkers().forEach(viMarker => {
+                let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
+                viTrack.removeDrawing(viMarker);
+                if (marker) {
+                    self.addMarkerToTrack(viTrack, marker);
+                } // add if viMarker in track
+            });
+            logTrack.markers.forEach(marker => {
+                if(!viTrack.getMarkers().find(viMarker => viMarker.id == marker.idMarker)) {
+                    self.addMarkerToTrack(viTrack, marker);
+                } // add if marker not in viTrack
+            });
+            viTrack.getAnnotations().forEach(viAnno => {
+                let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
+                viTrack.removeDrawing(viAnno);
+                if (anno) {
+                    self.addAnnotationToTrack(viTrack, anno);
+                }
+            });
+            logTrack.annotations.forEach(anno => {
+                if(!viTrack.getAnnotations().find(viAnno => viAnno.id == anno.idAnnotation)) {
+                    self.addAnnotationToTrack(viTrack, anno);
+                }
+            });
+            let promises = [];
+            viTrack.getCurves().forEach(viCurve => {
+                let line = logTrack.lines.find(line => line.idLine == viCurve.id);
+                let curveData = viCurve.rawData;
+                viTrack.removeDrawing(viCurve);
+                if (line) {
+                    self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
+                }
+            });
+            logTrack.lines.forEach(line => {
+                if(!viTrack.getCurves().find(viCurve => viCurve.id == line.idLine)) {
+                    promises.push(new Promise(resolve => {
+                        wiApiService.dataCurve(line.idCurve, function (curveData) {
+                            self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
+                            resolve();
+                        })
+                    }))
+                }
+            });
+            Promise.all(promises)
+                .then(function () {
+                    viTrack.getShadings().forEach(viShading => {
+                        let shading = logTrack.shadings.find(shading => shading.idShading == viShading.id);
+                        viTrack.removeDrawing(viShading);
+                        if (!shading) return;
+                        _addShadingToTrack(shading);
+                    });
+                    logTrack.shadings.forEach(shading => {
+                        if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
+                        _addShadingToTrack(shading);
+                    });
+
+                    logTrack.width = Utils.inchToPixel(logTrack.width);
+                    viTrack.setProperties(logTrack);
+                    viTrack.doPlot();
+                })
+                .catch(function (err) {
+                    console.error(err);
+                })
+        });
+    }
 
     this.addDepthTrack = function (callback) {
         var trackOrder = getOrderKey();
@@ -910,6 +998,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.adjustSlidingBarFromDepthRange([low, high]);
     }
 
+    this.updateTrack = function (viTrack) {
+        if (viTrack.isLogTrack()) {
+            self.updateLogTrack(viTrack);
+            return;
+        }
+        if (viTrack.isDepthTrack()) {
+            self.updateDepthTrack(viTrack);
+            return;
+        }
+        if (viTrack.isZoneTrack()) {
+            self.updateZoneTrack(viTrack);
+            return;
+        }
+        if (viTrack.isImageTrack()) {
+            self.updateImageTrack(viTrack);
+            return;
+        }
+        if (viTrack.isObjectTrack()) {
+            self.updateObjectTrack(viTrack);
+            return;
+        }
+    }
+
     /* Private Begin */
     function _splitZone(track, zone) {
         let props = Utils.objClone(zone.getProperties());
@@ -1076,10 +1187,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let curve = currentCurve.getProperties();
             curve.idTrack = desTrack.id;
             wiApiService.editLine(curve, function (res) {
-                track.removeCurve(currentCurve);
-                self.addCurveToTrack(desTrack, currentCurve.rawData, Utils.lineToTreeConfig(res).data);
-                track.doPlot(true);
-                desTrack.doPlot();
+                self.updateTrack(track);
+                self.updateTrack(desTrack);
             });
         });
         _registerTrackCallback(track);
