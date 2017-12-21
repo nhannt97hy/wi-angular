@@ -1485,33 +1485,30 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             continue;
                         } else {
                             for (let objectOfTrack of aTrack.object_of_tracks) {
-                                objectOfTrack.minY = viTrack.minY;
-                                objectOfTrack.maxY = viTrack.maxY;
+                                //objectOfTrack.minY = viTrack.minY;
+                                //objectOfTrack.maxY = viTrack.maxY;
                                 let anObject = wiD3Ctrl.addObjectToTrack(viTrack, objectOfTrack);
-                                
                                 let objectProps = JSON.parse(objectOfTrack.object);
                                 
                                 switch(objectProps.type) {
                                     case 'Histogram' :
-                                        objectProps.intervalDepthTop = objectOfTrack.topDepth;
-                                        objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
-                                        /*
-                                        objectProps.curve = new Object();
-                                        objectProps.curve.yStep = objectProps.yStep;
-                                        objectProps.curve.idCurve = objectProps.curveId;
-                                        
-                                        let wellProps = {
-                                            topDepth : objectProps.topDepth,
-                                            bottomDepth : objectProps.bottomDepth
+                                        if (objectProps.idHistogram) {
+                                            let histogramModel = findHistogramModelById(objectProps.idHistogram);
+                                            if (histogramModel && histogramModel.properties) {
+                                                anObject.createHistogram(
+                                                    histogramModel.properties.idHistogram, 
+                                                    histogramModel.properties.name, 
+                                                    wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                );
+                                            }
+                                            else {
+                                               // TODO 
+                                            }
                                         }
-
-                                        wiApiService.dataCurve(objectProps.curveId, function(returnedCurve) {
-                                            objectProps.curve.rawData = returnedCurve;
-                                            console.log("Histogram Props: ", objectProps);
-                                            anObject.createHistogramToForeignObject(objectProps, wellProps);
-                                        })
-                                        */
-
+                                        else {
+                                            // TODO
+                                        }
+                                        /*
                                         wiApiService.getHistogram(objectProps.idHistogram, function (histogramProps) {
                                             if(histogramProps.idHistogram) {
                                                 histogramProps.background = objectProps.background;
@@ -1522,14 +1519,15 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                                     wiApiService.dataCurve(histogramProps.idCurve, function (dataCurve) {
                                                         histogramProps.curve.rawData = dataCurve;
                                                         wiApiService.getWell(histogramProps.idWell, function (wellProps) {
-                                                            anObject.createHistogramToForeignObject(histogramProps, wellProps);
+                                                            anObject.createHistogramToForeignObject(histogramProps, wellProps, wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc);
                                                         })
                                                     })
                                                 })
                                             } else {
                                                 wiD3Ctrl.removeAnObjectOfObjectTrack(viTrack, anObject);
                                             }
-                                        })
+                                        });
+                                        */
 
                                         break;
                                     case 'Crossplot':
@@ -1780,7 +1778,8 @@ function findWells() {
     return wells;
 }
 
-exports.findHistogramModelById = function (idHistogram) {
+exports.findHistogramModelById = findHistogramModelById;
+function findHistogramModelById(idHistogram) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;

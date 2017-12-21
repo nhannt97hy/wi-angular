@@ -11,8 +11,10 @@ function getCurveFromName(name) {
     return samples;
 }
 
-function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
+function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService, $compile) {
     let self = this;
+    this.scopeObj = $scope;
+    this.compileFunc = $compile;
     let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
@@ -365,7 +367,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         config.yStep = parseFloat(_getWellProps().step);
         config.offsetY = parseFloat(_getWellProps().topDepth);
         config.width = Utils.inchToPixel(trackConfig.width);
-        config.wiComponentService = wiComponentService;
+        //config.wiComponentService = wiComponentService;
         console.log(config);
 
         let track = graph.createObjectTrack(config, document.getElementById(self.plotAreaId));
@@ -464,7 +466,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!config) {
             console.log('there are no configurations of object');
         }
-        let object = track.addObject(config, $scope, wiApiService, Utils);
+        let object = track.addObject(config, wiComponentService, wiApiService);
         track.plotObject(object);
         //track.rearrangeHeaders();
         track.onObjectMouseDown(object, function () {
@@ -1117,6 +1119,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _registerObjectTrackCallback(track) {
         let object;
+        /*
         track.plotContainer.call(d3.drag()
             .on('start', function () {
                 track.setCurrentDrawing(null);
@@ -1175,6 +1178,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 track.setMode(null);
             })
         );
+        */
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
@@ -1698,38 +1702,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!object) {
             return;
         }
-        switch (object.currentDraw) {
-            case "Histogram" :
-                let histogramConfig = {
-                    properties: object.viHistogram.histogramModel.properties,
-                    curves: getAllCurves(),
-                    background: object.background
-                }
-                DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (props) {
-                    object.refreshObjectOfTrack(props, wiApiService, function() {
-                        Utils.refreshProjectState();
-                    });
-                });
-                break;
-            case "Crossplot" :
-                object.viCrossplot.pointSet.name = object.name;
-                let crossplotConfig = {
-                    properties: object.viCrossplot.pointSet,
-                    curves: getAllCurves(),
-                    background: object.background,
-                }
-                if(!crossplotConfig.properties.idWell) {
-                    crossplotConfig.properties.idWell = _getWellProps().idWell;
-                }
-                DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (props) {
-                    object.refreshObjectOfTrack(props, wiApiService, function () {
-                        Utils.refreshProjectState();
-                    });
-                })
-                break;
-            default:
-                console.log('nothing drawing here!');
-        }
+        // TODO
     }
 
     function markerProperties(marker) {
@@ -1873,7 +1846,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                     break;
                 case "Histogram" :
-                    wiApiService.removeHistogram(object.viHistogram.histogramModel.properties.idHistogram, function () {
+                    wiApiService.removeHistogram(object.idHistogram, function () {
                         console.log("histogram removed");
                         Utils.refreshProjectState();
                     })
@@ -1909,80 +1882,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 separator: '1'
             }
         ];
-        if (object.viHistogram) {
-            contextMenu.push({
-                name: 'showBar',
-                label: 'Show Bar',
-                "isCheckType": 'true',
-                checked: object.viHistogram.histogramModel.properties.plot == "Bar" ? true : false,
-                handler: function () {
-                    switch (object.viHistogram.histogramModel.properties.plot) {
-                        case "Bar" :
-                            object.viHistogram.histogramModel.properties.plot = "Curve";
-                            break;
-                        default:
-                            object.viHistogram.histogramModel.properties.plot = "Bar";
-                    }
-                    object.refreshObjectOfTrack(object.viHistogram.histogramModel.properties, wiApiService, function () {
-                        Utils.refreshProjectState();
-                    });
-                }
-            });
-            contextMenu.push({
-                name: 'showGaussian',
-                label: 'Show showGaussian',
-                "isCheckType": 'true',
-                checked: object.viHistogram.histogramModel.properties.showGaussian,
-                handler: function () {
-                    object.viHistogram.histogramModel.properties.showGaussian = !object.viHistogram.histogramModel.properties.showGaussian;
-                    object.refreshObjectOfTrack(object.viHistogram.histogramModel.properties, wiApiService, function () {
-                        Utils.refreshProjectState();
-                    });
-                }
-            });
-            contextMenu.push({
-                name: 'showCumulative',
-                label: 'Show Cumulative',
-                "isCheckType": 'true',
-                checked: object.viHistogram.histogramModel.properties.showCumulative,
-                handler: function () {
-                    object.viHistogram.histogramModel.properties.showCumulative = !object.viHistogram.histogramModel.properties.showCumulative;
-                    object.refreshObjectOfTrack(object.viHistogram.histogramModel.properties, wiApiService, function () {
-                        Utils.refreshProjectState();
-                    });
-                }
-            });
-            contextMenu.push({
-                name: 'showGrid',
-                label: 'Show Grid',
-                "isCheckType": 'true',
-                checked: object.viHistogram.histogramModel.properties.showGrid,
-                handler: function () {
-                    object.viHistogram.histogramModel.properties.showGrid = !object.viHistogram.histogramModel.properties.showGrid;
-                    object.refreshObjectOfTrack(object.viHistogram.histogramModel.properties, wiApiService, function () {
-                        Utils.refreshProjectState();
-                    });
-                }
-            });
-            contextMenu.push({
-                name: 'showYAxisAsPercent',
-                label: 'Show Y Axis as PerCent',
-                "isCheckType": 'true',
-                checked: object.viHistogram.histogramModel.properties.plotType != "Frequency" ? true : false,
-                handler: function () {
-                    switch (object.viHistogram.histogramModel.properties.plotType) {
-                        case "Frequency" :
-                            object.viHistogram.histogramModel.properties.plotType = "Percentile";
-                            break;
-                        default:
-                            object.viHistogram.histogramModel.properties.plotType = "Frequency";
-                    }
-                    object.refreshObjectOfTrack(object.viHistogram.histogramModel.properties, wiApiService, function () {
-                        Utils.refreshProjectState();
-                    });
-                }
-            });
-        }
 
         self.setContextMenu(contextMenu);
     }
@@ -2242,7 +2141,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         createdHistogram.curve = histogramProps.curve;
                         let quest = {
                             name: 'addHistogram',
-                            config: createdHistogram
+                            config: createdHistogram,
+                            scopeObj: $scope,
+                            compileFunc: $compile
                         }
                         let trackOrder = getOrderKey();
 
@@ -2264,7 +2165,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                                 let object = self.addObjectToTrack(viTrack, {
                                     minY: viTrack.minY,
-                                    maxY: viTrack.maxY,
+                                    maxY: viTrack.maxY
                                 });
                                 if (object) {
                                     object.handleQuest(quest, _getWellProps());
@@ -2486,48 +2387,79 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: 'Add Histogram',
                     icon: 'histogram-new-16x16',
                     handler: function () {
-                        var curveArr = getAllCurves();
-                        if (!curveArr || !curveArr.length) {
-                            console.error('no curve');
-                            return;
-                        }
-                        let histogramConfig = {
-                            properties: {
-                                divisions: 10,
-                                plot: 'Bar',
-                                color: 'blue',
-                                showGrid: true,
-                                idWell: _getWellProps().idWell
-                            },
-                            curves: curveArr,
-                            dragToCreate: true
-                        }
-                        DialogUtils.histogramForObjectTrackDialog(ModalService, histogramConfig, function (histogramProps) {
-                            histogramProps.plotType = "Frequency";
-                            let dataRequest = angular.copy(histogramProps);
-                            dataRequest.idWell = _getWellProps().idWell;
-                            dataRequest.idCurve = histogramProps.curve.idCurve;
-                            if(!dataRequest.name) {
-                                dataRequest.name = "Histogram " + dataRequest.curve.name + " - " 
-                                    + (Math.random().toString(36).substr(2, 3));
-                            }
-                            delete dataRequest.curve;
-                            wiApiService.createHistogram(dataRequest, function(createdHistogram) {
+                        let windowY = self.getDepthRangeFromSlidingBar();
+                        let range = windowY[1] - windowY[0];
+                        let newHistogramProps = {
+                            divisions: 10,
+                            plot: 'Bar',
+                            color: 'blue',
+                            showGrid: true,
+                            idWell: _getWellProps().idWell,
+                            intervalDepthTop: windowY[0] + range/4.,
+                            intervalDepthBottom: windowY[1] - range/4.,
+                            name: "Histogram - " + (Math.random().toString(36).substr(2, 3))
+                        };
+
+                        let newHistogram;
+                        let newOoT;
+                        async.series([ function(callback) {
+                            wiApiService.createHistogram(newHistogramProps, function(createdHistogram) {
                                 if(!createdHistogram.idHistogram) {
                                     DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
-                                    return;
+                                    callback(createdHistogram);
                                 }
-                                createdHistogram.curve = histogramProps.curve;
-                                createdHistogram.dragToCreate = true;
-                                let quest = {
-                                    name: 'addHistogram',
-                                    config: createdHistogram
+                                else {
+                                    newHistogram = createdHistogram;
+                                    callback();
                                 }
-
-                                track.setCurrentQuest(quest);
-                                track.setMode("AddObject");
                             });
-                        });
+                        }, function(callback) {
+                            Utils.refreshProjectState().then(function() {
+                                callback();
+                            });
+                        }, function(callback) {
+                            DialogUtils.histogramFormatDialog(ModalService, newHistogram.idHistogram, function(histogramProps) {
+                                newHistogram = histogramProps
+                                callback();
+                            }, function() {
+                                callback('cancel');
+                            }, {
+                                hideApply: true,
+                                autoName: true
+                            });
+                        }, function(callback) {
+                            wiApiService.createObjectOfObjectTrack({
+                                idObjectTrack: _currentTrack.id,
+                                topDepth: newHistogram.intervalDepthTop,
+                                bottomDepth: newHistogram.intervalDepthBottom,
+                                object: JSON.stringify({
+                                    type: 'Histogram',
+                                    idHistogram: newHistogram.idHistogram,
+                                    background: 'white'
+                                })
+                            }, function(returnedObject) {
+                                if (returnedObject.idObjectOfTrack) {
+                                    newOoT = returnedObject;
+                                    callback();
+                                }
+                                else {
+                                    newOoT = null;
+                                    callback(returnedObject);
+                                }
+                            });
+                        }, function(callback) {
+                            Utils.refreshProjectState().then(function() {
+                                callback();
+                            });
+                        }, function(callback) {
+                            if (!_currentTrack) return;
+                            let transformY = _currentTrack.getTransformY();
+
+                            let object = self.addObjectToTrack(_currentTrack, newOoT);
+                            _currentTrack.setCurrentDrawing(object);
+                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile);
+                            callback();
+                        }]);
                     }
                 }, {
                     name: 'AddCrossplot',
@@ -2779,7 +2711,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
         return 0;
     }
-    this.openProptertiesDialog = function () {
+    this.openPropertiesDialog = function () {
         if (_currentTrack.isDepthTrack()) {
             openTrackPropertiesDialog();
             return;

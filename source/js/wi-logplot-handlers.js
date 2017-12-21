@@ -10,7 +10,7 @@ function genSamples(nSamples) {
 }
 
 exports.EditFormatButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().openProptertiesDialog();
+    this.wiLogplot.getwiD3Ctrl().openPropertiesDialog();
 };
 
 exports.SaveAsLogplotButtonClicked = function () {
