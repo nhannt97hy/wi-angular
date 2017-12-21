@@ -216,9 +216,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.histogramFormat = function(){
         DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl.id||self.idHistogram, 
             function(histogramProperties) {
+                if(!histogramProperties.idZoneSet){
+                    self.wiHistogramCtrl.CloseZone();
+                }else{
+                    self.wiHistogramCtrl.isShowWiZone = true;
+                }
                 self.linkModels();
                 if (self.getZoneCtrl()) zoneCtrl.zoneUpdate();
-                //self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves, histogramProperties.referenceScale);
             }
         );
     }
