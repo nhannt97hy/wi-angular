@@ -38,6 +38,8 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
     layoutManager = new GoldenLayout(layoutConfig, document.getElementById(domId));
+    layoutManager.init();
+    LAYOUT = layoutManager;
 
     layoutManager.registerComponent('wi-block', function (container, componentState) {
         let templateHtml = $('template#' + componentState.templateId).html();
@@ -49,23 +51,19 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
-        let modelRef = componentState.model
+        let modelRef = componentState.model;
         container.on('destroy', function () {
             let model = utils.getModel(modelRef.type, modelRef.id);
             if (!model) return;
             model.data.opened = false;
         })
     });
-    layoutManager.on('stackCreated', function (stack) {
-        stack.on('activeContentItemChanged', function (activeContentItem) {
-            if (activeContentItem.config.componentState.model) {
-                wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
-            }
-        })
-    })
 
-    layoutManager.init();
-    LAYOUT = layoutManager;
+    layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
+        if (activeContentItem.config.componentState.model) {
+            wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+        }
+    });
 }
 
 module.exports.putLeft = function (templateId, title) {
