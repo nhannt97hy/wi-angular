@@ -8981,24 +8981,33 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         }
 
         function deconvolution(input, kernel, out, callback){ // need update
-            // check validity of params
-            if(!input || !out || !kernel) callback(false);
-            if(input.length < 1 || kernel.length < 1) callback(false);
-
-            let a_dft = calDFT(input);
-            // console.log(a_dft);
-            let b_dft = calDFT(kernel);
-            // console.log(b_dft);
-            let c = new Array(input.length);
-            async.eachOfSeries(input,(data, i, done)=>{
-                c[i] = math.divide(a_dft[i], b_dft[i]);
-                async.setImmediate(done);
-            }, function(err){
-                console.log(c);
-                calIDFT(c, out);
-                console.log(out);
-                callback(true);
-            })
+             // check validity of params
+             if(!input || !out || !kernel) callback(false);
+             if(input.length < 1 || kernel.length < 1) callback(false);
+ 
+             let lstIndex = new Array();
+             let inputF = new Array();
+             for(let i = 0; i < input.length; i++){
+                 if(!isNaN(input[i])){
+                     inputF.push(input[i]);
+                     lstIndex.push(i);
+                 }
+             }
+             let kernelF = kernel.filter(d => {return !isNaN(d);});
+             out.length = input.length;
+             out.fill(NaN);
+ 
+             wiApiService.deconvolution({input: inputF, kernel: kernelF}, (result) => {
+                 let retArr = result.curve;
+                 let len = Math.min(lstIndex.length, retArr.length);
+                 for(let j = 0; j < len; j++){
+                     out[lstIndex[j]] = retArr[j];
+                     if(j == len - 1) {
+                         console.log('Done!');
+                         callback(true);
+                     }
+                 }
+             })
         }
 
         function saveCurve(curve){
@@ -9029,9 +9038,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                 if (self.isDeconvolution) {
                     deconvolution(input, kernel, self.ResultCurve.data, function (err) {
                         if (err) {
-                            console.log(self.ResultCurve.data);
-                            self.applyingInProgress = false;
-                            // saveCurve(self.ResultCurve);
+                            // console.log(self.ResultCurve.data);
+                            // self.applyingInProgress = false;
+                            saveCurve(self.ResultCurve);
                         } else {
                             console.log("Deconvolution Error!");
                             self.applyingInProgress = false;
@@ -9040,9 +9049,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                 } else {
                     convolution(input, kernel, self.ResultCurve.data, function (err) {
                         if (err) {
-                            console.log(self.ResultCurve.data);
-                            self.applyingInProgress = false;
-                            // saveCurve(self.ResultCurve);
+                            // console.log(self.ResultCurve.data);
+                            // self.applyingInProgress = false;
+                            saveCurve(self.ResultCurve);
                         } else {
                             console.log("Convolution Error!");
                             self.applyingInProgress = false;
