@@ -11171,6 +11171,76 @@ exports.curveFilterDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
+        this.createOp = 'backup';
+        this.filterOp = '5';
+        this.numLevel = 5;
+        this.wells = utils.findWells();
+        this.datasets = [];
+        this.curvesArr = [];
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if(selectedNodes && selectedNodes.length){
+            switch (selectedNodes[0].type){
+                case 'well':
+                self.SelectedWell = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+
+                default:
+                self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+            }
+        }
+        else {
+            self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+        }
+
+        function getDatasets() {
+            self.datasets.length = 0;
+            self.curvesArr.length = 0;
+            if(self.SelectedWell && self.SelectedWell.children.length){
+                self.SelectedWell.children.forEach(function (child, i) {
+                    if (child.type == 'dataset')
+                        self.datasets.push(child);
+                    if(i == self.SelectedWell.children.length - 1){
+                        if(self.datasets.length){
+                            self.SelectedDataset = self.datasets[0];
+                            self.datasets.forEach(child => {
+                                child.children.forEach(function (item) {
+                                    if (item.type == 'curve') {
+                                        self.curvesArr.push(item);
+                                    }
+                                })
+                            })
+                        }
+                    }
+                });
+            }
+        }
+
+        this.defaultDepthButtonClick = function(){
+            self.topDepth = self.SelectedWell.properties.topDepth;
+            self.bottomDepth = self.SelectedWell.properties.bottomDepth;
+        }
+        this.onChangeWell = function () {
+            getDatasets();
+            self.defaultDepthButtonClick();
+            self.SelectedCurve = self.curvesArr[0];
+        }
+        this.onChangeWell();
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.wells = utils.findWells();
+                self.onChangeWell();
+            }, 0);
+        });
+
         this.onCancelButtonClicked = function(){
             close(null);
         }
