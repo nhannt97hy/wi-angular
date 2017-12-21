@@ -1607,3 +1607,6 @@ Service.prototype.removeObjectOfObjectTrack = function (idObjectOfTrack, callbac
 Service.prototype.convolution = function (data, callback){
     this.post('/convolution', data, callback, 'processing');
 }
+Service.prototype.deconvolution = function (data, callback){
+    this.post('/deconvolution', data, callback, 'processing');
+}
