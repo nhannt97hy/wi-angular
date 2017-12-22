@@ -21,9 +21,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-    var saveHistogram= utils.debounce(function() {
+    var saveHistogram= utils.debounce(function(callback) {
             wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
                 console.log('updated');
+                if (callback) callback();
             });
         }, 3000);
 
@@ -34,6 +35,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (callback) callback();
         });
     }
+    this.saveHistogramNow = saveHistogramNow;
 /*
     this.statistics = {
         length: null,
@@ -63,13 +65,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getWell = getWell;
     function getWell() {
         if (!_well) {
-            _well = utils.findWellByHistogram(self.wiHistogramCtrl.id || self.idHistogram);
+            _well = utils.findWellByHistogram(self.idHistogram || self.wiHistogramCtrl.id);
         }
         return _well;
     }
 
     this.getModel = function(){
-        return utils.findHistogramModelById(self.wiHistogramCtrl.id || self.idHistogram);
+        return utils.findHistogramModelById(self.idHistogram || self.wiHistogramCtrl.id);
     }
     function getHistogramTitle(log) {
         if(!!self.histogramModel.properties.histogramTitle){
@@ -214,12 +216,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 */
 
     this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl.id||self.idHistogram, 
+        DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id, 
             function(histogramProperties) {
-                if(!histogramProperties.idZoneSet){
-                    self.wiHistogramCtrl.CloseZone();
-                }else{
-                    self.wiHistogramCtrl.isShowWiZone = true;
+                if (self.wiHistogramCtrl) {
+                    if(!histogramProperties.idZoneSet){
+                        self.wiHistogramCtrl.CloseZone();
+                    }else{
+                        self.wiHistogramCtrl.isShowWiZone = true;
+                    }
                 }
                 self.linkModels();
                 if (self.getZoneCtrl()) zoneCtrl.zoneUpdate();
@@ -494,5 +498,9 @@ app.component(componentName, {
         idHistogram: '<'
     }
 });
-
+app.filter('toFixed2', function() {
+    return function(item) {
+        return item.toFixed(2);
+    }
+});
 exports.name = moduleName;

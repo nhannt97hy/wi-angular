@@ -6335,9 +6335,11 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback) {
+
+exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback, cancelCallback, options) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
+        if (options) this.hideApply = options.hideApply;
         window.hisFormat = this;
         this._FNEW = 1;
         this._FEDIT = 2;
@@ -6412,6 +6414,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
+            if (options && options.autoName) {
+                self.histogramProps.name = "Histogram-" + self.SelectedCurve.properties.name + "-" + self.histogramProps.idHistogram;
+            }
             if (self.SelectedCurve.lineProperties) {
                 self.histogramProps.leftScale = self.SelectedCurve.lineProperties.minScale;
                 self.histogramProps.rightScale = self.SelectedCurve.lineProperties.maxScale;
@@ -6437,16 +6442,21 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
         this.onDepthTypeChanged = function () {
             switch (self.depthType) {
                 case "intervalDepth":
-                    self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop : getTopFromWell();
-                    self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
-                    self.histogramProps.idZoneSet = null;
-                    break;
+                self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop: getTopFromWell();
+                self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
+                self.histogramProps.idZoneSet = null;
+                break;
                 case "zonalDepth":
-                    if (self.selectedZoneSet) {
-                        self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
-                    }
-                    break;
+                if(self.selectedZoneSet){
+                    self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                }
+                break;
             }
+        }
+
+        this.defaultDepthButtonClick = function(){
+            self.histogramProps.referenceTopDepth = getTopFromWell();
+            self.histogramProps.referenceBottomDepth = getBottomFromWell();
         }
 
         this.chooseChartColor = function () {
@@ -6455,6 +6465,15 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
             });
         }
 
+        this.chooseRefCurveColor = function(index){
+            DialogUtils.colorPickerDialog(ModalService, self.ref_Curves_Arr[index].color, function (colorStr) {
+                self.ref_Curves_Arr[index].color = colorStr;
+            });
+        }
+
+        this.setClickedRow = function(index){
+            self.SelectedRefCurve = index;
+        }
         this.isNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
@@ -6470,10 +6489,10 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
             return inValid;
         }
 
-        this.onApplyButtonClicked = function () {
+        this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function (returnData) {
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
                 console.log('Return Data', returnData);
                 if (callback) callback(histogramModel.properties);
             });
@@ -6485,6 +6504,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
             close(null);
         }
         this.onCancelButtonClicked = function () {
+            if (cancelCallback) cancelCallback();
             close(null);
         }
     }

@@ -21,7 +21,7 @@ function ObjectOfTrack(config) {
     this.endDepth = config.endDepth || config.bottomDepth;
     this.name = "Object " + this.id;
     this.background = "white";
-    this.currentDraw = null;
+    this.currentDraw = null; // TO BE FIXED
 }
 
 ObjectOfTrack.prototype.getProperties = function() {
@@ -32,7 +32,7 @@ ObjectOfTrack.prototype.getProperties = function() {
         startDepth: this.startDepth,
         endDepth: this.endDepth,
         background: this.background,
-        type: this.currentDraw || "undefined",
+        type: this.currentDraw || "undefined", // TO BE FIXED
     }
 }
 
@@ -58,6 +58,7 @@ ObjectOfTrack.prototype.setProperties = function(props) {
 }
 
 ObjectOfTrack.prototype.exportsProperties = function() {
+    let self = this;
     let properties = new Object();
 
     properties.idObjectOfTrack = this.id;
@@ -66,39 +67,33 @@ ObjectOfTrack.prototype.exportsProperties = function() {
     properties.bottomDepth = this.endDepth;
 
     let objectToSave = new Object();
-    switch(this.currentDraw) {
-        case 'Histogram':
-            objectToSave.type = "Histogram";
-            let histogramProps = this.viHistogram.histogramModel.properties;
-            objectToSave.idHistogram = histogramProps.idHistogram;
-            objectToSave.background = this.background;
-
-            break;
-        case 'Crossplot':
-            objectToSave.type = "Crossplot";
-            let pointSet = this.viCrossplot.pointSet;
-
-            objectToSave.idCrossPlot = this.viCrossplot.idCrossPlot;
-            objectToSave.idPointSet = pointSet.idPointSet;
-            objectToSave.name = this.name;
-            objectToSave.background = this.background;
-            objectToSave.idWell = this.viCrossplot.idWell;
-            break;
-        default:
-            objectToSave = {
-                type: 'unknown'
-            }
-            break;
+    if (this.idHistogram) {
+        let objProps = {
+            type: 'Histogram',
+            idHistogram: this.idHistogram,
+            background: this.background
+        };
+        properties.object = JSON.stringify(objProps);
     }
-    properties.object = JSON.stringify(objectToSave);
+    else if (this.idCrossplot) {
+        // TODO
+    }
     return properties;
 }
 
-ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService, __Utils) {
+ObjectOfTrack.prototype.save = function() {
+    if (!this.idHistogram && !this.idCrossplot) return;
+    this.wiApiService.editObjectOfObjectTrack(this.exportsProperties(), function(returnedObject){
+        console.log('saved', returnedObject);
+    });
+}
+
+ObjectOfTrack.prototype.init = function(plotContainer, wiComponentService, wiApiService) {
     Drawing.prototype.init.call(this, plotContainer);
-    this.scopeObj = $scope;
     let self = this;
 
+    this.wiComponentService = wiComponentService;
+    this.wiApiService = wiApiService;
     this.svgContainer = plotContainer.select('.vi-track-svg-container');
 
     this.svgGroup = this.svgContainer.append('g')
@@ -114,84 +109,53 @@ ObjectOfTrack.prototype.init = function(plotContainer, $scope, wiApiService, __U
 
     $(self.objectContainer.node())
         .draggable({
-            // containment: self.svgContainer.node().parentNode,
+            containment: false,
             axis: 'y',
         })
         .resizable({
-            // containment: self.svgContainer.node().parentNode,
-            minHeight: 30,
+            minHeight: 200,
+            containment: false,
             handles: "n, s",
         })
         .on('resize', function(event, ui) {
-            self.showTooltip(event, ui);
-            
-            let newDepth = self.updateDepth(event, ui);
-            let transformY = self.getTransformY();
-            self.onViewportChange(null, null, transformY(newDepth[0]), transformY(newDepth[1]), false, true, true);
-            
+            self.showTooltip(self.updateDepth(event, ui));
         })
         .on('drag', function(event, ui) {
-            self.showTooltip(event, ui);
-
-            let newDepth = self.updateDepth(event, ui);
-            let transformY = self.getTransformY();
-            self.onViewportChange(null, null, transformY(newDepth[0]), transformY(newDepth[1]), false, true);
+            self.showTooltip(self.updateDepth(event, ui));
         })
         .on('dragstop', function(event, ui) {
             event.stopPropagation();
-            console.log("event detected: ", event,"ui: ", ui);
-            
             let newDepth = self.updateDepth(event, ui);
-            
-            let newProps = {};
-            switch (self.currentDraw) {
-                case 'Histogram' :
-                    newProps = self.viHistogram.histogramModel.properties;
-                    newProps.intervalDepthTop = parseFloat(newDepth[0].toFixed(4));
-                    newProps.intervalDepthBottom = parseFloat(newDepth[1].toFixed(4));
-                    break;
-                case 'Crossplot' :
-                    newProps = self.viCrossplot.pointSet;
-                    newProps.intervalDepthTop = parseFloat(newDepth[0].toFixed(4));
-                    newProps.intervalDepthBottom = parseFloat(newDepth[1].toFixed(4));
-                    break;
-                default :
-                    break;
+            let viHistogram = self.getViHistogram();
+            if (viHistogram) {
+                viHistogram.histogramModel.properties.intervalDepthTop = newDepth[0];
+                viHistogram.histogramModel.properties.intervalDepthBottom = newDepth[1];
             }
-            self.refreshObjectOfTrack(newProps, wiApiService, function () {
-                __Utils.refreshProjectState();
+            self.save();
+            viHistogram.saveHistogramNow(function() {
+                viHistogram.visHistogram.signal('histogram-update', 'Dragged');
+                self.hideTooltip();
             });
-            self.hideTooltip();
         })
         .on('resizestop', function(event, ui) {
             event.stopPropagation();
-            console.log("event detected: ", event,"ui: ", ui)
-
             let newDepth = self.updateDepth(event, ui);
-            
-            switch (self.currentDraw) {
-                case 'Histogram' : 
-                    self.viHistogram.histogramModel.properties.intervalDepthTop = parseFloat(newDepth[0].toFixed(4));
-                    self.viHistogram.histogramModel.properties.intervalDepthBottom = parseFloat(newDepth[1].toFixed(4));
-                    break;
-                case 'Crossplot' :
-                    self.viCrossplot.pointSet.intervalDepthTop = parseFloat(newDepth[0].toFixed(4));
-                    self.viCrossplot.pointSet.intervalDepthBottom = parseFloat(newDepth[1].toFixed(4));
-                    break;
-                default :
-                    break;
+            let viHistogram = self.getViHistogram();
+            if (viHistogram) {
+                viHistogram.histogramModel.properties.intervalDepthTop = newDepth[0];
+                viHistogram.histogramModel.properties.intervalDepthBottom = newDepth[1];
             }
-            self.refreshObjectOfTrack(null, wiApiService, function () {
-                __Utils.refreshProjectState();
+            self.save();
+            viHistogram.saveHistogramNow(function() {
+                viHistogram.visHistogram.signal('histogram-update', 'Resized');
+                self.hideTooltip();
             });
-            self.hideTooltip();
         });
     this.updateHeader();
 }
 
-ObjectOfTrack.prototype.showTooltip = function(event, ui) {
+ObjectOfTrack.prototype.showTooltip = function(newDepth) {
     let self = this;
-    let newDepth = self.updateDepth(event, ui);
     self.objectContainer.selectAll("div:not(.vi-object-tooltip):not(.ui-resizable-handle)").style('filter', "blur(3px)");
     content = '<span>' + (newDepth[0].toFixed(2) + ' - ' + newDepth[1].toFixed(2)) + '</span>';
     self.tooltip
@@ -199,7 +163,6 @@ ObjectOfTrack.prototype.showTooltip = function(event, ui) {
         .style('z-index', 89)
         .html(content);
 }
-
 ObjectOfTrack.prototype.hideTooltip = function() {
     let self = this;
     self.objectContainer.selectAll("div:not(.vi-object-tooltip):not(.ui-resizable-handle)").style('filter', "blur(0px)");
@@ -211,79 +174,22 @@ ObjectOfTrack.prototype.hideTooltip = function() {
 ObjectOfTrack.prototype.raise = function () {
     let self = this;
     this.svgGroup.raise();
-
-    switch(self.currentDraw) {
-        case "Histogram" : 
-            self.viHistogram.resizeSensor.detach();
-            self.viHistogram.resizeSensor = new ResizeSensor($(self.viHistogram.container.node()), function(param) {
-                self.viHistogram.doPlot();
-            } )
-            break;
-        case "Crossplot" :
-            self.viCrossplot.resizeSensor.detach();
-            self.viCrossplot.resizeSensor = new ResizeSensor($(self.viCrossplot.root.node()), function(param) {
-                self.viCrossplot._doPlot();
-            } )
-            break;
-        default:
-            break;
-    }
+    return;
 }
 
 ObjectOfTrack.prototype.updateDepth = function(event, ui){
     let self = this;
     let transformY = this.getTransformY();
-
-    let minY = transformY(this.startDepth);
-    let maxY = transformY(this.endDepth);
-    let originalHeight = maxY - minY;
-
-    let viewportStatus = self.getStatusOfViewport();
-
-    if(event.type == "dragstop" || event.type == "drag") {
-        let intervalDepth = self.endDepth - self.startDepth;
-
-        switch (viewportStatus) {
-            case _OVERFLOW_VIEWPORT_TOP:
-            case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
-                self.endDepth = transformY.invert(ui.position.top + self.objectContainer.node().getBoundingClientRect().height);
-                self.startDepth = self.endDepth - intervalDepth;
-                break;
-            case _INSIDE_VIEWPORT:
-            case _OVERFLOW_VIEWPORT_BOTTOM:
-                self.startDepth = transformY.invert(ui.position.top);
-                self.endDepth = self.startDepth + intervalDepth;
-                break;
-            default:
-                break;
-        }
-    } else if(event.type == "resizestop" || event.type == "resize") {
-        switch(viewportStatus) {
-            case _OVERFLOW_VIEWPORT_TOP:
-                if (!(ui.originalPosition.top + ui.size.height > self.getViewportY()[1])) {
-                    self.endDepth = transformY.invert(ui.originalPosition.top + ui.size.height);
-                }
-                break;
-            case _OVERFLOW_VIEWPORT_BOTTOM:
-                if (ui.position.top > 0) {
-                    self.startDepth = transformY.invert(ui.position.top);
-                }
-                break;
-            case _INSIDE_VIEWPORT:
-                if(ui.position.top != ui.originalPosition.top) {
-                    self.startDepth = transformY.invert(ui.position.top);
-                } else {
-                    self.endDepth = transformY.invert(ui.position.top + ui.size.height);
-                }
-                break;
-            case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
-
-                break;
-            default:
-                break;
-        }
+    if (ui.size) {
+        let bottom = ui.position.top + ui.size.height;
+        self.startDepth = transformY.invert(ui.position.top);
+        self.endDepth = transformY.invert(bottom);
     }
-
+    else {
+        let interval = self.endDepth - self.startDepth;
+        self.startDepth = transformY.invert(ui.position.top);
+        self.endDepth = self.startDepth + interval;
+    }
     return [self.startDepth, self.endDepth];
 };
 
@@ -298,7 +204,7 @@ ObjectOfTrack.prototype.doPlot = function(highlight, forcePlot) {
     let minX = d3.min(viewportX);
     let maxX = d3.max(viewportX);
 
-    this.onViewportChange(minX, maxX, minY, maxY, forcePlot, highlight);
+    this.drawContainer(minX, maxX, minY, maxY, forcePlot, highlight);
 
     if(this.objectContainer) {
         this.objectContainer.style('background-color', this.background || 'blue');
@@ -363,7 +269,35 @@ function buildHistogramProps(config, wellProps) {
     return histogramProps;
 }
 
-ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellProp) {
+function getWiD3HistogramName(idHistogram) {
+    return 'objHistogram' + idHistogram + 'D3Area';
+}
+ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, scopeObj, compileFunc) {
+    this.idHistogram = idHistogram;
+    var domEle = this.objectContainer
+            .append("div")
+            .style('position', 'absolute')
+            .style('overflow', 'hidden')
+            .attr('class', 'vi-object-histogram')
+            .style('width', '100%')
+            .style('height', '100%')
+            .style('display', 'flex')
+            .node();
+
+    let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="' 
+               + getWiD3HistogramName(idHistogram) + '" id-histogram="'
+               + idHistogram + '"></wi-d3-histogram>';
+    $(domEle).html(compileFunc(html)(scopeObj));
+    this.currentDraw = "Histogram";
+    this.name = histogramName
+
+    this.doPlot(true, true);
+}
+ObjectOfTrack.prototype.getViHistogram = function() {
+    let self = this;
+    return this.wiComponentService.getComponent(getWiD3HistogramName(self.idHistogram));
+}
+ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellProp, scopeObj, compileFunc) {
     if(config.dragToCreate) {
         config.intervalDepthTop = parseFloat(this.startDepth.toFixed(4));  
         config.intervalDepthBottom = parseFloat(this.endDepth.toFixed(4));
@@ -387,11 +321,13 @@ ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellPr
             .attr('class', 'vi-object-histogram')
             .style('width', '100%')
             .style('height', '100%')
+            .style('display', 'flex')
             .node();
 
-    this.viHistogram = graph.createHistogram(histogramModel, (parseFloat(config.curve.yStep) || parseFloat(wellProp.step)), parseFloat(wellProp.topDepth), parseFloat(wellProp.bottomDepth), domEle);
-
-    this.viHistogram.setCurve(config.curve.rawData);
+    let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="' 
+               + getWiD3HistogramName(config.idHistogram) + '" id-histogram="'
+               + config.idHistogram + '"></wi-d3-histogram>';
+    $(domEle).html(compileFunc(html)(scopeObj));
     this.currentDraw = "Histogram";
     this.setProperties({
         name: histogramModel.properties.name,
@@ -455,263 +391,29 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
     this.doPlot(true, false);
 }
 
-ObjectOfTrack.prototype.getStatusOfViewport = function(minY, maxY){
-    let self = this;
-    let viewportY = self.getViewportY();
-    let transformY = self.getTransformY();
-    minY = minY ? minY:transformY(self.startDepth);
-    maxY = maxY ? maxY:transformY(self.endDepth);
-
-    if(minY < viewportY[0] && maxY <= (viewportY[1]) && maxY >= viewportY[0]) {
-        return _OVERFLOW_VIEWPORT_TOP;
-    } else if(minY >= viewportY[0] && minY <= viewportY[1] && maxY >= viewportY[0] && maxY <= (viewportY[1])) {
-        return _INSIDE_VIEWPORT;
-    } else if(minY >= viewportY[0] && minY <= viewportY[1] && maxY > (viewportY[1])) {
-        return _OVERFLOW_VIEWPORT_BOTTOM;
-    } else if(minY < viewportY[0] && maxY > (viewportY[1])) {
-        return _OVERFLOW_VIEWPORT_TOP_BOTTOM;
-    } else {
-        return _OUT_OF_VIEWPORT;
-    }
-};
-
-ObjectOfTrack.prototype.onViewportChange = function(minX, maxX, minY, maxY, forcePlot, highlight, isResizing) {
-    //console.log('onViewportChange');
-    let self = this;
-    let viewportX = this.getViewportX();
-    let maxViewportY = this.getViewportY()[1];
-    let transformY = this.getTransformY();
-
-    minX = minX || d3.min(viewportX);
-    maxX = maxX || d3.max(viewportX);
-
+ObjectOfTrack.prototype.drawContainer = function(minX, maxX, minY, maxY, forcePlot, highlight) {
     this.objectContainer
             .style('x', minX)
             .style('top', minY)
             .style('width', maxX - minX)
             .style('height', maxY - minY);
-
-    let viewportStatus = self.getStatusOfViewport();
-    self.changeStatusOfViewport(viewportStatus, isResizing);
-
-    let top = minY;
-    let height = maxY - minY;
-    switch(viewportStatus) {
-        case _OVERFLOW_VIEWPORT_TOP:
-            top = -minY;
-            height = maxY;
-            break;
-        case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
-            top = -minY;
-            height = maxViewportY;
-            break;
-        case _OVERFLOW_VIEWPORT_BOTTOM:
-            top = 0;
-            height = maxViewportY - minY;
-            break;
-        case _INSIDE_VIEWPORT:
-            top = 0;
-            height = maxY - minY;
-            break;
-        case _OUT_OF_VIEWPORT: 
-            top = 0;
-            height = 0;
-            break;
-    }
-
-    switch(self.currentDraw) {
-        case 'Histogram':
-            self.objectContainer
-                    .select('.vi-object-histogram')
-                        .style('overflow', 'hidden')
-                        .style('top', top)
-                        .style('height', height);
-            break;
-        case 'Crossplot':
-            self.objectContainer
-                    .select('.vi-object-crossplot')
-                        .style('overflow', 'hidden')
-                        .style('top', top)
-                        .style('height', height);
-            break;
-    }
-
-    self.tooltip
-        .style('top', top)
-        .style('height', height);
-
-    if(forcePlot) {
-        if (this.viHistogram) {
-            this.viHistogram.doPlot();
-        } else if(this.viCrossplot) {
-            this.viCrossplot._doPlot();
+    console.log('drawContainer forcePlot');
+    if (this.idHistogram) {
+        if (this.getViHistogram().visHistogram.doPlot) {
+            this.getViHistogram().visHistogram.doPlot();
         }
     }
-}
-
-ObjectOfTrack.prototype.changeStatusOfViewport = function(newStatus, isResizing){
-    let self = this;
-    if(!self.lastViewportSatus || self.lastViewportSatus != newStatus) {
-        self.lastViewportSatus = newStatus;
-        self.enableAllState();
-        switch (newStatus) {
-            case _OVERFLOW_VIEWPORT_TOP:
-                self.objectContainer.style('border-top', 'none');
-                if(self.objectContainer.classed('ui-resizable') && !isResizing) {
-                    $(self.objectContainer.node()).resizable("option", "handles", "s");
-                }
-                break;
-            case _INSIDE_VIEWPORT:
-                
-                break;
-            case _OVERFLOW_VIEWPORT_BOTTOM:
-                self.objectContainer.style('border-bottom', 'none');
-                if(self.objectContainer.classed('ui-resizable') && !isResizing) {
-                    $(self.objectContainer.node()).resizable("option", "handles", "n");
-                }
-                break;
-            case _OVERFLOW_VIEWPORT_TOP_BOTTOM:
-                self.objectContainer.style('border-top', 'none');
-                self.objectContainer.style('border-bottom', 'none');
-                if(self.objectContainer.classed('ui-resizable') && !isResizing) {
-                    $(self.objectContainer.node()).resizable("disable");
-                }
-                break;
-            case _OUT_OF_VIEWPORT:
-                break;
-        }
-    } else {
-        return;
-    }
-};
-
-ObjectOfTrack.prototype.enableAllState = function(){
-    this.objectContainer.style('border-top', '1px solid blue');
-    this.objectContainer.style('border-bottom', '1px solid blue');
-    if(this.objectContainer.classed('ui-resizable')) {
-        if($(this.objectContainer.node()).resizable( "option", "disabled" )) {
-            $(this.objectContainer.node()).resizable("enable");
-        }   
-        $(this.objectContainer.node()).resizable("option", "handles", "n, s");
-    }
-};
-
-ObjectOfTrack.prototype.refreshObjectOfTrack = function(newProp, wiApiService, callback) {
-    let self = this;    
-    switch (this.currentDraw) {
-        case 'Histogram':
-            var __props = newProp;
-            if(__props) {
-                self.viHistogram.histogramModel.properties = __props;
-                self.setProperties(__props);
-            } else {
-              __props = self.viHistogram.histogramModel.properties;
-            }
-
-            if(__props.curve && __props.curve.rawData) {
-                self.viHistogram.setCurve(__props.curve.rawData);
-                self.viHistogram.histogramModel.properties.curveId = __props.curve.idCurve;
-            }
-
-            if(__props.intervalDepthTop != self.startDepth || __props.intervalDepthBottom != self.endDepth) {
-                self.startDepth = __props.intervalDepthTop;
-                self.endDepth = __props.intervalDepthBottom;
-                self.doPlot(true, true);
-            } else {
-                self.viHistogram.doPlot();
-            }
-
-            wiApiService.editObjectOfObjectTrack(self.exportsProperties(), function() {
-                console.log("Object edited");
-                let histogramPropsToRequest = angular.copy(self.viHistogram.histogramModel.properties);
-                histogramPropsToRequest.idCurve = self.viHistogram.histogramModel.properties.curveId;
-                delete histogramPropsToRequest.curve;
-                delete histogramPropsToRequest.curveId;
-                delete histogramPropsToRequest.discriminator;
-                wiApiService.editHistogram(histogramPropsToRequest, function(histogramEdited) {
-                    console.log("Histogram edited", histogramEdited);
-                    if(callback) callback();
-                })
-            });
-            break;
-        case 'Crossplot': 
-            var __props = newProp;
-            if(__props) {
-                if(!__props.curveX.data) {
-                    __props.curveX.data = processingData(__props.curveX.rawData, __props.well.properties);
-                }
-                if(!__props.curveY.data) {
-                    __props.curveY.data = processingData(__props.curveZ.rawData, __props.well.properties);
-                }
-                if(__props.curveZ && !__props.curveZ.data) {
-                    __props.curveZ.data = processingData(__props.curveZ.rawData, __props.well.properties);
-                }
-            }
-
-            if(__props) {
-                self.viCrossplot.pointSet = __props;
-            } else {
-                __props = self.viCrossplot.pointSet;
-            }
-            wiApiService.editCrossplot({
-                idCrossPlot: self.viCrossplot.idCrossPlot,
-                name: __props.name || self.name,
-                idWell: self.viCrossplot.idWell
-            }, function(returnedCrossplot) {
-                if(!returnedCrossplot.idCrossPlot) {
-                    alert("Error when edit crossplot!");
-                    return;
-                }
-                console.log("crossplot edited ", returnedCrossplot);
-                self.viCrossplot.setProperties(returnedCrossplot);
-                self.setProperties({
-                    name: __props.name
-                })
-
-                if(__props.intervalDepthTop != self.startDepth || 
-                    __props.intervalDepthBottom != self.endDepth ||
-                    (__props.background && __props.background != self.background)) {
-                    self.startDepth = __props.intervalDepthTop;
-                    self.endDepth = __props.intervalDepthBottom;
-                    if(__props.background) {
-                        self.background = __props.background;
-                    }
-                    self.doPlot(true, true);
-                } else {
-                    self.viCrossplot._doPlot();
-                }
-
-                wiApiService.editObjectOfObjectTrack(self.exportsProperties(), function() {
-                    console.log("Object edited");
-                    let pointSetProps = angular.copy(self.viCrossplot.pointSet);
-                    delete pointSetProps.curveX;
-                    delete pointSetProps.curveY;
-                    delete pointSetProps.curveZ;
-                    delete pointSetProps.background;
-                    delete pointSetProps.name;
-                    delete pointSetProps.well;
-
-                    wiApiService.editPointSet(pointSetProps, function(returnedPointSet) {
-                        console.log("pointSet edited ", returnedPointSet);
-                        if(callback) {
-                            callback();
-                        }
-                    });
-                });
-            });
-            break;
-        default:
-            break;
+    if (forcePlot) {
+        if (this.viCrossplot) this.viCrossplot.doPlot();
     }
 }
-
 ObjectOfTrack.prototype.handleQuest = function(quest, wellProp) {
     if(!quest || !quest.name) return;
     switch(quest.name) {
         case 'addHistogram':
             console.log("Well properties: ", wellProp);
             console.log("Quest config: ", quest.config);
-            this.createHistogramToForeignObject(quest.config, wellProp);
+            this.createHistogramToForeignObject(quest.config, wellProp, quest.scopeObj, quest.compileFunc);
             break;
         case 'addCrossplot':
             console.log("well properties: ", wellProp);

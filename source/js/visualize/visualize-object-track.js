@@ -9,12 +9,11 @@ Utils.extend(Track, ObjectTrack);
 function ObjectTrack(config) {
     Track.call(this, config);
     this.MIN_WIDTH = 200;
-    this.wiComponentService = config.wiComponentService;
 
     this.id = config.id || config.idObjectTrack;
-    this.idPlot = config.idPlot;
     this.name = config.title || 'Object Track';
     this.width = config.width || this.MIN_WIDTH;
+    this.width = (this.width < this.MIN_WIDTH)?this.MIN_WIDTH:this.width;
     this.minY = config.minY;
     this.maxY = config.maxY;
     this.justification = config.topJustification || "center";
@@ -42,7 +41,6 @@ ObjectTrack.prototype.setProperties = function (props) {
     Utils.setIfNotNull(this, 'showTitle', props.showTitle);
     Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
     Utils.setIfNotNull(this, 'width', props.width);
-    Utils.setIfNotNull(this, 'idPlot', props.idPlot);
 };
 
 ObjectTrack.prototype.init = function (baseElement) {
@@ -53,7 +51,6 @@ ObjectTrack.prototype.init = function (baseElement) {
         .on('mousedown', function () {
             self.setCurrentDrawing(null);
         });
-
     this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing vi-track-svg-container');
 }
@@ -132,7 +129,7 @@ ObjectTrack.prototype.addObjectHeader = function (object) {
     return header;
 }
 
-ObjectTrack.prototype.addObject = function (config, $scope, wiApiService, __Utils) {
+ObjectTrack.prototype.addObject = function (config, wiComponentService, wiApiService) {
     let self = this;
     config.idObjectTrack = this.id;
 
@@ -142,7 +139,7 @@ ObjectTrack.prototype.addObject = function (config, $scope, wiApiService, __Util
     if (config.maxX == null) config.maxX = d3.max(this.getViewportX());
 
     let object = new ObjectOfTrack(config);
-    object.init(this.plotContainer, $scope, wiApiService, __Utils);
+    object.init(this.plotContainer, wiComponentService, wiApiService);
     object.header = this.addObjectHeader(object);
     object.on('mousedown', function () {
         self.drawingMouseDownCallback(object);
@@ -210,9 +207,11 @@ ObjectTrack.prototype.highlightHeader = function (drawing) {
 
 ObjectTrack.prototype.onObjectHeaderMouseDown = function (object, callback) {
     let self = this;
-    object.header.on('mousedown', function () {
+    object.header.on('click', function() {
         self.drawingMouseDownCallback(object);
         self.plotObject(object);
+    });
+    object.header.on('mousedown', function () {
         callback();
     });
 };

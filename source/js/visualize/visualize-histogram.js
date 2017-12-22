@@ -164,6 +164,7 @@ function __reverseBins(bins) {
 const MINOR_TICKS = 5
 Histogram.prototype.doPlot = function() {
     var self = this;
+    console.log('vihist doPlot');
     if (self.timerHandle) {
         clearTimeout(self.timerHandle)
     }
