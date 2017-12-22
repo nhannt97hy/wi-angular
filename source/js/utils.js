@@ -174,7 +174,7 @@ function shadingToTreeConfig(shading, paletteList) {
         isNegPosFill: shading.isNegPosFill,
         positiveFill: shading.positiveFill ? JSON.parse(shading.positiveFill) : null,
         negativeFill: shading.negativeFill ? JSON.parse(shading.negativeFill) : null,
-        refLineWidth: shading.refLineWidth || 5,
+        refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
         // showRefLine: false
@@ -1215,7 +1215,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     });
                 }
                 else if (errorCode === 0) {
-                    errorMsg("Cannot drop curve from another well");
+                    error("Cannot drop curve from another well");
                 }
                 return;
             }
@@ -1235,7 +1235,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     })
                 }
                 else if (errorCode === 0) {
-                    errorMsg("Cannot drop curve from another well");
+                    error("Cannot drop curve from another well");
                 }
                 return;
             }
@@ -1246,7 +1246,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     wiSlidingBarCtrl.createPreview(idCurve);
                 }
                 else if (errorCode === 0) {
-                    errorMsg("Cannot drop curve from another well");
+                    error("Cannot drop curve from another well");
                 }
             }
         },
@@ -1315,7 +1315,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
         curveY.maxX = pointSet.scaleTop;
         pointSet.intervalDepthTop = objectProps.intervalDepthTop;
         pointSet.intervalDepthBottom = objectProps.intervalDepthBottom;
-
+        
         let crossplotConfig = {
             curve1 : curveX,
             curve2 : curveY,
@@ -1336,6 +1336,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
 
 function openLogplotTab(wiComponentService, logplotModel, callback) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    let graph = wiComponentService.getComponent('GRAPH');
     layoutManager.putTabRightWithModel(logplotModel);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
@@ -1422,10 +1423,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.markers.forEach(function (marker) {
                             wiD3Ctrl.addMarkerToTrack(trackObj, marker);
                         });
-                        aTrack.images.forEach(function (image) {
-                            image.src = image.location;
-                            wiD3Ctrl.addImageToTrack(trackObj, image);
-                        })
+                        // aTrack.images.forEach(function (image) {
+                        //     image.src = image.location;
+                        //     wiD3Ctrl.addImageToTrack(trackObj, image);
+                        // })
                         aTrack.annotations.forEach(function (anno) {
                             wiD3Ctrl.addAnnotationToTrack(trackObj, anno);
                         })
@@ -1489,7 +1490,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 //objectOfTrack.maxY = viTrack.maxY;
                                 let anObject = wiD3Ctrl.addObjectToTrack(viTrack, objectOfTrack);
                                 let objectProps = JSON.parse(objectOfTrack.object);
-                                
+
                                 switch(objectProps.type) {
                                     case 'Histogram' :
                                         if (objectProps.idHistogram) {
@@ -1515,9 +1516,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                                 histogramProps.intervalDepthTop = objectProps.intervalDepthTop;
                                                 histogramProps.intervalDepthBottom = objectProps.intervalDepthBottom;
                                                 wiApiService.infoCurve(histogramProps.idCurve, function (curveInfo) {
-                                                    histogramProps.curve = curveInfo;
                                                     wiApiService.dataCurve(histogramProps.idCurve, function (dataCurve) {
-                                                        histogramProps.curve.rawData = dataCurve;
                                                         wiApiService.getWell(histogramProps.idWell, function (wellProps) {
                                                             anObject.createHistogramToForeignObject(histogramProps, wellProps, wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc);
                                                         })
@@ -1566,6 +1565,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     }
                     aTrack = tracks.shift();
                 }
+                logplotCtrl.handlers.Scale100ButtonClicked();
                 if (callback) callback();
             });
     });
@@ -2458,7 +2458,8 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
         idCurve: curve.idCurve,
         leftScale: curve.minX,
         rightScale: curve.maxX,
-        name: histogramName
+        name: histogramName,
+        color:curve.line.color
     } : {
         idWell: idWell,
         name: histogramName,
@@ -2623,6 +2624,17 @@ exports.triggerWindowResize = triggerWindowResize;
 
 function putListFamily() {
     __GLOBAL.wiApiService.listFamily(function (families) {
+        // families.sort((a,b) => {
+        //     if (a.name.toLowerCase() < b.name.toLowerCase()) {
+        //         return -1;
+        //     }
+        //     if (a.name.toLowerCase() > b.name.toLowerCase()) {
+        //         return 1;
+        //     }
+        //     if (a.name.toLowerCase() == b.name.toLowerCase()) {
+        //         return 0;
+        //     }
+        // });
         __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.LIST_FAMILY, families);
     })
 }
@@ -2670,7 +2682,6 @@ exports.renameZoneSet = function (zoneSetModel) {
 
 exports.updateWiHistogramOnModelDeleted = function (model) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    console.error("mark");
     switch (model.type) {
         case 'curve':
             let idCurve = model.properties.idCurve;
@@ -2705,8 +2716,10 @@ exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted(m
                 let viTracks = wiD3Ctrl.getTracks();
                 viTracks.forEach(function (viTrack) {
                     if (!viTrack.isLogTrack()) return;
-                    let curve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
-                    viTrack.removeCurve(curve);
+                    let curves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
+                    curves.forEach(curve => {
+                        viTrack.removeCurve(curve);
+                    })
                 })
             });
             break;
@@ -2729,11 +2742,12 @@ function updateLinesOnCurveEdited(curveModel) {
         let viTracks = wiD3Ctrl.getTracks();
         viTracks.forEach(function (viTrack) {
             if (!viTrack.isLogTrack()) return;
-            let viCurve = viTrack.getCurves().find(curve => curve.idCurve == idCurve);
-            if (!viCurve) return;
-            wiApiService.infoLine(viCurve.id, function (line) {
-                viCurve.setProperties(line);
-                viCurve.doPlot();
+            let viCurves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
+            viCurves.forEach(viCurve => {
+                wiApiService.infoLine(viCurve.id, function (line) {
+                    viCurve.setProperties(line);
+                    viCurve.doPlot();
+                })
             })
         })
     });
@@ -2823,7 +2837,7 @@ function evaluateExpr(well, discriminator, callback) {
                 right = parseFloat(rightCurve.data[index].x);
             }
 
-            if (left && right) {
+            if (left!= null && right!= null) {
                 switch (condition.comparison) {
                     case '<':
                         return left < right;

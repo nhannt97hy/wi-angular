@@ -226,7 +226,7 @@ exports.ScaleFullButtonClicked = function () {
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
-exports.ScaleCustomButtonClicked = function() {
+exports.ScaleCustomButtonClicked = function () {
     let self = this;
     let currentScale = parseInt(this.wiLogplot.getwiD3Ctrl().scale);
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
@@ -236,7 +236,7 @@ exports.ScaleCustomButtonClicked = function() {
         input: currentScale,
         type: 'number'
     }
-    DialogUtils.promptDialog(self.ModalService, promptConfig, function(scale){
+    DialogUtils.promptDialog(self.ModalService, promptConfig, function (scale) {
         scaleTo(scale, self.wiLogplot, self.wiComponentService);
     })
 }
@@ -433,7 +433,7 @@ exports.ExportTrackButtonClicked = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = currentTrack.name.trim().replace(/ /g,'') + '.track';
+        let fileName = currentTrack.name.trim().replace(/ /g, '') + '.track';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';
@@ -469,7 +469,7 @@ exports.ImportTrackButtonClicked = function () {
             console.log("aTrack", response);
             let aTrack = response.content;
             let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-            utils.getPalettes(function(paletteList) {
+            utils.getPalettes(function (paletteList) {
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
                         let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
@@ -500,12 +500,12 @@ exports.ImportTrackButtonClicked = function () {
                         }
                     });
                 };
-                if(aTrack.markers) {
+                if (aTrack.markers) {
                     aTrack.markers.forEach(function (marker) {
                         wiD3Ctrl.addMarkerToTrack(trackObj, marker);
                     });
                 }
-                if(aTrack.images) {
+                if (aTrack.images) {
                     aTrack.images.forEach(function (image) {
                         image.src = image.location;
                         wiD3Ctrl.addImageToTrack(trackObj, image);
@@ -521,7 +521,7 @@ exports.ImportTrackButtonClicked = function () {
                         drawAllShadings(someTrack, trackObj);
                     }
                 });
-                if(aTrack.images) {
+                if (aTrack.images) {
                     aTrack.lines.forEach(function (line) {
                         utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
                             let lineModel = utils.lineToTreeConfig(line);
@@ -537,9 +537,9 @@ exports.ImportTrackButtonClicked = function () {
                     });
                 }
                 setTimeout(function () {
-                    if(response.reason == "CURVE_NOT_FOUND") {
+                    if (response.reason == "CURVE_NOT_FOUND") {
                         let message = "";
-                        aTrack.errorCurve.forEach(function(r){
+                        aTrack.errorCurve.forEach(function (r) {
                             message += "Curve: " + r.dataset + "." + r.curve + " Not exist! <br>";
                         });
                         utils.warning(message);
@@ -547,7 +547,7 @@ exports.ImportTrackButtonClicked = function () {
                 }, 1000);
             });
 
-        }).catch(err=>{
+        }).catch(err => {
             console.log(err);
         });
     }, true);
@@ -585,3 +585,48 @@ exports.CurveBolkUpdateButtonClicked = function () {
 
     });
 };
+
+
+exports.SaveAsLogplotNameButtonClicked = function () {
+    const wiApiService = this.wiApiService;
+    const wiLogplot = this.wiLogplot;
+    let wics = this.wiComponentService;
+    let mds = this.ModalService;
+    console.log(wiLogplot);
+    let DialogUtils = wics.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let Utils = wics.getComponent(wics.UTILS);
+    let promptConfig = {
+        title: '<span class="logplot-new-16x16"></span> Save As Logplot',
+        inputName: 'Name',
+        input: wiLogplot.logplotModel.properties.name
+    };
+    DialogUtils.promptDialog(mds, promptConfig, function (logplotName) {
+        let idWell = wiLogplot.logplotModel.properties.idWell;
+        let idPlot = wiLogplot.logplotModel.properties.idPlot;
+        let plots = wics.getComponent(wics.PROJECT_LOADED).wells.find(w => w.idWell == idWell).plots;
+        let isExisted = false;
+        plots.forEach(function (plot, index) {
+            if(plot.name == logplotName){
+                isExisted = true;
+                return;
+            }
+        });
+        if(isExisted){
+            DialogUtils.confirmDialog(mds, 'Existed!', 'Logplot '+ logplotName +' is existed! OVERWRITE IT?', function (yes) {
+                if(yes){
+                    wiApiService.savePlotAs({name: logplotName, idWell : idWell, idPlot: idPlot}, function (response) {
+                        console.log("==============", response);
+                        Utils.refreshProjectState();
+                        // Utils.openLogplotTab(wics, Utils.getModel('logplot', response.idPlot));
+                    });
+                }
+            });
+        } else {
+            wiApiService.savePlotAs({name: logplotName, idWell : idWell, idPlot: idPlot}, function (response) {
+                console.log("=============", response);
+                Utils.refreshProjectState();
+                // Utils.openLogplotTab(wics, Utils.getModel('logplot', response.idPlot));
+            });
+        }
+    });
+}

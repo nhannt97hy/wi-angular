@@ -77,6 +77,7 @@ const GET_PLOT = '/project/well/plot/info';
 const DUPLICATE_PLOT = '/project/well/plot/duplicate';
 const EXPORT_PLOT = '/project/well/plot/export';
 const EXPORT_PLOT_TRACK = '/project/well/plot/track/export';
+const SAVE_PLOT_AS = '/project/well/plot/save-as';
 
 const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
@@ -141,6 +142,8 @@ const CREATE_CROSSPLOT = '/project/well/cross-plot/new';
 const EDIT_CROSSPLOT = '/project/well/cross-plot/edit';
 const GET_CROSSPLOT = '/project/well/cross-plot/info';
 const DELETE_CROSSPLOT = '/project/well/cross-plot/delete';
+const DUPLICATE_CROSSPLOT = '/project/well/cross-plot/duplicate';
+const SAVE_CROSSPLOT_AS = '/project/well/cross-plot/save-as';
 
 const CREATE_POINTSET = '/project/well/cross-plot/point-set/new';
 const EDIT_POINTSET = '/project/well/cross-plot/point-set/edit';
@@ -163,6 +166,8 @@ const CREATE_HISTOGRAM = '/project/well/histogram/new';
 const EDIT_HISTOGRAM = '/project/well/histogram/edit';
 const GET_HISTOGRAM = '/project/well/histogram/info';
 const DELETE_HISTOGRAM = '/project/well/histogram/delete';
+const DUPLICATE_HISTOGRAM = '/project/well/histogram/duplicate';
+const SAVE_HISTOGRAM_AS = '/project/well/histogram/save-as';
 
 const CREATE_REF_CURVE = '/project/well/reference-curve/new';
 const EDIT_REF_CURVE = '/project/well/reference-curve/edit';
@@ -838,6 +843,7 @@ Service.prototype.exportCurve = function (idCurve, callback) {
     let dataRequest = {
         idCurve: idCurve
     }
+    self.wiComponentService.getComponent('SPINNER').show();
     self.$http({
         url: self.baseUrl + EXPORT_CURVE,
         method: 'POST',
@@ -849,9 +855,12 @@ Service.prototype.exportCurve = function (idCurve, callback) {
         responseType: "arraybuffer",
         data: dataRequest
     }).then(function (res) {
+        self.wiComponentService.getComponent('SPINNER').hide();
         callback(res.data, res.headers('Content-Type'));
+
     }, function (err) {
         console.error(err);
+        self.wiComponentService.getComponent('SPINNER').hide();
         self.getUtils().error("File not found!");
     });
 }
@@ -1327,12 +1336,39 @@ Service.prototype.duplicateLogplot = function (idPlot, idWell, callback) {
     const self = this;
     this.post(DUPLICATE_PLOT, {idPlot: idPlot, idWell: idWell}, callback);
 }
+
+Service.prototype.duplicateCrossPlot = function (idCrossPlot, idWell, callback){
+    let self = this;
+    this.post(DUPLICATE_CROSSPLOT, {idCrossPlot : idCrossPlot, idWell: idWell}, callback);
+}
+
+Service.prototype.duplicateHistogram = function (idHistogram, idWell, callback) {
+    let self = this;
+    this.post(DUPLICATE_HISTOGRAM, {idHistogram: idHistogram, idWell: idWell}, callback);
+}
+
+Service.prototype.savePlotAs = function (payload, callback) {
+    let self = this;
+    this.post(SAVE_PLOT_AS, payload, callback);
+}
+
+Service.prototype.saveCrossplotAs = function (payload, callback) {
+    let self = this;
+    this.post(SAVE_CROSSPLOT_AS, payload, callback);
+}
+
+Service.prototype.saveHistogramAs = function (payload, callback) {
+    let self = this;
+    this.post(SAVE_HISTOGRAM_AS, payload, callback);
+}
+
 Service.prototype.exportLogPlot = function (idPlot, callback) {
     //console.log("HIHIHIHIHIH");
     let self = this;
     let dataRequest = {
         idPlot: idPlot
     }
+    self.wiComponentService.getComponent('SPINNER').show();
     self.$http({
         url: self.baseUrl + EXPORT_PLOT,
         method: 'POST',
@@ -1344,15 +1380,18 @@ Service.prototype.exportLogPlot = function (idPlot, callback) {
         responseType: "arraybuffer",
         data: dataRequest
     }).then(function (res) {
+        self.wiComponentService.getComponent('SPINNER').hide();
         callback(res.data, res.headers('Content-Type'));
     }, function (err) {
         console.error(err);
+        self.wiComponentService.getComponent('SPINNER').hide();
         self.getUtils().error("File not found!");
     });
 }
 Service.prototype.exportLogTrack = function (data, callback) {
     let self = this;
     let dataRequest = data
+    self.wiComponentService.getComponent('SPINNER').show();
     self.$http({
         url: self.baseUrl + EXPORT_PLOT_TRACK,
         method: 'POST',
@@ -1364,9 +1403,11 @@ Service.prototype.exportLogTrack = function (data, callback) {
         responseType: "arraybuffer",
         data: dataRequest
     }).then(function (res) {
+        self.wiComponentService.getComponent('SPINNER').hide();
         callback(res.data, res.headers('Content-Type'));
     }, function (err) {
         console.error(err);
+        self.wiComponentService.getComponent('SPINNER').hide();
         self.getUtils().error("File not found!");
     });
 }
@@ -1565,4 +1606,7 @@ Service.prototype.removeObjectOfObjectTrack = function (idObjectOfTrack, callbac
 }
 Service.prototype.convolution = function (data, callback){
     this.post('/convolution', data, callback, 'processing');
+}
+Service.prototype.deconvolution = function (data, callback){
+    this.post('/deconvolution', data, callback, 'processing');
 }

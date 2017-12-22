@@ -18,13 +18,12 @@ function Controller(wiComponentService, $timeout, $scope) {
         _backdrop = document.getElementById('spinnerHolder');
         //$timeout(function() {show();}, 3000);
     }
-    this.show = show;
+    this.show = _.debounce(show, 200, { leading: true, trailing: false });
     function show() {
         self.shown = true;
-        
         if (_backdrop) _backdrop.appendChild(_spinner.spin().el);
     }
-    this.hide = hide; 
+    this.hide = _.debounce(hide, 300);
     function hide() {
         $timeout(function(){
             self.shown = false;

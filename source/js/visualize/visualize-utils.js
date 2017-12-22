@@ -547,8 +547,8 @@ function createFillStyles(ctx, fills, callback) {
 
 function trimData(data) {
     let i = 0, j = data.length -1;
-    for (;i < data.length && data[i].x == null; i++);
-    for (;j >= 0 && data[j].x == null; j--);
+    for (;i < data.length && (data[i].x == null || isNaN(data[i].x)); i++);
+    for (;j >= 0 && (data[j].x == null || isNaN(data[j].x)); j--);
     if (i >= j) return [];
     return data.slice(i, j+1);
 }
@@ -556,8 +556,8 @@ function trimData(data) {
 function parseData(data) {
     return data.map(function(d) {
         return {
-            x: (d.x == null || d.x == NaN) ? null : parseFloat(d.x),
-            y: (d.y == null || d.y == NaN) ? null : parseFloat(d.y)
+            x: (d.x == null || isNaN(d.y)) ? null : parseFloat(d.x),
+            y: (d.y == null || isNaN(d.y)) ? null : parseFloat(d.y)
         }
     });
 }
@@ -725,7 +725,9 @@ function getDpcm() {
 }
 
 let ALIGN = exports.ALIGN = {
-    CENTER_X: 1
+    CENTER_X: 1,
+    RIGHT: 2,
+    TOP: 3
 };
 
 let alignSvg = exports.alignSvg = function(element, container, type) {
@@ -734,6 +736,12 @@ let alignSvg = exports.alignSvg = function(element, container, type) {
 
     if (type == ALIGN.CENTER_X) {
         element.attr('x', containerDim.width / 2 - elemDim.width / 2);
+    }
+    else if (type == ALIGN.RIGHT) {
+        element.attr('x', containerDim.width - elemDim.width);
+    }
+    else if (type == ALIGN.TOP) {
+        element.attr('y', 0);
     }
     return element;
 }

@@ -12,14 +12,15 @@
                         <div class="col-sm-5">
                             <label class="col-sm-5 font-weight-normal">Top Depth (m)</label>
                             <div class="col-sm-7">
-                                <input type="number" class="form-control wi-form-control" step="any" ng-model="wiModal.props.referenceTopDepth">
+                                <input type="number" class="form-control wi-form-control" step="any" ng-model="wiModal.props.referenceTopDepth"
+                                min="{{wiModal.getTopFromWell()}}">
                             </div>
                         </div>
                         <div class="col-sm-5">
                             <label class="col-sm-5 font-weight-normal">Bottom Depth (m)</label>
                             <div class="col-sm-7">
                                 <input type="number" class="form-control wi-form-control" step="any"
-                                ng-model="wiModal.props.referenceBottomDepth">
+                                ng-model="wiModal.props.referenceBottomDepth" max="{{wiModal.getBottomFromWell()}}">
                             </div>
                         </div>
                         <div class="col-sm-2">

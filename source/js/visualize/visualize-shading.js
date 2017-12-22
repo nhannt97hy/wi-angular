@@ -63,7 +63,9 @@ function Shading(config) {
     this.leftX = config.leftX;
     this.rightX = config.rightX;
 
-    this.refLineWidth = config.refLineWidth || 2;
+    this.yStep = config.yStep || 1;
+
+    this.refLineWidth = config.refLineWidth || 1;
     this.refLineColor = config.refLineColor || '#3e3e3e';
 
     this.vpX = {
@@ -304,7 +306,7 @@ Shading.prototype.doPlot = function(highlight) {
         ctx.restore();
         drawHeader(self);
         drawRefLine(self);
-        self.canvas.lower();
+        // self.canvas.lower();
     });
     return this;
 }
@@ -382,7 +384,7 @@ Shading.prototype.prepareData = function(curve) {
     let self = this;
     let data = curve.data
         .filter(function(item) {
-            return Utils.isWithinYRange(item, windowY);
+            return Utils.isWithinYRange(item, [windowY[0]-self.yStep, windowY[1]+self.yStep]);
         })
         .map(function(item) {
             return {
@@ -501,8 +503,8 @@ function drawRefLine(shading) {
     }
 
     shading.refLine
-        .attr('x1', shading.vpX.ref)
-        .attr('x2', shading.vpX.ref)
+        .attr('x1', shading.vpX.ref - shading.refLineWidth / 2)
+        .attr('x2', shading.vpX.ref - shading.refLineWidth / 2)
         .attr('y1', 0)
         .attr('y2', shading.root.node().clientHeight)
         .attr('stroke', shading.refLineColor)

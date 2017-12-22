@@ -216,6 +216,12 @@ LogTrack.prototype.getMarkers = function() {
     });
 }
 
+LogTrack.prototype.getAnnotations = function() {
+    return this.drawings.filter(function(d) {
+        return d.isAnnotation();
+    })
+}
+
 /**
  * Get temporary curve to create pair shading
  */
@@ -368,6 +374,7 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     let leftName = leftCurve ? leftCurve.name : 'left';
     let rightName = rightCurve ? rightCurve.name : 'right';
     config.name = config.name || (leftName + ' - ' + rightName);
+    config.yStep = config.yStep || this.yStep;
 
 //    if (config.isNegPosFilling == null && !config.fill) {
     if (config.isNegPosFill == null && !config.fill) {
@@ -391,7 +398,7 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     shading.onRefLineDrag(function() {
         let rWidth = shading.refLineWidth;
         let leftMost = rWidth / 2;
-        let rightMost = self.plotContainer.node().clientWidth - rWidth / 2;
+        let rightMost = self.plotContainer.node().clientWidth - rWidth;
         let vpRefX = d3.event.x;
         vpRefX = vpRefX > rightMost ? rightMost : vpRefX;
         vpRefX = vpRefX < leftMost ? leftMost : vpRefX;
@@ -601,6 +608,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
     this.svgContainer.raise();
+    this.axisContainer.lower();
 }
 
 /**
@@ -793,10 +801,13 @@ LogTrack.prototype.updateAxis = function() {
     // let step = (transformY.invert(Utils.getDpcm()) - windowY[0]) * (this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor);
     // let start = Utils.roundUp(windowY[0], step);
     // let end = Utils.roundDown(windowY[1], step);
-    let yTickValues = this.prepareTicks()[0];
+    let yTicks = this.prepareTicks();
+    let yShownTicks = yTicks.filter(function(d) {
+        return d >= windowY[0];
+    });
 
     let yAxis = d3.axisLeft(transformY)
-        .tickValues(yTickValues)
+        .tickValues(yShownTicks)
         .tickFormat(this.showLabels ? this.getDecimalFormatter(this.yDecimal) : '')
         .tickSize(-rect.width);
 
@@ -819,15 +830,17 @@ LogTrack.prototype.updateAxis = function() {
                 return x;
             })
             .style('display', function(d, i) {
-                return ((i == 0 || i == self.yTicks) && !self.showEndLabels) ? 'none' : 'block';
+                return ((i == 0 || i == yShownTicks.length-1) && !self.showEndLabels) ? 'none' : 'block';
             });
-
-    this.yAxisGroup.selectAll('.tick line')
-        .style('display', function(d) { return d < windowY[0] ? 'none' : 'block' });
 
     this.xAxisGroup.selectAll('.tick')
         .classed('major', function(d,i) {
             return majorTest(i);
+        });
+
+    this.yAxisGroup.selectAll('.tick')
+        .classed('major', function(d) {
+            return yTicks.indexOf(d) % 5 == 0;
         });
 
     function linearMajorTest(i) {
@@ -906,6 +919,8 @@ LogTrack.prototype.addCurveHeader = function(curve) {
                 return i == 1 ? 1 : 0;
             })
             .text(function(d) { return d; });
+
+    this.drawingHeaderContainer.selectAll('.vi-shading-header').raise();
     return curveHeader;
 }
 
@@ -1014,7 +1029,6 @@ LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let svg = this.svgContainer;
     let y = this.getTransformY()(depth);
     let x = d3.mouse(this.plotContainer.node())[0];
-
     let lineData = drawVertical ? [
         {x1: x, y1: 0, x2: x, y2: plotRect.height},
         {x1: 0, y1: y, x2: plotRect.width, y2: y}
@@ -1039,7 +1053,7 @@ LogTrack.prototype.removeTooltipLines = function() {
     this.svgContainer.selectAll('line.tooltip-line').remove();
 }
 
-LogTrack.prototype.drawTooltipText = function(depth) {
+LogTrack.prototype.drawTooltipText = function(depth, showDepth) {
 
     let plotMouse = d3.mouse(this.plotContainer.node());
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
@@ -1047,7 +1061,7 @@ LogTrack.prototype.drawTooltipText = function(depth) {
     let svg = this.svgContainer;
 
     svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
-
+    if (!this.getCurves().length) return;
     let tooltip = svg.append('text')
         .attr('class', 'tooltip-text')
         .attr('y', y);
@@ -1055,10 +1069,10 @@ LogTrack.prototype.drawTooltipText = function(depth) {
     let xFormatter = this.getDecimalFormatter(this.xDecimal);
     let yFormatter = this.getDecimalFormatter(this.yDecimal);
 
-    let textData = [{
+    let textData = showDepth ? [{
         text: 'Depth: ' + yFormatter(this.getTransformY().invert(y)),
         color: 'black'
-    }];
+    }] : [];
     this.getCurves().forEach(function(curve) {
         let curveY = curve.getTransformY().invert(y);
         curveY = curve.offsetY + Utils.round(curveY - curve.offsetY, curve.yStep);
@@ -1080,11 +1094,11 @@ LogTrack.prototype.drawTooltipText = function(depth) {
             .text(function(d) { return d.text; });
 
     let bbox = tooltip.node().getBBox();
-    let offset = 10;
+    let offset = 20;
     let rectX = bbox.x + offset;
-    let rectY = bbox.y - offset - bbox.height - 2;
+    let rectY = bbox.y - offset - bbox.height;
 
-    if (rectY < 0) rectY = bbox.y + 2;
+    if (rectY < 0) rectY = bbox.y + offset - 10;
 
     tooltip.attr('y', rectY).selectAll('tspan').attr('x', rectX);
 
@@ -1096,14 +1110,71 @@ LogTrack.prototype.drawTooltipText = function(depth) {
         .attr('width', bbox.width + padding*2)
         .attr('height', bbox.height + padding*2);
 
-    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.CENTER_X);
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.RIGHT);
     let x = parseFloat(rect.attr('x')) + padding;
     tooltip.selectAll('tspan')
         .attr('x', x);
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.TOP);
+    y = parseFloat(rect.attr('y'));
+    tooltip.attr('y', y)
 
     tooltip.raise();
 }
 
 LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
+}
+
+/**
+ * Register event when drag curve
+ */
+LogTrack.prototype.onCurveDrag = function (callbackDrop) {
+    let self = this;
+    function triggerClickPlot (event) {
+        d3.event = event;
+        self.plotContainer.on("mousedown")();
+        self.trackContainer.node().focus();
+    }
+    function onCurveDropHandler(event) {
+        if (self == event.desTrack) return;
+        callbackDrop && callbackDrop(event.desTrack);
+    }
+    $(this.plotContainer.node()).draggable({
+        axis: 'x',
+        containment: self.root.node(),
+        helper: function () {
+            if (self.getCurrentCurve()) {
+                let currentCurve = self.getCurrentCurve();
+                return $('<img></img>').prop({src: currentCurve.canvas.node().toDataURL()});
+            }
+            return $('<span></span>');
+        },
+        distance: 10,
+        scope: 'curve',
+        drag: function (event, ui) {
+            if (!self.getCurrentCurve()) {
+                return false;
+            }
+        },
+        start: function (event, ui) {
+            triggerClickPlot(event);
+            document.addEventListener('oncurvedrop', onCurveDropHandler);
+        },
+        stop: function () {
+            document.removeEventListener('oncurvedrop', onCurveDropHandler);
+        }
+    })
+    .click(function (event) {
+        triggerClickPlot(event);
+    });
+    $(this.plotContainer.node()).droppable({
+        accept: '.vi-track-plot-container',
+        scope: 'curve',
+        tolerance: 'pointer',
+        drop: function (event, ui) {
+            let onCurveDrop = new Event('oncurvedrop');
+            onCurveDrop.desTrack = self;
+            document.dispatchEvent(onCurveDrop);
+        }
+    });
 }

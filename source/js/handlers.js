@@ -191,7 +191,9 @@ exports.OpenTemplateButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     let selectedNode = utils.getSelectedNode();
-    DialogUtils.OpenTemplateDialog(this.ModalService, selectedNode);
+    DialogUtils.OpenTemplateDialog(this.ModalService, selectedNode, function (plot) {
+        utils.openLogplotTab(self.wiComponentService, utils.getModel('logplot', plot.idPlot));
+    });
 };
 
 
@@ -778,7 +780,7 @@ exports.SonicRtButtonClicked = function () {
 
 exports.RtRx0ButtonClicked = function () {
     console.log('RtRx0Button is clicked');
-    newCrossPlotTemplate("DeepResistivityShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newCrossPlotTemplate("DeepResistivityInvadedZoneResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
@@ -867,21 +869,21 @@ exports.NeutronButtonClicked = function () {
 
 exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
-    newTemplateHistogram("DT Histogram" ,"Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("RHOB Histogram" ,"Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.SonicButtonClicked = function () {
     console.log('SonicButton is clicked');
-    newTemplateHistogram("RHBO Histogram","Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("DT Histogram","Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
 
 exports.SallowResistivityButtonClicked = function () {
     console.log('SallowResistivityButton is clicked');
-    newTemplateHistogram("MSFL Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("LLS Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
@@ -952,15 +954,18 @@ exports.CurvesHeaderButtonClicked = function () {
 };
 
 exports.FillDataGapsButtonClicked = function () {
-     console.log('FillDataGapsButton is clicked');
-     let self = this;
-     let wiComponentService = this.wiComponentService;
-     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-     DialogUtils.fillDataGapsDialog(this.ModalService);
+    console.log('FillDataGapsButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.fillDataGapsDialog(this.ModalService);
 };
 
 exports.CurveFilterButtonClicked = function () {
     console.log('CurveFilterButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.curveFilterDialog(this.ModalService);
 };
 
 exports.CurveConvolutionButtonClicked = function () {

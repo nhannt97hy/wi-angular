@@ -127,7 +127,7 @@ Curve.prototype.getProperties = function() {
         ignoreMissingValues: false,
         displayType: Utils.capitalize(this.scale),
         displayAs: 'Normal',
-        lineStyle: line.dash,
+        lineStyle: line.dash ? line.dash.toString() : null,
         lineWidth: line.width,
         lineColor: line.color,
         symbolName: Utils.capitalize(symbol.style),
@@ -354,11 +354,12 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
         });
     });
     if (this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative' && this.track) {
+        this.prevProps.displayAs = 'Cumulative';
         let cumulativeCurves = this.track.getCurves().filter(function(curve) {
             return curve.displayAs == 'Cumulative';
         });
         let index = cumulativeCurves.indexOf(this);
-        cumulativeCurves.slice(index+1).forEach(function(curve) {
+        cumulativeCurves.slice(0, index).forEach(function(curve) {
             curve.doPlot();
         })
     }
@@ -456,29 +457,28 @@ Curve.prototype.calculateDataForDisplayAs = function(originData) {
                 return curve.displayAs == 'Cumulative';
             });
             let index = cumulativeCurves.indexOf(this);
+            cumulativeCurves = cumulativeCurves.slice(0, index);
 
-            curveDicts = [];
             let transformX = this.getTransformX();
             let transformY = this.getTransformY();
 
-            cumulativeCurves.slice(0, index).forEach(function(curve) {
-                let dict = {};
-                curve.data.forEach(function(d) {
-                    let y = transformY(d.y);
-                    let x = transformX(d.x);
-                    if (y != null && x != null && !isNaN(y) && !isNaN(x))
-                        dict[y] = x;
-                });
-                curveDicts.push(dict);
-            });
-
             originData.forEach(function(d) {
-                let sumX = d.x;
-                curveDicts.forEach(function(dict) {
-                    if (dict[d.y] != null)
-                        sumX += dict[d.y];
+                let x = transformX.invert(d.x);
+                let y = transformY.invert(d.y);
+
+                if (x == null || isNaN(x) || y == null || isNaN(y))
+                    return;
+
+                cumulativeCurves.forEach(function(curve) {
+                    if (curve.dataMap[y] != null && !isNaN(curve.dataMap[y]))
+                        x += curve.dataMap[y];
                 });
-                data.push({ x: sumX, y: d.y });
+
+                x = transformX(x);
+                y = transformY(y);
+
+                if (x != null && !isNaN(x) && y != null && !isNaN(y))
+                    data.push({ x: x, y: y });
             });
             return data;
         default:

@@ -343,7 +343,7 @@ Histogram.prototype._doPlot = function() {
     function showTooltip(d, i) {
         var content = null;
         if (self.histogramModel.properties.plotType != 'Frequency') {
-            content = '<span>' + (d.length * 100 / self.fullData.length).toFixed(2) + '%</span>';
+            content = '<span>' + (d.length * 100 / self.getLength()).toFixed(2) + '%</span>';                
         }
         else {
             content = '<div>' + d.length + '</div>';
@@ -402,14 +402,14 @@ Histogram.prototype._doPlot = function() {
                 })
                 .attr('y', function(d, i) {
                     if (self.histogramModel.properties.plotType != 'Frequency') {
-                        return (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
+                        return (transformY(self.intervalBins[i].length * 100 / self.intervalData.length) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                     }
                     return (transformY(self.intervalBins[i].length) - transformY(self.fullBins[i].length ));
                 })
                 .attr('height', function(d, i) {
                     if (self.histogramModel.properties.plotType != 'Frequency') {
                         return transformY(wdY[0]) 
-                            - transformY(self.intervalBins[i].length * 100 / self.fullData.length);
+                            - transformY(self.intervalBins[i].length * 100 / self.intervalData.length);
                     }
                     return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
                 })
@@ -431,10 +431,11 @@ Histogram.prototype._doPlot = function() {
                     .attr('y', function(d, i) {
                         var fullBinHeight, cumHeight;
                         if (self.histogramModel.properties.plotType != 'Frequency') {
+                            let len = self.getLength();                                                        
                             fullBinHeight = ( transformY(wdY[0]) - transformY(self.fullBins[i].length * 100/self.fullData.length) );
                             cumHeight = fullBinHeight;
                             for (let k = 0; k <= j; k++) {
-                                cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length * 100 / self.fullData.length));
+                                cumHeight = cumHeight - (transformY(wdY[0]) - transformY(self.zoneBins[k][i].length * 100 / len));
                             }
                             return cumHeight;
                             //return (transformY(self.zoneBins[j][i].length * 100 / self.zoneBins[j].length) 
@@ -449,8 +450,9 @@ Histogram.prototype._doPlot = function() {
                     })
                     .attr('height', function(d, i) {
                         if (self.histogramModel.properties.plotType != 'Frequency') {
+                            let len = self.getLength();                            
                             return transformY(wdY[0]) 
-                                - transformY(self.zoneBins[j][i].length*100/self.fullData.length);
+                                - transformY(self.zoneBins[j][i].length*100/len);
                         }
                         return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
                     })
@@ -474,7 +476,7 @@ Histogram.prototype._doPlot = function() {
                 })
                 .y(function(d, i) {
                     if (self.histogramModel.properties.plotType != 'Frequency') {
-                        return transformY(d.length*100/self.fullData.length) + (transformY(self.intervalBins[i].length * 100 / self.fullData.length) - transformY(d.length * 100 / self.fullData.length));
+                        return transformY(d.length*100/self.fullData.length) + (transformY(self.intervalBins[i].length * 100 / self.intervalData.length) - transformY(d.length * 100 / self.fullData.length));
                     }
                     return transformY(d.length) + (transformY(self.intervalBins[i].length) - transformY(d.length ));    
                 });
@@ -497,7 +499,8 @@ Histogram.prototype._doPlot = function() {
                         }
                     }
                     if(self.histogramModel.properties.plotType != 'Frequency') {
-                        return transformY(binsHeight*100/self.fullData.length);
+                        let len = self.getLength();
+                        return transformY(binsHeight*100/len);
                     }
                     return transformY(binsHeight);    
                 });
@@ -741,11 +744,28 @@ Histogram.prototype.getViewportX = function() {
     return [0, $(this.svgContainer.node()).width()];
 }
 Histogram.prototype.getWindowY = function() {
-    if (this.histogramModel.properties.plotType != 'Frequency') {
-        let total = this.fullData.length;
-        return [0, d3.max(this.fullBins, function(d) { return d.length*100/total;})];
+    if (!this.histogramModel.properties.idZoneSet) {
+        // intervalDepth case
+        if (this.histogramModel.properties.plotType != 'Frequency') {
+            let total = this.intervalData.length;
+            return [0, d3.max(this.intervalBins, function(d) { return d.length*100/total;})];
+        }
+        return [0, d3.max(this.intervalBins, function(d) {return d.length;})];
+    }else{
+        // zoneDepth case
+        let totalLenArr = this.zoneBins.reduce(function (r, a) {
+            a.forEach(function (b, i) {
+                r[i] = (r[i] || 0) + b.length;
+            });
+            return r;
+        }, []);
+
+        if (this.histogramModel.properties.plotType != 'Frequency') {
+            let total = this.getLength();
+            return [0, d3.max(totalLenArr, function(d) { return d*100/total;})];
+        }
+        return [0, d3.max(totalLenArr)];
     }
-    return [0, d3.max(this.fullBins, function(d) {return d.length;})];
 }
 Histogram.prototype.getWindowX = function(isLoga, isFlipped) {
     var left = this.histogramModel.properties.leftScale;

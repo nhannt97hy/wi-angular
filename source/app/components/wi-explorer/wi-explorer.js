@@ -330,6 +330,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             self.handlers.DeleteItemButtonClicked(true);
                         }
                     }, {
+                        label: "Group Manager",
+                        icon: "dataset-new-16x16",
+                        handler: function () {
+                            DialogUtils.groupManagerDialog(ModalService, function () {
+                                utils.refreshProjectState();
+                            });
+                        }
+                    }
+                ];
+                if (groupsContextMenu.length) {
+                    wellContextMenu.push({
                         name: "AddToGroup",
                         label: wellModels[0].properties.idGroup? "Move To Group": "Add To Group",
                         icon: "plus-16x16",
@@ -340,8 +351,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             })
                         },
                         childContextMenu: groupsContextMenu
-                    }
-                ];
+                    });
+                }
                 if (wellModels[0].properties.idGroup) {
                     wellContextMenu.push({
                         label: 'Ungroup',
@@ -516,16 +527,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         name: "Delete",
                         label: "Delete",
-                        icon: "recycle-bin-empty-16x16",
-                        handler: function() {
-                            self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        name: "DeletePermanently",
-                        label: "Delete Permanently",
                         icon: "delete-16x16",
                         handler: function () {
-                            self.handlers.DeleteItemButtonClicked(true);
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         name: "ZoneManager",
@@ -544,16 +548,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     {
                         name: "Delete",
                         label: "Delete",
-                        icon: "recycle-bin-empty-16x16",
-                        handler: function() {
-                            self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        name: "DeletePermanently",
-                        label: "Delete Permanently",
                         icon: "delete-16x16",
                         handler: function () {
-                            self.handlers.DeleteItemButtonClicked(true);
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         name: "ZoneManager",
@@ -674,6 +671,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "annotation-16x16-edit",
                         handler: function() {
 
+                        }
+                    }, {
+                        name: "DuplicatePlot",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('plot');
                         }
                     }, {
                         name: "Delete",
@@ -820,6 +824,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
                         }
                     }, {
+                        name: "DuplicatePlot",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('crossplot');
+                        }
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -939,6 +950,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
 
                         }
                     }, {
+                        name: "DuplicatePlot",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('histogram');
+                        }
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -1001,16 +1019,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }, {
                         name: "Delete",
                         label: "Delete",
-                        icon: "recycle-bin-empty-16x16",
-                        handler: function() {
-                            self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        name: "DeletePermanently",
-                        label: "Delete Permanently",
                         icon: "delete-16x16",
                         handler: function () {
-                            self.handlers.DeleteItemButtonClicked(true);
+                            self.handlers.DeleteItemButtonClicked();
                         }
                     }, {
                         separator: '1'

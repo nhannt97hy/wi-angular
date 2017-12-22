@@ -33,19 +33,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function getOrderKey(track) {
         if (_tracks.length <= 0) {
-            return 'a';
+            return 'm';
         }
         if (!track) track = _currentTrack;
         var currentIdx = _tracks.indexOf(track);
         if (currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
             currentIdx = _tracks.length - 1;
             let currentOrderKey = _tracks[currentIdx].orderNum;
-            if (currentOrderKey < 'z') {
-                var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
-                console.log(key);
-                return key;
-            }
-            return null; // ERROR
+            var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+            console.log(key);
+            return key;
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
@@ -121,7 +118,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth),
             width: Utils.inchToPixel(logTrack.width),
-            zoomFactor: logTrack.zoomFactor
+            zoomFactor: logTrack.zoomFactor,
+            xMajorTicks: logTrack.majorTicks,
+            xMinorTicks: logTrack.minorTicks
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
         graph.rearrangeTracks(self);
@@ -148,6 +147,92 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackDragCallback(track);
         return track;
     };
+
+    this.updateLogTrack = function (viTrack) {
+        if (!viTrack.isLogTrack()) return;
+        let trackProps = viTrack.getProperties();
+        let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+        function _addShadingToTrack (shading) {
+            let shadingModel = Utils.shadingToTreeConfig(shading, palettes);
+            if (!shadingModel.idRightLine) return;
+            if (!shadingModel.idLeftLine) {
+                let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
+                if (!lineObj1) return;
+                self.addCustomShadingToTrack(viTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+            }
+            else {
+                let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
+                let lineObj2 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idLeftLine);
+                if (!lineObj1 || ! lineObj2) return;
+                self.addPairShadingToTrack(viTrack, lineObj2, lineObj1, shadingModel.data);
+            }
+        }
+        wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
+            viTrack.getMarkers().forEach(viMarker => {
+                let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
+                viTrack.removeDrawing(viMarker);
+                if (marker) {
+                    self.addMarkerToTrack(viTrack, marker);
+                } // add if viMarker in track
+            });
+            logTrack.markers.forEach(marker => {
+                if(!viTrack.getMarkers().find(viMarker => viMarker.id == marker.idMarker)) {
+                    self.addMarkerToTrack(viTrack, marker);
+                } // add if marker not in viTrack
+            });
+            viTrack.getAnnotations().forEach(viAnno => {
+                let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
+                viTrack.removeDrawing(viAnno);
+                if (anno) {
+                    self.addAnnotationToTrack(viTrack, anno);
+                }
+            });
+            logTrack.annotations.forEach(anno => {
+                if(!viTrack.getAnnotations().find(viAnno => viAnno.id == anno.idAnnotation)) {
+                    self.addAnnotationToTrack(viTrack, anno);
+                }
+            });
+            let promises = [];
+            viTrack.getCurves().forEach(viCurve => {
+                let line = logTrack.lines.find(line => line.idLine == viCurve.id);
+                let curveData = viCurve.rawData;
+                viTrack.removeDrawing(viCurve);
+                if (line) {
+                    self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
+                }
+            });
+            logTrack.lines.forEach(line => {
+                if(!viTrack.getCurves().find(viCurve => viCurve.id == line.idLine)) {
+                    promises.push(new Promise(resolve => {
+                        wiApiService.dataCurve(line.idCurve, function (curveData) {
+                            self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
+                            resolve();
+                        })
+                    }))
+                }
+            });
+            Promise.all(promises)
+                .then(function () {
+                    viTrack.getShadings().forEach(viShading => {
+                        let shading = logTrack.shadings.find(shading => shading.idShading == viShading.id);
+                        viTrack.removeDrawing(viShading);
+                        if (!shading) return;
+                        _addShadingToTrack(shading);
+                    });
+                    logTrack.shadings.forEach(shading => {
+                        if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
+                        _addShadingToTrack(shading);
+                    });
+
+                    logTrack.width = Utils.inchToPixel(logTrack.width);
+                    viTrack.setProperties(logTrack);
+                    viTrack.doPlot();
+                })
+                .catch(function (err) {
+                    console.error(err);
+                })
+        });
+    }
 
     this.addDepthTrack = function (callback) {
         var trackOrder = getOrderKey();
@@ -199,6 +284,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
         _registerTrackDragCallback(track);
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         self.updateScale();
     };
 
@@ -759,15 +847,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.updateScale = function () {
-        let track = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container`);
-        if (!track.length) return;
-        let trackHeight = track.height();
+        let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
+        if (!trackPlot) return;
+        let trackPlotHeight = trackPlot.getAttribute('height');
         let dpCm = Utils.getDpcm();
-        let heightCm = trackHeight / dpCm;
+        let heightCm = trackPlotHeight / dpCm;
         let depthRange = this.getDepthRange();
         let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
         this.scale = scale.toFixed(0);
-        // console.log(depthRange, heightCm);
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
         })
@@ -889,6 +976,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //let sign = (d3.event.deltaY<0)?"":"-";
         let value = (d3.event.deltaY<0)? 2 : -2;
         slidingBar.scroll(value);
+        _drawTooltip(_currentTrack);
     }
 
     this.zoom = function (zoomOut) {
@@ -914,6 +1002,30 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
+        _drawTooltip(_currentTrack);
+    }
+
+    this.updateTrack = function (viTrack) {
+        if (viTrack.isLogTrack()) {
+            self.updateLogTrack(viTrack);
+            return;
+        }
+        if (viTrack.isDepthTrack()) {
+            self.updateDepthTrack(viTrack);
+            return;
+        }
+        if (viTrack.isZoneTrack()) {
+            self.updateZoneTrack(viTrack);
+            return;
+        }
+        if (viTrack.isImageTrack()) {
+            self.updateImageTrack(viTrack);
+            return;
+        }
+        if (viTrack.isObjectTrack()) {
+            self.updateObjectTrack(viTrack);
+            return;
+        }
     }
 
     /* Private Begin */
@@ -963,11 +1075,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!_tooltip) return;
 
         let plotMouse = d3.mouse(track.plotContainer.node());
+        let x = plotMouse[0];
+        let y = plotMouse[1];
+        let plotDim = track.plotContainer.node().getBoundingClientRect();
+
+        if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
+
         let depth = track.getTransformY().invert(plotMouse[1]);
 
         _tracks.forEach(function(tr) {
             if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
-            if (tr.drawTooltipText) tr.drawTooltipText(depth);
+            if (tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
         // graph.createTooltipLines(svg);
     }
@@ -1059,9 +1177,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         track.onPlotMouseDown(function () {
             _onPlotMouseDownCallback(track);
         });
@@ -1076,6 +1194,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
+        });
+        track.onCurveDrag(function (desTrack) {
+            let currentCurve = track.getCurrentCurve();
+            let curve = currentCurve.getProperties();
+            curve.idTrack = desTrack.id;
+            wiApiService.editLine(curve, function (res) {
+                self.updateTrack(track);
+                self.updateTrack(desTrack);
+            });
         });
         _registerTrackCallback(track);
     }
@@ -1182,9 +1309,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         _registerTrackCallback(track);
     }
 
@@ -1272,9 +1399,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         _registerTrackCallback(track);
     }
 
@@ -1341,9 +1468,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('keydown', function () {
             _onTrackKeyPressCallback(track);
         });
-        track.onPlotMouseWheel(function () {
-            _onPlotMouseWheelCallback();
-        });
+        // track.onPlotMouseWheel(function () {
+        //     _onPlotMouseWheelCallback();
+        // });
         _registerTrackCallback(track);
     }
 
@@ -1459,7 +1586,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         for (var i = 0; i < _tracks.length; i++) {
             let viTrack = _tracks[i];
             let orderNum;
-            if (i == 0) orderNum = 'a';
+            if (i == 0) orderNum = 'm';
             else orderNum = String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(0) + 1);
             viTrack.orderNum = orderNum;
             promises.push(new Promise((resolve, reject) => {
@@ -1494,6 +1621,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     return track1.orderNum.localeCompare(track2.orderNum);
                 });
                 graph.rearrangeTracks(self);
+                console.log(_tracks.map(t => t.orderNum));
             }).catch(function (err) {
             if (err) {
                 _tracks = backupTracks;
@@ -1505,25 +1633,35 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function _registerTrackDragCallback(viTrack) {
         let originalOrderNum = viTrack.orderNum;
-        viTrack.onTrackDrag(function (desTrack) {
-            // let desTrackIndex = _tracks.findIndex(track => track == desTrack);
-            // if (_tracks[desTrackIndex + 1] == viTrack || desTrack == viTrack) return;
-            // let orderNum = getOrderKey(desTrack);
-            // orderTrack(viTrack, orderNum);
-        }, function (desTrack) {
-            let desTrackIndex = _tracks.findIndex(track => track == desTrack);
-            if (_tracks[desTrackIndex + 1] == viTrack || desTrack == viTrack) return;
-            let orderNum = getOrderKey(desTrack);
-            editOrderNum(viTrack, orderNum).then(function () {
-                if (orderNum.length < 50) return;
-                reindexAllTracks();
-            }).catch(function () {
-                orderTrack(originalOrderNum);
-            })
-        });
+        viTrack.onTrackDrag(
+            function (desTrack) {
+                let orderNum = getOrderKey(desTrack);
+                if (viTrack.orderNum > desTrack.orderNum) {
+                    let desTrackIndex = _tracks.findIndex(track => track == desTrack);
+                    if (desTrackIndex == 0) {
+                        orderNum = String.fromCharCode(_tracks[0].orderNum.charCodeAt(0) - 1);
+                    } else {
+                        desTrack = _tracks[desTrackIndex - 1];
+                        orderNum = getOrderKey(desTrack);
+                    }
+                }
+                editOrderNum(viTrack, orderNum).then(function () {
+                    console.log(_tracks.map(t => t.orderNum));
+                    if (orderNum.length > 50 || _tracks[0].orderNum < 'a' || _tracks[_tracks.length - 1].orderNum > 'z') {
+                        reindexAllTracks();
+                    }
+                }).catch(function (err) {
+                    console.log(err);
+                    orderTrack(viTrack, originalOrderNum);
+                })
+            });
     }
 
     function _onPlotMouseWheelCallback(track) {
+        if (!_tracks || !_tracks.length) return;
+        let mouse = d3.mouse(_tracks[0].plotContainer.node());
+        if (mouse[1] < 0) return;
+
         if (d3.event.ctrlKey) {
             self.zoom(d3.event.deltaY < 0);
             d3.event.preventDefault();
@@ -1671,8 +1809,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         imgzone.setProperties({
             done: true
         });
-
-        DialogUtils.imageZonePropertiesDialog(ModalService, imgzone, function (props) {
+        let _currentImage = imgzone.getProperties();
+        _currentImage.isCreated = true;
+        DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
             if (!props) return;
             wiApiService.editImage(props, function (imgProps) {
                 if (imgProps) {
@@ -1830,12 +1969,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _currentTrack.setCurrentDrawing(object);
         removeAnObjectOfObjectTrack();
     }
-    
+
     function removeAnObjectOfObjectTrack() {
         if(!_currentTrack.isObjectTrack() || (_currentTrack.isObjectTrack() && !_currentTrack.getCurrentDrawing)) {
+            console.log('not an object track');
             return;
         }
-        let object = _currentTrack.getCurrentDrawing(); 
+        let object = _currentTrack.getCurrentDrawing();
         console.log("Removing: ", object);
         wiApiService.removeObjectOfObjectTrack(object.id, function () {
             switch (object.currentDraw) {
@@ -2113,74 +2253,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Create Histogram Track",
             icon: "",
             handler: function () {
-                let curve = _currentTrack.getCurrentCurve();
-                let histogramModel = {
-                    properties: {
-                        divisions: 10,
-                        plot: "Bar",
-                        curve: curve,
-                        intervalDepthTop: _currentTrack.getWindowY()[0],
-                        intervalDepthBottom: _currentTrack.getWindowY()[1],
-                        color: 'blue',
-                        showGrid: true,
-                        idWell: _getWellProps().idWell
-                    },
-                    curves: getAllCurves(),
-                }
-                DialogUtils.histogramForObjectTrackDialog(ModalService, histogramModel, function (histogramProps) {
-                    histogramProps.plotType = "Frequency";
-                    let dataRequest = angular.copy(histogramProps);
-                    dataRequest.idWell = _getWellProps().idWell;
-                    dataRequest.idCurve = histogramProps.curve.idCurve;
-                    delete dataRequest.curve;
-                    wiApiService.createHistogram(dataRequest, function(createdHistogram) {
-                        if(!createdHistogram.idHistogram) {
-                            DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
-                            return;
-                        }
-                        createdHistogram.curve = histogramProps.curve;
-                        let quest = {
-                            name: 'addHistogram',
-                            config: createdHistogram,
-                            scopeObj: $scope,
-                            compileFunc: $compile
-                        }
-                        let trackOrder = getOrderKey();
-
-                        if (trackOrder) {
-                            const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
-                            let dataRequest = {
-                                idPlot: self.logPlotCtrl.id,
-                                title: 'Object Track',
-                                showTitle: true,
-                                topJustification: 'center',
-                                bottomJustification: 'center',
-                                color: '#fff',
-                                width: 2.5,
-                                orderNum: trackOrder
-                            };
-                            wiApiService.createObjectTrack(dataRequest, function (returnObjectTrack) {
-                                console.log("returned object track: ", returnObjectTrack);
-                                let viTrack = self.pushObjectTrack(returnObjectTrack);
-
-                                let object = self.addObjectToTrack(viTrack, {
-                                    minY: viTrack.minY,
-                                    maxY: viTrack.maxY
-                                });
-                                if (object) {
-                                    object.handleQuest(quest, _getWellProps());
-                                    wiApiService.createObjectOfObjectTrack(object.exportsProperties(), function (returnedObject) {
-                                        console.log('object returned: ', returnedObject);
-                                        object.setProperties(returnedObject);
-                                    })
-                                }
-                            });
-                        } else {
-                            //console.error('Cannot add new Histogram Object Track');
-                            DialogUtils.errorMessageDialog(ModalService, "Error! cannot get track order");
-                        }
-                    });
-                });
             }
         }
         ]);
@@ -2259,6 +2331,51 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return _tracks[i].getCurves();
             }
         }
+    }
+
+    function getAllCurvesOfWell() {
+        return new Promise(function(resolve, reject) {
+            let availableCurves = getAllCurves();
+            wiApiService.getWell(_getWellProps().idWell, function (wellInfo) {
+                let allCurves = [];
+                wellInfo.datasets.forEach(function (dataset) {
+                    allCurves = allCurves.concat(dataset.curves);
+                });
+                let unAvailableCurves = allCurves.filter(function (curve) {
+                    return availableCurves.filter(function (avaiCurve) { return avaiCurve.idCurve == curve.idCurve}).length == 0;
+                });
+                if(unAvailableCurves.length == 0) {
+                    resolve(availableCurves);
+                } else {
+                    for(let i = 0; i < unAvailableCurves.length; ++i) {
+                        wiApiService.infoCurve(unAvailableCurves[i].idCurve, function(infoCurve) {
+
+                            unAvailableCurves[i].minX = infoCurve.LineProperty.minScale;
+                            unAvailableCurves[i].maxX = infoCurve.LineProperty.maxScale;
+
+                            if(i == unAvailableCurves.length - 1) {
+                                resolve(availableCurves.concat(unAvailableCurves));
+                            }
+                        });
+                    }
+                }
+
+            });
+        });
+    }
+
+    function prepareCurveData(curve) {
+        return new Promise(function(resolve, reject) {
+            if(!curve) {
+                resolve(curve);
+            } else if(curve && curve.rawData) {
+                resolve(curve);
+            } else {
+                wiApiService.dataCurve(curve.idCurve, function(curveData) {
+                    resolve(graph.buildCurve(curve, curveData, _getWellProps()));
+                });
+            }
+        });
     }
 
     function _trackOnRightClick(track) {
@@ -2466,81 +2583,88 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: 'Add Crossplot',
                     icon: 'crossplot-new-16x16',
                     handler: function () {
-                        let allCurves = getAllCurves();
-                        let wellProps = _getWellProps();
+                        getAllCurvesOfWell().then(function (allCurves) {
 
-                        let crossplotConfig = {
-                            properties: {
-                                idCrossPlot: 1,
-                                idWell: wellProps.idWell,
-                                idCurveX: null,
-                                idCurveY: null,
-                                majorX: 5,
-                                minorX: 5,
-                                majorY: 5,
-                                minorY: 5,
-                                numColor: 5,
-                                scaleLeft: null,
-                                scaleRight: null,
-                                scaleBottom: null,
-                                scaleTop: null,
-                                pointSymbol: "Circle",
-                                pointSize: 5,
-                                pointColor: 'blue',
-                            },
-                            curves: allCurves,
-                            dragToCreate: true
-                        }
+                            let wellProps = _getWellProps();
+                            let crossplotConfig = {
+                                properties: {
+                                    idCrossPlot: 1,
+                                    idWell: wellProps.idWell,
+                                    idCurveX: null,
+                                    idCurveY: null,
+                                    majorX: 5,
+                                    minorX: 5,
+                                    majorY: 5,
+                                    minorY: 5,
+                                    numColor: 5,
+                                    scaleLeft: null,
+                                    scaleRight: null,
+                                    scaleBottom: null,
+                                    scaleTop: null,
+                                    pointSymbol: "Circle",
+                                    pointSize: 5,
+                                    pointColor: 'blue',
+                                },
+                                curves: allCurves,
+                                dragToCreate: true
+                            }
 
-                        DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (pointSetRaw) {
-                            let pointSetObj = angular.copy(pointSetRaw);
-                            delete pointSetObj.curveX;
-                            delete pointSetObj.curveY;
-                            delete pointSetObj.curveZ;
-                            delete pointSetObj.name;
-                            pointSetRaw.name = pointSetRaw.name || "Crossplot " + pointSetRaw.curveX.name + "_" + pointSetRaw.curveY.name + " - " + (Math.random().toString(36).substr(2, 3));
-                            wiApiService.createCrossplot({
-                                idWell: wellProps.idWell,
-                                name: pointSetRaw.name
-                            }, function (crossplot) {
-                                if (!crossplot.idCrossPlot) {
-                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + crossplot);
-                                    return;
-                                }
+                            DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (pointSetRaw) {
+                                prepareCurveData(pointSetRaw.curveX).then(function (curveX) {
+                                    prepareCurveData(pointSetRaw.curveY).then(function (curveY) {
+                                        prepareCurveData(pointSetRaw.curveZ).then(function(curveZ) {
+                                            pointSetRaw.curveX = curveX;
+                                            pointSetRaw.curveY = curveY;
+                                            pointSetRaw.curveZ = curveZ;
+                                            let pointSetObj = angular.copy(pointSetRaw);
+                                            delete pointSetObj.curveX;
+                                            delete pointSetObj.curveY;
+                                            delete pointSetObj.curveZ;
+                                            delete pointSetObj.name;
+                                            pointSetRaw.name = pointSetRaw.name || "Crossplot " + pointSetRaw.curveX.name + "_" + pointSetRaw.curveY.name + " - " + (Math.random().toString(36).substr(2, 3));
+                                            wiApiService.createCrossplot({
+                                                idWell: wellProps.idWell,
+                                                name: pointSetRaw.name
+                                            }, function (crossplot) {
+                                                if (!crossplot.idCrossPlot) {
+                                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + crossplot);
+                                                    return;
+                                                }
 
-                                pointSetObj.idCrossPlot = crossplot.idCrossPlot;
-                                Utils.createPointSet(pointSetObj, function (pointSet) {
-                                    if (!pointSet.idPointSet) {
-                                        DialogUtils.errorMessageDialog(ModalService, "Error when create pointSet!");
-                                        return;
-                                    }
-                                    let objectConfig = {
-                                        curve1: pointSetRaw.curveX,
-                                        curve2: pointSetRaw.curveY,
-                                        config: {
-                                            name: pointSetRaw.name,
-                                            idCrossPlot: crossplot.idCrossPlot,
-                                            idWell: wellProps.idWell,
-                                            topDepth: wellProps.topDepth,
-                                            bottomDepth: wellProps.bottomDepth,
-                                            pointSet: pointSet,
-                                        },
-                                        dragToCreate: true,
-                                        background: pointSetRaw.background
-                                    }
-                                    console.log("Crossplot configurations: ", objectConfig);
-                                    let quest = {
-                                        name: 'addCrossplot',
-                                        config: objectConfig
-                                    }
-                                    track.setCurrentQuest(quest);
-                                    track.setMode('AddObject');
-
-                                    // Utils.refreshProjectState();
+                                                pointSetObj.idCrossPlot = crossplot.idCrossPlot;
+                                                Utils.createPointSet(pointSetObj, function (pointSet) {
+                                                    if (!pointSet.idPointSet) {
+                                                        DialogUtils.errorMessageDialog(ModalService, "Error when create pointSet!");
+                                                        return;
+                                                    }
+                                                    let objectConfig = {
+                                                        curve1: pointSetRaw.curveX,
+                                                        curve2: pointSetRaw.curveY,
+                                                        config: {
+                                                            name: pointSetRaw.name,
+                                                            idCrossPlot: crossplot.idCrossPlot,
+                                                            idWell: wellProps.idWell,
+                                                            topDepth: wellProps.topDepth,
+                                                            bottomDepth: wellProps.bottomDepth,
+                                                            pointSet: pointSet,
+                                                        },
+                                                        dragToCreate: true,
+                                                        background: pointSetRaw.background
+                                                    }
+                                                    console.log("Crossplot configurations: ", objectConfig);
+                                                    let quest = {
+                                                        name: 'addCrossplot',
+                                                        config: objectConfig
+                                                    }
+                                                    track.setCurrentQuest(quest);
+                                                    track.setMode('AddObject');
+                                                });
+                                            });
+                                        });
+                                    });
                                 });
-                            })
-                        })
-
+                            });
+                        });
                     }
                 }, {
                     name: "DeleteTrack",
@@ -2671,7 +2795,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         } else if (_currentTrack.isImageTrack()) {
-            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, _currentTrack.getProperties(), function (props) {
+            let track = _currentTrack.getProperties();
+            track.isCreated = true;
+            DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, track, function (props) {
                 if (props) {
                     _currentTrack.removeAllDrawings();
                     props.idImageTrack = _currentTrack.id;
@@ -2683,9 +2809,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             }
                             data.width = Utils.inchToPixel(data.width);
                             _currentTrack.setProperties(data);
+                            _currentTrack.doPlot(true);
                         });
                     });
-                    _currentTrack.doPlot(true);
                 }
             });
         } else if (_currentTrack.isObjectTrack()) {
@@ -2745,7 +2871,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
-        self.svgId = self.plotAreaId + 'SVG';
+        // self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
         wiComponentService.on('tab-changed', function (logplotModel) {
             if (!logplotModel || logplotModel.type != 'logplot' || self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
@@ -2765,7 +2891,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+
         $timeout(function () {
+            d3.select('#' + self.plotAreaId).on('mousewheel', function() {
+                _onPlotMouseWheelCallback();
+            });
             graph.sheetDraggable(document.getElementById(self.plotAreaId));
             let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
             let domElement = $(`wi-d3[name=${self.name}]`);

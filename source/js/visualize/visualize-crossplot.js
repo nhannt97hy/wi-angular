@@ -723,7 +723,7 @@ Crossplot.prototype.updateAxisZRects = function() {
                 .attr('x', this.getViewportX()[1] + MARGIN_LEFT)
                 .attr('y', function(d) { return d.y + stepY; })
                 .attr('width', this.rectZWidth - MARGIN_LEFT)
-                .attr('height', -stepY)
+                .attr('height', -stepY>=0 ? -stepY:0)
                 .attr('fill', function(d) { return d.fill; });
     }
 

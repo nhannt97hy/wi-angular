@@ -354,12 +354,16 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
         crossplotConfig.background = "rgba(255, 255, 255, 1)";
     }
 
+    /*
     if(!crossplotConfig.curve1.data) {
         crossplotConfig.curve1.data = processingData(crossplotConfig.curve1.rawData, wellProp);
     }
     if(!crossplotConfig.curve2.data) {
         crossplotConfig.curve2.data = processingData(crossplotConfig.curve2.rawData, wellProp);
     }
+    */
+    crossplotConfig.curve1 = graph.buildCurve(crossplotConfig.curve1, crossplotConfig.curve1.rawData, wellProp);
+    crossplotConfig.curve2 = graph.buildCurve(crossplotConfig.curve2, crossplotConfig.curve2.rawData, wellProp);
 
     var domEle = this.objectContainer
         .append("div")
@@ -393,8 +397,13 @@ ObjectOfTrack.prototype.drawContainer = function(minX, maxX, minY, maxY, forcePl
             .style('top', minY)
             .style('width', maxX - minX)
             .style('height', maxY - minY);
+    console.log('drawContainer forcePlot');
+    if (this.idHistogram) {
+        if (this.getViHistogram().visHistogram.doPlot) {
+            this.getViHistogram().visHistogram.doPlot();
+        }
+    }
     if (forcePlot) {
-        //if (this.idHistogram) this.getViHistogram().doPlot();
         if (this.viCrossplot) this.viCrossplot.doPlot();
     }
 }

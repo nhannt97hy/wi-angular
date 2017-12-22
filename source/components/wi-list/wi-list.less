@@ -23,13 +23,16 @@ wi-list {
 		td, th {
 			text-align: left;
 			padding: 5px;
-			font-size: 13px;
+			font-size: 12px;
 		}
-
 		tr{
+			display: flex;
+			white-space: nowrap;
 			td{
-				border-bottom: 1px solid #cacbd3; 
-		 		border-right: 1px solid #cacbd3; 
+				text-overflow: ellipsis;
+				overflow: hidden;
+				border-bottom: 1px solid #cacbd3;
+		 		border-right: 1px solid #cacbd3;
 				text-indent: 8px;
 				> * {
 					background: transparent;
@@ -44,15 +47,13 @@ wi-list {
 				}
 			}
 			td:first-child {
-				width: 40%;
-			}	
+				flex: 2;
+			}
 			td:last-child{
+				flex: 3;
 				border-right: none;
 			}
 		}
-		// tr:nth-child(even) {
-		//  	background-color: #f9f9fc;		 	
-		// }	
 	}
 }
 /*

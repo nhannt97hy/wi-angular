@@ -2,6 +2,11 @@
     position: absolute;
 }
 
+
+.vi-track-container:not(.vi-log-track-container) {
+    z-index: 0;
+}
+
 .vi-zone-track-container {
 
     .vi-track-plot-container {
@@ -30,14 +35,14 @@
 
 .vi-zone-header {
     position: relative;
-    padding: 2px 0 2px 0;
+    padding: 1px 0 1px 0;
 
     .vi-zone-header-name {
         display: inline-block;
         position: relative;
         text-align: center;
         background-color: white;
-        border: 1px solid black;
+        border: 0.5px solid black;
         padding: 0 2px 0 2px;
         font-size: 10px;
         z-index: 1;
@@ -51,10 +56,36 @@
     }
 }
 
+.vi-depth-track-container {
+    .vi-track-svg-container {
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+
+    }
+
+    .vi-track-axis-container {
+        .domain {
+            display: none;
+        }
+        .tick  {
+            line {
+                stroke: black;
+                stroke-width: 1;
+                stroke-opacity: 1;
+            }
+            text {
+                font-weight: bold;
+                font-size: 14px;
+            }
+        }
+    }
+}
+
 .vi-object-track-container {
 
     .vi-track-plot-container {
-        border: 1px solid black;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
 
         .object-container {
             border-top: 1px solid blue;
@@ -96,14 +127,14 @@
 
 .vi-image-zone-header {
     position: relative;
-    padding: 2px 0 2px 0;
+    padding: 1px 0 1px 0;
 
     .vi-image-zone-header-name {
         display: inline-block;
         position: relative;
         text-align: center;
         background-color: white;
-        border: 1px solid black;
+        border: 0.5px solid black;
         padding: 0 2px 0 2px;
         font-size: 10px;
         z-index: 1;
@@ -119,14 +150,14 @@
 
 .vi-object-header {
     position: relative;
-    padding: 2px 0 2px 0;
+    padding: 1px 0 1px 0;
 
     .vi-object-header-name {
         display: inline-block;
         position: relative;
         text-align: center;
         background-color: white;
-        border: 1px solid black;
+        border: 0.5px solid black;
         padding: 0 2px 0 2px;
         font-size: 10px;
         z-index: 1;
@@ -140,32 +171,36 @@
     }
 }
 
+.vi-log-track-container, .vi-depth-track-container {
+    .tooltip-line {
+        stroke: black;
+        stroke-dasharray: 2, 1;
+        stroke-width: 1px;
+    }
+
+    .tooltip-rect {
+        stroke: #666;
+        stroke-width: 1px;
+        fill: rgba(255, 255, 160, 0.9);
+        font-size: 10;
+    }
+
+    .tooltip-text {
+        tspan {
+            dy: 1.2em;
+        }
+    }
+}
+
 .vi-log-track-container {
     text {
         cursor: default;
     }
 
     .vi-track-svg-container {
-        border: 1px solid black;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
 
-        .tooltip-line {
-            stroke: black;
-            stroke-dasharray: 2, 1;
-            stroke-width: 1px;
-        }
-
-        .tooltip-rect {
-            stroke: #666;
-            stroke-width: 1px;
-            fill: #ffffa0;
-            font-size: 10;
-        }
-
-        .tooltip-text {
-            tspan {
-                dy: 1.2em;
-            }
-        }
     }
 
     .vi-track-drawing {
@@ -178,6 +213,23 @@
     .vi-track-axis {
         .domain {
             display: none;
+        }
+        .tick {
+            line {
+                //stroke: rgba(0,118,118,1);
+                stroke: LightGray;
+                //stroke-dasharray: 20, 2;
+                stroke-width: 1;
+                stroke-opacity: 0.3;
+            }
+        }
+        .tick.major {
+            line {
+                //stroke: rgba(0,118,118,1);
+                stroke: LightGray;
+                //stroke-dasharray: 0;
+                stroke-opacity: 0.8;
+            }
         }
     }
 }
@@ -225,7 +277,6 @@
                 .tick {
                     line {
                         stroke: gray;
-                        stroke-dasharray: 20, 2;
                         stroke-width: 1;
                     }
                     .vi-major-tick { stroke-opacity: 0.8; }
@@ -299,18 +350,21 @@
     z-index: 2;
     height: 100%;
 }
+
 .tick {
     line {
-        stroke: rgba(0,118,118,1);
-        stroke-dasharray: 20, 2;
+        //stroke: rgba(0,118,118,1);
+        stroke: LightGray;
+        //stroke-dasharray: 20, 2;
         stroke-width: 1;
         stroke-opacity: 0.3;
     }
 }
 .tick.major {
     line {
-        stroke: rgba(0,118,118,1);
-        stroke-dasharray: 0;
+        //stroke: rgba(0,118,118,1);
+        stroke: LightGray;
+        //stroke-dasharray: 0;
         stroke-opacity: 0.8;
     }
 }

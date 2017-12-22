@@ -35,8 +35,8 @@ function Track(config) {
     this.maxY = config.maxY;
 }
 
-Track.prototype.DEFAULT_X_PADDING = 1;
-Track.prototype.DEFAULT_Y_PADDING = 5;
+Track.prototype.DEFAULT_X_PADDING = 0;
+Track.prototype.DEFAULT_Y_PADDING = 0;
 
 /**
  * Check if class of this instance is LogTrack
@@ -112,7 +112,8 @@ Track.prototype.createContainer = function() {
         .style('width', this.width + 'px')
         .style('display', 'flex')
         .style('flex-direction', 'column')
-        .style('outline', 'none');
+        .style('outline', 'none')
+        .style('margin-left', '-3px');
     let self = this;
     new ResizeSensor( $(this.root.node()), function(param) {
         self.doPlot();
@@ -157,6 +158,7 @@ Track.prototype.createHeaderContainer = function() {
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('z-index', 1)
+        .style('margin', '0 1px')
         .text(this.name)
         .on('mousedown', function(d) {
         })
@@ -167,7 +169,8 @@ Track.prototype.createHeaderContainer = function() {
         .attr('class', 'vi-track-drawing-header-container')
         .style('position', 'absolute')
         .style('top', this.headerNameBlock.node().clientHeight + this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
-        .style('width', '100%')
+        .style('width', 'calc(100% - 2px)')
+        .style('margin', '0 1px')
         .lower()
         .on('mousewheel', function() {
             if (d3.event.shiftKey) {
@@ -222,6 +225,8 @@ Track.prototype.createVerticalResizer = function() {
         .attr('class', 'vi-track-vertical-resizer')
         .attr('data-order-num', function(d) {return d;})
         .style('width', '5px')
+        .style('margin-left', '-3px')
+        .style('z-index', '1')
         .style('cursor', 'col-resize');
 }
 
@@ -258,7 +263,6 @@ Track.prototype.createHorizontalResizer = function() {
         .attr('class', 'vi-track-horizontal-resizer')
         .style('height', '5px')
         .style('background-color', 'lightgray')
-        .style('border-radius', '3px')
         .style('width', '100%')
         .style('cursor', 'row-resize')
         .call(d3.drag()
@@ -316,51 +320,35 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 /**
  * Register event when drag track
  */
-Track.prototype.onTrackDrag = function(callbackDrag, callbackDrop) {
+Track.prototype.onTrackDrag = function(callbackDrop) {
     let self = this;
     let width;
+    function onTrackDropHandler(event) {
+        if (self == event.desTrack) return;
+        callbackDrop(event.desTrack);
+    }
     $(this.trackContainer.node()).draggable({
         axis: 'x',
         containment: 'parent',
         helper: function () {
-            width = self.width;
-            self.width = 60;
-            self.doPlot();
             return $(self.trackContainer.node()).clone().css('z-index', 99);
         },
         opacity: 0.7,
         distance: 10,
         handle: '.vi-track-header-name',
-        snap: '.vi-track-vertical-resizer',
+        snap: '.vi-track-container',
         scope: 'tracks',
         start: function (event, ui) {
-            document.addEventListener('ontrackdrag', onTrackDragHandler, false);
-            self.width = width;
-            self.doPlot();
-            function onTrackDragHandler(event) {
-                document.removeEventListener('ontrackdrop', onTrackDragHandler);
-                if (self == event.desTrack) return;
-                callbackDrag(event.desTrack);
-            }
-            document.addEventListener('ontrackdrop', onTrackDropHandler, false);
-            self.width = width;
-            self.doPlot();
-            function onTrackDropHandler(event) {
-                document.removeEventListener('ontrackdrop', onTrackDropHandler);
-                if (self == event.desTrack) return;
-                callbackDrop(event.desTrack);
-            }
+            document.addEventListener('ontrackdrop', onTrackDropHandler);
         },
+        stop : function () {
+            document.removeEventListener('ontrackdrop', onTrackDropHandler);
+        }
     });
-    $(this.verticalResizer.node()).droppable({
+    $(this.trackContainer.node()).droppable({
         accept: '.vi-track-container',
-        tolerance: "touch",
+        tolerance: 'pointer',
         scope: 'tracks',
-        over: function (event, ui) {
-            let onTrackDrag = new Event('ontrackdrag');
-            onTrackDrag.desTrack = self;
-            document.dispatchEvent(onTrackDrag);
-        },
         drop: function (event, ui) {
             let onTrackDrop = new Event('ontrackdrop');
             onTrackDrop.desTrack = self;
@@ -411,6 +399,7 @@ Track.prototype.getDecimalFormatter = function(decimal) {
  * Register event for track container
  */
 Track.prototype.on = function(type, cb) {
+    if (!cb) return this.trackContainer.on(type);
     this.trackContainer.on(type, cb);
 }
 
@@ -418,10 +407,12 @@ Track.prototype.on = function(type, cb) {
  * Update header container
  */
 Track.prototype.updateHeader = function() {
+    let name = this.name + (this.zoomFactor == 1 ? '' : (' (' + this.zoomFactor + 'x)'));
+
     this.headerNameBlock
         .style('display', this.showTitle ? 'block': 'none')
         .style('text-align', this.justification)
-        .text(this.name);
+        .text(name);
 }
 
 Track.prototype.shouldRescaleWindowY = function() {
@@ -547,30 +538,66 @@ Track.prototype.prepareTicks = function() {
     let windowY = this.getWindowY();
     let transformY = this.getTransformY();
 
-    let range = windowY[1] - windowY[0];
-    let log10Step = Math.log((windowY[1] - windowY[0]) / 10) / Math.log(10);
-    let numDigits = Math.ceil(log10Step);
-    let mainStep = Math.pow(10, numDigits);
-    let ratio = range / mainStep;
-
-    while (ratio > 3) {
-        mainStep = mainStep * 2;
-        ratio = range / mainStep;
-    }
-    if (ratio < 1.5) {
-        mainStep = mainStep / 2;
-        ratio = range / mainStep;
-    }
-
     let zoomFactor = this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor;
-    mainStep *= zoomFactor;
-
-    let start = visUtils.roundDown(windowY[0], mainStep * 10);
-    let end = windowY[1];
-    let mainTicks = d3.range(start, end + mainStep / 2, mainStep);
-
     let inchStep = (transformY.invert(utils.getDpcm()) - windowY[0]) * zoomFactor;
-    let step = mainStep / Math.round(mainStep / inchStep)
 
-    return [d3.range(start, end + step / 2, step), mainTicks];
+    return d3.range(0, windowY[1], inchStep);
+
+    // let range = windowY[1] - windowY[0];
+    // let lower = Math.pow(10, Math.floor(Math.log(windowY[0]) / Math.log(10))); // 200 -> 100
+    // let higher = Math.pow(10, Math.ceil(Math.log(windowY[1]) / Math.log(10))); // 200 -> 1000
+
+    // let properMainTickNo = 3;
+    // let multiplyByFive = false;
+    // let mainTickNo, mainStep = higher;
+
+    // do {
+    //     mainStep /= 10;
+    //     mainTickNo = range / mainStep;
+    // }
+    // while (mainTickNo < properMainTickNo);
+
+    // if (mainTickNo > properMainTickNo + 2) {
+    //     mainStep *= 5;
+    //     mainTickNo = range / mainStep;
+    //     multiplyByFive = true;
+    // }
+
+    // let zoomFactor = this.shouldRescaleWindowY() ? this.zoomFactor : this.zoomFactor / this._maxZoomFactor;
+    // mainStep *= zoomFactor;
+
+    // let mainTicks = d3.range(lower, higher, mainStep);
+
+    // let inchStep = (transformY.invert(utils.getDpcm()) - windowY[0]) * zoomFactor;
+
+    // let anchor, candidate1, candidate2;
+    // for (let i = 0; i < mainTicks.length; i ++) {
+    //     if (mainTicks[i] > windowY[0]) {
+    //         candidate1 = mainTicks[i];
+    //         candidate2 = mainTicks[i+1];
+    //         break;
+    //     }
+    // }
+
+    // if (!multiplyByFive)
+    //     anchor = candidate1;
+    // else {
+    //     if ((candidate1 - lower) % (mainStep * 2) == 0) {
+    //         anchor = candidate1;
+    //     }
+    //     else
+    //         anchor = candidate2;
+    // }
+
+    // let leftHalf = d3.range(anchor, visUtils.roundDown(windowY[0], inchStep), -inchStep).reverse();
+    // let rightHalf = d3.range(anchor + inchStep, visUtils.roundUp(windowY[1], inchStep) + inchStep / 2, inchStep);
+
+    // return [
+    //     leftHalf.concat(rightHalf).map(function(x) {
+    //         return x.toFixed(6);
+    //     }),
+    //     mainTicks.map(function(x) {
+    //         return x.toFixed(6);
+    //     })
+    // ];
 }

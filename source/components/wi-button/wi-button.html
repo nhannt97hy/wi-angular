@@ -4,7 +4,8 @@
             data-toggle="tooltip" data-placement="bottom" title="{{wiButton.tooltip || wiButton.config.tooltip || wiButton.default.tooltip}}"
             ng-disabled='wiButton.isDisabled()'
             wi-element-ready="wiButton.initTooltip() ">
-        <span ng-if="!wiButton.isCheckType && wiButton.icon" style="background-color: {{wiButton.style}}" class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}"></span>
+        <span ng-if="!wiButton.isCheckType && wiButton.icon" style="background-color: {{wiButton.style}}" class="{{wiButton.icon || wiButton.config.icon || wiButton.default.icon}}"
+        ng-class="{'font-size-16': wiButton.layout != 'icon-top', 'font-size-32': wiButton.layout == 'icon-top'}"></span>
         <span ng-if="wiButton.isCheckType && !wiButton.icon" class="ti-check button-checkbox checked-off" ng-class="{'checked-on':wiButton.checked}"></span>
         <p class="{{wiButton.layout || wiButton.config.layout || wiButton.default.layout}}"
         ng-show="wiButton.label != null || wiButton.config.label != null">

@@ -73,25 +73,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getModel = function(){
         return utils.findHistogramModelById(self.idHistogram || self.wiHistogramCtrl.id);
     }
-    function getHistogramTitle() {
-        let well = getWell();
-        if (!self.histogramModel.properties.idCurve) return "Empty";
-        let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-        if (!curve) return "Empty";
-        let datasetId = curve.properties.idDataset;
-        for (let dataset of well.children) {
-            if (dataset.type == 'dataset' && dataset.id == datasetId) {
-                return well.properties.name + "." + dataset.properties.name;
+    function getHistogramTitle(log) {
+        if(!!self.histogramModel.properties.histogramTitle){
+            return;
+        }else{
+            let well = getWell();
+            if (!self.histogramModel.properties.idCurve) {
+                self.histogramModel.properties.histogramTitle = "Empty";
+            }else{
+                let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+                if (!curve) self.histogramModel.properties.histogramTitle = "Empty";
+                else self.histogramModel.properties.histogramTitle = well.properties.name + '.' + curve.datasetName;
             }
+            saveHistogramNow(function(){
+                console.log('change title');
+            });
         }
-        return "Empty";
     }
 
     function getXLabel() {
         if (self.curveModel) {
-            let idDataset = self.curveModel.properties.idDataset;
-            let datasetModel = utils.getModel('dataset', idDataset);
-            return datasetModel.properties.name + "." + self.curveModel.properties.name;
+            return self.curveModel.datasetName + "." + self.curveModel.properties.name;
         }
         return "";
     }
@@ -142,7 +144,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         }
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
+        getHistogramTitle();
         self.histogramModel.properties.xLabel = getXLabel();
     }
     this.refreshHistogram = function() {
@@ -163,12 +165,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.refreshHistogram();
         });
     }
-    this.onRefWindCtrlReady = function(refWindCtrl) {
-        refWindCtrl.update(getWell(), 
-            self.histogramModel.properties.reference_curves, 
-            self.histogramModel.properties.referenceScale,
-            self.histogramModel.properties.referenceVertLineNumber);
-    }
+    // this.onRefWindCtrlReady = function(refWindCtrl) {
+    //     console.log('RefWindCtrlReady');
+    //     refWindCtrl.update(getWell(), 
+    //         self.histogramModel.properties.reference_curves, 
+    //         self.histogramModel.properties.referenceScale,
+    //         self.histogramModel.properties.referenceVertLineNumber,
+    //         self.histogramModel.properties.referenceTopDepth,
+    //         self.histogramModel.properties.referenceBottomDepth);
+    // }
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
@@ -187,7 +192,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.linkModels();
         let domElem = document.getElementById(self.histogramAreaId);
         self.createVisualizeHistogram(self.histogramModel, domElem);
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
@@ -214,9 +218,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.histogramFormat = function(){
         DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id, 
             function(histogramProperties) {
+                if (self.wiHistogramCtrl) {
+                    if(!histogramProperties.idZoneSet){
+                        self.wiHistogramCtrl.CloseZone();
+                    }else{
+                        self.wiHistogramCtrl.isShowWiZone = true;
+                    }
+                }
                 self.linkModels();
                 if (self.getZoneCtrl()) zoneCtrl.zoneUpdate();
-                //self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves, histogramProperties.referenceScale);
             }
         );
     }
@@ -251,6 +261,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.discriminator();
             }
         }, {
+            name: "ReferenceWindow",
+            label: "Reference Window",
+            icon: "ti-layout-tab-window",
+            handler: function () {
+                DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
+                    saveHistogramNow(function() {
+                        self.getWiRefWindCtrl().update(getWell(), 
+                            self.histogramModel.properties.reference_curves, 
+                            self.histogramModel.properties.referenceScale,
+                            self.histogramModel.properties.referenceVertLineNumber,
+                            self.histogramModel.properties.referenceTopDepth,
+                            self.histogramModel.properties.referenceBottomDepth);
+                    });
+                });
+            }
+        },{
             name: "FlipHorizontalAxis",
             label: "Flip Horizontal Axis",
             "isCheckType": "true",
@@ -300,24 +326,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowReferenceWindow",
             label: "Show Reference Window",
             "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,            
+            checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,
             handler: function (index) {
-                // self.toogleShowReferenceWindow();
                 self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
                 self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-            }
-        },{
-            name: "ReferenceWindow",
-            label: "Reference Window",
-            handler: function () {
-                DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
-                    saveHistogramNow(function() {
-                        self.getWiRefWindCtrl().update(getWell(), 
-                            self.histogramModel.properties.reference_curves, 
-                            self.histogramModel.properties.referenceScale,
-                            self.histogramModel.properties.referenceVertLineNumber);
-                    });
-                });
             }
         },{
             name: "ShowCumulative",
@@ -334,7 +346,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowTooltip",
             label: "Show/Hide Tooltip",
             handler: function () {
-
             }
         }, {
             name: "FrequencyInfor",
