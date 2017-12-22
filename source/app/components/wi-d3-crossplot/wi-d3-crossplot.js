@@ -218,6 +218,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.crossplotModel.properties.referenceDisplay = false;
         utils.triggerWindowResize();
     }
+
+    this.updateAll = function (callback) {
+        wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
+            crossplot.pointSet = crossplot.pointsets[0];
+            self.crossplotModel.properties = crossplot;
+            self.pointSet = crossplot.pointSet;
+            self.linkModels();
+            if (crossplot.pointSet.idZoneSet) {
+                crossplot.pointSet.zones = self.pointSet.zones;
+            }
+            self.viCrossplot.setProperties(crossplot);
+            self.viCrossplot.doPlot();
+            if (self.histogramModelX) {
+                if ($('#' + self.name + "HistogramX").length) {
+                    self.histogramModelX.properties = buildHistogramProps(self.crossplotModel, 'xCurve');
+                    self.xHistogram.setHistogramModel(self.histogramModelX);
+                    let activeZones = self.getZoneCtrl().getActiveZones();
+                    self.xHistogram.setZoneSet(activeZones);
+                    self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
+                    self.xHistogram.doPlot();
+                }
+            }
+            if (self.histogramModelY) {
+                if ($('#' + self.name + "HistogramY").length) {
+                    self.histogramModelY.properties = buildHistogramProps(self.crossplotModel, 'yCurve');
+                    self.yHistogram.setHistogramModel(self.histogramModelY);
+                    let activeZones = self.getZoneCtrl().getActiveZones();
+                    self.yHistogram.setZoneSet(activeZones);
+                    self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
+                    self.yHistogram.doPlot();
+                }
+            }
+            callback && callback();
+        });
+    }
+
     this.propertiesDialog = function () {
         function openDialog() {
             if (!self.viCrossplot || !Object.keys(self.viCrossplot).length) {
@@ -263,7 +299,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         }
-        if (!self.crossplotModel || !self.pointSet) {
+        if (!self.pointSet) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
                 if (!self.pointSet) {

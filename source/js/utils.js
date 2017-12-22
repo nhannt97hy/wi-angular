@@ -2702,6 +2702,32 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
     }
 }
 
+exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDeleted(model) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let crossplotModels = wellModel.children.find(child => child.type == 'crossplots');
+            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+            crossplotModels.children.forEach(function (crossplotModel) {
+                let wiCrossplotCtrl = wiComponentService.getComponent('crossplot' + crossplotModel.properties.idCrossPlot);
+                if (!wiCrossplotCtrl) return;
+                let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+                let pointSet = wiD3CrossplotCtrl.pointSet;
+                if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
+                    layoutManager.removeTabWithModel(crossplotModel);
+                } else if (idCurve == pointSet.idCurveZ) {
+                    wiD3CrossplotCtrl.updateAll();
+                }
+            });
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
+}
+
 exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted(model) {
     let wiComponentService = __GLOBAL.wiComponentService;
     switch (model.type) {
