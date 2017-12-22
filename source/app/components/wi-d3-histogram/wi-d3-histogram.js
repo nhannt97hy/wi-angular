@@ -272,7 +272,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             self.histogramModel.properties.referenceScale,
                             self.histogramModel.properties.referenceVertLineNumber,
                             self.histogramModel.properties.referenceTopDepth,
-                            self.histogramModel.properties.referenceBottomDepth);
+                            self.histogramModel.properties.referenceBottomDepth,
+                            self.histogramModel.properties.referenceShowDepthGrid);
                     });
                 });
             }
