@@ -97,7 +97,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.histogramModel.properties.referenceScale,
             self.histogramModel.properties.referenceVertLineNumber,
             self.histogramModel.properties.referenceTopDepth,
-            self.histogramModel.properties.referenceBottomDepth);
+            self.histogramModel.properties.referenceBottomDepth,
+            self.histogramModel.properties.referenceShowDepthGrid);
     }
     this.getWell = getWell;
     function getWell() {

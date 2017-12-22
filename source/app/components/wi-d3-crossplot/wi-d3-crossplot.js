@@ -157,7 +157,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.referenceScale,
             self.crossplotModel.properties.referenceVertLineNumber,
             self.crossplotModel.properties.referenceTopDepth,
-            self.crossplotModel.properties.referenceBottomDepth);
+            self.crossplotModel.properties.referenceBottomDepth,
+            self.crossplotModel.properties.referenceShowDepthGrid);
     }
 
     this.getWiRefWindCtrlName = function () {
@@ -381,7 +382,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     self.crossplotModel.properties.referenceScale,
                                     self.crossplotModel.properties.referenceVertLineNumber,
                                     self.crossplotModel.properties.referenceTopDepth,
-                                    self.crossplotModel.properties.referenceBottomDepth);
+                                    self.crossplotModel.properties.referenceBottomDepth,
+                                    self.crossplotModel.properties.referenceShowDepthGrid);
                             });
                         }, self.setContextMenu);
                     }
