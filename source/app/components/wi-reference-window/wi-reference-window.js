@@ -181,11 +181,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .tickFormat(d3.format(',.0f'))
             .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
-        self.svg.select('.vi-refwind-axis-x-ticks').call(axisX);
-        self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
+            if(!self.showGrid){
+                self.svg.selectAll('.tick').remove();
+                self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
+                .selectAll('.vi-refwind-axis-y-ticks .tick line')
+                .style('stroke-opacity', 0);
+            }else{
+                self.svg.select('.vi-refwind-axis-x-ticks').call(axisX);
+                self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
+                .selectAll('.vi-refwind-axis-y-ticks .tick line')
+                .style('stroke-opacity', 0.3);
+            }
+            self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
             .selectAll('.vi-refwind-axis-y-ticks .tick text')
-                .style('transform', 'translateX(-' + CANVAS_WIDTH + 'px)');
-
+            .style('transform', 'translateX(-' + CANVAS_WIDTH + 'px)');
         getRefCurveContainer()
             .on('mousewheel', function() {
                 let absDeltaY = Math.abs(d3.event.deltaY);
@@ -232,7 +241,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.update = update;
-    function update(well, referenceCurves, scale, vertLineNo, top, bottom) {
+    function update(well, referenceCurves, scale, vertLineNo, top, bottom, grid) {
+        self.showGrid = grid;
         self.referenceCurves.length = 0;
         let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
         _minY = top;

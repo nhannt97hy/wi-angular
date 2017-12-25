@@ -21,9 +21,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-    var saveHistogram= utils.debounce(function() {
+    var saveHistogram= utils.debounce(function(callback) {
             wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
                 console.log('updated');
+                if (callback) callback();
             });
         }, 3000);
 
@@ -34,6 +35,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (callback) callback();
         });
     }
+    this.saveHistogramNow = saveHistogramNow;
 /*
     this.statistics = {
         length: null,
@@ -63,26 +65,30 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getWell = getWell;
     function getWell() {
         if (!_well) {
-            _well = utils.findWellByHistogram(self.wiHistogramCtrl.id || self.idHistogram);
+            _well = utils.findWellByHistogram(self.idHistogram || self.wiHistogramCtrl.id);
         }
         return _well;
     }
 
     this.getModel = function(){
-        return utils.findHistogramModelById(self.wiHistogramCtrl.id || self.idHistogram);
+        return utils.findHistogramModelById(self.idHistogram || self.wiHistogramCtrl.id);
     }
-    function getHistogramTitle() {
-        let well = getWell();
-        if (!self.histogramModel.properties.idCurve) return "Empty";
-        let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-        if (!curve) return "Empty";
-        let datasetId = curve.properties.idDataset;
-        for (let dataset of well.children) {
-            if (dataset.type == 'dataset' && dataset.id == datasetId) {
-                return well.properties.name + "." + dataset.properties.name;
+    function getHistogramTitle(log) {
+        if(!!self.histogramModel.properties.histogramTitle){
+            return;
+        }else{
+            let well = getWell();
+            if (!self.histogramModel.properties.idCurve) {
+                self.histogramModel.properties.histogramTitle = "Empty";
+            }else{
+                let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+                if (!curve) self.histogramModel.properties.histogramTitle = "Empty";
+                else self.histogramModel.properties.histogramTitle = well.properties.name + '.' + curve.datasetName;
             }
+            saveHistogramNow(function(){
+                console.log('change title');
+            });
         }
-        return "Empty";
     }
 
     function getXLabel() {
@@ -138,7 +144,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         }
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
+        getHistogramTitle();
         self.histogramModel.properties.xLabel = getXLabel();
     }
     this.refreshHistogram = function() {
@@ -186,7 +192,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.linkModels();
         let domElem = document.getElementById(self.histogramAreaId);
         self.createVisualizeHistogram(self.histogramModel, domElem);
-        self.histogramModel.properties.histogramTitle = getHistogramTitle();
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
@@ -211,11 +216,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 */
 
     this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.wiHistogramCtrl.id||self.idHistogram, 
+        DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id, 
             function(histogramProperties) {
+                if (self.wiHistogramCtrl) {
+                    if(!histogramProperties.idZoneSet){
+                        self.wiHistogramCtrl.CloseZone();
+                    }else{
+                        self.wiHistogramCtrl.isShowWiZone = true;
+                    }
+                }
                 self.linkModels();
                 if (self.getZoneCtrl()) zoneCtrl.zoneUpdate();
-                //self.getWiRefWindCtrl().update(getWell(), histogramProperties.reference_curves, histogramProperties.referenceScale);
             }
         );
     }
@@ -261,7 +272,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             self.histogramModel.properties.referenceScale,
                             self.histogramModel.properties.referenceVertLineNumber,
                             self.histogramModel.properties.referenceTopDepth,
-                            self.histogramModel.properties.referenceBottomDepth);
+                            self.histogramModel.properties.referenceBottomDepth,
+                            self.histogramModel.properties.referenceShowDepthGrid);
                     });
                 });
             }
@@ -487,5 +499,9 @@ app.component(componentName, {
         idHistogram: '<'
     }
 });
-
+app.filter('toFixed2', function() {
+    return function(item) {
+        return item.toFixed(2);
+    }
+});
 exports.name = moduleName;

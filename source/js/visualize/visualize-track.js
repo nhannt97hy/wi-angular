@@ -323,6 +323,10 @@ Track.prototype.onHorizontalResizerDrag = function(cb) {
 Track.prototype.onTrackDrag = function(callbackDrop) {
     let self = this;
     let width;
+    function onTrackDropHandler(event) {
+        if (self == event.desTrack) return;
+        callbackDrop(event.desTrack);
+    }
     $(this.trackContainer.node()).draggable({
         axis: 'x',
         containment: 'parent',
@@ -335,13 +339,11 @@ Track.prototype.onTrackDrag = function(callbackDrop) {
         snap: '.vi-track-container',
         scope: 'tracks',
         start: function (event, ui) {
-            document.addEventListener('ontrackdrop', onTrackDropHandler, false);
-            function onTrackDropHandler(event) {
-                document.removeEventListener('ontrackdrop', onTrackDropHandler);
-                if (self == event.desTrack) return;
-                callbackDrop(event.desTrack);
-            }
+            document.addEventListener('ontrackdrop', onTrackDropHandler);
         },
+        stop : function () {
+            document.removeEventListener('ontrackdrop', onTrackDropHandler);
+        }
     });
     $(this.trackContainer.node()).droppable({
         accept: '.vi-track-container',
@@ -405,10 +407,12 @@ Track.prototype.on = function(type, cb) {
  * Update header container
  */
 Track.prototype.updateHeader = function() {
+    let name = this.name + (this.zoomFactor == 1 ? '' : (' (' + this.zoomFactor + 'x)'));
+
     this.headerNameBlock
         .style('display', this.showTitle ? 'block': 'none')
         .style('text-align', this.justification)
-        .text(this.name);
+        .text(name);
 }
 
 Track.prototype.shouldRescaleWindowY = function() {

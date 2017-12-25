@@ -2,6 +2,11 @@
     position: absolute;
 }
 
+
+.vi-track-container:not(.vi-log-track-container) {
+    z-index: 0;
+}
+
 .vi-zone-track-container {
 
     .vi-track-plot-container {
@@ -52,13 +57,26 @@
 }
 
 .vi-depth-track-container {
-    .tick  {
-        line {
-            stroke: gray;
-            stroke-width: 1;
+    .vi-track-svg-container {
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+
+    }
+
+    .vi-track-axis-container {
+        .domain {
+            display: none;
         }
-        text {
-            font-weight: bold;
+        .tick  {
+            line {
+                stroke: black;
+                stroke-width: 1;
+                stroke-opacity: 1;
+            }
+            text {
+                font-weight: bold;
+                font-size: 14px;
+            }
         }
     }
 }
@@ -66,7 +84,8 @@
 .vi-object-track-container {
 
     .vi-track-plot-container {
-        border: 1px solid black;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
 
         .object-container {
             border-top: 1px solid blue;
@@ -152,6 +171,27 @@
     }
 }
 
+.vi-log-track-container, .vi-depth-track-container {
+    .tooltip-line {
+        stroke: black;
+        stroke-dasharray: 2, 1;
+        stroke-width: 1px;
+    }
+
+    .tooltip-rect {
+        stroke: #666;
+        stroke-width: 1px;
+        fill: rgba(255, 255, 160, 0.9);
+        font-size: 10;
+    }
+
+    .tooltip-text {
+        tspan {
+            dy: 1.2em;
+        }
+    }
+}
+
 .vi-log-track-container {
     text {
         cursor: default;
@@ -161,24 +201,6 @@
         border-left: 1px solid black;
         border-right: 1px solid black;
 
-        .tooltip-line {
-            stroke: black;
-            stroke-dasharray: 2, 1;
-            stroke-width: 1px;
-        }
-
-        .tooltip-rect {
-            stroke: #666;
-            stroke-width: 1px;
-            fill: rgba(255, 255, 160, 0.4);
-            font-size: 10;
-        }
-
-        .tooltip-text {
-            tspan {
-                dy: 1.2em;
-            }
-        }
     }
 
     .vi-track-drawing {
@@ -255,7 +277,6 @@
                 .tick {
                     line {
                         stroke: gray;
-                        stroke-dasharray: 20, 2;
                         stroke-width: 1;
                     }
                     .vi-major-tick { stroke-opacity: 0.8; }

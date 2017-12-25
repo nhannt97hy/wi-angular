@@ -5051,6 +5051,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
         this.status = false;
 
         this.isPropsChanged = false;
+        this.isCreated = props.isCreated;
 
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
@@ -5181,7 +5182,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         function bindProps () {
             props.showTitle = self.showTitle;
-            props.stitle = self.title;
+            props.title = self.title;
             props.topJustification = self.topJustification;
             props.trackColor = self.trackColor;
             props.width = self.width;
@@ -5249,6 +5250,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.fill = props.fill || 'white';
 
         this.uploadedImages = [];
+
+        this.isCreated = props.isCreated;
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
@@ -7042,9 +7045,11 @@ exports.polygonManagerDialog = function (ModalService, wiD3Crossplot, callback){
     });
 };
 
-exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback) {
+
+exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback, cancelCallback, options) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
+        if (options) this.hideApply = options.hideApply;
         window.hisFormat = this;
         this._FNEW = 1;
         this._FEDIT = 2;
@@ -7119,6 +7124,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
 
         this.onSelectCurveChange = function () {
             self.histogramProps.idCurve = self.SelectedCurve.id;
+            if (options && options.autoName) {
+                self.histogramProps.name = "Histogram-" + self.SelectedCurve.properties.name + "-" + self.histogramProps.idHistogram;
+            }
             if (self.SelectedCurve.lineProperties) {
                 self.histogramProps.leftScale = self.SelectedCurve.lineProperties.minScale;
                 self.histogramProps.rightScale = self.SelectedCurve.lineProperties.maxScale;
@@ -7144,16 +7152,21 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
         this.onDepthTypeChanged = function () {
             switch (self.depthType) {
                 case "intervalDepth":
-                    self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop : getTopFromWell();
-                    self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
-                    self.histogramProps.idZoneSet = null;
-                    break;
+                self.histogramProps.intervalDepthTop = self.histogramProps.intervalDepthTop ? self.histogramProps.intervalDepthTop: getTopFromWell();
+                self.histogramProps.intervalDepthBottom = self.histogramProps.intervalDepthBottom ? self.histogramProps.intervalDepthBottom : getBottomFromWell();
+                self.histogramProps.idZoneSet = null;
+                break;
                 case "zonalDepth":
-                    if (self.selectedZoneSet) {
-                        self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
-                    }
-                    break;
+                if(self.selectedZoneSet){
+                    self.histogramProps.idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                }
+                break;
             }
+        }
+
+        this.defaultDepthButtonClick = function(){
+            self.histogramProps.referenceTopDepth = getTopFromWell();
+            self.histogramProps.referenceBottomDepth = getBottomFromWell();
         }
 
         this.chooseChartColor = function () {
@@ -7162,6 +7175,15 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
             });
         }
 
+        this.chooseRefCurveColor = function(index){
+            DialogUtils.colorPickerDialog(ModalService, self.ref_Curves_Arr[index].color, function (colorStr) {
+                self.ref_Curves_Arr[index].color = colorStr;
+            });
+        }
+
+        this.setClickedRow = function(index){
+            self.SelectedRefCurve = index;
+        }
         this.isNotValid = function () {
             var inValid = false;
             if (!self.histogramProps.idZoneSet) {
@@ -7177,10 +7199,10 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
             return inValid;
         }
 
-        this.onApplyButtonClicked = function () {
+        this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
             histogramModel.properties = self.histogramProps;
-            wiApiService.editHistogram(histogramModel.properties, function (returnData) {
+            wiApiService.editHistogram(histogramModel.properties, function(returnData) {
                 console.log('Return Data', returnData);
                 if (callback) callback(histogramModel.properties);
             });
@@ -7192,6 +7214,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback)
             close(null);
         }
         this.onCancelButtonClicked = function () {
+            if (cancelCallback) cancelCallback();
             close(null);
         }
     }
@@ -7792,8 +7815,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                             name: 'none'
                         }
                     },
-                    startDepth: parseFloat(top.toFixed(2)),
-                    endDepth: parseFloat(bottom.toFixed(2)),
+                    startDepth: parseFloat(top.toFixed(4)),
+                    endDepth: parseFloat(bottom.toFixed(4)),
                     idZoneSet: self.SelectedZoneSet.id,
                     name: Math.round(top)
                 },
@@ -8517,7 +8540,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         });
     });
 };
-exports.referenceWindowsDialog = function (ModalService, well, plotModel, callback) {
+exports.referenceWindowsDialog = function (ModalService, well, plotModel, callback, callbackFinal) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         this._FNEW = 1;
@@ -8769,6 +8792,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
+            callbackFinal && callbackFinal();
             if (!ret) return;
         })
     });
@@ -9687,24 +9711,33 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         }
 
         function deconvolution(input, kernel, out, callback){ // need update
-            // check validity of params
-            if(!input || !out || !kernel) callback(false);
-            if(input.length < 1 || kernel.length < 1) callback(false);
-
-            let a_dft = calDFT(input);
-            // console.log(a_dft);
-            let b_dft = calDFT(kernel);
-            // console.log(b_dft);
-            let c = new Array(input.length);
-            async.eachOfSeries(input,(data, i, done)=>{
-                c[i] = math.divide(a_dft[i], b_dft[i]);
-                async.setImmediate(done);
-            }, function(err){
-                console.log(c);
-                calIDFT(c, out);
-                console.log(out);
-                callback(true);
-            })
+             // check validity of params
+             if(!input || !out || !kernel) callback(false);
+             if(input.length < 1 || kernel.length < 1) callback(false);
+ 
+             let lstIndex = new Array();
+             let inputF = new Array();
+             for(let i = 0; i < input.length; i++){
+                 if(!isNaN(input[i])){
+                     inputF.push(input[i]);
+                     lstIndex.push(i);
+                 }
+             }
+             let kernelF = kernel.filter(d => {return !isNaN(d);});
+             out.length = input.length;
+             out.fill(NaN);
+ 
+             wiApiService.deconvolution({input: inputF, kernel: kernelF}, (result) => {
+                 let retArr = result.curve;
+                 let len = Math.min(lstIndex.length, retArr.length);
+                 for(let j = 0; j < len; j++){
+                     out[lstIndex[j]] = retArr[j];
+                     if(j == len - 1) {
+                         console.log('Done!');
+                         callback(true);
+                     }
+                 }
+             })
         }
 
         function saveCurve(curve){
@@ -9735,9 +9768,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                 if (self.isDeconvolution) {
                     deconvolution(input, kernel, self.ResultCurve.data, function (err) {
                         if (err) {
-                            console.log(self.ResultCurve.data);
-                            self.applyingInProgress = false;
-                            // saveCurve(self.ResultCurve);
+                            // console.log(self.ResultCurve.data);
+                            // self.applyingInProgress = false;
+                            saveCurve(self.ResultCurve);
                         } else {
                             console.log("Deconvolution Error!");
                             self.applyingInProgress = false;
@@ -9746,9 +9779,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                 } else {
                     convolution(input, kernel, self.ResultCurve.data, function (err) {
                         if (err) {
-                            console.log(self.ResultCurve.data);
-                            self.applyingInProgress = false;
-                            // saveCurve(self.ResultCurve);
+                            // console.log(self.ResultCurve.data);
+                            // self.applyingInProgress = false;
+                            saveCurve(self.ResultCurve);
                         } else {
                             console.log("Convolution Error!");
                             self.applyingInProgress = false;
@@ -11867,6 +11900,76 @@ exports.curveFilterDialog = function(ModalService){
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+        this.createOp = 'backup';
+        this.filterOp = '5';
+        this.numLevel = 5;
+        this.wells = utils.findWells();
+        this.datasets = [];
+        this.curvesArr = [];
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if(selectedNodes && selectedNodes.length){
+            switch (selectedNodes[0].type){
+                case 'well':
+                self.SelectedWell = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+
+                default:
+                self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+            }
+        }
+        else {
+            self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+        }
+
+        function getDatasets() {
+            self.datasets.length = 0;
+            self.curvesArr.length = 0;
+            if(self.SelectedWell && self.SelectedWell.children.length){
+                self.SelectedWell.children.forEach(function (child, i) {
+                    if (child.type == 'dataset')
+                        self.datasets.push(child);
+                    if(i == self.SelectedWell.children.length - 1){
+                        if(self.datasets.length){
+                            self.SelectedDataset = self.datasets[0];
+                            self.datasets.forEach(child => {
+                                child.children.forEach(function (item) {
+                                    if (item.type == 'curve') {
+                                        self.curvesArr.push(item);
+                                    }
+                                })
+                            })
+                        }
+                    }
+                });
+            }
+        }
+
+        this.defaultDepthButtonClick = function(){
+            self.topDepth = self.SelectedWell.properties.topDepth;
+            self.bottomDepth = self.SelectedWell.properties.bottomDepth;
+        }
+        this.onChangeWell = function () {
+            getDatasets();
+            self.defaultDepthButtonClick();
+            self.SelectedCurve = self.curvesArr[0];
+        }
+        this.onChangeWell();
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.wells = utils.findWells();
+                self.onChangeWell();
+            }, 0);
+        });
 
         this.onCancelButtonClicked = function(){
             close(null);

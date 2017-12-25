@@ -21,7 +21,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         p90: null
     }
 
-    this.isShowWiZone = true;
     this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
     }
@@ -58,6 +57,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (self.name) wiComponentService.putComponent(self.name, self);
 
         self.histogramModel = self.getModel();
+        self.isShowWiZone = self.histogramModel ? !!self.histogramModel.properties.idZoneSet: false;
+        
     };
     this.getwiD3Ctrl = function() {
         return wiComponentService.getComponent(self.wiD3AreaName);
@@ -96,7 +97,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.histogramModel.properties.referenceScale,
             self.histogramModel.properties.referenceVertLineNumber,
             self.histogramModel.properties.referenceTopDepth,
-            self.histogramModel.properties.referenceBottomDepth);
+            self.histogramModel.properties.referenceBottomDepth,
+            self.histogramModel.properties.referenceShowDepthGrid);
     }
     this.getWell = getWell;
     function getWell() {

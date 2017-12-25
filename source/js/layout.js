@@ -38,6 +38,8 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
     layoutManager = new GoldenLayout(layoutConfig, document.getElementById(domId));
+    layoutManager.init();
+    LAYOUT = layoutManager;
 
     layoutManager.registerComponent('wi-block', function (container, componentState) {
         let templateHtml = $('template#' + componentState.templateId).html();
@@ -49,23 +51,19 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         container.getElement().html(compileFunc(html)(scopeObj));
-        let modelRef = componentState.model
+        let modelRef = componentState.model;
         container.on('destroy', function () {
             let model = utils.getModel(modelRef.type, modelRef.id);
             if (!model) return;
             model.data.opened = false;
         })
     });
-    layoutManager.on('stackCreated', function (stack) {
-        stack.on('activeContentItemChanged', function (activeContentItem) {
-            if (activeContentItem.config.componentState.model) {
-                wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
-            }
-        })
-    })
 
-    layoutManager.init();
-    LAYOUT = layoutManager;
+    layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
+        if (activeContentItem.config.componentState.model) {
+            wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+        }
+    });
 }
 
 module.exports.putLeft = function (templateId, title) {
@@ -107,35 +105,35 @@ module.exports.putComponentRight = function (text, title) {
 module.exports.putTabRightWithModel = function (model) {
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
-    let itemType, itemId, tabTitle, name, htmlTemplate;
+    let itemType, itemId, tabIcon, name, htmlTemplate;
     console.log(model);
     switch (model.type) {
         case 'logplot':
             itemId = 'logplot' + model.id;
-            tabTitle = '<span class="logplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            tabIcon = 'logplot-blank-16x16';
             name = 'logplot' + model.properties.idPlot;
             htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
             break;
         case 'crossplot':
             itemId = 'crossplot' + model.id;
-            tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            tabIcon = 'crossplot-blank-16x16';
             name = 'crossplot' + model.properties.idCrossPlot;
             htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
             break;
         case 'histogram':
             itemId = 'histogram' + model.id;
-            tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
+            tabIcon = 'histogram-blank-16x16';
             name = 'histogram' + model.properties.idHistogram;
             htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
             break;
         case 'comboview':
             itemId = 'comboview' + model.id;
-            tabTitle = '<span class="link-view-16x16"></span> &nbsp;' + model.properties.name;
+            tabIcon = 'link-view-16x16';
             name = 'comboview' + model.id;
             htmlTemplate = '<wi-comboview name="' + name + '" id="' + model.properties.idCombinedBox + '"></wi-comboview>'
             break;
         default:
-            console.log('model type is not valid');
+            console.error('model type is not valid');
             return;
     }
 
@@ -153,7 +151,7 @@ module.exports.putTabRightWithModel = function (model) {
             html: htmlTemplate,
             model: model
         },
-        title: tabTitle
+        title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name} - (${well.properties.name})</span>`
     });
     let tabContainer = rightContainer.getItemsById(itemId)[0];
     switch (model.type) {

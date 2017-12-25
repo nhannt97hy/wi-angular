@@ -2,35 +2,26 @@ wi-base-treeview {
     display: block;
     background: #fff;
     font-size: 13px;
+    margin-left: -5px;
     .wi-treeview-container {
         display: block;
-        cursor: pointer;
-        padding: 3px 0 3px 10px;
+        // cursor: pointer;
+        padding-left: 12px;
         wi-base-treeview{
-            border: none;
+            margin-left: unset;
         }
         .wi-parent-node {
             // position: relative;
             display: flex;
-            
+            height: 26px;
+            line-height: 26px;
+            cursor: pointer;
             .wi-parent-unit {
-                // position: absolute;
-                // right: 0;
-                // top: 0;
-                // bottom: 0;
-                // width: 100px; // use fixed width here!
                 overflow:hidden;
-                // padding-right: 1.5em;
-                line-height: 22px;
-                //border-left: 1px dotted #ddd;
                 flex: 1;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 overflow: hidden;
-            }
-            .icon-expanded {
-                width: 20px;
-                height: 22px;
             }
 
             .wi-parent-content {
@@ -39,19 +30,24 @@ wi-base-treeview {
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 overflow: hidden;
-
-                &>div>i {
-                    color: #333;
-                    margin-top: 4px;
+                .icon-expanded {
+                    width: 25px;
+                    padding-top: 6px;
+                    color: #33333369;
+                    &:hover {
+                        color: #333
+                    }
+                    > i {
+                        width: 100%;
+                        text-align: center;
+                    }
                 }
-
                 &>div:nth-child(2) {
                     flex: 1;
                     text-overflow: ellipsis;
                     overflow: hidden;
                     span{
-                        vertical-align: -webkit-baseline-middle;
-                        white-space: nowrap;
+                        vertical-align: middle;
                     }
                 }
 
@@ -64,11 +60,7 @@ wi-base-treeview {
         .item-active {
             color: #000;
             font-weight: bold;
-            .wi-parent-content{
-                & > div{
-                    background: #f0f0f0;
-                }
-            }
+            background: #f0f0f0;
         }
     }
 

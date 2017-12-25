@@ -157,7 +157,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.referenceScale,
             self.crossplotModel.properties.referenceVertLineNumber,
             self.crossplotModel.properties.referenceTopDepth,
-            self.crossplotModel.properties.referenceBottomDepth);
+            self.crossplotModel.properties.referenceBottomDepth,
+            self.crossplotModel.properties.referenceShowDepthGrid);
     }
 
     this.getWiRefWindCtrlName = function () {
@@ -218,6 +219,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.crossplotModel.properties.referenceDisplay = false;
         utils.triggerWindowResize();
     }
+
+    this.updateAll = function (callback) {
+        wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
+            crossplot.pointSet = crossplot.pointsets[0];
+            self.crossplotModel.properties = crossplot;
+            self.pointSet = crossplot.pointSet;
+            self.linkModels();
+            if (crossplot.pointSet.idZoneSet) {
+                crossplot.pointSet.zones = self.pointSet.zones;
+            }
+            self.viCrossplot.setProperties(crossplot);
+            self.viCrossplot.doPlot();
+            if (self.histogramModelX) {
+                if ($('#' + self.name + "HistogramX").length) {
+                    self.histogramModelX.properties = buildHistogramProps(self.crossplotModel, 'xCurve');
+                    self.xHistogram.setHistogramModel(self.histogramModelX);
+                    let activeZones = self.getZoneCtrl().getActiveZones();
+                    self.xHistogram.setZoneSet(activeZones);
+                    self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
+                    self.xHistogram.doPlot();
+                }
+            }
+            if (self.histogramModelY) {
+                if ($('#' + self.name + "HistogramY").length) {
+                    self.histogramModelY.properties = buildHistogramProps(self.crossplotModel, 'yCurve');
+                    self.yHistogram.setHistogramModel(self.histogramModelY);
+                    let activeZones = self.getZoneCtrl().getActiveZones();
+                    self.yHistogram.setZoneSet(activeZones);
+                    self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
+                    self.yHistogram.doPlot();
+                }
+            }
+            callback && callback();
+        });
+    }
+
     this.propertiesDialog = function () {
         function openDialog() {
             if (!self.viCrossplot || !Object.keys(self.viCrossplot).length) {
@@ -263,7 +300,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         }
-        if (!self.crossplotModel || !self.pointSet) {
+        if (!self.pointSet) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
                 if (!self.pointSet) {
@@ -308,104 +345,110 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         })
     }
-    let commonCtxMenu = [
-        {
-            name: "Refresh",
-            label: "Refresh",
-            icon: "reload-16x16",
-            handler: function () {
-            }
-        }, {
-            name: "Properties",
-            label: "Properties",
-            icon: "properties2-16x16",
-            handler: function () {
-                self.propertiesDialog();
-            }
-        }, {
-            name: "Discriminator",
-            label: "Discriminator",
-            icon: "ti-filter",
-            handler: function () {
-                self.discriminator();
-            }
-        }, {
-            name: "ReferenceWindow",
-            label: "Reference Window",
-            icon: "ti-layout-tab-window",            
-            handler: function () {
-                let well = getWell();
-                DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
-                    saveCrossplotNow(function() {
-                        self.getWiRefWindCtrl().update(_well,
-                            self.crossplotModel.properties.reference_curves,
-                            self.crossplotModel.properties.referenceScale,
-                            self.crossplotModel.properties.referenceVertLineNumber,
-                            self.crossplotModel.properties.referenceTopDepth,
-                            self.crossplotModel.properties.referenceBottomDepth);
-                    });
-                });
-            }
-        }, {
-            name: "ShowOverlay",
-            label: "Show Overlay",
-            icon: "",
-            handler: function () {
 
-            }
-        }, {
-            name: "ShowReferenceZone",
-            label: "Show Reference Zone",
-            isCheckType: "true",
-            checked: self.isShowWiZone,
-            handler: function (index) {
-                self.isShowWiZone = !self.isShowWiZone;
-                utils.triggerWindowResize();
-                self.contextMenu[index].checked = self.isShowWiZone;
-            }
-        }, {
-            name: "ShowReferenceWindow",
-            label: "Show Reference Window",
-            isCheckType: "true",
-            checked: self.crossplotModel ? self.crossplotModel.properties.referenceDisplay : false,
-            handler: function (index) {
-                self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
-                self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
-                $timeout(function() {
-                    self.getWiRefWindCtrl().refresh();
-                }, 100);
-                //utils.triggerWindowResize();
-            }
-        },{
-            name: "ShowTooltip",
-            label: "Show Tooltip",
-            handler: function () {
-
-            }
-        }, {
-            name: "ShowHistogram",
-            label: "Show Histogram",
-            isCheckType: "true",
-            checked: (self.crossplotModel && self.crossplotModel.properties)?self.crossplotModel.properties.showHistogram:false,
-            handler: function (index) {
-                self.doShowHistogram();
-                self.contextMenu[index].checked = self.crossplotModel.properties.showHistogram;;
-            }
-        }, {
-            name: "Function",
-            label: "Function",
-            childContextMenu: [
-
-            ],
-            handler: function () {
-
-            }
-        }
-    ];
-    this.contextMenu = commonCtxMenu;
     this.setContextMenu = function (contextMenu) {
-        self.contextMenu = contextMenu;
+        if (!contextMenu) {
+            self.contextMenu = [
+                {
+                    name: "Refresh",
+                    label: "Refresh",
+                    icon: "reload-16x16",
+                    handler: function () {
+                    }
+                }, {
+                    name: "Properties",
+                    label: "Properties",
+                    icon: "properties2-16x16",
+                    handler: function () {
+                        self.propertiesDialog();
+                    }
+                }, {
+                    name: "Discriminator",
+                    label: "Discriminator",
+                    icon: "ti-filter",
+                    handler: function () {
+                        self.discriminator();
+                    }
+                }, {
+                    name: "ReferenceWindow",
+                    label: "Reference Window",
+                    icon: "ti-layout-tab-window",
+                    handler: function () {
+                        let well = getWell();
+                        DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
+                            saveCrossplotNow(function() {
+                                self.getWiRefWindCtrl().update(_well,
+                                    self.crossplotModel.properties.reference_curves,
+                                    self.crossplotModel.properties.referenceScale,
+                                    self.crossplotModel.properties.referenceVertLineNumber,
+                                    self.crossplotModel.properties.referenceTopDepth,
+                                    self.crossplotModel.properties.referenceBottomDepth,
+                                    self.crossplotModel.properties.referenceShowDepthGrid);
+                            });
+                        }, self.setContextMenu);
+                    }
+                }, {
+                    name: "ShowOverlay",
+                    label: "Show Overlay",
+                    icon: "",
+                    handler: function () {
+        
+                    }
+                }, {
+                    name: "ShowReferenceZone",
+                    label: "Show Reference Zone",
+                    isCheckType: "true",
+                    checked: self.isShowWiZone,
+                    handler: function (index) {
+                        self.isShowWiZone = !self.isShowWiZone;
+                        utils.triggerWindowResize();
+                        self.contextMenu[index].checked = self.isShowWiZone;
+                    }
+                }, {
+                    name: "ShowReferenceWindow",
+                    label: "Show Reference Window",
+                    isCheckType: "true",
+                    checked: self.crossplotModel ? self.crossplotModel.properties.referenceDisplay : false,
+                    handler: function (index) {
+                        self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
+                        self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
+                        console.log(self.crossplotModel);
+                        $timeout(function() {
+                            self.getWiRefWindCtrl().refresh();
+                        }, 100);
+                        //utils.triggerWindowResize();
+                    }
+                },{
+                    name: "ShowTooltip",
+                    label: "Show Tooltip",
+                    handler: function () {
+        
+                    }
+                }, {
+                    name: "ShowHistogram",
+                    label: "Show Histogram",
+                    isCheckType: "true",
+                    checked: (self.crossplotModel && self.crossplotModel.properties)?self.crossplotModel.properties.showHistogram:false,
+                    handler: function (index) {
+                        self.doShowHistogram();
+                        self.contextMenu[index].checked = self.crossplotModel.properties.showHistogram;;
+                    }
+                }, {
+                    name: "Function",
+                    label: "Function",
+                    childContextMenu: [
+        
+                    ],
+                    handler: function () {
+        
+                    }
+                }
+            ];
+        } else {
+            self.contextMenu = contextMenu;
+        }
     }
+    this.setContextMenu();
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
@@ -414,8 +457,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
+        if (self.viCrossplot && self.viCrossplot.pointSet) return;
         if (!config) config = {};
-        // if (!self.viCrossplot) {
+
         let domElem = document.getElementById(self.crossplotAreaId);
         config.well = getWell().properties;
 
@@ -423,7 +467,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
         console.log("crossplot created: ", self.viCrossplot);
         self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
-        // }
+
         return self.viCrossplot;
     }
     this.initPolygons = function (polygons) {
@@ -486,7 +530,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function () {
                     let userLine = self.viCrossplot.endAddUserLine();
                     if (callback) callback(userLine);
-                    self.contextMenu = commonCtxMenu;
+                    self.setContextMenu();
                 }
             }
         ]);
@@ -507,7 +551,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function () {
                     let area = self.viCrossplot.endAddAreaRectangle();
                     if (callback) callback(area);
-                    self.contextMenu = commonCtxMenu;
+                    self.setContextMenu();
                     self.updateRefWindCanvas();
                 }
             }
@@ -524,7 +568,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function () {
                     let area = self.viCrossplot.endAddAreaPolygon();
                     if (callback) callback(area);
-                    self.contextMenu = commonCtxMenu;
+                    self.setContextMenu();
                     self.updateRefWindCanvas();
                 }
             }
@@ -546,7 +590,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 icon: "",
                 handler: function () {
                     self.viCrossplot.endAddTernaryPoint();
-                    self.contextMenu = commonCtxMenu;
+                    self.setContextMenu();
                     if (callback) callback(null);
                 }
             }
@@ -568,7 +612,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 icon: "",
                 handler: function () {
                     self.viCrossplot.endAddTernaryVertex();
-                    self.contextMenu = commonCtxMenu;
+                    self.setContextMenu();
                     if (callback) callback(null);
                 }
             }
@@ -590,7 +634,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     icon: "",
                     handler: function () {
                         callback(self.viCrossplot.endEditPolygon());
-                        self.contextMenu = commonCtxMenu;
+                        self.setContextMenu();
                     }
                 }
             ])
@@ -603,7 +647,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     icon: "",
                     handler: function () {
                         callback(self.viCrossplot.endAddPolygon());
-                        self.contextMenu = commonCtxMenu;
+                        self.setContextMenu();
                     }
                 }
             ])
@@ -621,23 +665,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.viCrossplot.mode == 'PlotAreaRectangle') {
             if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
                 self.viCrossplot.endAddAreaRectangle();
-                self.contextMenu = commonCtxMenu;
+                self.setContextMenu();
                 self.updateRefWindCanvas();
             }
         }
         else if (self.viCrossplot.mode == 'PlotUserLine') {
             if (self.viCrossplot.userLine && self.viCrossplot.userLine.points.length > 1) {
                 self.viCrossplot.endAddUserLine();
-                self.contextMenu = commonCtxMenu;
+                self.setContextMenu();
             }
         }
         else if (self.viCrossplot.mode == 'PlotTernaryVertex') {
             self.viCrossplot.endAddTernaryVertex();
-            self.contextMenu = commonCtxMenu;
+            self.setContextMenu();
         }
         else if (self.viCrossplot.mode == 'PlotTernaryPoint') {
             self.viCrossplot.endAddTernaryPoint();
-            self.contextMenu = commonCtxMenu;
+            self.setContextMenu();
         }
     }
 }

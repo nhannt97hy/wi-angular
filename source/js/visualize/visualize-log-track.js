@@ -216,6 +216,12 @@ LogTrack.prototype.getMarkers = function() {
     });
 }
 
+LogTrack.prototype.getAnnotations = function() {
+    return this.drawings.filter(function(d) {
+        return d.isAnnotation();
+    })
+}
+
 /**
  * Get temporary curve to create pair shading
  */
@@ -602,6 +608,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
     this.svgContainer.raise();
+    this.axisContainer.lower();
 }
 
 /**
@@ -1022,7 +1029,6 @@ LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let svg = this.svgContainer;
     let y = this.getTransformY()(depth);
     let x = d3.mouse(this.plotContainer.node())[0];
-
     let lineData = drawVertical ? [
         {x1: x, y1: 0, x2: x, y2: plotRect.height},
         {x1: 0, y1: y, x2: plotRect.width, y2: y}
@@ -1104,10 +1110,13 @@ LogTrack.prototype.drawTooltipText = function(depth, showDepth) {
         .attr('width', bbox.width + padding*2)
         .attr('height', bbox.height + padding*2);
 
-    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.CENTER_X);
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.RIGHT);
     let x = parseFloat(rect.attr('x')) + padding;
     tooltip.selectAll('tspan')
         .attr('x', x);
+    Utils.alignSvg(rect, this.plotContainer, Utils.ALIGN.TOP);
+    y = parseFloat(rect.attr('y'));
+    tooltip.attr('y', y)
 
     tooltip.raise();
 }
@@ -1125,6 +1134,10 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         d3.event = event;
         self.plotContainer.on("mousedown")();
         self.trackContainer.node().focus();
+    }
+    function onCurveDropHandler(event) {
+        if (self == event.desTrack) return;
+        callbackDrop && callbackDrop(event.desTrack);
     }
     $(this.plotContainer.node()).draggable({
         axis: 'x',
@@ -1145,12 +1158,10 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         },
         start: function (event, ui) {
             triggerClickPlot(event);
-            document.addEventListener('oncurverop', onCurveDropHandler, false);
-            function onCurveDropHandler(event) {
-                document.removeEventListener('oncurverop', onCurveDropHandler);
-                if (self == event.desTrack) return;
-                callbackDrop && callbackDrop(event.desTrack);
-            }
+            document.addEventListener('oncurvedrop', onCurveDropHandler);
+        },
+        stop: function () {
+            document.removeEventListener('oncurvedrop', onCurveDropHandler);
         }
     })
     .click(function (event) {
@@ -1161,7 +1172,7 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         scope: 'curve',
         tolerance: 'pointer',
         drop: function (event, ui) {
-            let onCurveDrop = new Event('oncurverop');
+            let onCurveDrop = new Event('oncurvedrop');
             onCurveDrop.desTrack = self;
             document.dispatchEvent(onCurveDrop);
         }

@@ -174,7 +174,7 @@ function shadingToTreeConfig(shading, paletteList) {
         isNegPosFill: shading.isNegPosFill,
         positiveFill: shading.positiveFill ? JSON.parse(shading.positiveFill) : null,
         negativeFill: shading.negativeFill ? JSON.parse(shading.negativeFill) : null,
-        refLineWidth: shading.refLineWidth || 2,
+        refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
         // showRefLine: false
@@ -1423,10 +1423,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         aTrack.markers.forEach(function (marker) {
                             wiD3Ctrl.addMarkerToTrack(trackObj, marker);
                         });
-                        aTrack.images.forEach(function (image) {
-                            image.src = image.location;
-                            wiD3Ctrl.addImageToTrack(trackObj, image);
-                        })
+                        // aTrack.images.forEach(function (image) {
+                        //     image.src = image.location;
+                        //     wiD3Ctrl.addImageToTrack(trackObj, image);
+                        // })
                         aTrack.annotations.forEach(function (anno) {
                             wiD3Ctrl.addAnnotationToTrack(trackObj, anno);
                         })
@@ -1486,17 +1486,30 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             continue;
                         } else {
                             for (let objectOfTrack of aTrack.object_of_tracks) {
-                                objectOfTrack.minY = viTrack.minY;
-                                objectOfTrack.maxY = viTrack.maxY;
+                                //objectOfTrack.minY = viTrack.minY;
+                                //objectOfTrack.maxY = viTrack.maxY;
                                 let anObject = wiD3Ctrl.addObjectToTrack(viTrack, objectOfTrack);
-
                                 let objectProps = JSON.parse(objectOfTrack.object);
 
                                 switch(objectProps.type) {
                                     case 'Histogram' :
-                                        objectProps.intervalDepthTop = objectOfTrack.topDepth;
-                                        objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
-                                        
+                                        if (objectProps.idHistogram) {
+                                            let histogramModel = findHistogramModelById(objectProps.idHistogram);
+                                            if (histogramModel && histogramModel.properties) {
+                                                anObject.createHistogram(
+                                                    histogramModel.properties.idHistogram, 
+                                                    histogramModel.properties.name, 
+                                                    wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                );
+                                            }
+                                            else {
+                                               // TODO 
+                                            }
+                                        }
+                                        else {
+                                            // TODO
+                                        }
+                                        /*
                                         wiApiService.getHistogram(objectProps.idHistogram, function (histogramProps) {
                                             if(histogramProps.idHistogram) {
                                                 histogramProps.background = objectProps.background;
@@ -1505,15 +1518,15 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                                 wiApiService.infoCurve(histogramProps.idCurve, function (curveInfo) {
                                                     wiApiService.dataCurve(histogramProps.idCurve, function (dataCurve) {
                                                         wiApiService.getWell(histogramProps.idWell, function (wellProps) {
-                                                            histogramProps.curve = graph.buildCurve(curveInfo, dataCurve, wellProps);
-                                                            anObject.createHistogramToForeignObject(histogramProps, wellProps);
+                                                            anObject.createHistogramToForeignObject(histogramProps, wellProps, wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc);
                                                         })
                                                     })
                                                 })
                                             } else {
                                                 wiD3Ctrl.removeAnObjectOfObjectTrack(viTrack, anObject);
                                             }
-                                        })
+                                        });
+                                        */
 
                                         break;
                                     case 'Crossplot':
@@ -1765,7 +1778,8 @@ function findWells() {
     return wells;
 }
 
-exports.findHistogramModelById = function (idHistogram) {
+exports.findHistogramModelById = findHistogramModelById;
+function findHistogramModelById(idHistogram) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
@@ -2610,6 +2624,17 @@ exports.triggerWindowResize = triggerWindowResize;
 
 function putListFamily() {
     __GLOBAL.wiApiService.listFamily(function (families) {
+        // families.sort((a,b) => {
+        //     if (a.name.toLowerCase() < b.name.toLowerCase()) {
+        //         return -1;
+        //     }
+        //     if (a.name.toLowerCase() > b.name.toLowerCase()) {
+        //         return 1;
+        //     }
+        //     if (a.name.toLowerCase() == b.name.toLowerCase()) {
+        //         return 0;
+        //     }
+        // });
         __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.LIST_FAMILY, families);
     })
 }
@@ -2668,6 +2693,32 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
                 let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
                 if (histogramModel.properties.idCurve && wiD3Ctrl.hasThisCurve(histogramModel.properties.idCurve)) {
                     wiD3Ctrl.unloadCurve();
+                }
+            });
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
+}
+
+exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDeleted(model) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let crossplotModels = wellModel.children.find(child => child.type == 'crossplots');
+            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+            crossplotModels.children.forEach(function (crossplotModel) {
+                let wiCrossplotCtrl = wiComponentService.getComponent('crossplot' + crossplotModel.properties.idCrossPlot);
+                if (!wiCrossplotCtrl) return;
+                let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+                let pointSet = wiD3CrossplotCtrl.pointSet;
+                if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
+                    layoutManager.removeTabWithModel(crossplotModel);
+                } else if (idCurve == pointSet.idCurveZ) {
+                    wiD3CrossplotCtrl.updateAll();
                 }
             });
             break;
