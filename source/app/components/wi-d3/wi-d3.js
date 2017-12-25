@@ -2273,37 +2273,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
-                Utils.createCrossplot(idWell, crossplotName, function (wiCrossplotCtrl) {
-                    console.log("wiCrossplotCtrl", wiCrossplotCtrl);
-                    let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                    let dataPointSet = {
-                        idCrossPlot: wiCrossplotCtrl.id,
-                        idWell: idWell,
-                        idCurveX: curve1.idCurve,
-                        idCurveY: curve2.idCurve,
-                        majorX: 5,
-                        minorX: 5,
-                        majorY: 5,
-                        minorY: 5,
-                        numColor: 5,
-                        scaleLeft: curve1.minX,
-                        scaleRight: curve1.maxX,
-                        scaleBottom: curve2.minX,
-                        scaleTop: curve2.maxX
-                    }
-                    let wellProps = _getWellProps();
-                    Utils.createPointSet(dataPointSet, function (pointSet) {
-                        wiD3CrossplotCtrl.createVisualizeCrossplot(curve1, curve2, {
-                            name: crossplotName,
-                            idCrossPlot: wiCrossplotCtrl.id,
-                            idWell: idWell,
-                            topDepth: wellProps.topDepth,
-                            bottomDepth: wellProps.bottomDepth,
-                            pointSet: pointSet
+                Utils.createCrossplot(idWell, crossplotName, function(err, crossplotModel) {
+                    if (err) {
+                        console.error(err);
+                        Utils.error(crossplotName + " existed!", function () {
+                            self.createCrossplot.call(self);
                         });
-                    })
+                    }
+                    else {
+                        Utils.openCrossplotTab(crossplotModel);
+                    }
+                }, null, {
+                    idCurveX: curve1.idCurve,
+                    idCurveY: curve2.idCurve
                 });
-            })
+            });
         }
     }
     this.createHistogram = function () {

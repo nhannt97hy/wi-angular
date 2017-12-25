@@ -5934,7 +5934,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
         this.crossplotModel = angular.copy(wiD3CrossplotCtrl.crossplotModel);
-        this.viCrossplot = wiD3CrossplotCtrl.viCrossplot.getProperties();
+        //this.viCrossplot = wiD3CrossplotCtrl.viCrossplot.getProperties();
         // this.props = crossplotModel.properties;
         this.selectedCurveX = null;
         this.selectedCurveY = null;
@@ -5986,9 +5986,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 });
                 cb();
             }
-            ], function(err) {
-                if (err) console.error('ERROR', err);
-            });
+        ], function(err) {
+            if (err) console.error('ERROR', err);
+        });
 
 
         function getZonesAndCurvesInDataset(callback) {
@@ -6244,14 +6244,14 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                         cb();
                     });
                 }
-                ], function(err, result) {
-                    if (err) {
-                        console.error(err);
-                        utils.error(err);
-                    }
-                    else {
-                        wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModel.properties;
-                        let pointSet = self.crossplotModel.properties.pointsets[0];
+            ], function(err, result) {
+                if (err) {
+                    console.error(err);
+                    utils.error(err);
+                }
+                else {
+                    wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModel.properties;
+                    let pointSet = self.crossplotModel.properties.pointsets[0];
 
                     // let crossplotProps = angular.copy(self.crossplotModel.properties);
                     // crossplotProps.pointSet = crossplotProps.pointsets[0];
@@ -6262,7 +6262,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                                 wiApiService.dataCurve(pointSet.idCurveX, function (curveData) {
                                     xCurveData = curveData;
                                     cb();
-                                })
+                                });
                             }
                             else async.setImmediate(cb);
                         },
@@ -6284,31 +6284,30 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             }
                             else async.setImmediate(cb);
                         }
-                        ], function(result, err) {
-                            console.log(result, err);
-                            let crossplotProps = angular.copy(self.crossplotModel.properties);
-                            crossplotProps.pointSet = crossplotProps.pointsets[0];
-                            if (xCurveData) {
-                                let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
-                                crossplotProps.pointSet.curveX
-                                = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
-                            }
-                            if (yCurveData) {
-                                let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
-                                crossplotProps.pointSet.curveY
-                                = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
-                            }
-                            if (zCurveData) {
-                                let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
-                                crossplotProps.pointSet.curveZ
-                                = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
-                            }
+                    ], function(result, err) {
+                        console.log(result, err);
+                        let crossplotProps = angular.copy(self.crossplotModel.properties);
+                        crossplotProps.pointSet = crossplotProps.pointsets[0];
+                        if (xCurveData) {
+                            let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
+                            crossplotProps.pointSet.curveX
+                            = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
+                        }
+                        if (yCurveData) {
+                            let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
+                            crossplotProps.pointSet.curveY
+                            = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
+                        }
+                        if (zCurveData) {
+                            let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
+                            crossplotProps.pointSet.curveZ
+                            = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
+                        }
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
                         //wiD3CrossplotCtrl.viCrossplot.doPlot();
                         self.updating = false;
                         if (callback) callback(crossplotProps);
-
                     });
                 }
             });

@@ -10,7 +10,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.crossplotModel = null;
     let zoneCtrl = null, refWindCtrl;
     this.viCrossplot = {};
-    this.isShowWiZone = true;
+    //this.isShowWiZone = true;
     // this.isShowReferenceWindow = true;
     let _well = null;
 
@@ -29,14 +29,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (callback) callback();
         });
     }
+    function getPointSet(crossplotProps) {
+        if (crossplotProps && crossplotProps.pointsets && crossplotProps.pointsets.length)
+            return crossplotProps.pointsets[0];
+        return null;
+    }
+    function getCrossplotAreaId() {
+        return self.name.replace('D3Area', '');
+    }
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
-        self.crossplotModel = utils.getModel('crossplot', self.wiCrossplotCtrl.id);
+        self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
+        /*
         if (self.crossplotModel) {
             wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
                 self.pointSet = crossplot.pointsets[0];
             });
         }
+        */
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -49,10 +59,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.onReady = function () {
         self.linkModels();
-
-        // self.createVisualizeCrossplot(self.curveXModel, self.curveYModel);
+        let crossplotProps = angular.copy(self.crossplotModel.properties);
+        if (crossplotProps.pointsets && crossplotProps.pointsets.length)
+            crossplotProps.pointSet = crossplotProps.pointsets[0];
+        self.createVisualizeCrossplot(null, null, crossplotProps);
     }
-    // let well = utils.findWellById(self.crossplotModel.properties.idWell);
 
     function buildHistogramProps(crossplotModel, xy) {
         var histogramProps = {};
@@ -88,7 +99,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 parseFloat(well.properties.topDepth),
                 parseFloat(well.properties.bottomDepth), elem);
 
-        let activeZones = self.getZoneCtrl().getActiveZones();
+        let zoneCtrl = self.getZoneCtrl();
+        if (!zoneCtrl) return;
+        let activeZones = zoneCtrl.getActiveZones();
         self.xHistogram.setZoneSet(activeZones);
         self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
 
@@ -112,7 +125,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 parseFloat(well.properties.topDepth),
                 parseFloat(well.properties.bottomDepth), innerElem[0]);
 
-        let activeZones = self.getZoneCtrl().getActiveZones();
+        let zoneCtrl = self.getZoneCtrl();
+        if (!zoneCtrl) return;
+        let activeZones = zoneCtrl.getActiveZones();
         self.yHistogram.setZoneSet(activeZones);
         self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
 
@@ -136,19 +151,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getModel = function(){
         return self.crossplotModel;
     }
-    this.CloseZone = function () {
+    /*this.CloseZone = function () {
         self.isShowWiZone = false;
         utils.triggerWindowResize();
-    }
-
+    }*/
+/*
     this.getZoneCtrl = function () {
         if (!zoneCtrl) zoneCtrl = wiComponentService.getComponent(self.getZoneName());
         return zoneCtrl;
     }
-
     this.getZoneName = function () {
         return self.name + "Zone";
     }
+*/
+    this.getZoneCtrl = function () {
+        if (self.wiCrossplotCtrl) {
+            return self.wiCrossplotCtrl.getWiZoneCtrl();
+        }
+        return null;
+    }
+
     this.onRefWindCtrlReady = function(refWindCtrl) {
         console.log('Reference window is ready to update');
         refWindCtrl.update(
@@ -160,7 +182,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.referenceBottomDepth,
             self.crossplotModel.properties.referenceShowDepthGrid);
     }
-
+/*
     this.getWiRefWindCtrlName = function () {
         return self.name + "RefWind";
     }
@@ -169,9 +191,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
         return refWindCtrl;
     }
+*/
+    this.getWiRefWindCtrl = function () {
+        if (self.wiCrossplotCtrl) {
+            return self.wiCrossplotCtrl.getWiRefWindCtrl();
+        }
+        return null;
+    }
+    function setWiZoneArr(zoneArray) {
+        //if (self.wiCrossplotCtrl) self.wiCrossplotCtrl.zoneArr = zoneArray;
+        self.zoneArr = zoneArray;
+    }
+    function getWiZoneArr() {
+        if (!self.wiCrossplotCtrl) return null;
+        return self.wiCrossplotCtrl.zoneArr;
+    }
 
     this.linkModels = function () {
-        self.zoneArr = null;
+        setWiZoneArr(null);
 
         if (self.crossplotModel && self.crossplotModel.properties.pointsets &&
             self.crossplotModel.properties.pointsets.length &&
@@ -179,28 +216,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.pointsets[0].idZoneSet) {
             console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointsets[0].idZoneSet);
-            self.zoneArr = self.zoneSetModel.children;
+            //self.zoneArr = self.zoneSetModel.children;
+
+            setWiZoneArr(self.zoneSetModel.children);
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {}
             });
-            self.getZoneCtrl().zones = self.zoneArr;
-            self.getZoneCtrl().zoneUpdate();
+            let zoneCtrl = self.getZoneCtrl();
+            if (zoneCtrl) {
+                zoneCtrl.zones = self.zoneSetModel.children;
+                zoneCtrl.zoneUpdate();
+            }
+            /*
             if (!self.pointSet) self.pointSet = self.crossplotModel.properties.pointsets[0];
             self.pointSet.zones = self.zoneArr.map(function(zone) {
+                return zone.properties;
+            });
+            */
+            let pointSet = getPointSet(self.crossplotModel.properties);
+            if (pointSet) pointSet.zones = self.zoneArr.map(function(zone) {
                 return zone.properties;
             });
         }
     }
 
+/*
     this.onZoneCtrlReady = function(zoneCtrl) {
         zoneCtrl.trap('zone-data', function(data) {
             console.log("zone data", data);
             self.updateViCrossplotZones(data);
         });
     }
-
+*/
     this.updateViCrossplotZones = function(data) {
-        let activeZones = self.getZoneCtrl().getActiveZones();
+        let zoneCtrl = self.getZoneCtrl();
+        if (!zoneCtrl) return;
+        let activeZones = zoneCtrl.getActiveZones();
 
         if (activeZones)
             activeZones = activeZones.map(function(d) { return d.properties.idZone; });
@@ -260,11 +311,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (!self.viCrossplot || !Object.keys(self.viCrossplot).length) {
                 self.viCrossplot = self.createVisualizeCrossplot(null, null, {
                     name: self.crossplotModel.properties.name,
-                    idPointSet: self.pointSet.idPointSet,
+                    //idPointSet: self.pointSet.idPointSet,
+                    idPointSet: getPointSet(self.crossplotModel.properties).idPointSet,
                     idCrossPlot: self.crossplotModel.properties.idCrossPlot,
                     idWell: self.crossplotModel.properties.idWell,
-                    pointSet: self.pointSet
-                })
+                    //pointSet: self.pointSet
+                    pointSet: getPointSet(self.crossplotModel.properties)
+                });
             }
             console.log("Model", self.crossplotModel);
             DialogUtils.crossplotFormatDialog(ModalService, self.wiCrossplotCtrl, function (crossplotProps) {
@@ -272,7 +325,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
                 self.linkModels();
                 if (crossplotProps.pointSet.idZoneSet) {
-                    crossplotProps.pointSet.zones = self.pointSet.zones;
+                    //crossplotProps.pointSet.zones = self.pointSet.zones;
+                    crossplotProps.pointSet.zones = self.zoneArr.map(function(zone) {
+                        return zone.properties;
+                    });;
                 }
                 self.viCrossplot.setProperties(crossplotProps);
                 self.viCrossplot.doPlot();
@@ -280,7 +336,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     if ($('#' + self.name + "HistogramX").length) {
                         self.histogramModelX.properties = buildHistogramProps(self.crossplotModel, 'xCurve');
                         self.xHistogram.setHistogramModel(self.histogramModelX);
-                        let activeZones = self.getZoneCtrl().getActiveZones();
+                        let zoneCtrl = self.getZoneCtrl();
+                        if (!zoneCtrl) return;
+                        let activeZones = zoneCtrl.getActiveZones();
                         self.xHistogram.setZoneSet(activeZones);
                         self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
 
@@ -291,7 +349,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     if ($('#' + self.name + "HistogramY").length) {
                         self.histogramModelY.properties = buildHistogramProps(self.crossplotModel, 'yCurve');
                         self.yHistogram.setHistogramModel(self.histogramModelY);
-                        let activeZones = self.getZoneCtrl().getActiveZones();
+                        let zoneCtrl = self.getZoneCtrl();
+                        if (!zoneCtrl) return;
+                        let activeZones = zoneCtrl.getActiveZones();
                         self.yHistogram.setZoneSet(activeZones);
                         self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
 
@@ -300,40 +360,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             });
         }
-        if (!self.pointSet) {
-            wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
-                self.pointSet = crossplot.pointsets[0];
-                if (!self.pointSet) {
-                    let pointSetProps = {
-                        idCrossPlot: self.crossplotModel.properties.idCrossPlot,
-                        idWell: self.getWell().properties.idWell,
-                        idCurveX: null,
-                        idCurveY: null,
-                        majorX: 5,
-                        minorX: 5,
-                        majorY: 5,
-                        minorY: 5,
-                        numColor: 5,
-                        scaleLeft: null,
-                        scaleRight: null,
-                        scaleBottom: null,
-                        scaleTop: null,
-                        pointSymbol: "Circle",
-                        pointSize: 5,
-                        pointColor: 'blue'
-                    };
-                    wiApiService.createPointSet(pointSetProps, function(pointSet) {
-                        self.pointSet = pointSet;
-                        openDialog();
-                    });
-                }
-                else {
-                    openDialog();
-                }
-            });
-        } else {
-            openDialog();
-        }
+        openDialog();
     }
 
     this.discriminator = function(){
@@ -374,16 +401,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: "Reference Window",
                     icon: "ti-layout-tab-window",
                     handler: function () {
-                        let well = getWell();
-                        DialogUtils.referenceWindowsDialog(ModalService, _well, self.crossplotModel, function() {
+                        DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.crossplotModel, function() {
                             saveCrossplotNow(function() {
-                                self.getWiRefWindCtrl().update(_well,
-                                    self.crossplotModel.properties.reference_curves,
-                                    self.crossplotModel.properties.referenceScale,
-                                    self.crossplotModel.properties.referenceVertLineNumber,
-                                    self.crossplotModel.properties.referenceTopDepth,
-                                    self.crossplotModel.properties.referenceBottomDepth,
-                                    self.crossplotModel.properties.referenceShowDepthGrid);
+                                let refWindCtrl = self.getWiRefWindCtrl();
+                                if (refWindCtrl) 
+                                    self.getWiRefWindCtrl().update(getWell(),
+                                        self.crossplotModel.properties.reference_curves,
+                                        self.crossplotModel.properties.referenceScale,
+                                        self.crossplotModel.properties.referenceVertLineNumber,
+                                        self.crossplotModel.properties.referenceTopDepth,
+                                        self.crossplotModel.properties.referenceBottomDepth);
                             });
                         }, self.setContextMenu);
                     }
@@ -398,11 +425,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     name: "ShowReferenceZone",
                     label: "Show Reference Zone",
                     isCheckType: "true",
-                    checked: self.isShowWiZone,
+                    checked: (self.wiCrossplotCtrl || {}).isShowWiZone || false,
                     handler: function (index) {
-                        self.isShowWiZone = !self.isShowWiZone;
+                        if (!self.wiCrossplotCtrl) return;
+                        self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
                         utils.triggerWindowResize();
-                        self.contextMenu[index].checked = self.isShowWiZone;
+                        self.contextMenu[index].checked = self.wiCrossplotCtrl.isShowWiZone;
                     }
                 }, {
                     name: "ShowReferenceWindow",
@@ -455,20 +483,68 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
     }
-
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (self.viCrossplot && self.viCrossplot.pointSet) return;
-        if (!config) config = {};
+        if (!config) {
+            console.error('createVisualizeCrossplot: config is null');
+            return;
+        }
 
         let domElem = document.getElementById(self.crossplotAreaId);
         config.well = getWell().properties;
 
-        console.log('Crossplot create with params: ', curveX, curveY, config, domElem);
-        self.viCrossplot = graph.createCrossplot(curveX, curveY, config, domElem);
-        console.log("crossplot created: ", self.viCrossplot);
-        self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
+        let viCurveX = curveX, viCurveY = curveY, viCurveZ;
 
-        return self.viCrossplot;
+        let pointSet = null;
+        if (config.pointsets && config.pointsets.length)
+            pointSet = config.pointsets[0];
+
+        if (pointSet) {
+            async.parallel([function(callback) {
+                if (!viCurveX && pointSet.idCurveX) {
+                    let curveModel = utils.getModel('curve', pointSet.idCurveX);
+                    wiApiService.dataCurve(pointSet.idCurveX, function(dataX) {
+                        viCurveX = graph.buildCurve(curveModel, dataX, config.well);
+                        callback();
+                    });
+                }
+                else {
+                    async.setImmediate(callback);
+                }
+            }, function(callback) {
+                if (!viCurveY && pointSet.idCurveY) {
+                    let curveModel = utils.getModel('curve', pointSet.idCurveY);
+                    wiApiService.dataCurve(pointSet.idCurveY, function(dataY) {
+                        viCurveY = graph.buildCurve(curveModel, dataY, config.well);
+                        callback();
+                    });
+                }
+                else {
+                    async.setImmediate(callback);
+                }
+
+            }, function(callback) {
+                if (!viCurveZ && pointSet.idCurveZ) {
+                    let curveModel = utils.getModel('curve', pointSet.idCurveZ);
+                    wiApiService.dataCurve(pointSet.idCurveZ, function(dataZ) {
+                        viCurveZ = graph.buildCurve(curveModel, dataZ, config.well);
+                        callback();
+                    });
+                }
+                else {
+                    async.setImmediate(callback);
+                }
+            }], function(err, result) {
+                self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
+                console.log("crossplot created: ", self.viCrossplot);
+                self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
+            });
+        }
+        else {
+            console.error('createVisualizeCrossplot: config has no pointsets');
+        }
+
+        //return self.viCrossplot;
     }
     this.initPolygons = function (polygons) {
         self.viCrossplot.polygons = [];
@@ -694,7 +770,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiCrossplotCtrl: '<'
+        wiCrossplotCtrl: '<',
+        idCrossplot: '<'
     }
 });
 

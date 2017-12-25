@@ -2257,62 +2257,99 @@ exports.upperCaseFirstLetter = function (string) {
 }
 exports.editProperty = editProperty;
 
-// exports.createNewBlankCrossPlot = function (wiComponentService, wiApiService, crossplotName) {
-//     let currentWell = getSelectedPath().find(node => node.type == 'well');
-//     if (!currentWell) {
-//         error('Please choose a well');
-//         return;
-//     }
-//     let crossplotsNode = getStaticNode('crossplots');
-//     let dataRequest = {
-//         idWell: crossplotsNode.properties.idWell,
-//         name: crossplotName,
-//         option: 'blank-plot'
-//     };
-//     return new Promise(function (resolve, reject) {
-//         wiApiService.post(route, dataRequest, function (response) {
-//             if (!response.data) {
-//                 reject(response);
-//             } else {
-//                 resolve(response);
-//             }
-//         });
-//     });
-// };
-
-exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate) {
+exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate, fromCurves) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
-    let dataRequest = {
-        idWell: idWell,
-        name: crossplotName,
-        crossTemplate: crossTemplate
-    }
-    return new Promise(function (resolve, reject) {
-        __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
-            if (crossplot.name) {
-                resolve(crossplot);
-                let crossplotModel = crossplotToTreeConfig(crossplot);
-                refreshProjectState().then(function () {
-                    setTimeout(() => {
-                        openCrossplotTab(crossplotModel, callback);
-                    });
-                });
-                setTimeout(function () {
-                    if (crossplot.foundCurveX && crossplot.foundCurveY) {
-
-                    } else {
-                        let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
-                        let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
-                        if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
-                    }
-                }, 1000);
-            } else {
-                reject(crossplot);
+    let crossplotProps;
+    let pointSetProps;
+    let crossplotModel;
+    async.series([function(cb) {
+        __GLOBAL.wiApiService.createCrossplot({
+            idWell: idWell,
+            name: crossplotName,
+            crossTemplate: crossTemplate
+        }, function (crossplot) {
+            if (!crossplot.name) {
+                cb("create Crossplot failed");
             }
+            else {
+                crossplotProps = crossplot;
+                // for crosstemplate
+                if (crossplot.foundCurveX && crossplot.foundCurveY) {
+                    console.log('found all curves');
+                } 
+                else {
+                    let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
+                    let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
+                    if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
+                }
+                cb();
+            }
+        });
+    }, function(cb) {
+        __GLOBAL.wiApiService.createPointSet({
+            idCrossPlot: crossplotProps.idCrossPlot,
+            idWell: idWell,
+            idCurveX: (fromCurves || {}).idCurveX || null,
+            idCurveY: (fromCurves || {}).idCurveY || null,
+            idCurveZ: (fromCurves || {}).idCurveZ || null,
+            majorX: 5,
+            minorX: 5,
+            majorY: 5,
+            minorY: 5
+        }, function (pointSet) {
+            if (!pointSet.idPointSet) {
+                cb('create pointset failed');
+            }
+            else {
+                pointSetProps = pointSet;
+                cb();
+            }
+        });
+    }, function(cb) {
+        refreshProjectState().then(cb);
+    }, function(cb) {
+        crossplotModel = getModel('crossplot', crossplotProps.idCrossPlot);
+        __GLOBAL.wiApiService.getCrossplot(crossplotProps.idCrossPlot, function(dataReturn) {
+            crossplotModel.properties = dataReturn;
+            cb();
         })
-    })
+    }], function(err, results) {
+        if (!callback) return;
+        callback(err, crossplotModel);
+    });
+
+    /*
+    __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
+        if (crossplot.name) {
+            let crossplotModel = crossplotToTreeConfig(crossplot);
+            refreshProjectState().then(function () {
+                openCrossplotTab(crossplotModel, callback);
+            });
+            setTimeout(function () {
+                if (crossplot.foundCurveX && crossplot.foundCurveY) {
+
+                } else {
+                    let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
+                    let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
+                    if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
+                }
+            }, 1000);
+        } else {
+            reject(crossplot);
+        }
+    });
+    */
 }
 
+function openCrossplotTab(crossplotModel) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRightWithModel(crossplotModel);
+    //if (callback) callback(wiCrossplotCtrl);
+};
+
+exports.openCrossplotTab = openCrossplotTab;
+/*
 function openCrossplotTab(crossplotModel, callback) {
 
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -2444,8 +2481,7 @@ function openCrossplotTab(crossplotModel, callback) {
     })
     if (callback) callback(wiCrossplotCtrl);
 };
-exports.openCrossplotTab = openCrossplotTab;
-
+*/
 exports.createHistogram = function (idWell, curve, histogramName, histogramTemplate) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let dataRequest = curve ? {
