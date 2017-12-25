@@ -1009,12 +1009,12 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
         this.symbolOptions = symbolOptions;
         console.log("options", this)
         this.lineStyles = [
-        [0, 1],
-        [8, 2, 2, 2, 2, 2],
-        [8, 2, 2, 2],
-        [2, 2],
-        [8, 2],
-        [1, 0]
+            [0, 1],
+            [8, 2, 2, 2, 2, 2],
+            [8, 2, 2, 2],
+            [2, 2],
+            [8, 2],
+            [1, 0]
         ];
         if (this.symbolOptions.symbolStyle.symbolName)
             this.symbolOptions.symbolStyle.symbolName = utils.upperCaseFirstLetter(this.symbolOptions.symbolStyle.symbolName);
@@ -1087,6 +1087,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         let error = null;
         let self = this;
         console.log("currentCurve", currentCurve);
+        wiApiService.curveInfo
         thisModalController = this;
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -1097,7 +1098,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
 
         let extentY = currentCurve.getExtentY();
 
-        if (currentCurve.line) {
+        if (currentCurve.line && currentCurve.dislayMode == 'Line' && currentCurve.dislayMode == 'Both') {
             this.lineOptions = {
                 display: true,
                 lineStyle: {
@@ -1110,13 +1111,13 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             this.lineOptions = {
                 display: false,
                 lineStyle: {
-                    lineColor: "transparent",
-                    lineWidth: 1,
-                    lineStyle: [0]
+                    lineColor: currentCurve.line ? currentCurve.line.color : 'blue',
+                    lineWidth: currentCurve.line ? currentCurve.line.width : 1,
+                    lineStyle: currentCurve.line ? currentCurve.line.dash : [0]
                 }
             }
         }
-        if (currentCurve.symbol) {
+        if (currentCurve.symbol && currentCurve.dislayMode == 'Symbol' && currentCurve.dislayMode == 'Both') {
             this.symbolOptions = {
                 display: true,
                 symbolStyle: {
@@ -1132,12 +1133,12 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             this.symbolOptions = {
                 display: false,
                 symbolStyle: {
-                    symbolName: "circle", // cross, diamond, star, triangle, dot, plus
-                    symbolSize: 5,
-                    symbolStrokeStyle: "blue",
-                    symbolFillStyle: "blue",
-                    symbolLineWidth: 1,
-                    symbolLineDash: [10, 0]
+                    symbolName: currentCurve.symbol ? currentCurve.symbol.style : 'circle', // cross, diamond, star, triangle, dot, plus
+                    symbolSize: currentCurve.symbol ? currentCurve.symbol.size : 5,
+                    symbolStrokeStyle: currentCurve.symbol ? currentCurve.symbol.strokeStyle : 'blue',
+                    symbolFillStyle: currentCurve.symbol ? currentCurve.symbol.fillStyle : 'blue',
+                    symbolLineWidth: currentCurve.symbol ? currentCurve.symbol.lineWidth : 1,
+                    symbolLineDash: currentCurve.symbol ? currentCurve.symbol.lineDash : [10, 0]
                 }
             }
         }
@@ -3230,6 +3231,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     idTrack : shadingOptions.idTrack,
                     isNegPosFill : self.shadingOptions.isNegPosFill,
                     leftFixedValue : self.shadingOptions.leftFixedValue,
+                    rightFixedValue : self.shadingOptions.rightFixedValue,
                     name : self.shadingOptions.name,
                     shadingStyle : self.shadingOptions.shadingStyle,
                     fill : temp.fill,
@@ -4720,7 +4722,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
-                console.log("tab shadings", item)
+                console.log("tab shadings", item);
+                delete item.leftLine;
+                delete item.rightLine;
                 switch(item.changed) {
                     case changed.unchanged:
                     callback();
