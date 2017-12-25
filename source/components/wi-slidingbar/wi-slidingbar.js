@@ -165,6 +165,19 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         self.slidingBarState.top = self.tinyWindow.top / parentHeight * 100.;
         self.slidingBarState.range = self.tinyWindow.height / parentHeight * 100.;
 
+        let tungTrickHandle = null;
+        function tungTrick(ui) {
+            if (tungTrickHandle) {
+                clearTimeout(tungTrickHandle);
+                tungTrickHandle = null;
+            }
+            let _ui = ui;
+            tungTrickHandle = setTimeout(function() {
+                update(_ui);
+                updateWid3();
+                tungTrickHandle = null;
+            }, 200);
+        }
         $(self.handleId).draggable({
             axis: "y",
             containment: "parent"
@@ -178,11 +191,13 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             event.stopPropagation();
             update(ui);
             updateWid3();
+            tungTrick(ui);
         });
         $(self.handleId).on("resizestop", function (event, ui) {
             event.stopPropagation();
             update(ui);
             updateWid3();
+            tungTrick(ui);
         });
 
         $(self.handleId).on("drag", function (event, ui) {
@@ -217,9 +232,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.scroll = scroll;
 
-    function scroll(deltaY) {
-        let pHeight = $(self.contentId).parent().parent().height();
-        let tempTopHandler = self.tinyWindow.top - deltaY;
+    function scroll(sign) {
+        let pHeight = $(self.contentId).height();
+        let realDeltaY = pHeight * self.slidingBarState.range / 100. * 0.1;
+        realDeltaY = (realDeltaY > 1)?realDeltaY:1;
+        realDeltaY *= sign;
+        let tempTopHandler = self.tinyWindow.top - realDeltaY;
 
         if (tempTopHandler < 0 + _offsetTop) {
             tempTopHandler = 0 + _offsetTop;
@@ -238,7 +256,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function onMouseWheel(event) {
-        let value = ( event.deltaY<0) ? -2 : 2;
+        let value = ( event.deltaY<0) ? -1 : 1;
         scroll(value);
     }
 /*

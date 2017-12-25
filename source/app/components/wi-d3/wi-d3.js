@@ -974,7 +974,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     */
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         //let sign = (d3.event.deltaY<0)?"":"-";
-        let value = (d3.event.deltaY<0)? 2 : -2;
+        let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
         _drawTooltip(_currentTrack);
     }
