@@ -60,6 +60,7 @@ function Curve(config) {
     this.blockPosition = config.blockPosition || 'none';
     this.wrapMode = config.wrapMode || 'none';
     this.displayAs = config.displayAs || 'Normal';
+    this.displayMode = config.displayMode || 'Line';
 
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
@@ -100,12 +101,12 @@ function Curve(config) {
  */
 Curve.prototype.getProperties = function() {
     let self = this;
-    function getDisplayMode() {
-        if (self.line && self.symbol) return 'Both';
-        if (self.line && !self.symbol) return 'Line';
-        if (!self.line && self.symbol) return 'Symbol';
-        return 'None';
-    }
+    // function getDisplayMode() {
+    //     if (self.line && self.symbol) return 'Both';
+    //     if (self.line && !self.symbol) return 'Line';
+    //     if (!self.line && self.symbol) return 'Symbol';
+    //     return 'None';
+    // }
 
     let line = this.line || {};
     let symbol = this.symbol || {};
@@ -121,7 +122,7 @@ Curve.prototype.getProperties = function() {
         minValue: this.minX,
         maxValue: this.maxX,
         autoValueScale: false,
-        displayMode: getDisplayMode(),
+        displayMode: this.displayMode,
         wrapMode: Utils.capitalize(this.wrapMode),
         blockPosition: Utils.capitalize(this.blockPosition),
         ignoreMissingValues: false,
@@ -135,7 +136,7 @@ Curve.prototype.getProperties = function() {
         symbolStrokeStyle: symbol.strokeStyle,
         symbolFillStyle: symbol.fillStyle,
         symbolLineWidth: symbol.lineWidth,
-        symbolLineDash: symbol.lineDash,
+        symbolLineDash: symbol.lineDash ? symbol.lineDash.toString() : null,
         displayAs: this.displayAs
     }
 }
@@ -160,6 +161,7 @@ Curve.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'blockPosition', Utils.lowercase(props.blockPosition));
     Utils.setIfNotNull(this, 'wrapMode', Utils.lowercase(props.wrapMode));
     Utils.setIfNotNull(this, 'displayAs', Utils.capitalize(props.displayAs));
+    Utils.setIfNotNull(this, 'displayMode', Utils.capitalize(props.displayMode));
 
     if (props.displayMode == 'Both' || props.displayMode == 'Line') {
         this.line = {
@@ -167,7 +169,7 @@ Curve.prototype.setProperties = function(props) {
             width: parseInt(props.lineWidth),
             color: Utils.convertColorToRGB(props.lineColor)
         }
-        if (props.displayMode == 'Line') this.symbol = null;
+        // if (props.displayMode == 'Line') this.symbol = null;
     }
 
     if (props.displayMode == 'Both' || props.displayMode == 'Symbol') {
@@ -179,13 +181,13 @@ Curve.prototype.setProperties = function(props) {
             lineWidth: parseInt(props.symbolLineWidth),
             lineDash: eval(props.symbolLineDash)
         }
-        if (props.displayMode == 'Symbol') this.line = null;
+        // if (props.displayMode == 'Symbol') this.line = null;
     }
 
-    if (props.displayMode == 'None') {
-        this.symbol = null;
-        this.line = null;
-    }
+    // if (props.displayMode == 'None') {
+    //     this.symbol = null;
+    //     this.line = null;
+    // }
 }
 
 /**
@@ -342,9 +344,9 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
         self.getCanvasTranslateXForWrapMode().forEach(function(translateX) {
             ctx.save();
             ctx.translate(translateX, 0);
-            if (self.line)
+            if (self.line && (self.displayMode == 'Line' || self.displayMode == 'Both'))
                 plotLine(self, data, highlight);
-            if (self.symbol)
+            if (self.symbol && (self.displayMode == 'Symbol' || self.displayMode == 'Both'))
                 plotSymbol(self, data, highlight);
 
             if (self.displayAs == 'Pid' && (self.line || self.symbol)) {

@@ -130,6 +130,7 @@ function lineToTreeConfig(line) {
         blockPosition: line.blockPosition,
         wrapMode: line.wrapMode,
         displayAs: line.displayAs,
+        displayMode: line.displayMode,
         line: null,
         symbol: null
     };
@@ -2126,12 +2127,6 @@ exports.pasteCurve = function () {
     }
 }
 
-function getDisplayMode(currentCurve) {
-    if (currentCurve.line && currentCurve.symbol) return "Both";
-    if (currentCurve.line && !currentCurve.symbol) return "Line";
-    if (!currentCurve.line && currentCurve.symbol) return "Symbol";
-    return "None";
-}
 
 exports.curveOptions = function (currentTrack, currentCurve, index) {
     let options = {
@@ -2147,7 +2142,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         maxValue: currentCurve.maxX,
         autoValueScale: false,
         displayType: currentCurve.scale,
-        displayMode: getDisplayMode(currentCurve),
+        displayMode: currentCurve.displayMode,
         wrapMode: currentCurve.wrapMode.capitalize(),
         blockPosition: currentCurve.blockPosition.capitalize(),
         displayAs: currentCurve.displayAs.capitalize()
