@@ -2726,8 +2726,10 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
                     wiD3Ctrl.unloadCurve();
                 }
                 let refWindCtrl = wiComponentService.getComponent(wiHistogramCtrl.getWiRefWindCtrlName());
-                for(let i = refWindCtrl._viCurves.length - 1; i >= 0; i--){
-                    if(refWindCtrl._viCurves[i].idCurve == idCurve) refWindCtrl.removeRefCurve(i);
+                if(refWindCtrl){
+                    for(let i = refWindCtrl._viCurves.length - 1; i >= 0; i--){
+                        if(refWindCtrl._viCurves[i].idCurve == idCurve) refWindCtrl.removeRefCurve(i);
+                    }
                 }
             });
             break;
@@ -2888,14 +2890,14 @@ function evaluateExpr(well, discriminator, callback) {
                 return curve.idCurve == condition.left.value;
             });
 
-            let left = parseFloat(leftCurve.data[index].x);
+            let left = leftCurve ? parseFloat(leftCurve.data[index].x) : null;
 
             let right = condition.right.value;
             if (condition.right.type == 'curve') {
                 let rightCurve = curvesData.find(function (curve) {
                     return curve.idCurve == condition.right.value;
                 })
-                right = parseFloat(rightCurve.data[index].x);
+                right = rightCurve ? parseFloat(rightCurve.data[index].x): null;
             }
 
             if (left!= null && right!= null) {
@@ -2924,10 +2926,12 @@ function evaluateExpr(well, discriminator, callback) {
         curveArr,
         function (curve, i, done) {
             __GLOBAL.wiApiService.dataCurve(curve, function (data) {
-                curvesData.push({
-                    idCurve: curve,
-                    data: data
-                })
+                if(Array.isArray(data)){
+                    curvesData.push({
+                        idCurve: curve,
+                        data: data
+                    })
+                }
                 done();
             })
         },
