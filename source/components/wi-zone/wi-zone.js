@@ -55,6 +55,7 @@ function ZoneController(wiComponentService, $timeout){
             return !self.zoneArr[i];
         });
     }
+    window.__ZONECTRL = self;
 }
 
 ZoneController.prototype.trap = function(eventName, handlerCb) {

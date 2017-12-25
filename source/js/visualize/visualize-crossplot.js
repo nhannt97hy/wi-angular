@@ -2,8 +2,16 @@ let Utils = require('./visualize-utils');
 let CommonSchema = require('./visualize-common-schema');
 let CanvasHelper = require('./visualize-canvas-helper');
 let SvgHelper = require('./visualize-svg-helper');
+let Curve = require('./visualize-curve');
 
 module.exports = Crossplot;
+
+function newCurve(config, data, step, offset) {
+    if (step) config.yStep = parseFloat(step);
+    if (offset) config.offsetY = parseFloat(offset);
+    config._data = data;
+    return new Curve(config);
+}
 
 function Crossplot(config) {
     this.setProperties(config);
@@ -464,23 +472,8 @@ Crossplot.prototype.init = function(domElem) {
 }
 
 Crossplot.prototype.createContainer = function() {
-    /*
-    this.container = this.root.append('div')
-        .attr('class', 'vi-crossplot-container');
-
-    this.headerContainer = this.container.append('div')
-        .attr('class', 'vi-crossplot-header-container');
-
-    this.headerContainer
-        .selectAll('div.vi-crossplot-header-row')
-        .data(['vi-crossplot-header-name', 'vi-crossplot-header-reference'])
-        .enter()
-        .append('div')
-            .attr('class', function(d) { return 'vi-crossplot-header-row ' + d; })
-            .text('-');
-    */
     this.container = this.root.select('.vi-crossplot-container');
-    this.headerContainer = this.root.select('div.vi-crossplot-header-container');
+    //this.headerContainer = this.root.select('div.vi-crossplot-header-container'); TUNG
 
     this.bodyContainer = this.container.append('div')
         .attr('class', 'vi-crossplot-body-container');
@@ -526,7 +519,7 @@ Crossplot.prototype.doPlot = function() {
     this.rectZWidth = this.shouldPlotZAxis() ? 20 : 0;
 
     this.adjustSize();
-    this.updateHeader();
+    //this.updateHeader();
     this.updateAxises();
     this.plotSymbols();
     this.updateClipPath();
@@ -553,12 +546,14 @@ Crossplot.prototype.updateClipPath = function() {
         .attr('height', Math.abs(vpY[0] - vpY[1]));
 }
 
+/* TUNG
 Crossplot.prototype.updateHeader = function() {
     this.headerContainer
         .selectAll('div.vi-crossplot-header-row')
         .data(['Crossplot: ' + this.name, 'Reference: [' + this.pointSet.intervalDepthTop + ' - ' + this.pointSet.intervalDepthBottom + ']'])
         .text(function(d) { return d; });
 }
+*/
 
 Crossplot.prototype.updateAxises = function() {
     this.updateAxisTicks();

@@ -1,46 +1,41 @@
-<div style="display:flex; flex-direction:row">
-  <div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Crossplot.isShowWiZone" style="min-width:10%;max-width:20%">
+<!--
+<div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Crossplot.isShowWiZone" style="min-width:10%;max-width:20%">
     <wi-container name='ZoneCrossplotContainer' title='Zone' close-handler='wiD3Crossplot.CloseZone'>
       <wi-zone name="{{wiD3Crossplot.getZoneName();}}" zones="wiD3Crossplot.zoneArr" active-zone="wiD3Crossplot.crossplotModel.properties.pointsets[0].activeZone" on-zone-ctrl-ready="wiD3Crossplot.onZoneCtrlReady"></wi-zone>
     </wi-container>
-  </div>
-  <div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;margin-left:14px">
-    <!-- <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
-    <h5>Reference: [{{wiD3Crossplot.wellProperties.topDepth}} - {{wiD3Crossplot.wellProperties.bottomDepth}}]</h5> -->
-    <div class='crossplot-container'>
-        <!--<div style='padding-left:2em;'>{{wiD3Crossplot.crossplotModel.properties.plotType}}</div>-->
-        <div wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}' style="display:flex;flex-direction:column;position:relative;flex:1">
-            <div class="vi-crossplot-header-container">
-                <div class='vi-crossplot-header-row vi-crossplot-header-name'></div>
-                <div class='vi-crossplot-header-row vi-crossplot-header-reference'></div>
+</div>
+-->
+<div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;margin-left:14px">
+    <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
+    <h5>Reference: [{{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthTop}} - {{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthBottom}}]</h5>
+    <div class='crossplot-container position-relative' wi-right-click='wiD3Crossplot.showContextMenu($event)' id='{{wiD3Crossplot.crossplotAreaId}}'>
+        <div style="display:flex;flex-direction:column;flex:1;">
+            <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram"
+                style="flex-basis: 25%;display: flex;flex-direction:row;">
+                <div style='flex-basis: 20%'></div>
+                <div id="{{wiD3Crossplot.name + 'HistogramX'}}" style='flex:1;'
+                    wi-element-ready="wiD3Crossplot.histogramXReady();">
+                </div>
             </div>
-            <div style="display:flex;flex-direction:column;flex:1;">
+            <div style='flex: 1; display:flex;flex-direction:row;'>
                 <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram"
-                    style="flex-basis: 25%;display: flex;flex-direction:row;">
-                    <div style='flex-basis: 20%'></div>
-                    <div id="{{wiD3Crossplot.name + 'HistogramX'}}" style='flex:1;'
-                        wi-element-ready="wiD3Crossplot.histogramXReady();">
-                    </div>
+                    style='flex-basis:20%;position:relative;'
+                    id="{{wiD3Crossplot.name + 'HistogramY'}}"
+                    wi-element-ready="wiD3Crossplot.histogramYReady();">
+                    <div class='transform-group'></div>
                 </div>
-                <div style='flex: 1; display:flex;flex-direction:row;'>
-                    <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram"
-                        style='flex-basis:20%;position:relative;'
-                        id="{{wiD3Crossplot.name + 'HistogramY'}}"
-                        wi-element-ready="wiD3Crossplot.histogramYReady();">
-                        <div class='transform-group'></div>
-                    </div>
-                    <div ng-dblclick="wiD3Crossplot.propertiesDialog();" style='flex:1' class='vi-crossplot-container'
-                        wi-element-ready='wiD3Crossplot.onReady()'>
-                        <div ng-if='wiD3Crossplot.loading' wi-element-ready="wiD3Crossplot.onLoading();" style="position:absolute;top:0;left:0;bottom:0;right:0" id="{{wiD3Crossplot.name + '-spinner'}}"></div>
-                    </div>
+                <div ng-dblclick="wiD3Crossplot.propertiesDialog();" style='flex:1' class='vi-crossplot-container'
+                    wi-element-ready='wiD3Crossplot.onReady()'>
+                    <div ng-if='wiD3Crossplot.loading' wi-element-ready="wiD3Crossplot.onLoading();" style="position:absolute;top:0;left:0;bottom:0;right:0" id="{{wiD3Crossplot.name + '-spinner'}}"></div>
                 </div>
-            </div>
-            <div class='vi-crossplot-footer-container'>
             </div>
         </div>
+        <div class='vi-crossplot-footer-container'>
+        </div>
     </div>
-  </div>
-  <div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
+</div>
+<!--
+<div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
     <wi-container name='RefCrossplotContainer'
         title='Reference Curve'
         close-handler='wiD3Crossplot.CloseReferenceWindow'>
@@ -49,5 +44,5 @@
         on-ref-wind-ctrl-ready="wiD3Crossplot.onRefWindCtrlReady">
       </wi-reference-window>
     </wi-container>
-  </div>
 </div>
+-->
