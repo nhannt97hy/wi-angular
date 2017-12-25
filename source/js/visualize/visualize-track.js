@@ -173,9 +173,9 @@ Track.prototype.createHeaderContainer = function() {
         .style('margin', '0 1px')
         .lower()
         .on('mousewheel', function() {
-            if (d3.event.shiftKey) {
+            //if (d3.event.shiftKey) {
                 self.headerScrollCallback();
-            }
+            //}
         })
         .on('mousedown', function() {
             d3.event.preventDefault();

@@ -445,8 +445,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.unloadCurve = unloadCurve;
     function unloadCurve() {
         curveLoading = true;
+        self.curveModel = null;
         self.visHistogram.setCurve(null);
-        curveLoading = true;
+        self.histogramModel.properties.xLabel = getXLabel();        
+        curveLoading = false;
         self.refreshHistogram();
         loadStatistics();
     }

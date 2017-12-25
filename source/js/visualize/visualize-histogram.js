@@ -464,7 +464,8 @@ Histogram.prototype._doPlot = function() {
     }
 
     function drawCurveHistogram() {
-        var line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+        //var line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+        var line = d3.line().curve(d3.curveBasis);
         var path = self.svgContainer.append('path')
             .attr('class', 'curves');
         
@@ -633,8 +634,8 @@ Histogram.prototype._doPlot = function() {
             .y(function(d) {
                 return cumulativeTransformY(d.y);
             })
-            .curve(d3.curveCatmullRom.alpha(0.2));
-            //.curve(d3.curveBasis);
+            //.curve(d3.curveCatmullRom.alpha(0.2));
+            .curve(d3.curveBasis);
 
         self.svgContainer.append('path').datum(cumulativePoints)
                 .attr('class', 'cumulative-line').attr('d', line);

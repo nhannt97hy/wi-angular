@@ -587,6 +587,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 listConfig.push(config);
                 if (!currentItem.data.ts || Date.now() - currentItem.data.ts > 30000)
                     wiApiService.getHistogram(itemProperties.idHistogram, function (dataReturn) {
+                        console.log(dataReturn);
+                        currentItem.properties = dataReturn;
+                        itemProperties = currentItem.properties;
                         itemProperties.reference_curves = dataReturn.reference_curves;
                         currentItem.data.ts = Date.now();
                     });
