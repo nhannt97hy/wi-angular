@@ -330,7 +330,7 @@
                                                         <option></option>
                                                     </select> -->
                                                     <ui-select ng-model="shading.rightLine"
-                                                                ng-change="wiModal.onChangeShading(shading._index);">
+                                                                ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectRightLine();">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.rightLine.name}}</ui-select-match>
                                                         <ui-select-choices group-by="'datasetName'"
                                                                     repeat='c as c in wiModal.curveList | filter: $select.search'>
@@ -348,10 +348,10 @@
                                                         <!-- <option value="{{item.id}}" ng-repeat="item in wiModal.curvesOnDataset">{{item.datasetCurve}}</option> -->
                                                     <!-- </select> -->
                                                     <ui-select ng-model="shading.leftLine"
-                                                                ng-change="wiModal.onChangeShading(shading._index);">
+                                                                ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectLeftLine();">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.leftLine.name}}</ui-select-match>
                                                         <ui-select-choices group-by="'datasetName'"
-                                                                    repeat='c as c in wiModal.curveList | filter: $select.search'>
+                                                                    repeat='c as c in wiModal.leftLimit | filter: $select.search'>
                                                                     <div class="padding-left-20px">{{c.name}}</div>
                                                         </ui-select-choices>
                                                     </ui-select>

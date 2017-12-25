@@ -60,10 +60,11 @@
                                             ng-change="wiModal.shadingOptions.leftFixedValue = null; wiModal.setLimit2(); wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine);"
                                             ng-disabled="!wiModal.shadingOptions.idRightLine">
                                     </select> -->
-                                    <ui-select ng-model="wiModal.shadingOptions.leftLine">
+                                    <ui-select ng-model="wiModal.shadingOptions.leftLine"
+                                                ng-change="wiModal.setLimit2()">
                                         <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.leftLine.name}}</ui-select-match>
                                         <ui-select-choices group-by="'datasetName'"
-                                                    repeat='c as c in wiModal.curveList | filter: $select.search'>
+                                                    repeat='c as c in wiModal.leftLimit | filter: $select.search'>
                                                     <div class="padding-left-20px">{{c.name}}</div>
                                         </ui-select-choices>
                                     </ui-select>
