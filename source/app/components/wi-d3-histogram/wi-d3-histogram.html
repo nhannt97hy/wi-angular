@@ -9,7 +9,8 @@
         Filter: [{{wiD3Histogram.zoneSetModel.properties.name}} - Zonation]
     </h5>
     <div class='histogram-container'>
-        <div style='display:flex;flex-direction:row;justify-content:space-between;'>
+        <div style='display:flex;flex-direction:row;justify-content:space-between;'
+        ng-if="wiD3Histogram.histogramModel.properties.idCurve">
             <div>{{wiD3Histogram.histogramModel.properties.plotType}}</div>
             <div>Probability (%)</div>
         </div>

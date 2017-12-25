@@ -1052,6 +1052,12 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
                 self.symbolOptions.patternFill.foreground = colorStr;
             });*/
         }
+        this.checkSize = function () {
+            if (this.lineOptions.lineStyle.lineWidth < 1) this.lineOptions.lineStyle.lineWidth = 1;
+            if (this.lineOptions.lineStyle.lineWidth > 10) this.lineOptions.lineStyle.lineWidth = 10;
+            if (this.symbolOptions.symbolStyle.symbolSize < 1) this.symbolOptions.symbolStyle.symbolSize = 1;
+            if (this.symbolOptions.symbolStyle.symbolSize > 30) this.symbolOptions.symbolStyle.symbolSize = 30;
+        }
         this.onOkButtonClicked = function () {
             if (self.symbolOptions.symbolStyle.symbolName)
                 self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
