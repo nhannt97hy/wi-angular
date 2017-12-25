@@ -136,7 +136,7 @@ Curve.prototype.getProperties = function() {
         symbolStrokeStyle: symbol.strokeStyle,
         symbolFillStyle: symbol.fillStyle,
         symbolLineWidth: symbol.lineWidth,
-        symbolLineDash: symbol.lineDash,
+        symbolLineDash: symbol.lineDash ? symbol.lineDash.toString() : null,
         displayAs: this.displayAs
     }
 }
