@@ -130,6 +130,7 @@ function lineToTreeConfig(line) {
         blockPosition: line.blockPosition,
         wrapMode: line.wrapMode,
         displayAs: line.displayAs,
+        displayMode: line.displayMode,
         line: null,
         symbol: null
     };
