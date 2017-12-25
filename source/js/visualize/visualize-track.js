@@ -331,9 +331,9 @@ Track.prototype.onTrackDrag = function(callbackDrop) {
         axis: 'x',
         containment: 'parent',
         helper: function () {
-            return $(self.trackContainer.node()).clone().css('z-index', 99);
+            return $(self.headerNameBlock.node()).clone()
+                .css({'z-index': 99, 'width': self.width, 'background-color': 'rgb(69, 129, 69)', 'box-shadow': '1px 1px 2px 2px rgba(0,0,0,0.2)', 'color': '#fff'});
         },
-        opacity: 0.7,
         distance: 10,
         handle: '.vi-track-header-name',
         snap: '.vi-track-container',
