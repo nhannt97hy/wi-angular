@@ -14,8 +14,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let _viCurves = new Array();
     let _wiD3CrossplotCtrl = null;
     self.loading = false;
-    // this._viCurves = _viCurves;
-    this.referenceCurves = new Array();
+    this._viCurves = _viCurves;
+    // this.referenceCurves = new Array();
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 
@@ -93,6 +93,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 return;
             }
             viCurve = graph.createCurve(config, dataCurve, getRefCurveContainer());
+            console.log(viCurve);
             //viCurve.doPlot();
             _viCurves.push(viCurve);
             if (callback) callback();
@@ -182,16 +183,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
             if(!self.showGrid){
-                self.svg.selectAll('.tick').remove();
                 self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
                 .selectAll('.vi-refwind-axis-y-ticks .tick line')
                 .style('stroke-opacity', 0);
             }else{
-                self.svg.select('.vi-refwind-axis-x-ticks').call(axisX);
                 self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
                 .selectAll('.vi-refwind-axis-y-ticks .tick line')
                 .style('stroke-opacity', 0.3);
             }
+            self.svg.select('.vi-refwind-axis-x-ticks').call(axisX);
             self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)
             .selectAll('.vi-refwind-axis-y-ticks .tick text')
             .style('transform', 'translateX(-' + CANVAS_WIDTH + 'px)');
@@ -243,7 +243,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.update = update;
     function update(well, referenceCurves, scale, vertLineNo, top, bottom, grid) {
         self.showGrid = grid;
-        self.referenceCurves.length = 0;
+        // self.referenceCurves.length = 0;
         let familyArray = wiComponentService.getComponent(wiComponentService.LIST_FAMILY);
         _minY = top;
         _maxY = bottom;
@@ -275,10 +275,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             getRefCurveContainer().on('mousewheel', null);
             self.loading = true;
             async.eachOf(referenceCurves, function(refCurve, idx, callback) {
-                if(refCurve.visiable){
+                if(refCurve.idCurve && refCurve.visiable){
                     refCurve.datasetName = utils.findDatasetById(refCurve.curve.idDataset).properties.name;
-                    self.referenceCurves.push(refCurve);
                     let config = {
+                        idCurve: refCurve.idCurve,
+                        name: refCurve.datasetName + '.' + refCurve.curve.name,
                         minX: refCurve.left,
                         maxX: refCurve.right,
                         minY: _top,

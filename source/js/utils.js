@@ -2691,8 +2691,12 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
                 let wiHistogramCtrl = wiComponentService.getComponent('histogram' + histogramModel.properties.idHistogram);
                 if (!wiHistogramCtrl) return;
                 let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                if (histogramModel.properties.idCurve && wiD3Ctrl.hasThisCurve(histogramModel.properties.idCurve)) {
+                if (histogramModel.properties.idCurve && wiD3Ctrl.hasThisCurve(idCurve)) {
                     wiD3Ctrl.unloadCurve();
+                }
+                let refWindCtrl = wiComponentService.getComponent(wiHistogramCtrl.getWiRefWindCtrlName());
+                for(let i = refWindCtrl._viCurves.length - 1; i >= 0; i--){
+                    if(refWindCtrl._viCurves[i].idCurve == idCurve) refWindCtrl.removeRefCurve(i);
                 }
             });
             break;
