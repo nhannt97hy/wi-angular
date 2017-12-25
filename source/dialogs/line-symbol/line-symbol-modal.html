@@ -16,7 +16,8 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-3" for="style">Line Style</label>
                                             <div class="col-sm-9">
-                                                <ui-select theme="bootstrap" ng-model="wiModal.lineOptions.lineStyle.lineStyle">
+                                                <ui-select theme="bootstrap" ng-model="wiModal.lineOptions.lineStyle.lineStyle"
+                                                            search-enabled="false">
                                                     <ui-select-match>
                                                         <svg height="10" width="100%" class="col-sm-12">
                                                             <line x1="0" y1="5" x2="100%" y2="5" stroke-dasharray="{{$select.selected.join(',')}}"
