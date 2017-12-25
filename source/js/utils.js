@@ -2973,3 +2973,18 @@ function getZoneSetsInWell (well) {
     return zoneSets;
 }
 exports.getZoneSetsInWell = getZoneSetsInWell;
+
+function getAllCurvesOfWell (well) {
+    let datasets =[];
+    let curves = [];
+    well.children.forEach(function (child) {
+        if (child.type == 'dataset') datasets.push(child);
+    });
+    datasets.forEach(function (child) {
+        child.children.forEach(function (item) {
+            if (item.type == 'curve') curves.push(item);
+        })
+    });
+    return curves;
+}
+exports.getAllCurvesOfWell = getAllCurvesOfWell;

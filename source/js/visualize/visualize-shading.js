@@ -113,7 +113,7 @@ Shading.prototype.getProperties = function() {
         idTrack: this.idTrack,
         name: this.name,
         fill: this.isNegPosFill ? null: this.fill,
-        negativeFill: this.isNegPosFill ? Utils.clone(this.negativeFill) : null,
+        negativeFill: this.isNegPosFill ? Utils.clone(this.negativeFill) : Utils.clone(this.fill),
         positiveFill: this.isNegPosFill ? Utils.clone(this.positiveFill) : Utils.clone(this.fill),
         isNegPosFill: this.isNegPosFill,
         idLeftLine: (leftCurve || {}).id,

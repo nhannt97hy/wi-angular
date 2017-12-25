@@ -306,6 +306,7 @@
                                                 <td class="text-center"><strong>Limit 1</strong></td>
                                                 <td colspan="2" class="text-center"><strong>Limit 2</strong></td>
                                                 <td colspan="3" class="text-center"><strong>Parameters</strong></td>
+                                                <td rowspan="2"></td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -316,6 +317,7 @@
                                                 <td class="text-center"><strong>Shading Name</strong></td>
                                                 <td class="text-center"><strong>Shading Style</strong></td>
                                                 <td class="text-center"><strong>Shading Options</strong></td>
+                                                <td></td>
                                             </tr>
                                             <tr ng-repeat="shading in wiModal.getShadings()"
                                                 ng-class="{'selected':$index == selectedRowShading}"
@@ -358,7 +360,6 @@
                                                     <input type="number" ng-model="shading.leftFixedValue"
                                                             class="form-control wi-form-control" id="fixedVal"
                                                             ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index); shading.idLeftLine = -3"
-                                                            ng-disabled="!shading.idRightLine"
                                                             step="any">
                                                 </td>
                                                 <!-- <td class="border border-style1-right">
@@ -370,14 +371,12 @@
                                                 <td>
                                                     <input type="text" ng-model="shading.name"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index)"
-                                                            ng-disabled="!shading.idRightLine">
+                                                            ng-change="wiModal.onChangeShading($index)">
                                                 </td>
                                                 <td>
                                                     <select ng-model="shading.shadingStyle"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index)"
-                                                            ng-disabled="!shading.idRightLine">
+                                                            ng-change="wiModal.onChangeShading($index)">
                                                         <option value="fillPattern">Fill Pattern</option>
                                                         <option value="variableShading">Variable Shading</option>
                                                     </select>
@@ -386,16 +385,15 @@
                                                     <input type="button" value="Define"
                                                             ng-model="shading.fillPattern"
                                                             class="form-control wi-form-control"
-                                                            ng-disabled="!shading.idRightLine"
-                                                            ng-click="wiModal.defineButtonClicked($index); wiModal.onChangeShading($index);">
+                                                            ng-click="wiModal.defineButtonClicked($index, $event); wiModal.onChangeShading($index);">
                                                 </td>
-                                                <!-- <td>
-                                                    <input type="button" value="Define"
-                                                            ng-model="shading.variableShading"
-                                                            class="form-control wi-form-control"
-                                                            ng-disabled="!shading.idRightLine"
-                                                            ng-click="wiModal.defineVariableButtonClicked($index)">
-                                                </td> -->
+                                                <td>
+                                                    <button class="btn btn-default wi-form-control" 
+                                                            ng-click="wiModal.removeRowShading(shading._index);"
+                                                            style="font-size: 10px; width: 100%">
+                                                        <span class="delete-16x16"></span>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
