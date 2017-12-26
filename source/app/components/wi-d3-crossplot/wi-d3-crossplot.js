@@ -483,6 +483,49 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
     }
+    this.showHisContextMenu = function(event, xy){
+        if (event.button != 2) return;
+        _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
+        visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
+        self.hisContextMenu = [{
+            name: "ShowAsLine",
+            label: "Show As Line",
+            "isCheckType": "true",
+            checked: _histogram ? (_histogram.properties.plot == "Curve") : false,
+            handler: function (index) {
+                if (_histogram.properties.plot == "Bar")
+                    _histogram.properties.plot = "Curve";
+                else _histogram.properties.plot = "Bar";
+                self.hisContextMenu[index].checked = _histogram ? (_histogram.properties.plot == "Curve") : false;
+                visHistogram.signal('histogram-update', "plot curve/bar");
+            }
+        },
+        {
+            name: "ShowGaussian",
+            label: "Show Gaussian Line",
+            "isCheckType": "true",
+            checked: _histogram ? _histogram.properties.showGaussian : false,
+            handler: function (index) {
+                _histogram.properties.showGaussian = !_histogram.properties.showGaussian;
+                self.hisContextMenu[index].checked = _histogram.properties.showGaussian;
+                visHistogram.signal('histogram-update', 'show/hide gaussian');
+            }
+        },
+        {
+            name: "ShowCumulative",
+            label: "Show Cumulative Line",
+            "isCheckType": "true",
+            checked: _histogram ? _histogram.properties.showCumulative : false,
+            handler: function (index) {
+                _histogram.properties.showCumulative = !_histogram.properties.showCumulative;
+                self.hisContextMenu[index].checked = _histogram.properties.showCumulative;
+                visHistogram.signal('histogram-update', "show/hide Cumulative curve");
+            }
+        }];
+        event.stopPropagation();
+        wiComponentService.getComponent('ContextMenu')
+            .open(event.clientX, event.clientY, self.hisContextMenu);
+    }
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (self.viCrossplot && self.viCrossplot.pointSet) return;
         if (!config) {
