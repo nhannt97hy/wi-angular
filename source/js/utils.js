@@ -2257,7 +2257,7 @@ exports.upperCaseFirstLetter = function (string) {
 }
 exports.editProperty = editProperty;
 
-exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate, fromCurves) {
+exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate, fromCurves = {}) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let crossplotProps;
     let pointSetProps;
@@ -2289,13 +2289,17 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
         __GLOBAL.wiApiService.createPointSet({
             idCrossPlot: crossplotProps.idCrossPlot,
             idWell: idWell,
-            idCurveX: (fromCurves || {}).idCurveX || null,
-            idCurveY: (fromCurves || {}).idCurveY || null,
-            idCurveZ: (fromCurves || {}).idCurveZ || null,
+            idCurveX: (fromCurves.CurveX || {}).idCurve || null,
+            idCurveY: (fromCurves.CurveY || {}).idCurve || null,
+            idCurveZ: (fromCurves.CurveZ || {}).idCurve || null,
             majorX: 5,
             minorX: 5,
             majorY: 5,
-            minorY: 5
+            minorY: 5,
+            scaleLeft:(fromCurves.CurveX || {}).minX != 'undefined'? (fromCurves.CurveX || {}).minX : null,
+            scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
+            scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
+            scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
         }, function (pointSet) {
             if (!pointSet.idPointSet) {
                 cb('create pointset failed');
