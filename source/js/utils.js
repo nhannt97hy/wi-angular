@@ -131,6 +131,7 @@ function lineToTreeConfig(line) {
         wrapMode: line.wrapMode,
         displayAs: line.displayAs,
         displayMode: line.displayMode,
+        autoValueScale: line.autoValueScale,
         line: null,
         symbol: null
     };
@@ -2140,7 +2141,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         alias: currentCurve.alias,
         minValue: currentCurve.minX,
         maxValue: currentCurve.maxX,
-        autoValueScale: false,
+        autoValueScale: currentCurve.autoValueScale,
         displayType: currentCurve.scale,
         displayMode: currentCurve.displayMode,
         wrapMode: currentCurve.wrapMode.capitalize(),

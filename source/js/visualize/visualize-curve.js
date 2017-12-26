@@ -44,7 +44,6 @@ function Curve(config) {
     Drawing.call(this, config);
     if (typeof config != 'object') config = {};
     let datasetName = gUtils.findDatasetById(config.idDataset) ? gUtils.findDatasetById(config.idDataset).name : null;
-    console.log("logggggggggggggggg", datasetName);
     this.id = config.id;
     this.idCurve = config.idCurve;
     this.idDataset = config.idDataset;
@@ -65,7 +64,7 @@ function Curve(config) {
     this.wrapMode = config.wrapMode || 'none';
     this.displayAs = config.displayAs || 'Normal';
     this.displayMode = config.displayMode || 'Line';
-
+    this.autoValueScale = config.autoValueScale || false;
     this.yStep = config.yStep || 1;
     this.offsetY = config.offsetY || 0;
 
@@ -125,7 +124,7 @@ Curve.prototype.getProperties = function() {
         showDataset: false,
         minValue: this.minX,
         maxValue: this.maxX,
-        autoValueScale: false,
+        autoValueScale: this.autoValueScale,
         displayMode: this.displayMode,
         wrapMode: Utils.capitalize(this.wrapMode),
         blockPosition: Utils.capitalize(this.blockPosition),
@@ -159,6 +158,7 @@ Curve.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'name', props.name);
     Utils.setIfNotNull(this, 'unit', props.unit);
     Utils.setIfNotNull(this, 'showHeader', props.showHeader);
+    Utils.setIfNotNull(this, 'autoValueScale', props.autoValueScale);
     Utils.setIfNotNull(this, 'minX', props.minValue);
     Utils.setIfNotNull(this, 'maxX', props.maxValue);
     Utils.setIfNotNull(this, 'scale', Utils.capitalize(props.displayType));
