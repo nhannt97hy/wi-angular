@@ -2931,13 +2931,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //graph.sheetDraggable(document.getElementById(self.plotAreaId));
             let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
             let domElement = $(`wi-d3[name=${self.name}]`);
-            domElement.on('mouseover', function () {
+            domElement.on('mouseenter', function () {
                 if (!dragMan.dragging) return;
                 dragMan.wiD3Ctrl = self;
-            });
-            domElement.on('mouseleave', function () {
-                if (!dragMan.dragging) return;
-                dragMan.wiD3Ctrl = null;
             });
         }, 1000)
     };

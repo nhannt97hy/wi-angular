@@ -229,6 +229,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         $(`wi-slidingbar[name=${self.name}]`).on('mouseover', function () {
             dragMan.wiSlidingBarCtrl = self;
+            dragMan.wiD3Ctrl = null;
         });
 
         $(`wi-slidingbar[name=${self.name}]`).on('mouseleave', function () {
