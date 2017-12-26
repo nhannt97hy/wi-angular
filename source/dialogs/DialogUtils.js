@@ -3558,7 +3558,7 @@ exports.logTrackPropertiesDialog1 = function (ModalService, currentTrack, wiLogp
                             self.curves[self.__idx] = {
                                 _index: self.__idx,
                                 alias: curveInfo.name,
-                                autoValueScale: false,
+                                autoValueScale: lineProps.autoValueScale,
                                 blockPosition: lineProps.blockPosition,
                                 displayAs: 'Normal',
                                 displayMode: lineProps.displayMode,
