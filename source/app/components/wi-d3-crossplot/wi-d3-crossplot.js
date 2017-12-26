@@ -252,17 +252,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let zoneCtrl = self.getZoneCtrl();
         if (!zoneCtrl) return;
         let activeZones = zoneCtrl.getActiveZones();
-
+        let _activeZones;
         if (activeZones)
-            activeZones = activeZones.map(function(d) { return d.properties.idZone; });
+            _activeZones = activeZones.map(function(d) { return d.properties.idZone; });
 
         if (self.viCrossplot && self.viCrossplot.setProperties) {
             self.viCrossplot.setProperties({
                 pointSet: {
-                    activeZone: data == 'All' ? data : activeZones
+                    activeZone: data == 'All' ? data : _activeZones
                 }
             });
             self.viCrossplot.doPlot();
+        }
+        if(self.xHistogram && self.yHistogram){
+            self.xHistogram.setZoneSet(activeZones);
+            self.yHistogram.setZoneSet(activeZones);            
+            self.xHistogram.doPlot();
+            self.yHistogram.doPlot();
         }
     }
 
