@@ -2331,8 +2331,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         Utils.openCrossplotTab(crossplotModel);
                     }
                 }, null, {
-                    idCurveX: curve1.idCurve,
-                    idCurveY: curve2.idCurve
+                    CurveX: curve1,
+                    CurveY: curve2
                 });
             });
         }
