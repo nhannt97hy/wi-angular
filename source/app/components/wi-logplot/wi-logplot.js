@@ -15,7 +15,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isReferenceLine = true;
         self.isTooltip = true;
         self.logplotModel = self.getLogplotModel();
-        self.wellName = self.logplotModel ? utils.getModel('well', self.logplotModel.properties.idWell).properties.name : 'Well';
+        self.wellModel = utils.getModel('well', self.logplotModel.properties.idWell);
 
         // Setup handlers for logplot
         $scope.handlers = {};

@@ -1,7 +1,7 @@
 <div class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
     @@include('./toolbar/index.html')
 </div>
-<div class="logplot-well-name" ng-bind="wiLogplot.wellName"></div>
+<div class="logplot-well-name" ng-bind="wiLogplot.wellModel.properties.name"></div>
 <div class="logplot-main-content">
     <div class='slidingbar'>
         <wi-slidingbar

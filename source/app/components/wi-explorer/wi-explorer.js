@@ -670,7 +670,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Rename",
                         icon: "annotation-16x16-edit",
                         handler: function() {
-
+                            let selectedNode = utils.getSelectedNode();
+                            if (selectedNode.type != 'logplot') return;
+                            let promptConfig = {
+                                title: '<span class="logplot-edit-16x16"></span> Rename Logplot',
+                                inputName: 'New Logplot Name',
+                                input: selectedNode.properties.name
+                            }
+                            DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
+                                if (!res) return;
+                                let logplotInfo = selectedNode.properties;
+                                logplotInfo.name = res;
+                                wiApiService.editLogplot(logplotInfo, function () {
+                                    $timeout(function () {
+                                        selectedNode.properties.name = res;
+                                        selectedNode.data.label = res;
+                                        let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                                        let logplotTab = layoutManager.getItemById('logplot' + selectedNode.properties.idPlot);
+                                        if (!logplotTab) return;
+                                        let wellModel = utils.findWellByLogplot(selectedNode.properties.idPlot);
+                                        logplotTab.setTitle(`<span class="logplot-blank-16x16"></span> <span> ${res} - (${wellModel.properties.name})</span>`);
+                                    })
+                                });
+                            });
                         }
                     }, {
                         name: "DuplicatePlot",
@@ -821,7 +843,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Rename",
                         icon: "annotation-16x16-edit",
                         handler: function() {
-
+                            let selectedNode = utils.getSelectedNode();
+                            if (selectedNode.type != 'crossplot') return;
+                            let promptConfig = {
+                                title: '<span class="crossplot-predefine-16x16"></span> Rename Crossplot',
+                                inputName: 'New Crossplot Name',
+                                input: selectedNode.properties.name
+                            }
+                            DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
+                                if (!res) return;
+                                let crossplotInfo = selectedNode.properties;
+                                crossplotInfo.name = res;
+                                wiApiService.editCrossplot(crossplotInfo, function () {
+                                    $timeout(function () {
+                                        selectedNode.properties.name = res;
+                                        selectedNode.data.label = res;
+                                        let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                                        let crossplotTab = layoutManager.getItemById('crossplot' + selectedNode.properties.idCrossPlot);
+                                        if (!crossplotTab) return;
+                                        let wellModel = utils.findWellByCrossplot(selectedNode.properties.idCrossPlot);
+                                        crossplotTab.setTitle(`<span class="crossplot-blank-16x16"></span> <span> ${res} - (${wellModel.properties.name})</span>`);
+                                    })
+                                });
+                            });
                         }
                     }, {
                         name: "DuplicatePlot",
@@ -947,7 +991,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: "Rename",
                         icon: "annotation-16x16-edit",
                         handler: function() {
-
+                            let selectedNode = utils.getSelectedNode();
+                            if (selectedNode.type != 'histogram') return;
+                            let promptConfig = {
+                                title: '<span class="histogram-predefine-16x16"></span> Rename Histogram',
+                                inputName: 'New Histogram Name',
+                                input: selectedNode.properties.name
+                            }
+                            DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
+                                if (!res) return;
+                                let histogramInfo = selectedNode.properties;
+                                histogramInfo.name = res;
+                                wiApiService.editHistogram(histogramInfo, function () {
+                                    $timeout(function () {
+                                        selectedNode.properties.name = res;
+                                        selectedNode.data.label = res;
+                                        let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                                        let histogramTab = layoutManager.getItemById('histogram' + selectedNode.properties.idHistogram);
+                                        if (!histogramTab) return;
+                                        let wellModel = utils.findWellByHistogram(selectedNode.properties.idHistogram);
+                                        histogramTab.setTitle(`<span class="histogram-blank-16x16"></span> <span> ${res} - (${wellModel.properties.name})</span>`);
+                                    })
+                                });
+                            });
                         }
                     }, {
                         name: "DuplicatePlot",
