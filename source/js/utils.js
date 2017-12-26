@@ -1892,7 +1892,7 @@ exports.renameWell = function () {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let wellInfo = selectedNode.properties;
+        let wellInfo = angular.copy(selectedNode.properties);
         wellInfo.name = ret;
         wiApiService.editWell(wellInfo, function () {
             __GLOBAL.$timeout(function () {
@@ -1916,7 +1916,7 @@ exports.renameDataset = function () {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let datasetInfo = selectedNode.properties;
+        let datasetInfo = angular.copy(selectedNode.properties);
         datasetInfo.name = ret;
         wiApiService.editDataset(datasetInfo, function () {
             __GLOBAL.$timeout(function () {
@@ -2700,7 +2700,7 @@ exports.renameZoneSet = function (zoneSetModel) {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let zoneSetInfo = zoneSetModel.properties;
+        let zoneSetInfo = angular.copy(zoneSetModel.properties);
         zoneSetInfo.name = ret;
         wiApiService.editZoneSet(zoneSetInfo, function () {
             __GLOBAL.$timeout(function () {
