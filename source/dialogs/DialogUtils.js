@@ -1,7 +1,9 @@
 function initModal(modal) {
     modal.element.modal();
     $(modal.element).prop('tabindex', 1);
-    $(modal.element[0].children[0]).draggable();
+    $(modal.element[0].children[0]).draggable({
+        containment:[-$(window).width()/2, -100, $(window).width()/2, $(window).height() - 100]
+    });
     $(modal.element).keyup(function (e) {
         if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.ESCAPE) {
             let okButton, cancelButton;
@@ -7209,7 +7211,7 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback,
         controllerAs: 'wiModal'
     }).then(function (modal) {
         initModal(modal);
-        $(modal.element[0].children[0]).draggable();
+        //$(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -8017,7 +8019,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         initModal(modal);
-        $(modal.element[0].children[0]).draggable();
+        //$(modal.element[0].children[0]).draggable();
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
@@ -9365,19 +9367,19 @@ this.onCancelButtonClicked = function () {
 };
 }
 
-ModalService.showModal({
-    templateUrl: "curve-rescale/curve-rescale-modal.html",
-    controller: ModalController,
-    controllerAs: 'wiModal'
-}).then(function (modal) {
-    initModal(modal);
-    $(modal.element[0].children[0]).draggable();
-    modal.close.then(function (ret) {
-        $('.modal-backdrop').last().remove();
-        $('body').removeClass('modal-open');
-        callback(ret);
+    ModalService.showModal({
+        templateUrl: "curve-rescale/curve-rescale-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        //$(modal.element[0].children[0]).draggable();
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
+        });
     });
-});
 }
 
 exports.curveComrarisonDialog = function (ModalService, callback) {
