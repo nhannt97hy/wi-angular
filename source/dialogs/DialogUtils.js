@@ -1291,17 +1291,17 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             else {
                 let curveInTree = utils.getCurveFromId(currentCurve.idCurve);
                 console.log('curveInTree', curveInTree);
-                wiApiService.scaleCurve(curveInTree.id, function (scaleObj) {
-                    $timeout(function () {
-                        if (curveInTree.properties.idFamily == null) {
+                if (curveInTree.properties.idFamily == null) {
+                    wiApiService.scaleCurve(curveInTree.id, function (scaleObj) {
+                        $timeout(function () {
                             self.curveOptions.minValue = scaleObj.minScale;
                             self.curveOptions.maxValue = scaleObj.maxScale;
-                        } else {
-                            self.curveOptions.minValue = curveInTree.properties.minScale;
-                            self.curveOptions.maxValue = curveInTree.properties.maxScale;
-                        }
-                    })
-                });
+                        })
+                    });
+                } else {
+                    self.curveOptions.minValue = curveInTree.lineProperties.minScale;
+                    self.curveOptions.maxValue = curveInTree.lineProperties.maxScale;
+                }
             }
         }
         function updateLine(callback) {
@@ -2687,6 +2687,9 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         console.log("input shadingOptions", shadingOptions);
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
+        let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
+        this.leftLimit = customLimit.concat(self.curveList);
+
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
         this.curves = utils.getAllCurvesOfWell(this.well);
 
@@ -3187,7 +3190,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
             }
             this.onCancelButtonClicked = function () {
-                close(null);
+                close();
             }
             this.onOkButtonClicked = function () {
                 switch (self.varShadingType) {
@@ -3224,12 +3227,12 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     break;
                 }
                 let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
-                // console.log(fill);
+                console.log("gg",self.shadingOptions);
                 let options = {
                     _index : shadingOptions._index,
                     changed : shadingOptions.changed,
                     idControlCurve : self.variableShadingOptions.controlCurve.id,
-                    idLeftLine : self.shadingOptions.leftLine ? self.shadingOpitons.leftLine.id : null,
+                    idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
                     idRightLine : self.shadingOptions.rightLine.id,
                     leftLine : self.shadingOptions.leftLine,
                     rightLine : self.shadingOptions.rightLine,
@@ -4623,6 +4626,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
         // shading tab
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+
+        let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
+        this.leftLimit = customLimit.concat(self.curveList);
         this.shadingList = currentTrack.getShadings();
         this.shadingList.forEach(function(s) {
             self.shadings.push(s.getProperties());
@@ -4632,7 +4638,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             s.changed = changed.unchanged;
             s._index = index;
             s.rightLine = getLine(s.idRightLine);
-            s.leftLine = getLine(s.idLeftLine);
+            if (s.type == 'left') s.leftLine = {"id": -1, "name": "left"}
+            if (s.type == 'right') s.leftLine = {"id": -2, "name": "right"}
+            if (s.type == 'custom') s.leftLine = {"id": -3, "name": "custom"}
+            if (s.type == 'pair') s.leftLine = getLine(s.idLeftLine);
             s.shadingStyle = getShadingStyle(s.isNegPosFill ? s.positiveFill : s.fill);
         });
         this.getShadings = function () {
@@ -4725,19 +4734,43 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 console.log("shadingOptions: ", self.shadings);
             }, self.shadings[self.__idx], currentTrack, wiLogplotCtrl);
             $event.stopPropagation();
+        };
+        this.onSelectRightLine = function () {
+            self.shadings[self.__idx].idRightLine = self.shadings[self.__idx].rightLine.id;
+        };
+        this.onSelectLeftLine = function () {
+            self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
         }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 console.log("tab shadings", item);
                 delete item.leftLine;
                 delete item.rightLine;
+                if(item.idLeftLine == -3) {
+                    item.type = 'custom';
+                    item.idLeftLine = null;
+                };
+                if(item.idLeftLine == -2) {
+                    item.type = 'right';
+                    item.idLeftLine = null;
+                };
+                if(item.idLeftLine == -1) {
+                    item.type = 'left';
+                    item.idLeftLine = null;
+                };
+                if(item.idLeftLine > 0) {
+                    item.type = 'pair';
+                    item.leftFixedValue = null;
+                    item.idLeftLine = parseInt(item.idLeftLine);
+                }
                 switch(item.changed) {
                     case changed.unchanged:
                     callback();
                     break;
                     case changed.created: {
-                            console.log("///", item);
                         wiApiService.createShading(item, function (shading) {
+                            item.leftLine = getLine(item.idLeftLine);
+                            item.rightLine = getLine(item.idRightLine);
                             callback();
                         });
                         item.changed = changed.unchanged;
@@ -4746,7 +4779,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
                     case changed.updated: {
                         wiApiService.editShading(item, function (shading) {
-                            console.log("///", shading, item);
+                            item.leftLine = getLine(item.idLeftLine);
+                            item.rightLine = getLine(item.idRightLine);
                             if (callback) callback();
                         });
                         item.changed = changed.unchanged;

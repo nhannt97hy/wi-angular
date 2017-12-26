@@ -1,4 +1,5 @@
 let Utils = require('./visualize-utils');
+let gUtils = require('./../utils');
 let Drawing = require('./visualize-drawing');
 let CanvasHelper = require('./visualize-canvas-helper');
 
@@ -13,6 +14,7 @@ Utils.extend(Drawing, Curve);
  * @param {Number} [config.id] - The id of this line(curve) in backend (idLine field)
  * @param {Number} [config.idCurve] - The id of this line(curve) in backend (idCurve field)
  * @param {Number} [config.idDataset] - The id of the dataset in backend (idDataset field)
+ * @param {String} [config.datasetName] - the datasetName (datasetName feild)
  * @param {String} [config.name] - Name of new curve
  * @param {Array} [config._data] - Data containing x, y coordinates or the curve * CHANGE config.data -> config._data -- TUNG *
  * @param {String} [config.unit] - Unit of data
@@ -41,10 +43,12 @@ Utils.extend(Drawing, Curve);
 function Curve(config) {
     Drawing.call(this, config);
     if (typeof config != 'object') config = {};
-
+    let datasetName = gUtils.findDatasetById(config.idDataset) ? gUtils.findDatasetById(config.idDataset).name : null;
+    console.log("logggggggggggggggg", datasetName);
     this.id = config.id;
     this.idCurve = config.idCurve;
     this.idDataset = config.idDataset;
+    this.datasetName = datasetName;
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';
 
