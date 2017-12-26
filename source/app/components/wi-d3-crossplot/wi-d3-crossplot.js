@@ -79,7 +79,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             histogramProps.intervalDepthBottom = pointSet.intervalDepthBottom;
             histogramProps.color = pointSet.pointColor;
             histogramProps.activeZone = pointSet.activeZone;
-            histogramProps.divisions = (xy == 'xCurve')?pointSet.majorX:pointSet.majorY;
+            histogramProps.divisions = ((xy == 'xCurve')?pointSet.majorX:pointSet.majorY) * 10;
         }
         histogramProps.loga = false;
         histogramProps.showGrid = false;
