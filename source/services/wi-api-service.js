@@ -324,13 +324,14 @@ var wiApiWorker = function ($http, wiComponentService) {
                         return;
                     }
                     if (err.status == 401) {
-                        if (err.data.reason) alert(err.data.reason);
-                        window.localStorage.removeItem('token');
-                        window.localStorage.removeItem('username');
-                        window.localStorage.removeItem('password');
-                        window.localStorage.removeItem('rememberAuth');
                         self.stopWorking();
-                        location.reload();
+                        if (err.data.reason) self.getUtils().error(err.data.reason, function () {
+                            window.localStorage.removeItem('token');
+                            window.localStorage.removeItem('username');
+                            window.localStorage.removeItem('password');
+                            window.localStorage.removeItem('rememberAuth');
+                            location.reload();
+                        });
                     } else {
                         self.stopWorking();
                         // job.callback(err);

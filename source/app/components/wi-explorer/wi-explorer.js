@@ -679,7 +679,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             }
                             DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
                                 if (!res) return;
-                                let logplotInfo = selectedNode.properties;
+                                let logplotInfo = angular.copy(selectedNode.properties);
                                 logplotInfo.name = res;
                                 wiApiService.editLogplot(logplotInfo, function () {
                                     $timeout(function () {
@@ -852,7 +852,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             }
                             DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
                                 if (!res) return;
-                                let crossplotInfo = selectedNode.properties;
+                                let crossplotInfo = angular.copy(selectedNode.properties);
                                 crossplotInfo.name = res;
                                 wiApiService.editCrossplot(crossplotInfo, function () {
                                     $timeout(function () {
@@ -1000,7 +1000,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             }
                             DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
                                 if (!res) return;
-                                let histogramInfo = selectedNode.properties;
+                                let histogramInfo = angular.copy(selectedNode.properties);
                                 histogramInfo.name = res;
                                 wiApiService.editHistogram(histogramInfo, function () {
                                     $timeout(function () {

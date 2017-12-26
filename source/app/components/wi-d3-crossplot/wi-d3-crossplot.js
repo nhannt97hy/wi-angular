@@ -14,7 +14,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     // this.isShowReferenceWindow = true;
     let _well = null;
 
-    var saveCrossplot= utils.debounce(function() {
+    var saveCrossplot= _.debounce(function() {
         wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
             console.log('updated');
         });

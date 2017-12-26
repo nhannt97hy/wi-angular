@@ -60,6 +60,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 _viCurve.doPlot();
             });
         })
+        let logplotModel = logPlotCtrl.getLogplotModel();
+        let logplotRequest = angular.copy(logplotModel.properties);
+        logplotRequest.referenceCurve = idCurve;
+        wiApiService.editLogplot(logplotRequest, function () {
+            logplotModel.properties.referenceCurve = idCurve;
+        });
     }
 
     this.verifyDroppedIdCurve = function(idCurve) {
@@ -221,11 +227,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).on("mousewheel", onMouseWheel);
 
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-        $(self.contentId).on('mouseover', function () {
+        $(`wi-slidingbar[name=${self.name}]`).on('mouseover', function () {
             dragMan.wiSlidingBarCtrl = self;
         });
 
-        $(self.contentId).on('mouseleave', function () {
+        $(`wi-slidingbar[name=${self.name}]`).on('mouseleave', function () {
             dragMan.wiSlidingBarCtrl = null;
         });
     };

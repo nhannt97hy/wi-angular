@@ -5300,7 +5300,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             self.done = true;
         }
 
-        this.onImageUrlChange = utils.debounce(function () {
+        this.onImageUrlChange = _.debounce(function () {
             self.done = validateUrl(self.imageUrl);
         }, 500);
 
@@ -6800,7 +6800,7 @@ exports.imagePropertiesDialog = function (ModalService, wiD3Ctrl, config, callba
 
         let [trackTop, trackBottom] = wiD3Ctrl.getDepthRangeFromSlidingBar(); // top & bottom track in meter
         let mPerPx = (trackBottom - trackTop) / trackHeight;
-        this.onImageUrlChange = utils.debounce(function () {
+        this.onImageUrlChange = _.debounce(function () {
             self.done = false;
             let img = new Image();
             img.onload = function () {

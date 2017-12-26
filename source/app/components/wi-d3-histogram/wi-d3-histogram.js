@@ -21,7 +21,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-    var saveHistogram= utils.debounce(function(callback) {
+    var saveHistogram= _.debounce(function(callback) {
             wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
                 console.log('updated');
                 if (callback) callback();
