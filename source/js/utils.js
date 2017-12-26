@@ -3027,3 +3027,17 @@ function getAllCurvesOfWell (well) {
     return curves;
 }
 exports.getAllCurvesOfWell = getAllCurvesOfWell;
+
+function getShadingStyle(fillObj) {
+    if (fillObj.pattern) return "fillPattern";
+
+    if (fillObj.varShading) return "variableShading";
+
+    fillObj.pattern = {
+        name: 'none',
+        background: "white",
+        foreground: 'black'
+    };
+    return "fillPattern";
+}
+exports.getShadingStyle = getShadingStyle;
