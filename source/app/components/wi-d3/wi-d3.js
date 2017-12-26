@@ -2946,8 +2946,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let wholeWidth = $(`wi-logplot[name=${self.logPlotCtrl.name}]`).width();
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
-        self.sliderWidth = wholeWidth - slidingBarWidth - 36;
-        if (self.contentWidth <= self.sliderWidth + 21) 
+        self.sliderWidth = wholeWidth - slidingBarWidth - 56;
+        if (self.contentWidth <= self.sliderWidth + 41) 
             self.slider.noUiSlider.reset();
             //$(`#${self.plotAreaId}`).css('left', '0px');
     }
