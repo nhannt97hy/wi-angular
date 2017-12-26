@@ -64,7 +64,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             crossplotProps.pointSet = crossplotProps.pointsets[0];
         self.createVisualizeCrossplot(null, null, crossplotProps);
     }
-
+    function updateHistogramProps(crossplotModel,xy){
+        let histogramProps = xy == 'xCurve' ? self.histogramModelX.properties : self.histogramModelY.properties;
+        if (crossplotModel.properties.pointsets && crossplotModel.properties.pointsets.length) {
+            pointSet = crossplotModel.properties.pointsets[0];
+            histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
+            histogramProps.leftScale = (xy == 'xCurve')?pointSet.scaleLeft:pointSet.scaleBottom;
+            histogramProps.rightScale = (xy == 'xCurve')?pointSet.scaleRight:pointSet.scaleTop;
+            histogramProps.idZoneSet = pointSet.idZoneSet;
+            histogramProps.intervalDepthTop = pointSet.intervalDepthTop;
+            histogramProps.intervalDepthBottom = pointSet.intervalDepthBottom;
+            histogramProps.color = pointSet.pointColor;
+            histogramProps.activeZone = pointSet.activeZone;
+        }
+    }
     function buildHistogramProps(crossplotModel, xy) {
         var histogramProps = {};
         var pointSet = null;
@@ -135,8 +148,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.doShowHistogram = function() {
         if (self.crossplotModel && self.crossplotModel.properties) {
-            self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
-            if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
+            let pointSet = self.crossplotModel.properties.pointsets[0];
+            if(pointSet.idCurveX && pointSet.idCurveY){
+                self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
+                if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
+            }
         }
     }
 
@@ -340,7 +356,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.viCrossplot.doPlot();
                 if (self.histogramModelX) {
                     if ($('#' + self.name + "HistogramX").length) {
-                        self.histogramModelX.properties = buildHistogramProps(self.crossplotModel, 'xCurve');
+                        updateHistogramProps(self.crossplotModel, 'xCurve');
                         self.xHistogram.setHistogramModel(self.histogramModelX);
                         let zoneCtrl = self.getZoneCtrl();
                         if (!zoneCtrl) return;
@@ -353,7 +369,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
                 if (self.histogramModelY) {
                     if ($('#' + self.name + "HistogramY").length) {
-                        self.histogramModelY.properties = buildHistogramProps(self.crossplotModel, 'yCurve');
+                        updateHistogramProps(self.crossplotModel, 'yCurve');
                         self.yHistogram.setHistogramModel(self.histogramModelY);
                         let zoneCtrl = self.getZoneCtrl();
                         if (!zoneCtrl) return;
