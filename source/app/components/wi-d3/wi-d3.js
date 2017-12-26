@@ -2890,13 +2890,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     function updateSlider() {
-        let wholeWidth = $(`wi-logplot#${self.logPlotCtrl.id}`).width();
+        let wholeWidth = $(`wi-logplot[name=${self.logPlotCtrl.name}]`).width();
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 36;
+        if (self.contentWidth <= self.sliderWidth + 21) 
+            self.slider.noUiSlider.reset();
+            //$(`#${self.plotAreaId}`).css('left', '0px');
     }
     this.onReady = function(args) {
-        self.resizeSensor = new ResizeSensor(document.getElementById(self.plotAreaId), function(){
+        new ResizeSensor(document.getElementById(self.plotAreaId), function(){
+            console.log('*********** RESIZE SENSOR************');
+            updateSlider();
+        });
+        
+        new ResizeSensor($(`wi-logplot[name=${self.logPlotCtrl.name}]`), function(){
             updateSlider();
         });
     }
