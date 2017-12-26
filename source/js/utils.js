@@ -131,6 +131,7 @@ function lineToTreeConfig(line) {
         wrapMode: line.wrapMode,
         displayAs: line.displayAs,
         displayMode: line.displayMode,
+        autoValueScale: line.autoValueScale,
         line: null,
         symbol: null
     };
@@ -1892,7 +1893,7 @@ exports.renameWell = function () {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let wellInfo = selectedNode.properties;
+        let wellInfo = angular.copy(selectedNode.properties);
         wellInfo.name = ret;
         wiApiService.editWell(wellInfo, function () {
             __GLOBAL.$timeout(function () {
@@ -1916,7 +1917,7 @@ exports.renameDataset = function () {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let datasetInfo = selectedNode.properties;
+        let datasetInfo = angular.copy(selectedNode.properties);
         datasetInfo.name = ret;
         wiApiService.editDataset(datasetInfo, function () {
             __GLOBAL.$timeout(function () {
@@ -2140,7 +2141,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         alias: currentCurve.alias,
         minValue: currentCurve.minX,
         maxValue: currentCurve.maxX,
-        autoValueScale: false,
+        autoValueScale: currentCurve.autoValueScale,
         displayType: currentCurve.scale,
         displayMode: currentCurve.displayMode,
         wrapMode: currentCurve.wrapMode.capitalize(),
@@ -2704,7 +2705,7 @@ exports.renameZoneSet = function (zoneSetModel) {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let zoneSetInfo = zoneSetModel.properties;
+        let zoneSetInfo = angular.copy(zoneSetModel.properties);
         zoneSetInfo.name = ret;
         wiApiService.editZoneSet(zoneSetInfo, function () {
             __GLOBAL.$timeout(function () {
@@ -3031,3 +3032,17 @@ function getAllCurvesOfWell (well) {
     return curves;
 }
 exports.getAllCurvesOfWell = getAllCurvesOfWell;
+
+function getShadingStyle(fillObj) {
+    if (fillObj.pattern) return "fillPattern";
+
+    if (fillObj.varShading) return "variableShading";
+
+    fillObj.pattern = {
+        name: 'none',
+        background: "white",
+        foreground: 'black'
+    };
+    return "fillPattern";
+}
+exports.getShadingStyle = getShadingStyle;

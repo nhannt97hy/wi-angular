@@ -359,7 +359,9 @@
                                                 <td>
                                                     <input type="number" ng-model="shading.leftFixedValue"
                                                             class="form-control wi-form-control" id="fixedVal"
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index); shading.idLeftLine = -3"
+                                                            ng-change="wiModal.onChangeShading($index);
+                                                            wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);
+                                                            wiModal.typeFixedValue();"
                                                             step="any">
                                                 </td>
                                                 <!-- <td class="border border-style1-right">

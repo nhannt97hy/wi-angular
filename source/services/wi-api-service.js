@@ -310,8 +310,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                         if (response.data.code == 200) {
                             if (job.callback) job.callback(response.data.content);
                         } else {
-                            job.callback(response.data.reason);
+                            // job.callback(response.data.reason);
                             // if (response.data.reason) self.getUtils().error('Error: ' + response.data.reason);
+                            throw response;
                         }
                         self.stopWorking();
                     })
@@ -332,10 +333,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                         location.reload();
                     } else {
                         self.stopWorking();
-                        console.error(err);
                         // job.callback(err);
                         if (err.data && err.data.reason) self.getUtils().error(err.data.reason);
-                        else self.getUtils().error(err);
+                        console.error(err.data);
                     }
                 });
 

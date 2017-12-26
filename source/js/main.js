@@ -180,9 +180,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiApiService,
         $timeout
     };
-    // UTIL FUNCTIONS
-    utils.setGlobalObj(functionBindingProp);
-    wiComponentService.putComponent(wiComponentService.UTILS, utils);
     // Logplot Handlers
     wiComponentService.putComponent(wiComponentService.LOGPLOT_HANDLERS, logplotHandlers);
     // Crossplot Handlers
@@ -218,7 +215,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);
     wiComponentService.putComponent(wiComponentService.DRAG_MAN, dragMan);
     /* ======================================== */
-    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
     let boundedLayoutManager = layoutManager;
     layoutManager = {};
     utils.bindFunctions(layoutManager, boundedLayoutManager, functionBindingProp);
@@ -257,6 +253,17 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+    let functionBindingProp = {
+        $scope,
+        wiComponentService,
+        ModalService,
+        wiApiService,
+        $timeout
+    };
+    window.utils = utils;
+    utils.setGlobalObj(functionBindingProp);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
+    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
     if(!window.localStorage.getItem('rememberAuth')) {
         DialogUtils.authenticationDialog(ModalService, wiComponentService, function (userInfo) {
             if (userInfo.remember) {

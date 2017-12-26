@@ -23,6 +23,7 @@ function initModal(modal) {
 
 exports.authenticationDialog = function (ModalService, wiComponentService,callback) {
     function ModalController($scope, close, wiApiService) {
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let self = this;
         this.disabled = false;
         this.error = null;
@@ -46,36 +47,10 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 fullname: self.userfullnameReg,
                 captcha: self.captcha
             }
-            wiApiService.register(dataRequest, function (response) {
-                if(response == "USER_EXISTED"){
-                    // alert("User existed");
-                    authenticationMessage(ModalService, "Registration", "User already exists!", function () {
-                    });
-                } else if(response == "WRONG_CAPTCHA"){
-                    //alert("Wrong captcha");
-                    authenticationMessage(ModalService, "Registration", "Captcha was not correct!", function () {
-                    });
-                } else {
-                    authenticationMessage(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
-                        location.reload();
-                    });
-                }
-                // let userInfo = {
-                //     username: self.usernameReg,
-                //     password: self.passwordReg,
-                //     token: token
-                // }
-                // wiApiService.setAuthenticationInfo(userInfo);
-                // close(100);
-                // if(token != "CAPTCHA"){
-                //     setTimeout(function () {
-                //         warningMessageDialog(ModalService, "Register Successfully! Wait for active", function () {
-                //             location.reload();
-                //         });
-                //     }, 200);
-                // } else {
-                //     alert("Captcha is not correct!");
-                // }
+            wiApiService.register(dataRequest, function () {
+                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
+                    location.reload();
+                });
             });
         }
         this.onLoginButtonClicked = function () {
@@ -86,29 +61,15 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 password: self.password,
                 whoami: 'main-service'
             }
-            wiApiService.login(dataRequest, function(response) {
-                if(response == "USER_NOT_EXISTS"){
-                    authenticationMessage(ModalService, "Login", "User is not exists.", function () {
-                    });
-                } else if (response == "WRONG_PASSWORD") {
-                    authenticationMessage(ModalService, "Login", "Password is not correct.", function () {
-                    });
-                } else if (response == "NOT_ACTIVATED"){
-                    authenticationMessage(ModalService, "Login", "You are not activated. Please wait for account activation.", function () {
-                    });
-                } else if(response == "DATABASE_CREATION_FAIL"){
-                    authenticationMessage(ModalService, "Login", "Backend Service problem.", function () {
-                    });
-                } else {
-                    let userInfo = {
-                        username: self.username,
-                        password: self.password,
-                        token: response,
-                        remember: self.remember
-                    };
-                    wiApiService.setAuthenticationInfo(userInfo);
-                    close(userInfo);
-                }
+            wiApiService.login(dataRequest, function(token) {
+               let userInfo = {
+                    username: self.username,
+                    password: self.password,
+                    token: token,
+                    remember: self.remember
+                };
+                wiApiService.setAuthenticationInfo(userInfo);
+                close(userInfo);
             });
 
         }
@@ -128,29 +89,6 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         });
     });
 };
-exports.authenticationMessage = authenticationMessage;
-function authenticationMessage(ModalService, type, message, callback) {
-    function ModalController($scope, close) {
-        let self = this;
-        this.title = type;
-        this.message = message;
-        this.onCloseButtonClicked = function () {
-            close(null);
-        };
-    }
-    ModalService.showModal({
-        templateUrl: 'authentication-message/authentication-message-modal.html',
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        initModal(modal);
-        modal.close.then(function (data) {
-            if (callback) callback();
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-        })
-    });
-}
 
 exports.newProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
@@ -2684,6 +2622,12 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.paletteName = null;
         this.curveList = currentTrack.getCurves();
         this.shadingOptions = shadingOptions;
+
+        if (!shadingOptions.shadingStyle) 
+            this.shadingOptions.shadingStyle = utils.getShadingStyle(this.shadingOptions.isNegPosFill ? this.shadingOptions.positiveFill : this.shadingOptions.fill)
+        this.shadingOptions.leftLine = getLine(this.shadingOptions.idLeftLine);
+        this.shadingOptions.rightLine = getLine(this.shadingOptions.idRightLine);
+
         console.log("input shadingOptions", shadingOptions);
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
@@ -2743,7 +2687,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     startX : controlCurve.lineProperties.minScale,
                     endX : controlCurve.lineProperties.maxScale,
                     gradient : {
-                        startColor : 'transparent',
+                        startColor : 'blue',
                         endColor : 'transparent'
                     },
                     palette : null,
@@ -2757,7 +2701,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     startX : controlCurve.lineProperties.minScale,
                     endX : controlCurve.lineProperties.maxScale,
                     gradient : {
-                        startColor : 'transparent',
+                        startColor : 'blue',
                         endColor : 'transparent'
                     },
                     palette : null,
@@ -2771,7 +2715,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                     startX : controlCurve.lineProperties.minScale,
                     endX : controlCurve.lineProperties.maxScale,
                     gradient : {
-                        startColor : 'transparent',
+                        startColor : 'blue',
                         endColor : 'transparent'
                     },
                     palette : null,
@@ -2780,100 +2724,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 }
             }
         };
-        // this.fillPatternOptions.fill = {
-        //     display: (this.shadingOptions.fill && this.shadingOptions.fill.display != null)?this.shadingOptions.fill.display:condition1,
-        //     pattern: this.shadingOptions.fill.pattern ? {
-        //         name: (condition1 ? this.shadingOptions.fill.pattern.name : "none"),
-        //         foreground: (condition1 ? this.shadingOptions.fill.pattern.foreground : null),
-        //         background: (condition1 ? this.shadingOptions.fill.pattern.background : null)
-        //     } : {
-        //         name: null,
-        //         foreground : null,
-        //         background : null
-        //     }
-        // };
-        // this.fillPatternOptions.positiveFill = {
-        //     display: (this.shadingOptions.positiveFill && this.shadingOptions.positiveFill.display != null)?this.shadingOptions.positiveFill.display:condition2,
-        //     pattern: this.shadingOptions.positiveFill.pattern ? {
-        //         name: (condition2 ? this.shadingOptions.positiveFill.pattern.name : "none"),
-        //         foreground: (condition2 ? this.shadingOptions.positiveFill.pattern.foreground : null),
-        //         background: (condition2 ? this.shadingOptions.positiveFill.pattern.background : null)
-        //     } : {
-        //         name: null,
-        //         foreground : null,
-        //         background : null
-        //     }
-        // };
-
-        // this.fillPatternOptions.negativeFill = {
-        //     display: (this.shadingOptions.negativeFill && this.shadingOptions.negativeFill.display != null)?this.shadingOptions.negativeFill.display:condition2,
-        //     pattern: this.shadingOptions.negativeFill.pattern ? {
-        //         name: (condition2 ? this.shadingOptions.negativeFill.pattern.name : "none"),
-        //         foreground: (condition2 ? this.shadingOptions.negativeFill.pattern.foreground : null),
-        //         background: (condition2 ? this.shadingOptions.negativeFill.pattern.background : null)
-        //     } : {
-        //         name: null,
-        //         foreground : null,
-        //         background : null
-        //     }
-        // };
-
-        // this.variableShadingOptions.controlCurve = utils.getCurveFromId(this.shadingOptions.idControlCurve);
-
-        // this.variableShadingOptions.fill = {
-        //     display: (this.shadingOptions.fill && this.shadingOptions.fill.display != null)?this.shadingOptions.fill.display:condition3,
-        //     varShading: this.shadingOptions.fill.varShading ? {
-        //         startX: condition3?this.shadingOptions.fill.varShading.startX:this.variableShadingOptions.controlCurve.lineProperties.minScale,
-        //         endX: condition3?this.shadingOptions.fill.varShading.endX:this.variableShadingOptions.controlCurve.lineProperties.maxScale,
-        //         gradient: condition3gradient?{
-        //             startColor: condition3?this.shadingOptions.fill.varShading.gradient.startColor:null,
-        //             endColor: condition3?this.shadingOptions.fill.varShading.gradient.endColor:null
-        //         }:null,
-        //         palette: condition3palette?(condition3?this.shadingOptions.fill.varShading.palette:null):null,
-        //         palName: condition3palette?(condition3?this.shadingOptions.fill.varShading.palName:null):null,
-        //         customFills: condition3customFills?(condition3?this.shadingOptions.fill.varShading.customFills:null):null
-        //     }
-        // };
-        // this.variableShadingOptions.positiveFill = {
-        //     display: (this.shadingOptions.positiveFill && this.shadingOptions.positiveFill.display != null)?this.shadingOptions.positiveFill.display:condition4,
-        //     varShading: {
-        //         startX: condition4?this.shadingOptions.positiveFill.varShading.startX:this.variableShadingOptions.controlCurve.lineProperties.minScale,
-        //         endX: condition4?this.shadingOptions.positiveFill.varShading.endX:this.variableShadingOptions.controlCurve.lineProperties.maxScale,
-        //         gradient: condition4gradient?{
-        //             startColor: condition4?this.shadingOptions.positiveFill.varShading.gradient.startColor:null,
-        //             endColor: condition4?this.shadingOptions.positiveFill.varShading.gradient.endColor:null
-        //         }:null,
-        //         palette: condition4palette?( condition4?this.shadingOptions.positiveFill.varShading.palette:null):null,
-        //         palName: condition4palette?(condition4?this.shadingOptions.positiveFill.varShading.palName:null):null,
-        //         customFills: condition4customFills?( condition4?this.shadingOptions.positiveFill.varShading.customFills:null):null
-        //     }
-        // };
-        // this.variableShadingOptions.negativeFill = {
-        //     display: (this.shadingOptions.negativeFill && this.shadingOptions.negativeFill.display != null)?this.shadingOptions.negativeFill.display:condition4,
-        //     varShading: {
-        //         startX: condition4?this.shadingOptions.negativeFill.varShading.startX:this.variableShadingOptions.controlCurve.lineProperties.minScale,
-        //         endX: condition4?this.shadingOptions.negativeFill.varShading.endX:this.variableShadingOptions.controlCurve.lineProperties.maxScale,
-        //         gradient: condition4gradient?{
-        //             startColor: condition4?this.shadingOptions.negativeFill.varShading.gradient.startColor:null,
-        //             endColor: condition4?this.shadingOptions.negativeFill.varShading.gradient.endColor:null
-        //         }:null,
-        //         palette: condition4palette?( condition4?this.shadingOptions.negativeFill.varShading.palette:null):null,
-        //         palName: condition4palette?(condition4?this.shadingOptions.negativeFill.varShading.palName:null):null,
-        //         customFills: condition4customFills?( condition4?this.shadingOptions.negativeFill.varShading.customFills:null):null
-        //     }
-        // }
-        // function checkProp (par, sub) {
-        //     let temp = false;
-        //     if (par.hasOwnProperty('sub') && par + '.' + sub) temp == true;
-        //     return temp;
-        // }
-        // this.fillColorGradient = function (color) {
-        //     DialogUtils.colorPickerDialog(ModalService, color, function (colorStr) {
-        //         color = colorStr;
-        //     });
-        // }
         this.namePals = new Array();
-        // wiApiService.getPalettes(function(pals){
             utils.getPalettes(function(pals){
                 self.paletteList = pals;
                 self.paletteName = Object.keys(self.paletteList);
@@ -2886,6 +2737,42 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 $('#' + idEnable + ":button").attr("disabled", value);
             }
         //button
+        this.typeFixedValue = function () {
+            if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightLine.minX){
+                self.shadingOptions.leftLine = {"id": -1, "name": "left"};
+                self.shadingOptions.idLeftLine = -1;
+                self.shadingOptions.type = 'left';
+            }
+            if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightLine.maxX) {
+                self.shadingOptions.leftLine = {"id": -2, "name": "right"};
+                self.shadingOptions.idLeftLine = -2;
+                self.shadingOptions.type = 'right';
+            }
+            else {
+                self.shadingOptions.leftLine = {"id": -3, "name": "custom"};
+                self.shadingOptions.idLeftLine = -3;
+                self.shadingOptions.type = 'custom';
+            }
+        }
+        this.onSelectRightLine = function () {
+            self.shadingOptions.idRightLine = self.shadingOptions.rightLine.id;
+        };
+        this.onSelectLeftLine = function () {
+            self.shadingOptions.idLeftLine = self.shadingOptions.leftLine.id;
+            if (self.shadingOptions.leftLine.id == -1) 
+                    self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
+            if (self.shadingOptions.leftLine.id == -2) 
+                    self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
+        }
+        function getLine (idLine) {
+            let line = null;
+            if (idLine != null && !isNaN(idLine)) {
+                line = self.curveList.filter(function(c) {
+                    return (c.id == idLine);
+                })[0];
+            };
+            return line;
+        }
         this.foreground = function () {
             if(!self.fillPatternOptions.fill.pattern.foreground) self.fillPatternOptions.fill.pattern.name = 'basement';
             $timeout(function() {
@@ -2994,12 +2881,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 }
             }
         }
-        /*if(this.shadingOptions.idLeftLine) {
-            this.shadingOptions.isNegPosFill = false;
-            this.fillPatternOptions.fill.display = true;
-            this.variableShadingOptions.fill.display = true;
-        }*/
-        // wiApiService.getPalettes(function(paletteList){
         utils.getPalettes(function(paletteList){
 
             let paletteNameArr = Object.keys(paletteList);
@@ -3079,15 +2960,15 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         //     }
         //     return true;
         // }
-        this.setLimit2 = function() {
-            if(self.shadingOptions.idLeftLine == -1) {
-                self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).minX;
-            }
-            if(self.shadingOptions.idLeftLine == -2) {
-                self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).maxX;
-            }
-            if(self.shadingOptions.idLeftLine > 0) self.shadingOptions.leftFixedValue = null;
-        }
+        // this.setLimit2 = function() {
+        //     if(self.shadingOptions.idLeftLine == -1) {
+        //         self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).minX;
+        //     }
+        //     if(self.shadingOptions.idLeftLine == -2) {
+        //         self.shadingOptions.leftFixedValue = findInVisCurveListByIdLine(self.shadingOptions.idRightLine).maxX;
+        //     }
+        //     if(self.shadingOptions.idLeftLine > 0) self.shadingOptions.leftFixedValue = null;
+        // }
 
         this.arrayPaletteToString = function(palette){
             return JSON.stringify(palette);
@@ -3190,6 +3071,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
             }
             this.onCancelButtonClicked = function () {
+                console.log(self.shadingOptions);
                 close();
             }
             this.onOkButtonClicked = function () {
@@ -3364,7 +3246,7 @@ exports.logTrackPropertiesDialog1 = function (ModalService, currentTrack, wiLogp
             shadingItem.rightFixedValue = null;
 
             shadingItem.name = shadingProps.name;
-            shadingItem.shadingStyle = getShadingStyle(shadingProps.isNegPosFill ? shading.positiveFill : shading.fill);
+            shadingItem.shadingStyle = utils.getShadingStyle(shadingProps.isNegPosFill ? shading.positiveFill : shading.fill);
             shadingItem.idControlCurve = shadingProps.idControlCurve;
             shadingItem.isNegPosFill = shadingProps.isNegPosFill;
             shadingItem.type = shadingProps.type;
@@ -3614,7 +3496,7 @@ exports.logTrackPropertiesDialog1 = function (ModalService, currentTrack, wiLogp
                             self.curves[self.__idx] = {
                                 _index: self.__idx,
                                 alias: curveInfo.name,
-                                autoValueScale: false,
+                                autoValueScale: lineProps.autoValueScale,
                                 blockPosition: lineProps.blockPosition,
                                 displayAs: 'Normal',
                                 displayMode: lineProps.displayMode,
@@ -4642,8 +4524,26 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             if (s.type == 'right') s.leftLine = {"id": -2, "name": "right"}
             if (s.type == 'custom') s.leftLine = {"id": -3, "name": "custom"}
             if (s.type == 'pair') s.leftLine = getLine(s.idLeftLine);
-            s.shadingStyle = getShadingStyle(s.isNegPosFill ? s.positiveFill : s.fill);
+            s.shadingStyle = utils.getShadingStyle(s.isNegPosFill ? s.positiveFill : s.fill);
         });
+        this.typeFixedValue = function () {
+            if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightLine.minX) {
+                self.shadings[self.__idx].leftLine = {"id": -1, "name": "left"};
+                self.shadings[self.__idx].idLeftLine = -1;
+                self.shadings[self.__idx].type = 'left';
+            }
+            if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightLine.maxX) {
+                self.shadings[self.__idx].leftLine = {"id": -2, "name": "right"};
+                self.shadings[self.__idx].idLeftLine = -2;
+                self.shadings[self.__idx].type = 'right';
+            }
+            else  {
+                self.shadings[self.__idx].leftLine = {"id": -3, "name": "custom"};
+                self.shadings[self.__idx].idLeftLine = -3;
+                self.shadings[self.__idx].type = 'custom';
+
+            }
+        }
         this.getShadings = function () {
             return self.shadings.filter(function (s, index) {
                 return (s.changed == changed.unchanged ||
@@ -4740,54 +4640,98 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.onSelectLeftLine = function () {
             self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
+            if (self.shadings[self.__idx].leftLine.id == -1) 
+                    self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
+            if (self.shadings[self.__idx].leftLine.id == -2) 
+                    self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
         }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 console.log("tab shadings", item);
-                delete item.leftLine;
-                delete item.rightLine;
+                let request = angular.copy(item);
                 if(item.idLeftLine == -3) {
                     item.type = 'custom';
-                    item.idLeftLine = null;
                 };
                 if(item.idLeftLine == -2) {
                     item.type = 'right';
-                    item.idLeftLine = null;
                 };
                 if(item.idLeftLine == -1) {
                     item.type = 'left';
-                    item.idLeftLine = null;
                 };
                 if(item.idLeftLine > 0) {
                     item.type = 'pair';
-                    item.leftFixedValue = null;
-                    item.idLeftLine = parseInt(item.idLeftLine);
                 }
+                delete request.leftLine;
+                delete request.rightLine;
+
+                if (item.idLeftLine < 0) 
+                    request.idLeftLine = null;
+                else {
+                        request.leftFixedValue = null;
+                        request.idLeftLine = parseInt(item.idLeftLine);
+                    }
                 switch(item.changed) {
                     case changed.unchanged:
                     callback();
                     break;
                     case changed.created: {
-                        wiApiService.createShading(item, function (shading) {
-                            item.leftLine = getLine(item.idLeftLine);
-                            item.rightLine = getLine(item.idRightLine);
-                            callback();
+                        wiApiService.createShading(request, function (shading) {
+                            utils.getPalettes(function(paletteList){
+                                let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
+                                let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+                                let lineObj1 = null;
+                                let lineObj2 = null;
+                                if(!shadingModel.idRightLine) return;
+                                if(!shadingModel.idLeftLine) {
+                                    lineObj1 = item.leftLine;
+                                    wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                                } else {
+                                    lineObj1 = item.leftLine;
+                                    lineObj2 = item.rightLine;
+                                    if (lineObj1 && lineObj2)
+                                        wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
+                                    else {
+                                        console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
+                                    }
+                                }
+                                callback();
+                            })
                         });
                         item.changed = changed.unchanged;
                         break;
                     }
 
                     case changed.updated: {
-                        wiApiService.editShading(item, function (shading) {
-                            item.leftLine = getLine(item.idLeftLine);
-                            item.rightLine = getLine(item.idRightLine);
-                            if (callback) callback();
+                        wiApiService.editShading(request, function (shading) {
+                            utils.getPalettes(function(paletteList){
+                                wiApiService.dataCurve(item.idControlCurve, function (curveData) {
+                                    item.controlCurve = graph.buildCurve({ idCurve: item.idControlCurve }, curveData, self.well.properties);
+                                    if(!item.isNegPosFill) {
+                                        if(item.fill.varShading && item.fill.varShading.palette)
+                                            item.fill.varShading.palette = paletteList[item.fill.varShading.palName];
+                                    }
+                                    else {
+                                        if(item.positiveFill.varShading && item.positiveFill.varShading.palette)
+                                            item.positiveFill.varShading.palette = paletteList[item.positiveFill.varShading.palName];
+                                        if(item.negativeFill.varShading && item.negativeFill.varShading.palette)
+                                            item.negativeFill.varShading.palette = paletteList[item.negativeFill.varShading.palName];
+                                    }
+                                    self.shadingList[idx].setProperties(item);
+                                    $timeout(function() {
+                                        currentTrack.plotAllDrawings();
+                                    });
+
+                                    callback();
+                                });
+                            });
                         });
                         item.changed = changed.unchanged;
                         break;
                     }
                     case changed.deleted:
-                    wiApiService.removeShading(item.idShading, function () {
+                    wiApiService.removeShading(item.idShading, function (shading) {
+                        let currentShading = currentTrack.findShadingById(shading.idShading);
+                        wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
                         callback();
                     });
                     break;
@@ -4801,8 +4745,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
-                    // self.curveList = currentTrack.getCurves();
-
                     if (updateShadingsTabCb) updateShadingsTabCb(err);
             });
         }
