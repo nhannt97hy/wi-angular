@@ -1626,10 +1626,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (err) {
                 _tracks = backupTracks;
             }
-        })
+        });
     }
-
-    window.TRACKS = _tracks;
 
     function _registerTrackDragCallback(viTrack) {
         let originalOrderNum = viTrack.orderNum;
@@ -2880,7 +2878,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             d3.select('#' + self.plotAreaId).on('mousewheel', function() {
                 _onPlotMouseWheelCallback();
             });
-            graph.sheetDraggable(document.getElementById(self.plotAreaId));
+
+            //graph.sheetDraggable(document.getElementById(self.plotAreaId));
             let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
             let domElement = $(`wi-d3[name=${self.name}]`);
             domElement.on('mouseover', function () {
@@ -2889,6 +2888,38 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         }, 1000)
     };
+
+    function updateSlider() {
+        let wholeWidth = $(`wi-logplot#${self.logPlotCtrl.id}`).width();
+        let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
+        self.contentWidth = $("#" + self.plotAreaId).width();
+        self.sliderWidth = wholeWidth - slidingBarWidth - 36;
+    }
+    this.onReady = function(args) {
+        self.resizeSensor = new ResizeSensor(document.getElementById(self.plotAreaId), function(){
+            updateSlider();
+        });
+    }
+
+    this.onSliderReady = function() {
+        self.slider = $($('#' + self.plotAreaId).siblings()[0]).children()[0];
+        noUiSlider.create(self.slider, {
+            start: [0],
+            connect: [true, false],
+            range: {
+                'min': 0,
+                'max': 100
+            }
+        });
+        self.slider.noUiSlider.on('update', function(values) {
+            console.log('value', values);
+            let difference = self.contentWidth - self.sliderWidth + 20;
+            let val = parseFloat(values[0]);
+            let left = -1*difference * val / 100.;
+            $(`#${self.plotAreaId}`).css('left', left + 'px');
+        });
+        updateSlider();
+    }
 
     var commonCtxMenu = [
         {
@@ -3031,6 +3062,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.setContextMenu = function (ctxMenu) {
         self.contextMenu = ctxMenu;
     }
+
+    window._WiD3CTRL = self;
 }
 
 let app = angular.module(moduleName, []);
