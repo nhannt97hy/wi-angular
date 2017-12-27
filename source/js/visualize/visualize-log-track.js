@@ -1002,7 +1002,10 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     let x = d3.event.offsetX;
     let y = d3.event.offsetY;
 
-    if (d3.event.button != 0) return;
+    if (d3.event.button != 0) {
+        d3.event.currentDrawing = this.currentDrawing;
+        return;
+    } 
 
     if (this.currentDrawing && this.currentDrawing.nearPoint(x, y)) {
         d3.event.currentDrawing = this.currentDrawing;
