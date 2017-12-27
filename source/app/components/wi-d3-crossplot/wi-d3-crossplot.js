@@ -153,6 +153,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if(pointSet.idCurveX && pointSet.idCurveY){
                 self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
                 if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
+                $timeout(function(){
+                    if(pointSet.idCurveZ){
+                        console.log('idCurveZ');
+                        $('#' + self.name + "HistogramX").css("margin-right","20px");
+                    }else{
+                        $('#' + self.name + "HistogramX").css("margin-right","0px");
+                    }
+                },500);
             }
         }
     }
@@ -357,6 +365,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.viCrossplot.doPlot();
                 if (self.histogramModelX) {
                     if ($('#' + self.name + "HistogramX").length) {
+                        if(crossplotProps.pointSet.idCurveZ){
+                            $('#' + self.name + "HistogramX").css("margin-right","20px");
+                        }else{
+                            $('#' + self.name + "HistogramX").css("margin-right","0px");
+                        }
                         updateHistogramProps(self.crossplotModel, 'xCurve');
                         self.xHistogram.setHistogramModel(self.histogramModelX);
                         let zoneCtrl = self.getZoneCtrl();
