@@ -312,7 +312,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                         } else {
                             // job.callback(response.data.reason);
                             // if (response.data.reason) self.getUtils().error('Error: ' + response.data.reason);
-                            throw response;
+                            throw response.data;
                         }
                         self.stopWorking();
                     })
@@ -335,8 +335,8 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         self.stopWorking();
                         // job.callback(err);
-                        if (err.data && err.data.reason) self.getUtils().error(err.data.reason);
-                        console.error(err.data);
+                        if (err.reason) self.getUtils().error(err.reason);
+                        console.error(err);
                     }
                 });
 

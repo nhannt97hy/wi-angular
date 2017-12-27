@@ -254,7 +254,7 @@
                                                             ng-click="wiModal.lineStyleButtonClicked($index, $event); wiModal.onChangeCurve(curve._index);"
                                                             ng-disabled="!wiModal.lineCurve[curve._index].id || (curve.displayMode == 'Symbol' || curve.displayMode == 'None')"> -->
                                                     <button type="button" 
-                                                            ng-click="wiModal.onEditDisplayModeButtonClicked($index, $event)"
+                                                            ng-click="wiModal.onEditStyleButtonClicked($index, $event)"
                                                             ng-disabled="curve.displayMode =='None'"
                                                             class="btn btn-default wi-form-control" 
                                                             style="font-size: 10px; width: 100%">Edit</button>
@@ -276,7 +276,7 @@
                                                     <!-- <input type="button" class="btn btn-default" 
                                                             ng-click="wiModal.removeRowCurve(curve._index)"/> -->
                                                     <button class="btn btn-default wi-form-control" 
-                                                            ng-click="wiModal.removeRowCurve(curve._index);"
+                                                            ng-click="wiModal.removeRowCurve(curve);"
                                                             style="font-size: 10px; width: 100%">
                                                         <span class="delete-16x16"></span>
                                                     </button>

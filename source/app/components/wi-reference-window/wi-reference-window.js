@@ -176,7 +176,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             .tickValues(d3.range(0, 1, 1 / _vertLineNo))
             .tickSize(-1*$(getRefCurveContainer().node()).height())
             .tickFormat("");
-
+        if (_scale < 0) {
+            _scale = (_bottom - _top) * 100 / $(getRefCurveContainer().node()).height()*getDpcm();
+        }
         let step = _scale / 100;
         let axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.round(_bottom), step))
             .tickFormat(d3.format(',.0f'))

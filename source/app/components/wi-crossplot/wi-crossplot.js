@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.isShowWiZone = true;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     
+    let refWindCtrl = null;
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);        
         self.wiD3CrossplotName = self.name + 'D3Area';

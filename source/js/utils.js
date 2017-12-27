@@ -118,22 +118,18 @@ function lineToTreeConfig(line) {
         symbol: null
     };
     let temp = line.displayMode.toLowerCase().trim();
-    if (temp == 'line' || temp == 'both') {
-        lineModel.data.line = {
-            dash: eval(line.lineStyle),
-            color: line.lineColor,
-            width: line.lineWidth
-        }
+    lineModel.data.line = {
+        dash: eval(line.lineStyle),
+        color: line.lineColor,
+        width: line.lineWidth
     }
-    if (temp == 'symbol' || temp == 'both') {
-        lineModel.data.symbol = {
-            style: line.symbolName.toLowerCase(),
-            fillStyle: line.symbolFillStyle,
-            strokeStyle: line.symbolStrokeStyle,
-            lineWidth: line.symbolLineWidth,
-            lineDash: eval(line.symbolLineDash),
-            size: parseInt(line.symbolSize)
-        }
+    lineModel.data.symbol = {
+        style: line.symbolName.toLowerCase(),
+        fillStyle: line.symbolFillStyle,
+        strokeStyle: line.symbolStrokeStyle,
+        lineWidth: line.symbolLineWidth,
+        lineDash: eval(line.symbolLineDash),
+        size: parseInt(line.symbolSize)
     }
     return lineModel;
 }
