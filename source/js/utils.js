@@ -2738,7 +2738,7 @@ exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDelet
                 let wiCrossplotCtrl = wiComponentService.getComponent('crossplot' + crossplotModel.properties.idCrossPlot);
                 if (!wiCrossplotCtrl) return;
                 let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                let pointSet = wiD3CrossplotCtrl.pointSet;
+                let pointSet = wiD3CrossplotCtrl.getPointSet(wiD3CrossplotCtrl.crossplotModel.properties);
                 if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
                     layoutManager.removeTabWithModel(crossplotModel);
                 } else if (idCurve == pointSet.idCurveZ) {

@@ -34,6 +34,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return crossplotProps.pointsets[0];
         return null;
     }
+    this.getPointSet = getPointSet;
     function getCrossplotAreaId() {
         return self.name.replace('D3Area', '');
     }
