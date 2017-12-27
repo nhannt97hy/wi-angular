@@ -122,7 +122,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             xMajorTicks: logTrack.majorTicks,
             xMinorTicks: logTrack.minorTicks
         };
-        let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
+        let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId), wiApiService);
         graph.rearrangeTracks(self);
 
         _tracks.push(track);
@@ -1782,8 +1782,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             delete request.leftLine;
             delete request.rightLine;
 
-            if (options.idLeftLine < 0) 
+            if (options.idLeftLine < 0) {
                 request.idLeftLine = null;
+                options.leftLine = null;
+                options.idLeftLine = null;
+            }
             else {
                     request.leftFixedValue = null;
                     request.idLeftLine = parseInt(options.idLeftLine);
@@ -2236,6 +2239,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         display: true,
                         pattern: {
                             name: "none",
+                            foreground: "black",
                             background: "blue"
                         }
                     },
@@ -2243,6 +2247,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         display: false,
                         pattern: {
                             name: "none",
+                            foreground: "black",
                             background: "blue"
                         }
                     },
@@ -2250,6 +2255,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         display: false,
                         pattern: {
                             name: "none",
+                            foreground: "black",
                             background: "blue"
                         }
                     },
