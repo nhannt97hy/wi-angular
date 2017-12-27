@@ -927,7 +927,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "DT Histogram",
                                 icon: "",
                                 handler: function () {
-                                    globalHandlers.DensityButtonClicked();
+                                    globalHandlers.SonicButtonClicked();
                                 }
                             },
                             {
@@ -943,7 +943,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 label: "RHOB Histogram",
                                 icon: "",
                                 handler: function () {
-                                    globalHandlers.SonicButtonClicked();
+                                    globalHandlers.DensityButtonClicked();
                                 }
                             },
                             {

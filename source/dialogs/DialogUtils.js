@@ -2625,7 +2625,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.shadingOptions = shadingOptions;
         let cloneOptions = angular.copy(shadingOptions);
 
-        if (!shadingOptions.shadingStyle) 
+        if (!shadingOptions.shadingStyle)
             this.shadingOptions.shadingStyle = utils.getShadingStyle(this.shadingOptions.isNegPosFill ? this.shadingOptions.positiveFill : this.shadingOptions.fill)
         if (this.shadingOptions.type == 'left') this.shadingOptions.leftLine = {"id": -1, "name": "left"}
         if (this.shadingOptions.type == 'right') this.shadingOptions.leftLine = {"id": -2, "name": "right"}
@@ -2764,9 +2764,9 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         };
         this.onSelectLeftLine = function () {
             self.shadingOptions.idLeftLine = self.shadingOptions.leftLine.id;
-            if (self.shadingOptions.leftLine.id == -1) 
+            if (self.shadingOptions.leftLine.id == -1)
                     self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
-            if (self.shadingOptions.leftLine.id == -2) 
+            if (self.shadingOptions.leftLine.id == -2)
                     self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
         }
         function getLine (idLine) {
@@ -3158,7 +3158,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         modal.close.then(function (options) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-            
+
             if (options) {
                 callback(options)
                 /*var objData = JSON.parse(data);
@@ -3396,9 +3396,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 default:
                 break;
             }
-            DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, 
-                                                curve.lineOptions, 
-                                                curve.symbolOptions, 
+            DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService,
+                                                curve.lineOptions,
+                                                curve.symbolOptions,
                                                 function (lineOptions, symbolOptions) {
                 if (lineOptions) curve.lineOptions = lineOptions;
                 if (symbolOptions) curve.symbolOptions = symbolOptions;
@@ -3560,8 +3560,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             if (self.shadings[self.__idx].changed == changed.unchanged) self.shadings[self.__idx].changed = changed.updated;
         }
         this.addRowShading = function () {
-            self.shadings.push({ 
-                _index: self.shadings.length, 
+            self.shadings.push({
+                _index: self.shadings.length,
                 changed: changed.created,
                 idTrack: currentTrack.id,
                 idControlCurve: utils.getAllCurvesOfWell(this.well)[0].id,
@@ -3598,13 +3598,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.removeRowShading = function (index) {
             if (!self.shadings[index]) return;
-            if(self.shadings[index].changed == changed.created) 
+            if(self.shadings[index].changed == changed.created)
                 self.shadings.splice(index, 1);
-            else 
+            else
                 self.shadings[index].changed = changed.deleted;
         };
         this.defineButtonClicked = function (index, $event) {
-            self.setClickedRowShading(index); 
+            self.setClickedRowShading(index);
 
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options){
                 if(options) self.shadings[self.__idx] = options;
@@ -3618,9 +3618,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.onSelectLeftLine = function () {
             self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
-            if (self.shadings[self.__idx].leftLine.id == -1) 
+            if (self.shadings[self.__idx].leftLine.id == -1)
                     self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
-            if (self.shadings[self.__idx].leftLine.id == -2) 
+            if (self.shadings[self.__idx].leftLine.id == -2)
                     self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
         }
         function updateShadingsTab(updateShadingsTabCb) {
@@ -3642,7 +3642,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 delete request.leftLine;
                 delete request.rightLine;
 
-                if (item.idLeftLine < 0) 
+                if (item.idLeftLine < 0)
                     request.idLeftLine = null;
                 else {
                         request.leftFixedValue = null;
@@ -4907,6 +4907,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
         this.depthType = 'intervalDepth';
         this.lineMode = false;
+        this.overlayLines = [];
+        this.selectedIdOverlayLine = null;
 
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
@@ -4935,7 +4937,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                 // self.pointSet = self.crossplotModel.properties.pointSet;
                 self.depthType = (pointSet && pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
-
+                self.selectedIdOverlayLine = pointSet.idOverlayLine;
                 self.lineMode = pointSet.lineMode ? pointSet.lineMode : true;
                 pointSet.activeZone = pointSet.activeZone ? pointSet.activeZone : 'All';
                 self.selectedZone = pointSet.activeZone ? pointSet.activeZone : 'All'; // To be removed
@@ -4946,6 +4948,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 CURVE_SYMBOLS.forEach(function(symbol) {
                     autoScaleCurve(symbol, true);
                 });
+                loadOverlays();
                 cb();
             }
         ], function(err) {
@@ -5011,23 +5014,27 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             let idCurve = pointSet[key];
             if (pointSet && pointSet[key]) {
                 if (noForce && pointSet[scaleKeys[0]] != null && pointSet[scaleKeys[1]] != null) return;
-
-                let curve = findCurveById(idCurve).properties;
-
-                let family = utils.findFamilyById(curve.idFamily);
-                if (family) {
-                    pointSet[scaleKeys[0]] = family.minScale;
-                    pointSet[scaleKeys[1]] = family.maxScale;
+                let curve = findCurveById(idCurve);
+                if (curve.lineProperties) {
+                    pointSet[scaleKeys[0]] = curve.lineProperties.minScale;
+                    pointSet[scaleKeys[1]] = curve.lineProperties.maxScale;
                 }
                 else {
-                    wiApiService.scaleCurve(idCurve, function (scaleObj) {
+                    wiApiService.infoCurve(idCurve, function (info) {
                         $timeout(function () {
-                            pointSet[scaleKeys[0]] = scaleObj.minScale;
-                            pointSet[scaleKeys[1]] = scaleObj.maxScale;
+                            pointSet[scaleKeys[0]] = info.LineProperty.minScale;
+                            pointSet[scaleKeys[1]] = info.LineProperty.maxScale;
                         });
-                    });
+                    })
                 }
             }
+        }
+
+        function loadOverlays() {
+            let pointSet = self.crossplotModelProps.pointsets[0];
+            wiApiService.listOverlayLine(pointSet.idCurveX, pointSet.idCurveY, function(ret) {
+                self.overlayLines = ret;
+            });
         }
 
         function getTopFromWell() {
@@ -5046,6 +5053,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                 // self.crossplotModel.properties.pointsets[0]['idCurve' + symbol] = idCurve;
                 autoScaleCurve(symbol);
+                if (symbol != 'Z') loadOverlays();
             }
         }
 
@@ -5064,7 +5072,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 case "intervalDepth":
                 self.crossplotModelProps.pointsets[0].intervalDepthTop = self.crossplotModelProps.pointsets[0].intervalDepthTop ? self.crossplotModelProps.pointsets[0].intervalDepthTop: getTopFromWell();
                 self.crossplotModelProps.pointsets[0].intervalDepthBottom = self.crossplotModelProps.pointsets[0].intervalDepthBottom ? self.crossplotModelProps.pointsets[0].intervalDepthBottom : getBottomFromWell();
-                self.crossplotModelProps.pointsets[0].idZoneSet = null;
+                delete self.crossplotModelProps.pointsets[0].idZoneSet;
                 break;
                 case "zonalDepth":
                 if(self.selectedZoneSet){
@@ -5198,6 +5206,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 },
                 function(cb) {
+                    self.crossplotModelProps.pointsets[0].idOverlayLine = self.selectedIdOverlayLine;
                     wiApiService.editPointSet(self.crossplotModelProps.pointsets[0], function(response) { cb();});
                 }
             ], function(err, result) {
@@ -5211,7 +5220,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                     // let crossplotProps = angular.copy(self.crossplotModel.properties);
                     // crossplotProps.pointSet = crossplotProps.pointsets[0];
-                    var xCurveData, yCurveData, zCurveData;
+                    var xCurveData, yCurveData, zCurveData, overlayLine;
                     async.parallel([
                         function(cb) {
                             if (pointSet.idCurveX) {
@@ -5239,6 +5248,21 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                                 })
                             }
                             else async.setImmediate(cb);
+                        },
+                        function(cb) {
+                            if (self.selectedIdOverlayLine) {
+                                wiApiService.getOverlayLine(self.selectedIdOverlayLine, function(ret) {
+                                    //self.updating = false;
+                                    overlayLine = (ret || {}).data;
+                                    //if (callback) callback(crossplotProps);
+                                    cb();
+                                });
+                            }
+                            else {
+                                async.setImmediate(cb);
+                                //self.updating = false;
+                                //if (callback) callback(crossplotProps);
+                            }
                         }
                     ], function(result, err) {
                         let crossplotProps = angular.copy(self.crossplotModelProps);
@@ -5260,6 +5284,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                         }
                         else {
                             delete crossplotProps.pointSet.curveZ;
+                        }
+
+                        if (overlayLine) {
+                            crossplotProps.pointSet.overlayLine = overlayLine;
                         }
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
@@ -8672,7 +8700,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
              // check validity of params
              if(!input || !out || !kernel) callback(false);
              if(input.length < 1 || kernel.length < 1) callback(false);
- 
+
              let lstIndex = new Array();
              let inputF = new Array();
              for(let i = 0; i < input.length; i++){
@@ -8684,7 +8712,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
              let kernelF = kernel.filter(d => {return !isNaN(d);});
              out.length = input.length;
              out.fill(NaN);
- 
+
              wiApiService.deconvolution({input: inputF, kernel: kernelF}, (result) => {
                  let retArr = result.curve;
                  let len = Math.min(lstIndex.length, retArr.length);
@@ -11030,7 +11058,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
         this.histogramProps.dragToCreate = objectConfig.dragToCreate;
         this.histogramProps.background = objectConfig.background;
         this.SelectedCurve = this.histogramProps.curve;
-        
+
         this.well.children.forEach(function (child, i) {
             switch (child.type) {
                 case 'dataset':
@@ -11063,7 +11091,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                 self.histogramProps.intervalDepthBottom = self.SelectedCurve.maxY;
             }
         }
-        
+
         this.onSelectCurveChange = function () {
             self.histogramProps.curveId = self.SelectedCurve.id;
             self.histogramProps.leftScale = self.SelectedCurve.minX;

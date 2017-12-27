@@ -101,6 +101,16 @@ module.exports.putComponentRight = function (text, title) {
         });
 };
 */
+module.exports.putTabRight = function (config) {
+    let childConfig = {
+        type: 'component',
+        componentName: 'html-block',
+        componentState: {},
+        title: 'Title'
+    }
+    Object.assign(childConfig, config);
+    layoutManager.root.getItemsById('right')[0].addChild(childConfig);
+}
 
 module.exports.putTabRightWithModel = function (model) {
     let wiComponentService = this.wiComponentService;

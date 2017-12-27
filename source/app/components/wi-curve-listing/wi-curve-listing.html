@@ -1,0 +1,18 @@
+<div class="curve-listing-toolbar-wrapper">
+  <wi-toolbar>
+    <wi-button icon="plus-16x16" type="small" tooltip="Add Curve" handler=""></wi-button>
+    <wi-button icon="ti-layout-tab-window" type="small" tooltip="Show/Hide Reference" handler=""></wi-button>
+    <wi-button icon="properties-16x16" type="small" tooltip="Properties" handler=""></wi-button>
+  </wi-toolbar>
+</div>
+<div class="curve-listing-main-content" style="flex: 1; display: flex; flex-direction: row;">
+  <div resizable r-directions="['right']" r-flex="true" style="min-width: 10%; max-width: 50%">
+
+  </div>
+  <div resizable r-directions="['left']" r-flex="true" ng-show="" style="width: 20%; min-width: 10%; max-width: 30%">
+    <wi-container name='RefCrossplotContainer' title='Reference' close-handler=''>
+      <wi-reference-window name="" on-ref-wind-ctrl-ready="">
+      </wi-reference-window>
+    </wi-container>
+  </div>
+</div>
