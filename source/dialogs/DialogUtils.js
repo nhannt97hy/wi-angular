@@ -947,7 +947,7 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
 
         this.lineOptions = lineOptions;
         this.symbolOptions = symbolOptions;
-        console.log("options", this)
+        console.log("options", lineOptions, symbolOptions);
         this.lineStyles = [
             [0, 1],
             [8, 2, 2, 2, 2, 2],
@@ -967,9 +967,6 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
 
         this.drawIcon = utils.drawIcon;
 
-        this.onSelectSymbol = function () {
-            console.log("choossss");
-        }
         this.lineColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.lineOptions.lineStyle.lineColor, function (colorStr) {
                 self.lineOptions.lineStyle.lineColor = colorStr;
@@ -1002,7 +999,9 @@ exports.lineSymbolAttributeDialog = function (ModalService, wiComponentService, 
             if (self.symbolOptions.symbolStyle.symbolName)
                 self.symbolOptions.symbolStyle.symbolName = self.symbolOptions.symbolStyle.symbolName.toLowerCase();
             self.symbolOptions.symbolStyle.symbolStrokeStyle = self.symbolOptions.symbolStyle.symbolFillStyle;
+            console.log("arr string", self.lineOptions, self.symbolOptions);
             close(self.lineOptions, self.symbolOptions);
+
         };
         this.onCancelButtonClicked = function () {
             close(null);
@@ -1044,7 +1043,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
 
         let extentY = currentCurve.getExtentY();
 
-        if (currentCurve.line && currentCurve.dislayMode == 'Line' && currentCurve.dislayMode == 'Both') {
+        if (currentCurve.line && (currentCurve.dislayMode == 'Line' || currentCurve.dislayMode == 'Both')) {
             this.lineOptions = {
                 display: true,
                 lineStyle: {
@@ -1063,7 +1062,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 }
             }
         }
-        if (currentCurve.symbol && currentCurve.dislayMode == 'Symbol' && currentCurve.dislayMode == 'Both') {
+        if (currentCurve.symbol && (currentCurve.dislayMode == 'Symbol' || currentCurve.dislayMode == 'Both')) {
             this.symbolOptions = {
                 display: true,
                 symbolStyle: {
@@ -2627,7 +2626,10 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
         if (!shadingOptions.shadingStyle) 
             this.shadingOptions.shadingStyle = utils.getShadingStyle(this.shadingOptions.isNegPosFill ? this.shadingOptions.positiveFill : this.shadingOptions.fill)
-        this.shadingOptions.leftLine = getLine(this.shadingOptions.idLeftLine);
+        if (this.shadingOptions.type == 'left') this.shadingOptions.leftLine = {"id": -1, "name": "left"}
+        if (this.shadingOptions.type == 'right') this.shadingOptions.leftLine = {"id": -2, "name": "right"}
+        if (this.shadingOptions.type == 'custom') this.shadingOptions.leftLine = {"id": -3, "name": "custom"}
+        if (this.shadingOptions.type == 'pair') this.shadingOptions.leftLine = getLine(this.shadingOptions.idLeftLine);
         this.shadingOptions.rightLine = getLine(this.shadingOptions.idRightLine);
 
         console.log("input shadingOptions", shadingOptions);
@@ -3074,7 +3076,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             }
             this.onCancelButtonClicked = function () {
                 console.log(self.shadingOptions);
-                close();
+                close(null, 100);
             }
             this.onOkButtonClicked = function () {
                 switch (self.varShadingType) {
@@ -3155,6 +3157,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         modal.close.then(function (options) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
+            
             if (options) {
                 callback(options)
                 /*var objData = JSON.parse(data);
@@ -4320,20 +4323,20 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             c.lineOptions = {
                 display: (c.displayMode == 'Line' || c.displayMode == 'Both'),
                 lineStyle: {
-                    lineColor: c.lineColor,
-                    lineStyle: c.lineStyle,
-                    lineWidth: c.lineWidth
+                    lineColor: c.lineColor ? c.lineColor : "blue",
+                    lineStyle: c.lineStyle ? c.lineStyle : [10],
+                    lineWidth: c.lineWidth ? c.lineWidth : 1
                 }
             };
             c.symbolOptions = {
                 display: (c.displayMode == 'Symbol' || c.displayMode == 'Both'),
                 symbolStyle: {
-                    symbolFillStyle: c.symbolFillStyle,
-                    symbolLineDash: c.symbolLineDash,
-                    symbolLineWidth: c.symbolLineWidth,
-                    symbolName: c.symbolName,
-                    symbolSize: c.symbolSize,
-                    symbolStrokeStyle: c.symbolStrokeStyle
+                    symbolFillStyle: c.symbolFillStyle ? c.symbolFillStyle : 'blue',
+                    symbolLineDash: c.symbolLineDash ? c.symbolLineDash : [10,0],
+                    symbolLineWidth: c.symbolLineWidth ? c.symbolLineWidth : 1,
+                    symbolName: c.symbolName ? c.symbolName : 'circle',
+                    symbolSize: c.symbolSize ? c.symbolSize : 5,
+                    symbolStrokeStyle: c.symbolStrokeStyle ? c.symbolStrokeStyle : 'blue'
                 }
             }
         });
@@ -4376,7 +4379,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             symbolOptions: {
                                 display: false,
                                 symbolStyle: {
-                                    symbolFillStyle: "transparent",
+                                    symbolFillStyle: "blue",
                                     symbolLineDash: [10, 0],
                                     symbolLineWidth: 1,
                                     symbolName: "circle",
@@ -4425,21 +4428,43 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.onEditDisplayModeButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
-            DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, 
-                                                self.curves[self.__idx].lineOptions, self.curves[self.__idx].symbolOptions, 
-                                                function (lineStyle, symbolStyle) {
+            // let lineOptions = null;
+            // let symbolOptions = null;
+            self.curves[self.__idx].lineOptions.display = false;
+            self.curves[self.__idx].symbolOptions.display = false;
+
+            switch (self.curves[self.__idx].displayMode) {
+                case "Line":
+                    self.curves[self.__idx].lineOptions.display = true;
+                break;
+                case "Symbol":
+                    self.curves[self.__idx].symbolOptions.display = true;
+                break;
+                case "Both":
+                    self.curves[self.__idx].lineOptions.display = true;
+                    self.curves[self.__idx].symbolOptions.display = true;
+                break;
+                default:
+                break;
+            }
+            DialogUtils.lineSymbolAttributeDialog(ModalService, 
+                                                wiComponentService, 
+                                                self.curves[self.__idx].lineOptions, 
+                                                self.curves[self.__idx].symbolOptions, 
+                                                function (lineOptions, symbolOptions) {
                 if (lineOptions) self.curves[self.__idx].lineOptions = lineOptions;
                 if (symbolOptions) self.curves[self.__idx].symbolOptions = symbolOptions;
+                if (self.curves[self.__idx].changed == changed.unchanged) self.curves[self.__idx].changed = changed.updated;
             });
             $event.stopPropagation();
         };
         function preUpdate (lineProps) {
             let line = lineProps;
             line.lineColor = lineProps.lineOptions.lineStyle.lineColor;
-            line.lineStyle = lineProps.lineOptions.lineStyle.lineStyle;
+            line.lineStyle = JSON.stringify(lineProps.lineOptions.lineStyle.lineStyle);
             line.lineWidth = lineProps.lineOptions.lineStyle.lineWidth;
             line.symbolFillStyle = lineProps.symbolOptions.symbolStyle.symbolFillStyle;
-            line.symbolLineDash = lineProps.symbolOptions.symbolStyle.symbolLineDash;
+            line.symbolLineDash = JSON.stringify(lineProps.symbolOptions.symbolStyle.symbolLineDash);
             line.symbolLineWidth = lineProps.symbolOptions.symbolStyle.symbolLineWidth;
             line.symbolName = lineProps.symbolOptions.symbolStyle.symbolName;
             line.symbolSize = lineProps.symbolOptions.symbolStyle.symbolSize;
@@ -4693,7 +4718,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                     if (lineObj1 && lineObj2)
                                         wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
                                     else {
-                                        console.error("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
+                                        console.log("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
                                     }
                                 }
                                 callback();
@@ -6318,8 +6343,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
+        initModal(modal);
         modal.element.modal({backdrop:'static', keyboard:false});
-        $(modal.element[0].children[0]).draggable();
+        // $(modal.element[0].children[0]).draggable();
         modal.element.find('#spinner-holder')[0].appendChild(new Spinner().spin().el);
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
@@ -9582,7 +9608,7 @@ ModalService.showModal({
     controllerAs: 'wiModal'
 }).then(function (modal) {
     initModal(modal);
-    $(modal.element[0].children[0]).draggable();
+    // $(modal.element[0].children[0]).draggable();
     modal.close.then(function (ret) {
         $('.modal-backdrop').last().remove();
         $('body').removeClass('modal-open');
@@ -12349,8 +12375,9 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {
-        modal.element.modal();
-        $(modal.element[0].children[0]).draggable();
+        initModal(modal);
+        // modal.element.modal();
+        // $(modal.element[0].children[0]).draggable();
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');

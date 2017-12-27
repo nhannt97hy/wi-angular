@@ -1764,14 +1764,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         this.shadingList = _currentTrack.getShadings();
 
         console.log("Shading Properties", currentShading);
-        // DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-        //     if (props) {
-        //         console.log('logTrackPropertiesData', props);
-        //     }
-        // }, {
-        //     tabs: ['false', 'false', 'true'],
-        //     shadingOnly: true
-        // });
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
             console.log("update shadingAttributeDialog", options);
             let request = angular.copy(options);
@@ -1816,7 +1808,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                 });
             });
-        }, shadingOptions, _currentTrack, self.wiLogplotCtrl)
+        }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
@@ -2285,14 +2277,65 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     else {
                         self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
                     }
-                    DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-                        if (props) {
-                            console.log('logTrackPropertiesData', props);
+                    // DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                    //     if (props) {
+                    //         console.log('logTrackPropertiesData', props);
+                    //     }
+                    // }, {
+                    //     tabs: ['false', 'false', 'true'],
+                    //     shadingOnly: true
+                    // });
+                    let currentShading = _currentTrack.getCurrentShading();
+                    let shadingOptions = currentShading.getProperties();
+                    let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+                    this.shadingList = _currentTrack.getShadings();
+
+                    console.log("Shading Properties", currentShading);
+                    DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+                        console.log("update shadingAttributeDialog", options);
+                        let request = angular.copy(options);
+                        if(options.idLeftLine == -3) {
+                            options.type = 'custom';
+                        };
+                        if(options.idLeftLine == -2) {
+                            options.type = 'right';
+                        };
+                        if(options.idLeftLine == -1) {
+                            options.type = 'left';
+                        };
+                        if(options.idLeftLine > 0) {
+                            options.type = 'pair';
                         }
-                    }, {
-                        tabs: ['false', 'false', 'true'],
-                        shadingOnly: true
-                    });
+                        delete request.leftLine;
+                        delete request.rightLine;
+
+                        if (options.idLeftLine < 0) 
+                            request.idLeftLine = null;
+                        else {
+                                request.leftFixedValue = null;
+                                request.idLeftLine = parseInt(options.idLeftLine);
+                            }
+                        Utils.getPalettes(function(paletteList){
+                            wiApiService.dataCurve(options.idControlCurve, function (curveData) {
+                                options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
+                                if(!options.isNegPosFill) {
+                                    if(options.fill.varShading && options.fill.varShading.palette)
+                                        options.fill.varShading.palette = options[options.fill.varShading.palName];
+                                }
+                                else {
+                                    if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
+                                        options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
+                                    if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
+                                        options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
+                                }
+                                currentShading.setProperties(options);
+                                $timeout(function() {
+                                    _currentTrack.plotAllDrawings();
+                                });
+
+                            });
+                        });
+                    }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
                 })
             }
         }, {
