@@ -438,15 +438,15 @@ function createFillStyles(ctx, fills, callback) {
 
                 let minY = d3.min(data, function(d) { return d.y; });
                 let maxY = d3.max(data, function(d) { return d.y; });
+                let minX = d3.min(data, function(d) { return d.x; });
+                let maxX = d3.max(data, function(d) { return d.x; });
+
                 let transform;
 
                 if (fill.varShading.customFills) {
                     let customFills = fill.varShading.customFills;
                     let content = customFills.content;
                     let patCanvasId = customFills.patCanvasId;
-
-                    let minX = d3.min(data, function(d) { return d.x; });
-                    let maxX = d3.max(data, function(d) { return d.x; });
 
                     if (minX == null || maxX == null || maxX - minX == 0) {
                         fillStyles.push('transparent');
@@ -500,7 +500,10 @@ function createFillStyles(ctx, fills, callback) {
                     });
                 }
                 else {
-                    let gradient = ctx.createLinearGradient(0, minY, 0, maxY);
+                    let gradient = fill.varShading.horizontal
+                        ? ctx.createLinearGradient(minX, 0, maxX, 0)
+                        : ctx.createLinearGradient(0, minY, 0, maxY);
+
                     let reverse = startX > endX;
 
                     if (fill.varShading.gradient) {

@@ -331,7 +331,8 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
             let rect = self.header.node().getBoundingClientRect();
             varShading.startX = 0;
             varShading.endX = rect.width;
-            varShading.data = Utils.range(0, 1, 0.1).map(function(d) {
+            varShading.horizontal = true;
+            varShading.data = Utils.range(0, 1, 0.01).map(function(d) {
                 return {
                     x: d * rect.width,
                     y: d * rect.height
