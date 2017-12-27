@@ -1788,24 +1788,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     request.leftFixedValue = null;
                     request.idLeftLine = parseInt(options.idLeftLine);
                 }
-            Utils.getPalettes(function(paletteList){
-                wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                    options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
-                    if(!options.isNegPosFill) {
-                        if(options.fill.varShading && options.fill.varShading.palette)
-                            options.fill.varShading.palette = options[options.fill.varShading.palName];
-                    }
-                    else {
-                        if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
-                            options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                        if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
-                            options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                    }
-                    currentShading.setProperties(options);
-                    $timeout(function() {
-                        _currentTrack.plotAllDrawings();
-                    });
+            wiApiService.editShading(request, function (shading) {
+                Utils.getPalettes(function(paletteList){
+                    wiApiService.dataCurve(options.idControlCurve, function (curveData) {
+                        options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
+                        if(!options.isNegPosFill) {
+                            if(options.fill.varShading && options.fill.varShading.palette)
+                                options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
+                        }
+                        else {
+                            if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
+                                options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
+                            if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
+                                options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
+                        }
+                        currentShading.setProperties(options);
+                        $timeout(function() {
+                            _currentTrack.plotAllDrawings();
+                        });
 
+                    });
                 });
             });
         }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
@@ -2974,9 +2976,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //graph.sheetDraggable(document.getElementById(self.plotAreaId));
             let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
             let domElement = $(`wi-d3[name=${self.name}]`);
-            domElement.on('mouseenter', function () {
+            domElement.on('mouseover', function () {
                 if (!dragMan.dragging) return;
                 dragMan.wiD3Ctrl = self;
+            });
+            domElement.on('mouseleave', function () {
+                if (!dragMan.dragging) return;
+                dragMan.wiD3Ctrl = null;
             });
         }, 1000)
     };

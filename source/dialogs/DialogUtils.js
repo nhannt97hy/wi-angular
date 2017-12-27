@@ -2623,6 +2623,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.paletteName = null;
         this.curveList = currentTrack.getCurves();
         this.shadingOptions = shadingOptions;
+        let cloneOptions = angular.copy(shadingOptions);
 
         if (!shadingOptions.shadingStyle) 
             this.shadingOptions.shadingStyle = utils.getShadingStyle(this.shadingOptions.isNegPosFill ? this.shadingOptions.positiveFill : this.shadingOptions.fill)
@@ -3075,8 +3076,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
             }
             this.onCancelButtonClicked = function () {
-                console.log(self.shadingOptions);
-                close(null, 100);
+                console.log("clone", self.shadingOptions, cloneOptions);
+                close(cloneOptions);
             }
             this.onOkButtonClicked = function () {
                 switch (self.varShadingType) {
@@ -3645,26 +3646,26 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     request.idLeftLine = null;
                 else {
                         request.leftFixedValue = null;
-                        request.idLeftLine = parseInt(item.idLeftLine);
+                        request.idLeftLine = parseInt(item.leftLine.id);
                     }
                 switch(item.changed) {
                     case changed.unchanged:
                     callback();
                     break;
                     case changed.created: {
+                        console.log("create shading", request, item);
                         wiApiService.createShading(request, function (shading) {
                             utils.getPalettes(function(paletteList){
-                                let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
+                                let shadingModel = utils.shadingToTreeConfig(shading);
                                 let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-                                let lineObj1 = null;
-                                let lineObj2 = null;
+                                // let lineObj1 = null;
+                                // let lineObj2 = null;
+                                let lineObj1 = item.rightLine;
+                                let lineObj2 = ( item.idLeftLine > 0 ) ? item.leftLine : null;
                                 if(!shadingModel.idRightLine) return;
-                                if(!shadingModel.idLeftLine) {
-                                    lineObj1 = item.leftLine;
+                                if(!shadingModel.idLeftLine || shadingModel.idLeftLine < 0) {
                                     wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
                                 } else {
-                                    lineObj1 = item.leftLine;
-                                    lineObj2 = item.rightLine;
                                     if (lineObj1 && lineObj2)
                                         wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
                                     else {
@@ -3680,27 +3681,29 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
                     case changed.updated: {
                         wiApiService.editShading(request, function (shading) {
-                            utils.getPalettes(function(paletteList){
-                                wiApiService.dataCurve(item.idControlCurve, function (curveData) {
-                                    item.controlCurve = graph.buildCurve({ idCurve: item.idControlCurve }, curveData, self.well.properties);
-                                    if(!item.isNegPosFill) {
-                                        if(item.fill.varShading && item.fill.varShading.palette)
-                                            item.fill.varShading.palette = paletteList[item.fill.varShading.palName];
-                                    }
-                                    else {
-                                        if(item.positiveFill.varShading && item.positiveFill.varShading.palette)
-                                            item.positiveFill.varShading.palette = paletteList[item.positiveFill.varShading.palName];
-                                        if(item.negativeFill.varShading && item.negativeFill.varShading.palette)
-                                            item.negativeFill.varShading.palette = paletteList[item.negativeFill.varShading.palName];
-                                    }
-                                    self.shadingList[idx].setProperties(item);
-                                    $timeout(function() {
-                                        currentTrack.plotAllDrawings();
-                                    });
+                            console.log("edit Shading", shading);
+                            // utils.getPalettes(function(paletteList){
+                            //     wiApiService.dataCurve(item.idControlCurve, function (curveData) {
+                            //         item.controlCurve = graph.buildCurve({ idCurve: item.idControlCurve }, curveData, self.well.properties);
+                            //         if(!item.isNegPosFill) {
+                            //             if(item.fill.varShading && item.fill.varShading.palette)
+                            //                 item.fill.varShading.palette = paletteList[item.fill.varShading.palName];
+                            //         }
+                            //         else {
+                            //             if(item.positiveFill.varShading && item.positiveFill.varShading.palette)
+                            //                 item.positiveFill.varShading.palette = paletteList[item.positiveFill.varShading.palName];
+                            //             if(item.negativeFill.varShading && item.negativeFill.varShading.palette)
+                            //                 item.negativeFill.varShading.palette = paletteList[item.negativeFill.varShading.palName];
+                            //         }
+                            //         console.log("item shading", item, shading, paletteList);
+                            //         self.shadingList[idx].setProperties(item);
+                            //         $timeout(function() {
+                            //             currentTrack.plotAllDrawings();
+                            //         });
 
                                     callback();
-                                });
-                            });
+                            //     });
+                            // });
                         });
                         item.changed = changed.unchanged;
                         break;
