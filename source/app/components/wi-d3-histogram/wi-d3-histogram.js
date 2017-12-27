@@ -347,6 +347,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowTooltip",
             label: "Show/Hide Tooltip",
             handler: function () {
+                self.histogramModel.properties.showTooltip = !(self.histogramModel.properties.showTooltip || false);
             }
         }, {
             name: "FrequencyInfor",

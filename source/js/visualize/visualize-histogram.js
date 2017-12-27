@@ -414,7 +414,10 @@ Histogram.prototype._doPlot = function() {
                     return transformY(wdY[0]) - transformY(self.intervalBins[i].length);
                 })
                 .attr('fill', self.histogramModel.properties.color?self.histogramModel.properties.color:'steelblue')
-                .on('mousemove', function(d, i) { showTooltip(self.intervalBins[i]);})
+                .on('mousemove', function(d, i) { 
+                    if (self.histogramModel.properties.showTooltip)
+                        showTooltip(self.intervalBins[i]);
+                })
                 .on('mouseout', hideTooltip);
         }
         else {
@@ -457,7 +460,10 @@ Histogram.prototype._doPlot = function() {
                         return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
                     })
                     .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue')
-                    .on('mousemove', function(d, i) { showTooltip(self.zoneBins[j][i]); })
+                    .on('mousemove', function(d, i) { 
+                        if (self.histogramModel.properties.showTooltip)
+                            showTooltip(self.intervalBins[i]);
+                    })
                     .on('mouseout', hideTooltip);
             }
         }

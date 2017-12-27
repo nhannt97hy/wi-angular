@@ -44,6 +44,27 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         });
     }
+    let _well = null;
+    this.getWell = getWell;
+    function getWell() {
+        if (!_well) {
+            _well = utils.findWellByCrossplot(self.id);
+        }
+        return _well;
+    }
+
+    this.onRefWindCtrlReady = function(refWindCtrl) {
+        console.log('Reference window is ready to update');
+        refWindCtrl.update(
+            getWell(),
+            self.crossplotModel.properties.reference_curves,
+            self.crossplotModel.properties.referenceScale,
+            self.crossplotModel.properties.referenceVertLineNumber,
+            self.crossplotModel.properties.referenceTopDepth,
+            self.crossplotModel.properties.referenceBottomDepth,
+            //self.crossplotModel.properties.referenceShowDepthGrid);
+            true);
+    }
 
     this.zoneArr = null; // important. This will be set in wi-d3-crossplot. TUNG
 
@@ -57,6 +78,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getWiRefWindCtrl = function () {
         if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
         return refWindCtrl;
+    }
+    this.CloseReferenceWindow = function () {
+        self.crossplotModel.properties.referenceDisplay = false;
     }
 }
 

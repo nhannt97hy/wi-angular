@@ -4884,7 +4884,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
 }
 */
 
-exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback){
+exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback, cancelCallback, options){
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         const CURVE_SYMBOLS = ['X', 'Y', 'Z'];
 
@@ -4895,9 +4895,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         let graph = wiComponentService.getComponent('GRAPH');
 
         let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-        this.crossplotModel = angular.copy(wiD3CrossplotCtrl.crossplotModel);
-        //this.viCrossplot = wiD3CrossplotCtrl.viCrossplot.getProperties();
-        // this.props = crossplotModel.properties;
+
+        this.crossplotModelProps = angular.copy(wiD3CrossplotCtrl.crossplotModel.properties);
+
         this.selectedCurveX = null;
         this.selectedCurveY = null;
         this.selectedCurveZ = null;
@@ -4913,18 +4913,18 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         async.waterfall([
             function(cb) {
-                var pointsets = self.crossplotModel.properties.pointsets;
+                var pointsets = self.crossplotModelProps.pointsets;
                 if (!pointsets || !pointsets.length || !pointsets[0].idPointSet ) {
-                    wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
-                        // self.crossplotModel.properties.pointSet = crossplot.pointsets[0];
-                        self.crossplotModel.properties = crossplot;
+                    wiApiService.getCrossplot(self.crossplotModelProps.idCrossPlot, function (crossplot) {
+                        self.crossplotModelProps = crossplot;
+                        wiCrossplotCtrl.crossplotModel.properties = crossplot;
                         cb();
                     });
                 }
                 else cb();
             },
             function(cb) {
-                let pointSet = self.crossplotModel.properties.pointsets[0];
+                let pointSet = self.crossplotModelProps.pointsets[0];
                 if (!pointSet.pointSymbol)
                     pointSet.pointSymbol = 'Circle';
 
@@ -4968,7 +4968,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             }
                         })
                     });
-                    let pointSet = self.crossplotModel.properties.pointsets[0];
+                    let pointSet = self.crossplotModelProps.pointsets[0];
                     if (self.zoneSets && self.zoneSets.length > 0) {
                         if (!pointSet.idZoneSet) {
                             self.selectedZoneSet = self.zoneSets[0];
@@ -5007,7 +5007,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         function autoScaleCurve(symbol, noForce) {
             let key = 'idCurve' + symbol;
             let scaleKeys = getScaleKeys(symbol);
-            let pointSet = self.crossplotModel.properties.pointsets[0];
+            let pointSet = self.crossplotModelProps.pointsets[0];
             let idCurve = pointSet[key];
             if (pointSet && pointSet[key]) {
                 if (noForce && pointSet[scaleKeys[0]] != null && pointSet[scaleKeys[1]] != null) return;
@@ -5039,7 +5039,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         function onSelectedCurveChange(symbol) {
             // let idCurve = self['selectedCurve' + symbol]
-            let idCurve = self.crossplotModel.properties.pointsets[0]['idCurve' + symbol];
+            let idCurve = self.crossplotModelProps.pointsets[0]['idCurve' + symbol];
             if (idCurve) {
                 let scaleKeys = getScaleKeys(symbol);
                 let key1 = scaleKeys[0], key2 = scaleKeys[1];
@@ -5062,13 +5062,13 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.onDepthTypeChanged = function(){
             switch (self.depthType) {
                 case "intervalDepth":
-                self.crossplotModel.properties.pointsets[0].intervalDepthTop = self.crossplotModel.properties.pointsets[0].intervalDepthTop ? self.crossplotModel.properties.pointsets[0].intervalDepthTop: getTopFromWell();
-                self.crossplotModel.properties.pointsets[0].intervalDepthBottom = self.crossplotModel.properties.pointsets[0].intervalDepthBottom ? self.crossplotModel.properties.pointsets[0].intervalDepthBottom : getBottomFromWell();
-                self.crossplotModel.properties.pointsets[0].idZoneSet = null;
+                self.crossplotModelProps.pointsets[0].intervalDepthTop = self.crossplotModelProps.pointsets[0].intervalDepthTop ? self.crossplotModelProps.pointsets[0].intervalDepthTop: getTopFromWell();
+                self.crossplotModelProps.pointsets[0].intervalDepthBottom = self.crossplotModelProps.pointsets[0].intervalDepthBottom ? self.crossplotModelProps.pointsets[0].intervalDepthBottom : getBottomFromWell();
+                self.crossplotModelProps.pointsets[0].idZoneSet = null;
                 break;
                 case "zonalDepth":
                 if(self.selectedZoneSet){
-                    self.crossplotModel.properties.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                    self.crossplotModelProps.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
                 }
                 break;
             }
@@ -5076,24 +5076,24 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         this.onZoneSetChange = function () {
             if(self.selectedZoneSet){
-                self.crossplotModel.properties.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+                self.crossplotModelProps.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
             }
         }
 
         this.onActiveZoneChange = function(){
             if (self.selectedZone) {
-                self.crossplotModel.properties.pointsets[0].activeZone = self.selectedZone;
+                self.crossplotModelProps.pointsets[0].activeZone = self.selectedZone;
             }
         }
 
         this.onLineModeChange = function(){
-            self.crossplotModel.properties.pointsets[0].lineMode = self.lineMode;
+            self.crossplotModelProps.pointsets[0].lineMode = self.lineMode;
         }
 
         // modal button
         this.colorSymbol = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.crossplotModel.properties.pointsets[0].pointColor, function (colorStr) {
-                self.crossplotModel.properties.pointsets[0].pointColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.crossplotModelProps.pointsets[0].pointColor, function (colorStr) {
+                self.crossplotModelProps.pointsets[0].pointColor = colorStr;
             });
         };
         this.drawIcon = utils.drawIcon;
@@ -5107,8 +5107,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         // }
 
         // AXIS COLORS - START
-        $scope.isDefineDepthColors = self.crossplotModel.properties.isDefineDepthColors;
-        $scope.axisColors = self.crossplotModel.properties.axisColors;
+        $scope.isDefineDepthColors = self.crossplotModelProps.isDefineDepthColors;
+        $scope.axisColors = self.crossplotModelProps.axisColors;
 
         if (!$scope.axisColors || $scope.axisColors == 'null')
             $scope.axisColors = [];
@@ -5162,11 +5162,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             return false;
         }
 
-        function updateCrossplot(callback) {
-            // var payload = buildPayload(self.crossplotModel.properties);
-
-            self.crossplotModel.properties.isDefineDepthColors = $scope.isDefineDepthColors;
-            self.crossplotModel.properties.axisColors = $scope.axisColors;
+        function updateCrossplot() {
+            self.crossplotModelProps.isDefineDepthColors = $scope.isDefineDepthColors;
+            self.crossplotModelProps.axisColors = $scope.axisColors;
 
             if ($scope.isDefineDepthColors) {
                 for (let c of $scope.axisColors) {
@@ -5189,7 +5187,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             async.parallel([
                 function(cb) {
                     payload = {
-                        idCrossPlot: self.crossplotModel.properties.idCrossPlot,
+                        idCrossPlot: self.crossplotModelProps.idCrossPlot,
                         isDefineDepthColors: $scope.isDefineDepthColors,
                         axisColors: JSON.stringify($scope.axisColors),
                         idWell: self.well.properties.idWell
@@ -5200,9 +5198,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 },
                 function(cb) {
-                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], function(){
-                        cb();
-                    });
+                    wiApiService.editPointSet(self.crossplotModelProps.pointsets[0], function(response) { cb();});
                 }
             ], function(err, result) {
                 if (err) {
@@ -5210,8 +5206,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     utils.error(err);
                 }
                 else {
-                    wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModel.properties;
-                    let pointSet = self.crossplotModel.properties.pointsets[0];
+                    wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModelProps;
+                    let pointSet = self.crossplotModelProps.pointsets[0];
 
                     // let crossplotProps = angular.copy(self.crossplotModel.properties);
                     // crossplotProps.pointSet = crossplotProps.pointsets[0];
@@ -5245,8 +5241,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             else async.setImmediate(cb);
                         }
                     ], function(result, err) {
-                        console.log(result, err);
-                        let crossplotProps = angular.copy(self.crossplotModel.properties);
+                        let crossplotProps = angular.copy(self.crossplotModelProps);
                         crossplotProps.pointSet = crossplotProps.pointsets[0];
                         if (xCurveData) {
                             let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
@@ -5263,6 +5258,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             crossplotProps.pointSet.curveZ
                             = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
                         }
+                        else {
+                            delete crossplotProps.pointSet.curveZ;
+                        }
 
                         //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
                         //wiD3CrossplotCtrl.viCrossplot.doPlot();
@@ -5274,15 +5272,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         }
 
         this.onOkButtonClicked = function () {
-            updateCrossplot(function (crossplotProps) {
-                close(crossplotProps);
-            });
+            updateCrossplot();
+            close();
         };
         this.onApplyButtonClicked = function () {
-            // updateCrossplot();
-            updateCrossplot(function (crossplotProps) {
-                if (callback) callback(crossplotProps);
-            });
+            updateCrossplot();
         };
         this.onCancelButtonClicked = function () {
             close(null);
