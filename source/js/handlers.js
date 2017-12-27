@@ -748,7 +748,13 @@ exports.PickettButtonClicked = function () {
     console.log('PickettButton is clicked');
     newCrossPlotTemplate("PickettPlot", this.wiComponentService, this.ModalService);
 };
-
+function getStaticNode(type) {
+    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+    if(!currentWell){
+        return utils.error("Please select well first!");
+    }
+    return utils.getStaticNode(type);
+}
 exports.BlankHistogramButtonClicked = function () {
     const self = this;
     console.log("Blank Hisogram clicked");
@@ -758,8 +764,8 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let selectedNode = utils.getSelectedNode();
-    if (selectedNode.type != 'histograms') return;
+    let selectedNode = getStaticNode('histograms');
+    if (!selectedNode) return;
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
@@ -782,10 +788,10 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let selectedNode = utils.getSelectedNode();
-    if (selectedNode.type != 'histograms') return;
+    let selectedNode = getStaticNode('histograms');
+    if (!selectedNode) return;
     let promptConfig = {
-        title: 'Create New Histogram Template',
+        title: 'Create New Histogram From Template',
         inputName: 'Histogram Name',
         input: name
     }
@@ -802,19 +808,19 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     });
 }
 
-exports.PHI_TOTALButtonClicked = function () {
-    console.log('PHI_TOTALButton is clicked');
-    newTemplateHistogram("PHI_TOTAL Histogram", "Phi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
-
-    });
-};
-
 exports.GammaRayButtonClicked = function () {
     console.log('GammaRayButton is clicked');
     newTemplateHistogram("GR Histogram", "GammaRay", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 
+};
+
+exports.SonicButtonClicked = function () {
+    console.log('SonicButton is clicked');
+    newTemplateHistogram("DT Histogram", "Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
 };
 
 exports.NeutronButtonClicked = function () {
@@ -831,20 +837,6 @@ exports.DensityButtonClicked = function () {
     });
 };
 
-exports.SonicButtonClicked = function () {
-    console.log('SonicButton is clicked');
-    newTemplateHistogram("DT Histogram","Sonic", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
-
-    });
-};
-
-exports.SallowResistivityButtonClicked = function () {
-    console.log('SallowResistivityButton is clicked');
-    newTemplateHistogram("LLS Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
-
-    });
-};
-
 exports.DeepResistivityButtonClicked = function () {
     console.log('DeepResistivityButton is clicked');
     newTemplateHistogram("LLD Histogram", "DeepResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
@@ -852,12 +844,29 @@ exports.DeepResistivityButtonClicked = function () {
     });
 };
 
-exports.MSFLHistogramButtonClicked = function () {
-    console.log('MSFLHistogramButton is clicked');
-    newTemplateHistogram("MSFL Histogram", "ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+exports.SallowResistivityButtonClicked = function () {
+    console.log('SallowResistivityButton is clicked');
+    // newTemplateHistogram("LLS Histogram","ShallowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    //
+    // });
+};
+
+exports.PHI_TOTALButtonClicked = function () {
+    console.log('PHI_TOTALButton is clicked');
+    newTemplateHistogram("PHI_TOTAL Histogram", "Phi_total", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
+
+
+exports.MSFLHistogramButtonClicked = function () {
+    console.log('MSFLHistogramButton is clicked');
+    newTemplateHistogram("MSFL Histogram", "ShadowResistivity", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+
+    });
+};
+
 exports.AddCurveButtonClicked = function () {
     console.log('AddCurveButton is clicked');
     let self = this;
