@@ -87,6 +87,7 @@ const POINTSET_SCHEMA = {
         idCurveX: { type: 'Integer' },
         idCurveY: { type: 'Integer' },
         idCurveZ: { type: 'Integer' },
+        idOverlayLine: { type: 'Integer' },
         curveX: { type: 'Object' },
         logX: { type: 'Boolean', default: false },
         majorX: { type: 'Integer', default: 5, null: false },
@@ -124,6 +125,7 @@ const POINTSET_SCHEMA = {
         standalone: { type: 'Boolean', default: false },
         overlayLine: { type: 'String' },
         activeZone: { type: 'String' },
+        overlayLine: { type: 'Object' },
         zones: {
             type: 'Array',
             item: ZONE_SCHEMA,
@@ -455,6 +457,8 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-ternary');
 
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-overlay-line');
 
     this.resizeSensor = new ResizeSensor( $(this.root.node()), function(param) {
         self._doPlot();
@@ -530,6 +534,7 @@ Crossplot.prototype.doPlot = function() {
     this.plotTernary();
     this.plotArea();
     this.plotUserLine();
+    this.plotOverlayLines();
     window._CROSSPLOT = this;
 }
 
@@ -803,6 +808,43 @@ Crossplot.prototype.plotEquations = function() {
 
     let gWidth = equationContainer.node().getBoundingClientRect().width;
     equationContainer.attr('transform', 'translate(' + (this.getViewportX()[1] - gWidth) + ',' + this.getViewportY()[1] + ')' );
+}
+
+Crossplot.prototype.plotOverlayLines = function() {
+    let overlayLineContainer = this.svgContainer.select('g.vi-crossplot-overlay-line')
+        .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+    window.tX = transformX;
+    window.tY = transformY;
+
+    let line = d3.line()
+        .x(function(d) { return transformX(parseFloat(d.y)); })
+        .y(function(d) { return transformY(parseFloat(d.x)); })
+        .defined(function(d) {
+            return !isNaN(d.x) && !isNaN(d.y);
+        });
+
+    let data = (this.pointSet.overlayLine || {}).lines || [];
+    let overlayLines = overlayLineContainer.selectAll('path.line')
+        .data(data);
+
+    overlayLines.enter().append('path')
+        .merge(overlayLines)
+        .attr('class', 'line')
+        .attr('d', function(d) {
+            return line(d.data);
+        })
+        .attr('stroke', function(d) {
+            return d.color.replace('Dk', 'Dark');
+        })
+        .attr('stroke-width', 2)
+        .attr('fill', 'none');
+
+    overlayLines.exit().remove();
+
+    overlayLineContainer.selectAll('path.tick').remove();
 }
 
 Crossplot.prototype.plotUserDefineLines = function() {
