@@ -71,12 +71,8 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-4">Symbol Type</label>
                                             <div class="col-sm-8">
-                                                <!-- <select ng-model="wiModal.symbolOptions.symbolStyle.symbolName"
-                                                        class="form-control wi-form-control"
-                                                        ng-options="item for item in wiModal.symbolType">
-                                                </select> -->
                                                 <ui-select theme="bootstrap"
-                                                            ng-model="wiModal.symbolOptions.symbolStyle.symbolName">
+                                                            ng-model="wiModal.symbolOptions.symbolStyle.symbolName" search-enabled="false">
                                                     <ui-select-match>
                                                         <div ng-repeat="type in wiModal.symbolType"
                                                              ng-if="wiModal.symbolOptions.symbolStyle.symbolName==type">
