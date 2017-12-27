@@ -5011,21 +5011,18 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             let idCurve = pointSet[key];
             if (pointSet && pointSet[key]) {
                 if (noForce && pointSet[scaleKeys[0]] != null && pointSet[scaleKeys[1]] != null) return;
-
-                let curve = findCurveById(idCurve).properties;
-
-                let family = utils.findFamilyById(curve.idFamily);
-                if (family) {
-                    pointSet[scaleKeys[0]] = family.minScale;
-                    pointSet[scaleKeys[1]] = family.maxScale;
+                let curve = findCurveById(idCurve);
+                if (curve.lineProperties) {
+                    pointSet[scaleKeys[0]] = curve.lineProperties.minScale;
+                    pointSet[scaleKeys[1]] = curve.lineProperties.maxScale;
                 }
                 else {
-                    wiApiService.scaleCurve(idCurve, function (scaleObj) {
+                    wiApiService.infoCurve(idCurve, function (info) {
                         $timeout(function () {
-                            pointSet[scaleKeys[0]] = scaleObj.minScale;
-                            pointSet[scaleKeys[1]] = scaleObj.maxScale;
+                            pointSet[scaleKeys[0]] = info.LineProperty.minScale;
+                            pointSet[scaleKeys[1]] = info.LineProperty.maxScale;
                         });
-                    });
+                    })
                 }
             }
         }

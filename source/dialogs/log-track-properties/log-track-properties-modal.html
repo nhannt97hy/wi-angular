@@ -214,7 +214,7 @@
                                                                 ng-change="wiModal.onSelectCurve(); wiModal.onChangeCurve(curve._index);">
                                                         <ui-select-match placeholder='Select a curve'>{{curve.lineCurve.properties.name}}</ui-select-match>
                                                         <ui-select-choices group-by="'datasetName'"
-                                                                    repeat='c as c in wiModal.curvesArr | filter: $select.search'>
+                                                                    repeat='c as c in wiModal.curvesArr | filter: {name:$select.search}'>
                                                                     <div class="padding-left-20px">{{c.properties.name}}</div>
                                                         </ui-select-choices>
                                                     </ui-select>
