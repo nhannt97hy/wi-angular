@@ -3440,7 +3440,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                     wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curveList = currentTrack.getCurves();
                                     self.curves[idx].idLine = line.idLine;
-                                    item.changed = changed.created;
+                                    item.changed = changed.unchanged;
                                 } else {
                                     console.error(err);
                                 }
