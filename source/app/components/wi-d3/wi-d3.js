@@ -636,6 +636,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.addAnnotation = function () {
+        if (!_currentTrack.isLogTrack()) return;
         let [topDepth, bottomDepth] = self.getDepthRangeFromSlidingBar();
         let range = bottomDepth - topDepth;
         let top = (topDepth + bottomDepth) / 2;
@@ -2223,123 +2224,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "histogram-new-16x16",
             handler: self.createHistogram
         }, {
-            name: "CreateShading",
+            name: "Create Shading",
             label: "Create Shading",
             icon: "shading-add-16x16",
-            handler: function () {
-                let curve1 = _currentTrack.getCurrentCurve();
-                let curve2 = _currentTrack.getTmpCurve();
-                if (!curve1) return;
-                var config = {
-                    isNegPosFill: false,
-                    fill: {
-                        display: true,
-                        pattern: {
-                            name: "none",
-                            background: "blue"
-                        }
-                    },
-                    positiveFill: {
-                        display: false,
-                        pattern: {
-                            name: "none",
-                            background: "blue"
-                        }
-                    },
-                    negativeFill: {
-                        display: false,
-                        pattern: {
-                            name: "none",
-                            background: "blue"
-                        }
-                    },
-                    showRefLine: false
-                };
-
-                let shadingObj = {
-                    idTrack: _currentTrack.id,
-                    name: curve2 ? (curve1.name + '-' + curve2.name)
-                        : (curve1.name + '-left'),
-                    negativeFill: config.negativeFill,
-                    positiveFill: config.positiveFill,
-                    fill: config.fill,
-                    isNegPosFill: config.isNegPosFill,
-                    idLeftLine: curve2 ? curve2.id : null,
-                    idRightLine: curve1.id,
-                    leftFixedValue: curve2 ? null : curve1.minX,
-                    rightFixedValue: null,
-                    idControlCurve: null
-                }
-                wiApiService.createShading(shadingObj, function (shading) {
-                    let shadingModel = Utils.shadingToTreeConfig(shading);
-                    if (!curve2) {
-                        // This should open dialog
-                        self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);
-                    }
-                    else {
-                        self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
-                    }
-                    // DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-                    //     if (props) {
-                    //         console.log('logTrackPropertiesData', props);
-                    //     }
-                    // }, {
-                    //     tabs: ['false', 'false', 'true'],
-                    //     shadingOnly: true
-                    // });
-                    let currentShading = _currentTrack.getCurrentShading();
-                    let shadingOptions = currentShading.getProperties();
-                    let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-                    this.shadingList = _currentTrack.getShadings();
-
-                    console.log("Shading Properties", currentShading);
-                    DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
-                        console.log("update shadingAttributeDialog", options);
-                        let request = angular.copy(options);
-                        if(options.idLeftLine == -3) {
-                            options.type = 'custom';
-                        };
-                        if(options.idLeftLine == -2) {
-                            options.type = 'right';
-                        };
-                        if(options.idLeftLine == -1) {
-                            options.type = 'left';
-                        };
-                        if(options.idLeftLine > 0) {
-                            options.type = 'pair';
-                        }
-                        delete request.leftLine;
-                        delete request.rightLine;
-
-                        if (options.idLeftLine < 0) 
-                            request.idLeftLine = null;
-                        else {
-                                request.leftFixedValue = null;
-                                request.idLeftLine = parseInt(options.idLeftLine);
-                            }
-                        Utils.getPalettes(function(paletteList){
-                            wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                                options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
-                                if(!options.isNegPosFill) {
-                                    if(options.fill.varShading && options.fill.varShading.palette)
-                                        options.fill.varShading.palette = options[options.fill.varShading.palName];
-                                }
-                                else {
-                                    if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
-                                        options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                                    if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
-                                        options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                                }
-                                currentShading.setProperties(options);
-                                $timeout(function() {
-                                    _currentTrack.plotAllDrawings();
-                                });
-
-                            });
-                        });
-                    }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
-                })
-            }
+            handler: self.createShadingForSelectedCurve
         }, {
             name: "createHistogramTrack",
             label: "Create Histogram Track",
@@ -2349,7 +2237,113 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         ]);
     }
+    this.createShadingForSelectedCurve = function () {
+        if (!_currentTrack.isLogTrack()) return;
+        let curve1 = _currentTrack.getCurrentCurve();
+        let curve2 = _currentTrack.getTmpCurve();
+        if (!curve1) return;
+        var config = {
+            isNegPosFill: false,
+            fill: {
+                display: true,
+                pattern: {
+                    name: "none",
+                    background: "blue"
+                }
+            },
+            positiveFill: {
+                display: false,
+                pattern: {
+                    name: "none",
+                    background: "blue"
+                }
+            },
+            negativeFill: {
+                display: false,
+                pattern: {
+                    name: "none",
+                    background: "blue"
+                }
+            },
+            showRefLine: false
+        };
 
+        let shadingObj = {
+            idTrack: _currentTrack.id,
+            name: curve2 ? (curve1.name + '-' + curve2.name)
+                : (curve1.name + '-left'),
+            negativeFill: config.negativeFill,
+            positiveFill: config.positiveFill,
+            fill: config.fill,
+            isNegPosFill: config.isNegPosFill,
+            idLeftLine: curve2 ? curve2.id : null,
+            idRightLine: curve1.id,
+            leftFixedValue: curve2 ? null : curve1.minX,
+            rightFixedValue: null,
+            idControlCurve: null
+        }
+        wiApiService.createShading(shadingObj, function (shading) {
+            let shadingModel = Utils.shadingToTreeConfig(shading);
+            if (!curve2) {
+                // This should open dialog
+                self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);
+            }
+            else {
+                self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
+            }
+            let currentShading = _currentTrack.getCurrentShading();
+            let shadingOptions = currentShading.getProperties();
+            let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+            this.shadingList = _currentTrack.getShadings();
+
+            console.log("Shading Properties", currentShading);
+            DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+                console.log("update shadingAttributeDialog", options);
+                let request = angular.copy(options);
+                if(options.idLeftLine == -3) {
+                    options.type = 'custom';
+                };
+                if(options.idLeftLine == -2) {
+                    options.type = 'right';
+                };
+                if(options.idLeftLine == -1) {
+                    options.type = 'left';
+                };
+                if(options.idLeftLine > 0) {
+                    options.type = 'pair';
+                }
+                delete request.leftLine;
+                delete request.rightLine;
+
+                if (options.idLeftLine < 0) 
+                    request.idLeftLine = null;
+                else {
+                        request.leftFixedValue = null;
+                        request.idLeftLine = parseInt(options.idLeftLine);
+                    }
+                Utils.getPalettes(function(paletteList){
+                    wiApiService.dataCurve(options.idControlCurve, function (curveData) {
+                        options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
+                        if(!options.isNegPosFill) {
+                            if(options.fill.varShading && options.fill.varShading.palette)
+                                options.fill.varShading.palette = options[options.fill.varShading.palName];
+                        }
+                        else {
+                            if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
+                                options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
+                            if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
+                                options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
+                        }
+                        currentShading.setProperties(options);
+                        $timeout(function() {
+                            _currentTrack.plotAllDrawings();
+                        });
+
+                    });
+                });
+            }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
+        })
+    }
     this.createCrossplot = function () {
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
