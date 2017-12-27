@@ -499,7 +499,7 @@ input[type="checkbox"] {
 		display: block;
 	}
 	tbody {
-		height: 10em;
+		height: 25rem;
 		overflow-y: overlay;
 	}
 	tr {
@@ -510,8 +510,10 @@ input[type="checkbox"] {
 		text-align: center;
 		padding: 0.6em;
 	};
-	tbody>tr>td {
+	tbody>tr>td:not(:second-child){
 		text-align: center;
+	}
+	tbody>tr>td{
 		padding: 0.3em;
 	}
 	background: #F2F2F2;
@@ -537,6 +539,9 @@ input[type=checkbox].input-check {
 .ui-select-match .ui-select-toggle {
 	height: 24px;
 	padding: 2px 8px;
+	>a.btn{
+		margin-top: 1px;
+	}
 }
 .ui-select-search {
 	height: 24px;

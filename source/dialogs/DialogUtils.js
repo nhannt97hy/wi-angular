@@ -3283,11 +3283,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         this.onSelectCurve = function () {
             let curve = self.curves.find(c => c._index == self.__idx);
             idCurveNew = curve.lineCurve.id;
-            let curveExisted = false;
-            if (curve.changed == changed.unchanged) curveExisted = true;
+            let curveUnchanged = false;
+            if (curve.changed == changed.unchanged) curveUnchanged = true;
             wiApiService.infoCurve(idCurveNew, function (curveInfo) {
                 let lineProps = curveInfo.LineProperty;
-                console.log("curveInfo", curveInfo, curve, curveExisted);
+                console.log("curveInfo", curveInfo, curve, curveUnchanged);
                 if (!lineProps) {
                     console.log("idFamily is not detected!");
                 } else {
@@ -3295,20 +3295,20 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         self.curves[self.curves.findIndex(c => c._index == self.__idx)] = {
                             _index: self.__idx,
                             alias: curveInfo.name,
-                            autoValueScale: curveExisted ? curve.autoValueScale : false,
+                            autoValueScale: curveUnchanged ? curve.autoValueScale : false,
                             blockPosition: lineProps.blockPosition,
-                            displayAs: curveExisted ? curve.displayAs : 'Normal',
+                            displayAs: curveUnchanged ? curve.displayAs : 'Normal',
                             displayMode: lineProps.displayMode,
                             displayType: lineProps.displayType,
-                            idLine: curveExisted ? curve.idLine : null,
+                            idLine: curveUnchanged ? curve.idLine : null,
                             idTrack: currentTrack.id,
                             idCurve: curveInfo.idCurve,
-                            ignoreMissingValues: curveExisted ? curve.ignoreMissingValues : true,
+                            ignoreMissingValues: curveUnchanged ? curve.ignoreMissingValues : true,
                             maxValue: lineProps.maxScale,
                             minValue: lineProps.minScale,
-                            showDataset: curveExisted ? curve.showDataset : true,
-                            showHeader: curveExisted ? curve.showHeader : true,
-                            wrapMode: curveExisted ? curve.wrapMode : 'None',
+                            showDataset: curveUnchanged ? curve.showDataset : true,
+                            showHeader: curveUnchanged ? curve.showHeader : true,
+                            wrapMode: curveUnchanged ? curve.wrapMode : 'None',
                             lineOptions: {
                                 display: true,
                                 lineStyle: {
@@ -3320,16 +3320,16 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             symbolOptions: {
                                 display: false,
                                 symbolStyle: {
-                                    symbolFillStyle: "blue",
+                                    symbolFillStyle: lineProps.symbolFillStyle,
                                     symbolLineDash: [10, 0],
                                     symbolLineWidth: 1,
                                     symbolName: "circle",
                                     symbolSize: 4,
-                                    symbolStrokeStyle: "blue"
+                                    symbolStrokeStyle: lineProps.symbolStrokeStyle
                                 }
                             },
                             lineCurve: utils.getCurveFromId(curveInfo.idCurve),
-                            changed : curveExisted ? changed.updated : curve.changed
+                            changed : curveUnchanged ? changed.updated : curve.changed
                         };
                         console.log("self.curves", self.curves);
                     });
@@ -4964,9 +4964,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     self.datasetsInWell.forEach(function (dataset) {
                         dataset.children.forEach(function (curve) {
                             if (curve.type == 'curve') {
-                                let d = curve;
-                                d.datasetCurve = dataset.properties.name + "." + curve.properties.name;
-                                self.curvesOnDataset.push(d);
+                                self.curvesOnDataset.push(curve);
                             }
                         })
                     });
