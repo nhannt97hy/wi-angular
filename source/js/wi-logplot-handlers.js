@@ -250,7 +250,6 @@ exports.ZoomOutButtonClicked = function () {
 
 exports.CropDisplayButtonClicked = function () {
     this.wiLogplot.getSlidingbarCtrl().scaleView();
-    console.log('CropDisplayButton is clicked');
 };
 exports.RangeSpecificButtonClicked = function () {
     let self = this;
@@ -266,7 +265,6 @@ exports.RangeSpecificButtonClicked = function () {
 
 exports.ViewWholeWellButtonClicked = function () {
     this.wiLogplot.getSlidingbarCtrl().resetView();
-    console.log('ViewWholeWellButton is clicked');
 };
 
 exports.AddDepthAxisButtonClicked = function () {
@@ -354,7 +352,7 @@ exports.AddZoneButtonClicked = function () {
 };
 
 exports.AnnotationsButtonClicked = function () {
-    console.log('AnnotationsButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().addAnnotation();
 };
 
 exports.AddImageButtonClicked = function () {
@@ -407,7 +405,7 @@ exports.RemoveImageButtonClicked = function () {
 }
 
 exports.AddShadingButtonClicked = function () {
-    console.log('AddShadingButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().createShadingForSelectedCurve();
 };
 
 exports.CrossPlotButtonClicked = function () {
@@ -553,7 +551,6 @@ exports.ImportTrackButtonClicked = function () {
     }, true);
 }
 exports.AutoSizeTrackButtonClicked = function () {
-    console.log("AutoSizeTrackCheckboxClicked");
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
@@ -564,7 +561,6 @@ exports.AutoSizeTrackButtonClicked = function () {
 };
 
 exports.TrackBolkUpdateButtonClicked = function () {
-    console.log("TrackBulkUpdateButtonClicked");
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
@@ -576,7 +572,6 @@ exports.TrackBolkUpdateButtonClicked = function () {
 };
 
 exports.CurveBolkUpdateButtonClicked = function () {
-    console.log("CurveBulkUpdateButtonClicked");
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
