@@ -71,7 +71,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                     
                                     <tr ng-repeat="ref_curve in wiModal.ref_Curves_Arr"
                                         ng-click="wiModal.setClickedRow($index)"
                                         ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}" >
@@ -82,7 +81,7 @@
                                                 ng-change="wiModal.onSelectRefCurve($index, 'curve')">
                                                 <ui-select-match placeholder='Select a curve'>{{ref_curve.curve.name}}</ui-select-match>
                                                 <ui-select-choices group-by="'datasetName'"
-                                                repeat='curve.properties as curve in wiModal.curvesArr | filter: $select.search'>
+                                                repeat='curve.properties as curve in wiModal.curvesArr | filter: {name:$select.search}'>
                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                             </ui-select-choices>
                                             </ui-select>

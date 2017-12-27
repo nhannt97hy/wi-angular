@@ -5986,9 +5986,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     self.datasetsInWell.forEach(function (dataset) {
                         dataset.children.forEach(function (curve) {
                             if (curve.type == 'curve') {
-                                let d = curve;
-                                d.datasetCurve = dataset.properties.name + "." + curve.properties.name;
-                                self.curvesOnDataset.push(d);
+                                self.curvesOnDataset.push(curve);
                             }
                         })
                     });

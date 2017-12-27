@@ -3,17 +3,21 @@
     ng-click="wiConditionNode.doSelect($event)">
     
     <div ng-if="!wiConditionNode.isNull() && !wiConditionNode.item.children" class="container-fluid">
-        <div class='col-xs-5'>
-            <select class='form-control' ng-model="wiConditionNode.item.left.value"
-                ng-options="curve.id as curve.properties.name group by curve.datasetName for curve in wiConditionNode.curveOptions"
-                ng-change="wiConditionNode.update()"></select>
+        <div class='col-xs-5'class='form-control'>
+            <ui-select ng-model='wiConditionNode.item.left.value' ng-change="wiConditionNode.update()">
+                <ui-select-match placeholder='Select a curve'>{{$select.selected.properties.name}}</ui-select-match>
+                <ui-select-choices group-by="'datasetName'"
+                repeat='curve.id as curve in wiConditionNode.curveOptions | filter:{name:$select.search} track by curve.id'>
+                <div class="padding-left-20px">{{curve.properties.name}}</div>
+            </ui-select-choices>
+            </ui-select>
         </div>
-        <div class='col-xs-3'>
-            <select class='form-control' ng-model="wiConditionNode.item.comparison" 
+        <div class='col-xs-2'>
+            <select class='form-control wi-form-control' ng-model="wiConditionNode.item.comparison" 
                 ng-options="com for com in wiConditionNode.comparisons"
                 ng-change="wiConditionNode.update()"></select>
         </div>
-        <div class='col-xs-4'>
+        <div class='col-xs-5'>
             <wi-multi-input ng-model='wiConditionNode.item.right' model='wiConditionNode.item.right' curves-list='wiConditionNode.curveOptions'
             ng-change='wiConditionNode.update()'></wi-multi-input>
         </div>
