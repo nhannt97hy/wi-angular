@@ -880,7 +880,15 @@ exports.EditTextCurveButtonClicked = function () {
 };
 
 exports.CurveListing_EditButtonClicked = function () {
-    console.log('CurveListing/EditButton is clicked');
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'curveListing',
+        title: 'Curve Edit',
+        componentState: {
+            html: `<wi-curve-listing name="curvelisting"></wi-curve-listing>`
+        }
+    })
 };
 
 exports.InteractiveCurveEditButtonClicked = function () {
