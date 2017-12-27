@@ -361,7 +361,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         return zone.properties;
                     });;
                 }
-                console.log('OVERLAY', crossplotProps.pointSet.overlayLine);
+
                 self.viCrossplot.setProperties(crossplotProps);
                 self.viCrossplot.doPlot();
                 if (self.histogramModelX) {
@@ -651,7 +651,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let curveModel = utils.getModel('curve', pointSet.idCurveZ);
                     wiApiService.dataCurve(pointSet.idCurveZ, function(dataZ) {
                         viCurveZ = graph.buildCurve(curveModel, dataZ, config.well);
-                        pointSet.viCurveZ = viCurveZ;
+                        pointSet.curveZ = viCurveZ;
                         callback();
                     });
                 }
@@ -659,7 +659,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     async.setImmediate(callback);
                 }
             }, function(callback) {
-                if (!pointSet.overlayLine && pointSet.idOverlayLine) {
+                if (pointSet.idOverlayLine) {
                     wiApiService.getOverlayLine(pointSet.idOverlayLine, function(ret) {
                         pointSet.overlayLine = (ret || {}).data;
                         callback();

@@ -4908,7 +4908,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.depthType = 'intervalDepth';
         this.lineMode = false;
         this.overlayLines = [];
-        this.selectedIdOverlayLine = null;
 
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
@@ -4937,7 +4936,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                 // self.pointSet = self.crossplotModel.properties.pointSet;
                 self.depthType = (pointSet && pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
-                self.selectedIdOverlayLine = pointSet.idOverlayLine;
                 self.lineMode = pointSet.lineMode ? pointSet.lineMode : true;
                 pointSet.activeZone = pointSet.activeZone ? pointSet.activeZone : 'All';
                 self.selectedZone = pointSet.activeZone ? pointSet.activeZone : 'All'; // To be removed
@@ -5208,8 +5206,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 },
                 function(cb) {
-                    self.crossplotModel.properties.pointsets[0].idOverlayLine = self.selectedIdOverlayLine;
-                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], function(){
+                    wiApiService.editPointSet(self.crossplotModel.properties.pointsets[0], function(ret){
                         cb();
                     });
                 }
@@ -5272,8 +5269,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             crossplotProps.pointSet.curveZ
                             = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
                         }
-                        if (self.selectedIdOverlayLine) {
-                            wiApiService.getOverlayLine(self.selectedIdOverlayLine, function(ret) {
+                        if (crossplotProps.pointSet.idOverlayLine) {
+                            wiApiService.getOverlayLine(crossplotProps.pointSet.idOverlayLine, function(ret) {
                                 self.updating = false;
                                 crossplotProps.pointSet.overlayLine = (ret || {}).data;
                                 if (callback) callback(crossplotProps);
