@@ -3050,3 +3050,8 @@ function getShadingStyle(fillObj) {
     return "fillPattern";
 }
 exports.getShadingStyle = getShadingStyle;
+
+function isEmpty(val){
+    return (val === undefined || val == null || val.length <= 0) ? true : false;
+}
+exports.isEmpty = isEmpty;
