@@ -226,7 +226,7 @@ function zoneSetToTreeConfig(zoneSet) {
 }
 
 exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
-exports.createZoneSet = function (idWell, callback) {
+exports.createZoneSet = function createZoneSet (idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -246,9 +246,9 @@ exports.createZoneSet = function (idWell, callback) {
             name: ret,
             idWell: idWell
         }
-        wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
-            if (!dataReturn || !dataReturn.idZoneSet) {
-                DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Zone Set: " + ret + " existed!");
+        wiApiService.createZoneSet(zoneSetInfo, function (dataReturn, err) {
+            if (err) {
+                createZoneSet(idWell, callback);
             } else {
                 __GLOBAL.$timeout(function () {
                     if (callback) callback(dataReturn);
@@ -1268,9 +1268,9 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         plotTemplate: type ? type : null
     };
     return new Promise(function (resolve, reject) {
-        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function (logplot) {
-            if (!logplot.name) {
-                reject(logplot);
+        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function (logplot, err) {
+            if (err) {
+                reject();
             } else {
                 logplot.parent = angular.copy(well.properties);
                 resolve(logplot);
@@ -2010,7 +2010,7 @@ let refreshProjectState = function () {
 }
 exports.refreshProjectState = refreshProjectState;
 
-exports.renameWell = function () {
+exports.renameWell = function renameWell (newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -2018,14 +2018,18 @@ exports.renameWell = function () {
     let promptConfig = {
         title: '<span class="curve-data-16x16"></span> Rename Well',
         inputName: 'Name',
-        input: selectedNode.properties.name
+        input: newName || selectedNode.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let wellInfo = angular.copy(selectedNode.properties);
         wellInfo.name = ret;
-        wiApiService.editWell(wellInfo, function () {
+        wiApiService.editWell(wellInfo, function (res, err) {
+            if (err) {
+                renameWell(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
@@ -2034,7 +2038,7 @@ exports.renameWell = function () {
     });
 }
 
-exports.renameDataset = function () {
+exports.renameDataset = function renameDataset (newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -2042,14 +2046,18 @@ exports.renameDataset = function () {
     let promptConfig = {
         title: '<span class="curve-data-16x16"></span> Rename Dataset',
         inputName: 'Name',
-        input: selectedNode.properties.name
+        input: newName || selectedNode.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let datasetInfo = angular.copy(selectedNode.properties);
         datasetInfo.name = ret;
-        wiApiService.editDataset(datasetInfo, function () {
+        wiApiService.editDataset(datasetInfo, function (res, err) {
+            if (err) {
+                renameDataset(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
@@ -2105,7 +2113,7 @@ exports.exportCurve = function () {
     });
 }
 
-exports.renameCurve = function () {
+exports.renameCurve = function renameCurve (newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -2113,7 +2121,7 @@ exports.renameCurve = function () {
     let promptConfig = {
         title: '<span class="curve-edit-16x16"></span> Rename Curve',
         inputName: 'Name',
-        input: selectedNode.properties.name
+        input: newName || selectedNode.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
@@ -2125,7 +2133,11 @@ exports.renameCurve = function () {
             dataset: selectedNode.properties.dataset,
             unit: selectedNode.properties.unit
         }
-        wiApiService.editCurve(curveInfo, function () {
+        wiApiService.editCurve(curveInfo, function (res, err) {
+            if (err) {
+                renameCurve(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
@@ -2331,7 +2343,7 @@ exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
     });
 }
 
-function editProperty(item) {
+function editProperty(item, callback) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
@@ -2342,12 +2354,16 @@ function editProperty(item) {
     switch (selectedNode.type) {
         case 'well':
             wiApiService.editWell(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'dataset':
             wiApiService.editDataset(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'curve':
@@ -2358,24 +2374,30 @@ function editProperty(item) {
             }
             wiApiService.editCurve(newProperties, function () {
                 refreshProjectState().then(function () {
-                    wiComponentService.emit('update-properties', selectedNode);
                     updateLinesOnCurveEdited(selectedNode);
+                    callback && callback();
                 }).catch();
             });
             break;
         case 'zoneset':
             wiApiService.editZoneSet(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'zone':
             wiApiService.editZone(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'logplot':
             wiApiService.editLogplot(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         default:
@@ -2398,8 +2420,8 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             idWell: idWell,
             name: crossplotName,
             crossTemplate: crossTemplate
-        }, function (crossplot) {
-            if (!crossplot.name) {
+        }, function (crossplot, err) {
+            if (err) {
                 cb("create Crossplot failed");
             }
             else {
@@ -2411,7 +2433,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                 else {
                     let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
                     let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
-                    if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
+                    // if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
                 }
                 cb();
             }
@@ -2431,8 +2453,8 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
             scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
             scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
-        }, function (pointSet) {
-            if (!pointSet.idPointSet) {
+        }, function (pointSet, err) {
+            if (err) {
                 cb('create pointset failed');
             }
             else {
@@ -2632,20 +2654,20 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
         histogramTemplate: histogramTemplate
     };
     return new Promise(function (resolve, reject) {
-        __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
-            if (histogram.name) {
+        __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram, err) {
+            if (!err) {
                 resolve(histogram);
                 let histogramModel = histogramToTreeConfig(histogram);
                 refreshProjectState().then(function () {
                     openHistogramTab(histogramModel);
                 });
-                setTimeout(function () {
-                    if (histogram.noCurveFound || histogram.noCurveFound == "true") {
-                        DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
-                    }
-                }, 1000);
+                // setTimeout(function () {
+                //     if (histogram.noCurveFound || histogram.noCurveFound == "true") {
+                //         DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
+                //     }
+                // }, 1000);
             } else {
-                reject(histogram);
+                reject();
             }
         })
     })
@@ -2824,20 +2846,24 @@ exports.openZonemanager = function (item) {
     })
 }*/
 
-exports.renameZoneSet = function (zoneSetModel) {
+exports.renameZoneSet = function renameZoneSet (zoneSetModel, newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let promptConfig = {
         title: '<span class="user-define-16x16"></span> Rename ZoneSet',
         inputName: 'Name',
-        input: zoneSetModel.properties.name
+        input: newName || zoneSetModel.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let zoneSetInfo = angular.copy(zoneSetModel.properties);
         zoneSetInfo.name = ret;
-        wiApiService.editZoneSet(zoneSetInfo, function () {
+        wiApiService.editZoneSet(zoneSetInfo, function (res, err) {
+            if (err) {
+                renameZoneSet(zoneSetModel, newName);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 zoneSetModel.properties.name = ret;
                 zoneSetModel.data.label = ret;

@@ -84,6 +84,7 @@ const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
 const GET_LOG_TRACK = '/project/well/plot/track/info';
 const EDIT_TRACK = '/project/well/plot/track/edit';
+const DUPLICATE_LOG_TRACK = '/project/well/plot/track/duplicate';
 
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
@@ -323,7 +324,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                 .catch(function (err) {
                     self.isFree = true;
                     if (err.status >= 500 || err.status < 0) {
-                        self.getUtils().error('Error connecting to server!');
+                        self.getUtils().error('Error connecting to server!', function () {
+                            job.callback && job.callback(null, err)
+                        });
                         self.stopWorking();
                         return;
                     }
@@ -338,8 +341,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                         });
                     } else {
                         self.stopWorking();
-                        // job.callback(err);
-                        if (err.reason) self.getUtils().error(err.reason);
+                        if (err.reason) self.getUtils().error(err.reason, function () {
+                            job.callback && job.callback(null, err)
+                        });
                         console.error(err);
                     }
                 });
@@ -979,6 +983,15 @@ Service.prototype.removeLogTrack = function (idTrack, callback) {
     this.delete(DELETE_LOG_TRACK, dataRequest, callback);
 }
 
+
+Service.prototype.duplicateLogTrack = function (idTrack, callback) {
+    var self = this;
+    let dataRequest = {
+        idTrack: idTrack
+    };
+    this.post(DUPLICATE_LOG_TRACK, dataRequest, callback);
+}
+
 Service.prototype.infoTrack = function (idTrack, callback) {
     let self = this;
     let dataRequest = {
@@ -992,6 +1005,7 @@ Service.prototype.editTrack = function (trackObj, callback) {
     let dataRequest = trackObj;
     this.post(EDIT_TRACK, dataRequest, callback);
 }
+
 
 Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     var self = this;

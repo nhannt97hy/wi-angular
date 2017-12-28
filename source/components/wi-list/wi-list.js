@@ -14,8 +14,12 @@ function Controller(wiComponentService) {
     };
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    this.onChange = function (item) {
-        utils.editProperty(item);
+    this.onChange = function (item, callback) {
+        utils.editProperty(item, function () {
+            setTimeout(() => {
+                wiComponentService.emit('update-properties', utils.getSelectedNode());
+            });
+        });
     }
 }
 

@@ -418,10 +418,11 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
         timeHandle = setTimeout(function(){
             updateShading(shading, callback);
             timeHandle = null;
-        }, 1000);
+        }, 500);
     }
     function updateShading(shading, callback) {
-        self.wiApiService.editShading(shading, function(res) {
+        let request = shading.getProperties();
+        self.wiApiService.editShading(request, function(res) {
             if (callback) callback(res);
         })
     }

@@ -67,6 +67,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             }
         }
         let backupSelectedNodes = angular.copy(wiComponentService.getComponent(wiComponentService.SELECTED_NODES));
+        if (!backupSelectedNodes) return;
         let selectedNodes = [];
         backupSelectedNodes.forEach(function(selectedNode) {
             let node = utils.getModel(selectedNode.type, selectedNode.id) || utils.getStaticNode(selectedNode.type);
@@ -669,7 +670,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16-edit",
-                        handler: function() {
+                        handler: function renameLogplot () {
                             let selectedNode = utils.getSelectedNode();
                             if (selectedNode.type != 'logplot') return;
                             let promptConfig = {
@@ -681,7 +682,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 if (!res) return;
                                 let logplotInfo = angular.copy(selectedNode.properties);
                                 logplotInfo.name = res;
-                                wiApiService.editLogplot(logplotInfo, function () {
+                                wiApiService.editLogplot(logplotInfo, function (res, err) {
+                                    if (err) {
+                                        renameLogplot();
+                                        return;
+                                    }
                                     $timeout(function () {
                                         selectedNode.properties.name = res;
                                         selectedNode.data.label = res;
@@ -842,7 +847,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16-edit",
-                        handler: function() {
+                        handler: function renameCrossplot () {
                             let selectedNode = utils.getSelectedNode();
                             if (selectedNode.type != 'crossplot') return;
                             let promptConfig = {
@@ -854,7 +859,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 if (!res) return;
                                 let crossplotInfo = angular.copy(selectedNode.properties);
                                 crossplotInfo.name = res;
-                                wiApiService.editCrossplot(crossplotInfo, function () {
+                                wiApiService.editCrossplot(crossplotInfo, function (res, err) {
+                                    if (err) {
+                                        renameCrossplot();
+                                        return;
+                                    }
                                     $timeout(function () {
                                         selectedNode.properties.name = res;
                                         selectedNode.data.label = res;
@@ -990,7 +999,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16-edit",
-                        handler: function() {
+                        handler: function renameHistogram () {
                             let selectedNode = utils.getSelectedNode();
                             if (selectedNode.type != 'histogram') return;
                             let promptConfig = {
@@ -1002,7 +1011,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 if (!res) return;
                                 let histogramInfo = angular.copy(selectedNode.properties);
                                 histogramInfo.name = res;
-                                wiApiService.editHistogram(histogramInfo, function () {
+                                wiApiService.editHistogram(histogramInfo, function (res, err) {
+                                    if (err) {
+                                        renameHistogram();
+                                        return;
+                                    }
                                     $timeout(function () {
                                         selectedNode.properties.name = res;
                                         selectedNode.data.label = res;

@@ -47,6 +47,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
+    this.getOrderKey = getOrderKey;
 
     /**
      * If param is absent, return a boolean indicating whether tooltip is on or off
@@ -2464,7 +2465,135 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _trackOnRightClick(track) {
-        if (track.isZoneTrack()) {
+        if (track.isLogTrack()) {
+            self.setContextMenu( [
+                {
+                    name: "TrackProperties",
+                    label: "Track Properties",
+                    icon: 'track-properties-16x16',
+                    handler: openTrackPropertiesDialog
+                },
+                {
+                    name: "SwitchToLogarithmic",
+                    label: "Switch Linear/Logarithmic",
+                    icon: 'logarithmic-switch-16x16',
+                    handler: function () {
+                        let scale = _currentTrack.scale;
+                        if (scale.toLowerCase() == 'linear')
+                            _currentTrack.scale = 'logarithmic';
+                        else if (scale.toLowerCase() == 'logarithmic')
+                            _currentTrack.scale = 'linear';
+                        _currentTrack.doPlot(true);
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "AddDepthTrack",
+                    label: "Add Depth Track",
+                    icon: 'depth-axis-add-16x16',
+                    handler: function () {
+                        self.addDepthTrack();
+                    }
+                },
+                {
+                    name: "AddLogTrack",
+                    label: "Add Log Track",
+                    icon: 'logplot-blank-16x16',
+                    handler: function () {
+                        self.addLogTrack();
+                    }
+                },
+                {
+                    name: 'AddImageTrack',
+                    label: 'Add Image Track',
+                    icon: 'image-track-16x16',
+                    handler: function () {
+                        self.addImageTrack();
+                    }
+                }, {
+                    name: "AddZonationTrack",
+                    label: "Add Zonation Track",
+                    icon: 'zonation-track-add-16x16',
+                    handler: function () {
+                        self.addZoneTrack();
+                    }
+                }, {
+                    name: "AddObjectTrack",
+                    label: "Add Object Track",
+                    icon: '',
+                    handler: function () {
+                        self.addObjectTrack();
+                    }
+                }, {
+                    separator: '1'
+                }, {
+                    name: "AddMarker",
+                    label: "Add Marker",
+                    icon: 'marker-add-16x16',
+                    handler: function () {
+                        self.addMarker();
+                    }
+                },
+                {
+                    name: "Add Annotation",
+                    label: "Add Annotation",
+                    icon: 'annotation-16x16',
+                    handler: function () {
+                        self.addAnnotation();
+                    }
+                },
+                {
+                    name: "Create Shading",
+                    label: "Create Shading",
+                    icon: 'shading-add-16x16',
+                    handler: function () {
+                        DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                            if (props) {
+                                console.log('logTrackPropertiesData', props);
+                            }
+                        }, {
+                            tabs: ['false', 'false', 'true'],
+                            shadingOnly: true
+                        });
+                    }
+                },
+                {
+                    separator: '1'
+                },
+                {
+                    name: "DuplicateTrack",
+                    label: "Duplicate Track",
+                    icon: 'track-duplicate-16x16',
+                    handler: function () {
+                        logplotHandlers.DuplicateTrackButtonClicked();
+                    }
+                },
+                {
+                    name: "DeleteTrack",
+                    label: "Delete Track",
+                    icon: 'track-delete-16x16',
+                    handler: function () {
+                        logplotHandlers.DeleteTrackButtonClicked();
+                    }
+                }, {
+                    name: "ExportTrack",
+                    label: "Export Track",
+                    // icon: "track-delete-16x16",
+                    handler: function () {
+                        logplotHandlers.ExportTrackButtonClicked();
+                    }
+                }, {
+                    name: "ImportTrack",
+                    label: "Import Track",
+                    // icon: "track-delete-16x16",
+                    handler: function () {
+                        logplotHandlers.ImportTrackButtonClicked();
+                    }
+                },
+            ])
+        } else if (track.isZoneTrack()) {
             self.setContextMenu([
                 {
                     name: "TrackProperties",
@@ -2521,13 +2650,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             return;
                         }
                         track.setMode('AddZone');
-                    }
-                }, {
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        logplotHandlers.DuplicateTrackButtonClicked();
                     }
                 }, {
                     name: "DeleteTrack",
@@ -2813,13 +2935,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         track.setMode('AddImageZone');
                     }
                 }, {
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        logplotHandlers.DuplicateTrackButtonClicked();
-                    }
-                }, {
                     name: "DeleteTrack",
                     label: "Delete Track",
                     icon: 'track-delete-16x16',
@@ -3046,40 +3161,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             label: "Track Properties",
             icon: 'track-properties-16x16',
             handler: openTrackPropertiesDialog
-        },
-        {
-            name: "SwitchToLogarithmic",
-            label: "Switch Linear/Logarithmic",
-            icon: 'logarithmic-switch-16x16',
-            handler: function () {
-                let scale = _currentTrack.scale;
-                if (scale.toLowerCase() == 'linear')
-                    _currentTrack.scale = 'logarithmic';
-                else if (scale.toLowerCase() == 'logarithmic')
-                    _currentTrack.scale = 'linear';
-                _currentTrack.doPlot(true);
-            }
-        },
-        {
+        }, {
             separator: '1'
-        },
-        {
+        }, {
             name: "AddDepthTrack",
             label: "Add Depth Track",
             icon: 'depth-axis-add-16x16',
             handler: function () {
                 self.addDepthTrack();
             }
-        },
-        {
+        }, {
             name: "AddLogTrack",
             label: "Add Log Track",
             icon: 'logplot-blank-16x16',
             handler: function () {
                 self.addLogTrack();
             }
-        },
-        {
+        }, {
             name: 'AddImageTrack',
             label: 'Add Image Track',
             icon: 'image-track-16x16',
@@ -3103,69 +3201,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, {
             separator: '1'
         }, {
-            name: "AddMarker",
-            label: "Add Marker",
-            icon: 'marker-add-16x16',
-            handler: function () {
-                self.addMarker();
-            }
-        },
-        {
-            name: "Add Annotation",
-            label: "Add Annotation",
-            icon: 'annotation-16x16',
-            handler: function () {
-                self.addAnnotation();
-            }
-        },
-        {
-            name: "Create Shading",
-            label: "Create Shading",
-            icon: 'shading-add-16x16',
-            handler: function () {
-                DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-                    if (props) {
-                        console.log('logTrackPropertiesData', props);
-                    }
-                }, {
-                    tabs: ['false', 'false', 'true'],
-                    shadingOnly: true
-                });
-            }
-        },
-        {
-            separator: '1'
-        },
-        {
-            name: "DuplicateTrack",
-            label: "Duplicate Track",
-            icon: 'track-duplicate-16x16',
-            handler: function () {
-                logplotHandlers.DuplicateTrackButtonClicked();
-            }
-        },
-        {
             name: "DeleteTrack",
             label: "Delete Track",
             icon: 'track-delete-16x16',
             handler: function () {
                 logplotHandlers.DeleteTrackButtonClicked();
             }
-        }, {
-            name: "ExportTrack",
-            label: "Export Track",
-            // icon: "track-delete-16x16",
-            handler: function () {
-                logplotHandlers.ExportTrackButtonClicked();
-            }
-        }, {
-            name: "ImportTrack",
-            label: "Import Track",
-            // icon: "track-delete-16x16",
-            handler: function () {
-                logplotHandlers.ImportTrackButtonClicked();
-            }
-        },
+        }
     ];
 
     this.contextMenu = commonCtxMenu;
