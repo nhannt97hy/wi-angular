@@ -652,7 +652,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
         console.log("CROSS NAME : ", crossplotName);
         utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(err, crossplotModel){
             if (err) {
-                newCrossPlotTemplate(templateCross, wiComponentService, ModalService, callback);
+                newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
             }
             else {
                 utils.openCrossplotTab(crossplotModel);
