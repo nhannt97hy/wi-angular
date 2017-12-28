@@ -21,8 +21,8 @@ exports.CanvasHelper = CanvasHelper;
  * @param {Object} domElem - The DOM element to contain the track
  * @returns {Object} The created track
  */
-exports.createLogTrack = function(config, domElem) {
-    let logTrack = new LogTrack(config);
+exports.createLogTrack = function(config, domElem, wiApiService) {
+    let logTrack = new LogTrack(config, wiApiService);
     logTrack.init(domElem);
     return logTrack;
 }

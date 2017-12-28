@@ -36,9 +36,10 @@ Utils.extend(Track, LogTrack);
  * @param {Boolean} [config.showEndLabels] - Indicate whether to show labels at two ends
  * @param {Boolean} [config.labelFormat]
  */
-function LogTrack(config) {
+function LogTrack(config, wiApiService) {
     Track.call(this, config);
-
+    if (!wiApiService) console.error("wiApiService is null, fix it!!!");
+    this.wiApiService = wiApiService;
     this.id = config.id;
     this.idPlot = config.idPlot;
 
@@ -405,8 +406,25 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
         shading.refX = shading.getTransformX(shading.selectedCurve).invert(vpRefX);
         shading.drawRootTooltip();
         self.plotShading(shading);
+        scheduleUpdateShading(shading, function(res){
+            console.log("udpate shading", res);
+        });
     });
-
+    let timeHandle = null;
+    function scheduleUpdateShading (shading, callback) {
+        if (timeHandle) {
+            clearTimeout(timeHandle);
+        }
+        timeHandle = setTimeout(function(){
+            updateShading(shading, callback);
+            timeHandle = null;
+        }, 1000);
+    }
+    function updateShading(shading, callback) {
+        self.wiApiService.editShading(shading, function(res) {
+            if (callback) callback(res);
+        })
+    }
     this.drawings.push(shading);
     return shading;
 }

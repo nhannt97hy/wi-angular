@@ -122,7 +122,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             xMajorTicks: logTrack.majorTicks,
             xMinorTicks: logTrack.minorTicks
         };
-        let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId));
+        let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId), wiApiService);
         graph.rearrangeTracks(self);
 
         _tracks.push(track);
@@ -1766,7 +1766,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         console.log("Shading Properties", currentShading);
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
-            console.log("update shadingAttributeDialog", options);
             let request = angular.copy(options);
             if(options.idLeftLine == -3) {
                 options.type = 'custom';
@@ -1783,12 +1782,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             delete request.leftLine;
             delete request.rightLine;
 
-            if (options.idLeftLine < 0) 
+            if (options.idLeftLine < 0) {
                 request.idLeftLine = null;
+                options.leftLine = null;
+                options.idLeftLine = null;
+            }
             else {
                     request.leftFixedValue = null;
                     request.idLeftLine = parseInt(options.idLeftLine);
                 }
+            console.log("update shadingAttributeDialog", options, request);
             wiApiService.editShading(request, function (shading) {
                 Utils.getPalettes(function(paletteList){
                     wiApiService.dataCurve(options.idControlCurve, function (curveData) {
@@ -2238,7 +2241,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         ]);
     }
     this.createShadingForSelectedCurve = function () {
-        if (!_currentTrack.isLogTrack()) return;
+        
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1) return;
@@ -2248,6 +2251,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 display: true,
                 pattern: {
                     name: "none",
+                    foreground: "black",
                     background: "blue"
                 }
             },
@@ -2255,6 +2259,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 display: false,
                 pattern: {
                     name: "none",
+                    foreground: "black",
                     background: "blue"
                 }
             },
@@ -2262,6 +2267,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 display: false,
                 pattern: {
                     name: "none",
+                    foreground: "black",
                     background: "blue"
                 }
             },
@@ -2291,6 +2297,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             else {
                 self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
             }
+            // DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+            //     if (props) {
+            //         console.log('logTrackPropertiesData', props);
+            //     }
+            // }, {
+            //     tabs: ['false', 'false', 'true'],
+            //     shadingOnly: true
+            // });
             let currentShading = _currentTrack.getCurrentShading();
             let shadingOptions = currentShading.getProperties();
             let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
