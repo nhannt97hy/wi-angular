@@ -17,6 +17,7 @@ function initModal(modal) {
                 }
             }
             if (e.keyCode == $.ui.keyCode.ENTER && okButton) okButton.click();
+            if (e.keyCode == $.ui.keyCode.ENTER && !okButton && cancelButton) cancelButton.click();
             if (e.keyCode == $.ui.keyCode.ESCAPE && cancelButton) cancelButton.click();
             e.stopPropagation();
         }

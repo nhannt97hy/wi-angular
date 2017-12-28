@@ -1268,9 +1268,9 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
         plotTemplate: type ? type : null
     };
     return new Promise(function (resolve, reject) {
-        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function (logplot) {
-            if (!logplot.name) {
-                reject(logplot);
+        wiApiService.post(wiApiService.CREATE_PLOT, dataRequest, function (logplot, err) {
+            if (err) {
+                reject();
             } else {
                 logplot.parent = angular.copy(well.properties);
                 resolve(logplot);
@@ -2268,8 +2268,8 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             idWell: idWell,
             name: crossplotName,
             crossTemplate: crossTemplate
-        }, function (crossplot) {
-            if (!crossplot.name) {
+        }, function (crossplot, err) {
+            if (err) {
                 cb("create Crossplot failed");
             }
             else {
@@ -2301,8 +2301,8 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
             scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
             scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
-        }, function (pointSet) {
-            if (!pointSet.idPointSet) {
+        }, function (pointSet, err) {
+            if (err) {
                 cb('create pointset failed');
             }
             else {

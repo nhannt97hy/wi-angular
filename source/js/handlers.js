@@ -269,9 +269,7 @@ exports.BlankLogplotButtonClicked = function () {
                 });
             })
             .catch(function(err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.BlankLogplotButtonClicked.call(self);
-                });
+                exports.BlankLogplotButtonClicked.call(self);
             });
     });
 };
@@ -310,9 +308,7 @@ exports.TrippleComboButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.TrippleComboButtonClicked.call(self);
-                });
+                exports.TrippleComboButtonClicked.call(self);
             });
     });
 };
@@ -351,9 +347,7 @@ exports.DensityNeutronButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.DensityNeutronButtonClicked.call(self);
-                });
+                exports.DensityNeutronButtonClicked.call(self);
             });
     });
 };
@@ -392,9 +386,7 @@ exports.ResistivitySonicButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.ResistivitySonicButtonClicked.call(self);
-                });
+                exports.ResistivitySonicButtonClicked.call(self);
             });
     });
 };
@@ -433,9 +425,7 @@ exports.TriTracksBlankButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.TriTracksBlankButtonClicked.call(self);
-                });
+                exports.TriTracksBlankButtonClicked.call(self);
             });
     });
 };
@@ -476,9 +466,7 @@ exports.InputCurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.InputCurveButtonClicked.call(self);
-                });
+                exports.InputCurveButtonClicked.call(self);
             });
     });
 };
@@ -525,9 +513,7 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.LithoPlusSyn_CurveButtonClicked.call(self);
-                });
+                exports.LithoPlusSyn_CurveButtonClicked.call(self);
             });
     });
 };
@@ -570,9 +556,7 @@ exports.Syn_CurveButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.Syn_CurveButtonClicked.call(self);
-                });
+                exports.Syn_CurveButtonClicked.call(self);
             });
     });
 };
@@ -621,9 +605,7 @@ exports.ResultButtonClicked = function () {
                 });
             })
             .catch(function (err) {
-                utils.error(logplotName + " existed!", function () {
-                    exports.ResultButtonClicked.call(self);
-                });
+                exports.ResultButtonClicked.call(self);
             });
     });
 };
@@ -646,10 +628,7 @@ exports.BlankCrossPlotButtonClicked = function () {
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(err, crossplotModel) {
             if (err) {
-                console.error(err);
-                utils.error(crossplotName + " existed!", function () {
-                    exports.BlankCrossPlotButtonClicked.call(self);
-                });
+                exports.BlankCrossPlotButtonClicked.call(self);
             }
             else {
                 utils.openCrossplotTab(crossplotModel);
@@ -673,9 +652,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
         console.log("CROSS NAME : ", crossplotName);
         utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(err, crossplotModel){
             if (err) {
-                utils.error(crossplotName + " existed!", function () {
-                    newCrossPlotTemplate(templateCross, wiComponentService, ModalService, callback);
-                });
+                newCrossPlotTemplate(templateCross, wiComponentService, ModalService, callback);
             }
             else {
                 utils.openCrossplotTab(crossplotModel);
