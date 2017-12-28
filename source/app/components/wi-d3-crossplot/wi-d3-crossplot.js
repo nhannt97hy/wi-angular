@@ -458,7 +458,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         self.crossplotModel.properties.referenceScale,
                                         self.crossplotModel.properties.referenceVertLineNumber,
                                         self.crossplotModel.properties.referenceTopDepth,
-                                        self.crossplotModel.properties.referenceBottomDepth, 
+                                        self.crossplotModel.properties.referenceBottomDepth,
                                         self.crossplotModel.properties.referenceShowDepthGrid);
                                         //true);
                             });
@@ -678,7 +678,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             },
             function(callback) {
-                if (!config.pointSet.overlayLine && config.pointSet.idOverlayLine) {
+                if (config.pointSet.idOverlayLine) {
                     wiApiService.getOverlayLine(config.pointSet.idOverlayLine, function(ret) {
                         config.pointSet.overlayLine = (ret || {}).data;
                         callback();

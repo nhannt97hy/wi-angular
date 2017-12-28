@@ -3121,7 +3121,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 console.log("gg",self.shadingOptions);
                 let options = {
                     _index : shadingOptions._index,
-                    changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0) 
+                    changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
                                 ? (shadingOptions.changed = 2) : shadingOptions.changed,
                     idControlCurve : self.variableShadingOptions.controlCurve.id,
                     idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
@@ -5226,6 +5226,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             }
 
             self.updating = true;
+            let overlayLine;
             async.parallel([
                 function(cb) {
                     payload = {
@@ -5240,7 +5241,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 },
                 function(cb) {
-                    self.crossplotModelProps.pointsets[0].idOverlayLine = self.selectedIdOverlayLine;
                     wiApiService.editPointSet(self.crossplotModelProps.pointsets[0], function(response) { cb();});
                 }
             ], function(err, result) {
@@ -5254,7 +5254,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                     // let crossplotProps = angular.copy(self.crossplotModel.properties);
                     // crossplotProps.pointSet = crossplotProps.pointsets[0];
-                    var xCurveData, yCurveData, zCurveData, overlayLine;
+                    var xCurveData, yCurveData, zCurveData;
                     async.parallel([
                         function(cb) {
                             if (pointSet.idCurveX) {
@@ -5284,8 +5284,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             else async.setImmediate(cb);
                         },
                         function(cb) {
-                            if (self.selectedIdOverlayLine) {
-                                wiApiService.getOverlayLine(self.selectedIdOverlayLine, function(ret) {
+                            if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
+                                wiApiService.getOverlayLine(self.crossplotModelProps.pointsets[0].idOverlayLine, function(ret) {
                                     //self.updating = false;
                                     overlayLine = (ret || {}).data;
                                     //if (callback) callback(crossplotProps);
