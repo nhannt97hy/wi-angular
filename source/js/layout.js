@@ -53,9 +53,11 @@ module.exports.createLayout = function (domId, $scope, $compile) {
         container.getElement().html(compileFunc(html)(scopeObj));
         let modelRef = componentState.model;
         container.on('destroy', function () {
-            let model = utils.getModel(modelRef.type, modelRef.id);
-            if (!model) return;
-            model.data.opened = false;
+            if(modelRef){
+                let model = utils.getModel(modelRef.type, modelRef.id);
+                if (!model) return;
+                model.data.opened = false;
+            }
         })
     });
 
@@ -102,6 +104,12 @@ module.exports.putComponentRight = function (text, title) {
 };
 */
 module.exports.putTabRight = function (config) {
+    let rightContainer = layoutManager.root.getItemsById('right')[0];
+    let tabItem = rightContainer.getItemsById(config.id)[0];
+    if (tabItem) {
+        rightContainer.setActiveContentItem(config.id);
+        return;
+    }
     let childConfig = {
         type: 'component',
         componentName: 'html-block',
