@@ -776,7 +776,7 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
             .then(function (histogram) {
             })
             .catch(function (err) {
-                newTemplateHistogram(templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
+                newTemplateHistogram(histogramName, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
             });
     });
 }
