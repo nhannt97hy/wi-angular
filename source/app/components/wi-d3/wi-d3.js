@@ -46,6 +46,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
+    this.getOrderKey = getOrderKey;
 
     /**
      * If param is absent, return a boolean indicating whether tooltip is on or off
