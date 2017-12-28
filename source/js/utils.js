@@ -2281,7 +2281,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                 else {
                     let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
                     let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
-                    if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
+                    // if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
                 }
                 cb();
             }
@@ -2509,11 +2509,11 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
                 refreshProjectState().then(function () {
                     openHistogramTab(histogramModel);
                 });
-                setTimeout(function () {
-                    if (histogram.noCurveFound || histogram.noCurveFound == "true") {
-                        DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
-                    }
-                }, 1000);
+                // setTimeout(function () {
+                //     if (histogram.noCurveFound || histogram.noCurveFound == "true") {
+                //         DialogUtils.warningMessageDialog(__GLOBAL.ModalService, "NO CURVE FOUND");
+                //     }
+                // }, 1000);
             } else {
                 reject(histogram);
             }
