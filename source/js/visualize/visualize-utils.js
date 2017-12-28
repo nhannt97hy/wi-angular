@@ -69,7 +69,7 @@ function getProperties(obj) {
     return props;
 }
 
-function setProperties(obj, props, forArray) {
+function setProperties(obj, props) {
     if (typeof props != 'object') props = {};
 
     Object.keys(obj.PROPERTIES).forEach(function(key) {

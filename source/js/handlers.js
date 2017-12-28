@@ -884,9 +884,10 @@ exports.CurveListing_EditButtonClicked = function () {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
         id: 'curveListing',
-        title: 'Curve Edit',
+        title: 'Table Curve Edit',
+        tabIcon: 'curve-listing-16x16',
         componentState: {
-            html: `<wi-curve-listing name="curvelisting"></wi-curve-listing>`
+            html: `<wi-curve-listing></wi-curve-listing>`
         }
     })
 };
