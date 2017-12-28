@@ -57,6 +57,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 let model = utils.getModel(modelRef.type, modelRef.id);
                 if (!model) return;
                 model.data.opened = false;
+                if (model.isReady) model.isReady = false;
             }
         })
     });

@@ -15,6 +15,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let self = this;
     this.scopeObj = $scope;
     this.compileFunc = $compile;
+    
     let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
@@ -2959,6 +2960,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.logPlotCtrl = getLogplotCtrl();
         wiComponentService.on('tab-changed', function (logplotModel) {
             if (!logplotModel || logplotModel.type != 'logplot' || self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
+            if(!logplotModel.isReady) return;
             self.plotAll();
         });
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
@@ -2994,7 +2996,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         }, 1000)
     };
-
+    this.$onDestroy = function() {
+        console.log('on destroy');
+        wiComponentService.pushComponent(self.name, null);
+    }
     function updateSlider() {
         let wholeWidth = $(`wi-logplot[name=${self.logPlotCtrl.name}]`).width();
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
