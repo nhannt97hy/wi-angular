@@ -347,6 +347,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             name: "ShowTooltip",
             label: "Show/Hide Tooltip",
             handler: function () {
+                self.histogramModel.properties.showTooltip = !(self.histogramModel.properties.showTooltip || false);
             }
         }, {
             name: "FrequencyInfor",
@@ -503,7 +504,7 @@ app.component(componentName, {
 });
 app.filter('toFixed2', function() {
     return function(item) {
-        return item.toFixed(2);
+        if (item) return item.toFixed(2);
     }
 });
 exports.name = moduleName;

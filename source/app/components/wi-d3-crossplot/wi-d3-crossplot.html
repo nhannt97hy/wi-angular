@@ -7,7 +7,7 @@
 -->
 <div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;margin-left:14px">
     <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
-    <h5>Reference: [{{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthTop}} - {{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthBottom}}]</h5>
+    <h5>Reference: [{{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthTop | toFixed2}} - {{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthBottom | toFixed2}}]</h5>
     <div class='crossplot-container position-relative' id='{{wiD3Crossplot.crossplotAreaId}}'>
         <div style="display:flex;flex-direction:column;flex:1;">
             <div ng-if="wiD3Crossplot.crossplotModel.properties.showHistogram"

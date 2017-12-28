@@ -387,11 +387,11 @@ wiApiWorker.prototype.getUtils = Service.prototype.getUtils;
 //add authenService parameter for using authenticate service
 Service.prototype.post = function (route, payload, callback, option) {
     var self = this;
-    // for (const key in payload) {
-    //     if (typeof payload[key] == 'object') {
-    //         payload[key] = JSON.stringify(payload[key]);
-    //     }
-    // }
+    //for (const key in payload) {
+    //    if (payload[key] != null && typeof payload[key] == 'object') {
+    //        payload[key] = JSON.stringify(payload[key]);
+    //    }
+    //}
     let requestObj = {
         url: option ? (option == 'auth' ? AUTHENTICATION_SERVICE + route: PROCESSING_SERVICE + route) : self.baseUrl + route,
         method: 'POST',
