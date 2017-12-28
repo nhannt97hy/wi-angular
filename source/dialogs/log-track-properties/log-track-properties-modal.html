@@ -330,7 +330,8 @@
                                                         <option></option>
                                                     </select> -->
                                                     <ui-select ng-model="shading.rightLine"
-                                                                ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectRightLine();">
+                                                                ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectRightLine();
+                                                                wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.rightLine.name}}</ui-select-match>
                                                         <ui-select-choices group-by="'datasetName'"
                                                                     repeat='c as c in wiModal.curveList | filter: $select.search'>
@@ -348,7 +349,8 @@
                                                         <!-- <option value="{{item.id}}" ng-repeat="item in wiModal.curvesOnDataset">{{item.datasetCurve}}</option> -->
                                                     <!-- </select> -->
                                                     <ui-select ng-model="shading.leftLine"
-                                                                ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectLeftLine();">
+                                                                ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectLeftLine();
+                                                                wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.leftLine.name}}</ui-select-match>
                                                         <ui-select-choices group-by="'datasetName'"
                                                                     repeat='c as c in wiModal.leftLimit | filter: $select.search'>
@@ -360,7 +362,7 @@
                                                     <input type="number" ng-model="shading.leftFixedValue"
                                                             class="form-control wi-form-control" id="fixedVal"
                                                             ng-change="wiModal.onChangeShading($index);
-                                                            wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);
+                                                            wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index);
                                                             wiModal.typeFixedValue();"
                                                             step="any">
                                                 </td>
@@ -373,7 +375,7 @@
                                                 <td>
                                                     <input type="text" ng-model="shading.name"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index)">
+                                                            ng-change="wiModal.onChangeShading($index); shading.setName = true;">
                                                 </td>
                                                 <td>
                                                     <select ng-model="shading.shadingStyle"
