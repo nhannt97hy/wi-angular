@@ -87,7 +87,7 @@ const POINTSET_SCHEMA = {
         idCurveX: { type: 'Integer' },
         idCurveY: { type: 'Integer' },
         idCurveZ: { type: 'Integer' },
-        idOverlayLine: { type: 'Integer' },
+        idOverlayLine: { type: 'String' },
         curveX: { type: 'Object' },
         logX: { type: 'Boolean', default: false },
         majorX: { type: 'Integer', default: 5, null: false },
@@ -827,6 +827,11 @@ Crossplot.prototype.plotOverlayLines = function() {
         });
 
     let data = (this.pointSet.overlayLine || {}).lines || [];
+    for (let i = 0; i < data.length; i ++) {
+        data[i].data = data[i].data.filter(function(d) {
+            return !isNaN(d.x) && !isNaN(d.y);
+        });
+    }
     let overlayLines = overlayLineContainer.selectAll('path.line')
         .data(data);
 
@@ -843,8 +848,69 @@ Crossplot.prototype.plotOverlayLines = function() {
         .attr('fill', 'none');
 
     overlayLines.exit().remove();
-
     overlayLineContainer.selectAll('path.tick').remove();
+    overlayLineContainer.selectAll('text').remove();
+    
+    for (let line of data) {
+        let color = line.color;
+        let name = line.names;
+        let points = line.data.map(function(d) {
+            return {
+                x: transformX(parseFloat(d.y)),
+                y: transformY(parseFloat(d.x)),
+                type: d.type
+            }
+        });
+        if (points.length <= 1) break;
+        let sign = 1;
+        if (points[0].x < points[1].x) sign = -1;
+
+        overlayLineContainer.append('text')
+            .attr('x', points[0].x + 10 * sign)
+            .attr('y', points[0].y)
+            .text(name)
+            .attr('stroke', color.replace('Dk', 'Dark'))
+            .attr('fill', color.replace('Dk', 'Dark'));
+
+        for (let i = 0; i < points.length; i ++) {
+            let a, b;
+            if (i == points.length -1) {
+                a = points[i];
+                b = points[i-1];
+            }
+            else {
+                a = points[i];
+                b = points[i+1];
+            }
+            let v_x = b.y - a.y;
+            let v_y = a.x - b.x;
+            let v_length = Math.sqrt(v_x*2 + v_y*2)
+            v_x /= v_length;
+            v_y /= v_length;
+            if (isNaN(v_x) || isNaN(v_y)) continue
+            /*overlayLineContainer.append('circle')
+                .attr('cx', a.x)
+                .attr('cy', a.y)
+                .attr('r', 5)
+                .attr('stroke', 'black')*/
+            overlayLineContainer.append('path')
+                .attr('class', 'tick')
+                .attr('d', 'M ' + (a.x+v_x) + ' ' + (a.y+v_y) + ' '
+                          +'L ' + (a.x-v_x) + ' ' + (a.y-v_y))
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1);
+
+
+            if (!isNaN(points[i].type)) {
+                //rad = Math.atan(v_x/v_y);
+                //deg = rad * (180/Math.PI);
+                overlayLineContainer.append('text')
+                    .attr('x', a.x - 7)
+                    .attr('y', a.y - 7)
+                    .text(points[i].type);
+            }
+        }
+    }
 }
 
 Crossplot.prototype.plotUserDefineLines = function() {

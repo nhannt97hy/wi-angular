@@ -504,7 +504,7 @@ app.component(componentName, {
 });
 app.filter('toFixed2', function() {
     return function(item) {
-        return item.toFixed(2);
+        if (item) return item.toFixed(2);
     }
 });
 exports.name = moduleName;

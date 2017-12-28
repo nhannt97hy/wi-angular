@@ -4908,7 +4908,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.depthType = 'intervalDepth';
         this.lineMode = false;
         this.overlayLines = [];
-        this.selectedIdOverlayLine = null;
 
         this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
@@ -4937,7 +4936,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                 // self.pointSet = self.crossplotModel.properties.pointSet;
                 self.depthType = (pointSet && pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
-                self.selectedIdOverlayLine = pointSet.idOverlayLine;
                 self.lineMode = pointSet.lineMode ? pointSet.lineMode : true;
                 pointSet.activeZone = pointSet.activeZone ? pointSet.activeZone : 'All';
                 self.selectedZone = pointSet.activeZone ? pointSet.activeZone : 'All'; // To be removed
@@ -5282,6 +5280,16 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             crossplotProps.pointSet.curveZ
                             = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
                         }
+//<<<<<<< HEAD
+//=======
+//                        if (crossplotProps.pointSet.idOverlayLine) {
+//                            wiApiService.getOverlayLine(crossplotProps.pointSet.idOverlayLine, function(ret) {
+//                                self.updating = false;
+//                                crossplotProps.pointSet.overlayLine = (ret || {}).data;
+//                                if (callback) callback(crossplotProps);
+//                            })
+//                        }
+//>>>>>>> 3c954e48492c4ace5861607278cd06cf472232cf
                         else {
                             delete crossplotProps.pointSet.curveZ;
                         }
@@ -7526,7 +7534,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         });
     });
 };
-exports.referenceWindowsDialog = function (ModalService, well, plotModel, callback, callbackFinal) {
+exports.referenceWindowsDialog = function (ModalService, well, plotModel, callback) {
     function ModalController(close, wiComponentService, wiApiService, $timeout) {
         let self = this;
         this._FNEW = 1;
@@ -7707,12 +7715,12 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this.onApplyButtonClicked = function() {
             console.log("on Apply clicked");
             if(self.ref_Curves_Arr && self.ref_Curves_Arr.length) {
-                async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, callback) {
+                async.eachOfSeries(self.ref_Curves_Arr, function(curve, idx, cb) {
                     switch(self.ref_Curves_Arr[idx].flag){
                         case self._FDEL:
                             wiApiService.removeRefCurve(self.ref_Curves_Arr[idx].idReferenceCurve, function(){
                                 console.log('removeRefCurve');
-                                callback();
+                                cb();
                             });
                             break;
 
@@ -7720,19 +7728,19 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                             wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
                                 self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
                                 console.log('createRefCurve');
-                                callback();
+                                cb();
                             });
                             break;
 
                         case self._FEDIT:
                             wiApiService.editRefCurve(self.ref_Curves_Arr[idx], function(){
                                 console.log('editRefCurve');
-                                callback();
+                                cb();
                             })
                             break;
 
                         default:
-                            callback();
+                            cb();
                             break;
                     }
                 }, function(err) {
@@ -7778,7 +7786,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-            callbackFinal && callbackFinal();
+            //callbackFinal && callbackFinal();
             if (!ret) return;
         })
     });

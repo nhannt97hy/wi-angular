@@ -15,16 +15,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _well = null;
 
     var saveCrossplot= _.debounce(function() {
-        wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
+        wiApiService.editCrossplot(__packedProperties(self.crossplotModel.properties), function(returnData) {
             console.log('updated');
         });
     }, 3000);
 
     this.saveCrossplot = saveCrossplot;
+    function __packProperties(crossplotModelProps) {
+        let packedProps = angular.copy(crossplotModelProps);
+        // remove unnecessary fields.
+        delete packedProps.reference_curves;
 
+        return packedProps;
+    }
     function saveCrossplotNow(callback) {
-        console.log('saveCrossplotNow');
-        wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
+        wiApiService.editCrossplot(__packProperties(self.crossplotModel.properties), function(returnData) {
             console.log('updated', self.crossplotModel.properties);
             if (callback) callback();
         });
@@ -454,7 +459,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         self.crossplotModel.properties.referenceVertLineNumber,
                                         self.crossplotModel.properties.referenceTopDepth,
                                         self.crossplotModel.properties.referenceBottomDepth, 
-                                        true);
+                                        self.crossplotModel.properties.referenceShowDepthGrid);
+                                        //true);
                             });
                         }, self.setContextMenu);
                     }
@@ -663,7 +669,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let curveModel = utils.getModel('curve', config.pointSet.idCurveZ);
                     wiApiService.dataCurve(config.pointSet.idCurveZ, function(dataZ) {
                         viCurveZ = graph.buildCurve(curveModel, dataZ, config.well);
-//<<<<<<< HEAD
                         config.pointSet.curveZ = viCurveZ;
                         callback();
                     });
@@ -672,19 +677,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     async.setImmediate(callback);
                 }
             },
-//=======
-//                        pointSet.viCurveZ = viCurveZ;
-//                        callback();
-//                    });
-//                }
-//                else {
-//                    async.setImmediate(callback);
-//                }
-//            }, function(callback) {
-//                if (!pointSet.overlayLine && pointSet.idOverlayLine) {
-//                   wiApiService.getOverlayLine(pointSet.idOverlayLine, function(ret) {
-//                        pointSet.overlayLine = (ret || {}).data;
-//>>>>>>> f01b9621e3df147812e9f3b5c2c4de2e915479ca
             function(callback) {
                 if (!config.pointSet.overlayLine && config.pointSet.idOverlayLine) {
                     wiApiService.getOverlayLine(config.pointSet.idOverlayLine, function(ret) {
@@ -936,7 +928,7 @@ app.component(componentName, {
 });
 app.filter('toFixed2', function() {
     return function(item) {
-        return item.toFixed(2);
+        if (item) return item.toFixed(2);
     }
 });
 

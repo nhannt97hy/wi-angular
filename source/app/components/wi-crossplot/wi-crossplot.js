@@ -62,8 +62,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.crossplotModel.properties.referenceVertLineNumber,
             self.crossplotModel.properties.referenceTopDepth,
             self.crossplotModel.properties.referenceBottomDepth,
-            //self.crossplotModel.properties.referenceShowDepthGrid);
-            true);
+            self.crossplotModel.properties.referenceShowDepthGrid);
+            //true);
     }
 
     this.zoneArr = null; // important. This will be set in wi-d3-crossplot. TUNG
