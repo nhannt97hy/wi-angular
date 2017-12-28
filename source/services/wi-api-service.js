@@ -217,6 +217,9 @@ const GET_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/info/
 const EDIT_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/edit/';
 const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/delete/';
 
+const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
+const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -384,6 +387,11 @@ wiApiWorker.prototype.getUtils = Service.prototype.getUtils;
 //add authenService parameter for using authenticate service
 Service.prototype.post = function (route, payload, callback, option) {
     var self = this;
+    // for (const key in payload) {
+    //     if (typeof payload[key] == 'object') {
+    //         payload[key] = JSON.stringify(payload[key]);
+    //     }
+    // }
     let requestObj = {
         url: option ? (option == 'auth' ? AUTHENTICATION_SERVICE + route: PROCESSING_SERVICE + route) : self.baseUrl + route,
         method: 'POST',
@@ -1579,6 +1587,14 @@ Service.prototype.getObjectTrack = function (idObjectTrack, callback) {
 Service.prototype.removeObjectTrack = function (idObjectTrack, callback) {
     let self = this;
     this.delete(DELETE_OBJECT_TRACK, { idObjectTrack: idObjectTrack }, callback);
+}
+
+Service.prototype.listOverlayLine = function(idCurveX, idCurveY, callback) {
+    this.post(LIST_OVERLAY_LINE, { idCurveX: idCurveX, idCurveY: idCurveY }, callback);
+}
+
+Service.prototype.getOverlayLine = function(idOverlayLine, callback) {
+    this.post(GET_OVERLAY_LINE, { idOverlayLine: idOverlayLine }, callback);
 }
 
 Service.prototype.createObjectOfObjectTrack = function (data, callback) {

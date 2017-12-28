@@ -153,6 +153,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if(pointSet.idCurveX && pointSet.idCurveY){
                 self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
                 if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
+                $timeout(function(){
+                    if(pointSet.idCurveZ){
+                        console.log('idCurveZ');
+                        $('#' + self.name + "HistogramX").css("margin-right","20px");
+                    }else{
+                        $('#' + self.name + "HistogramX").css("margin-right","0px");
+                    }
+                },500);
             }
         }
     }
@@ -283,7 +291,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         if(self.xHistogram && self.yHistogram){
             self.xHistogram.setZoneSet(activeZones);
-            self.yHistogram.setZoneSet(activeZones);            
+            self.yHistogram.setZoneSet(activeZones);
             self.xHistogram.doPlot();
             self.yHistogram.doPlot();
         }
@@ -353,10 +361,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         return zone.properties;
                     });;
                 }
+                console.log('OVERLAY', crossplotProps.pointSet.overlayLine);
                 self.viCrossplot.setProperties(crossplotProps);
                 self.viCrossplot.doPlot();
                 if (self.histogramModelX) {
                     if ($('#' + self.name + "HistogramX").length) {
+                        if(crossplotProps.pointSet.idCurveZ){
+                            $('#' + self.name + "HistogramX").css("margin-right","20px");
+                        }else{
+                            $('#' + self.name + "HistogramX").css("margin-right","0px");
+                        }
                         updateHistogramProps(self.crossplotModel, 'xCurve');
                         self.xHistogram.setHistogramModel(self.histogramModelX);
                         let zoneCtrl = self.getZoneCtrl();
@@ -427,7 +441,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.crossplotModel, function() {
                             saveCrossplotNow(function() {
                                 let refWindCtrl = self.getWiRefWindCtrl();
-                                if (refWindCtrl) 
+                                if (refWindCtrl)
                                     self.getWiRefWindCtrl().update(getWell(),
                                         self.crossplotModel.properties.reference_curves,
                                         self.crossplotModel.properties.referenceScale,
@@ -442,7 +456,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: "Show Overlay",
                     icon: "",
                     handler: function () {
-        
+
                     }
                 }, {
                     name: "ShowReferenceZone",
@@ -473,7 +487,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     name: "ShowTooltip",
                     label: "Show Tooltip",
                     handler: function () {
-        
+
                     }
                 }, {
                     name: "ShowHistogram",
@@ -488,10 +502,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     name: "Function",
                     label: "Function",
                     childContextMenu: [
-        
+
                     ],
                     handler: function () {
-        
+
                     }
                 }
             ];
@@ -603,8 +617,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let viCurveX = curveX, viCurveY = curveY, viCurveZ;
 
         let pointSet = null;
-        if (config.pointsets && config.pointsets.length)
+        if (config.pointsets && config.pointsets.length) {
             pointSet = config.pointsets[0];
+            viCurveZ = pointSet.curveZ;
+        }
 
         if (pointSet) {
             async.parallel([function(callback) {
@@ -635,6 +651,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let curveModel = utils.getModel('curve', pointSet.idCurveZ);
                     wiApiService.dataCurve(pointSet.idCurveZ, function(dataZ) {
                         viCurveZ = graph.buildCurve(curveModel, dataZ, config.well);
+                        pointSet.viCurveZ = viCurveZ;
+                        callback();
+                    });
+                }
+                else {
+                    async.setImmediate(callback);
+                }
+            }, function(callback) {
+                if (!pointSet.overlayLine && pointSet.idOverlayLine) {
+                    wiApiService.getOverlayLine(pointSet.idOverlayLine, function(ret) {
+                        pointSet.overlayLine = (ret || {}).data;
                         callback();
                     });
                 }
