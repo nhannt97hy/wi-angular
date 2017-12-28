@@ -276,42 +276,21 @@ exports.NewTrackButtonClicked = function () {
 };
 
 exports.DuplicateTrackButtonClicked = function () {
-    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS)
-    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
-    let currentTrack = wiD3Ctrl.getCurrentTrack();
-    if (!currentTrack.isLogTrack()) {
-        utils.warning('Can not duplicate this track. Please choose a Log Track!');
-        return;
-    }
-    let wiApiService = this.wiApiService;
-    let props = currentTrack.getProperties();
-    wiD3Ctrl.addLogTrack(props.title, function (newTrack) {
-        props.orderNum = newTrack.orderNum;
-        props.idTrack = newTrack.id;
-        props.width = utils.pixelToInch(props.width);
-        wiApiService.editTrack(props, function (ret) {
-            props.width = utils.inchToPixel(props.width);
-            newTrack.setProperties(props);
-            let curves = currentTrack.getCurves();
-            if (!curves.length) return;
-            curves.forEach(function (curve) {
-                wiApiService.createLine({
-                    idTrack: newTrack.id,
-                    idCurve: curve.idCurve
-                }, function (line) {
-                    let newCurveProps = curve.getProperties();
-                    newCurveProps.idLine = line.idLine;
-                    newCurveProps.idTrack = newTrack.id;
-                    newCurveProps.lineStyle = JSON.stringify(newCurveProps.lineStyle);
-                    wiApiService.editLine(newCurveProps, function () {
-                        let newCurve = wiD3Ctrl.addCurveToTrack(newTrack, curve.rawData, {});
-                        newCurve.setProperties(newCurveProps);
-                        newTrack.plotCurve(newCurve);
-                    });
-                })
+    const wiComponentService = this.wiComponentService;
+    const wiApiService = this.wiApiService;
+    const wiLogplot = this.wiLogplot;
+    const wiD3Ctrl = wiLogplot.getwiD3Ctrl();
+    const currentTrack = wiD3Ctrl.getCurrentTrack();
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let trackInfo = currentTrack.getProperties();
+    DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this log track?", function (yes) {
+        if (yes) {
+            wiApiService.duplicateLogTrack({orderNum: wiD3Ctrl.getOrderKey(currentTrack), idTrack: trackInfo.idTrack}, function (aTrack) {
+                let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+                wiD3Ctrl.updateTrack(trackObj);
             });
-        });
-    })
+        }
+    });
 };
 
 exports.AddZonationTrackButtonClicked = function () {
@@ -464,87 +443,12 @@ exports.ImportTrackButtonClicked = function () {
         document.body.removeChild(fileInput);
         trackData.file = fileInput.files[0];
         wiApiService.postWithTrackTemplateFile(trackData).then(function (response) {
-            console.log("aTrack", response);
             let aTrack = response.content;
-            let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-            utils.getPalettes(function (paletteList) {
-                function drawAllShadings(someTrack, trackObj) {
-                    someTrack.shadings.forEach(function (shading) {
-                        let shadingModel = utils.shadingToTreeConfig(shading, paletteList);
-                        let linesOfTrack = trackObj.getCurves();
-                        console.log("LinhTinh:", linesOfTrack, shading, shadingModel);
-                        let lineObj1 = null;
-                        let lineObj2 = null;
-
-                        if (!shadingModel.idRightLine) return;
-                        if (!shadingModel.idLeftLine) {
-                            for (let line of linesOfTrack) {
-                                if (line.id == shading.idRightLine) {
-                                    lineObj1 = line;
-                                }
-                            }
-                            wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                        }
-                        else {
-                            for (let line of linesOfTrack) {
-                                if (line.id == shading.idRightLine) {
-                                    lineObj1 = line;
-                                }
-                                if (line.id == shading.idLeftLine) {
-                                    lineObj2 = line;
-                                }
-                            }
-                            wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
-                        }
-                    });
-                };
-                if (aTrack.markers) {
-                    aTrack.markers.forEach(function (marker) {
-                        wiD3Ctrl.addMarkerToTrack(trackObj, marker);
-                    });
-                }
-                if (aTrack.images) {
-                    aTrack.images.forEach(function (image) {
-                        image.src = image.location;
-                        wiD3Ctrl.addImageToTrack(trackObj, image);
-                    });
-                }
-                let eventEmitter = new EventEmitter();
-                let lineCount = 0;
-                let lineNum = aTrack.lines ? aTrack.lines.length : 0;
-                eventEmitter.on('line-drawed', function (someTrack) {
-                    console.log(someTrack);
-                    lineCount++;
-                    if (lineCount == lineNum) {
-                        drawAllShadings(someTrack, trackObj);
-                    }
-                });
-                if (aTrack.images) {
-                    aTrack.lines.forEach(function (line) {
-                        utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
-                            let lineModel = utils.lineToTreeConfig(line);
-                            if (!err) {
-                                wiD3Ctrl.addCurveToTrack(trackObj, data, lineModel.data);
-                            }
-                            else {
-                                console.error(err);
-                                wiComponentService.getComponent(wiComponentService.UTILS).error(err);
-                            }
-                            eventEmitter.emitEvent('line-drawed', [aTrack]);
-                        });
-                    });
-                }
-                setTimeout(function () {
-                    if (response.reason == "CURVE_NOT_FOUND") {
-                        let message = "";
-                        aTrack.errorCurve.forEach(function (r) {
-                            message += "Curve: " + r.dataset + "." + r.curve + " Not exist! <br>";
-                        });
-                        utils.warning(message);
-                    }
-                }, 1000);
+            aTrack.orderNum = wiD3Ctrl.getOrderKey(currentTrack);
+            wiApiService.editTrack(aTrack, function (t) {
+                let trackObj = wiD3Ctrl.pushLogTrack(t);
+                wiD3Ctrl.updateTrack(trackObj);
             });
-
         }).catch(err => {
             console.log(err);
         });

@@ -3,13 +3,13 @@ const moduleName = 'wi-api-service';
 
 var __USERINFO = {
     username: null,
-    password: null,
-    token: null
+    token: null,
+    refreshToken: null
 };
 
 __USERINFO.username = window.localStorage.getItem('username');
-__USERINFO.password = window.localStorage.getItem('password');
 __USERINFO.token = window.localStorage.getItem('token');
+__USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
 
 let app = angular.module(moduleName, []);
 
@@ -32,6 +32,7 @@ const PROCESSING_SERVICE = 'http://54.169.13.92';
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
+const REFRESH_TOKEN = '/refresh-token';
 
 const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
@@ -83,6 +84,7 @@ const CREATE_LOG_TRACK = '/project/well/plot/track/new';
 const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
 const GET_LOG_TRACK = '/project/well/plot/track/info';
 const EDIT_TRACK = '/project/well/plot/track/edit';
+const DUPLICATE_LOG_TRACK = '/project/well/plot/track/duplicate';
 
 const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
 const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
@@ -322,7 +324,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                 .catch(function (err) {
                     self.isFree = true;
                     if (err.status >= 500 || err.status < 0) {
-                        self.getUtils().error('Error connecting to server!');
+                        self.getUtils().error('Error connecting to server!', function () {
+                            job.callback && job.callback(null, err)
+                        });
                         self.stopWorking();
                         return;
                     }
@@ -330,15 +334,16 @@ var wiApiWorker = function ($http, wiComponentService) {
                         self.stopWorking();
                         if (err.data.reason) self.getUtils().error(err.data.reason, function () {
                             window.localStorage.removeItem('token');
+                            window.localStorage.removeItem('refreshToken');
                             window.localStorage.removeItem('username');
-                            window.localStorage.removeItem('password');
                             window.localStorage.removeItem('rememberAuth');
                             location.reload();
                         });
                     } else {
                         self.stopWorking();
-                        // job.callback(err);
-                        if (err.reason) self.getUtils().error(err.reason);
+                        if (err.reason) self.getUtils().error(err.reason, function () {
+                            job.callback && job.callback(null, err)
+                        });
                         console.error(err);
                     }
                 });
@@ -508,6 +513,16 @@ Service.prototype.register = function (data, callback) {
     let self = this;
     console.log(data);
     this.post(REGISTER, data, callback, 'auth');
+}
+Service.prototype.refreshToken = function (refreshToken) {
+  if (!refreshToken) return;
+  let self = this;
+  this.post(REFRESH_TOKEN, {refresh_token: refreshToken}, function (res) {
+    window.localStorage.setItem('token', res.token);
+    window.localStorage.setItem('refreshToken', res.refresh_token);
+    __USERINFO.token = res.token;
+    __USERINFO.refreshToken = res.refresh_token;
+  },  'auth');
 }
 Service.prototype.postWithTemplateFile = function (dataPayload) {
     var self = this;
@@ -767,6 +782,7 @@ Service.prototype.getProject = function (infoProject, callback) {
 
 Service.prototype.getProjectInfo = function (idProject, callback) {
     this.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
+    __USERINFO.refreshToken && this.refreshToken(__USERINFO.refreshToken);
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {
@@ -967,6 +983,15 @@ Service.prototype.removeLogTrack = function (idTrack, callback) {
     this.delete(DELETE_LOG_TRACK, dataRequest, callback);
 }
 
+
+Service.prototype.duplicateLogTrack = function (idTrack, callback) {
+    var self = this;
+    let dataRequest = {
+        idTrack: idTrack
+    };
+    this.post(DUPLICATE_LOG_TRACK, dataRequest, callback);
+}
+
 Service.prototype.infoTrack = function (idTrack, callback) {
     let self = this;
     let dataRequest = {
@@ -980,6 +1005,7 @@ Service.prototype.editTrack = function (trackObj, callback) {
     let dataRequest = trackObj;
     this.post(EDIT_TRACK, dataRequest, callback);
 }
+
 
 Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     var self = this;

@@ -17,6 +17,7 @@ function initModal(modal) {
                 }
             }
             if (e.keyCode == $.ui.keyCode.ENTER && okButton) okButton.click();
+            if (e.keyCode == $.ui.keyCode.ENTER && !okButton && cancelButton) cancelButton.click();
             if (e.keyCode == $.ui.keyCode.ESCAPE && cancelButton) cancelButton.click();
             e.stopPropagation();
         }
@@ -63,11 +64,11 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 password: self.password,
                 whoami: 'main-service'
             }
-            wiApiService.login(dataRequest, function(token) {
+            wiApiService.login(dataRequest, function(res) {
                let userInfo = {
                     username: self.username,
-                    password: self.password,
-                    token: token,
+                    token: res.token,
+                    refreshToken: res.refresh_token,
                     remember: self.remember
                 };
                 wiApiService.setAuthenticationInfo(userInfo);
@@ -2719,7 +2720,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             },
             negativeFill : {
                 display : this.shadingOptions.isNegPosFill && this.shadingOptions.negativeFill.display,
-                varShading : this.shadingOptions.fill.varShading ? this.shadingOptions.negativeFill.varShading : {
+                varShading : this.shadingOptions.negativeFill.varShading ? this.shadingOptions.negativeFill.varShading : {
                     startX : controlCurve.lineProperties.minScale,
                     endX : controlCurve.lineProperties.maxScale,
                     gradient : {
@@ -3120,7 +3121,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 console.log("gg",self.shadingOptions);
                 let options = {
                     _index : shadingOptions._index,
-                    changed : shadingOptions.changed,
+                    changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
+                                ? (shadingOptions.changed = 2) : shadingOptions.changed,
                     idControlCurve : self.variableShadingOptions.controlCurve.id,
                     idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
                     idRightLine : self.shadingOptions.rightLine.id,
@@ -3532,6 +3534,25 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     s.changed == changed.created);
             });
         };
+        this.setShadingName = function(leftPart, rightPart, idx) {
+            if (self.shadings[idx].changed == changed.created && !self.shadings[idx].setName && leftPart && rightPart) {
+                let left = null;
+                let right = null;
+                if(!leftPart) return;
+                else {
+                    left = leftPart.name;
+                    if (rightPart.id == -1) right = 'left';
+                    else if (rightPart.id == -2) right = 'right';
+                    else if (rightPart.id == -3) {
+                        right = self.shadings[idx].leftFixedValue;
+                    }
+                    else if(rightPart.id > 0) {
+                        right = rightPart.name;
+                    }
+                    self.shadings[idx].name = left + '-' + right;
+                }
+            }
+        }
         function getLine (idLine) {
             let line = null;
             if (idLine != null && !isNaN(idLine)) {
@@ -3566,6 +3587,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             self.shadings.push({
                 _index: self.shadings.length,
                 changed: changed.created,
+                setName: false,
                 idTrack: currentTrack.id,
                 idControlCurve: utils.getAllCurvesOfWell(this.well)[0].id,
                 name: 'xx_yy',
@@ -3614,7 +3636,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options){
                 if(options) self.shadings[self.__idx] = options;
-                if(self.shadings[self.__idx].changed == changed.unchanged) self.shadings[self.__idx].changed = changed.updated;
+                // if(self.shadings[self.__idx].changed == changed.unchanged) self.shadings[self.__idx].changed = changed.updated;
                 console.log("shadingOptions: ", self.shadings);
             }, self.shadings[self.__idx], currentTrack, wiLogplotCtrl);
             $event.stopPropagation();
@@ -3628,6 +3650,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
             if (self.shadings[self.__idx].leftLine.id == -2)
                     self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
+            if (self.shadings[self.__idx].leftLine.id > 0) self.shadings[self.__idx].leftFixedValue = null;
         }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
@@ -3659,6 +3682,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         request.leftFixedValue = null;
                         request.idLeftLine = parseInt(item.leftLine.id);
                     }
+                console.log("edit Shadinggggggg", item, request, options);
+
                 switch(item.changed) {
                     case changed.unchanged:
                     callback();
@@ -3691,8 +3716,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     }
 
                     case changed.updated: {
+                        console.log("edit Shading", item, request, options);
                         wiApiService.editShading(request, function (shading) {
-                            console.log("edit Shading", shading, item);
                             utils.getPalettes(function(paletteList){
                                 wiApiService.dataCurve(options.idControlCurve, function (curveData) {
                                     options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, self.well.properties);
@@ -5201,6 +5226,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             }
 
             self.updating = true;
+            let overlayLine;
             async.parallel([
                 function(cb) {
                     payload = {
@@ -5215,7 +5241,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     });
                 },
                 function(cb) {
-                    self.crossplotModelProps.pointsets[0].idOverlayLine = self.selectedIdOverlayLine;
                     wiApiService.editPointSet(self.crossplotModelProps.pointsets[0], function(response) { cb();});
                 }
             ], function(err, result) {
@@ -5229,7 +5254,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
                     // let crossplotProps = angular.copy(self.crossplotModel.properties);
                     // crossplotProps.pointSet = crossplotProps.pointsets[0];
-                    var xCurveData, yCurveData, zCurveData, overlayLine;
+                    var xCurveData, yCurveData, zCurveData;
                     async.parallel([
                         function(cb) {
                             if (pointSet.idCurveX) {
@@ -5259,8 +5284,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                             else async.setImmediate(cb);
                         },
                         function(cb) {
-                            if (self.selectedIdOverlayLine) {
-                                wiApiService.getOverlayLine(self.selectedIdOverlayLine, function(ret) {
+                            if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
+                                wiApiService.getOverlayLine(self.crossplotModelProps.pointsets[0].idOverlayLine, function(ret) {
                                     //self.updating = false;
                                     overlayLine = (ret || {}).data;
                                     //if (callback) callback(crossplotProps);

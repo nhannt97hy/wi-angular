@@ -272,8 +272,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                 window.localStorage.setItem('rememberAuth', true);
             }
             window.localStorage.setItem('username', userInfo.username);
-            window.localStorage.setItem('password', userInfo.password);
             window.localStorage.setItem('token', userInfo.token);
+            window.localStorage.setItem('refreshToken', userInfo.refreshToken);
             wiComponentService.getComponent('user').userUpdate();
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
         });
@@ -282,15 +282,19 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         let query = queryString.parse(location.search);
         if(Object.keys(query).length){
             if(query.idProject){
-                $timeout(function(){
-                    wiApiService.getProject({idProject:query.idProject}, function(projectData){
-                        if(projectData.name){
-                            utils.projectOpen(wiComponentService,projectData);
-                        }else{
-                            utils.error("Project not exist!");
+                $timeout(function () {
+                    wiApiService.getProjectInfo(query.idProject, function (project) {
+                        if (project.name) {
+                            wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
+                                if (projectData.name) {
+                                    utils.projectOpen(wiComponentService, projectData);
+                                } else {
+                                    utils.error("Project not exist!");
+                                }
+                            })
                         }
                     })
-                },100);
+                }, 100);
             }
         }else{
             let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
