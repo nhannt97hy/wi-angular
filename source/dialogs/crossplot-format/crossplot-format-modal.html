@@ -196,10 +196,11 @@
                                                 Overlay Lines
                                             </label>
                                             <div class="col-sm-10 padding-left-0" style="left: -10px">
-                                                <select class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.pointsets[0].idOverlayLine"
-                                                    ng-options="item.idOverlayLine as item.name for item in wiModal.overlayLines">
-                                                    <!--<option value="">-------------</option>-->
-                                                </select>
+                                                <ui-select ng-model='wiModal.crossplotModelProps.pointsets[0].idOverlayLine'>
+                                                    <ui-select-match placeholder='Select Overlay Lines' allow-clear='true'>{{$select.selected.name}}</ui-select-match>
+                                                    <ui-select-choices repeat='item.idOverlayLine as item in wiModal.overlayLines | filter: {name:$select.search}'
+                                                    >{{item.name}}</ui-select-choices>
+                                                </ui-select>
                                             </div>
                                         </div>
                                     </div>
