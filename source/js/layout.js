@@ -107,7 +107,7 @@ module.exports.putTabRight = function (config) {
     let rightContainer = layoutManager.root.getItemsById('right')[0];
     let tabItem = rightContainer.getItemsById(config.id)[0];
     if (tabItem) {
-        rightContainer.setActiveContentItem(config.id);
+        rightContainer.setActiveContentItem(tabItem);
         return;
     }
     let childConfig = {
