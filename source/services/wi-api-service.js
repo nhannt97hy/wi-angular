@@ -324,7 +324,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                 .catch(function (err) {
                     self.isFree = true;
                     if (err.status >= 500 || err.status < 0) {
-                        self.getUtils().error('Error connecting to server!');
+                        self.getUtils().error('Error connecting to server!', function () {
+                            job.callback && job.callback(null, err)
+                        });
                         self.stopWorking();
                         return;
                     }
@@ -339,8 +341,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                         });
                     } else {
                         self.stopWorking();
-                        // job.callback(err);
-                        if (err.reason) self.getUtils().error(err.reason);
+                        if (err.reason) self.getUtils().error(err.reason, function () {
+                            job.callback && job.callback(null, err)
+                        });
                         console.error(err);
                     }
                 });
