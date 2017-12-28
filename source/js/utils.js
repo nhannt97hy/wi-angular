@@ -1858,7 +1858,7 @@ let refreshProjectState = function () {
 }
 exports.refreshProjectState = refreshProjectState;
 
-exports.renameWell = function () {
+exports.renameWell = function renameWell (newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -1866,14 +1866,18 @@ exports.renameWell = function () {
     let promptConfig = {
         title: '<span class="curve-data-16x16"></span> Rename Well',
         inputName: 'Name',
-        input: selectedNode.properties.name
+        input: newName || selectedNode.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let wellInfo = angular.copy(selectedNode.properties);
         wellInfo.name = ret;
-        wiApiService.editWell(wellInfo, function () {
+        wiApiService.editWell(wellInfo, function (res, err) {
+            if (err) {
+                renameWell(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
@@ -1882,7 +1886,7 @@ exports.renameWell = function () {
     });
 }
 
-exports.renameDataset = function () {
+exports.renameDataset = function renameDataset (newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -1890,14 +1894,18 @@ exports.renameDataset = function () {
     let promptConfig = {
         title: '<span class="curve-data-16x16"></span> Rename Dataset',
         inputName: 'Name',
-        input: selectedNode.properties.name
+        input: newName || selectedNode.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let datasetInfo = angular.copy(selectedNode.properties);
         datasetInfo.name = ret;
-        wiApiService.editDataset(datasetInfo, function () {
+        wiApiService.editDataset(datasetInfo, function (res, err) {
+            if (err) {
+                renameDataset(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
@@ -1953,7 +1961,7 @@ exports.exportCurve = function () {
     });
 }
 
-exports.renameCurve = function () {
+exports.renameCurve = function renameCurve (newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -1961,7 +1969,7 @@ exports.renameCurve = function () {
     let promptConfig = {
         title: '<span class="curve-edit-16x16"></span> Rename Curve',
         inputName: 'Name',
-        input: selectedNode.properties.name
+        input: newName || selectedNode.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
@@ -1973,7 +1981,11 @@ exports.renameCurve = function () {
             dataset: selectedNode.properties.dataset,
             unit: selectedNode.properties.unit
         }
-        wiApiService.editCurve(curveInfo, function () {
+        wiApiService.editCurve(curveInfo, function (res, err) {
+            if (err) {
+                renameCurve(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
@@ -2179,7 +2191,7 @@ exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
     });
 }
 
-function editProperty(item) {
+function editProperty(item, callback) {
     let selectedNode = getSelectedNode();
     let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
@@ -2190,12 +2202,16 @@ function editProperty(item) {
     switch (selectedNode.type) {
         case 'well':
             wiApiService.editWell(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'dataset':
             wiApiService.editDataset(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'curve':
@@ -2206,24 +2222,30 @@ function editProperty(item) {
             }
             wiApiService.editCurve(newProperties, function () {
                 refreshProjectState().then(function () {
-                    wiComponentService.emit('update-properties', selectedNode);
                     updateLinesOnCurveEdited(selectedNode);
+                    callback && callback();
                 }).catch();
             });
             break;
         case 'zoneset':
             wiApiService.editZoneSet(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'zone':
             wiApiService.editZone(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         case 'logplot':
             wiApiService.editLogplot(newProperties, function () {
-                refreshProjectState();
+                refreshProjectState().then(function () {
+                    callback && callback();
+                });
             });
             break;
         default:
@@ -2672,20 +2694,24 @@ exports.openZonemanager = function (item) {
     })
 }*/
 
-exports.renameZoneSet = function (zoneSetModel) {
+exports.renameZoneSet = function renameZoneSet (zoneSetModel, newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let promptConfig = {
         title: '<span class="user-define-16x16"></span> Rename ZoneSet',
         inputName: 'Name',
-        input: zoneSetModel.properties.name
+        input: newName || zoneSetModel.properties.name
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
         let zoneSetInfo = angular.copy(zoneSetModel.properties);
         zoneSetInfo.name = ret;
-        wiApiService.editZoneSet(zoneSetInfo, function () {
+        wiApiService.editZoneSet(zoneSetInfo, function (res, err) {
+            if (err) {
+                renameZoneSet(zoneSetModel, newName);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 zoneSetModel.properties.name = ret;
                 zoneSetModel.data.label = ret;
