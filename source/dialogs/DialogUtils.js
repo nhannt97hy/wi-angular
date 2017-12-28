@@ -63,11 +63,11 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 password: self.password,
                 whoami: 'main-service'
             }
-            wiApiService.login(dataRequest, function(token) {
+            wiApiService.login(dataRequest, function(res) {
                let userInfo = {
                     username: self.username,
-                    password: self.password,
-                    token: token,
+                    token: res.token,
+                    refreshToken: res.refresh_token,
                     remember: self.remember
                 };
                 wiApiService.setAuthenticationInfo(userInfo);
