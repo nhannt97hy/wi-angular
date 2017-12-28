@@ -226,7 +226,7 @@ function zoneSetToTreeConfig(zoneSet) {
 }
 
 exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
-exports.createZoneSet = function (idWell, callback) {
+exports.createZoneSet = function createZoneSet (idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -246,9 +246,9 @@ exports.createZoneSet = function (idWell, callback) {
             name: ret,
             idWell: idWell
         }
-        wiApiService.createZoneSet(zoneSetInfo, function (dataReturn) {
-            if (!dataReturn || !dataReturn.idZoneSet) {
-                DialogUtils.errorMessageDialog(__GLOBAL.ModalService, "Zone Set: " + ret + " existed!");
+        wiApiService.createZoneSet(zoneSetInfo, function (dataReturn, err) {
+            if (err) {
+                createZoneSet(idWell, callback);
             } else {
                 __GLOBAL.$timeout(function () {
                     if (callback) callback(dataReturn);
@@ -2502,8 +2502,8 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
         histogramTemplate: histogramTemplate
     };
     return new Promise(function (resolve, reject) {
-        __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram) {
-            if (histogram.name) {
+        __GLOBAL.wiApiService.createHistogram(dataRequest, function (histogram, err) {
+            if (!err) {
                 resolve(histogram);
                 let histogramModel = histogramToTreeConfig(histogram);
                 refreshProjectState().then(function () {
@@ -2515,7 +2515,7 @@ exports.createHistogram = function (idWell, curve, histogramName, histogramTempl
                 //     }
                 // }, 1000);
             } else {
-                reject(histogram);
+                reject();
             }
         })
     })

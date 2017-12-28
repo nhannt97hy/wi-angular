@@ -754,9 +754,7 @@ exports.BlankHistogramButtonClicked = function () {
             .then(function (histogram) {
             })
             .catch(function (err) {
-                utils.error(histogramName + " existed!", function () {
-                    exports.BlankHistogramButtonClicked.call(self);
-                });
+                exports.BlankHistogramButtonClicked.call(self);
             });
     });
 }
@@ -778,9 +776,7 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
             .then(function (histogram) {
             })
             .catch(function (err) {
-                utils.error(histogramName + " existed!", function () {
-                    newTemplateHistogram(templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
-                });
+                newTemplateHistogram(templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
             });
     });
 }
