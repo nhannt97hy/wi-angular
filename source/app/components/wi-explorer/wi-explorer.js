@@ -67,6 +67,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
             }
         }
         let backupSelectedNodes = angular.copy(wiComponentService.getComponent(wiComponentService.SELECTED_NODES));
+        if (!backupSelectedNodes) return;
         let selectedNodes = [];
         backupSelectedNodes.forEach(function(selectedNode) {
             let node = utils.getModel(selectedNode.type, selectedNode.id) || utils.getStaticNode(selectedNode.type);
