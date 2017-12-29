@@ -45,6 +45,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 yStep: stepY,
                 offsetY: minY,
                 //scale: "Logarithmic" || "Linear",
+                scale: infoCurve.LineProperty ? infoCurve.LineProperty.displayType : "Linear",
                 line: {
                     color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
                 }
@@ -58,7 +59,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 console.log("slidingCurve", config);
                 config._data = dataCurve;
                 _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
-                //_viCurve.setProperties({displayType: 'Logarithmic | Linear'})
+                // _viCurve.setProperties({displayType: 'Logarithmic | Linear'})
+                _viCurve.setProperties({displayType: config.scale});
                 _viCurve.doPlot();
             });
         })
@@ -224,6 +226,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             if (currentParentHeight !== parentHeight) self.refreshHandler();
             _viCurve.doPlot();
         });
+        document.addEventListener('resize', function (event) {
+            let currentParentHeight = $(self.contentId).height();
+            if (currentParentHeight !== parentHeight) self.refreshHandler();
+            _viCurve.doPlot();
+        })
 
         $(self.contentId).on("mousewheel", onMouseWheel);
         $(self.handleId).on("mousewheel", onMouseWheel);

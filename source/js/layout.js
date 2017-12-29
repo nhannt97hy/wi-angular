@@ -59,7 +59,11 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 model.data.opened = false;
                 if (model.isReady) model.isReady = false;
             }
-        })
+        });
+        container.on('resize', function () {
+            // wiComponentService.emit('resize');
+            document.dispatchEvent(new Event('resize'));
+        });
     });
 
     layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {

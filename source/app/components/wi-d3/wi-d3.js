@@ -3120,16 +3120,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
-        if (self.contentWidth <= self.sliderWidth + 41) 
+        if (self.contentWidth <= self.sliderWidth + 41)
             self.slider.noUiSlider.reset();
             //$(`#${self.plotAreaId}`).css('left', '0px');
     }
     this.onReady = function(args) {
+        document.addEventListener('resize', function (event) {
+            updateSlider();
+        })
         new ResizeSensor(document.getElementById(self.plotAreaId), function(){
-            console.log('*********** RESIZE SENSOR************');
             updateSlider();
         });
-        
         new ResizeSensor($(`wi-logplot[name=${self.logPlotCtrl.name}]`), function(){
             updateSlider();
         });

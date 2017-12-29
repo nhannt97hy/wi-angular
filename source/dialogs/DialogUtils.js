@@ -487,10 +487,9 @@ exports.addNewDialog = function (ModalService, callback) {
             };
             console.log("data new well: ", data);
 
-            wiApiService.createWell(data, function (response) {
-                console.log('response', response);
+            wiApiService.createWell(data, function (response, err) {
+                if (err) return;
                 close(response, 500);
-
                 $timeout(function(){
                     $scope.$apply();
                 });

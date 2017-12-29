@@ -118,6 +118,9 @@ Track.prototype.createContainer = function() {
     new ResizeSensor( $(this.root.node()), function(param) {
         self.doPlot();
     } );
+    document.addEventListener('resize', function (event) {
+        self.doPlot();
+    })
 }
 Track.prototype.updateOrderNum = function() {
     this.trackContainer.datum(this.orderNum)

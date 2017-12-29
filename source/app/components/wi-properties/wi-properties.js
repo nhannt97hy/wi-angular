@@ -447,6 +447,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     wiApiService.getCrossplot(itemProperties.idCrossPlot, function (dataReturn) {
                         console.log(dataReturn);
                         currentItem.properties = dataReturn;
+                        currentItem.properties.discriminator = JSON.parse(currentItem.properties.discriminator);
                         itemProperties = currentItem.properties;
                         currentItem.data.ts = Date.now();
                     });
@@ -589,6 +590,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     wiApiService.getHistogram(itemProperties.idHistogram, function (dataReturn) {
                         console.log(dataReturn);
                         currentItem.properties = dataReturn;
+                        currentItem.properties.discriminator = JSON.parse(currentItem.properties.discriminator);
                         itemProperties = currentItem.properties;
                         itemProperties.reference_curves = dataReturn.reference_curves;
                         currentItem.data.ts = Date.now();
