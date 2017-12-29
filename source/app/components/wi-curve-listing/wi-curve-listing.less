@@ -14,5 +14,64 @@ wi-curve-listing{
         max-width: 40%;
         display: flex;
         flex-direction: column;
+        table{
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            &>tbody{
+                overflow-y: overlay;
+                overflow-x: hidden;
+            }
+            tr{
+                display: flex;
+            }
+        }
+    }
+
+    .editing{
+        flex:1;
+        display: flex;
+        flex-direction:column;
+        margin:0px 14px;
+        height: 100%;
+        overflow: hidden;
+        padding-bottom: 10px;
+        &>div{
+            overflow-x:overlay;
+            position: relative;
+            table{
+                thead{
+                    display: table-row;
+                }
+        
+                tbody{
+                    overflow-y:hidden;
+                    overflow-x:hidden;
+                    display:block;
+                }
+        
+                thead>tr>th{
+                    min-width:140px;
+                    &:first-child{
+                        min-width: 50px;
+                    }
+                }
+                tbody>tr>td{
+                    min-width:140px;
+                    &:first-of-type{
+                        background: #ccc;
+                    }
+                }
+                tbody>tr>th{
+                    min-width: 50px;
+                }
+                thead>tr>th{
+                    text-align:center;
+                }
+            }
+        }
+    }
+    .nanValue{
+        background: steelblue;
     }
 }

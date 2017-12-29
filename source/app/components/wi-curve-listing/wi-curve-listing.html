@@ -1,80 +1,73 @@
 <div class="curve-listing-toolbar-wrapper">
-  <wi-toolbar>
-    <wi-button icon="plus-16x16" layout="icon-left" type="small" label='Add Curve' tooltip="Add Curve" handler=""></wi-button>
-  </wi-toolbar>
-  <wi-toolbar>
-    <wi-button layout="icon-left" type="small" label='Show Reference Window' is-check-type="1" checked='wiCurveListing.isShowRefWin' tooltip="Show/Hide Reference" handler="wiCurveListing.toggleRefWin"></wi-button>
-    <wi-button layout="icon-left" icon="ti-layout-tab-window" label='Reference Window' type="small" tooltip="Properties" handler=""></wi-button>
-  </wi-toolbar>
+	<wi-toolbar>
+		<wi-button icon="plus-16x16" layout="icon-left" type="small" label='Add Curve' tooltip="Add Curve" handler="wiCurveListing.onAddCurveButtonClicked"></wi-button>
+		<wi-button icon="save-16x16" layout="icon-left" type="small" label='Save Curve(s)' tooltip="Save Curve(s)" handler="wiCurveListing.onSaveButtonClicked"></wi-button>
+	</wi-toolbar>
+	<wi-toolbar>
+		<wi-button layout="icon-left" type="small" label='Show Reference Window' is-check-type="1" checked='wiCurveListing.isShowRefWin'
+		    tooltip="Show/Hide Reference" handler="wiCurveListing.toggleRefWin"></wi-button>
+		<wi-button layout="icon-left" icon="ti-layout-tab-window" label='Reference Window' type="small" tooltip="Properties" handler="wiCurveListing.onRefWinBtnClicked"></wi-button>
+	</wi-toolbar>
 </div>
 <div class="curve-listing-main-content">
-      <div resizable r-directions="['right']" r-flex="true" class="listing">
-          <div>
-            <label class="col-sm-4">
-              <span class="well-16x16"></span>&nbsp;Well
-            </label>
-            <div class="col-sm-8">
-              <select class="form-control wi-form-control" ng-model='wiCurveListing.SelectedWell'
-              ng-options="well as well.properties.name for well in wiCurveListing.wells"
-              ng-change="wiCurveListing.onChangeWell()"></select>
-            </div>
-          </div>
-          <div style="border: 1px solid #ccc; height: 100%">
-            <table class="table table-bordered">
-              <thead style="display:block;">
-                <tr>
-                  <th style="width:40%">Name</th>
-                  <th style="width:40%">Dataset</th>
-                  <th style="width:20%">Select</th>
-                </tr>
-              </thead>
-              <tbody style="display:block;height:80%;overflow-x:hidden;overflow-y:overlay">
-                <tr ng-repeat="curve in wiCurveListing.curvesArr track by curve.id">
-                  <td style="width:40%">{{curve.name}}</td>
-                  <td style="width:40%">{{curve.datasetName}}</td>
-                  <td style="width:20%;text-align:center">
-                    <input type="checkbox" ng-model="curve.selected" ng-change="wiCurveListing.onCurveSelectClick(curve.name, curve.datasetName, curve.id, curve.selected)">
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div style="text-align:right;padding-right:5px;">
-                <button class='btn btn-default' ng-click='wiCurveListing.onSaveButtonClicked()' ng-disabled="wiCurveListing.applyingInProgress">
-                    <span class="apply-16x16"></span>&nbsp;Save</button>
-            </div>
-          </div>
-      </div>
-      <div style='flex:1; display: flex;flex-direction:column;margin:0px 14px'>
-        <div class="pane-table" id="output">
-		<table class="table table-bordered"
-			infinite-scroll="wiCurveListing.LoadMoreOutPut()"
-			infinite-scroll-distance="2"
-			infinite-scroll-use-document-bottom='true'
-			infinite-scroll-listen-for-event='list:changeWell'>
-            <thead>
-				<tr>
-					<th>Index</th>
-					<th>Depth</th>
-					<th ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]"
-					ng-if="curve.show">{{curve.datasetCurve}}</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="row in wiCurveListing.loaded">
-					<th>{{$index}}</th>
-					<td>{{wiCurveListing.depthArr[$index]}}</td>
-					<td ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]"
-					ng-if='col.show'>{{col.data[$parent.$index]}}</td>
-				</tr>
-			</tbody>
-          </table>
-        </div>
-      </div>
-      <div resizable r-directions="['left']" r-flex="true" ng-show="wiCurveListing.isShowRefWin" style="width: 20%; min-width: 10%; max-width: 30%">
-        <!-- <wi-container name='RefCrossplotContainer' title='Reference' close-handler='wiCurveListing.isShowRefWin = false'>
+	<div resizable r-directions="['right']" r-flex="true" class="listing">
+		<div>
+			<label class="col-sm-4">
+				<span class="well-16x16"></span>&nbsp;Well
+			</label>
+			<div class="col-sm-8">
+				<select class="form-control wi-form-control" ng-model='wiCurveListing.SelectedWell' ng-options="well as well.properties.name for well in wiCurveListing.wells"
+				    ng-change="wiCurveListing.onChangeWell()"></select>
+			</div>
+		</div>
+		<div>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th style="flex:2">Name</th>
+						<th style="flex:2">Dataset</th>
+						<th style="flex:1">Select</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="curve in wiCurveListing.curvesArr track by curve.id">
+						<td style="flex:2">{{curve.name}}</td>
+						<td style="flex:2">{{curve.datasetName}}</td>
+						<td style="flex:1;text-align:center">
+							<input type="checkbox" ng-model="curve.selected" ng-change="wiCurveListing.onCurveSelectClick(curve.name, curve.datasetName, curve.id, curve.selected)">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="editing">
+		<div id="output">
+			<table class="table table-bordered" infinite-scroll="wiCurveListing.LoadMoreOutPut()" infinite-scroll-distance="2" infinite-scroll-container='"#output"'
+			    infinite-scroll-listen-for-event='list:changeWell'>
+				<thead>
+					<tr>
+						<th>Index</th>
+						<th>Depth</th>
+						<th ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.datasetCurve}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="row in wiCurveListing.loaded" ng-init="parentId = $index">
+						<th>{{$index}}</th>
+						<td>{{wiCurveListing.depthArr[$index]}}</td>
+						<td ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
+						ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">{{col.data[parentId]}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div resizable r-directions="['left']" r-flex="true" ng-show="wiCurveListing.isShowRefWin" style="width: 20%; min-width: 10%; max-width: 30%">
+		<!-- <wi-container name='RefCrossplotContainer' title='Reference' close-handler='wiCurveListing.isShowRefWin = false'>
           <wi-reference-window name="wiCurveListingRefWin">
           </wi-reference-window>
         </wi-container> -->
-        refWin
-      </div>
+		refWin
+	</div>
 </div>

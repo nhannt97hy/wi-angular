@@ -50,7 +50,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     
     this.$onInit = function () {
-        wiComponentService.putComponent('wiCurveListing',self);
+        // wiComponentService.putComponent('wiCurveListing',self);
         self.isShowRefWin = false;
         self.datasets = [];
         self.curvesArr = [];
@@ -123,8 +123,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
 
+    this.onAddCurveButtonClicked = function(){
+        console.log('onAddCurveButtonClicked');
+    }
     this.onSaveButtonClicked = function(){
         console.log('onSaveButtonClicked');
+    }
+    this.onRefWinBtnClicked = function(){
+        console.log('onRefWinBtnClicked');
+    }
+    this.isNaN = function(val){
+        return isNaN(val);
     }
 }
 
