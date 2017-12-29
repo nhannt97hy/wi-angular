@@ -4103,6 +4103,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         this.isPropsChanged = false;
         this.isCreated = props.isCreated;
+        this.wasApplyButtonClicked = false;
 
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
@@ -4130,7 +4131,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             this.configImage = function (index) {
                 self.imagesOfCurrentTrack[index].done = true;
                 DialogUtils.imageZonePropertiesDialog(ModalService, self.imagesOfCurrentTrack[index], function (data) {
-                    if (!data) return;
+                    if (!data || data === true) return;
                     self.imagesOfCurrentTrack[index] = data;
                     self.onImageChanged(index);
                 });
@@ -4140,6 +4141,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                 let newImage = {
                     // name: 'New Image',
                     fill: 'white',
+                    showName: true,
                     flag: _NEW
                 };
 
@@ -4182,7 +4184,6 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                         case _NEW:
                             delete self.imagesOfCurrentTrack[i].flag;
                             self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
-                            self.imagesOfCurrentTrack[i].showName = true;
                             wiApiService.createImage(self.imagesOfCurrentTrack[i], function(data) {
                                 self.imagesOfCurrentTrack[i] = data;
                                 callback();
@@ -4192,7 +4193,6 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                         case _EDIT:
                             delete self.imagesOfCurrentTrack[i].flag;
                             self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
-                            self.imagesOfCurrentTrack[i].showName = true;
                             wiApiService.editImage(self.imagesOfCurrentTrack[i], function(data) {
                                 self.imagesOfCurrentTrack[i] = data;
                                 callback();
@@ -4243,15 +4243,20 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         this.onOkButtonClicked = function () {
             bindProps();
-            if (self.status) {
-                doApply(function() {
-                    close(props);
-                });
+            if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                close(null);
             } else {
-                close(props);
+                if (self.status) {
+                    doApply(function() {
+                        close(props);
+                    });
+                } else {
+                    close(props);
+                }
             }
         }
         this.onApplyButtonClicked = function () {
+            self.wasApplyButtonClicked = true;
             bindProps();
             if (self.status) {
                 doApply(function() {
@@ -4302,7 +4307,10 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         this.uploadedImages = [];
 
-        this.isCreated = props.isCreated;
+        this.wasApplyButtonClicked = false;
+        this.isNewDraw = props.isNewDraw || false;
+
+        this.isPropsChanged = false;
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
@@ -4339,6 +4347,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                     self.uploadedImages.push(latestImage);
                 });
             });
+            self.isPropsChanged = true;
         }
 
         this.background = function () {
@@ -4346,6 +4355,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                 self.fill = colorStr;
                 console.log(colorStr);
             });
+            self.isPropsChanged = true;
         }
 
         this.openGallery = function () {
@@ -4368,6 +4378,10 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.onImageUrlChange = _.debounce(function () {
             self.done = validateUrl(self.imageUrl);
         }, 500);
+
+        this.onPropsChange = function() {
+            self.isPropsChanged = true;
+        }
 
         function validateUrl (str) {
             var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
@@ -4412,23 +4426,39 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             props.bottomDepth = self.bottomDepth;
             props.imageUrl = self.imageUrl;
             props.name = self.name;
-            // props.showName = self.showName;
+            props.showName = self.showName;
             props.fill = self.fill;
             props.done = self.done;
+            props.isNewDraw = self.isNewDraw;
         }
 
         this.onOkButtonClicked = function () {
             bindProps();
-            close(props, 100);
+            if (self.isNewDraw) {
+                if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                    close(true);
+                } else {
+                    close(props, 100);
+                }
+            } else {
+                if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                    close(null);
+                } else {
+                    close(props, 100);
+                }
+            }
         }
 
         this.onApplyButtonClicked = function () {
+            self.wasApplyButtonClicked = true;
             bindProps();
             callback(props);
+            self.isNewDraw = false;
         }
 
         this.onCancelButtonClicked = function () {
-            close(null);
+            if (self.wasApplyButtonClicked) close(true);
+            else close(null);
         }
     }
     ModalService.showModal({

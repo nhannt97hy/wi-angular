@@ -589,6 +589,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!track || !track.addImageZone) return;
         let imgzone = track.addImageZone(config, track);
 
+        if (imgzone.idImageOfTrack) imgzone.header.attr('id', 'id' + imgzone.idImageOfTrack);
+
         track.plotImageZone(imgzone);
         track.rearrangeHeaders();
         track.onImageZoneMouseDown(imgzone, function() {
@@ -1448,24 +1450,69 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .on('end', function () {
                 if (track.mode != 'AddImageZone') return;
 
-                DialogUtils.imageZonePropertiesDialog(ModalService, imgzone.getProperties(), function (props) {
+                let _currentImage = imgzone.getProperties();
+                _currentImage.isNewDraw = true;
+
+                DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
                     if (!props) {
                         track.removeImage(imgzone);
                         return;
+                    } else if (props === true) {
+                        return;
                     }
+                    let isNewDraw = props.isNewDraw;
                     props.idImageTrack = track.id;
-                    wiApiService.createImage(props, function (imgProps) {
-                        if (imgProps) {
-                            $timeout(function () {
-                                imgzone.setProperties(imgProps);
-                                self.drawImageZone(imgzone, imgProps, true);
-                            });
-                        }
-                    });
+                    delete props.isNewDraw;
+                    if (isNewDraw) {
+                        wiApiService.createImage(props, function (imgProps) {
+                            if (imgProps) {
+                                $timeout(function () {
+                                    imgzone.setProperties(imgProps);
+                                    imgzone.header.attr('id', 'id' + imgzone.idImageOfTrack);
+                                    if (!imgzone.showName) imgzone.header.select('div').remove();
+                                    self.drawImageZone(imgzone, imgProps, isNewDraw);
+                                    track.plotImageZone(imgzone);
+                                    track.rearrangeHeaders();
+                                    _currentImage = imgzone.getProperties();
+                                });
+                            }
+                        });
+                    } else {
+                        props.idImageOfTrack = _currentImage.idImageOfTrack;
+                        wiApiService.editImage(props, function (imgProps) {
+                            if (imgProps) {
+                                $timeout(function () {
+                                    imgzone.setProperties(imgProps);
+                                    if (!imgzone.showName) imgzone.header.select('div').remove();
+                                    else {
+                                        imgzone.header.select('div').remove();
+                                        delete imgzone.header;
+                                        imgzone.header = track.addImageZoneHeader(imgzone, false);
+                                    }
+                                    self.drawImageZone(imgzone, imgProps, isNewDraw);
+                                    track.onImageZoneHeaderMouseDown(imgzone, function() {
+                                        _setCurrentTrack(track);
+                                        let depthRange = imgzone.getDepthRange();
+                                        let rangeValue = depthRange[1] - depthRange[0];
+                                        depthRange[0] -= rangeValue * 0.5;
+                                        depthRange[1] += rangeValue * 0.5;
+
+                                        self.setDepthRange(depthRange);
+                                        self.adjustSlidingBarFromDepthRange(depthRange);
+                                        if (d3.event.button == 2) {
+                                            _imageZoneOnRightClick();
+                                        }
+                                    });
+                                    imgzone.doPlot();
+                                    track.plotImageZone(imgzone);
+                                    track.rearrangeHeaders();
+                                    _currentImage = imgzone.getProperties();
+                                });
+                            }
+                        });
+                    }
                 });
-                track.plotImageZone(imgzone);
                 track.setMode(null);
-                track.rearrangeHeaders();
             })
         );
         track.on('keydown', function () {
@@ -1852,27 +1899,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function imageProperties() {
         let track = _currentTrack;
         let imgzone = track.getCurrentImageZone();
-        console.log(imgzone);
         imgzone.setProperties({
             done: true
         });
         let _currentImage = imgzone.getProperties();
-        _currentImage.isCreated = true;
         DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
-            if (!props) return;
+            if (!props || props === true) return;
             wiApiService.editImage(props, function (imgProps) {
                 if (imgProps) {
                     $timeout(function () {
-                		imgzone.setProperties(imgProps);
+                        imgzone.setProperties(imgProps);
+                        imgzone.header.select('div').remove();
+                        delete imgzone.header;
+                        imgzone.header = track.addImageZoneHeader(imgzone, false);
                 		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
+                        track.onImageZoneHeaderMouseDown(imgzone, function() {
+                            _setCurrentTrack(track);
+                            let depthRange = imgzone.getDepthRange();
+                            let rangeValue = depthRange[1] - depthRange[0];
+                            depthRange[0] -= rangeValue * 0.5;
+                            depthRange[1] += rangeValue * 0.5;
+
+                            self.setDepthRange(depthRange);
+                            self.adjustSlidingBarFromDepthRange(depthRange);
+                            if (d3.event.button == 2) {
+                                _imageZoneOnRightClick();
+                            }
+                        });
+                        track.plotImageZone(imgzone);
+                        track.rearrangeHeaders();
                     });
+                    track.setMode(null);
                 }
             });
         });
-        track.plotImageZone(imgzone);
-        track.setMode(null);
-        track.rearrangeHeaders();
     }
 
     function showImage() {
