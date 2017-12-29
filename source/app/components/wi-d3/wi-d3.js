@@ -2088,7 +2088,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiApiService.removeObjectOfObjectTrack(object.id, function () {
             switch (object.currentDraw) {
                 case "Crossplot":
-                    wiApiService.removeCrossplot(object.viCrossplot.idCrossPlot, function () {
+                    wiApiService.removeCrossplot(object.idCrossplot, function () {
                         console.log("crossplot removed");
                         Utils.refreshProjectState();
                     });
@@ -2851,88 +2851,74 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: 'Add Crossplot',
                     icon: 'crossplot-new-16x16',
                     handler: function () {
-                        getAllCurvesOfWell().then(function (allCurves) {
-
-                            let wellProps = _getWellProps();
-                            let crossplotConfig = {
-                                properties: {
-                                    idCrossPlot: 1,
-                                    idWell: wellProps.idWell,
-                                    idCurveX: null,
-                                    idCurveY: null,
-                                    majorX: 5,
-                                    minorX: 5,
-                                    majorY: 5,
-                                    minorY: 5,
-                                    numColor: 5,
-                                    scaleLeft: null,
-                                    scaleRight: null,
-                                    scaleBottom: null,
-                                    scaleTop: null,
-                                    pointSymbol: "Circle",
-                                    pointSize: 5,
-                                    pointColor: 'blue',
-                                },
-                                curves: allCurves,
-                                dragToCreate: true
-                            }
-
-                            DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (pointSetRaw) {
-                                prepareCurveData(pointSetRaw.curveX).then(function (curveX) {
-                                    prepareCurveData(pointSetRaw.curveY).then(function (curveY) {
-                                        prepareCurveData(pointSetRaw.curveZ).then(function(curveZ) {
-                                            pointSetRaw.curveX = curveX;
-                                            pointSetRaw.curveY = curveY;
-                                            pointSetRaw.curveZ = curveZ;
-                                            let pointSetObj = angular.copy(pointSetRaw);
-                                            delete pointSetObj.curveX;
-                                            delete pointSetObj.curveY;
-                                            delete pointSetObj.curveZ;
-                                            delete pointSetObj.name;
-                                            pointSetRaw.name = pointSetRaw.name || "Crossplot " + pointSetRaw.curveX.name + "_" + pointSetRaw.curveY.name + " - " + (Math.random().toString(36).substr(2, 3));
-                                            wiApiService.createCrossplot({
-                                                idWell: wellProps.idWell,
-                                                name: pointSetRaw.name
-                                            }, function (crossplot) {
-                                                if (!crossplot.idCrossPlot) {
-                                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + crossplot);
-                                                    return;
-                                                }
-
-                                                pointSetObj.idCrossPlot = crossplot.idCrossPlot;
-                                                Utils.createPointSet(pointSetObj, function (pointSet) {
-                                                    if (!pointSet.idPointSet) {
-                                                        DialogUtils.errorMessageDialog(ModalService, "Error when create pointSet!");
-                                                        return;
-                                                    }
-                                                    let objectConfig = {
-                                                        curve1: pointSetRaw.curveX,
-                                                        curve2: pointSetRaw.curveY,
-                                                        config: {
-                                                            name: pointSetRaw.name,
-                                                            idCrossPlot: crossplot.idCrossPlot,
-                                                            idWell: wellProps.idWell,
-                                                            topDepth: wellProps.topDepth,
-                                                            bottomDepth: wellProps.bottomDepth,
-                                                            pointSet: pointSet,
-                                                        },
-                                                        dragToCreate: true,
-                                                        background: pointSetRaw.background
-                                                    }
-                                                    console.log("Crossplot configurations: ", objectConfig);
-                                                    let quest = {
-                                                        name: 'addCrossplot',
-                                                        config: objectConfig
-                                                    }
-                                                    track.setCurrentQuest(quest);
-                                                    track.setMode('AddObject');
-                                                });
-                                            });
+                        let windowY = self.getDepthRangeFromSlidingBar();
+                        let range = windowY[1] - windowY[0];
+                        let newCrossplotModel = null;
+                        let newOoT;
+                        async.series([ function(callback) {
+                            utils.createCrossplot(_getWellProps().idWell, 
+                                "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
+                                function(err, crossplotModel) {
+                                    if (err) {
+                                        console.error(err);
+                                        utils.error(err, function() {
+                                            callback();
                                         });
-                                    });
-                                });
+                                    }
+                                    else {
+                                        newCrossplotModel = crossplotModel;
+                                        callback();
+                                    }
+                                }
+                            );
+                        }, function(callback) {
+                            let pointSet = newCrossplotModel.properties.pointsets[0];
+                            pointSet.intervalDepthTop = windowY[0] + range/4.;
+                            pointSet.intervalDepthBottom = windowY[1] - range/4.;
+                            wiApiService.editPointSet(pointSet, function(returnData) {
+                                newCrossplotModel.properties.pointsets[0] = returnData;
+                                callback();
                             });
-                        });
+                        }, function(callback) {
+                            DialogUtils.crossplotFormatDialog(ModalService, newCrossplotModel.properties.idCrossPlot, function(crossplotProps) {
+                                newCrossplotModel.properties = crossplotProps
+                                callback();
+                            }, function() {
+                                callback('cancel');
+                            }, {
+                                hideApply: true,
+                                autoName: true
+                            });
+                        }, function(callback) {
+                            wiApiService.createObjectOfObjectTrack({
+                                idObjectTrack: _currentTrack.id,
+                                topDepth: newCrossplotModel.properties.pointsets[0].intervalDepthTop,
+                                bottomDepth: newCrossplotModel.properties.pointsets[0].intervalDepthBottom,
+                                object: JSON.stringify({
+                                    type: 'Crossplot',
+                                    idCrossplot: newCrossplotModel.properties.idCrossPlot,
+                                    background: 'white'
+                                })
+                            }, function(returnedObject) {
+                                if (returnedObject.idObjectOfTrack) {
+                                    newOoT = returnedObject;
+                                    callback();
+                                }
+                                else {
+                                    newOoT = null;
+                                    callback(returnedObject);
+                                }
+                            });
+                        }, function(callback) {
+                            if (!_currentTrack) return;
+                            let transformY = _currentTrack.getTransformY();
+
+                            let object = self.addObjectToTrack(_currentTrack, newOoT);
+                            _currentTrack.setCurrentDrawing(object);
+                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
+                                newCrossplotModel.properties.name, $scope, $compile);
+                            callback();
+                        }]);
                     }
                 }, {
                     name: "DeleteTrack",

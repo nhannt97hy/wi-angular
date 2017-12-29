@@ -76,7 +76,12 @@ ObjectOfTrack.prototype.exportsProperties = function() {
         properties.object = JSON.stringify(objProps);
     }
     else if (this.idCrossplot) {
-        // TODO
+        let objProps = {
+            type: 'Crossplot',
+            idCrossplot: this.idCrossplot,
+            background: this.background
+        };
+        properties.object = JSON.stringify(objProps);
     }
     return properties;
 }
@@ -125,33 +130,41 @@ ObjectOfTrack.prototype.init = function(plotContainer, wiComponentService, wiApi
         })
         .on('dragstop', function(event, ui) {
             event.stopPropagation();
-            let newDepth = self.updateDepth(event, ui);
-            let viHistogram = self.getViHistogram();
-            if (viHistogram) {
-                viHistogram.histogramModel.properties.intervalDepthTop = newDepth[0];
-                viHistogram.histogramModel.properties.intervalDepthBottom = newDepth[1];
-            }
+            updateObject(ui);
             self.save();
+        })
+        .on('resizestop', function(event, ui) {
+            event.stopPropagation();
+            updateObject(ui);
+            self.save();
+        });
+    
+    this.updateHeader();
+
+    function updateObject(ui) {
+        let newDepth = self.updateDepth(event, ui);
+        let viHistogram = self.getViHistogram();
+        if (viHistogram) {
+            viHistogram.histogramModel.properties.intervalDepthTop = newDepth[0];
+            viHistogram.histogramModel.properties.intervalDepthBottom = newDepth[1];
             viHistogram.saveHistogramNow(function() {
                 viHistogram.visHistogram.signal('histogram-update', 'Dragged');
                 self.hideTooltip();
             });
-        })
-        .on('resizestop', function(event, ui) {
-            event.stopPropagation();
-            let newDepth = self.updateDepth(event, ui);
-            let viHistogram = self.getViHistogram();
-            if (viHistogram) {
-                viHistogram.histogramModel.properties.intervalDepthTop = newDepth[0];
-                viHistogram.histogramModel.properties.intervalDepthBottom = newDepth[1];
-            }
-            self.save();
-            viHistogram.saveHistogramNow(function() {
-                viHistogram.visHistogram.signal('histogram-update', 'Resized');
+        }
+
+        let viCrossplot = self.getViCrossplot();
+        if (viCrossplot) {
+            viCrossplot.crossplotModel.properties.pointsets[0].intervalDepthTop = newDepth[0];
+            viCrossplot.crossplotModel.properties.pointsets[0].intervalDepthBottom = newDepth[1];
+            viCrossplot.saveCrossplotNow(function() {
+                viCrossplot.viCrossplot.pointSet.intervalDepthTop = newDepth[0];
+                viCrossplot.viCrossplot.pointSet.intervalDepthBottom = newDepth[1];
+                viCrossplot.viCrossplot.doPlot();
                 self.hideTooltip();
             });
-        });
-    this.updateHeader();
+        }
+    }
 }
 
 ObjectOfTrack.prototype.showTooltip = function(newDepth) {
@@ -272,6 +285,9 @@ function buildHistogramProps(config, wellProps) {
 function getWiD3HistogramName(idHistogram) {
     return 'objHistogram' + idHistogram + 'D3Area';
 }
+function getWiD3CrossplotName(idCrossplot) {
+    return 'objCrossplot' + idCrossplot + 'D3Area';
+}
 ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, scopeObj, compileFunc) {
     this.idHistogram = idHistogram;
     var domEle = this.objectContainer
@@ -293,10 +309,36 @@ ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, s
 
     this.doPlot(true, true);
 }
+ObjectOfTrack.prototype.createCrossplot = function(idCrossplot, crossplotName, scopeObj, compileFunc) {
+    this.idCrossplot = idCrossplot;
+    var domEle = this.objectContainer
+            .append("div")
+            .style('position', 'absolute')
+            .style('overflow', 'hidden')
+            .attr('class', 'vi-object-crossplot')
+            .style('width', '100%')
+            .style('height', '100%')
+            .style('display', 'flex')
+            .node();
+
+    let html = '<wi-d3-crossplot style="flex: 1; display: flex;flex-direction:column;" name="' 
+               + getWiD3CrossplotName(idCrossplot) + '" id-crossplot="'
+               + idCrossplot + '"></wi-d3-crossplot>';
+    $(domEle).html(compileFunc(html)(scopeObj));
+    this.currentDraw = "Crossplot";
+    this.name = crossplotName;
+
+    this.doPlot(true, true);
+}
 ObjectOfTrack.prototype.getViHistogram = function() {
     let self = this;
     return this.wiComponentService.getComponent(getWiD3HistogramName(self.idHistogram));
 }
+ObjectOfTrack.prototype.getViCrossplot = function() {
+    let self = this;
+    return this.wiComponentService.getComponent(getWiD3CrossplotName(self.idCrossplot));
+}
+
 ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellProp, scopeObj, compileFunc) {
     if(config.dragToCreate) {
         config.intervalDepthTop = parseFloat(this.startDepth.toFixed(4));  
@@ -403,8 +445,10 @@ ObjectOfTrack.prototype.drawContainer = function(minX, maxX, minY, maxY, forcePl
             this.getViHistogram().visHistogram.doPlot();
         }
     }
-    if (forcePlot) {
-        if (this.viCrossplot) this.viCrossplot.doPlot();
+    if (this.idCrossplot) {
+        if (this.getViCrossplot().viCrossplot.doPlot) {
+            this.getViCrossplot().viCrossplot.doPlot();
+        }
     }
 }
 ObjectOfTrack.prototype.handleQuest = function(quest, wellProp) {

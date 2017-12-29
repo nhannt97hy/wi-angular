@@ -697,7 +697,10 @@ LogTrack.prototype.onPlotMouseDown = function(cb) {
             self.plotMouseDownCallback();
             cb();
         })
-        .on('contextmenu', cb);
+        .on('contextmenu', function() {
+            d3.event.currentDrawing = self.currentDrawing;
+            cb();
+        });
 }
 
 /**
