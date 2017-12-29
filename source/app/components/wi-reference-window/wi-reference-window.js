@@ -279,21 +279,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             async.eachOf(referenceCurves, function(refCurve, idx, callback) {
                 if(refCurve.idCurve && refCurve.visiable){
                     refCurve.datasetName = utils.findDatasetById(refCurve.curve.idDataset).properties.name;
-                    let config = {
-                        idCurve: refCurve.idCurve,
-                        name: refCurve.datasetName + '.' + refCurve.curve.name,
-                        minX: refCurve.left,
-                        maxX: refCurve.right,
-                        minY: _top,
-                        maxY: _bottom,
-                        yStep: stepY,
-                        offsetY: _top,
-                        line: {
-                            color: refCurve.color
+                    wiApiService.infoCurve(refCurve.idCurve, function (curve) {
+                        let config = {
+                            idCurve: refCurve.idCurve,
+                            name: refCurve.datasetName + '.' + refCurve.curve.name,
+                            minX: refCurve.left,
+                            maxX: refCurve.right,
+                            minY: _top,
+                            maxY: _bottom,
+                            yStep: stepY,
+                            offsetY: _top,
+                            scale: curve.LineProperty ? curve.LineProperty.displayType : "Linear",
+                            line: {
+                                color: refCurve.color
+                            }
                         }
-                    }
-    
-                    refWindCtrl.addRefCurve(refCurve.idCurve, config, callback);
+                        refWindCtrl.addRefCurve(refCurve.idCurve, config, callback);
+                    });
                 }else{
                     callback();
                 }
