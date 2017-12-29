@@ -158,6 +158,8 @@ ImageTrack.prototype.addImageZone = function(config, track) {
 
 ImageTrack.prototype.adjustImage = function(img) {
     let self = this;
+    img.topDepth = Math.round(img.topDepth * 10000) / 10000;
+    img.bottomDepth = Math.round(img.bottomDepth * 10000) / 10000;
     self.plotImageZone(img);
     return img;
 }
