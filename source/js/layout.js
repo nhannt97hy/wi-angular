@@ -57,6 +57,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 let model = utils.getModel(modelRef.type, modelRef.id);
                 if (!model) return;
                 model.data.opened = false;
+                if (model.isReady) model.isReady = false;
             }
         });
         container.on('resize', function () {
@@ -111,7 +112,7 @@ module.exports.putTabRight = function (config) {
     let rightContainer = layoutManager.root.getItemsById('right')[0];
     let tabItem = rightContainer.getItemsById(config.id)[0];
     if (tabItem) {
-        rightContainer.setActiveContentItem(config.id);
+        rightContainer.setActiveContentItem(tabItem);
         return;
     }
     let childConfig = {

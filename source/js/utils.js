@@ -1327,7 +1327,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiApiService = __GLOBAL.wiApiService;
     // wiApiService.getPalettes(function(paletteList) {
     getPalettes(function (paletteList) {
-        wiApiService.post(wiApiService.GET_PLOT, {idPlot: logplotModel.id},
+        wiApiService.getLogplot(logplotModel.id,
             function (plot) {
                 if (logplotModel.properties.referenceCurve) {
                     slidingBarCtrl.createPreview(plot.referenceCurve);
@@ -1393,6 +1393,174 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 
                     });
                 };
+                let trackProps = new Array();
+                async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
+                    if (aTrack.idDepthAxis) {
+                        wiD3Ctrl.pushDepthTrack(aTrack);
+                        trackProps.push(aTrack);
+                        async.setImmediate(_callback);
+                    }
+                    else if (aTrack.idTrack) {
+                        let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+                        trackProps.push(aTrack);
+                        async.setImmediate(_callback);
+                    } else if (aTrack.idZoneTrack) {
+                        let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
+                        trackProps.push(aTrack);
+                        async.setImmediate(_callback);
+                        
+                    } else if(aTrack.idImageTrack) {
+                        let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
+                        trackProps.push(aTrack);
+                        async.setImmediate(_callback);
+                    } else if(aTrack.idObjectTrack) {
+                        let viTrack = wiD3Ctrl.pushObjectTrack(aTrack);
+                        trackProps.push(aTrack);
+                        async.setImmediate(_callback);
+                    } else {
+                        async.setImmediate(_callback);
+                    }
+                }, function(error) {
+                    buildTracks();
+                });
+                function buildTracks() {
+                    let loadedTracks = wiD3Ctrl.getTracks();
+                    async.eachOf(loadedTracks, function(aTrack, idx, _cb){
+                        if (aTrack.type == "depth-track") {
+                            console.log('depth track');
+                            async.setImmediate(_cb);
+                        }
+                        else if (aTrack.type == "log-track") {
+                            trackProps[idx].markers.forEach(function (marker) {
+                                wiD3Ctrl.addMarkerToTrack(aTrack, marker);
+                            });
+                            trackProps[idx].annotations.forEach(function (anno) {
+                                wiD3Ctrl.addAnnotationToTrack(aTrack, anno);
+                            })
+                            if (!trackProps[idx].lines || trackProps[idx].lines.length == 0) {
+                                async.setImmediate(_cb);
+                            }
+
+                            let lineCount = 0;
+                            let lineNum = trackProps[idx].lines.length;
+                            let eventEmitter = new EventEmitter();
+                            eventEmitter.on('line-drawed', function (someTrack) {
+                                console.log(someTrack);
+                                lineCount++;
+                                if (lineCount == lineNum) {
+                                    drawAllShadings(someTrack, aTrack);
+                                    _cb();
+                                }
+                            });
+
+                            //let someTrack = aTrack;
+                            trackProps[idx].lines.forEach(function (line) {
+                                getCurveData(wiApiService, line.idCurve, function (err, data) {
+                                    let lineModel = lineToTreeConfig(line);
+
+                                    if (!err) {
+                                        wiD3Ctrl.addCurveToTrack(aTrack, data, lineModel.data);
+                                    }
+                                    else {
+                                        console.error(err);
+                                        wiComponentService.getComponent(wiComponentService.UTILS).error(err);
+                                    }
+                                    eventEmitter.emitEvent('line-drawed', [trackProps[idx]]);
+                                });
+                            });
+                        }
+                        else if (aTrack.type == "zone-track") {
+                            if (!trackProps[idx].zoneset) {
+                                async.setImmediate(_cb);
+                            }
+                            wiApiService.getZoneSet(trackProps[idx].zoneset.idZoneSet, function (zoneset) {
+                                for (let zone of zoneset.zones) {
+                                    wiD3Ctrl.addZoneToTrack(aTrack, zone);
+                                }
+                                _cb();
+                            });
+                        }
+                        else if (aTrack.type == "image-track") {
+                            wiApiService.getImagesOfTrack(trackProps[idx].idImageTrack, function (images) {
+                                for (let img of images) {
+                                    wiD3Ctrl.addImageZoneToTrack(aTrack, img);
+                                }
+                                _cb();
+                            });
+                        }
+                        else if (aTrack.type == "object-track") {
+                            if(!trackProps[idx].object_of_tracks || !trackProps[idx].object_of_tracks.length) {
+                                async.setImmediate(_cb);
+                            } else {
+                                for (let objectOfTrack of trackProps[idx].object_of_tracks) {
+                                    //objectOfTrack.minY = viTrack.minY;
+                                    //objectOfTrack.maxY = viTrack.maxY;
+                                    let anObject = wiD3Ctrl.addObjectToTrack(aTrack, objectOfTrack);
+                                    let objectProps = JSON.parse(objectOfTrack.object);
+
+                                    switch(objectProps.type) {
+                                        case 'Histogram' :
+                                            if (objectProps.idHistogram) {
+                                                let histogramModel = findHistogramModelById(objectProps.idHistogram);
+                                                if (histogramModel && histogramModel.properties) {
+                                                    anObject.createHistogram(
+                                                        histogramModel.properties.idHistogram, 
+                                                        histogramModel.properties.name, 
+                                                        wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                    );
+                                                }
+                                                else {
+                                                   // TODO 
+                                                }
+                                            }
+                                            else {
+                                                // TODO
+                                            }
+
+                                            break;
+                                        case 'Crossplot':
+                                            objectProps.intervalDepthTop = objectOfTrack.topDepth;
+                                            objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
+                                            wiApiService.getCrossplot(objectProps.idCrossPlot, function(crossplot) {
+                                                if(crossplot.idCrossPlot) {
+                                                    wiApiService.getPointSet(objectProps.idPointSet, function(pointSet) {
+                                                        wiApiService.infoCurve(pointSet.idCurveX, function(curveX) {
+                                                            wiApiService.dataCurve(pointSet.idCurveX, function(dataCurveX) {
+                                                                curveX.rawData = dataCurveX;
+                                                                if(pointSet.idCurveX == pointSet.idCurveY) {
+                                                                    let curveY = curveX;
+                                                                    createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
+                                                                } else {
+                                                                    wiApiService.infoCurve(pointSet.idCurveY, function(curveY) {
+                                                                        wiApiService.dataCurve(pointSet.idCurveY, function(dataCurveY) {
+                                                                            curveY.rawData = dataCurveY;
+                                                                            createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
+                                                                        })
+                                                                    })
+                                                                }
+                                                            })
+                                                        })
+                                                    });
+                                                } else {
+                                                    wiD3Ctrl.removeAnObjectOfObjectTrack(aTrack, anObject);
+                                                }
+                                            });
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
+                                }
+                                async.setImmediate(_cb);
+                            }
+                        }
+                    }, function(err) {
+                        logplotCtrl.handlers.Scale100ButtonClicked();
+                        logplotModel.isReady = true;
+                        if (callback) callback();
+                    });
+                }
+                /*
                 let aTrack = tracks.shift();
                 while (aTrack) {
                     if (aTrack.idDepthAxis) {
@@ -1489,24 +1657,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                         else {
                                             // TODO
                                         }
-                                        /*
-                                        wiApiService.getHistogram(objectProps.idHistogram, function (histogramProps) {
-                                            if(histogramProps.idHistogram) {
-                                                histogramProps.background = objectProps.background;
-                                                histogramProps.intervalDepthTop = objectProps.intervalDepthTop;
-                                                histogramProps.intervalDepthBottom = objectProps.intervalDepthBottom;
-                                                wiApiService.infoCurve(histogramProps.idCurve, function (curveInfo) {
-                                                    wiApiService.dataCurve(histogramProps.idCurve, function (dataCurve) {
-                                                        wiApiService.getWell(histogramProps.idWell, function (wellProps) {
-                                                            anObject.createHistogramToForeignObject(histogramProps, wellProps, wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc);
-                                                        })
-                                                    })
-                                                })
-                                            } else {
-                                                wiD3Ctrl.removeAnObjectOfObjectTrack(viTrack, anObject);
-                                            }
-                                        });
-                                        */
+                                        
 
                                         break;
                                     case 'Crossplot':
@@ -1545,8 +1696,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     }
                     aTrack = tracks.shift();
                 }
-                logplotCtrl.handlers.Scale100ButtonClicked();
-                if (callback) callback();
+                */
+                // logplotCtrl.handlers.Scale100ButtonClicked();
+                // if (callback) callback();
             });
     });
 };
