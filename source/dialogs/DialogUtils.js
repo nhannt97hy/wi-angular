@@ -5290,7 +5290,6 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         function updateCrossplot() {
             self.crossplotModelProps.isDefineDepthColors = $scope.isDefineDepthColors;
             self.crossplotModelProps.axisColors = JSON.stringify($scope.axisColors);
-            _crossplotModel.properties = self.crossplotModelProps;
             if ($scope.isDefineDepthColors) {
                 for (let c of $scope.axisColors) {
                     if (c.minValue == null || c.maxValue == null || c.color == null) {
@@ -5308,9 +5307,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 }
             }
 
+            _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
             self.updating = true;
+            self.updating = false;
+            if (callback) callback(self.crossplotModelProps);
+            /*
             let overlayLine;
-            _crossplotModel.properties = self.crossplotModelProps;
 
             let pointSet = self.crossplotModelProps.pointsets[0];
 
@@ -5359,18 +5361,15 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
                 if (xCurveData) {
                     let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
-                    crossplotProps.pointSet.curveX
-                    = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
+                    crossplotProps.pointSet.curveX = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
                 }
                 if (yCurveData) {
                     let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
-                    crossplotProps.pointSet.curveY
-                    = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
+                    crossplotProps.pointSet.curveY = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
                 }
                 if (zCurveData) {
                     let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
-                    crossplotProps.pointSet.curveZ
-                    = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
+                    crossplotProps.pointSet.curveZ = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
                 }
                 else {
                     delete crossplotProps.pointSet.curveZ;
@@ -5379,10 +5378,11 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 if (overlayLine) {
                     crossplotProps.pointSet.overlayLine = overlayLine;
                 }
-
                 self.updating = false;
                 if (callback) callback(crossplotProps);
             });
+            */
+
             /*
             async.parallel([
                 function(cb) {

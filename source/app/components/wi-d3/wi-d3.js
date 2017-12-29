@@ -2881,8 +2881,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             });
                         }, function(callback) {
                             DialogUtils.crossplotFormatDialog(ModalService, newCrossplotModel.properties.idCrossPlot, function(crossplotProps) {
-                                newCrossplotModel.properties = crossplotProps
-                                callback();
+                                newCrossplotModel.properties = crossplotProps;
+                                async.parallel([ function(cb) {
+                                    wiApiService.editCrossplot(newCrossplotModel.properties, function(returnData) {
+                                        cb();
+                                    });
+                                }, function(cb) {
+                                    wiApiService.editPointSet(newCrossplotModel.properties.pointsets[0], function(returnData) {
+                                        cb();
+                                    });
+                                }], function(err, result) {
+                                    callback();
+                                });
                             }, function() {
                                 callback('cancel');
                             }, {

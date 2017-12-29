@@ -1423,6 +1423,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     buildTracks();
                 });
                 function buildTracks() {
+                    trackProps.sort(function (track1, track2) {
+                        return track1.orderNum.localeCompare(track2.orderNum);
+                    });
                     let loadedTracks = wiD3Ctrl.getTracks();
                     async.eachOf(loadedTracks, function(aTrack, idx, _cb){
                         if (aTrack.type == "depth-track") {
