@@ -463,6 +463,9 @@ Crossplot.prototype.init = function(domElem) {
     this.resizeSensor = new ResizeSensor( $(this.root.node()), function(param) {
         self._doPlot();
     } );
+    document.addEventListener('resize', function (event) {
+        self._doPlot();
+    })
     /*
     d3.select(window)
         .on('resize', function() {
@@ -511,7 +514,7 @@ Crossplot.prototype._doPlot = function(){
     self.timerHandle = setTimeout(function() {
         self.timerHandle = null;
         self.doPlot();
-    }, 1000);
+    }, 500);
 };
 
 Crossplot.prototype.doPlot = function() {

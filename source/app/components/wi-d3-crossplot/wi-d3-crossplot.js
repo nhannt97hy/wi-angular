@@ -139,6 +139,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             innerElem.css('width', elem[0].clientHeight + 'px');
             innerElem.css('height', elem[0].clientWidth + 'px');
         });
+        document.addEventListener('resize', function (event) {
+            innerElem.css('width', elem[0].clientHeight + 'px');
+            innerElem.css('height', elem[0].clientWidth + 'px');
+        })
         innerElem.css('width', elem[0].clientHeight + 'px');
         innerElem.css('height', elem[0].clientWidth + 'px');
         var well = getWell();

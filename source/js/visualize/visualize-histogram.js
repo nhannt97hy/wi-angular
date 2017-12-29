@@ -171,7 +171,7 @@ Histogram.prototype.doPlot = function() {
     self.timerHandle = setTimeout(function() {
         self.timerHandle = null;
         self._doPlot();
-    }, 1000);
+    }, 500);
 }
 Histogram.prototype._doPlot = function() {
     var self = this;
@@ -723,6 +723,9 @@ Histogram.prototype.init = function(domElem) {
     this.resizeSensor = new ResizeSensor( $(this.container.node()), function(param) {
         self.doPlot();
     } );
+    document.addEventListener('resize', function (event) {
+        self.doPlot();
+    })
 
     this.svgContainer
         .selectAll('g.vi-histogram-axis-group')

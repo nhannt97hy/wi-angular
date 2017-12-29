@@ -222,6 +222,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             if (currentParentHeight !== parentHeight) self.refreshHandler();
             _viCurve.doPlot();
         });
+        document.addEventListener('resize', function (event) {
+            let currentParentHeight = $(self.contentId).height();
+            if (currentParentHeight !== parentHeight) self.refreshHandler();
+            _viCurve.doPlot();
+        })
 
         $(self.contentId).on("mousewheel", onMouseWheel);
         $(self.handleId).on("mousewheel", onMouseWheel);

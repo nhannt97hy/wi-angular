@@ -30,6 +30,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.onReady = function() {
         if (self.onRefWindCtrlReady) self.onRefWindCtrlReady(self);
+        document.addEventListener('resize', function (event) {
+            refresh();
+        })
         new ResizeSensor(document.getElementById(self.name), function() {
             //_viCurves.forEach(function(c) { c.doPlot(); });
             refresh();
