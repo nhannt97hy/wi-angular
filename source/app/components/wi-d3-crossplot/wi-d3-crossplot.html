@@ -1,11 +1,4 @@
-<!--
-<div resizable r-directions="['right']" r-flex="true" ng-show="wiD3Crossplot.isShowWiZone" style="min-width:10%;max-width:20%">
-    <wi-container name='ZoneCrossplotContainer' title='Zone' close-handler='wiD3Crossplot.CloseZone'>
-      <wi-zone name="{{wiD3Crossplot.getZoneName();}}" zones="wiD3Crossplot.zoneArr" active-zone="wiD3Crossplot.crossplotModel.properties.pointsets[0].activeZone" on-zone-ctrl-ready="wiD3Crossplot.onZoneCtrlReady"></wi-zone>
-    </wi-container>
-</div>
--->
-<div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column;margin-left:14px">
+<div class='d3-crossplot-region' style="flex:1;display:flex; flex-direction:column">
     <h4>Crossplot: {{wiD3Crossplot.crossplotModel.properties.name}}</h4>
     <h5>Reference: [{{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthTop | toFixed2}} - {{wiD3Crossplot.crossplotModel.properties.pointsets[0].intervalDepthBottom | toFixed2}}]</h5>
     <div class='crossplot-container position-relative' id='{{wiD3Crossplot.crossplotAreaId}}'>
@@ -36,15 +29,3 @@
         </div>
     </div>
 </div>
-<!--
-<div resizable r-directions="['left']" r-flex="true" ng-show="wiD3Crossplot.crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
-    <wi-container name='RefCrossplotContainer'
-        title='Reference Curve'
-        close-handler='wiD3Crossplot.CloseReferenceWindow'>
-      <wi-reference-window
-        name='{{wiD3Crossplot.getWiRefWindCtrlName()}}'
-        on-ref-wind-ctrl-ready="wiD3Crossplot.onRefWindCtrlReady">
-      </wi-reference-window>
-    </wi-container>
-</div>
--->

@@ -86,30 +86,30 @@
                     </div>
                     <div class="form-group">
                         <label for="isShowName" class="col-sm-3 normal-text">
-                            <input type="checkbox" id="isShowName" ng-model="wiModal.showName">Show Name
+                            <input type="checkbox" ng-change="wiModal.onPropsChange()" id="isShowName" ng-model="wiModal.showName">Show Name
                         </label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control wi-form-control" id="name" ng-model="wiModal.name" ng-disabled="!wiModal.showName">
+                            <input type="text" ng-change="wiModal.onPropsChange()" class="form-control wi-form-control" id="name" ng-model="wiModal.name" ng-disabled="!wiModal.showName">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="start-depth" class="control-label col-sm-3 normal-text">Start (depth)</label>
                         <div class="col-sm-8">
-                            <input type="number" min="0" step="0.0001" class="form-control wi-form-control" id="start-depth" ng-model="wiModal.topDepth">
+                            <input type="number" ng-change="wiModal.onPropsChange()" min="0" step="0.0001" class="form-control wi-form-control" id="start-depth" ng-model="wiModal.topDepth">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="start-depth" class="control-label col-sm-3 normal-text">End (depth)</label>
                         <div class="col-sm-8">
-                            <input type="number" min="0" step="0.0001" class="form-control wi-form-control" id="end-depth" ng-model="wiModal.bottomDepth">
+                            <input type="number" ng-change="wiModal.onPropsChange()" min="0" step="0.0001" class="form-control wi-form-control" id="end-depth" ng-model="wiModal.bottomDepth">
                         </div>
                     </div>
                 </form>
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;Apply</button>
                 <button type="button" ng-click="wiModal.onOkButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;OK</button>
-                <button ng-if="wiModal.isCreated" type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="!wiModal.done || !wiModal.imageUrl"><span class="ok-16x16"></span>&nbsp;Apply</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

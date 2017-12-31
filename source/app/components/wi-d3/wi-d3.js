@@ -589,6 +589,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!track || !track.addImageZone) return;
         let imgzone = track.addImageZone(config, track);
 
+        if (imgzone.idImageOfTrack) imgzone.header.attr('id', 'id' + imgzone.idImageOfTrack);
+
         track.plotImageZone(imgzone);
         track.rearrangeHeaders();
         track.onImageZoneMouseDown(imgzone, function() {
@@ -1448,24 +1450,69 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .on('end', function () {
                 if (track.mode != 'AddImageZone') return;
 
-                DialogUtils.imageZonePropertiesDialog(ModalService, imgzone.getProperties(), function (props) {
+                let _currentImage = imgzone.getProperties();
+                _currentImage.isNewDraw = true;
+
+                DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
                     if (!props) {
                         track.removeImage(imgzone);
                         return;
+                    } else if (props === true) {
+                        return;
                     }
+                    let isNewDraw = props.isNewDraw;
                     props.idImageTrack = track.id;
-                    wiApiService.createImage(props, function (imgProps) {
-                        if (imgProps) {
-                            $timeout(function () {
-                                imgzone.setProperties(imgProps);
-                                self.drawImageZone(imgzone, imgProps, true);
-                            });
-                        }
-                    });
+                    delete props.isNewDraw;
+                    if (isNewDraw) {
+                        wiApiService.createImage(props, function (imgProps) {
+                            if (imgProps) {
+                                $timeout(function () {
+                                    imgzone.setProperties(imgProps);
+                                    imgzone.header.attr('id', 'id' + imgzone.idImageOfTrack);
+                                    if (!imgzone.showName) imgzone.header.select('div').remove();
+                                    self.drawImageZone(imgzone, imgProps, isNewDraw);
+                                    track.plotImageZone(imgzone);
+                                    track.rearrangeHeaders();
+                                    _currentImage = imgzone.getProperties();
+                                });
+                            }
+                        });
+                    } else {
+                        props.idImageOfTrack = _currentImage.idImageOfTrack;
+                        wiApiService.editImage(props, function (imgProps) {
+                            if (imgProps) {
+                                $timeout(function () {
+                                    imgzone.setProperties(imgProps);
+                                    if (!imgzone.showName) imgzone.header.select('div').remove();
+                                    else {
+                                        imgzone.header.select('div').remove();
+                                        delete imgzone.header;
+                                        imgzone.header = track.addImageZoneHeader(imgzone, false);
+                                    }
+                                    self.drawImageZone(imgzone, imgProps, isNewDraw);
+                                    track.onImageZoneHeaderMouseDown(imgzone, function() {
+                                        _setCurrentTrack(track);
+                                        let depthRange = imgzone.getDepthRange();
+                                        let rangeValue = depthRange[1] - depthRange[0];
+                                        depthRange[0] -= rangeValue * 0.5;
+                                        depthRange[1] += rangeValue * 0.5;
+
+                                        self.setDepthRange(depthRange);
+                                        self.adjustSlidingBarFromDepthRange(depthRange);
+                                        if (d3.event.button == 2) {
+                                            _imageZoneOnRightClick();
+                                        }
+                                    });
+                                    imgzone.doPlot();
+                                    track.plotImageZone(imgzone);
+                                    track.rearrangeHeaders();
+                                    _currentImage = imgzone.getProperties();
+                                });
+                            }
+                        });
+                    }
                 });
-                track.plotImageZone(imgzone);
                 track.setMode(null);
-                track.rearrangeHeaders();
             })
         );
         track.on('keydown', function () {
@@ -1852,27 +1899,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function imageProperties() {
         let track = _currentTrack;
         let imgzone = track.getCurrentImageZone();
-        console.log(imgzone);
         imgzone.setProperties({
             done: true
         });
         let _currentImage = imgzone.getProperties();
-        _currentImage.isCreated = true;
         DialogUtils.imageZonePropertiesDialog(ModalService, _currentImage, function (props) {
-            if (!props) return;
+            if (!props || props === true) return;
             wiApiService.editImage(props, function (imgProps) {
                 if (imgProps) {
                     $timeout(function () {
-                		imgzone.setProperties(imgProps);
+                        imgzone.setProperties(imgProps);
+                        imgzone.header.select('div').remove();
+                        delete imgzone.header;
+                        imgzone.header = track.addImageZoneHeader(imgzone, false);
                 		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
+                        track.onImageZoneHeaderMouseDown(imgzone, function() {
+                            _setCurrentTrack(track);
+                            let depthRange = imgzone.getDepthRange();
+                            let rangeValue = depthRange[1] - depthRange[0];
+                            depthRange[0] -= rangeValue * 0.5;
+                            depthRange[1] += rangeValue * 0.5;
+
+                            self.setDepthRange(depthRange);
+                            self.adjustSlidingBarFromDepthRange(depthRange);
+                            if (d3.event.button == 2) {
+                                _imageZoneOnRightClick();
+                            }
+                        });
+                        track.plotImageZone(imgzone);
+                        track.rearrangeHeaders();
                     });
+                    track.setMode(null);
                 }
             });
         });
-        track.plotImageZone(imgzone);
-        track.setMode(null);
-        track.rearrangeHeaders();
     }
 
     function showImage() {
@@ -2027,7 +2088,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiApiService.removeObjectOfObjectTrack(object.id, function () {
             switch (object.currentDraw) {
                 case "Crossplot":
-                    wiApiService.removeCrossplot(object.viCrossplot.idCrossPlot, function () {
+                    wiApiService.removeCrossplot(object.idCrossplot, function () {
                         console.log("crossplot removed");
                         Utils.refreshProjectState();
                     });
@@ -2790,88 +2851,84 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     label: 'Add Crossplot',
                     icon: 'crossplot-new-16x16',
                     handler: function () {
-                        getAllCurvesOfWell().then(function (allCurves) {
-
-                            let wellProps = _getWellProps();
-                            let crossplotConfig = {
-                                properties: {
-                                    idCrossPlot: 1,
-                                    idWell: wellProps.idWell,
-                                    idCurveX: null,
-                                    idCurveY: null,
-                                    majorX: 5,
-                                    minorX: 5,
-                                    majorY: 5,
-                                    minorY: 5,
-                                    numColor: 5,
-                                    scaleLeft: null,
-                                    scaleRight: null,
-                                    scaleBottom: null,
-                                    scaleTop: null,
-                                    pointSymbol: "Circle",
-                                    pointSize: 5,
-                                    pointColor: 'blue',
-                                },
-                                curves: allCurves,
-                                dragToCreate: true
-                            }
-
-                            DialogUtils.crossplotForObjectTrackDialog(ModalService, crossplotConfig, function (pointSetRaw) {
-                                prepareCurveData(pointSetRaw.curveX).then(function (curveX) {
-                                    prepareCurveData(pointSetRaw.curveY).then(function (curveY) {
-                                        prepareCurveData(pointSetRaw.curveZ).then(function(curveZ) {
-                                            pointSetRaw.curveX = curveX;
-                                            pointSetRaw.curveY = curveY;
-                                            pointSetRaw.curveZ = curveZ;
-                                            let pointSetObj = angular.copy(pointSetRaw);
-                                            delete pointSetObj.curveX;
-                                            delete pointSetObj.curveY;
-                                            delete pointSetObj.curveZ;
-                                            delete pointSetObj.name;
-                                            pointSetRaw.name = pointSetRaw.name || "Crossplot " + pointSetRaw.curveX.name + "_" + pointSetRaw.curveY.name + " - " + (Math.random().toString(36).substr(2, 3));
-                                            wiApiService.createCrossplot({
-                                                idWell: wellProps.idWell,
-                                                name: pointSetRaw.name
-                                            }, function (crossplot) {
-                                                if (!crossplot.idCrossPlot) {
-                                                    DialogUtils.errorMessageDialog(ModalService, "Error! " + crossplot);
-                                                    return;
-                                                }
-
-                                                pointSetObj.idCrossPlot = crossplot.idCrossPlot;
-                                                Utils.createPointSet(pointSetObj, function (pointSet) {
-                                                    if (!pointSet.idPointSet) {
-                                                        DialogUtils.errorMessageDialog(ModalService, "Error when create pointSet!");
-                                                        return;
-                                                    }
-                                                    let objectConfig = {
-                                                        curve1: pointSetRaw.curveX,
-                                                        curve2: pointSetRaw.curveY,
-                                                        config: {
-                                                            name: pointSetRaw.name,
-                                                            idCrossPlot: crossplot.idCrossPlot,
-                                                            idWell: wellProps.idWell,
-                                                            topDepth: wellProps.topDepth,
-                                                            bottomDepth: wellProps.bottomDepth,
-                                                            pointSet: pointSet,
-                                                        },
-                                                        dragToCreate: true,
-                                                        background: pointSetRaw.background
-                                                    }
-                                                    console.log("Crossplot configurations: ", objectConfig);
-                                                    let quest = {
-                                                        name: 'addCrossplot',
-                                                        config: objectConfig
-                                                    }
-                                                    track.setCurrentQuest(quest);
-                                                    track.setMode('AddObject');
-                                                });
-                                            });
+                        let windowY = self.getDepthRangeFromSlidingBar();
+                        let range = windowY[1] - windowY[0];
+                        let newCrossplotModel = null;
+                        let newOoT;
+                        async.series([ function(callback) {
+                            utils.createCrossplot(_getWellProps().idWell, 
+                                "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
+                                function(err, crossplotModel) {
+                                    if (err) {
+                                        console.error(err);
+                                        utils.error(err, function() {
+                                            callback();
                                         });
-                                    });
-                                });
+                                    }
+                                    else {
+                                        newCrossplotModel = crossplotModel;
+                                        callback();
+                                    }
+                                }
+                            );
+                        }, function(callback) {
+                            let pointSet = newCrossplotModel.properties.pointsets[0];
+                            pointSet.intervalDepthTop = windowY[0] + range/4.;
+                            pointSet.intervalDepthBottom = windowY[1] - range/4.;
+                            wiApiService.editPointSet(pointSet, function(returnData) {
+                                newCrossplotModel.properties.pointsets[0] = returnData;
+                                callback();
                             });
-                        });
+                        }, function(callback) {
+                            DialogUtils.crossplotFormatDialog(ModalService, newCrossplotModel.properties.idCrossPlot, function(crossplotProps) {
+                                newCrossplotModel.properties = crossplotProps;
+                                async.parallel([ function(cb) {
+                                    wiApiService.editCrossplot(newCrossplotModel.properties, function(returnData) {
+                                        cb();
+                                    });
+                                }, function(cb) {
+                                    wiApiService.editPointSet(newCrossplotModel.properties.pointsets[0], function(returnData) {
+                                        cb();
+                                    });
+                                }], function(err, result) {
+                                    callback();
+                                });
+                            }, function() {
+                                callback('cancel');
+                            }, {
+                                hideApply: true,
+                                autoName: true
+                            });
+                        }, function(callback) {
+                            wiApiService.createObjectOfObjectTrack({
+                                idObjectTrack: _currentTrack.id,
+                                topDepth: newCrossplotModel.properties.pointsets[0].intervalDepthTop,
+                                bottomDepth: newCrossplotModel.properties.pointsets[0].intervalDepthBottom,
+                                object: JSON.stringify({
+                                    type: 'Crossplot',
+                                    idCrossplot: newCrossplotModel.properties.idCrossPlot,
+                                    background: 'white'
+                                })
+                            }, function(returnedObject) {
+                                if (returnedObject.idObjectOfTrack) {
+                                    newOoT = returnedObject;
+                                    callback();
+                                }
+                                else {
+                                    newOoT = null;
+                                    callback(returnedObject);
+                                }
+                            });
+                        }, function(callback) {
+                            if (!_currentTrack) return;
+                            let transformY = _currentTrack.getTransformY();
+
+                            let object = self.addObjectToTrack(_currentTrack, newOoT);
+                            _currentTrack.setCurrentDrawing(object);
+                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
+                                newCrossplotModel.properties.name, $scope, $compile);
+                            callback();
+                        }]);
                     }
                 }, {
                     name: "DeleteTrack",

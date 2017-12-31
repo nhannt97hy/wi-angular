@@ -148,7 +148,7 @@ ImageTrack.prototype.addImageZone = function(config, track) {
         imgzone.doPlot(true);
         imgzone.drawImage(config, true);
     }
-    imgzone.header = this.addImageZoneHeader(imgzone);
+    imgzone.header = this.addImageZoneHeader(imgzone, true);
     imgzone.on('mousedown', function() {
         self.drawingMouseDownCallback(imgzone);
     });
@@ -158,6 +158,8 @@ ImageTrack.prototype.addImageZone = function(config, track) {
 
 ImageTrack.prototype.adjustImage = function(img) {
     let self = this;
+    img.topDepth = Math.round(img.topDepth * 10000) / 10000;
+    img.bottomDepth = Math.round(img.bottomDepth * 10000) / 10000;
     self.plotImageZone(img);
     return img;
 }
@@ -184,24 +186,35 @@ ImageTrack.prototype.removeImage = function(imgzone) {
     this.removeDrawing(imgzone);
 }
 
-ImageTrack.prototype.addImageZoneHeader = function(imgzone) {
+ImageTrack.prototype.addImageZoneHeader = function(imgzone, isNew) {
     let self = this;
 
-    let header = this.drawingHeaderContainer.append('div')
-        .attr('class', 'vi-image-zone-header')
-        .attr('data-topdepth', imgzone.topDepth)
-        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
-        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+    let header;
 
-    header.append('div')
-        .attr('class', 'vi-drawing-header-highlight-area vi-drawing-header-name vi-image-zone-header-name');
+    if (isNew) {
+        header = this.drawingHeaderContainer.append('div')
+            .attr('class', 'vi-image-zone-header')
+            .attr('data-topdepth', imgzone.topDepth)
+            .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+            .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+    } else {
+        header = this.drawingHeaderContainer.select('#id' + imgzone.idImageOfTrack);
+    }
 
-    let rect = header.node().getBoundingClientRect();
-    
-    header.append('svg')
-        .attr('class', 'vi-drawing-header-fill vi-image-zone-header-fill')
-        .attr('width', rect.width)
-        .attr('height', rect.height);
+    if (imgzone.showName) {
+        header.append('div')
+            .attr('class', 'vi-drawing-header-highlight-area vi-drawing-header-name vi-image-zone-header-name');
+    }
+
+    if (isNew) {
+        let rect = header.node().getBoundingClientRect();
+        
+        header.append('svg')
+            .attr('class', 'vi-drawing-header-fill vi-image-zone-header-fill')
+            .attr('width', rect.width)
+            .attr('height', rect.height);
+    }
+
     return header;
 }
 
@@ -221,13 +234,6 @@ ImageTrack.prototype.onImageZoneMouseDown = function(imgzone, cb) {
         self.drawingMouseDownCallback(imgzone);
         d3.select(this).raise();
         cb();
-    });
-}
-
-ImageTrack.prototype.onImageZoneMouseOver = function (imgzone, cb) {
-    let self = this;
-    imgzone.on('mouseover', function () {
-        
     });
 }
 

@@ -4114,6 +4114,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         this.isPropsChanged = false;
         this.isCreated = props.isCreated;
+        this.wasApplyButtonClicked = false;
 
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
@@ -4141,7 +4142,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             this.configImage = function (index) {
                 self.imagesOfCurrentTrack[index].done = true;
                 DialogUtils.imageZonePropertiesDialog(ModalService, self.imagesOfCurrentTrack[index], function (data) {
-                    if (!data) return;
+                    if (!data || data === true) return;
                     self.imagesOfCurrentTrack[index] = data;
                     self.onImageChanged(index);
                 });
@@ -4151,6 +4152,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                 let newImage = {
                     // name: 'New Image',
                     fill: 'white',
+                    showName: true,
                     flag: _NEW
                 };
 
@@ -4193,7 +4195,6 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                         case _NEW:
                             delete self.imagesOfCurrentTrack[i].flag;
                             self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
-                            self.imagesOfCurrentTrack[i].showName = true;
                             wiApiService.createImage(self.imagesOfCurrentTrack[i], function(data) {
                                 self.imagesOfCurrentTrack[i] = data;
                                 callback();
@@ -4203,7 +4204,6 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                         case _EDIT:
                             delete self.imagesOfCurrentTrack[i].flag;
                             self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
-                            self.imagesOfCurrentTrack[i].showName = true;
                             wiApiService.editImage(self.imagesOfCurrentTrack[i], function(data) {
                                 self.imagesOfCurrentTrack[i] = data;
                                 callback();
@@ -4254,15 +4254,20 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         this.onOkButtonClicked = function () {
             bindProps();
-            if (self.status) {
-                doApply(function() {
-                    close(props);
-                });
+            if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                close(null);
             } else {
-                close(props);
+                if (self.status) {
+                    doApply(function() {
+                        close(props);
+                    });
+                } else {
+                    close(props);
+                }
             }
         }
         this.onApplyButtonClicked = function () {
+            self.wasApplyButtonClicked = true;
             bindProps();
             if (self.status) {
                 doApply(function() {
@@ -4313,7 +4318,10 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         this.uploadedImages = [];
 
-        this.isCreated = props.isCreated;
+        this.wasApplyButtonClicked = false;
+        this.isNewDraw = props.isNewDraw || false;
+
+        this.isPropsChanged = false;
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
@@ -4350,6 +4358,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                     self.uploadedImages.push(latestImage);
                 });
             });
+            self.isPropsChanged = true;
         }
 
         this.background = function () {
@@ -4357,6 +4366,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                 self.fill = colorStr;
                 console.log(colorStr);
             });
+            self.isPropsChanged = true;
         }
 
         this.openGallery = function () {
@@ -4379,6 +4389,10 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.onImageUrlChange = _.debounce(function () {
             self.done = validateUrl(self.imageUrl);
         }, 500);
+
+        this.onPropsChange = function() {
+            self.isPropsChanged = true;
+        }
 
         function validateUrl (str) {
             var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
@@ -4423,23 +4437,39 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             props.bottomDepth = self.bottomDepth;
             props.imageUrl = self.imageUrl;
             props.name = self.name;
-            // props.showName = self.showName;
+            props.showName = self.showName;
             props.fill = self.fill;
             props.done = self.done;
+            props.isNewDraw = self.isNewDraw;
         }
 
         this.onOkButtonClicked = function () {
             bindProps();
-            close(props, 100);
+            if (self.isNewDraw) {
+                if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                    close(true);
+                } else {
+                    close(props, 100);
+                }
+            } else {
+                if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                    close(null);
+                } else {
+                    close(props, 100);
+                }
+            }
         }
 
         this.onApplyButtonClicked = function () {
+            self.wasApplyButtonClicked = true;
             bindProps();
             callback(props);
+            self.isNewDraw = false;
         }
 
         this.onCancelButtonClicked = function () {
-            close(null);
+            if (self.wasApplyButtonClicked) close(true);
+            else close(null);
         }
     }
     ModalService.showModal({
@@ -4980,19 +5010,22 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
 }
 */
 
-exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callback, cancelCallback, options){
+exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback, cancelCallback, options){
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         const CURVE_SYMBOLS = ['X', 'Y', 'Z'];
 
         let self = this;
+        this.hideApply = ((options || {}).hideApply || false);
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
 
-        let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+        let _crossplotModel = utils.getModel('crossplot', wiCrossplotId);
+        //let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
 
-        this.crossplotModelProps = angular.copy(wiD3CrossplotCtrl.crossplotModel.properties);
+        //this.crossplotModelProps = angular.copy(wiD3CrossplotCtrl.crossplotModel.properties);
+        this.crossplotModelProps = angular.copy(_crossplotModel.properties);
 
         this.selectedCurveX = null;
         this.selectedCurveY = null;
@@ -5005,7 +5038,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
         this.lineMode = false;
         this.overlayLines = [];
 
-        this.well = utils.findWellByCrossplot(wiCrossplotCtrl.id);
+        this.well = utils.findWellByCrossplot(wiCrossplotId);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
 
         async.waterfall([
@@ -5014,7 +5047,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 if (!pointsets || !pointsets.length || !pointsets[0].idPointSet ) {
                     wiApiService.getCrossplot(self.crossplotModelProps.idCrossPlot, function (crossplot) {
                         self.crossplotModelProps = crossplot;
-                        wiCrossplotCtrl.crossplotModel.properties = crossplot;
+                        //wiCrossplotCtrl.crossplotModel.properties = crossplot;
+                        _crossplotModel.properties = crossplot;
                         cb();
                     });
                 }
@@ -5266,8 +5300,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
 
         function updateCrossplot() {
             self.crossplotModelProps.isDefineDepthColors = $scope.isDefineDepthColors;
-            self.crossplotModelProps.axisColors = $scope.axisColors;
-
+            self.crossplotModelProps.axisColors = JSON.stringify($scope.axisColors);
             if ($scope.isDefineDepthColors) {
                 for (let c of $scope.axisColors) {
                     if (c.minValue == null || c.maxValue == null || c.color == null) {
@@ -5285,8 +5318,83 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                 }
             }
 
+            _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
             self.updating = true;
+            self.updating = false;
+            if (callback) callback(self.crossplotModelProps);
+            /*
             let overlayLine;
+
+            let pointSet = self.crossplotModelProps.pointsets[0];
+
+            var xCurveData, yCurveData, zCurveData;
+            async.parallel([
+                function(cb) {
+                    if (pointSet.idCurveX) {
+                        wiApiService.dataCurve(pointSet.idCurveX, function (curveData) {
+                            xCurveData = curveData;
+                            cb();
+                        });
+                    }
+                    else async.setImmediate(cb);
+                },
+                function(cb) {
+                    if (pointSet.idCurveY) {
+                        wiApiService.dataCurve(pointSet.idCurveY, function (curveData) {
+                            yCurveData = curveData;
+                            cb();
+                        });
+                    }
+                    else async.setImmediate(cb);
+                },
+                function(cb) {
+                    if (pointSet.idCurveZ) {
+                        wiApiService.dataCurve(pointSet.idCurveZ, function (curveData) {
+                            zCurveData = curveData;
+                            cb();
+                        })
+                    }
+                    else async.setImmediate(cb);
+                },
+                function(cb) {
+                    if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
+                        wiApiService.getOverlayLine(self.crossplotModelProps.pointsets[0].idOverlayLine, function(ret) {
+                            overlayLine = (ret || {}).data;
+                            cb();
+                        });
+                    }
+                    else {
+                        async.setImmediate(cb);
+                    }
+                }
+            ], function(result, err) {
+                let crossplotProps = angular.copy(self.crossplotModelProps);
+                crossplotProps.pointSet = crossplotProps.pointsets[0];
+                if (xCurveData) {
+                    let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
+                    crossplotProps.pointSet.curveX = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
+                }
+                if (yCurveData) {
+                    let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
+                    crossplotProps.pointSet.curveY = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
+                }
+                if (zCurveData) {
+                    let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
+                    crossplotProps.pointSet.curveZ = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
+                }
+                else {
+                    delete crossplotProps.pointSet.curveZ;
+                }
+
+                if (overlayLine) {
+                    crossplotProps.pointSet.overlayLine = overlayLine;
+                }
+                self.updating = false;
+                if (callback) callback(crossplotProps);
+            });
+            */
+
+            /*
             async.parallel([
                 function(cb) {
                     payload = {
@@ -5309,98 +5417,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
                     utils.error(err);
                 }
                 else {
-                    wiD3CrossplotCtrl.crossplotModel.properties = self.crossplotModelProps;
-                    let pointSet = self.crossplotModelProps.pointsets[0];
-
-                    // let crossplotProps = angular.copy(self.crossplotModel.properties);
-                    // crossplotProps.pointSet = crossplotProps.pointsets[0];
-                    var xCurveData, yCurveData, zCurveData;
-                    async.parallel([
-                        function(cb) {
-                            if (pointSet.idCurveX) {
-                                wiApiService.dataCurve(pointSet.idCurveX, function (curveData) {
-                                    xCurveData = curveData;
-                                    cb();
-                                });
-                            }
-                            else async.setImmediate(cb);
-                        },
-                        function(cb) {
-                            if (pointSet.idCurveY) {
-                                wiApiService.dataCurve(pointSet.idCurveY, function (curveData) {
-                                    yCurveData = curveData;
-                                    cb();
-                                });
-                            }
-                            else async.setImmediate(cb);
-                        },
-                        function(cb) {
-                            if (pointSet.idCurveZ) {
-                                wiApiService.dataCurve(pointSet.idCurveZ, function (curveData) {
-                                    zCurveData = curveData;
-                                    cb();
-                                })
-                            }
-                            else async.setImmediate(cb);
-                        },
-                        function(cb) {
-                            if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
-                                wiApiService.getOverlayLine(self.crossplotModelProps.pointsets[0].idOverlayLine, function(ret) {
-                                    //self.updating = false;
-                                    overlayLine = (ret || {}).data;
-                                    //if (callback) callback(crossplotProps);
-                                    cb();
-                                });
-                            }
-                            else {
-                                async.setImmediate(cb);
-                                //self.updating = false;
-                                //if (callback) callback(crossplotProps);
-                            }
-                        }
-                    ], function(result, err) {
-                        let crossplotProps = angular.copy(self.crossplotModelProps);
-                        crossplotProps.pointSet = crossplotProps.pointsets[0];
-                        if (xCurveData) {
-                            let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
-                            crossplotProps.pointSet.curveX
-                            = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
-                        }
-                        if (yCurveData) {
-                            let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
-                            crossplotProps.pointSet.curveY
-                            = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
-                        }
-                        if (zCurveData) {
-                            let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
-                            crossplotProps.pointSet.curveZ
-                            = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
-                        }
-//<<<<<<< HEAD
-//=======
-//                        if (crossplotProps.pointSet.idOverlayLine) {
-//                            wiApiService.getOverlayLine(crossplotProps.pointSet.idOverlayLine, function(ret) {
-//                                self.updating = false;
-//                                crossplotProps.pointSet.overlayLine = (ret || {}).data;
-//                                if (callback) callback(crossplotProps);
-//                            })
-//                        }
-//>>>>>>> 3c954e48492c4ace5861607278cd06cf472232cf
-                        else {
-                            delete crossplotProps.pointSet.curveZ;
-                        }
-
-                        if (overlayLine) {
-                            crossplotProps.pointSet.overlayLine = overlayLine;
-                        }
-
-                        //wiD3CrossplotCtrl.viCrossplot.setProperties(crossplotProps);
-                        //wiD3CrossplotCtrl.viCrossplot.doPlot();
-                        self.updating = false;
-                        if (callback) callback(crossplotProps);
-                    });
                 }
             });
+            */
         }
 
         this.onOkButtonClicked = function () {
@@ -5411,6 +5430,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotCtrl, callbac
             updateCrossplot();
         };
         this.onCancelButtonClicked = function () {
+            if (cancelCallback) cancelCallback();
             close(null);
         };
     };

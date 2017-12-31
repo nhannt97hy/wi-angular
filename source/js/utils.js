@@ -1325,7 +1325,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
-    // wiApiService.getPalettes(function(paletteList) {
     getPalettes(function (paletteList) {
         wiApiService.getLogplot(logplotModel.id,
             function (plot) {
@@ -1424,6 +1423,9 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                     buildTracks();
                 });
                 function buildTracks() {
+                    trackProps.sort(function (track1, track2) {
+                        return track1.orderNum.localeCompare(track2.orderNum);
+                    });
                     let loadedTracks = wiD3Ctrl.getTracks();
                     async.eachOf(loadedTracks, function(aTrack, idx, _cb){
                         if (aTrack.type == "depth-track") {
@@ -1493,8 +1495,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 async.setImmediate(_cb);
                             } else {
                                 for (let objectOfTrack of trackProps[idx].object_of_tracks) {
-                                    //objectOfTrack.minY = viTrack.minY;
-                                    //objectOfTrack.maxY = viTrack.maxY;
                                     let anObject = wiD3Ctrl.addObjectToTrack(aTrack, objectOfTrack);
                                     let objectProps = JSON.parse(objectOfTrack.object);
 
@@ -1519,6 +1519,25 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 
                                             break;
                                         case 'Crossplot':
+                                            if (objectProps.idCrossplot) {
+                                                let crossplotModel = getModel('crossplot', objectProps.idCrossplot);
+                                                if (crossplotModel && crossplotModel.properties) {
+                                                    anObject.createCrossplot(
+                                                        crossplotModel.properties.idCrossPlot, 
+                                                        crossplotModel.properties.name, 
+                                                        wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                    );
+                                                }
+                                                else {
+                                                   // TODO 
+                                                }
+                                            }
+                                            else {
+                                                // TODO
+                                            }
+
+                                            break;
+
                                             objectProps.intervalDepthTop = objectOfTrack.topDepth;
                                             objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
                                             wiApiService.getCrossplot(objectProps.idCrossPlot, function(crossplot) {
@@ -2474,28 +2493,6 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
         if (!callback) return;
         callback(err, crossplotModel);
     });
-
-    /*
-    __GLOBAL.wiApiService.createCrossplot(dataRequest, function (crossplot) {
-        if (crossplot.name) {
-            let crossplotModel = crossplotToTreeConfig(crossplot);
-            refreshProjectState().then(function () {
-                openCrossplotTab(crossplotModel, callback);
-            });
-            setTimeout(function () {
-                if (crossplot.foundCurveX && crossplot.foundCurveY) {
-
-                } else {
-                    let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
-                    let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
-                    if (crossTemplate) DialogUtils.warningMessageDialog(__GLOBAL.ModalService, curveX + "<br>" + curveY);
-                }
-            }, 1000);
-        } else {
-            reject(crossplot);
-        }
-    });
-    */
 }
 
 function openCrossplotTab(crossplotModel) {
