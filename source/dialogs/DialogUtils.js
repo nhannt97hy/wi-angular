@@ -1292,10 +1292,13 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             });
         };
         this.onApplyButtonClicked = function () {
-            updateLine();
+            updateLine(function () {
+                if (callback) callback();
+            });
         };
         this.onOkButtonClicked = function () {
             updateLine(function () {
+                if (callback) callback();
                 close(null, 100);
             });
         };
@@ -1331,8 +1334,6 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-
-            if (callback) callback(ret);
         });
     });
 };

@@ -1877,7 +1877,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils,
             currentCurve,
             _currentTrack,
-            self.wiLogplotCtrl
+            self.wiLogplotCtrl,
+            function() {
+                _currentTrack.updateScaleInfo({
+                    leftVal:currentCurve.minX,
+                    rightVal:currentCurve.maxX,
+                    scale: currentCurve.scale
+                });
+                _currentTrack.updateAxis();
+            }
         );
 
         // Prevent track properties dialog from opening
@@ -2225,7 +2233,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     DialogUtils,
                     currentCurve,
                     _currentTrack,
-                    self.wiLogplotCtrl)
+                    self.wiLogplotCtrl,
+                    function() {
+                        _currentTrack.updateScaleInfo({
+                            leftVal:currentCurve.minX,
+                            rightVal:currentCurve.maxX,
+                            scale: currentCurve.scale
+                        });
+                        _currentTrack.updateAxis();
+                    }
+                );
             }
         }, {
             name: "EditCurve",

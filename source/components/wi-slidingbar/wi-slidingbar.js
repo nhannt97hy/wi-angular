@@ -249,7 +249,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.scroll = scroll;
 
     function scroll(sign) {
-        let pHeight = $(self.contentId).height();
+        let pHeight = $(self.contentId).parent().height();
         let realDeltaY = pHeight * self.slidingBarState.range / 100. * 0.1;
         realDeltaY = (realDeltaY > 1)?realDeltaY:1;
         realDeltaY *= sign;
@@ -339,15 +339,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.scaleView = function() {
         if ( logPlotCtrl.cropDisplay ) return;
-        //if ( _scaleView ) return;
         logPlotCtrl.cropDisplay = true;
         //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
         let scale = currentParentHeight / self.tinyWindow.height;
         let newParentHeight = currentParentHeight * scale;
         let newTop = (self.slidingBarState.top * newParentHeight) / 100.;
-        //let newParentHeight = Math.round(currentParentHeight * scale);
-        //let newTop = Math.round((self.slidingBarState.top * newParentHeight) / 100);
 
         $(self.contentId).height(newParentHeight);
         _offsetTop = newTop;
@@ -356,7 +353,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.resetView = function() {
-        //_scaleView = false;
         logPlotCtrl.cropDisplay = false;
         let defaultParentHeight = $(self.contentId).parent().parent().height();
         _offsetTop = 0;
