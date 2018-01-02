@@ -10394,7 +10394,7 @@ exports.addCurveDialog = function (ModalService) {
                 return curve.name == self.curveName && curve.properties.idDataset == self.datasetName;
             })
             if(curve){
-                utils.error('Curve exsisted!');
+                utils.error('Curve existed!');
                 self.applyingInProgress = false;
             }else {
                 let bottomDepth = self.SelectedWell.properties.bottomDepth;

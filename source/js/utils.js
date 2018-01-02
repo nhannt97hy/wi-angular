@@ -2084,7 +2084,7 @@ exports.renameDataset = function renameDataset (newName) {
         });
     });
 }
-exports.createDataset = function () {
+exports.createDataset = function (name) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -2092,7 +2092,7 @@ exports.createDataset = function () {
     let promptConfig = {
         title: '<span class="dataset-new-16x16"></span> Create New Dataset',
         inputName: 'Name',
-        input: 'NewDataset'
+        input: name || 'NewDataset'
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
@@ -2103,7 +2103,11 @@ exports.createDataset = function () {
             datasetKey: selectedNode.properties.name,
             datasetLabel: selectedNode.properties.name
         }
-        wiApiService.createDataset(datasetInfo, function () {
+        wiApiService.createDataset(datasetInfo, function (res, err) {
+            if (err) {
+                exports.createDataset(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 refreshProjectState();
             })
