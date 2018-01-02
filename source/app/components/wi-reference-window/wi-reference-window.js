@@ -183,9 +183,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             _scale = (_bottom - _top) * 100 / $(getRefCurveContainer().node()).height()*getDpcm();
         }
         let step = _scale / 100;
-        let axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.round(_bottom), step))
-            .tickFormat(d3.format(',.0f'))
-            .tickSize(-1 * $(getRefCurveContainer().node()).width());
+        let axisY;
+        if ((_bottom - _top) > 10)
+            axisY = d3.axisLeft(transformY).tickValues(d3.range(Math.ceil(_top), Math.round(_bottom), step))
+                .tickFormat(d3.format(',.0f'))
+                .tickSize(-1 * $(getRefCurveContainer().node()).width());
+        else 
+            axisY = d3.axisLeft(transformY).tickValues(d3.range(_top, _bottom, step))
+                .tickFormat(d3.format(',.0f'))
+                .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
             if(!self.showGrid){
                 self.svg.select('.vi-refwind-axis-y-ticks').call(axisY)

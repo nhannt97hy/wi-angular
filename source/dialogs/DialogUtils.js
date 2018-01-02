@@ -5072,6 +5072,20 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 async.setImmediate(cb);
             },
             getZonesAndCurvesInDataset,
+            function(cb){
+                let blankCurve = [{
+                    name: 'Blank Curve',
+                    type: 'curve',
+                    id: null,
+                    datasetName: 'Blank',
+                    properties: {
+                        name: 'Blank Curve',
+                        idCurve: null
+                    }
+                }]
+                self.curvesOnDatasetWithBlank = blankCurve.concat(self.curvesOnDataset);
+                cb();
+            },
             function(cb) {
                 CURVE_SYMBOLS.forEach(function(symbol) {
                     autoScaleCurve(symbol, true);
@@ -5161,7 +5175,15 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         function loadOverlays() {
             let pointSet = self.crossplotModelProps.pointsets[0];
             wiApiService.listOverlayLine(pointSet.idCurveX, pointSet.idCurveY, function(ret) {
-                self.overlayLines = ret;
+                if(ret.length){
+                    let blank = [{
+                        idOverlayLine: null,
+                        name: 'Blank OverlayLine'
+                    }]
+                    self.overlayLines = blank.concat(ret);
+                }else{
+                    self.overlayLines = ret;
+                }
             });
         }
 
@@ -5173,17 +5195,23 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         }
 
         function onSelectedCurveChange(symbol) {
-            // let idCurve = self['selectedCurve' + symbol]
             let idCurve = self.crossplotModelProps.pointsets[0]['idCurve' + symbol];
             if (idCurve) {
-                let scaleKeys = getScaleKeys(symbol);
-                let key1 = scaleKeys[0], key2 = scaleKeys[1];
-
-                // self.crossplotModel.properties.pointsets[0]['idCurve' + symbol] = idCurve;
                 autoScaleCurve(symbol);
                 if (symbol != 'Z') loadOverlays();
+            }else{
+                let scaleKeys = getScaleKeys(symbol);
+                let pointSet = self.crossplotModelProps.pointsets[0];     
+                // pointSet['idCurve' + symbol] = null;           
+                pointSet[scaleKeys[0]] = null;
+                pointSet[scaleKeys[1]] = null;
             }
         }
+        // this.onOverLayLineChanged = function(){
+        //     if(!crossplotModelProps.pointsets[0].idOverlayLine){
+
+        //     }
+        // }
 
         this.onselectedCurveXChange = function() {
             onSelectedCurveChange('X');
@@ -11013,7 +11041,7 @@ exports.curveFilterDialog = function(ModalService){
 
         this.createOp = 'backup';
         this.filterOp = '5';
-        this.numLevel = 5;
+        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;
         this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];
