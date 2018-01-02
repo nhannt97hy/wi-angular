@@ -7825,7 +7825,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             $event.stopPropagation();
         }
         this.IsNotValid = function(){
-            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth;
+            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
         }
 
         this.onApplyButtonClicked = function() {
