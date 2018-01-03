@@ -682,7 +682,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils.annotationPropertiesDialog(ModalService, annotation, function (annotationConfig) {
                 wiApiService.editAnnotation(annotationConfig, function (annotation) {
                     viAnno.setProperties(annotation);
-                    viAnno.doPlot();
+                    viAnno.doPlot(true);
                 })
             })
         })
@@ -1990,7 +1990,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         DialogUtils.markerPropertiesDialog(ModalService, marker.getProperties(), function (props) {
             wiApiService.editMarker(props, function () {
                 marker.setProperties(props);
-                marker.doPlot();
+                marker.doPlot(true);
             })
         })
     }
@@ -2002,7 +2002,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             annotationConfig.idTrack = _currentTrack.id;
             wiApiService.editAnnotation(annotationConfig, function () {
                 anno.setProperties(annotationConfig);
-                anno.doPlot();
+                anno.doPlot(true);
             })
         })
     }
