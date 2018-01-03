@@ -267,16 +267,9 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
     if(!window.localStorage.getItem('rememberAuth')) {
-        DialogUtils.authenticationDialog(ModalService, wiComponentService, function (userInfo) {
-            if (userInfo.remember) {
-                window.localStorage.setItem('rememberAuth', true);
-            }
-            window.localStorage.setItem('username', userInfo.username);
-            window.localStorage.setItem('token', userInfo.token);
-            window.localStorage.setItem('refreshToken', userInfo.refreshToken);
-            wiComponentService.getComponent('user').userUpdate();
+        utils.doLogin(function () {
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-        });
+        })
     }else{
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
         let query = queryString.parse(location.search);

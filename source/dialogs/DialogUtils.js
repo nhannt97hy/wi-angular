@@ -50,10 +50,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 fullname: self.userfullnameReg,
                 captcha: self.captcha
             }
-            wiApiService.register(dataRequest, function () {
-                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
-                    location.reload();
-                });
+            wiApiService.register(dataRequest, function (res) {
+                if (!res) return;
+                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {});
             });
         }
         this.onLoginButtonClicked = function () {
@@ -65,7 +64,8 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 whoami: 'main-service'
             }
             wiApiService.login(dataRequest, function(res) {
-               let userInfo = {
+                if (!res) return;
+                let userInfo = {
                     username: self.username,
                     token: res.token,
                     refreshToken: res.refresh_token,

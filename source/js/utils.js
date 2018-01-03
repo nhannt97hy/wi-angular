@@ -60,6 +60,25 @@ function warning (warningMessage, callback) {
 }
 exports.warning = warning;
 
+exports.doLogin = function doLogin (cb) {
+    window.localStorage.removeItem('token');
+    window.localStorage.removeItem('refreshToken');
+    window.localStorage.removeItem('username');
+    window.localStorage.removeItem('rememberAuth');
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.authenticationDialog(__GLOBAL.ModalService, wiComponentService, function (userInfo) {
+        if (userInfo.remember) {
+            window.localStorage.setItem('rememberAuth', true);
+        }
+        window.localStorage.setItem('username', userInfo.username);
+        window.localStorage.setItem('token', userInfo.token);
+        window.localStorage.setItem('refreshToken', userInfo.refreshToken);
+        wiComponentService.getComponent('user').userUpdate();
+        cb && cb();
+    });
+}
+
 exports.projectOpen = function (wiComponentService, projectData) {
     let LProject = {id:projectData.idProject, name:projectData.name};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
