@@ -11502,7 +11502,7 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
                             break;
                     }
                 }, function(err) {
-                    // if(callback) callback();
+                    if(cb) cb();
                     // cb();
                 });
         };
