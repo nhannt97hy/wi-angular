@@ -50,10 +50,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 fullname: self.userfullnameReg,
                 captcha: self.captcha
             }
-            wiApiService.register(dataRequest, function () {
-                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
-                    location.reload();
-                });
+            wiApiService.register(dataRequest, function (res) {
+                if (!res) return;
+                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {});
             });
         }
         this.onLoginButtonClicked = function () {
@@ -65,7 +64,8 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 whoami: 'main-service'
             }
             wiApiService.login(dataRequest, function(res) {
-               let userInfo = {
+                if (!res) return;
+                let userInfo = {
                     username: self.username,
                     token: res.token,
                     refreshToken: res.refresh_token,
@@ -1292,10 +1292,13 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
             });
         };
         this.onApplyButtonClicked = function () {
-            updateLine();
+            updateLine(function () {
+                if (callback) callback();
+            });
         };
         this.onOkButtonClicked = function () {
             updateLine(function () {
+                if (callback) callback();
                 close(null, 100);
             });
         };
@@ -1331,8 +1334,6 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-
-            if (callback) callback(ret);
         });
     });
 };
@@ -2889,6 +2890,16 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.arrayPaletteToString = function(palette){
             return JSON.stringify(palette);
         }
+        this.disablePointer = function (cond) {
+            let style = {};
+            if (cond) {
+                style = {
+                    "opacity": "0.5",
+                    "pointer-events": "none"
+                }
+            }
+            return style;
+        }
         /*
         async function getVariableShading () {
 
@@ -3275,6 +3286,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let savedZoomFactor = this.props.general.zoomFactor;
 
         this.props.general.width = utils.pixelToInch(this.props.general.width);
+        this.colorTrack = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        };
         function updateGeneralTab(callback) {
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
@@ -6445,6 +6461,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         this.nameHAlign = props.nameHAlign.toLowerCase();
         this.nameVAlign = props.nameVAlign.toLowerCase();
         this.precision = props.precision;
+        this.depth = props.depth;
         this.onPrecisionChange = function () {
             self.depth = +self.depth.toFixed(self.precision);
         }
@@ -11554,7 +11571,7 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
                             break;
                     }
                 }, function(err) {
-                    // if(callback) callback();
+                    if(cb) cb();
                     // cb();
                 });
         };
