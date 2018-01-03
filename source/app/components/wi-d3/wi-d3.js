@@ -2022,6 +2022,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         ]);
+        console.log(self.contextMenu);
     }
 
     function _zoneOnRightClick() {
@@ -3273,6 +3274,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
+        console.log(self.contextMenu);
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {
                 self.contextMenu = commonCtxMenu;
