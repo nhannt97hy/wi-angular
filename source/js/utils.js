@@ -63,6 +63,8 @@ exports.warning = warning;
 exports.projectOpen = function (wiComponentService, projectData) {
     let LProject = {id:projectData.idProject, name:projectData.name};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
+    window.history.pushState(LProject, LProject.name, '?idProject=' + LProject.id);
+    document.title = LProject.name + " - Well Insight";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
