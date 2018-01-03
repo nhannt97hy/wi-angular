@@ -6445,6 +6445,7 @@ exports.markerPropertiesDialog = function (ModalService, markerProperties, callb
         this.nameHAlign = props.nameHAlign.toLowerCase();
         this.nameVAlign = props.nameVAlign.toLowerCase();
         this.precision = props.precision;
+        this.depth = props.depth;
         this.onPrecisionChange = function () {
             self.depth = +self.depth.toFixed(self.precision);
         }

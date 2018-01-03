@@ -646,6 +646,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let top = (topDepth + bottomDepth) / 2;
         let bottom = top + (range / 10);
         let defaultAnn = {
+            idTrack: _currentTrack.id,
             text: 'Type some text here',
             textStyle: {
                 fontSize: '12px',
@@ -664,10 +665,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             shadow: false,
             vertical: false
         }
-        DialogUtils.annotationPropertiesDialog(ModalService, defaultAnn, function (annotationConfig) {
-            annotationConfig.idTrack = _currentTrack.id;
-            wiApiService.createAnnotation(annotationConfig, function (annotation) {
-                self.addAnnotationToTrack(_currentTrack, annotation);
+        wiApiService.createAnnotation(defaultAnn, function (annotation) {
+            let viAnno = self.addAnnotationToTrack(_currentTrack, annotation);
+            DialogUtils.annotationPropertiesDialog(ModalService, annotation, function (annotationConfig) {
+                wiApiService.editAnnotation(annotationConfig, function (annotation) {
+                    viAnno.setProperties(annotation);
+                    viAnno.doPlot();
+                })
             })
         })
     }
@@ -1151,9 +1155,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (d3.event.currentDrawing && d3.event.button == 2) {
             if (d3.event.currentDrawing.isCurve()) {
                 _curveOnRightClick();
-            }
-            else if (d3.event.currentDrawing.isShading()) {
+            } else if (d3.event.currentDrawing.isShading()) {
                 _shadingOnRightClick();
+            } else if (d3.event.currentDrawing.isAnnotation()) {
+                _annotationOnRightClick();
+            } else if (d3.event.currentDrawing.isMarker()) {
+                _markerOnRightClick();
             }
         }
     }
@@ -1162,9 +1169,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (d3.event.currentDrawing) {
             if (d3.event.currentDrawing.isCurve()) {
                 _curveOnDoubleClick();
-            }
-            else if (d3.event.currentDrawing.isShading()) {
+            } else if (d3.event.currentDrawing.isShading()) {
                 _shadingOnDoubleClick();
+            } else if (d3.event.currentDrawing.isAnnotation()) {
+                _annotationOnDoubleClick();
+            } else if (d3.event.currentDrawing.isMarker()) {
+                _markerOnDoubleClick();
             }
         }
     }
@@ -2022,7 +2032,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         ]);
-        console.log(self.contextMenu);
     }
 
     function _zoneOnRightClick() {
@@ -2215,93 +2224,93 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let currentCurve = _currentTrack.getCurrentCurve();
         self.setContextMenu([{
-            name: "CurveProperties",
-            label: "Curve Properties",
-            icon: "curve-properties-16x16",
-            handler: function () {
-                DialogUtils.curvePropertiesDialog(
-                    ModalService,
-                    wiComponentService,
-                    wiApiService,
-                    DialogUtils,
-                    currentCurve,
-                    _currentTrack,
-                    self.wiLogplotCtrl)
-            }
-        }, {
-            name: "EditCurve",
-            label: "Edit Curve",
-            icon: "edit-curve-text-16x16",
-            handler: function () {
-                // Utils.error("Feature is not implemented");
-
-                let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
-                let datasetModel = Utils.getModel('dataset', currentCurve.idDataset);
-                let wellModel = Utils.getModel('well', datasetModel.properties.idWell);
-                let request = {
-                    projectName: rootNodes.name,
-                    wellName: wellModel.properties.name,
-                    idDataset: currentCurve.idDataset,
-                    idSrcCurve: currentCurve.idCurve,
-                    // idDesCurve: idDesCurve
-                    newCurvename: "new_curve",
-                    idLine: currentCurve.id,
-                    data: currentCurve.data.map(d => d.x),
-                    isBackup: true
+                name: "CurveProperties",
+                label: "Curve Properties",
+                icon: "curve-properties-16x16",
+                handler: function () {
+                    DialogUtils.curvePropertiesDialog(
+                        ModalService,
+                        wiComponentService,
+                        wiApiService,
+                        DialogUtils,
+                        currentCurve,
+                        _currentTrack,
+                        self.wiLogplotCtrl)
                 }
-                wiApiService.editDataCurve(request, function (response) {
-                    console.log('edit curve response', response);
-                });
-            }
-        }, {
-            name: "DepthShift",
-            label: "Depth Shift",
-            icon: "",
-            handler: function () {
+            }, {
+                name: "EditCurve",
+                label: "Edit Curve",
+                icon: "edit-curve-text-16x16",
+                handler: function () {
+                    // Utils.error("Feature is not implemented");
 
-            }
-        }, {
-            name: "RemoveCurve",
-            label: "Remove Curve",
-            icon: "curve-hide-16x16",
-            handler: function () {
-                let idLine = _currentTrack.getCurrentCurve().id;
-                wiApiService.removeLine(idLine, self.removeCurrentCurve());
-            }
-        }, {
-            name: "BaseLineShift",
-            label: "BaseLine Shift",
-            handler: function () {
+                    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+                    let datasetModel = Utils.getModel('dataset', currentCurve.idDataset);
+                    let wellModel = Utils.getModel('well', datasetModel.properties.idWell);
+                    let request = {
+                        projectName: rootNodes.name,
+                        wellName: wellModel.properties.name,
+                        idDataset: currentCurve.idDataset,
+                        idSrcCurve: currentCurve.idCurve,
+                        // idDesCurve: idDesCurve
+                        newCurvename: "new_curve",
+                        idLine: currentCurve.id,
+                        data: currentCurve.data.map(d => d.x),
+                        isBackup: true
+                    }
+                    wiApiService.editDataCurve(request, function (response) {
+                        console.log('edit curve response', response);
+                    });
+                }
+            }, {
+                name: "DepthShift",
+                label: "Depth Shift",
+                icon: "",
+                handler: function () {
 
-            }
-        }, {
-            name: "ReverseDisplaay",
-            label: "Reverse Displaay",
-            handler: function () {
+                }
+            }, {
+                name: "RemoveCurve",
+                label: "Remove Curve",
+                icon: "curve-hide-16x16",
+                handler: function () {
+                    let idLine = _currentTrack.getCurrentCurve().id;
+                    wiApiService.removeLine(idLine, self.removeCurrentCurve());
+                }
+            }, {
+                name: "BaseLineShift",
+                label: "BaseLine Shift",
+                handler: function () {
 
+                }
+            }, {
+                name: "ReverseDisplaay",
+                label: "Reverse Displaay",
+                handler: function () {
+
+                }
+            }, {
+                name: "CrossPlot",
+                label: "Cross plot",
+                icon: "crossplot-blank-16x16",
+                handler: self.createCrossplot
+            }, {
+                name: "Histogram",
+                label: "Histogram",
+                icon: "histogram-new-16x16",
+                handler: self.createHistogram
+            }, {
+                name: "Create Shading",
+                label: "Create Shading",
+                icon: "shading-add-16x16",
+                handler: self.createShadingForSelectedCurve
+            }, {
+                name: "createHistogramTrack",
+                label: "Create Histogram Track",
+                icon: "",
+                handler: function () {
+                }
             }
-        }, {
-            name: "CrossPlot",
-            label: "Cross plot",
-            icon: "crossplot-blank-16x16",
-            handler: self.createCrossplot
-        }, {
-            name: "Histogram",
-            label: "Histogram",
-            icon: "histogram-new-16x16",
-            handler: self.createHistogram
-        }, {
-            name: "Create Shading",
-            label: "Create Shading",
-            icon: "shading-add-16x16",
-            handler: self.createShadingForSelectedCurve
-        }, {
-            name: "createHistogramTrack",
-            label: "Create Histogram Track",
-            icon: "",
-            handler: function () {
-            }
-        }
         ]);
     }
     this.createShadingForSelectedCurve = function () {
@@ -3274,7 +3283,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
-        console.log(self.contextMenu);
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {
                 self.contextMenu = commonCtxMenu;

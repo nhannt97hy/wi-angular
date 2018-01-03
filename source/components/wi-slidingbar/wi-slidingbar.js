@@ -149,7 +149,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         self.tinyWindow.top = top;
     }
 
-    function saveStateToServer() {
+    let saveStateToServer = _.debounce(function () {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
@@ -162,8 +162,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 bottom: high
             }
         }
-        wiApiService.editLogplot(newLogplot);
-    }
+        wiApiService.editLogplot(newLogplot, null, { silent: true });
+    }, 1000);
     
     this.$onInit = function () {
         self.contentId = '#sliding-bar-content' + self.name;
@@ -285,8 +285,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let newTop = tempTopHandler;
         let newHeight = self.tinyWindow.height;
         updateSlidingHandler(newTop, newHeight);
-
         updateWid3();
+        saveStateToServer();
     }
 
     function onMouseWheel(event) {
