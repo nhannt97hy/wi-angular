@@ -724,7 +724,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 _markerOnRightClick();
             }
         });
-        marker.on('dblclick', _markerOnDoubleClick);
+        marker.on('dblclick', function () {
+            _markerOnDoubleClick(marker);
+        });
         marker.onLineDragEnd(function () {
             // send api to update this marker
             wiApiService.editMarker(marker.getProperties(), function () {

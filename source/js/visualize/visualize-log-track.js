@@ -1194,9 +1194,9 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
             document.removeEventListener('oncurvedrop', onCurveDropHandler);
         }
     })
-    .click(function (event) {
-        triggerClickPlot(event);
-    });
+    // .click(function (event) {
+    //     triggerClickPlot(event);
+    // });
     $(this.plotContainer.node()).droppable({
         accept: '.vi-track-plot-container',
         scope: 'curve',
