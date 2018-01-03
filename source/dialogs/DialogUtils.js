@@ -2889,6 +2889,16 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.arrayPaletteToString = function(palette){
             return JSON.stringify(palette);
         }
+        this.disablePointer = function (cond) {
+            let style = {};
+            if (cond) {
+                style = {
+                    "opacity": "0.5",
+                    "pointer-events": "none"
+                }
+            }
+            return style;
+        }
         /*
         async function getVariableShading () {
 
@@ -3275,6 +3285,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let savedZoomFactor = this.props.general.zoomFactor;
 
         this.props.general.width = utils.pixelToInch(this.props.general.width);
+        this.colorTrack = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        };
         function updateGeneralTab(callback) {
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);

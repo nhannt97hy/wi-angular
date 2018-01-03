@@ -38,6 +38,7 @@ Utils.extend(Track, LogTrack);
  */
 function LogTrack(config, wiApiService) {
     Track.call(this, config);
+    console.log("logTrack", config);
     if (!wiApiService) console.error("wiApiService is null, fix it!!!");
     this.wiApiService = wiApiService;
     this.id = config.id;
@@ -51,6 +52,7 @@ function LogTrack(config, wiApiService) {
 
     this.name = config.name || 'Track';
     this.width = config.width || 120;
+    this.bgColor = config.color;
 
     this.drawings = [];
     this.minX = config.minX;

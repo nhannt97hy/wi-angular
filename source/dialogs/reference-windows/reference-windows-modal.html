@@ -60,21 +60,21 @@
                             <table class="table table-bordered margin-left-1em refCurve availableCurve">
                                 <thead>
                                     <tr>
-                                        <th width="2%"></th>
+                                        <th width="1%"></th>
                                         <th width="25%">Curve Name</th>
                                         <th width="20%">Left</th>
                                         <th width="20%">Right</th>
                                         <th width="9%">Vis.</th>
                                         <th width="9%">Log</th>
                                         <th width="10%">Color</th>
-                                        <th width="5%"></th>
+                                        <th width="6%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="ref_curve in wiModal.ref_Curves_Arr"
                                         ng-click="wiModal.setClickedRow($index)"
                                         ng-class="{selected:$index == wiModal.SelectedRefCurve, 'display-none': ref_curve.flag === wiModal._FDEL}" >
-                                        <td ng-class="{'color-navy': $index == wiModal.SelectedRefCurve}" width="2%">
+                                        <td ng-class="{'color-navy': $index == wiModal.SelectedRefCurve}" width="1%">
                                         </td>
                                         <td width="25%">
                                             <ui-select ng-model="ref_curve.curve"
@@ -113,12 +113,13 @@
                                             </div>
                                         </td>
                                         <td width="10%">
-                                            <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" class="form-control wi-form-control width-80px thick-border" type="button">
+                                            <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" 
+                                                    class="form-control wi-form-control width-80px thick-border" type="button">
                                         </td>
-                                        <td width="5%">
-                                            <button type="button" class="btn btn-default" ng-click="wiModal.Delete($index)"
-                                                    style="padding: 0">
-                                                <i class="delete-16x16"></i>
+                                        <td width="6%" style="text-align: center;">
+                                            <button class="btn btn-default" ng-click="wiModal.Delete($index)"
+                                                    style="padding: 3px">
+                                                <span class="delete-16x16"></span>
                                             </button>
                                         </td>
                                     </tr>

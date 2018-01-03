@@ -122,7 +122,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             width: Utils.inchToPixel(logTrack.width),
             zoomFactor: logTrack.zoomFactor,
             xMajorTicks: logTrack.majorTicks,
-            xMinorTicks: logTrack.minorTicks
+            xMinorTicks: logTrack.minorTicks,
+
+            topJustification: logTrack.topJustification,
+            bottomJustification: logTrack.bottomJustification,
+            color: logTrack.color,
+            showDepthGrid: logTrack.showDepthGrid,
+            showLabels: logTrack.showLabels,
+            showEndLabels: logTrack.showEndLabels,
+            showTitle: logTrack.showTitle,
+            showValueGrid: logTrack.showValueGrid,
+
+            labelFormat: logTrack.labelFormat,
+            displayType: logTrack.displayType
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId), wiApiService);
         graph.rearrangeTracks(self);
