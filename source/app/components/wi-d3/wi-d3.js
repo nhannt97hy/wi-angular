@@ -122,7 +122,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             width: Utils.inchToPixel(logTrack.width),
             zoomFactor: logTrack.zoomFactor,
             xMajorTicks: logTrack.majorTicks,
-            xMinorTicks: logTrack.minorTicks
+            xMinorTicks: logTrack.minorTicks,
+
+            topJustification: logTrack.topJustification,
+            bottomJustification: logTrack.bottomJustification,
+            color: logTrack.color,
+            showDepthGrid: logTrack.showDepthGrid,
+            showLabels: logTrack.showLabels,
+            showEndLabels: logTrack.showEndLabels,
+            showTitle: logTrack.showTitle,
+            showValueGrid: logTrack.showValueGrid,
+
+            labelFormat: logTrack.labelFormat,
+            displayType: logTrack.displayType
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId), wiApiService);
         graph.rearrangeTracks(self);
@@ -2030,6 +2042,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         ]);
+        console.log(self.contextMenu);
     }
 
     function _zoneOnRightClick() {
@@ -3290,6 +3303,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
+        console.log(self.contextMenu);
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {
                 self.contextMenu = commonCtxMenu;

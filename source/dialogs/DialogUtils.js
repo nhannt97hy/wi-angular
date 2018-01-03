@@ -50,10 +50,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 fullname: self.userfullnameReg,
                 captcha: self.captcha
             }
-            wiApiService.register(dataRequest, function () {
-                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {
-                    location.reload();
-                });
+            wiApiService.register(dataRequest, function (res) {
+                if (!res) return;
+                dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {});
             });
         }
         this.onLoginButtonClicked = function () {
@@ -65,7 +64,8 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                 whoami: 'main-service'
             }
             wiApiService.login(dataRequest, function(res) {
-               let userInfo = {
+                if (!res) return;
+                let userInfo = {
                     username: self.username,
                     token: res.token,
                     refreshToken: res.refresh_token,
@@ -2890,6 +2890,16 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.arrayPaletteToString = function(palette){
             return JSON.stringify(palette);
         }
+        this.disablePointer = function (cond) {
+            let style = {};
+            if (cond) {
+                style = {
+                    "opacity": "0.5",
+                    "pointer-events": "none"
+                }
+            }
+            return style;
+        }
         /*
         async function getVariableShading () {
 
@@ -3276,6 +3286,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         let savedZoomFactor = this.props.general.zoomFactor;
 
         this.props.general.width = utils.pixelToInch(this.props.general.width);
+        this.colorTrack = function () {
+            DialogUtils.colorPickerDialog(ModalService, self.props.general.color, function (colorStr) {
+                self.props.general.color = colorStr;
+            });
+        };
         function updateGeneralTab(callback) {
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
@@ -5073,6 +5088,20 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 async.setImmediate(cb);
             },
             getZonesAndCurvesInDataset,
+            function(cb){
+                let blankCurve = [{
+                    name: 'Blank Curve',
+                    type: 'curve',
+                    id: null,
+                    datasetName: 'Blank',
+                    properties: {
+                        name: 'Blank Curve',
+                        idCurve: null
+                    }
+                }]
+                self.curvesOnDatasetWithBlank = blankCurve.concat(self.curvesOnDataset);
+                cb();
+            },
             function(cb) {
                 CURVE_SYMBOLS.forEach(function(symbol) {
                     autoScaleCurve(symbol, true);
@@ -5162,7 +5191,15 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         function loadOverlays() {
             let pointSet = self.crossplotModelProps.pointsets[0];
             wiApiService.listOverlayLine(pointSet.idCurveX, pointSet.idCurveY, function(ret) {
-                self.overlayLines = ret;
+                if(ret.length){
+                    let blank = [{
+                        idOverlayLine: null,
+                        name: 'Blank OverlayLine'
+                    }]
+                    self.overlayLines = blank.concat(ret);
+                }else{
+                    self.overlayLines = ret;
+                }
             });
         }
 
@@ -5174,17 +5211,23 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         }
 
         function onSelectedCurveChange(symbol) {
-            // let idCurve = self['selectedCurve' + symbol]
             let idCurve = self.crossplotModelProps.pointsets[0]['idCurve' + symbol];
             if (idCurve) {
-                let scaleKeys = getScaleKeys(symbol);
-                let key1 = scaleKeys[0], key2 = scaleKeys[1];
-
-                // self.crossplotModel.properties.pointsets[0]['idCurve' + symbol] = idCurve;
                 autoScaleCurve(symbol);
                 if (symbol != 'Z') loadOverlays();
+            }else{
+                let scaleKeys = getScaleKeys(symbol);
+                let pointSet = self.crossplotModelProps.pointsets[0];     
+                // pointSet['idCurve' + symbol] = null;           
+                pointSet[scaleKeys[0]] = null;
+                pointSet[scaleKeys[1]] = null;
             }
         }
+        // this.onOverLayLineChanged = function(){
+        //     if(!crossplotModelProps.pointsets[0].idOverlayLine){
+
+        //     }
+        // }
 
         this.onselectedCurveXChange = function() {
             onSelectedCurveChange('X');
@@ -7826,7 +7869,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             $event.stopPropagation();
         }
         this.IsNotValid = function(){
-            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth;
+            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
         }
 
         this.onApplyButtonClicked = function() {
@@ -10395,7 +10438,7 @@ exports.addCurveDialog = function (ModalService) {
                 return curve.name == self.curveName && curve.properties.idDataset == self.datasetName;
             })
             if(curve){
-                utils.error('Curve exsisted!');
+                utils.error('Curve existed!');
                 self.applyingInProgress = false;
             }else {
                 let bottomDepth = self.SelectedWell.properties.bottomDepth;
@@ -11014,7 +11057,7 @@ exports.curveFilterDialog = function(ModalService){
 
         this.createOp = 'backup';
         this.filterOp = '5';
-        this.numLevel = 5;
+        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;
         this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];

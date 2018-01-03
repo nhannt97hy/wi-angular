@@ -60,6 +60,25 @@ function warning (warningMessage, callback) {
 }
 exports.warning = warning;
 
+exports.doLogin = function doLogin (cb) {
+    window.localStorage.removeItem('token');
+    window.localStorage.removeItem('refreshToken');
+    window.localStorage.removeItem('username');
+    window.localStorage.removeItem('rememberAuth');
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.authenticationDialog(__GLOBAL.ModalService, wiComponentService, function (userInfo) {
+        if (userInfo.remember) {
+            window.localStorage.setItem('rememberAuth', true);
+        }
+        window.localStorage.setItem('username', userInfo.username);
+        window.localStorage.setItem('token', userInfo.token);
+        window.localStorage.setItem('refreshToken', userInfo.refreshToken);
+        wiComponentService.getComponent('user').userUpdate();
+        cb && cb();
+    });
+}
+
 exports.projectOpen = function (wiComponentService, projectData) {
     let LProject = {id:projectData.idProject, name:projectData.name};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
@@ -1574,7 +1593,19 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             }
                         }
                     }, function(err) {
-                        logplotCtrl.handlers.Scale100ButtonClicked();
+                        let currentState = JSON.parse(plot.currentState);
+                        if (currentState.top && currentState.bottom){
+                            logplotCtrl.handlers.ScalePreviousState(currentState.top, currentState.bottom);
+                        } else {
+                            logplotCtrl.handlers.Scale100ButtonClicked();
+                        }
+                        setTimeout(function () {
+                            if(plot.cropDisplay) {
+                                logplotCtrl.handlers.CropDisplayButtonClicked();
+                            } else {
+                                logplotCtrl.handlers.ViewWholeWellButtonClicked();
+                            }
+                        },500);
                         logplotModel.isReady = true;
                         if (callback) callback();
                     });
@@ -2084,7 +2115,7 @@ exports.renameDataset = function renameDataset (newName) {
         });
     });
 }
-exports.createDataset = function () {
+exports.createDataset = function (name) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
@@ -2092,7 +2123,7 @@ exports.createDataset = function () {
     let promptConfig = {
         title: '<span class="dataset-new-16x16"></span> Create New Dataset',
         inputName: 'Name',
-        input: 'NewDataset'
+        input: name || 'NewDataset'
     }
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
@@ -2103,7 +2134,11 @@ exports.createDataset = function () {
             datasetKey: selectedNode.properties.name,
             datasetLabel: selectedNode.properties.name
         }
-        wiApiService.createDataset(datasetInfo, function () {
+        wiApiService.createDataset(datasetInfo, function (res, err) {
+            if (err) {
+                exports.createDataset(ret);
+                return;
+            }
             __GLOBAL.$timeout(function () {
                 refreshProjectState();
             })

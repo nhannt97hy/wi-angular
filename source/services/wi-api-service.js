@@ -7,9 +7,12 @@ var __USERINFO = {
     refreshToken: null
 };
 
-__USERINFO.username = window.localStorage.getItem('username');
-__USERINFO.token = window.localStorage.getItem('token');
-__USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
+function getAuthInfo () {
+    __USERINFO.username = window.localStorage.getItem('username');
+    __USERINFO.token = window.localStorage.getItem('token');
+    __USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
+}
+getAuthInfo();
 
 let app = angular.module(moduleName, []);
 
@@ -337,7 +340,9 @@ var wiApiWorker = function ($http, wiComponentService) {
                             window.localStorage.removeItem('refreshToken');
                             window.localStorage.removeItem('username');
                             window.localStorage.removeItem('rememberAuth');
-                            location.reload();
+                            self.getUtils().doLogin(function () {
+                                getAuthInfo();
+                            });
                         });
                     } else {
                         self.stopWorking();
@@ -392,11 +397,13 @@ wiApiWorker.prototype.getUtils = Service.prototype.getUtils;
 //add authenService parameter for using authenticate service
 Service.prototype.post = function (route, payload, callback, option) {
     var self = this;
-    //for (const key in payload) {
-    //    if (payload[key] != null && typeof payload[key] == 'object') {
-    //        payload[key] = JSON.stringify(payload[key]);
-    //    }
-    //}
+    for (const key in payload) {
+       if (payload[key] != null && typeof payload[key] == 'object') {
+           //    payload[key] = JSON.stringify(payload[key]);
+           console.log('*********PAYLOAD WITH OBJECT**********', payload);
+           break;
+       }
+    }
     let requestObj = {
         url: option ? (option == 'auth' ? AUTHENTICATION_SERVICE + route: PROCESSING_SERVICE + route) : self.baseUrl + route,
         method: 'POST',
@@ -517,11 +524,16 @@ Service.prototype.register = function (data, callback) {
 Service.prototype.refreshToken = function (refreshToken) {
   if (!refreshToken) return;
   let self = this;
-  this.post(REFRESH_TOKEN, {refresh_token: refreshToken}, function (res) {
+  this.post(REFRESH_TOKEN, {refresh_token: refreshToken}, function (res, err) {
+    if (err) {
+        self.getUtils().doLogin(function () {
+            getAuthInfo();
+        });
+        return;
+    }
     window.localStorage.setItem('token', res.token);
     window.localStorage.setItem('refreshToken', res.refresh_token);
-    __USERINFO.token = res.token;
-    __USERINFO.refreshToken = res.refresh_token;
+    getAuthInfo();
   },  'auth');
 }
 Service.prototype.postWithTemplateFile = function (dataPayload) {

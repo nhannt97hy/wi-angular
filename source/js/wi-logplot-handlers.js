@@ -164,6 +164,20 @@ function scaleTo1(rangeUnit, wiLogplot, wiComponentService) {
     wiSlidingbarCtrl.updateRangeSlidingHandler(rangeHandlerByPercent);
 }
 
+exports.ScalePreviousState = function (top, bottom) {
+    let wiLogplot = this.wiLogplot;
+    let track = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`);
+    if (!track.length) return false;
+    let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
+    let depthRange = new Array(top, bottom);
+    if (depthRange[1] > wiD3Ctrl.getMaxDepth()) depthRange[1] = wiD3Ctrl.getMaxDepth();
+    wiD3Ctrl.setDepthRange(depthRange, true);
+    wiD3Ctrl.processZoomFactor();
+    wiD3Ctrl.plotAll();
+    wiD3Ctrl.updateScale();
+    wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
+};
+
 exports.Scale20ButtonClicked = function () {
     let rangeUnit = 20;
     console.log(this);
@@ -250,6 +264,7 @@ exports.ZoomOutButtonClicked = function () {
 
 exports.CropDisplayButtonClicked = function () {
     this.wiLogplot.getSlidingbarCtrl().scaleView();
+    this.wiApiService.editLogplot({idPlot: this.wiLogplot.id, cropDisplay: true});
 };
 exports.RangeSpecificButtonClicked = function () {
     let self = this;
@@ -265,6 +280,7 @@ exports.RangeSpecificButtonClicked = function () {
 
 exports.ViewWholeWellButtonClicked = function () {
     this.wiLogplot.getSlidingbarCtrl().resetView();
+    this.wiApiService.editLogplot({idPlot: this.wiLogplot.id, cropDisplay: false});
 };
 
 exports.AddDepthAxisButtonClicked = function () {
