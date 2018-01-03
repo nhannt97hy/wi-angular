@@ -678,23 +678,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 inputName: 'New Logplot Name',
                                 input: selectedNode.properties.name
                             }
-                            DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
-                                if (!res) return;
+                            DialogUtils.promptDialog(ModalService, promptConfig, function (newName) {
+                                if (!newName) return;
                                 let logplotInfo = angular.copy(selectedNode.properties);
-                                logplotInfo.name = res;
+                                logplotInfo.name = newName;
                                 wiApiService.editLogplot(logplotInfo, function (res, err) {
                                     if (err) {
                                         renameLogplot();
                                         return;
                                     }
                                     $timeout(function () {
-                                        selectedNode.properties.name = res;
-                                        selectedNode.data.label = res;
+                                        selectedNode.properties.name = newName;
+                                        selectedNode.data.label = newName;
                                         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
                                         let logplotTab = layoutManager.getItemById('logplot' + selectedNode.properties.idPlot);
                                         if (!logplotTab) return;
                                         let wellModel = utils.findWellByLogplot(selectedNode.properties.idPlot);
-                                        logplotTab.setTitle(`<span class="logplot-blank-16x16"></span> <span> ${res} - (${wellModel.properties.name})</span>`);
+                                        logplotTab.setTitle(`<span class="logplot-blank-16x16"></span> <span> ${newName} - (${wellModel.properties.name})</span>`);
                                     })
                                 });
                             });
@@ -855,23 +855,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 inputName: 'New Crossplot Name',
                                 input: selectedNode.properties.name
                             }
-                            DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
-                                if (!res) return;
+                            DialogUtils.promptDialog(ModalService, promptConfig, function (newName) {
+                                if (!newName) return;
                                 let crossplotInfo = angular.copy(selectedNode.properties);
-                                crossplotInfo.name = res;
+                                crossplotInfo.name = newName;
                                 wiApiService.editCrossplot(crossplotInfo, function (res, err) {
                                     if (err) {
                                         renameCrossplot();
                                         return;
                                     }
                                     $timeout(function () {
-                                        selectedNode.properties.name = res;
-                                        selectedNode.data.label = res;
+                                        selectedNode.properties.name = newName.name;
+                                        selectedNode.data.label = newName.name;
                                         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
                                         let crossplotTab = layoutManager.getItemById('crossplot' + selectedNode.properties.idCrossPlot);
                                         if (!crossplotTab) return;
                                         let wellModel = utils.findWellByCrossplot(selectedNode.properties.idCrossPlot);
-                                        crossplotTab.setTitle(`<span class="crossplot-blank-16x16"></span> <span> ${res} - (${wellModel.properties.name})</span>`);
+                                        crossplotTab.setTitle(`<span class="crossplot-blank-16x16"></span> <span> ${newName} - (${wellModel.properties.name})</span>`);
                                     })
                                 });
                             });
@@ -1007,23 +1007,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                                 inputName: 'New Histogram Name',
                                 input: selectedNode.properties.name
                             }
-                            DialogUtils.promptDialog(ModalService, promptConfig, function (res) {
-                                if (!res) return;
+                            DialogUtils.promptDialog(ModalService, promptConfig, function (newName) {
+                                if (!newName) return;
                                 let histogramInfo = angular.copy(selectedNode.properties);
-                                histogramInfo.name = res;
+                                histogramInfo.name = newName;
                                 wiApiService.editHistogram(histogramInfo, function (res, err) {
                                     if (err) {
                                         renameHistogram();
                                         return;
                                     }
                                     $timeout(function () {
-                                        selectedNode.properties.name = res;
-                                        selectedNode.data.label = res;
+                                        selectedNode.properties.name = newName.name;
+                                        selectedNode.data.label = newName.name;
                                         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
                                         let histogramTab = layoutManager.getItemById('histogram' + selectedNode.properties.idHistogram);
                                         if (!histogramTab) return;
                                         let wellModel = utils.findWellByHistogram(selectedNode.properties.idHistogram);
-                                        histogramTab.setTitle(`<span class="histogram-blank-16x16"></span> <span> ${res} - (${wellModel.properties.name})</span>`);
+                                        histogramTab.setTitle(`<span class="histogram-blank-16x16"></span> <span> ${newName} - (${wellModel.properties.name})</span>`);
                                     })
                                 });
                             });
