@@ -5,7 +5,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let self = this;
     this.isShowWiZone = true;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    
+    let _wiD3CrossplotCtrl = null;
     let refWindCtrl = null;
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);        
@@ -21,11 +21,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             wiCrossplot: self
         });
         self.handlers = $scope.handlers;
-        self.crossplotModel = utils.getModel('crossplot', self.id);
+        //self.crossplotModel = utils.getModel('crossplot', self.id);
     };
     this.CloseZone = function () {
         self.isShowWiZone = false;
-        //utils.triggerWindowResize();
     }
 
     this.getWiZoneCtrlName = function () {
@@ -54,22 +53,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.onRefWindCtrlReady = function(refWindCtrl) {
-        console.log('Reference window is ready to update');
+        let wiD3CrossplotCtrl = self.getWiD3CrossplotCtrl();
+        console.log('Reference window is ready to update', wiD3CrossplotCtrl);
+        if (!wiD3CrossplotCtrl || !wiD3CrossplotCtrl.crossplotModel 
+            || !wiD3CrossplotCtrl.crossplotModel.properties
+            || !wiD3CrossplotCtrl.crossplotModel.properties.reference_curves) return;
+        console.log('start update reference window ', wiD3CrossplotCtrl);
         refWindCtrl.update(
             getWell(),
-            self.crossplotModel.properties.reference_curves,
-            self.crossplotModel.properties.referenceScale,
-            self.crossplotModel.properties.referenceVertLineNumber,
-            self.crossplotModel.properties.referenceTopDepth,
-            self.crossplotModel.properties.referenceBottomDepth,
-            self.crossplotModel.properties.referenceShowDepthGrid);
-            //true);
+            wiD3CrossplotCtrl.crossplotModel.properties.reference_curves,
+            wiD3CrossplotCtrl.crossplotModel.properties.referenceScale,
+            wiD3CrossplotCtrl.crossplotModel.properties.referenceVertLineNumber,
+            wiD3CrossplotCtrl.crossplotModel.properties.referenceTopDepth,
+            wiD3CrossplotCtrl.crossplotModel.properties.referenceBottomDepth,
+            wiD3CrossplotCtrl.crossplotModel.properties.referenceShowDepthGrid);
     }
 
     this.zoneArr = null; // important. This will be set in wi-d3-crossplot. TUNG
 
     this.getWiD3CrossplotCtrl = function () {
-        return wiComponentService.getComponent(self.wiD3CrossplotName);
+        if (!_wiD3CrossplotCtrl) {
+            _wiD3CrossplotCtrl = wiComponentService.getComponent(self.wiD3CrossplotName);
+        }
+        return _wiD3CrossplotCtrl;
     }
     this.getWiRefWindCtrlName = function () {
         return self.name + "RefWind";
@@ -80,7 +86,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         return refWindCtrl;
     }
     this.CloseReferenceWindow = function () {
-        self.crossplotModel.properties.referenceDisplay = false;
+        let wiD3CrossplotCtrl = self.getWiD3CrossplotCtrl();
+        if (wiD3CrossplotCtrl) return;
+            wiD3CrossplotCtrl.crossplotModel.properties.referenceDisplay = false;
     }
 }
 

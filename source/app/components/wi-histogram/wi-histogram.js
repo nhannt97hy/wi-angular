@@ -4,7 +4,7 @@ const moduleName = 'wi-histogram';
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     let _well = null;
-    self.histogramModel = null;
+    let _wiD3HistogramCtrl = null;
     this.statistics = {
         length: null,
         min: null,
@@ -55,13 +55,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.$onInit = function () {
         self.wiD3AreaName = self.name + "D3Area";
         if (self.name) wiComponentService.putComponent(self.name, self);
-
-        self.histogramModel = self.getModel();
-        self.isShowWiZone = self.histogramModel ? !!self.histogramModel.properties.idZoneSet: false;
+        let histogramModel = self.getModel();
+        self.isShowWiZone = histogramModel ? !!histogramModel.properties.idZoneSet: false;
         
     };
     this.getwiD3Ctrl = function() {
-        return wiComponentService.getComponent(self.wiD3AreaName);
+        if(!_wiD3HistogramCtrl){
+            _wiD3HistogramCtrl = wiComponentService.getComponent(self.wiD3AreaName);
+        }
+        return _wiD3HistogramCtrl;
     }
 
     this.getModel = function() {
@@ -69,6 +71,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.loadStatistics = function(visHistogram) {
+        console.log('loadStatistics');
         self.statistics.length = visHistogram.getLength();
         self.statistics.min = visHistogram.getMin();
         self.statistics.max = visHistogram.getMax();
@@ -92,14 +95,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.onRefWindCtrlReady = function(refWindCtrl) {
         console.log('RefWindCtrlReady');
+        let wiD3HistogramCtrl = self.getwiD3Ctrl();
+        if(!wiD3HistogramCtrl || !wiD3HistogramCtrl.histogramModel 
+            || !wiD3HistogramCtrl.histogramModel.properties
+    || !wiD3HistogramCtrl.histogramModel.properties.reference_curves) return;
         refWindCtrl.update(getWell(), 
-            self.histogramModel.properties.reference_curves, 
-            self.histogramModel.properties.referenceScale,
-            self.histogramModel.properties.referenceVertLineNumber,
-            self.histogramModel.properties.referenceTopDepth,
-            self.histogramModel.properties.referenceBottomDepth,
-            self.histogramModel.properties.referenceShowDepthGrid);
-            //true);
+            wiD3HistogramCtrl.histogramModel.properties.reference_curves, 
+            wiD3HistogramCtrl.histogramModel.properties.referenceScale,
+            wiD3HistogramCtrl.histogramModel.properties.referenceVertLineNumber,
+            wiD3HistogramCtrl.histogramModel.properties.referenceTopDepth,
+            wiD3HistogramCtrl.histogramModel.properties.referenceBottomDepth,
+            wiD3HistogramCtrl.histogramModel.properties.referenceShowDepthGrid);
     }
     this.getWell = getWell;
     function getWell() {

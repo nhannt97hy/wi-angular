@@ -64,6 +64,8 @@ function LogTrack(config, wiApiService) {
 
     this.showLabels = config.showLabels == null ? false : config.showLabels;
     this.showEndLabels = config.showEndLabels == null ? true : config.showEndLabels;
+    this.showXGrids = config.showValueGrid == null ? false : config.showValueGrid;
+    this.showYGrids = config.showDepthGrid == null ? false : config.showDepthGrid;
     this.labelFormat = config.labelFormat;
     this.gridColor = 'gray';
 

@@ -106,29 +106,46 @@
                                     </div>
                                     <div class="col-sm-5">
                                         <label>
-                                            <input type="radio" name="filterOp" value="6" ng-model="wiModal.filterOp">&nbsp;User define(Compelete Table)
+                                            <input type="radio" name="filterOp" value="6" ng-model="wiModal.filterOp"
+                                            ng-click="wiModal.onNumLevelChange()">&nbsp;User define(Compelete Table)
                                         </label>
                                     </div>
                                 </div>
                                 <div class="form-group" ng-if="wiModal.filterOp!='2'">
                                     <label class="col-sm-5">Number of levels (must be odd):</label>
                                     <div class="col-sm-5">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.numLevel" step="1" min='1'>
+                                        <input type="number" class="form-control wi-form-control" step="1" min='3'
+                                        ng-model="wiModal.numLevel" ng-blur="wiModal.onNumLevelChange()">
                                     </div>
                                 </div>
                                 <div class="form-group" ng-if="wiModal.filterOp=='2'">
                                     <label class="col-sm-2">Polynomial Order:</label>
                                     <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.polyOder" step="1">
+                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.polyOder" step="1" min='1'>
                                     </div>
                                     <label class="col-sm-2">Derivative Order:</label>
                                     <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.devOrder" step="1">
+                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.devOrder" step="1" min='0'>
                                     </div>
                                     <label class="col-sm-2">Number Points:</label>
                                     <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.numPoints" step="1">
+                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.numPoints" step="1" min='3'>
                                     </div>
+                                </div>
+                                <div class="form-group" ng-if="wiModal.filterOp=='6'" style="width:100%;overflow:overlay;">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <th ng-repeat="col in wiModal.table track by $index"
+                                                style="min-width:130px;text-align:center">factor {{$index}}</th>
+                                            </tr>
+                                            <tr>
+                                                <td ng-repeat="col in wiModal.table track by $index" style="min-width:130px;">
+                                                    <input type="number" class="form-control wi-form-control" ng-model="col" step='0.0001' min='0'>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

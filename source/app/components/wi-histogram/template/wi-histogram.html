@@ -5,7 +5,7 @@
     <div style="display:flex; flex-direction:row;width:100%;background-color:white;">
         <div resizable r-directions="['right']" r-flex="true" ng-show="wiHistogram.isShowWiZone" style="min-width:10%;max-width:20%">
             <wi-container title='Zone' close-handler='wiHistogram.CloseZone'>
-                <wi-zone name="{{wiHistogram.getWiZoneCtrlName()}}" zones="wiHistogram.zoneArr" active-zone="wiHistogram.histogramModel.properties.activeZone"
+                <wi-zone name="{{wiHistogram.getWiZoneCtrlName()}}" zones="wiHistogram.zoneArr" active-zone="wiHistogram.getwiD3Ctrl().histogramModel.properties.activeZone"
                     on-zone-ctrl-ready="wiHistogram.onZoneCtrlReady">
                 </wi-zone>
             </wi-container>
@@ -23,7 +23,7 @@
                 <h5 class='text-left statistic-header'>
                     <label>Statistics</label>
                 </h5>
-                <div class="scroll-content" ng-show="wiHistogram.histogramModel.properties.idCurve">
+                <div class="scroll-content" ng-show="wiHistogram.getwiD3Ctrl().histogramModel.properties.idCurve">
                     <div>
                         <div class="row">
                             <div class="col-sm-3"><label>Variables</label></div>
@@ -34,8 +34,8 @@
                         <div class="row wi-small text-color-steelblue">
                             <div class="col-sm-3 text-right"><label>{{wiHistogram.getwiD3Ctrl().curveModel.properties.name}}:</label></div>
                             <div class="col-sm-3">
-                                <span ng-show="!wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.histogramModel.properties.intervalDepthTop}}-{{wiHistogram.histogramModel.properties.intervalDepthBottom}}]</span>
-                                <span ng-show="wiHistogram.histogramModel.properties.idZoneSet">[{{wiHistogram.getwiD3Ctrl().zoneSetModel.properties.name}}-Zonation]</span>
+                                <span ng-show="!wiHistogram.getwiD3Ctrl().histogramModel.properties.idZoneSet">[{{wiHistogram.getwiD3Ctrl().histogramModel.properties.intervalDepthTop}}-{{wiHistogram.getwiD3Ctrl().histogramModel.properties.intervalDepthBottom}}]</span>
+                                <span ng-show="wiHistogram.getwiD3Ctrl().histogramModel.properties.idZoneSet">[{{wiHistogram.getwiD3Ctrl().zoneSetModel.properties.name}}-Zonation]</span>
                             </div>
                             <div class="col-sm-3"></div>
                             <div class="col-sm-3"></div>
@@ -93,7 +93,7 @@
             </div>
         </div>
 
-        <div resizable r-directions="['left']" r-flex="true" ng-if="wiHistogram.histogramModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
+        <div resizable r-directions="['left']" r-flex="true" ng-if="wiHistogram.getwiD3Ctrl().histogramModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
             <wi-container title='Reference Curve' close-handler='wiHistogram.CloseReferenceWindow'>
                 <wi-reference-window
                     name='{{wiHistogram.getWiRefWindCtrlName()}}'

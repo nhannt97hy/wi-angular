@@ -11059,6 +11059,7 @@ exports.curveFilterDialog = function(ModalService){
         this.createOp = 'backup';
         this.filterOp = '5';
         this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;
+        this.table = new Array(5).fill(0.2).map(d => {return parseFloat(d.toFixed(4))});
         this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];
@@ -11128,6 +11129,72 @@ exports.curveFilterDialog = function(ModalService){
 
         this.onCancelButtonClicked = function(){
             close(null);
+        }
+
+        this.validate = function(){
+            if(self.applyingInProgress) return true;
+            if(self.filterOp == '2'){
+                return !self.polyOder || self.devOrder == null || ! self.numPoints;
+            }else{
+                return !self.numLevel;
+            }
+        }
+        this.onNumLevelChange = function(){
+            if(self.numLevel %2 == 0) self.numLevel = self.numLevel + 1;
+            if(self.filterOp == '6'){
+                self.table = new Array(self.numLevel).fill(1/self.numLevel).map(d => {return parseFloat(d.toFixed(4))});
+            }
+        }
+        function getData(){
+            wiApiService.dataCurve(self.SelectedCurve.id)
+        }
+
+        function squareFilter(){
+            console.log('squareFilter');
+        }
+        function savgoFilter(){
+            console.log('savgoFilter');
+        }
+        function bellFilter(){
+            console.log('bellFilter');
+        }
+        function fftFilter(){
+            console.log('fftFilter');
+        }
+        function medianFilter(){
+            console.log('medianFilter');
+        }
+        function customFilter(){
+            console.log('customFilter');
+        }
+
+        this.onRunButtonClicked = function(){
+            self.applyingInProgress = true;
+            switch(self.filterOp){
+                case '1':
+                squareFilter();
+                break;
+
+                case '2':
+                savgoFilter();
+                break;
+
+                case '3':
+                bellFilter();
+                break;
+
+                case '4':
+                fftFilter();
+                break;
+
+                case '5':
+                medianFilter();
+                break;
+
+                case '6':
+                customFilter();
+                break;
+            }            
         }
     }
 
@@ -11504,7 +11571,7 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
                             break;
                     }
                 }, function(err) {
-                    // if(callback) callback();
+                    if(cb) cb();
                     // cb();
                 });
         };
