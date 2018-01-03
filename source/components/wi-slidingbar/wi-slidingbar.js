@@ -149,6 +149,22 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         self.tinyWindow.top = top;
     }
 
+    function saveStateToServer() {
+        let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        let max = wiD3Controller.getMaxDepth();
+        let min = wiD3Controller.getMinDepth();
+        let low = min + (max - min) * self.slidingBarState.top / 100.;
+        let high = low + (max - min) * self.slidingBarState.range / 100.;
+        let newLogplot = {
+            idPlot: logPlotCtrl.getLogplotModel().properties.idPlot,
+            currentState: {
+                top: low,
+                bottom: high
+            }
+        }
+        wiApiService.editLogplot(newLogplot);
+    }
+    
     this.$onInit = function () {
         self.contentId = '#sliding-bar-content' + self.name;
         self.handleId = '#sliding-handle' + self.name;
@@ -208,6 +224,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             update(ui);
             updateWid3();
             tungTrick(ui);
+            saveStateToServer();
         });
 
         $(self.handleId).on("drag", function (event, ui) {
@@ -219,6 +236,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             event.stopPropagation();
             update(ui);
             updateWid3();
+            saveStateToServer();
         });
 
         new ResizeSensor($(self.contentId), function () {
