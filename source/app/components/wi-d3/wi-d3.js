@@ -122,7 +122,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             width: Utils.inchToPixel(logTrack.width),
             zoomFactor: logTrack.zoomFactor,
             xMajorTicks: logTrack.majorTicks,
-            xMinorTicks: logTrack.minorTicks
+            xMinorTicks: logTrack.minorTicks,
+
+            topJustification: logTrack.topJustification,
+            bottomJustification: logTrack.bottomJustification,
+            color: logTrack.color,
+            showDepthGrid: logTrack.showDepthGrid,
+            showLabels: logTrack.showLabels,
+            showEndLabels: logTrack.showEndLabels,
+            showTitle: logTrack.showTitle,
+            showValueGrid: logTrack.showValueGrid,
+
+            labelFormat: logTrack.labelFormat,
+            displayType: logTrack.displayType
         };
         let track = graph.createLogTrack(config, document.getElementById(self.plotAreaId), wiApiService);
         graph.rearrangeTracks(self);
@@ -1887,7 +1899,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils,
             currentCurve,
             _currentTrack,
-            self.wiLogplotCtrl
+            self.wiLogplotCtrl,
+            function() {
+                _currentTrack.updateScaleInfo({
+                    leftVal:currentCurve.minX,
+                    rightVal:currentCurve.maxX,
+                    scale: currentCurve.scale
+                });
+                _currentTrack.updateAxis();
+            }
         );
 
         // Prevent track properties dialog from opening
@@ -2224,45 +2244,54 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let currentCurve = _currentTrack.getCurrentCurve();
         self.setContextMenu([{
-                name: "CurveProperties",
-                label: "Curve Properties",
-                icon: "curve-properties-16x16",
-                handler: function () {
-                    DialogUtils.curvePropertiesDialog(
-                        ModalService,
-                        wiComponentService,
-                        wiApiService,
-                        DialogUtils,
-                        currentCurve,
-                        _currentTrack,
-                        self.wiLogplotCtrl)
-                }
-            }, {
-                name: "EditCurve",
-                label: "Edit Curve",
-                icon: "edit-curve-text-16x16",
-                handler: function () {
-                    // Utils.error("Feature is not implemented");
-
-                    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
-                    let datasetModel = Utils.getModel('dataset', currentCurve.idDataset);
-                    let wellModel = Utils.getModel('well', datasetModel.properties.idWell);
-                    let request = {
-                        projectName: rootNodes.name,
-                        wellName: wellModel.properties.name,
-                        idDataset: currentCurve.idDataset,
-                        idSrcCurve: currentCurve.idCurve,
-                        // idDesCurve: idDesCurve
-                        newCurvename: "new_curve",
-                        idLine: currentCurve.id,
-                        data: currentCurve.data.map(d => d.x),
-                        isBackup: true
+            name: "CurveProperties",
+            label: "Curve Properties",
+            icon: "curve-properties-16x16",
+            handler: function () {
+                DialogUtils.curvePropertiesDialog(
+                    ModalService,
+                    wiComponentService,
+                    wiApiService,
+                    DialogUtils,
+                    currentCurve,
+                    _currentTrack,
+                    self.wiLogplotCtrl,
+                    function() {
+                        _currentTrack.updateScaleInfo({
+                            leftVal:currentCurve.minX,
+                            rightVal:currentCurve.maxX,
+                            scale: currentCurve.scale
+                        });
+                        _currentTrack.updateAxis();
                     }
-                    wiApiService.editDataCurve(request, function (response) {
-                        console.log('edit curve response', response);
-                    });
+                );
+            }
+        }, {
+            name: "EditCurve",
+            label: "Edit Curve",
+            icon: "edit-curve-text-16x16",
+            handler: function () {
+                // Utils.error("Feature is not implemented");
+
+                let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+                let datasetModel = Utils.getModel('dataset', currentCurve.idDataset);
+                let wellModel = Utils.getModel('well', datasetModel.properties.idWell);
+                let request = {
+                    projectName: rootNodes.name,
+                    wellName: wellModel.properties.name,
+                    idDataset: currentCurve.idDataset,
+                    idSrcCurve: currentCurve.idCurve,
+                    // idDesCurve: idDesCurve
+                    newCurvename: "new_curve",
+                    idLine: currentCurve.id,
+                    data: currentCurve.data.map(d => d.x),
+                    isBackup: true
                 }
-            }, {
+                wiApiService.editDataCurve(request, function (response) {
+                    console.log('edit curve response', response);
+                });
+            }
+        }, {
                 name: "DepthShift",
                 label: "Depth Shift",
                 icon: "",

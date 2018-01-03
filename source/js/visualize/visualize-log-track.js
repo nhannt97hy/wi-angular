@@ -38,6 +38,7 @@ Utils.extend(Track, LogTrack);
  */
 function LogTrack(config, wiApiService) {
     Track.call(this, config);
+    console.log("logTrack", config);
     if (!wiApiService) console.error("wiApiService is null, fix it!!!");
     this.wiApiService = wiApiService;
     this.id = config.id;
@@ -51,6 +52,7 @@ function LogTrack(config, wiApiService) {
 
     this.name = config.name || 'Track';
     this.width = config.width || 120;
+    this.bgColor = config.color;
 
     this.drawings = [];
     this.minX = config.minX;
@@ -784,9 +786,10 @@ LogTrack.prototype.genXTickValues = function() {
     let windowX = this.getWindowX();
     if (self.scale == 'logarithmic') {
         if (windowX[0] < windowX[1])
-            return genLogTickValues(windowX[0], windowX[1]);
+            return Utils.genLogTickValues(windowX[0], windowX[1]);
         else {
-            return genLogTickValues(windowX[1], windowX[0]).reverse();
+            return Utils.genLogTickValues(windowX[1], windowX[0]).reverse();
+
         }
     }
     else {

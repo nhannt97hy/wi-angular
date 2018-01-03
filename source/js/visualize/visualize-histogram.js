@@ -224,15 +224,29 @@ Histogram.prototype._doPlot = function() {
 
     let tickCountX = (vpX[1] - vpX[0])/40;
     // Setup Axis X
+    let xTickValues;
+    if (!self.histogramModel.properties.loga) {
+        xTickValues = d3.range(wdX[0], wdX[1], realStep);
+    }
+    else {
+        xTickValues = Utils.genLogTickValues(wdX[0], wdX[1]);
+    }
     this.axisX = d3.axisBottom(transformX)
-       // .ticks(tickCountX, ',.0f');
-       // .tickValues(d3.range(wdX[0], wdX[1] + realStep/2, realStep))
-        .tickValues(d3.range(wdX[0], wdX[1], realStep))
+        .tickValues(xTickValues)
         .tickFormat(Utils.getDecimalFormatter(0))
         .tickPadding(10);
 
     // Setup histogram generator
-    let thresholds = d3.range(domain[0], domain[1], (domain[1] - domain[0])/nBins);
+    let thresholds;
+    if (!self.histogramModel.properties.loga) {
+        thresholds = d3.range(domain[0], domain[1], (domain[1] - domain[0])/nBins);
+    }
+    else {
+        let targetThresholds = d3.range(vpX[0], vpX[1], (vpX[1] - vpX[0])/nBins);
+        thresholds = targetThresholds.map(function(d) {
+            return transformX.invert(d);
+        });
+    }
     var histogramGenerator = d3.histogram().domain(domain).thresholds(thresholds);
 
     // Prepare data and group them in bins: fullData/fullBins, intervalData/intervalBins, zoneData[]/zoneBins[]
@@ -289,11 +303,21 @@ Histogram.prototype._doPlot = function() {
     this.axisX = this.axisX.tickSize(-this.svgContainer.node().clientHeight);
     this.axisY = this.axisY.tickSize(-this.svgContainer.node().clientWidth);
 
-    this.svgContainer.select('g.vi-histogram-axis-x-ticks')
-        .call(this.axisX)
+    let axisXGroup = this.svgContainer.select('g.vi-histogram-axis-x-ticks');
+    axisXGroup.call(this.axisX)
         .style('transform', 'translateY(' + vpY[1] + 'px)');
-    this.svgContainer.select('g.vi-histogram-axis-y-ticks')
-        .call(this.axisY)
+
+    if (self.histogramModel.properties.loga) {
+        axisXGroup.selectAll('.tick').classed('majorX', function(d, i) {
+            return Utils.logMajorTest(xTickValues[i]);
+        });
+    }
+    else {
+        axisXGroup.selectAll('.tick').classed('majorX', true);
+    }
+
+    let axisYGroup = this.svgContainer.select('g.vi-histogram-axis-y-ticks');
+    axisYGroup.call(this.axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
 
 
@@ -374,7 +398,6 @@ Histogram.prototype._doPlot = function() {
         let bars = self.svgContainer.selectAll('.bars').data(self.fullBins).enter()
             .append('g').attr('class', 'bars')
             .attr('transform', function(d) {
-                //return 'translate(' + transformX(d.x0) + ', ' + transformY(getBinValue(d)) + ')';
                 if (self.histogramModel.properties.plotType != 'Frequency') {
                     return 'translate(' + transformX(d.x0) + ', ' + transformY(d.length*100/self.fullData.length) + ')';
                 }
