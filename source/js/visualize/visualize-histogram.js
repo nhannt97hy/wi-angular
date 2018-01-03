@@ -312,6 +312,9 @@ Histogram.prototype._doPlot = function() {
             return Utils.logMajorTest(xTickValues[i]);
         });
     }
+    else {
+        axisXGroup.selectAll('.tick').classed('majorX', true);
+    }
 
     let axisYGroup = this.svgContainer.select('g.vi-histogram-axis-y-ticks');
     axisYGroup.call(this.axisY)
