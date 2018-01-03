@@ -853,7 +853,7 @@ Crossplot.prototype.plotOverlayLines = function() {
     overlayLines.exit().remove();
     overlayLineContainer.selectAll('path.tick').remove();
     overlayLineContainer.selectAll('text').remove();
-    
+
     for (let line of data) {
         let color = line.color;
         let name = line.names;
@@ -953,7 +953,7 @@ Crossplot.prototype.plotUserDefineLines = function() {
 }
 
 Crossplot.prototype.plotRegressionLines = function() {
-    if (this.data.length == 0) return;
+    // if (this.data.length == 0) return;
     this.prepareRegressionLines();
 
     let transformX = this.getTransformX();
