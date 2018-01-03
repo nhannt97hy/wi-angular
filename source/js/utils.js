@@ -1574,7 +1574,19 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                             }
                         }
                     }, function(err) {
-                        logplotCtrl.handlers.Scale100ButtonClicked();
+                        let currentState = JSON.parse(plot.currentState);
+                        if (currentState.top && currentState.bottom){
+                            logplotCtrl.handlers.ScalePreviousState(currentState.top, currentState.bottom);
+                        } else {
+                            logplotCtrl.handlers.Scale100ButtonClicked();
+                        }
+                        setTimeout(function () {
+                            if(plot.cropDisplay) {
+                                logplotCtrl.handlers.CropDisplayButtonClicked();
+                            } else {
+                                logplotCtrl.handlers.ViewWholeWellButtonClicked();
+                            }
+                        },500);
                         logplotModel.isReady = true;
                         if (callback) callback();
                     });
