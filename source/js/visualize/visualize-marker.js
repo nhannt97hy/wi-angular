@@ -225,7 +225,7 @@ Marker.prototype.updateTextPosition = function(element, hAlign, vAlign) {
     let textRect = element.node().getBBox();
     element.attr('display', 'block');
     let padding = 5;
-    switch (hAlign) {
+    switch (Utils.capitalize(hAlign)) {
         case 'Left':
             textX = minX + padding;
             break;
@@ -239,7 +239,7 @@ Marker.prototype.updateTextPosition = function(element, hAlign, vAlign) {
             textX = minX + padding;
             break;
     }
-    switch (vAlign) {
+    switch (Utils.capitalize(vAlign)) {
         case 'High':
             textY = y - padding;
             break;

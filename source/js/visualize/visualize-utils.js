@@ -44,6 +44,8 @@ exports.getDistance = getDistance;
 exports.sum = sum;
 exports.mean = mean;
 exports.getBoundingClientDimension = getBoundingClientDimension;
+exports.genLogTickValues = genLogTickValues;
+exports.logMajorTest = logMajorTest;
 
 function getProperties(obj) {
     let props = {};
@@ -888,4 +890,21 @@ let alignSvg = exports.alignSvg = function(element, container, type) {
         element.attr('y', 0);
     }
     return element;
+}
+
+function genLogTickValues(minVal, maxVal) {
+    var tickValues = new Array();
+    var leftExponent = Math.floor(Math.log10(minVal));
+    var rightExponent = Math.ceil(Math.log10(maxVal));
+    for (let i = leftExponent; i <= rightExponent; i++) {
+        for (let j = 1; j < 10; j++) {
+            let value = j * Math.pow(10, i);
+            if (value >= minVal && value <= maxVal)
+                tickValues.push(value);
+        }
+    }
+    return tickValues;
+}
+function logMajorTest(value) {
+    return Number.isInteger(Math.log10(value))?true:false;
 }

@@ -786,9 +786,10 @@ LogTrack.prototype.genXTickValues = function() {
     let windowX = this.getWindowX();
     if (self.scale == 'logarithmic') {
         if (windowX[0] < windowX[1])
-            return genLogTickValues(windowX[0], windowX[1]);
+            return Utils.genLogTickValues(windowX[0], windowX[1]);
         else {
-            return genLogTickValues(windowX[1], windowX[0]).reverse();
+            return Utils.genLogTickValues(windowX[1], windowX[0]).reverse();
+
         }
     }
     else {

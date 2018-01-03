@@ -302,9 +302,10 @@ var wiApiWorker = function ($http, wiComponentService) {
     }
     this.working = function () {
         if (self.isAvailable() && self.jobQueue.length) {
-            self.startWorking();
             var job = self.dequeueJob();
             var now = new Date();
+            let silent = job.option && job.option.silent;
+            self.startWorking(silent);
             // Uncomment this line below to debug
             // console.log('worker is now working with: ', job, "at: " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + ":" + now.getMilliseconds());
             // console.log('worker: current Request: ', self.currentRequestWorking);
@@ -372,9 +373,9 @@ var wiApiWorker = function ($http, wiComponentService) {
         }
     }
 }
-wiApiWorker.prototype.startWorking = function () {
+wiApiWorker.prototype.startWorking = function (silent = false) {
     let self = this;
-    self.wiComponentService.getComponent('SPINNER').show();
+    if (!silent) self.wiComponentService.getComponent('SPINNER').show();
     self.currentRequestWorking++;
     // if(self.currentRequestWorking >= MAXIMUM_REQUEST){
     //     self.isFree = false;
@@ -404,8 +405,19 @@ Service.prototype.post = function (route, payload, callback, option) {
            break;
        }
     }
+    let url = null;
+    switch (option) {
+        case 'auth':
+            url = AUTHENTICATION_SERVICE + route;
+            break;
+        case 'processing':
+            url = PROCESSING_SERVICE + route;
+        default:
+            url = self.baseUrl + route;
+            break;
+    }
     let requestObj = {
-        url: option ? (option == 'auth' ? AUTHENTICATION_SERVICE + route: PROCESSING_SERVICE + route) : self.baseUrl + route,
+        url: url,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -416,7 +428,8 @@ Service.prototype.post = function (route, payload, callback, option) {
     };
     let jobObj = {
         request: requestObj,
-        callback: callback
+        callback: callback,
+        option: option
     };
     self.wiApiWorker.enqueueJob(jobObj);
 }
@@ -968,10 +981,10 @@ Service.prototype.getLogplot = function (idLogplot, callback) {
     let self = this;
     this.post(GET_PLOT, {idPlot: idLogplot}, callback);
 }
-Service.prototype.editLogplot = function (infoLogplot, callback) {
+Service.prototype.editLogplot = function (infoLogplot, callback, option) {
     if (!infoLogplot.option) infoLogplot.option = '';
     let self = this;
-    this.post(EDIT_PLOT, infoLogplot, callback);
+    this.post(EDIT_PLOT, infoLogplot, callback, option);
 }
 Service.prototype.removeLogplot = function (idLogplot, callback) {
     let self = this;

@@ -149,7 +149,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         self.tinyWindow.top = top;
     }
 
-    function saveStateToServer() {
+    let saveStateToServer = _.debounce(function () {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
@@ -162,8 +162,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 bottom: high
             }
         }
-        wiApiService.editLogplot(newLogplot);
-    }
+        wiApiService.editLogplot(newLogplot, null, { silent: true });
+    }, 1000);
     
     this.$onInit = function () {
         self.contentId = '#sliding-bar-content' + self.name;
@@ -267,7 +267,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.scroll = scroll;
 
     function scroll(sign) {
-        let pHeight = $(self.contentId).height();
+        let pHeight = $(self.contentId).parent().height();
         let realDeltaY = pHeight * self.slidingBarState.range / 100. * 0.1;
         realDeltaY = (realDeltaY > 1)?realDeltaY:1;
         realDeltaY *= sign;
@@ -285,8 +285,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let newTop = tempTopHandler;
         let newHeight = self.tinyWindow.height;
         updateSlidingHandler(newTop, newHeight);
-
         updateWid3();
+        saveStateToServer();
     }
 
     function onMouseWheel(event) {
@@ -357,15 +357,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.scaleView = function() {
         if ( logPlotCtrl.cropDisplay ) return;
-        //if ( _scaleView ) return;
         logPlotCtrl.cropDisplay = true;
         //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
         let scale = currentParentHeight / self.tinyWindow.height;
         let newParentHeight = currentParentHeight * scale;
         let newTop = (self.slidingBarState.top * newParentHeight) / 100.;
-        //let newParentHeight = Math.round(currentParentHeight * scale);
-        //let newTop = Math.round((self.slidingBarState.top * newParentHeight) / 100);
 
         $(self.contentId).height(newParentHeight);
         _offsetTop = newTop;
@@ -374,7 +371,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.resetView = function() {
-        //_scaleView = false;
         logPlotCtrl.cropDisplay = false;
         let defaultParentHeight = $(self.contentId).parent().parent().height();
         _offsetTop = 0;

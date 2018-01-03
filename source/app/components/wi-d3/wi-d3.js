@@ -658,6 +658,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let top = (topDepth + bottomDepth) / 2;
         let bottom = top + (range / 10);
         let defaultAnn = {
+            idTrack: _currentTrack.id,
             text: 'Type some text here',
             textStyle: {
                 fontSize: '12px',
@@ -676,10 +677,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             shadow: false,
             vertical: false
         }
-        DialogUtils.annotationPropertiesDialog(ModalService, defaultAnn, function (annotationConfig) {
-            annotationConfig.idTrack = _currentTrack.id;
-            wiApiService.createAnnotation(annotationConfig, function (annotation) {
-                self.addAnnotationToTrack(_currentTrack, annotation);
+        wiApiService.createAnnotation(defaultAnn, function (annotation) {
+            let viAnno = self.addAnnotationToTrack(_currentTrack, annotation);
+            DialogUtils.annotationPropertiesDialog(ModalService, annotation, function (annotationConfig) {
+                wiApiService.editAnnotation(annotationConfig, function (annotation) {
+                    viAnno.setProperties(annotation);
+                    viAnno.doPlot(true);
+                })
             })
         })
     }
@@ -1163,9 +1167,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (d3.event.currentDrawing && d3.event.button == 2) {
             if (d3.event.currentDrawing.isCurve()) {
                 _curveOnRightClick();
-            }
-            else if (d3.event.currentDrawing.isShading()) {
+            } else if (d3.event.currentDrawing.isShading()) {
                 _shadingOnRightClick();
+            } else if (d3.event.currentDrawing.isAnnotation()) {
+                _annotationOnRightClick();
+            } else if (d3.event.currentDrawing.isMarker()) {
+                _markerOnRightClick();
             }
         }
     }
@@ -1174,9 +1181,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (d3.event.currentDrawing) {
             if (d3.event.currentDrawing.isCurve()) {
                 _curveOnDoubleClick();
-            }
-            else if (d3.event.currentDrawing.isShading()) {
+            } else if (d3.event.currentDrawing.isShading()) {
                 _shadingOnDoubleClick();
+            } else if (d3.event.currentDrawing.isAnnotation()) {
+                _annotationOnDoubleClick();
+            } else if (d3.event.currentDrawing.isMarker()) {
+                _markerOnDoubleClick();
             }
         }
     }
@@ -1889,7 +1899,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils,
             currentCurve,
             _currentTrack,
-            self.wiLogplotCtrl
+            self.wiLogplotCtrl,
+            function() {
+                _currentTrack.updateScaleInfo({
+                    leftVal:currentCurve.minX,
+                    rightVal:currentCurve.maxX,
+                    scale: currentCurve.scale
+                });
+                _currentTrack.updateAxis();
+            }
         );
 
         // Prevent track properties dialog from opening
@@ -1972,7 +1990,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         DialogUtils.markerPropertiesDialog(ModalService, marker.getProperties(), function (props) {
             wiApiService.editMarker(props, function () {
                 marker.setProperties(props);
-                marker.doPlot();
+                marker.doPlot(true);
             })
         })
     }
@@ -1984,7 +2002,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             annotationConfig.idTrack = _currentTrack.id;
             wiApiService.editAnnotation(annotationConfig, function () {
                 anno.setProperties(annotationConfig);
-                anno.doPlot();
+                anno.doPlot(true);
             })
         })
     }
@@ -2034,7 +2052,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
         ]);
-        console.log(self.contextMenu);
     }
 
     function _zoneOnRightClick() {
@@ -2238,7 +2255,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     DialogUtils,
                     currentCurve,
                     _currentTrack,
-                    self.wiLogplotCtrl)
+                    self.wiLogplotCtrl,
+                    function() {
+                        _currentTrack.updateScaleInfo({
+                            leftVal:currentCurve.minX,
+                            rightVal:currentCurve.maxX,
+                            scale: currentCurve.scale
+                        });
+                        _currentTrack.updateAxis();
+                    }
+                );
             }
         }, {
             name: "EditCurve",
@@ -2266,54 +2292,54 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 });
             }
         }, {
-            name: "DepthShift",
-            label: "Depth Shift",
-            icon: "",
-            handler: function () {
+                name: "DepthShift",
+                label: "Depth Shift",
+                icon: "",
+                handler: function () {
 
-            }
-        }, {
-            name: "RemoveCurve",
-            label: "Remove Curve",
-            icon: "curve-hide-16x16",
-            handler: function () {
-                let idLine = _currentTrack.getCurrentCurve().id;
-                wiApiService.removeLine(idLine, self.removeCurrentCurve());
-            }
-        }, {
-            name: "BaseLineShift",
-            label: "BaseLine Shift",
-            handler: function () {
+                }
+            }, {
+                name: "RemoveCurve",
+                label: "Remove Curve",
+                icon: "curve-hide-16x16",
+                handler: function () {
+                    let idLine = _currentTrack.getCurrentCurve().id;
+                    wiApiService.removeLine(idLine, self.removeCurrentCurve());
+                }
+            }, {
+                name: "BaseLineShift",
+                label: "BaseLine Shift",
+                handler: function () {
 
-            }
-        }, {
-            name: "ReverseDisplaay",
-            label: "Reverse Displaay",
-            handler: function () {
+                }
+            }, {
+                name: "ReverseDisplaay",
+                label: "Reverse Displaay",
+                handler: function () {
 
+                }
+            }, {
+                name: "CrossPlot",
+                label: "Cross plot",
+                icon: "crossplot-blank-16x16",
+                handler: self.createCrossplot
+            }, {
+                name: "Histogram",
+                label: "Histogram",
+                icon: "histogram-new-16x16",
+                handler: self.createHistogram
+            }, {
+                name: "Create Shading",
+                label: "Create Shading",
+                icon: "shading-add-16x16",
+                handler: self.createShadingForSelectedCurve
+            }, {
+                name: "createHistogramTrack",
+                label: "Create Histogram Track",
+                icon: "",
+                handler: function () {
+                }
             }
-        }, {
-            name: "CrossPlot",
-            label: "Cross plot",
-            icon: "crossplot-blank-16x16",
-            handler: self.createCrossplot
-        }, {
-            name: "Histogram",
-            label: "Histogram",
-            icon: "histogram-new-16x16",
-            handler: self.createHistogram
-        }, {
-            name: "Create Shading",
-            label: "Create Shading",
-            icon: "shading-add-16x16",
-            handler: self.createShadingForSelectedCurve
-        }, {
-            name: "createHistogramTrack",
-            label: "Create Histogram Track",
-            icon: "",
-            handler: function () {
-            }
-        }
         ]);
     }
     this.createShadingForSelectedCurve = function () {
@@ -3286,7 +3312,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
-        console.log(self.contextMenu);
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {
                 self.contextMenu = commonCtxMenu;

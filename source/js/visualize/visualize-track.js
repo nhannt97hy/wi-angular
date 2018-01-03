@@ -113,7 +113,7 @@ Track.prototype.createContainer = function() {
         .style('display', 'flex')
         .style('flex-direction', 'column')
         .style('outline', 'none')
-        .style('margin-left', '-3px');
+        //.style('margin-left', '-3px');
     let self = this;
     new ResizeSensor( $(this.root.node()), function(param) {
         self.doPlot();
@@ -228,9 +228,9 @@ Track.prototype.createVerticalResizer = function() {
         .attr('class', 'vi-track-vertical-resizer')
         .attr('data-order-num', function(d) {return d;})
         .style('width', '5px')
-        .style('margin-left', '-3px')
         .style('z-index', '1')
-        .style('cursor', 'col-resize');
+        .style('cursor', 'col-resize')
+        //.style('margin-left', '-3px');
 }
 
 /**
