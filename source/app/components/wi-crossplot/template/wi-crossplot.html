@@ -4,14 +4,15 @@
 <div class="crossplot-main-content" style="flex: 1; display: flex; flex-direction: row;">
     <div resizable r-directions="['right']" r-flex="true" ng-show="wiCrossplot.isShowWiZone" style="min-width:10%;max-width:20%">
         <wi-container name='ZoneCrossplotContainer' title='Zone' close-handler='wiCrossplot.CloseZone'>
-          <wi-zone name="{{wiCrossplot.getWiZoneCtrlName();}}" zones="wiCrossplot.zoneArr" active-zone="wiCrossplot.crossplotModel.properties.pointsets[0].activeZone" on-zone-ctrl-ready="wiCrossplot.onZoneCtrlReady"></wi-zone>
+          <wi-zone name="{{wiCrossplot.getWiZoneCtrlName();}}" zones="wiCrossplot.zoneArr" active-zone="wiCrossplot.getWiD3CrossplotCtrl().crossplotModel.properties.pointsets[0].activeZone" on-zone-ctrl-ready="wiCrossplot.onZoneCtrlReady"></wi-zone>
         </wi-container>
     </div>
     <wi-d3-crossplot style="width: 100%; flex: 1; display: flex;margin-left:14px;"
         name='{{wiCrossplot.wiD3CrossplotName}}'
         wi-crossplot-ctrl='wiCrossplot'>
     </wi-d3-crossplot>
-    <div resizable r-directions="['left']" r-flex="true" ng-show="wiCrossplot.crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
+    <div resizable r-directions="['left']" r-flex="true" 
+        ng-show="wiCrossplot.getWiD3CrossplotCtrl().crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
         <wi-container name='RefCrossplotContainer'
             title='Reference Curve'
             close-handler='wiCrossplot.CloseReferenceWindow'>

@@ -724,7 +724,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 _markerOnRightClick();
             }
         });
-        marker.on('dblclick', _markerOnDoubleClick);
+        marker.on('dblclick', function () {
+            _markerOnDoubleClick(marker);
+        });
         marker.onLineDragEnd(function () {
             // send api to update this marker
             wiApiService.editMarker(marker.getProperties(), function () {
@@ -3201,10 +3203,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (!dragMan.dragging) return;
                 dragMan.wiD3Ctrl = self;
             });
-            domElement.on('mouseleave', function () {
-                if (!dragMan.dragging) return;
-                dragMan.wiD3Ctrl = null;
-            });
+            // domElement.on('mouseleave', function () {
+            //     if (!dragMan.dragging) return;
+            //     dragMan.wiD3Ctrl = null;
+            // });
         }, 1000)
     };
     this.$onDestroy = function() {

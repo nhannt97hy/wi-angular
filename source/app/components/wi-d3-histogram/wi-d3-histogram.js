@@ -109,43 +109,55 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.linkModels = function () {
         setWiHistogramZoneArr(null);
         self.histogramModel = self.getModel();
-        if (self.histogramModel.properties.idZoneSet) {
-            self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
-            if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
-                self.visHistogram.setHistogramModel(self.histogramModel);
-            if (self.getZoneCtrl()) zoneCtrl.zones = self.zoneSetModel.children;
-            //self.zoneArr = self.zoneSetModel.children;
-            setWiHistogramZoneArr(self.zoneSetModel.children);
-        }
-        else {
-            self.zoneSetModel = null;
-        }
-        if (self.histogramModel.properties.idCurve) {
-            self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
-            if (Object.keys(self.visHistogram).length !==0) {
-                if(self.visHistogram.discriminator != self.histogramModel.properties.discriminator){
-                    self.visHistogram.discriminator = self.histogramModel.properties.discriminator;
-                    utils.evaluateExpr(getWell(), self.visHistogram.discriminator, function(result){
-                        self.visHistogram.discriminatorArr = result;
-                        console.log('link models');
-
-                        if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
-                            self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
-                            loadCurve(self.visHistogram.idCurve);
-                        } else {
-                            self.visHistogram.signal('histogram-update', "no load curve");
-                        }
-                    });
-                } else if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
-                    self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
-                    loadCurve(self.visHistogram.idCurve);
-                } else {
-                    self.visHistogram.signal('histogram-update', "no load curve");
+        wiApiService.getHistogram(self.histogramModel.id, function(xplotProps){
+            self.histogramModel.properties = xplotProps;
+            if (self.histogramModel.properties.idZoneSet) {
+                self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
+                if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
+                    self.visHistogram.setHistogramModel(self.histogramModel);
+                if (self.getZoneCtrl()) zoneCtrl.zones = self.zoneSetModel.children;
+                //self.zoneArr = self.zoneSetModel.children;
+                setWiHistogramZoneArr(self.zoneSetModel.children);
+            }
+            else {
+                self.zoneSetModel = null;
+            }
+            if (self.histogramModel.properties.idCurve) {
+                self.curveModel = utils.getCurveFromId(self.histogramModel.properties.idCurve);
+                if (Object.keys(self.visHistogram).length !==0) {
+                    if(self.visHistogram.discriminator != self.histogramModel.properties.discriminator){
+                        self.visHistogram.discriminator = self.histogramModel.properties.discriminator;
+                        utils.evaluateExpr(getWell(), self.visHistogram.discriminator, function(result){
+                            self.visHistogram.discriminatorArr = result;
+                            console.log('link models');
+    
+                            if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                                self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
+                                loadCurve(self.visHistogram.idCurve);
+                            } else {
+                                self.visHistogram.signal('histogram-update', "no load curve");
+                            }
+                        });
+                    } else if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
+                        self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
+                        loadCurve(self.visHistogram.idCurve);
+                    } else {
+                        self.visHistogram.signal('histogram-update', "no load curve");
+                    }
                 }
             }
-        }
-        getHistogramTitle();
-        self.histogramModel.properties.xLabel = getXLabel();
+            getHistogramTitle();
+            self.histogramModel.properties.xLabel = getXLabel();
+
+            let refWindCtrl = self.getWiRefWindCtrl();
+            if (refWindCtrl) refWindCtrl.update(getWell(), 
+                    xplotProps.reference_curves,
+                    xplotProps.referenceScale,
+                    xplotProps.referenceVertLineNumber,
+                    xplotProps.referenceTopDepth,
+                    xplotProps.referenceBottomDepth,
+                    xplotProps.referenceShowDepthGrid);
+        })
     }
     this.refreshHistogram = function() {
         if (self.visHistogram) {
@@ -470,21 +482,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.wiHistogramCtrl) {
             $timeout(function () {
                 self.wiHistogramCtrl.loadStatistics(self.visHistogram);
-                /*
-                self.statistics.length = self.visHistogram.getLength();
-                self.statistics.min = self.visHistogram.getMin();
-                self.statistics.max = self.visHistogram.getMax();
-                self.statistics.avg = self.visHistogram.getAverage();
-                self.statistics.avg_dev = self.visHistogram.getAverageDeviation();
-                self.statistics.std_dev = self.visHistogram.getStandardDeviation();
-                self.statistics.var = self.visHistogram.getVariance();
-                self.statistics.skew = self.visHistogram.getSkewness();
-                self.statistics.kur = self.visHistogram.getKurtosis();
-                self.statistics.med = self.visHistogram.getMedian();
-                self.statistics.p10 = self.visHistogram.getPercentile(0.1);
-                self.statistics.p50 = self.visHistogram.getPercentile(0.5);
-                self.statistics.p90 = self.visHistogram.getPercentile(0.9);
-                */
             });
         }
     }

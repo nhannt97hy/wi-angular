@@ -91,6 +91,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (crossplotProps.pointsets && crossplotProps.pointsets.length)
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
+            let refWindCtrl = self.getWiRefWindCtrl();
+            if (refWindCtrl) refWindCtrl.update(getWell(), 
+                    xplotProps.reference_curves,
+                    xplotProps.referenceScale,
+                    xplotProps.referenceVertLineNumber,
+                    xplotProps.referenceTopDepth,
+                    xplotProps.referenceBottomDepth,
+                    xplotProps.referenceShowDepthGrid);
         });
     }
     function updateHistogramProps(crossplotModel,xy){

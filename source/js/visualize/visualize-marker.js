@@ -165,9 +165,11 @@ Marker.prototype.lineDragCallback = function() {
 Marker.prototype.onLineDragEnd = function(cb) {
     let self = this;
     let preY;
+    let originalY;
     this.svgGroup.call(d3.drag()
         .on('start', function() {
             preY = d3.mouse(self.root.node())[1];
+            originalY = preY;
         })
         .on('drag', function() {
             d3.event.preY = preY;
@@ -175,7 +177,11 @@ Marker.prototype.onLineDragEnd = function(cb) {
             d3.event.currentY = preY;
             self.lineDragCallback();
         })
-        .on('end', cb)
+        .on('end', function () {
+            if (Math.abs(originalY - d3.mouse(self.root.node())[1]) > 2) {
+                cb && cb();
+            }
+        })
     );
 }
 

@@ -193,12 +193,20 @@ Annotation.prototype.on = function(type, cb) {
 
 Annotation.prototype.onRectDragEnd = function(cb) {
     let self = this;
+    let originalY, originalX;
     this.svgGroup.call(d3.drag()
-        .on('start', function() {})
+        .on('start', function() {
+            originalX = d3.event.x;
+            originalY = d3.event.y;
+        })
         .on('drag', function() {
             self.rectDragCallback();
         })
-        .on('end', cb)
+        .on('end', function () {
+            if (Math.abs(originalY - d3.event.y) > 2 || Math.abs(originalX - d3.event.x) > 2) {
+                cb && cb();
+            }
+        })
     );
 }
 
