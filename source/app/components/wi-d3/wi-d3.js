@@ -3203,10 +3203,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (!dragMan.dragging) return;
                 dragMan.wiD3Ctrl = self;
             });
-            domElement.on('mouseleave', function () {
-                if (!dragMan.dragging) return;
-                dragMan.wiD3Ctrl = null;
-            });
+            // domElement.on('mouseleave', function () {
+            //     if (!dragMan.dragging) return;
+            //     dragMan.wiD3Ctrl = null;
+            // });
         }, 1000)
     };
     this.$onDestroy = function() {
