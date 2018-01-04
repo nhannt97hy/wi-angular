@@ -1761,15 +1761,34 @@ exports.importFromInventoryDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        self.treeviewName = "inventoryTreeview";
+        function modelFrom (project) {
+            let projectModel = utils.createProjectModel(project);
+            project.wells.forEach(well => {
+                let wellModel = utils.createWellModel(well)
+                projectModel.children.push(wellModel);
+                well.datasets.forEach(dataset => {
+                    let datasetModel = utils.createDatasetModel(dataset);
+                    wellModel.children.push(datasetModel);
+                    dataset.curves.forEach(curve => {
+                        datasetModel.children.push(utils.createCurveModel(curve));
+                    })
+                })
+            })
+            return projectModel;
+        }
 
         let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        let projectModel = utils.projectToTreeConfig(projectLoaded);
-        let dustbinModel = utils.dustbinToTreeConfig();
-        self.treeConfig = [projectModel, dustbinModel];
+        let projectModel = modelFrom(projectLoaded);
+        this.projectConfig = [projectModel];
+        let inventoryModel;
+        this.inventoryConfig = [inventoryModel];
+        wiApiService.getInventory(function (inventory) {
+            inventoryModel = modelFrom(inventory);
+            self.inventoryConfig[0] = inventoryModel;
+            inventoryModel.data.label = 'Inventory';
+        })
 
         this.onCancelButtonClicked = function () {
-            console.log("onCancelButtonClicked");
             close(null, 100);
         };
     }

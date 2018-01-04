@@ -20,17 +20,19 @@ let app = angular.module(moduleName, []);
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
+const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
 // const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
 // const PROCESSING_SERVICE = 'http://54.169.13.92';
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://localhost:3000';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 // const PROCESSING_SERVICE = 'http://localhost:5000';
-
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -225,6 +227,8 @@ const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/de
 const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
 const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
 
+const GET_INVENTORY = '/user/fullinfo';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -412,6 +416,9 @@ Service.prototype.post = function (route, payload, callback, option) {
             break;
         case 'processing':
             url = PROCESSING_SERVICE + route;
+            break;
+        case 'inventory':
+            url = INVENTORY_SERVICE + route;
             break;
         default:
             url = self.baseUrl + route;
@@ -1579,9 +1586,7 @@ Service.prototype.saveCustomFills = function (customFills, callback) {
     this.post(SAVE_CUSTOM_FILLS, customFills, callback);
 }
 Service.prototype.setAuthenticationInfo = function (authenInfo) {
-    __USERINFO.username = authenInfo.username;
-    __USERINFO.password = authenInfo.password;
-    __USERINFO.token = authenInfo.token;
+    __USERINFO = authenInfo;
 }
 
 Service.prototype.getCaptcha = function () {
@@ -1683,9 +1688,16 @@ Service.prototype.convolution = function (data, callback){
 Service.prototype.deconvolution = function (data, callback){
     this.post('/deconvolution', data, callback, 'processing');
 }
+<<<<<<< Updated upstream
 Service.prototype.medfil = function (data, callback){
     this.post('/median', data, callback, 'processing');
 }
 Service.prototype.savgolfil = function (data, callback){
     this.post('/savgol', data, callback, 'processing');
 }
+=======
+
+Service.prototype.getInventory = function (callback) {
+    this.post(GET_INVENTORY, {}, callback, 'inventory');
+}
+>>>>>>> Stashed changes
