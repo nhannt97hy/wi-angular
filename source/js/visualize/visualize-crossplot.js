@@ -846,7 +846,11 @@ Crossplot.prototype.plotOverlayLines = function() {
             return line(d.data);
         })
         .attr('stroke', function(d) {
-            return d.color.replace('Dk', 'Dark');
+            let color = d.color;
+            if (d.names == 'SS') color = 'Green';
+            if (d.names == 'LS') color = 'Blue';
+            if (d.names == 'DOL') color = 'Pink';
+            return color.replace('Dk', 'Dark');
         })
         .attr('stroke-width', 2)
         .attr('fill', 'none');

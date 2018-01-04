@@ -775,7 +775,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             function(callback) {
                 if (config.pointSet.idOverlayLine) {
-                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, idCurveX, idCurveY, function(ret) {
+                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, config.pointSet.idCurveX, config.pointSet.idCurveY, function(ret) {
                         config.pointSet.overlayLine = (ret || {}).data;
                         callback();
                     });
