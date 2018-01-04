@@ -821,10 +821,11 @@ Crossplot.prototype.plotOverlayLines = function() {
     let transformY = this.getTransformY();
     window.tX = transformX;
     window.tY = transformY;
+    let isSwap = (this.pointSet.overlayLine || {}).isSwap;
 
     let line = d3.line()
-        .x(function(d) { return transformX(parseFloat(d.y)); })
-        .y(function(d) { return transformY(parseFloat(d.x)); })
+        .x(function(d) { return transformX(parseFloat(isSwap ? d.x : d.y)); })
+        .y(function(d) { return transformY(parseFloat(isSwap ? d.y : d.x)); })
         .defined(function(d) {
             return !isNaN(d.x) && !isNaN(d.y);
         });
@@ -857,10 +858,15 @@ Crossplot.prototype.plotOverlayLines = function() {
     for (let line of data) {
         let color = line.color;
         let name = line.names;
+
+        if (name == 'SS') color = 'Green';
+        if (name == 'LS') color = 'Blue';
+        if (name == 'DOL') color = 'Pink';
+
         let points = line.data.map(function(d) {
             return {
-                x: transformX(parseFloat(d.y)),
-                y: transformY(parseFloat(d.x)),
+                x: transformX(parseFloat(isSwap ? d.x : d.y)),
+                y: transformY(parseFloat(isSwap ? d.y : d.x)),
                 type: d.type
             }
         });
@@ -887,7 +893,7 @@ Crossplot.prototype.plotOverlayLines = function() {
             }
             let v_x = b.y - a.y;
             let v_y = a.x - b.x;
-            let v_length = Math.sqrt(v_x*2 + v_y*2)
+            let v_length = Math.sqrt(v_x*v_x + v_y*v_y)
             v_x /= v_length;
             v_y /= v_length;
             if (isNaN(v_x) || isNaN(v_y)) continue
@@ -896,10 +902,11 @@ Crossplot.prototype.plotOverlayLines = function() {
                 .attr('cy', a.y)
                 .attr('r', 5)
                 .attr('stroke', 'black')*/
+            let TICK_SIZE = 5
             overlayLineContainer.append('path')
                 .attr('class', 'tick')
-                .attr('d', 'M ' + (a.x+v_x) + ' ' + (a.y+v_y) + ' '
-                          +'L ' + (a.x-v_x) + ' ' + (a.y-v_y))
+                .attr('d', 'M ' + (a.x+v_x * TICK_SIZE) + ' ' + (a.y+v_y*TICK_SIZE) + ' '
+                          +'L ' + (a.x-v_x * TICK_SIZE) + ' ' + (a.y-v_y*TICK_SIZE))
                 .attr('stroke', 'black')
                 .attr('stroke-width', 1);
 

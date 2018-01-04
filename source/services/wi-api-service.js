@@ -1645,8 +1645,12 @@ Service.prototype.listOverlayLine = function(idCurveX, idCurveY, callback) {
     this.post(LIST_OVERLAY_LINE, { idCurveX: idCurveX, idCurveY: idCurveY }, callback);
 }
 
-Service.prototype.getOverlayLine = function(idOverlayLine, callback) {
-    this.post(GET_OVERLAY_LINE, { idOverlayLine: idOverlayLine }, callback);
+Service.prototype.getOverlayLine = function(idOverlayLine, idCurveX, idCurveY, callback) {
+    this.post(GET_OVERLAY_LINE, {
+        idOverlayLine: idOverlayLine,
+        idCurveX: idCurveX,
+        idCurveY: idCurveY
+    }, callback);
 }
 
 Service.prototype.createObjectOfObjectTrack = function (data, callback) {

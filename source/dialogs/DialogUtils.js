@@ -5366,7 +5366,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                     return;
                 }
             }
-
+            // if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
+            //     let overlayProps = self.overlayLines.filter(function(o) {
+            //         return o.idOverlayLine == self.crossplotModelProps.pointsets[0].idOverlayLine;
+            //     })[0];
+            //     self.crossplotModelProps.pointsets[0].isOverlayLineSwap = overlayProps.isSwap;
+            // }
             _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
             self.updating = true;
             self.updating = false;

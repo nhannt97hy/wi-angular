@@ -93,7 +93,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
             let refWindCtrl = self.getWiRefWindCtrl();
-            if (refWindCtrl) refWindCtrl.update(getWell(), 
+            if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
                     xplotProps.referenceScale,
                     xplotProps.referenceVertLineNumber,
@@ -430,7 +430,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         },
                         function(cb) {
                             if (xplotProps.pointsets[0].idOverlayLine) {
-                                wiApiService.getOverlayLine(xplotProps.pointsets[0].idOverlayLine, function(ret) {
+                                wiApiService.getOverlayLine(xplotProps.pointsets[0].idOverlayLine, pointSet.idCurveX, pointSet.idCurveY, function(ret) {
                                     overlayLine = (ret || {}).data;
                                     cb();
                                 });
@@ -458,6 +458,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
 
                         if (overlayLine) {
+                            // overlayLine.isSwap = crossplotProps.pointSet.isOverlayLineSwap;
                             crossplotProps.pointSet.overlayLine = overlayLine;
                         }
                         //if (callback) callback(crossplotProps);
@@ -774,7 +775,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             function(callback) {
                 if (config.pointSet.idOverlayLine) {
-                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, function(ret) {
+                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, idCurveX, idCurveY, function(ret) {
                         config.pointSet.overlayLine = (ret || {}).data;
                         callback();
                     });
