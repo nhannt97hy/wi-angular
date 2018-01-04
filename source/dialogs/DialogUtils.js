@@ -2691,7 +2691,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         let controlCurve = utils.getCurveFromId(this.shadingOptions.idControlCurve);
         console.log("controlCurve", controlCurve.lineProperties);
 
-        
+
         this.namePals = new Array();
             utils.getPalettes(function(pals){
                 self.paletteList = pals;
@@ -2704,8 +2704,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             this.enableFill = function (idEnable, value) {
                 $('#' + idEnable + ":button").attr("disabled", value);
             }
-        // function 
-        
+        // function
+
         this.typeFixedValue = function () {
             if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightLine.minX){
                 self.shadingOptions.leftLine = {"id": -1, "name": "left"};
@@ -2969,7 +2969,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             else {
                 if (callback) callback();
             }
-            
+
         }, function(callback) {
             utils.getPalettes(function(paletteList){
                 paletteNameArr = Object.keys(paletteList);
@@ -2985,7 +2985,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
         // Call Backend API
         //getVariableShading();
-        
+
 
         function initVariableShadingOptions() {
             self.variableShadingOptions = {
@@ -3076,7 +3076,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         }
 
         this.displayType = this.shadingOptions.isNegPosFill;
-        
+
         this.foregroundCustomFills = function(index){
             if(!self.variableShadingOptions.fill.varShading.customFills.content[index].foreground) self.variableShadingOptions.fill.varShading.customFills.content[index].pattern = 'basement';
             $timeout(function() {
@@ -3090,7 +3090,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 self.variableShadingOptions.fill.varShading.customFills.content[index].background = colorStr;
             });
         };
-        
+
         this.idx = null;
         this.setClickedRow = function(index){
             $scope.selectedRow = index;
@@ -3122,7 +3122,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 });
             }
         };
-        
+
         // TO CHANGE: set this.displayType = false
         this.setCustomFillsIfNull = function() {
             self.displayType = false;
@@ -3202,7 +3202,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             console.log("gg",self.shadingOptions);
             let options = {
                 _index : shadingOptions._index,
-                changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0) 
+                changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
                             ? (shadingOptions.changed = 2) : shadingOptions.changed,
                 idControlCurve : self.variableShadingOptions.controlCurve.id,
                 idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
@@ -5217,8 +5217,8 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 if (symbol != 'Z') loadOverlays();
             }else{
                 let scaleKeys = getScaleKeys(symbol);
-                let pointSet = self.crossplotModelProps.pointsets[0];     
-                // pointSet['idCurve' + symbol] = null;           
+                let pointSet = self.crossplotModelProps.pointsets[0];
+                // pointSet['idCurve' + symbol] = null;
                 pointSet[scaleKeys[0]] = null;
                 pointSet[scaleKeys[1]] = null;
             }
@@ -7475,6 +7475,10 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         this.vertices = ternary.vertices.map(function(vertex, index) {
             vertex.change = change.unchanged;
             vertex.index = index;
+
+            vertex.x = +parseFloat(vertex.x).toFixed(4);
+            vertex.y = +parseFloat(vertex.y).toFixed(4);
+
             return vertex;
         });
         this.modelData = [];
@@ -7561,6 +7565,8 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             wiD3CrossplotCtrl.pickVertex(idx, function(vertex) {
                 $('#ternary-modal').modal('show');
                 vertex = angular.copy(vertex);
+                vertex.x = +parseFloat(vertex.x).toFixed(4);
+                vertex.y = +parseFloat(vertex.y).toFixed(4);
 
                 if (idx == null) {
                     vertex.name = 'Material_' + (self.vertices.length + 1);
@@ -7587,6 +7593,10 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             wiD3CrossplotCtrl.pickPoint(function(point) {
                 $('#ternary-modal').modal('show');
                 if (point) {
+                    point = angular.copy(point);
+                    point.x = +parseFloat(point.x).toFixed(4);
+                    point.y = +parseFloat(point.y).toFixed(4);
+
                     calculateOptions.point = point;
                     $scope.$apply();
                 }
@@ -7662,8 +7672,13 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             let result = viCrossplot.calculateTernary();
             if (result.error)
                 utils.error(result.error);
-            else
+            else {
+                result.materials = result.materials.map(function(m) {
+                    return +parseFloat(m).toFixed(4);
+                });
                 $scope.result = result;
+
+            }
         }
 
         this.onOkButtonClicked = function () {
@@ -11194,7 +11209,7 @@ exports.curveFilterDialog = function(ModalService){
                 case '6':
                 customFilter();
                 break;
-            }            
+            }
         }
     }
 
