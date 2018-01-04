@@ -61,7 +61,6 @@ module.exports.createLayout = function (domId, $scope, $compile) {
             }
         });
         container.on('resize', function () {
-            // wiComponentService.emit('resize');
             document.dispatchEvent(new Event('resize'));
         });
     });
@@ -69,6 +68,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
         if (activeContentItem.config.componentState.model) {
             wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+            document.dispatchEvent(new Event('resize'));
         }
     });
 }
