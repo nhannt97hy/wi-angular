@@ -241,13 +241,13 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         new ResizeSensor($(self.contentId), function () {
             let currentParentHeight = $(self.contentId).height();
-            if (currentParentHeight !== parentHeight) self.refreshHandler();
-            _viCurve.doPlot();
+            if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
+            _viCurve && _viCurve.doPlot();
         });
         document.addEventListener('resize', function (event) {
             let currentParentHeight = $(self.contentId).height();
-            if (currentParentHeight !== parentHeight) self.refreshHandler();
-            _viCurve.doPlot();
+            if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
+            _viCurve && _viCurve.doPlot();
         })
 
         $(self.contentId).on("mousewheel", onMouseWheel);

@@ -1029,6 +1029,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     let x = d3.event.offsetX;
     let y = d3.event.offsetY;
 
+    this.trackContainer.node().focus();
     if (d3.event.button != 0) {
         d3.event.currentDrawing = this.currentDrawing;
         return;

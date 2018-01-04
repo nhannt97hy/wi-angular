@@ -3160,11 +3160,8 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             return true;
 
         }
-        this.onCancelButtonClicked = function () {
-            console.log("clone", self.shadingOptions, cloneOptions);
-            close(cloneOptions);
-        }
-        this.onOkButtonClicked = function () {
+        this._options = {};
+        function doApply() {
             switch (self.varShadingType) {
                 case "gradient":
                 self.variableShadingOptions.fill.varShading.palette = null;
@@ -3200,7 +3197,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             }
             let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
             console.log("gg",self.shadingOptions);
-            let options = {
+            self._options = {
                 _index : shadingOptions._index,
                 changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
                             ? (shadingOptions.changed = 2) : shadingOptions.changed,
@@ -3219,10 +3216,18 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 fill : temp.fill,
                 positiveFill : temp.positiveFill,
                 negativeFill : temp.negativeFill
-            }
-            console.log("options", options);
-            close(options);
-
+            };
+        }
+        this.onCancelButtonClicked = function () {
+            close(cloneOptions, 100);
+        }
+        this.onApplyButtonClicked = function () {
+            doApply();
+            callback(self._options);
+        };
+        this.onOkButtonClicked = function () {
+            doApply();
+            close(self._options, 100);
         };
     }
     ModalService.showModal({
