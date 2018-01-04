@@ -72,6 +72,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
+        self.setContextMenu();
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -342,6 +343,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     //    utils.triggerWindowResize();
     }
 
+    this.switchReferenceWindow = function(state) {
+        if (state != undefined || state != null) self.crossplotModel.properties.referenceDisplay = state;
+        else self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
+        let index = 6; // HARD CODED - TUNG (for quick fix)
+        if (self.contextMenu.length >= index) {
+            self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
+        }
+    }
+
     this.updateAll = function (callback) {
         wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
             //crossplot.pointSet = crossplot.pointsets[0];
@@ -581,12 +591,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     isCheckType: "true",
                     checked: self.crossplotModel ? self.crossplotModel.properties.referenceDisplay : false,
                     handler: function (index) {
-                        self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
-                        self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
-                        console.log(self.crossplotModel);
-                        $timeout(function() {
+                        self.switchReferenceWindow();
+                        //self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
+                        //self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
+                        /*$timeout(function() {
                             self.getWiRefWindCtrl().refresh();
-                        }, 100);
+                        }, 100);*/
                         //utils.triggerWindowResize();
                     }
                 },{
@@ -619,7 +629,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.contextMenu = contextMenu;
         }
     }
-    this.setContextMenu();
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();

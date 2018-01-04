@@ -28,8 +28,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isShowWiZone = false;
     }
     this.CloseReferenceWindow = function () {
-        if (self.histogramModel) 
-            self.histogramModel.properties.referenceDisplay = false;
+        let wiD3HistogramCtrl = self.getwiD3Ctrl();
+        if (wiD3HistogramCtrl && wiD3HistogramCtrl.histogramModel) 
+            wiD3HistogramCtrl.histogramModel.properties.referenceDisplay = false;
     }
 
     this.getWiZoneCtrlName = function () {

@@ -88,15 +88,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         return _wiD3CrossplotCtrl;
     }
 
-    this.addRefCurve = function(idCurve, config, callback) {
+    this.addRefCurve = function(idCurve, config,callback) {
         var viCurve = null;
         utils.getCurveData(wiApiService, idCurve, function (err, dataCurve) {
             if (err) {
                 utils.error(err);
                 return;
             }
+            // let filteredDataCurve = dataCurve.filter(function(d) {
+            //     let depth = wellTopDepth + parseFloat(d.y) * config.yStep;
+            //     return (depth >= config.minY) && (depth <= config.maxY);
+            // });
+            // viCurve = graph.createCurve(config, filteredDataCurve, getRefCurveContainer());
             viCurve = graph.createCurve(config, dataCurve, getRefCurveContainer());
-            console.log(viCurve);
+            //console.log(viCurve);
             //viCurve.doPlot();
             _viCurves.push(viCurve);
             if (callback) callback();
@@ -297,7 +302,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             minY: _top,
                             maxY: _bottom,
                             yStep: stepY,
-                            offsetY: _top,
+                            offsetY: well.properties.topDepth,
                             scale: curve.LineProperty ? curve.LineProperty.displayType : "Linear",
                             line: {
                                 color: refCurve.color

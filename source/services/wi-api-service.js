@@ -412,6 +412,7 @@ Service.prototype.post = function (route, payload, callback, option) {
             break;
         case 'processing':
             url = PROCESSING_SERVICE + route;
+            break;
         default:
             url = self.baseUrl + route;
             break;
@@ -1677,4 +1678,10 @@ Service.prototype.convolution = function (data, callback){
 }
 Service.prototype.deconvolution = function (data, callback){
     this.post('/deconvolution', data, callback, 'processing');
+}
+Service.prototype.medfil = function (data, callback){
+    this.post('/median', data, callback, 'processing');
+}
+Service.prototype.savgolfil = function (data, callback){
+    this.post('/savgol', data, callback, 'processing');
 }

@@ -11078,6 +11078,7 @@ exports.curveFilterDialog = function(ModalService){
         this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];
+        this.curveData = null;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if(selectedNodes && selectedNodes.length){
             switch (selectedNodes[0].type){
@@ -11138,12 +11139,17 @@ exports.curveFilterDialog = function(ModalService){
             self.applyingInProgress = false;
             $timeout(function(){
                 self.wells = utils.findWells();
+                self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
                 self.onChangeWell();
             }, 0);
         });
 
         this.onCancelButtonClicked = function(){
             close(null);
+        }
+
+        this.onChangeCurve = function(){
+            if(self.createOp == 'new') self.curveName = self.SelectedCurve.name;
         }
 
         this.validate = function(){
@@ -11153,6 +11159,7 @@ exports.curveFilterDialog = function(ModalService){
             }else{
                 return !self.numLevel;
             }
+            if(self.createOp == 'new') return !self.curveName;
         }
         this.onNumLevelChange = function(){
             if(self.numLevel %2 == 0) self.numLevel = self.numLevel + 1;
@@ -11160,8 +11167,63 @@ exports.curveFilterDialog = function(ModalService){
                 self.table = new Array(self.numLevel).fill(1/self.numLevel).map(d => {return parseFloat(d.toFixed(4))});
             }
         }
-        function getData(){
-            wiApiService.dataCurve(self.SelectedCurve.id)
+        function isExisted(curveName, dataset){
+            return self.curvesArr.find(curve => {
+                return curve.name == curveName && curve.properties.idDataset == dataset;
+            })
+        }
+        function getData(callback){
+            delete self.curveData;
+            wiApiService.dataCurve(self.SelectedCurve.id, function(data){
+                self.curveData = data.map(d => {return parseFloat(d.x)});
+                if(callback) callback();
+            })
+        }
+
+        function saveCurve(data){
+            let payload = null;
+            switch(self.createOp){
+                case 'backup':
+                    payload = {
+                        idDataset: self.SelectedCurve.properties.idDataset,
+                        curveName: self.SelectedCurve.properties.name + '_BK',
+                        unit: self.SelectedCurve.properties.unit,
+                        idDesCurve: self.SelectedCurve.id,
+                        data: data
+                    };
+                    let i = isExisted(payload.curveName, payload.idDataset);
+                    while(i){
+                        payload.curveName = payload.curveName + '_BK';
+                        i = isExisted(payload.curveName, payload.idDataset);
+                    }
+                    $timeout(function(){
+                        console.log('do save curve');
+                        delete payload.idDesCurve;
+                        wiApiService.processingDataCurve(payload, function(){
+                            utils.refreshProjectState();                        
+                        })
+                    },500)
+                    break;
+
+                case 'new':
+                    payload = {
+                        idDataset: self.SelectedDataset.id,
+                        curveName: self.curveName,
+                        unit: self.SelectedCurve.properties.unit,
+                        idDesCurve: self.SelectedCurve.id,
+                        data: data
+                    };
+                    if(isExisted(payload.curveName, payload.idDataset)){
+                        delete payload.curveName;
+                    } else{
+                        delete payload.idDesCurve;
+                    }
+
+                    wiApiService.processingDataCurve(payload, function(){
+                        utils.refreshProjectState();                        
+                    })
+                    break;
+            }
         }
 
         function squareFilter(){
@@ -11169,6 +11231,28 @@ exports.curveFilterDialog = function(ModalService){
         }
         function savgoFilter(){
             console.log('savgoFilter');
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < self.curveData.length; i++){
+                if(!isNaN(self.curveData[i])){
+                    inputF.push(self.curveData[i]);
+                    lstIndex.push(i);
+                }
+            }
+            let out = new Array(self.curveData.length).fill(NaN);
+
+            wiApiService.savgolfil({input: inputF, length: self.numPoints, poly: self.polyOder, deriv: self.devOrder}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        saveCurve(out);
+                    }
+                }
+            })
+
         }
         function bellFilter(){
             console.log('bellFilter');
@@ -11183,32 +11267,51 @@ exports.curveFilterDialog = function(ModalService){
             console.log('customFilter');
         }
 
+        function run(){
+            getData(function(){
+                switch(self.filterOp){
+                    case '1':
+                    squareFilter();
+                    break;
+    
+                    case '2':
+                    savgoFilter();
+                    break;
+    
+                    case '3':
+                    bellFilter();
+                    break;
+    
+                    case '4':
+                    fftFilter();
+                    break;
+    
+                    case '5':
+                    medianFilter();
+                    break;
+    
+                    case '6':
+                    customFilter();
+                    break;
+                }
+            })
+        }
         this.onRunButtonClicked = function(){
             self.applyingInProgress = true;
-            switch(self.filterOp){
-                case '1':
-                squareFilter();
-                break;
-
-                case '2':
-                savgoFilter();
-                break;
-
-                case '3':
-                bellFilter();
-                break;
-
-                case '4':
-                fftFilter();
-                break;
-
-                case '5':
-                medianFilter();
-                break;
-
-                case '6':
-                customFilter();
-                break;
+            if(self.createOp == 'new'){
+                if(isExisted(self.curveName, self.SelectedDataset.id)){
+                    DialogUtils.confirmDialog(ModalService, "Save Curve", "OverWrite?", function (ret) {
+                        if(ret){
+                            run();
+                        }else{
+                            self.applyingInProgress = false;                            
+                        }
+                    })
+                }else{
+                    run();
+                }
+            }else{
+                run();
             }
         }
     }

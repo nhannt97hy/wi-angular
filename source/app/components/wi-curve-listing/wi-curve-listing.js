@@ -42,7 +42,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         for(let i = 0; i < length; i++){
             self.depthArr[i] = parseFloat((step * i + topDepth).toFixed(4));
         }
-        self.loaded = self.depthArr.slice(0,15);
+        self.loaded = self.depthArr.slice(0,25);
         self.curvesData[self.currentIndex].forEach(curve => {
             curve.show = false;
         })
@@ -95,7 +95,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.LoadMoreOutPut = function(){
         let len = self.loaded.length;
         console.log('Load more',len);
-        self.loaded.push(...self.depthArr.slice(len, len + 15));
+        self.loaded.push(...self.depthArr.slice(len, len + 25));
     }
 
     this.onCurveSelectClick = function(name, dataset, id, selected){
