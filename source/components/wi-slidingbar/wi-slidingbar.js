@@ -157,6 +157,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let high = low + (max - min) * self.slidingBarState.range / 100.;
         let newLogplot = {
             idPlot: logPlotCtrl.getLogplotModel().properties.idPlot,
+            cropDisplay: logPlotCtrl.cropDisplay,
             currentState: {
                 top: low,
                 bottom: high
@@ -356,11 +357,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     this.scaleView = function() {
-        if ( logPlotCtrl.cropDisplay ) return;
+        //if ( logPlotCtrl.cropDisplay ) return;
         logPlotCtrl.cropDisplay = true;
         //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
-        let scale = currentParentHeight / self.tinyWindow.height;
+        let viewHeight = $(self.contentId).parent().parent().height();
+        let scale = viewHeight / self.tinyWindow.height;
         let newParentHeight = currentParentHeight * scale;
         let newTop = (self.slidingBarState.top * newParentHeight) / 100.;
 
@@ -368,6 +370,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         _offsetTop = newTop;
         $(self.contentId).css('top', '-' + newTop + 'px');
         _viCurve.doPlot();
+        saveStateToServer();
     }
 
     this.resetView = function() {
@@ -376,6 +379,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);
         if (_viCurve) _viCurve.doPlot();
+        saveStateToServer();
     }
 }
 
