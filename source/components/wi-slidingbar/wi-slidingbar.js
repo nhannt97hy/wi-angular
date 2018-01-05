@@ -268,17 +268,22 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.scroll = scroll;
 
     function scroll(sign) {
-        let pHeight = $(self.contentId).parent().height();
-        let realDeltaY = pHeight * self.slidingBarState.range / 100. * 0.1;
-        realDeltaY = (realDeltaY > 1)?realDeltaY:1;
+        const SCROLL_FACTOR = 0.15;
+        const MIN_SCROLL = 2;
+
+        let wholeHeight = $(self.contentId).height();
+        let viewHeight = $(self.contentId).parent().height();
+
+        let realDeltaY = wholeHeight * self.slidingBarState.range / 100. * SCROLL_FACTOR;
+        realDeltaY = (realDeltaY > MIN_SCROLL)?realDeltaY:MIN_SCROLL;
         realDeltaY *= sign;
         let tempTopHandler = self.tinyWindow.top - realDeltaY;
 
         if (tempTopHandler < 0 + _offsetTop) {
             tempTopHandler = 0 + _offsetTop;
         }
-        else if (tempTopHandler + self.tinyWindow.height > pHeight + _offsetTop ) {
-            tempTopHandler = pHeight + _offsetTop - self.tinyWindow.height;
+        else if (tempTopHandler + self.tinyWindow.height > viewHeight + _offsetTop ) {
+            tempTopHandler = viewHeight + _offsetTop - self.tinyWindow.height;
         }
 
         //let newTop = Math.round(tempTopHandler);
