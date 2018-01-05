@@ -33,13 +33,13 @@ wi-curve-listing{
         display: flex;
         flex-direction:column;
         margin:0px 14px;
-        height: 100%;
+        height: 95%;
         overflow: hidden;
-        padding-bottom: 10px;
         &>div{
             overflow-x:overlay;
             position: relative;
             table{
+                margin-bottom: 0px;
                 thead{
                     display: table-row;
                 }
@@ -49,21 +49,30 @@ wi-curve-listing{
                     overflow-x:hidden;
                     display:block;
                 }
+                td,th {
+                    vertical-align: middle;
+                    height: 43px;
+                }
         
                 thead>tr>th{
-                    min-width:140px;
+                    width:140px;
+                    min-width: 140px;
                     &:first-child{
+                        width: 50px;
                         min-width: 50px;
                     }
                 }
                 tbody>tr>td{
-                    min-width:140px;
+                    min-width: 140px;
+                    width:140px;
                     &:first-of-type{
                         background: #ccc;
                     }
                 }
                 tbody>tr>th{
                     min-width: 50px;
+                    width: 50px;
+                    text-align: center;
                 }
                 thead>tr>th{
                     text-align:center;

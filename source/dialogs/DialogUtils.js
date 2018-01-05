@@ -4450,14 +4450,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
-                let _DIVIDER;
-                if (item.match('/') != null) {
-                    _DIVIDER = '/';
-                } else {
-                    _DIVIDER = '\\';
-                }
                 return {
-                    name: item.split(_DIVIDER).pop(),
+                    name: getImageName(item),
                     imageUrl: wiApiService.BASE_URL + item
                 }
             });
@@ -4477,7 +4471,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                     self.onImageUrlChange();
                     self.done = true;
                     let latestImage = {
-                        name: self.imageUrl.match(/\/([^\/]+)\/?$/)[1],
+                        name: getImageName(self.imageUrl),
                         imageUrl: self.imageUrl
                     }
                     self.uploadedImages.push(latestImage);
@@ -4489,7 +4483,6 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.background = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill, function (colorStr) {
                 self.fill = colorStr;
-                console.log(colorStr);
             });
             self.isPropsChanged = true;
         }
@@ -4520,8 +4513,18 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         }
 
         function validateUrl (str) {
-            var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+            var regex = /^(http|https|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(me|cloud|com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
             return regex.test(str);
+        }
+
+        function getImageName (img) {
+            let _DIVIDER;
+            if (img.match('/') != null) {
+                _DIVIDER = '/';
+            } else {
+                _DIVIDER = '\\';
+            }
+            return img.split(_DIVIDER).pop();
         }
 
         function doApply(callback) {
@@ -5199,12 +5202,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
             getZonesAndCurvesInDataset,
             function(cb){
                 let blankCurve = [{
-                    name: 'Blank Curve',
+                    name: '',
                     type: 'curve',
                     id: null,
-                    datasetName: 'Blank',
+                    datasetName: '',
                     properties: {
-                        name: 'Blank Curve',
+                        name: '',
                         idCurve: null
                     }
                 }]
@@ -5303,7 +5306,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 if(ret.length){
                     let blank = [{
                         idOverlayLine: null,
-                        name: 'Blank OverlayLine'
+                        name: ''
                     }]
                     self.overlayLines = blank.concat(ret);
                 }else{
@@ -7580,21 +7583,24 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             displayProp: 'id',
             checkBoxes: true
         };
-        $scope.result = {}
         this.idPolygonTest = [];
         let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
         let props = angular.copy(viCrossplot.getProperties());
         let ternary = this.ternary = props.ternary;
 
-        this.vertices = ternary.vertices.map(function(vertex, index) {
-            vertex.change = change.unchanged;
-            vertex.index = index;
+        function prepareVertices(vertices) {
+            self.vertices = vertices.map(function(vertex, index) {
+                vertex.change = change.unchanged;
+                vertex.index = index;
 
-            vertex.x = +parseFloat(vertex.x).toFixed(4);
-            vertex.y = +parseFloat(vertex.y).toFixed(4);
+                vertex.x = +parseFloat(vertex.x).toFixed(4);
+                vertex.y = +parseFloat(vertex.y).toFixed(4);
 
-            return vertex;
-        });
+                return vertex;
+            });
+        }
+        prepareVertices(ternary.vertices);
+
         this.modelData = [];
         this.optionsData = [1, 2, 3];
         let savedTernary = angular.copy(ternary);
@@ -7608,6 +7614,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             $scope.selectedRow = 0;
         }
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
+        $scope.result = ternary.result || {};
 
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
@@ -7727,6 +7734,14 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
 
         function setVertices(callback) {
+            let usedVertices = self.getVertices().filter(function(d) {
+                return d.used && d.x != null && d.y != null && !isNaN(d.x) && !isNaN(d.y);
+            });
+            if (usedVertices.length > 3) {
+                utils.error('There can not be more than 3 vertices used in ternary');
+                return;
+            }
+
             async.eachOfSeries(self.vertices, function(vertex, idx, cb){
                 vertex = self.vertices[idx];
                 let data = {
@@ -7742,36 +7757,38 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
 
                 switch(self.vertices[idx].change) {
                     case change.created:
-                    wiApiService.createTernary(data, function(response) {
-                        self.vertices[idx].change = change.unchanged;
-                        self.vertices[idx].idVertex = response.idTernary;
-                        cb();
-                    });
-                    break;
+                        wiApiService.createTernary(data, function(response) {
+                            self.vertices[idx].idVertex = response.idTernary;
+                            cb();
+                        });
+                        break;
                     case change.updated:
-                    wiApiService.editTernary(data, function(response) {
-                        self.vertices[idx].change = change.unchanged;
-                        cb();
-                    });
-                    break;
+                        wiApiService.editTernary(data, function(response) {
+                            cb();
+                        });
+                        break;
                     case change.deleted:
-                    wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
-                        cb();
-                    });
-                    break;
+                        wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
+                            cb();
+                        });
+                        break;
                     default:
-                    cb();
+                        cb();
                 }
             }, function() {
                 for (let i = self.vertices.length - 1; i >= 0; i--){
-                    if (self.vertices[i].change == change.deleted) {
+                    if (self.vertices[i].change == change.deleted || self.vertices[i].change == change.uncreated) {
                         self.vertices.splice(i, 1);
                     }
                 }
+                prepareVertices(self.vertices);
                 savedTernary.vertices = self.getVertices();
                 savedTernary.calculate = calculateOptions;
+                if (usedVertices.length < 3) $scope.result = {};
+                savedTernary.result = $scope.result;
                 viCrossplot.setProperties({ ternary: savedTernary });
                 viCrossplot.plotTernary();
+                savedTernary = angular.copy(savedTernary);
                 if (callback) callback();
             });
         }
@@ -7978,26 +7995,20 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
 
         this.Delete = function (index) {
             self.SelectedRefCurve = index;
-            // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
             if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-                //self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             } else {
                 self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-            // $event.stopPropagation();
+        }
+        this.roundDepth = function(){
+            if(self.props.referenceTopDepth)
+            self.props.referenceTopDepth = parseFloat(self.props.referenceTopDepth.toFixed(4));
+            if(self.props.referenceBottomDepth)
+            self.props.referenceBottomDepth = parseFloat(self.props.referenceBottomDepth.toFixed(4));
         }
 
-        this.DeleteRefCurve = function(){
-            if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
-                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-            }else{
-                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
-            }
-            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-            $event.stopPropagation();
-        }
         this.IsNotValid = function(){
             return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
         }
@@ -8076,7 +8087,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-            //callbackFinal && callbackFinal();
             if (!ret) return;
         })
     });
@@ -11314,7 +11324,7 @@ exports.curveFilterDialog = function(ModalService){
                         console.log('do save curve');
                         delete payload.idDesCurve;
                         wiApiService.processingDataCurve(payload, function(){
-                            utils.refreshProjectState();                        
+                            utils.refreshProjectState();
                         })
                     },500)
                     break;
@@ -11334,7 +11344,7 @@ exports.curveFilterDialog = function(ModalService){
                     }
 
                     wiApiService.processingDataCurve(payload, function(){
-                        utils.refreshProjectState();                        
+                        utils.refreshProjectState();
                     })
                     break;
             }
@@ -11366,7 +11376,6 @@ exports.curveFilterDialog = function(ModalService){
                     }
                 }
             })
-
         }
         function bellFilter(){
             console.log('bellFilter');
@@ -11376,6 +11385,27 @@ exports.curveFilterDialog = function(ModalService){
         }
         function medianFilter(){
             console.log('medianFilter');
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < self.curveData.length; i++){
+                if(!isNaN(self.curveData[i])){
+                    inputF.push(self.curveData[i]);
+                    lstIndex.push(i);
+                }
+            }
+            let out = new Array(self.curveData.length).fill(NaN);
+
+            wiApiService.medfil({input: inputF, length: self.numLevel}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        saveCurve(out);
+                    }
+                }
+            })
         }
         function customFilter(){
             console.log('customFilter');
@@ -11387,23 +11417,23 @@ exports.curveFilterDialog = function(ModalService){
                     case '1':
                     squareFilter();
                     break;
-    
+
                     case '2':
                     savgoFilter();
                     break;
-    
+
                     case '3':
                     bellFilter();
                     break;
-    
+
                     case '4':
                     fftFilter();
                     break;
-    
+
                     case '5':
                     medianFilter();
                     break;
-    
+
                     case '6':
                     customFilter();
                     break;
@@ -11418,7 +11448,7 @@ exports.curveFilterDialog = function(ModalService){
                         if(ret){
                             run();
                         }else{
-                            self.applyingInProgress = false;                            
+                            self.applyingInProgress = false;
                         }
                     })
                 }else{

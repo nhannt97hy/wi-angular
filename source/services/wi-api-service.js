@@ -1558,7 +1558,7 @@ Service.prototype.listCombinedBoxTool = function (idCombinedBox, callback) {
 
 
 //ternary apis
-Service.prototype.createGroup = function (data, callback) {
+Service.prototype.createTernary = function (data, callback) {
     let self = this;
     this.post(CREATE_TERNARY, data, callback);
 }

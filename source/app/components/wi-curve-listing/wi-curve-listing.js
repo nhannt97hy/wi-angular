@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.applyingInProgress = false;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     function getDatasets() {
         self.datasets.length = 0;
@@ -42,7 +43,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         for(let i = 0; i < length; i++){
             self.depthArr[i] = parseFloat((step * i + topDepth).toFixed(4));
         }
-        self.loaded = self.depthArr.slice(0,25);
+        self.loaded = self.depthArr.slice(0,500);
         self.curvesData[self.currentIndex].forEach(curve => {
             curve.show = false;
         })
@@ -50,7 +51,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     
     this.$onInit = function () {
-        // wiComponentService.putComponent('wiCurveListing',self);
         self.isShowRefWin = false;
         self.datasets = [];
         self.curvesArr = [];
@@ -84,6 +84,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.applyingInProgress = false;
             $timeout(function(){
                 self.wells = utils.findWells();
+                self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
                 self.onChangeWell();
             }, 0);
         });
@@ -94,8 +95,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.LoadMoreOutPut = function(){
         let len = self.loaded.length;
-        console.log('Load more',len);
-        self.loaded.push(...self.depthArr.slice(len, len + 25));
+        self.loaded.push(...self.depthArr.slice(len, len + 500));
     }
 
     this.onCurveSelectClick = function(name, dataset, id, selected){
@@ -125,6 +125,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.onAddCurveButtonClicked = function(){
         console.log('onAddCurveButtonClicked');
+        DialogUtils.addCurveDialog(ModalService);
     }
     this.onSaveButtonClicked = function(){
         console.log('onSaveButtonClicked');

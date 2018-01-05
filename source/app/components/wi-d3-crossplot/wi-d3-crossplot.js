@@ -784,6 +784,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     async.setImmediate(callback);
                 }
             }], function(err, result) {
+                if (config.ternaries) {
+                    let vertices = config.ternaries.map(function(d) {
+                        return {
+                            x: d.xValue,
+                            y: d.yValue,
+                            name: d.name,
+                            style: d.style,
+                            used: d.usedIn,
+                            showed: d.show,
+                            idVertex: d.idTernary
+                        };
+                    });
+                    config.ternary = { vertices: vertices };
+                }
+
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 self.loading = false;
