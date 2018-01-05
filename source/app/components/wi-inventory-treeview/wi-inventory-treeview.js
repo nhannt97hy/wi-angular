@@ -22,6 +22,10 @@ function Controller($controller, wiComponentService) {
         let node = this.config[$index];
         unselectAllNodes();
         if (node.data) node.data.selected = true;
+        self.selectedNode = node;
+        setTimeout(() => {
+            this.container.onConfigClick && this.container.onConfigClick();
+        });
     }
 }
 
@@ -36,7 +40,8 @@ app.component(componentName, {
         name: '@',
         config: '<',
         baseTreeviewName: '<',
-        container: '<'
+        container: '<',
+        selectedNode: '='
     }
 });
 exports.name = moduleName;

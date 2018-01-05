@@ -226,6 +226,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         this.title = promptConfig.title;
         this.inputName = promptConfig.inputName;
         this.input = promptConfig.input;
+        // type: [select, text]
         this.type = promptConfig.type ? promptConfig.type : 'text';
         this.options = promptConfig.options;
         this.onBlur = function(args) {
@@ -1757,6 +1758,24 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     });
 };
 
+function importModelExistedDialog (ModalService, callback) {
+    function ModalController($scope, close, wiComponentService) {
+        let self = this;
+    }
+    ModalService.showModal({
+        templateUrl: "import-model-existed/import-model-existed-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback && callback();
+        });
+    });
+}
+
 exports.importFromInventoryDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
@@ -1780,14 +1799,80 @@ exports.importFromInventoryDialog = function (ModalService) {
         let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         let projectModel = modelFrom(projectLoaded);
         this.projectConfig = [projectModel];
+        this.projectSelectedNode = projectModel;
         let inventoryModel;
         this.inventoryConfig = [inventoryModel];
         wiApiService.getInventory(function (inventory) {
             inventoryModel = modelFrom(inventory);
             self.inventoryConfig[0] = inventoryModel;
+            inventoryModel.type = 'inventory';
             inventoryModel.data.label = 'Inventory';
+            self.inventorySelectedNode = inventoryModel;
         })
 
+        this.onConfigClick = function () {
+            console.log(this.projectSelectedNode, this.inventorySelectedNode);
+            if (!this.projectSelectedNode || !this.inventorySelectedNode) return;
+            this.importValid = false;
+            switch (this.inventorySelectedNode.type) {
+                case 'well':
+                    if (this.projectSelectedNode.type == 'project' || this.projectSelectedNode.type == 'well') self.importValid = true;
+                    break;
+                case 'dataset':
+                    if (this.projectSelectedNode.type == 'well' || this.projectSelectedNode.type == 'dataset') self.importValid = true;
+                    break;
+                case 'curve':
+                    if (this.projectSelectedNode.type == 'dataset' || this.projectSelectedNode.type == 'curve') self.importValid = true;
+                    break;
+                default:
+                    this.importValid = false;
+                    break;
+            }
+            $scope.$apply();
+        }
+        let importItems = [];
+        let dialogUtils = exports;
+        function importModel (model, desParentModel) {
+            let item = angular.copy(model.properties);
+            let sameNameExisted = desParentModel.children.find(c => c.name == model.name);
+            if (sameNameExisted) {
+                importModelExistedDialog(ModalService, function () {
+                    
+                });
+                // dialogUtils.promptDialog(ModalService, {
+                //     title: model.type.capitalize() + 'name existed',
+                //     inputName: ''
+                //     input: 
+                // })
+            } else {
+                switch (model.type) {
+                    case 'well':
+                        item.parent = angular.copy(desParentModel.properties);
+                        importItems.push(item);
+                        desParentModel.children.push(angular.copy(model));
+                        break;
+                    case 'dataset':
+                        break;
+                    case 'curve':
+                        
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        this.importButtonClicked = function () {
+            if (!this.importValid) return;
+            let parentModel = this.projectSelectedNode;
+            if (this.projectSelectedNode.type == this.inventorySelectedNode.type) {
+                parentModel = utils.getParentByModel(this.projectSelectedNode.type, this.projectSelectedNode.id, null, projectModel);
+            }
+            importModel(this.inventorySelectedNode, parentModel);
+        }
+
+        this.onLoadButtonClicked = function () {
+
+        }
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };

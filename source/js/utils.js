@@ -532,14 +532,15 @@ function createCurveModel (curve) {
     curveModel.name = curve.name;
     curveModel.type = 'curve';
     curveModel.id = curve.idCurve;
-    curveModel.properties = {
+    curveModel.properties = curve;
+    Object.assign(curveModel.properties, {
         idDataset: curve.idDataset,
         idCurve: curve.idCurve,
         idFamily: curve.idFamily,
         name: curve.name,
         unit: curve.unit || "NA",
         alias: curve.name
-    };
+    });
     curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
@@ -595,13 +596,14 @@ function createDatasetModel (dataset) {
     datasetModel.name = dataset.name;
     datasetModel.type = "dataset";
     datasetModel.id = dataset.idDataset;
-    datasetModel.properties = {
+    datasetModel.properties = dataset;
+    Object.assign(datasetModel.properties, {
         idWell: dataset.idWell,
         idDataset: dataset.idDataset,
         name: dataset.name,
         datasetKey: dataset.datasetKey,
         datasetLabel: dataset.datasetLabel
-    };
+    });
     datasetModel.data = {
         childExpanded: false,
         icon: "curve-data-16x16",
@@ -871,7 +873,8 @@ function createWellModel(well) {
     wellModel.name = "well";
     wellModel.type = "well";
     wellModel.id = well.idWell;
-    wellModel.properties = {
+    wellModel.properties = well;
+    Object.assign(wellModel, {
         idProject: well.idProject,
         idWell: well.idWell,
         name: well.name,
@@ -879,7 +882,7 @@ function createWellModel(well) {
         bottomDepth: parseFloat(well.bottomDepth),
         step: parseFloat(well.step),
         idGroup: well.idGroup
-    };
+    });
     wellModel.data = {
         childExpanded: false,
         icon: "well-16x16",
@@ -981,7 +984,7 @@ function createProjectModel (project) {
         childExpanded: true,
         icon: 'well-insight-16x16',
         label: project.name,
-        selected: true
+        selected: false
     };
     projectModel.children = new Array();
     return projectModel;
@@ -1101,12 +1104,14 @@ function getSelectedProjectNode() {
 
 exports.getSelectedPath = getSelectedPath;
 
-function getSelectedPath(foundCB) {
+function getSelectedPath(foundCB, rootNode) {
     const wiComponentService = __GLOBAL.wiComponentService;
-    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
-    if (!rootNodes) return;
+    if (!rootNode) {
+        rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+    }
+    if (!rootNode) return;
     let selectedPath = new Array();
-    visit(rootNodes[0], function (node, options) {
+    visit(rootNode, function (node, options) {
         if (node.data) {
             if (foundCB) {
                 if (foundCB(node)) {
@@ -1853,8 +1858,15 @@ function getModel(type, id, rootNode) {
     });
     return model;
 }
-
 exports.getModel = getModel;
+
+exports.getParentByModel = function (modelType, idModel, parentType, rootNode) {
+    var path = getSelectedPath(function (node) {
+        return node.type == modelType && node.id == idModel;
+    }, rootNode) || [];
+    if (!parentType) return path[path.length - 2];
+    return path.find(p => p.type == parentType);
+};
 
 exports.findLogplotModelById = function (logplotId) {
     let wiComponentService = __GLOBAL.wiComponentService;
