@@ -547,9 +547,11 @@ Service.prototype.refreshToken = function (refreshToken) {
   let self = this;
   this.post(REFRESH_TOKEN, {refresh_token: refreshToken}, function (res, err) {
     if (err) {
-        self.getUtils().doLogin(function () {
-            getAuthInfo();
-        });
+        if (err.code == 401) {
+            self.getUtils().doLogin(function () {
+                getAuthInfo();
+            });
+        }
         return;
     }
     window.localStorage.setItem('token', res.token);
