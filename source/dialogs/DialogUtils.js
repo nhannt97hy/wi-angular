@@ -4365,14 +4365,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
-                let _DIVIDER;
-                if (item.match('/') != null) {
-                    _DIVIDER = '/';
-                } else {
-                    _DIVIDER = '\\';
-                }
                 return {
-                    name: item.split(_DIVIDER).pop(),
+                    name: getImageName(item),
                     imageUrl: wiApiService.BASE_URL + item
                 }
             });
@@ -4392,7 +4386,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                     self.onImageUrlChange();
                     self.done = true;
                     let latestImage = {
-                        name: self.imageUrl.match(/\/([^\/]+)\/?$/)[1],
+                        name: getImageName(self.imageUrl),
                         imageUrl: self.imageUrl
                     }
                     self.uploadedImages.push(latestImage);
@@ -4404,7 +4398,6 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.background = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill, function (colorStr) {
                 self.fill = colorStr;
-                console.log(colorStr);
             });
             self.isPropsChanged = true;
         }
@@ -4435,8 +4428,18 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         }
 
         function validateUrl (str) {
-            var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+            var regex = /^(http|https|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(me|cloud|com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
             return regex.test(str);
+        }
+
+        function getImageName (img) {
+            let _DIVIDER;
+            if (img.match('/') != null) {
+                _DIVIDER = '/';
+            } else {
+                _DIVIDER = '\\';
+            }
+            return img.split(_DIVIDER).pop();
         }
 
         function doApply(callback) {
