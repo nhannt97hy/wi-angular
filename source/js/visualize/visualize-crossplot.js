@@ -210,7 +210,8 @@ const TERNARY_SCHEMA = {
                 }
             }
 
-        }
+        },
+        result: { type: 'Object'}
     }
 }
 
@@ -1383,7 +1384,7 @@ Crossplot.prototype.plotTernary = function() {
     });
 
     vertices.filter(function(v){
-        return v.x != null && v.y != null;
+        return v.x != null && v.y != null && !isNaN(v.x) && !isNaN(v.y);
     }).forEach(function(v) {
         let x = transformX(v.x);
         let y = transformY(v.y);
@@ -1395,7 +1396,9 @@ Crossplot.prototype.plotTernary = function() {
             .text(v.name);
     });
 
-    vertices = this.ternary.vertices.filter(function(v) { return v.used; });
+    vertices = this.ternary.vertices.filter(function(v) {
+        return v.used && v.x != null && v.y != null && !isNaN(v.x) && !isNaN(v.y);
+    });
     if (vertices.length != 3) return;
 
     let line = d3.line()

@@ -7498,21 +7498,24 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             displayProp: 'id',
             checkBoxes: true
         };
-        $scope.result = {}
         this.idPolygonTest = [];
         let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
         let props = angular.copy(viCrossplot.getProperties());
         let ternary = this.ternary = props.ternary;
 
-        this.vertices = ternary.vertices.map(function(vertex, index) {
-            vertex.change = change.unchanged;
-            vertex.index = index;
+        function prepareVertices(vertices) {
+            self.vertices = vertices.map(function(vertex, index) {
+                vertex.change = change.unchanged;
+                vertex.index = index;
 
-            vertex.x = +parseFloat(vertex.x).toFixed(4);
-            vertex.y = +parseFloat(vertex.y).toFixed(4);
+                vertex.x = +parseFloat(vertex.x).toFixed(4);
+                vertex.y = +parseFloat(vertex.y).toFixed(4);
 
-            return vertex;
-        });
+                return vertex;
+            });
+        }
+        prepareVertices(ternary.vertices);
+
         this.modelData = [];
         this.optionsData = [1, 2, 3];
         let savedTernary = angular.copy(ternary);
@@ -7526,6 +7529,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             $scope.selectedRow = 0;
         }
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
+        $scope.result = ternary.result || {};
 
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
@@ -7645,6 +7649,14 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
 
         function setVertices(callback) {
+            let usedVertices = self.getVertices().filter(function(d) {
+                return d.used && d.x != null && d.y != null && !isNaN(d.x) && !isNaN(d.y);
+            });
+            if (usedVertices.length > 3) {
+                utils.error('There can not be more than 3 vertices used in ternary');
+                return;
+            }
+
             async.eachOfSeries(self.vertices, function(vertex, idx, cb){
                 vertex = self.vertices[idx];
                 let data = {
@@ -7660,36 +7672,38 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
 
                 switch(self.vertices[idx].change) {
                     case change.created:
-                    wiApiService.createTernary(data, function(response) {
-                        self.vertices[idx].change = change.unchanged;
-                        self.vertices[idx].idVertex = response.idTernary;
-                        cb();
-                    });
-                    break;
+                        wiApiService.createTernary(data, function(response) {
+                            self.vertices[idx].idVertex = response.idTernary;
+                            cb();
+                        });
+                        break;
                     case change.updated:
-                    wiApiService.editTernary(data, function(response) {
-                        self.vertices[idx].change = change.unchanged;
-                        cb();
-                    });
-                    break;
+                        wiApiService.editTernary(data, function(response) {
+                            cb();
+                        });
+                        break;
                     case change.deleted:
-                    wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
-                        cb();
-                    });
-                    break;
+                        wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
+                            cb();
+                        });
+                        break;
                     default:
-                    cb();
+                        cb();
                 }
             }, function() {
                 for (let i = self.vertices.length - 1; i >= 0; i--){
-                    if (self.vertices[i].change == change.deleted) {
+                    if (self.vertices[i].change == change.deleted || self.vertices[i].change == change.uncreated) {
                         self.vertices.splice(i, 1);
                     }
                 }
+                prepareVertices(self.vertices);
                 savedTernary.vertices = self.getVertices();
                 savedTernary.calculate = calculateOptions;
+                if (usedVertices.length < 3) $scope.result = {};
+                savedTernary.result = $scope.result;
                 viCrossplot.setProperties({ ternary: savedTernary });
                 viCrossplot.plotTernary();
+                savedTernary = angular.copy(savedTernary);
                 if (callback) callback();
             });
         }
@@ -11225,7 +11239,7 @@ exports.curveFilterDialog = function(ModalService){
                         console.log('do save curve');
                         delete payload.idDesCurve;
                         wiApiService.processingDataCurve(payload, function(){
-                            utils.refreshProjectState();                        
+                            utils.refreshProjectState();
                         })
                     },500)
                     break;
@@ -11245,7 +11259,7 @@ exports.curveFilterDialog = function(ModalService){
                     }
 
                     wiApiService.processingDataCurve(payload, function(){
-                        utils.refreshProjectState();                        
+                        utils.refreshProjectState();
                     })
                     break;
             }
@@ -11318,23 +11332,23 @@ exports.curveFilterDialog = function(ModalService){
                     case '1':
                     squareFilter();
                     break;
-    
+
                     case '2':
                     savgoFilter();
                     break;
-    
+
                     case '3':
                     bellFilter();
                     break;
-    
+
                     case '4':
                     fftFilter();
                     break;
-    
+
                     case '5':
                     medianFilter();
                     break;
-    
+
                     case '6':
                     customFilter();
                     break;
@@ -11349,7 +11363,7 @@ exports.curveFilterDialog = function(ModalService){
                         if(ret){
                             run();
                         }else{
-                            self.applyingInProgress = false;                            
+                            self.applyingInProgress = false;
                         }
                     })
                 }else{
