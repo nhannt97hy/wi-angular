@@ -5117,12 +5117,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
             getZonesAndCurvesInDataset,
             function(cb){
                 let blankCurve = [{
-                    name: 'Blank Curve',
+                    name: '',
                     type: 'curve',
                     id: null,
-                    datasetName: 'Blank',
+                    datasetName: '',
                     properties: {
-                        name: 'Blank Curve',
+                        name: '',
                         idCurve: null
                     }
                 }]
@@ -5221,7 +5221,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 if(ret.length){
                     let blank = [{
                         idOverlayLine: null,
-                        name: 'Blank OverlayLine'
+                        name: ''
                     }]
                     self.overlayLines = blank.concat(ret);
                 }else{
