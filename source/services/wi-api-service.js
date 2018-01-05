@@ -1688,16 +1688,13 @@ Service.prototype.convolution = function (data, callback){
 Service.prototype.deconvolution = function (data, callback){
     this.post('/deconvolution', data, callback, 'processing');
 }
-<<<<<<< Updated upstream
 Service.prototype.medfil = function (data, callback){
     this.post('/median', data, callback, 'processing');
 }
 Service.prototype.savgolfil = function (data, callback){
     this.post('/savgol', data, callback, 'processing');
 }
-=======
 
 Service.prototype.getInventory = function (callback) {
     this.post(GET_INVENTORY, {}, callback, 'inventory');
 }
->>>>>>> Stashed changes

@@ -57,7 +57,9 @@
 						<th>{{$index}}</th>
 						<td>{{wiCurveListing.depthArr[$index]}}</td>
 						<td ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
-						ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">{{col.data[parentId]}}</td>
+						ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">
+							<input type="number" class='form-control wi-form-control' ng-model="col.data[parentId]" step="any">
+					</td>
 					</tr>
 				</tbody>
 			</table>

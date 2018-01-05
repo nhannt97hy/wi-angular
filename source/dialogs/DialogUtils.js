@@ -7893,26 +7893,20 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
 
         this.Delete = function (index) {
             self.SelectedRefCurve = index;
-            // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
             if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-                //self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             } else {
                 self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-            // $event.stopPropagation();
+        }
+        this.roundDepth = function(){
+            if(self.props.referenceTopDepth)
+            self.props.referenceTopDepth = parseFloat(self.props.referenceTopDepth.toFixed(4));
+            if(self.props.referenceBottomDepth)
+            self.props.referenceBottomDepth = parseFloat(self.props.referenceBottomDepth.toFixed(4));
         }
 
-        this.DeleteRefCurve = function(){
-            if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
-                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-            }else{
-                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
-            }
-            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-            $event.stopPropagation();
-        }
         this.IsNotValid = function(){
             return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
         }
@@ -7991,7 +7985,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-            //callbackFinal && callbackFinal();
             if (!ret) return;
         })
     });
@@ -11281,7 +11274,6 @@ exports.curveFilterDialog = function(ModalService){
                     }
                 }
             })
-
         }
         function bellFilter(){
             console.log('bellFilter');
@@ -11291,6 +11283,27 @@ exports.curveFilterDialog = function(ModalService){
         }
         function medianFilter(){
             console.log('medianFilter');
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < self.curveData.length; i++){
+                if(!isNaN(self.curveData[i])){
+                    inputF.push(self.curveData[i]);
+                    lstIndex.push(i);
+                }
+            }
+            let out = new Array(self.curveData.length).fill(NaN);
+
+            wiApiService.medfil({input: inputF, length: self.numLevel}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        saveCurve(out);
+                    }
+                }
+            })
         }
         function customFilter(){
             console.log('customFilter');
