@@ -21,7 +21,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         self.datasets.forEach(child => {
                             child.children.forEach(function (item) {
                                 if (item.type == 'curve') {
-                                    let d = item;
+                                    let d = angular.copy(item);
                                     d.selected = false;
                                     self.curvesArr.push(d);
                                 }
@@ -32,25 +32,35 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         }
     }
-    this.onChangeWell = function () {
+    this.onChangeWell = function (clear) {
         getDatasets();
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
-        let step = self.SelectedWell.properties.step;
-        let topDepth = self.SelectedWell.properties.topDepth;
-        let bottomDepth = self.SelectedWell.properties.bottomDepth;
+        let step = self.SelectedWell.step;
+        let topDepth = self.SelectedWell.topDepth;
+        let bottomDepth = self.SelectedWell.bottomDepth;
         let length = Math.round((bottomDepth - topDepth)/step) + 1;
         self.depthArr = new Array(length);
         for(let i = 0; i < length; i++){
             self.depthArr[i] = parseFloat((step * i + topDepth).toFixed(4));
         }
         self.loaded = self.depthArr.slice(0,500);
+        if(clear){
+            self.curvesData[self.currentIndex].forEach(curve => {
+                curve.show = false;
+            })
+        }
         self.curvesData[self.currentIndex].forEach(curve => {
-            curve.show = false;
+            if(curve.show){
+                self.curvesArr.find(c => {
+                    return c.id == curve.id;
+                }).selected = true;
+            }
         })
         $scope.$emit('list:changeWell');
     }
     
     this.$onInit = function () {
+        wiComponentService.putComponent('WCL', self);
         self.isShowRefWin = false;
         self.datasets = [];
         self.curvesArr = [];
@@ -79,7 +89,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
 
-        this.onChangeWell();
+        this.onChangeWell(true);
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
             $timeout(function(){
@@ -121,6 +131,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             let index = self.curvesData[self.currentIndex].findIndex(c => {return c.id == id});
             self.curvesData[self.currentIndex][index].show = false;
         }
+    }
+
+    this.onModifyCurve = function(id){
+        self.curvesArr.find(c => {
+            return c.id == id;
+        }).modified = true;
     }
 
     this.onAddCurveButtonClicked = function(){

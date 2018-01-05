@@ -30,7 +30,8 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="curve in wiCurveListing.curvesArr track by curve.id">
+					<tr ng-repeat="curve in wiCurveListing.curvesArr track by curve.id"
+					ng-class="{modified: curve.modified}">
 						<td style="flex:2">{{curve.name}}</td>
 						<td style="flex:2">{{curve.datasetName}}</td>
 						<td style="flex:1;text-align:center">
@@ -58,7 +59,7 @@
 						<td>{{wiCurveListing.depthArr[$index]}}</td>
 						<td ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
 						ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">
-							<input type="number" class='form-control wi-form-control' ng-model="col.data[parentId]" step="any">
+							<input type="number" class='form-control wi-form-control editor' ng-model="col.data[parentId]" step="any" ng-change="col.edit = true;wiCurveListing.onModifyCurve(col.id);">
 					</td>
 					</tr>
 				</tbody>
