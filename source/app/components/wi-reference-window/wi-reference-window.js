@@ -195,7 +195,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 .tickSize(-1 * $(getRefCurveContainer().node()).width());
         else 
             axisY = d3.axisLeft(transformY).tickValues(d3.range(_top, _bottom, step))
-                .tickFormat(d3.format(',.0f'))
+                .tickFormat(d3.format(',.2f'))
                 .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
             if(!self.showGrid){
