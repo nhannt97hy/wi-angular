@@ -111,6 +111,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.histogramModel = self.getModel();
         wiApiService.getHistogram(self.histogramModel.id, function(xplotProps){
             self.histogramModel.properties = xplotProps;
+            self.histogramModel.properties.discriminator = JSON.parse(xplotProps.discriminator);
             if (self.histogramModel.properties.idZoneSet) {
                 self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
                 if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
