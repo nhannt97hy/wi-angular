@@ -33,9 +33,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         let well = utils.findWellByLogplot(logplotId);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-        let minY = parseFloat(well.properties.topDepth);
-        let maxY = parseFloat(well.properties.bottomDepth);
-        let stepY = parseFloat(well.properties.step);
+        let minY = well.topDepth;
+        let maxY = well.bottomDepth;
+        let stepY = well.step;
         wiApiService.infoCurve(idCurve, function (infoCurve) {
             let config = {
                 minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,

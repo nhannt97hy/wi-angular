@@ -5316,10 +5316,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         }
 
         function getTopFromWell() {
-            return parseFloat(self.well.properties.topDepth);
+            return self.well.topDepth;
         }
         function getBottomFromWell() {
-            return parseFloat(self.well.properties.bottomDepth);
+            return self.well.bottomDepth;
         }
 
         function onSelectedCurveChange(symbol) {
@@ -6414,11 +6414,11 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback,
         }
 
         function getTopFromWell() {
-            return parseFloat(self.well.properties.topDepth);
+            return self.well.topDepth;
         }
 
         function getBottomFromWell() {
-            return parseFloat(self.well.properties.bottomDepth);
+            return self.well.bottomDepth;
         }
         this.onDepthTypeChanged = function () {
             switch (self.depthType) {
@@ -7114,7 +7114,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 if (pre_zone) {
                     free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
                 } else {
-                    free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
+                    free = zone.properties.startDepth - self.SelectedWell.topDepth >= 50 ? 50 : zone.properties.startDepth - self.SelectedWell.topDepth;
                 }
 
                 if (parseInt(free) > 0) {
@@ -7124,8 +7124,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 }
 
             } else {
-                var top = parseFloat(self.SelectedWell.properties.topDepth);
-                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                var top = self.SelectedWell.topDepth;
+                var bottom = self.SelectedWell.bottomDepth > top + 50 ? top + 50 : self.SelectedWell.bottomDepth;
                 self.addZone(0, top, bottom);
             }
         }
@@ -7145,7 +7145,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 if (next_zone) {
                     free = next_zone.properties.startDepth - zone.properties.endDepth >= 50 ? 50 : next_zone.properties.startDepth - zone.properties.endDepth;
                 } else {
-                    free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
+                    free = self.SelectedWell.bottomDepth - zone.properties.endDepth >= 50 ? 50 : self.SelectedWell.bottomDepth - zone.properties.endDepth;
 
                 }
 
@@ -7156,8 +7156,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 }
 
             } else {
-                var top = parseFloat(self.SelectedWell.properties.topDepth);
-                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                var top = self.SelectedWell.topDepth;
+                var bottom = self.SelectedWell.bottomDepth > top + 50 ? top + 50 : self.SelectedWell.bottomDepth;
                 self.addZone(0, top, bottom);
             }
         }
@@ -7184,7 +7184,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     return false; // check unique zone name
                 }
 
-                if( self.zoneArr[0].properties.startDepth < self.SelectedWell.properties.topDepth){
+                if( self.zoneArr[0].properties.startDepth < self.SelectedWell.topDepth){
                     self.zoneArr[0].err = true;
                     return false;
                 }
@@ -7201,7 +7201,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         return false;
                     }
                     let last = self.zoneArr[self.zoneArr.length - 1];
-                    if(last.properties.startDepth >= last.properties.endDepth || last.properties.endDepth > self.SelectedWell.properties.bottomDepth){
+                    if(last.properties.startDepth >= last.properties.endDepth || last.properties.endDepth > self.SelectedWell.bottomDepth){
                         self.zoneArr[self.zoneArr.length - 1].err = true;
                         return false;
                     }
@@ -7920,10 +7920,10 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             }
         })
         this.getTopFromWell = function() {
-            return parseFloat(self.well.properties.topDepth);
+            return self.well.topDepth;
         }
         this.getBottomFromWell = function() {
-            return parseFloat(self.well.properties.bottomDepth);
+            return self.well.bottomDepth;
         }
 
         this.defaultDepthButtonClick = function(){
@@ -8314,8 +8314,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
         refresh();
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         this.selectWell = function(idWell) {
@@ -8370,8 +8370,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
         function curveAverageCacl () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            if(self.topDepth < self.wellModel.topDepth || self.bottomDepth > self.wellModel.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
             let selectedCurves = [];
             let allData = [];
             let dataAvg = [];
@@ -8379,11 +8379,11 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 return (curve.flag == true);
             });
             let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.topDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.bottomDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             console.log("yy", yTop, yBottom);
             if(selectedCurves.length > 0){
                 async.eachOfSeries(selectedCurves, function(item, idx, callback) {
@@ -8506,8 +8506,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         function setLinePropertiesIfNull (curve) {
@@ -8550,8 +8550,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
             }, 100);
         }
         this.defaultDepth = function () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
         function refresh (cb) {
             self.datasets = [];
@@ -8570,17 +8570,17 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         function run () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth ||
-                self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            if(self.topDepth < self.wellModel.topDepth ||
+                self.bottomDepth > self.wellModel.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
             let inputData = [];
             let outputData = [];
             let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.topDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.bottomDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
 
             function linearToLinearX (a, b, c, y, z) {
                 return (c - a) * (z - y) / (b - a) + y;
@@ -8747,8 +8747,8 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.selectZoneSetPara = selectZoneSetPara;
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         this.selectedWell = function (idWell) {
@@ -8787,12 +8787,12 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(!self.checked && (self.topDepth < self.wellModel.properties.topDepth ||
-                self.bottomDepth > self.wellModel.properties.bottomDepth))
+            if(!self.checked && (self.topDepth < self.wellModel.topDepth ||
+                self.bottomDepth > self.wellModel.bottomDepth))
             {
                 dialogUtils.errorMessageDialog(ModalService,
-                    "Input invalid [" + self.wellModel.properties.topDepth + "," +
-                    self.wellModel.properties.bottomDepth+ "]" );
+                    "Input invalid [" + self.wellModel.topDepth + "," +
+                    self.wellModel.bottomDepth+ "]" );
             }
 
 
@@ -8811,11 +8811,11 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                 let Sx2 = null;
                                 let Sy2 = null;
                                 let yStart = Math.round((
-                                    start - parseFloat(self.wellModel.properties.topDepth))
-                                /parseFloat(self.wellModel.properties.step));
+                                    start - self.wellModel.topDepth)
+                                /self.wellModel.step);
                                 let yEnd = Math.round((
-                                    end - parseFloat(self.wellModel.properties.topDepth))
-                                /parseFloat(self.wellModel.properties.step));
+                                    end - self.wellModel.topDepth)
+                                /self.wellModel.step);
                                 let N = yEnd - yStart + 1;
                                 for (let i = yStart; i <= yEnd; i++){
                                     if (data1[i] != null && !isNaN(data1[i]) &&
@@ -9173,8 +9173,8 @@ exports.splitCurveDialog = function (ModalService, callback) {
             self.idDataset = self.datasetModel.id;
             self.curveModel = self.curves[0];
             self.idCurve = self.curveModel.id;
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         };
         this.selectWell = function (idWell) {
             self.wellModel = utils.findWellById(idWell);
@@ -9249,7 +9249,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
 
                     async.each(self.arrayCurve,function(curve, cb) {
                         dataCurve.forEach(function(data, y) {
-                            let currentDept = y*parseFloat(self.wellModel.properties.step) + parseFloat(self.wellModel.properties.topDepth);
+                            let currentDept = y*self.wellModel.step + self.wellModel.topDepth;
 
                             if(currentDept >= curve.start && currentDept <= curve.end) {
                                 curve.data[y] = parseFloat(data.x);
@@ -9325,8 +9325,8 @@ exports.mergeCurveDialog = function (ModalService) {
         refresh();
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         this.selectWell = function(idWell) {
@@ -9379,18 +9379,18 @@ exports.mergeCurveDialog = function (ModalService) {
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            if(self.topDepth < self.wellModel.topDepth || self.bottomDepth > self.wellModel.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
             let allData = [];
             self.selectedCurves = self.availableCurves.filter(function(curve, index) {
                 return (curve.flag == true);
             });
             let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.topDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.bottomDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             console.log("yy", yTop, yBottom);
             if(self.selectedCurves.length > 0){
                 async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
@@ -9551,8 +9551,8 @@ exports.fillDataGapsDialog = function(ModalService){
                        });
                    }
                })
-                self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-                self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+                self.topDepth = self.selectedWell.topDepth;
+                self.bottomDepth = self.selectedWell.bottomDepth;
                 self.SelectedCurve = self.curves[0];
                 self.selectedDataset = self.datasets[0];
                 this.getCurveData();
@@ -9571,8 +9571,8 @@ exports.fillDataGapsDialog = function(ModalService){
             }, 0);
         });
         this.clickDefault = function () {
-            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+            self.topDepth = self.selectedWell.topDepth;
+            self.bottomDepth = self.selectedWell.bottomDepth;
         }
 
         this.checked = false;
@@ -9645,7 +9645,7 @@ exports.fillDataGapsDialog = function(ModalService){
             })
         }
         function run(){
-            let step = parseFloat(self.selectedWell.properties.step);
+            let step = self.selectedWell.step;
             self.maxgaps = self.calcMethod == 'sample' ? self.gapsMaximum : (self.gapsMaximum/step);
             let data = self.CurvesData.find(d => {return d.id == self.SelectedCurve.id;}).data;
             processing(data, function(){
@@ -9790,8 +9790,8 @@ exports.curveDerivativeDialog = function(ModalService){
                         });
                     }
                 })
-                self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-                self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+                self.topDepth = self.selectedWell.topDepth;
+                self.bottomDepth = self.selectedWell.bottomDepth;
                 if (self.curves.length) {
                     self.SelectedCurve = self.curves[0];
                     self.selectedDataset = self.datasets[0].id;
@@ -9863,15 +9863,15 @@ exports.curveDerivativeDialog = function(ModalService){
             }
         }
         this.clickDefault = function () {
-            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+            self.topDepth = self.selectedWell.topDepth;
+            self.bottomDepth = self.selectedWell.bottomDepth;
         }
 
         function derivative(input){
             let out = new Array(input.length).fill(NaN);
             for(let i = 0; i < input.length - 1; i++){
-                let step = parseFloat(self.selectedWell.properties.step);
-                let currentDepth = i * step + parseFloat(self.selectedWell.properties.topDepth);
+                let step = self.selectedWell.step;
+                let currentDepth = i * step + self.selectedWell.topDepth;
                 if(currentDepth >= self.topDepth && currentDepth <= self.bottomDepth)
                     out[i] = (input[i + 1] - input[i])/step;
             }
@@ -10011,10 +10011,10 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.DevCurve = null;
                 self.AziCurve = null;
             // }
-            self.step = parseFloat(self.SelectedWell.properties.step);
-            self.topDepth = parseFloat(self.SelectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.SelectedWell.properties.bottomDepth);
-            self.tvdRef = parseFloat(self.SelectedWell.properties.topDepth);
+            self.step = self.SelectedWell.step;
+            self.topDepth = self.SelectedWell.topDepth;
+            self.bottomDepth = self.SelectedWell.bottomDepth;
+            self.tvdRef = self.SelectedWell.topDepth;
             let length = Math.round((self.bottomDepth - self.topDepth)/self.step) + 1;
             self.FullSize = new Array(length);
             for(let i = 0; i < length; i++){
@@ -10581,9 +10581,9 @@ exports.addCurveDialog = function (ModalService) {
                 utils.error('Curve existed!');
                 self.applyingInProgress = false;
             }else {
-                let bottomDepth = self.SelectedWell.properties.bottomDepth;
-                let topDepth = self.SelectedWell.properties.topDepth;
-                let step = self.SelectedWell.properties.step;
+                let bottomDepth = self.SelectedWell.bottomDepth;
+                let topDepth = self.SelectedWell.topDepth;
+                let step = self.SelectedWell.step;
                 let length = Math.ceil((bottomDepth - topDepth)/step)+1;
                 let initValue = self.initValue?self.initValue:100;
                 let payload = {
@@ -11250,8 +11250,8 @@ exports.curveFilterDialog = function(ModalService){
         }
 
         this.defaultDepthButtonClick = function(){
-            self.topDepth = self.SelectedWell.properties.topDepth;
-            self.bottomDepth = self.SelectedWell.properties.bottomDepth;
+            self.topDepth = self.SelectedWell.topDepth;
+            self.bottomDepth = self.SelectedWell.bottomDepth;
         }
         this.onChangeWell = function () {
             getDatasets();

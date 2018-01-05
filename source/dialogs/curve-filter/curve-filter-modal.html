@@ -28,11 +28,11 @@
                                 <div class="form-group">
                                     <label class="col-sm-2">Top Depth</label>
                                     <div class="col-sm-3">
-                                        <input class="form-control wi-form-control" type="number" ng-model="wiModal.topDepth" step="any" min='{{wiModal.SelectedWell.properties.topDepth}}'>
+                                        <input class="form-control wi-form-control" type="number" ng-model="wiModal.topDepth" step="any" min='{{wiModal.SelectedWell.topDepth}}'>
                                     </div>
                                     <label class="col-sm-2">Botton Depth</label>
                                     <div class="col-sm-3">
-                                        <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any" max='{{wiModal.SelectedWell.properties.bottomDepth}}'>
+                                        <input ng-model="wiModal.bottomDepth" type="number" class="form-control wi-form-control" step="any" max='{{wiModal.SelectedWell.bottomDepth}}'>
                                     </div>
                                     <div class="col-sm-2">
                                         <button class="btn btn-default wi-form-control width-100-percent" ng-click="wiModal.defaultDepthButtonClick()">Default</button>

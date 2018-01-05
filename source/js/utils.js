@@ -3218,8 +3218,8 @@ exports.getDataTopBottomRange = getDataTopBottomRange;
 
 function convertRangeDepthToIndex (depth, well) {
     let d = Math.round((
-                depth - parseFloat(well.properties.topDepth))
-                            /parseFloat(well.properties.step));
+                depth - well.topDepth)
+                            /well.step);
     return d;
 }
 exports.convertRangeDepthToIndex = convertRangeDepthToIndex;

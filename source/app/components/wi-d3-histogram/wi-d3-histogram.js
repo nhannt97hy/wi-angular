@@ -429,9 +429,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var elem = document.getElementById(self.histogramAreaId);
 
         var well = getWell();
-        self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step), 
-                parseFloat(well.properties.topDepth), 
-                parseFloat(well.properties.bottomDepth), elem);
+        self.visHistogram = graph.createHistogram(histogramModel, well.step, 
+                well.topDepth, 
+                well.bottomDepth, elem);
         //self.visHistogram.zoneSetModel = self.zoneSetModel;
         //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
 

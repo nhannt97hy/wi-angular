@@ -270,7 +270,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
         adjustRange();
 
-        let stepY = parseFloat(well.properties.step);
+        let stepY = well.step;
 
         var refWindCtrl = self;
         refWindCtrl.removeAllRefCurves();
@@ -302,7 +302,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             minY: _top,
                             maxY: _bottom,
                             yStep: stepY,
-                            offsetY: well.properties.topDepth,
+                            offsetY: well.topDepth,
                             scale: curve.LineProperty ? curve.LineProperty.displayType : "Linear",
                             line: {
                                 color: refCurve.color

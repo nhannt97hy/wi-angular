@@ -146,9 +146,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         var elem = document.getElementById(self.name + 'HistogramX');
         var well = getWell();
-        self.xHistogram = graph.createHistogram(self.histogramModelX, parseFloat(well.properties.step),
-                parseFloat(well.properties.topDepth),
-                parseFloat(well.properties.bottomDepth), elem);
+        self.xHistogram = graph.createHistogram(self.histogramModelX, well.step,
+                well.topDepth,
+                well.bottomDepth, elem);
 
         let zoneCtrl = self.getZoneCtrl();
         if (!zoneCtrl) return;
@@ -176,9 +176,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         innerElem.css('width', elem[0].clientHeight + 'px');
         innerElem.css('height', elem[0].clientWidth + 'px');
         var well = getWell();
-        self.yHistogram = graph.createHistogram(self.histogramModelY, parseFloat(well.properties.step),
-                parseFloat(well.properties.topDepth),
-                parseFloat(well.properties.bottomDepth), innerElem[0]);
+        self.yHistogram = graph.createHistogram(self.histogramModelY, well.step,
+                well.topDepth,
+                well.bottomDepth, innerElem[0]);
 
         let zoneCtrl = self.getZoneCtrl();
         if (!zoneCtrl) return;
