@@ -2519,29 +2519,33 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             }
         });
     }, function(cb) {
-        __GLOBAL.wiApiService.createPointSet({
-            idCrossPlot: crossplotProps.idCrossPlot,
-            idWell: idWell,
-            idCurveX: (fromCurves.CurveX || {}).idCurve || null,
-            idCurveY: (fromCurves.CurveY || {}).idCurve || null,
-            idCurveZ: (fromCurves.CurveZ || {}).idCurve || null,
-            majorX: 5,
-            minorX: 5,
-            majorY: 5,
-            minorY: 5,
-            scaleLeft:(fromCurves.CurveX || {}).minX != 'undefined'? (fromCurves.CurveX || {}).minX : null,
-            scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
-            scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
-            scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
-        }, function (pointSet, err) {
-            if (err) {
-                cb('create pointset failed');
-            }
-            else {
-                pointSetProps = pointSet;
-                cb();
-            }
-        });
+        if(!crossTemplate){
+            __GLOBAL.wiApiService.createPointSet({
+                idCrossPlot: crossplotProps.idCrossPlot,
+                idWell: idWell,
+                idCurveX: (fromCurves.CurveX || {}).idCurve || null,
+                idCurveY: (fromCurves.CurveY || {}).idCurve || null,
+                idCurveZ: (fromCurves.CurveZ || {}).idCurve || null,
+                majorX: 5,
+                minorX: 5,
+                majorY: 5,
+                minorY: 5,
+                scaleLeft:(fromCurves.CurveX || {}).minX != 'undefined'? (fromCurves.CurveX || {}).minX : null,
+                scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
+                scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
+                scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
+            }, function (pointSet, err) {
+                if (err) {
+                    cb('create pointset failed');
+                }
+                else {
+                    pointSetProps = pointSet;
+                    cb();
+                }
+            });
+        } else {
+            cb();
+        }
     }, function(cb) {
         refreshProjectState().then(cb);
     }, function(cb) {
