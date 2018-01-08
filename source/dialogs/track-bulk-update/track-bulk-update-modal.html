@@ -45,20 +45,20 @@
                                 </td>
                                 <td width="10%">
                                     <input type="checkbox" 
-                                            ng-model="track.showXGrids">
+                                            ng-model="track.showValueGrid">
                                 </td>
                                 <td width="10%">
                                     <input type="checkbox" 
-                                            ng-model="track.showYGrids">
+                                            ng-model="track.showDepthGrid">
                                 </td>
                                 <td width="10%">
                                     <input type="number" step="any" 
-                                            ng-model="track.xMajorTicks"
+                                            ng-model="track.majorTicks"
                                             class="form-control wi-form-control">
                                 </td>
                                 <td width="10%">
                                     <input type="number" step="any" 
-                                            ng-model="track.xMinorTicks"
+                                            ng-model="track.minorTicks"
                                             class="form-control wi-form-control">
                                 </td>
                                 <td width="10%">
@@ -76,7 +76,7 @@
                                 <td width="10%">
                                     <div class="float-left">
                                         <button ng-click="wiModal.colorTrack(track);"
-                                                ng-style="{'background-color':track.bgColor}"
+                                                ng-style="{'background-color':track.color}"
                                                 class="form-control wi-form-control width-80px thick-border">
                                         </button>
                                     </div>
@@ -92,6 +92,10 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked();" 
+                        ng-disabled="wiModal.applyingInProgress" class="btn btn-default">
+                    <span class="apply-16x16"></span>&nbsp;Apply
+                </button>
                 <button type="button" ng-click="wiModal.onOkButtonClicked();" 
                         ng-disabled="wiModal.applyingInProgress" class="btn btn-default">
                     <span class="ok-16x16"></span>&nbsp;Ok

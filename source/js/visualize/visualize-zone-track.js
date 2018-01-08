@@ -59,7 +59,7 @@ ZoneTrack.prototype.getProperties = function() {
         showTitle: this.showTitle,
         topJustification: Utils.capitalize(this.justification),
         bottomJustification: 'Center',
-        color: Utils.convertColorToRGB(this.color),
+        color: Utils.convertColorToRGB(this.bgColor),
         width: this.width,
         nameZoneSet: this.nameZoneSet,
         idZoneSet: this.idZoneSet
@@ -74,7 +74,7 @@ ZoneTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'name', props.title);
     Utils.setIfNotNull(this, 'showTitle', props.showTitle);
     Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
-    Utils.setIfNotNull(this, 'color', Utils.convertColorToRGB(props.color));
+    Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.color));
     Utils.setIfNotNull(this, 'width', props.width);
     Utils.setIfNotNull(this, 'nameZoneSet', props.nameZoneSet);
     Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);

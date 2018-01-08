@@ -79,8 +79,8 @@ DepthTrack.prototype.getProperties = function() {
         orderNum: this.orderNum,
         showTitle: this.showTitle,
         title: this.name,
-        trackBackground: this.bgColor,
-        geometryWidth: this.width,
+        color: this.bgColor,
+        width: this.width,
         justification: Utils.capitalize(this.justification),
         depthType: 'MD',
         unitType: this.unit,
@@ -94,8 +94,8 @@ DepthTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'orderNum', props.orderNum);
     Utils.setIfNotNull(this, 'showTitle', props.showTitle);
     Utils.setIfNotNull(this, 'name', props.title);
-    Utils.setIfNotNull(this, 'bgColor', props.trackBackground);
-    Utils.setIfNotNull(this, 'width', props.geometryWidth);
+    Utils.setIfNotNull(this, 'bgColor', props.color);
+    Utils.setIfNotNull(this, 'width', props.width);
     Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.justification));
     Utils.setIfNotNull(this, 'unit', props.unitType);
     Utils.setIfNotNull(this, 'yDecimal', props.decimals);

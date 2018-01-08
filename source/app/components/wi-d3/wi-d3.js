@@ -313,7 +313,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 title: "Image Track " + (imageTracks.length + 1),
                 topJustification: "center",
                 bottomJustification: "center",
-                trackColor: '#ffffff',
+                color: '#ffffff',
                 width: Utils.inchToPixel(1)
             }
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
@@ -323,7 +323,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     showTitle: imageTrackProperties.showTitle,
                     topJustification: imageTrackProperties.topJustification,
                     bottomJustification: imageTrackProperties.bottomJustification,
-                    color: imageTrackProperties.trackColor,
+                    color: imageTrackProperties.color,
                     width: imageTrackProperties.width,
                     orderNum: trackOrder
                 }
@@ -372,7 +372,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 showTitle: true,
                 title: "Zone Track " + (zoneTracks.length + 1),
                 topJustification: "center",
-                trackColor: '#ffffff',
+                color: '#ffffff',
                 width: Utils.inchToPixel(1),
                 parameterSet: null
             }
@@ -383,7 +383,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     showTitle: zoneTrackProperties.isShowTitle,
                     topJustification: zoneTrackProperties.topJustification,
                     bottomJustification: zoneTrackProperties.bottomJustification,
-                    color: zoneTrackProperties.trackColor,
+                    color: zoneTrackProperties.color,
                     width: zoneTrackProperties.width,
                     idZoneSet: zoneTrackProperties.idZoneSet,
                     orderNum: trackOrder
@@ -412,6 +412,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         config.yStep = parseFloat(_getWellProps().step);
         config.offsetY = parseFloat(_getWellProps().topDepth);
         config.width = Utils.inchToPixel(zoneTrack.width);
+        config.bgColor = zoneTrack.color;
+
         config.wiComponentService = wiComponentService;
         console.log(config);
 
@@ -1766,9 +1768,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
                 else if (drawing.isShading()) {
-                    // TO DO
-                    // Send api before deleting
-                    track.removeDrawing(drawing);
+                    wiApiService.removeShading(drawing.id, function() {
+                        track.removeDrawing(drawing);
+                    });
                 }
                 else if (drawing.isZone()) {
                     // Send api before deleting
@@ -2217,12 +2219,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 icon: "shading-delete-16x16",
                 handler: function () {
                     let currentShading = _currentTrack.getCurrentShading();
-                    wiApiService.removeShading(currentShading.id, function (ret) {
-                        console.log(ret, currentShading);
-                        self.removeShadingFromTrack(_currentTrack, currentShading);
-                    });
-                    // self.addLeftShadingToTrack(_currentTrack, _currentTrack.getCurrentCurve(), {});
-
+                    wiApiService.removeShading(currentShading.id, self.removeCurrentShading);
                 }
             }]);
         /*$timeout(function() {
