@@ -15,6 +15,8 @@ const XLSX = require('xlsx');
 const workbook = XLSX.readFile('Wi-UI.Tung.xlsx');
 const rsync = require('gulp-rsync');
 const fs = require('fs');
+var browserSync = require('browser-sync');
+var reload = browserSync.reload;
 
 const BUILD_DIR = {
     root: 'build',
@@ -411,4 +413,15 @@ gulp.task('deploy-dev', function() {
             username: "ec2-user",
 			port: 2221
     }));
+});
+
+gulp.task('serve', [], function () {
+    browserSync({
+        notify: false,
+        server: {
+            baseDir: BUILD_DIR.root
+        }
+    });
+
+    gulp.watch([BUILD_DIR.root + '/index.html'], reload);
 });
