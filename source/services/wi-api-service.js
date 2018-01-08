@@ -542,7 +542,7 @@ Service.prototype.register = function (data, callback) {
     console.log(data);
     this.post(REGISTER, data, callback, 'auth');
 }
-Service.prototype.refreshToken = function (refreshToken) {
+Service.prototype.refreshToken = function (refreshToken, callback) {
   if (!refreshToken) return;
   let self = this;
   this.post(REFRESH_TOKEN, {refresh_token: refreshToken}, function (res, err) {
@@ -557,6 +557,7 @@ Service.prototype.refreshToken = function (refreshToken) {
     window.localStorage.setItem('token', res.token);
     window.localStorage.setItem('refreshToken', res.refresh_token);
     getAuthInfo();
+    callback && callback();
   },  'auth');
 }
 Service.prototype.postWithTemplateFile = function (dataPayload) {
@@ -816,8 +817,10 @@ Service.prototype.getProject = function (infoProject, callback) {
 }
 
 Service.prototype.getProjectInfo = function (idProject, callback) {
-    this.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
-    __USERINFO.refreshToken && this.refreshToken(__USERINFO.refreshToken);
+    let self = this;
+    __USERINFO.refreshToken && this.refreshToken(__USERINFO.refreshToken, function () {
+        self.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
+    });
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {
