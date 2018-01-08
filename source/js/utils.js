@@ -65,6 +65,7 @@ exports.doLogin = function doLogin (cb) {
     window.localStorage.removeItem('refreshToken');
     window.localStorage.removeItem('username');
     window.localStorage.removeItem('rememberAuth');
+    $('.modal').remove();
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.authenticationDialog(__GLOBAL.ModalService, wiComponentService, function (userInfo) {
@@ -3275,3 +3276,25 @@ function getVisualizeShading (track, idShading) {
     return shadings.filter(s => s.id == idShading)[0];
 }
 exports.getVisualizeShading = getVisualizeShading;
+
+function updateWiCurveListingOnModelDeleted(model){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let wiCurveListing = wiComponentService.getComponent('WCL');
+            console.log({wiCurveListing});
+            let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
+            let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
+            if(indexCurve){
+                wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+            }
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
+}
+
+exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;

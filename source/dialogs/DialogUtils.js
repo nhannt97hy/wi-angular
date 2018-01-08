@@ -1,7 +1,7 @@
 function initModal(modal) {
     modal.element.modal();
     $(modal.element).prop('tabindex', 1);
-    $(modal.element[0].children[0]).draggable({
+    $(modal.element).find('.modal-content').draggable({
         containment:[-$(window).width()/2, -100, $(window).width()/2, $(window).height() - 100]
     });
     $(modal.element).keyup(function (e) {

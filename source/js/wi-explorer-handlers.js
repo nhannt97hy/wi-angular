@@ -130,6 +130,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                                 utils.updateWiLogplotOnModelDeleted(curve);
                                 utils.updateWiCrossplotOnModelDeleted(curve);
                                 utils.updateWiHistogramOnModelDeleted(curve);
+                                utils.updateWiCurveListingOnModelDeleted(curve);
                             });
                         }
                         break;
@@ -139,6 +140,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                             utils.updateWiLogplotOnModelDeleted(selectedNode);
                             utils.updateWiCrossplotOnModelDeleted(selectedNode);
                             utils.updateWiHistogramOnModelDeleted(selectedNode);
+                            utils.updateWiCurveListingOnModelDeleted(selectedNode);
                         }
                         break;
                     case 'zoneset':

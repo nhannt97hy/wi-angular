@@ -231,9 +231,13 @@ Histogram.prototype._doPlot = function() {
     else {
         xTickValues = Utils.genLogTickValues(wdX[0], wdX[1]);
     }
+    let _nDecimal = Math.ceil(-1*Math.log10(Math.abs(realStep)));
+    _nDecimal = (_nDecimal >= 0)? _nDecimal:0;
+    
     this.axisX = d3.axisBottom(transformX)
         .tickValues(xTickValues)
-        .tickFormat(Utils.getDecimalFormatter(2))
+//        .tickFormat(Utils.getDecimalFormatter(realStep > 1 ? 0:2))
+        .tickFormat(Utils.getDecimalFormatter(_nDecimal))
         .tickPadding(10);
 
     // Setup histogram generator

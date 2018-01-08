@@ -93,9 +93,18 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
             $timeout(function(){
-                self.wells = utils.findWells();
-                self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
-                self.onChangeWell();
+                async.series([function(callback){
+                    self.wells = utils.findWells();
+                    self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
+                    if(!self.SelectedWell){
+                        self.curvesData.splice(self.currentIndex,1);
+                        self.SelectedWell = self.wells[0];
+                    }
+                    callback();
+                }], function(err, ret){
+                    self.onChangeWell();
+                })
+                
             }, 0);
         });
     };
