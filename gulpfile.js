@@ -423,5 +423,5 @@ gulp.task('serve', [], function () {
         }
     });
 
-    gulp.watch([BUILD_DIR.root + '/index.html'], reload);
+    gulp.watch([BUILD_DIR.js + '/main.js.bundle.js'], reload);
 });
