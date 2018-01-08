@@ -11727,7 +11727,7 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
         // console.log("allTracks", allTracks);
         function getTrackProps (track) {
             let props =  {
-                check : false
+                check : true
             }
             switch (track.type) {
                 case 'log-track':

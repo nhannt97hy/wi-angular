@@ -1763,8 +1763,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let props = curve.getProperties();
                     console.log(props);
                     let idLine = props.idLine;
-                    wiApiService.removeLine(idLine, function () {
+                    wiApiService.removeLine(idLine, function (res) {
                         track.removeCurve(curve);
+                        if (Array.isArray(res.shadings) && res.shadings.length) {
+                            res.shadings.forEach(function(s) {
+                                let shading = utils.getVisualizeShading(track, s.idShading);
+                                track.removeDrawing(shading);
+                            });
+                        }
                     });
                 }
                 else if (drawing.isShading()) {
@@ -2303,7 +2309,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 icon: "curve-hide-16x16",
                 handler: function () {
                     let idLine = _currentTrack.getCurrentCurve().id;
-                    wiApiService.removeLine(idLine, self.removeCurrentCurve());
+                    wiApiService.removeLine(idLine, function(res){
+                        self.removeCurrentCurve();
+                        if (Array.isArray(res.shadings) && res.shadings.length) {
+                            res.shadings.forEach(function(s) {
+                                let shading = utils.getVisualizeShading(track, s.idShading);
+                                track.removeDrawing(shading);
+                            });
+                        }
+                    });
                 }
             }, {
                 name: "BaseLineShift",

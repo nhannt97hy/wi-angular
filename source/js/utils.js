@@ -3269,3 +3269,9 @@ function isEmpty(val){
     return (val === undefined || val == null || val.length <= 0) ? true : false;
 }
 exports.isEmpty = isEmpty;
+
+function getVisualizeShading (track, idShading) {
+    let shadings = (track.drawings).filter(d => d.type == 'shading')
+    return shadings.filter(s => s.id == idShading)[0];
+}
+exports.getVisualizeShading = getVisualizeShading;

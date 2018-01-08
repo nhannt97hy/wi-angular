@@ -480,7 +480,7 @@ exports.AutoSizeTrackButtonClicked = function () {
     });
 };
 
-exports.TrackBolkUpdateButtonClicked = function () {
+exports.TrackBulkUpdateButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
@@ -491,7 +491,7 @@ exports.TrackBolkUpdateButtonClicked = function () {
     });
 };
 
-exports.CurveBolkUpdateButtonClicked = function () {
+exports.CurveBulkUpdateButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
