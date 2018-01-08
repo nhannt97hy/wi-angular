@@ -2622,7 +2622,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.paletteList = null;
         this.paletteName = null;
         this.curveList = currentTrack.getCurves();
-        this.shadingOptions = shadingOptions;
+        this.shadingOptions = angular.copy(shadingOptions);
         let cloneOptions = angular.copy(shadingOptions);
         let paletteNameArr = [];
         let paletteValArr = [];
@@ -3039,7 +3039,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills;
             };
 
-            // comment gì cho thật cute đây Y_Y
+            // comment Y_Y
             function getPaletteNameByValue(palVal) {
                 let idx = paletteValArr.indexOf(JSON.stringify(palVal));
                 return paletteNameArr[idx];
@@ -3219,7 +3219,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             };
         }
         this.onCancelButtonClicked = function () {
-            close(cloneOptions, 100);
+            close(null);
         }
         this.onApplyButtonClicked = function () {
             doApply();
@@ -3241,6 +3241,7 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
             $('body').removeClass('modal-open');
 
             if (options) {
+                console.log("callback options" , options);
                 callback(options)
                 /*var objData = JSON.parse(data);
                 callback(objData.fillPatternOptions, objData.variableShadingOptions, objData.shadingOptions);*/
@@ -3916,21 +3917,21 @@ exports.depthTrackPropertiesDialog = function (ModalService, currentTrack, wiApi
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         console.log("Depth track", currentTrack);
         this.props = currentTrack.getProperties();
-        console.log('props1', this.props.geometryWidth, this.props);
+        console.log('props1', this.props.width, this.props);
 
-        this.props.geometryWidth = utils.pixelToInch(this.props.geometryWidth);
-        console.log('props2', this.props.geometryWidth, this.props);
+        this.props.width = utils.pixelToInch(this.props.width);
+        console.log('props2', this.props.width, this.props);
         // Dialog buttons
         this.trackBackground = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.props.trackBackground, function (colorStr) {
-                self.props.trackBackground = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.props.color, function (colorStr) {
+                self.props.color = colorStr;
             });
         }
 
         function updateDepthTrack() {
             utils.editDepthTrack(self.props, wiApiService);
             let newProps = angular.copy(self.props);
-            newProps.geometryWidth = utils.inchToPixel(self.props.geometryWidth);
+            newProps.width = utils.inchToPixel(self.props.width);
             currentTrack.setProperties(newProps);
             currentTrack.doPlot(true);
         };
@@ -3970,7 +3971,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
             showTitle: true,
             title: "New Zone",
             topJustification: "center",
-            trackColor: '#ffffff',
+            color: '#ffffff',
             width: utils.inchToPixel(2),
             parameterSet: null
         }
@@ -3979,7 +3980,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
         this.isShowTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
-        this.trackColor = props.trackColor;
+        this.color = props.color;
         this.width = props.width;
         this.parameterSet = props.parameterSet;
         this.zoneSets = [];
@@ -4003,8 +4004,8 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
             });
         }
         this.trackBackground = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
-                self.trackColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.color, function (colorStr) {
+                self.color = colorStr;
             });
         }
         this.onOkButtonClicked = function () {
@@ -4017,7 +4018,7 @@ exports.zoneTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, zoneT
                 showTitle: self.isShowTitle,
                 title: self.title,
                 topJustification: self.topJustification,
-                trackColor: self.trackColor,
+                color: self.color,
                 width: self.width,
                 parameterSet: self.parameterSet,
                 idZoneSet: self.idZoneSet
@@ -11455,8 +11456,8 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
 
         this.tracks.forEach(function(track) {
             self.colorTrack = function (track) {
-                dialogUtils.colorPickerDialog(ModalService, track.bgColor, function (colorStr) {
-                    track.bgColor = colorStr;
+                dialogUtils.colorPickerDialog(ModalService, track.color, function (colorStr) {
+                    track.color = colorStr;
                 });
             };
             self.sumWidth += track.width;
@@ -11484,116 +11485,128 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
         // console.log("allTracks", allTracks);
         function getTrackProps (track) {
             let props =  {
-                type : track.type,
-                title : track.name,
-                showXGrids : track.showXGrids ? track.showXGrids : false,
-                showYGrids : track.showYGrids ? track.showYGrids : false,
-                xMajorTicks : track.xMajorTicks ? track.xMajorTicks : null,
-                xMinorTicks : track.xMinorTicks ? track.xMinorTicks : null,
-                width : utils.pixelToInch(track.width),
-                zoomFactor : track.zoomFactor,
-                bgColor : track.bgColor,
                 check : false
             }
             switch (track.type) {
                 case 'log-track':
-                    props.idTrack = track.id;
+                    props = track.getProperties();
+                    props.width = utils.pixelToInch(track.width);
+                    props.type = "Log Track";
                     break;
                 case 'depth-track':
-                    props.idDepthAxis = track.id;
-                    props.justification = track.justification.toLowerCase();
+                    props = track.getProperties();
+                    props.width = utils.pixelToInch(track.width);
+                    props.type = "Depth Track";
                     break;
                 case 'zone-track':
-                    props.idZoneTrack = track.id;
+                    props = track.getProperties();
+                    props.width = utils.pixelToInch(track.width);
+                    props.type = "Zone Track";
                     break;
                 case 'image-track':
-                    props.idImageTrack = track.id;
+                    props = track.getProperties();
+                    props.width = utils.pixelToInch(track.width);
+                    props.type = "Image Track";
                     break;
                 default:
                     break;
             }
             return props;
         }
-
-        this.onOkButtonClicked = function(cb){
+        function callAPI (cb) {
             async.eachOfSeries(self.tracks, function(track, idx, callback){
-                    switch(track.type) {
-                        case 'log-track':
-                            if( track.check ) {
-                                wiApiService.editTrack(track, function(res) {
-                                    let l = angular.copy(track);
-                                    l.width = utils.inchToPixel(l.width);
-                                    let logTrack = getLogTrack(l);
-                                    console.log("log", res, l, logTrack);
-                                    logTrack.setProperties(l);
+                console.log("API", track);
+                switch(track.type) {
+                    case 'Log Track':
+                        if( track.check ) {
+                            wiApiService.editTrack(track, function(res) {
+                                let l = angular.copy(track);
+                                l.width = utils.inchToPixel(l.width);
+                                let logTrack = getLogTrack(l);
+                                console.log("log", res, l, logTrack);
+                                logTrack.setProperties(l);
 
-                                    logTrack.doPlot(true);
-                                    if (callback) callback();
-                                })
-                            } else {
+                                logTrack.doPlot(true);
                                 if (callback) callback();
-
-                            }
-                            break;
-                        case 'depth-track':
-                            if( track.check ) {
-                                wiApiService.editDepthTrack(track, function(res) {
-                                    console.log("depth", res);
-                                    let d = angular.copy(track);
-                                    d.width = utils.inchToPixel(d.width);
-                                    let depthTrack = getDepthTrack(d);
-                                    depthTrack.setProperties(d);
-
-                                    depthTrack.doPlot(true);
-                                    if (callback) callback();
-                                })
-                            } else {
-                                if (callback) callback();
-
-                            }
-                            break;
-                        case 'zone-track':
-                            if( track.check ) {
-                                wiApiService.editZoneTrack(track, function(res) {
-                                    console.log("zone", res);
-                                    let z = angular.copy(track);
-                                    z.width = utils.inchToPixel(z.width);
-                                    let zoneTrack = getZoneTrack(z);
-                                    zoneTrack.setProperties(z);
-
-                                    zoneTrack.doPlot(true);
-                                    if (callback) callback();
-                                })
-                            } else {
-                                if (callback) callback();
-
-                            }
-                            break;
-                        case 'image-track':
-                            if( track.check ) {
-                                wiApiService.editImageTrack(track, function(res) {
-                                    console.log("image", res);
-                                    let i = angular.copy(track);
-                                    i.width = utils.inchToPixel(i.width);
-                                    let imageTrack = getImageTrack(i);
-                                    imageTrack.setProperties(i);
-
-                                    imageTrack.doPlot(true);
-                                    if (callback) callback();
-                                })
-                            } else {
-                                if (callback) callback();
-
-                            }
-                            break;
-                        default:
+                            })
+                        } else {
                             if (callback) callback();
-                            break;
-                    }
-                }, function(err) {
-                    if(cb) cb();
-                    // cb();
-                });
+
+                        }
+                        break;
+                    case 'Depth Track':
+                        if( track.check ) {
+                            track.trackBackground = track.color;
+                            wiApiService.editDepthTrack(track, function(res) {
+                                console.log("depth", res);
+                                let d = angular.copy(track);
+                                d.width = utils.inchToPixel(d.width);
+                                let depthTrack = getDepthTrack(d);
+                                depthTrack.setProperties(d);
+
+                                depthTrack.doPlot(true);
+                                if (callback) callback();
+                            })
+                        } else {
+                            if (callback) callback();
+
+                        }
+                        break;
+                    case 'Zone Track':
+                        if( track.check ) {
+                            wiApiService.editZoneTrack(track, function(res) {
+                                console.log("zone", res);
+                                let z = angular.copy(track);
+                                z.width = utils.inchToPixel(z.width);
+                                let zoneTrack = getZoneTrack(z);
+                                zoneTrack.setProperties(z);
+
+                                zoneTrack.doPlot(true);
+                                if (callback) callback();
+                            })
+                        } else {
+                            if (callback) callback();
+
+                        }
+                        break;
+                    case 'Image Track':
+                        if( track.check ) {
+                            wiApiService.editImageTrack(track, function(res) {
+                                console.log("image", res);
+                                let i = angular.copy(track);
+                                i.width = utils.inchToPixel(i.width);
+                                let imageTrack = getImageTrack(i);
+                                imageTrack.setProperties(i);
+
+                                imageTrack.doPlot(true);
+                                if (callback) callback();
+                            })
+                        } else {
+                            if (callback) callback();
+
+                        }
+                        break;
+                    default:
+                        if (callback) callback();
+                        break;
+                }
+            }, function(err) {
+                if (err) {
+                    setTimeout(() => {
+                        DialogUtils.errorMessageDialog(ModalService, err);
+                    });
+                }
+                if(cb) cb();
+            });
+        }
+        this.onApplyButtonClicked = function(){
+            callAPI(function(){});
+        };
+        this.onOkButtonClicked = function(){
+            callAPI(function(){
+                close();
+            });
+            
         };
         this.onCancelButtonClicked = function(){
             close(null);
