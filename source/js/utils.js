@@ -65,6 +65,7 @@ exports.doLogin = function doLogin (cb) {
     window.localStorage.removeItem('refreshToken');
     window.localStorage.removeItem('username');
     window.localStorage.removeItem('rememberAuth');
+    $('.modal').remove();
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     DialogUtils.authenticationDialog(__GLOBAL.ModalService, wiComponentService, function (userInfo) {
