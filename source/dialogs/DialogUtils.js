@@ -4238,7 +4238,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
         this.imagesOfCurrentTrack = [];
         this.status = false;
 
-        this.isPropsChanged = false;
+        this.arePropsChanged = false;
         this.isCreated = props.isCreated;
         this.wasApplyButtonClicked = false;
 
@@ -4287,13 +4287,13 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             }
             this.onAddButtonClicked = function () {
                 self.addImage(self.imagesOfCurrentTrack.length);
-                self.isPropsChanged = true;
+                self.arePropsChanged = true;
             }
             this.onImageChanged = function(index) {
                 if (typeof self.imagesOfCurrentTrack[index].flag === 'undefined') {
                     self.imagesOfCurrentTrack[index].flag = _EDIT;
                 }
-                self.isPropsChanged = true;
+                self.arePropsChanged = true;
             }
             this.onDeleteButtonClicked = function () {
                 if (self.imagesOfCurrentTrack[self.selectedRow].flag != _NEW) {
@@ -4302,14 +4302,14 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
                     self.imagesOfCurrentTrack.splice(self.selectedRow, 1);
                 }
                 self.selectedRow = self.selectedRow > 0 ? self.selectedRow - 1 : 0;
-                self.isPropsChanged = true;
+                self.arePropsChanged = true;
             }
             this.onClearAllButtonClicked = function () {
                 self.imagesOfCurrentTrack.map(function(i){
                     i.flag = _DEL;
                 })
                 self.selectedRow = -1;
-                self.isPropsChanged = true;
+                self.arePropsChanged = true;
             }
         }
 
@@ -4380,7 +4380,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         this.onOkButtonClicked = function () {
             bindProps();
-            if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+            if (self.wasApplyButtonClicked && !self.arePropsChanged) {
                 close(null);
             } else {
                 if (self.status) {
@@ -4441,13 +4441,14 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.name = props.name;
         this.showName = props.showName;
         this.fill = props.fill || 'white';
+        this.smartDisplay = props.smartDisplay || false;
 
         this.uploadedImages = [];
 
         this.wasApplyButtonClicked = false;
         this.isNewDraw = props.isNewDraw || false;
 
-        this.isPropsChanged = false;
+        this.arePropsChanged = false;
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
@@ -4478,14 +4479,14 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                     self.uploadedImages.push(latestImage);
                 });
             });
-            self.isPropsChanged = true;
+            self.arePropsChanged = true;
         }
 
         this.background = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill, function (colorStr) {
                 self.fill = colorStr;
             });
-            self.isPropsChanged = true;
+            self.arePropsChanged = true;
         }
 
         this.openGallery = function () {
@@ -4510,7 +4511,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         }, 500);
 
         this.onPropsChange = function() {
-            self.isPropsChanged = true;
+            self.arePropsChanged = true;
         }
 
         function validateUrl (str) {
@@ -4567,6 +4568,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             props.imageUrl = self.imageUrl;
             props.name = self.name;
             props.showName = self.showName;
+            props.smartDisplay = self.smartDisplay;
             props.fill = self.fill;
             props.done = self.done;
             props.isNewDraw = self.isNewDraw;
@@ -4575,13 +4577,13 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.onOkButtonClicked = function () {
             bindProps();
             if (self.isNewDraw) {
-                if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                if (self.wasApplyButtonClicked && !self.arePropsChanged) {
                     close(true);
                 } else {
                     close(props, 100);
                 }
             } else {
-                if (self.wasApplyButtonClicked && !self.isPropsChanged) {
+                if (self.wasApplyButtonClicked && !self.arePropsChanged) {
                     close(null);
                 } else {
                     close(props, 100);
