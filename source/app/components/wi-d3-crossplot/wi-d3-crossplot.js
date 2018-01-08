@@ -72,6 +72,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
+        self.setContextMenu();
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -92,7 +93,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
             let refWindCtrl = self.getWiRefWindCtrl();
-            if (refWindCtrl) refWindCtrl.update(getWell(), 
+            if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
                     xplotProps.referenceScale,
                     xplotProps.referenceVertLineNumber,
@@ -145,9 +146,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         var elem = document.getElementById(self.name + 'HistogramX');
         var well = getWell();
-        self.xHistogram = graph.createHistogram(self.histogramModelX, parseFloat(well.properties.step),
-                parseFloat(well.properties.topDepth),
-                parseFloat(well.properties.bottomDepth), elem);
+        self.xHistogram = graph.createHistogram(self.histogramModelX, well.step,
+                well.topDepth,
+                well.bottomDepth, elem);
 
         let zoneCtrl = self.getZoneCtrl();
         if (!zoneCtrl) return;
@@ -175,9 +176,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         innerElem.css('width', elem[0].clientHeight + 'px');
         innerElem.css('height', elem[0].clientWidth + 'px');
         var well = getWell();
-        self.yHistogram = graph.createHistogram(self.histogramModelY, parseFloat(well.properties.step),
-                parseFloat(well.properties.topDepth),
-                parseFloat(well.properties.bottomDepth), innerElem[0]);
+        self.yHistogram = graph.createHistogram(self.histogramModelY, well.step,
+                well.topDepth,
+                well.bottomDepth, innerElem[0]);
 
         let zoneCtrl = self.getZoneCtrl();
         if (!zoneCtrl) return;
@@ -342,6 +343,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     //    utils.triggerWindowResize();
     }
 
+    this.switchReferenceWindow = function(state) {
+        if (state != undefined || state != null) self.crossplotModel.properties.referenceDisplay = state;
+        else self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
+        let index = 6; // HARD CODED - TUNG (for quick fix)
+        if (self.contextMenu.length >= index) {
+            self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
+        }
+    }
+
     this.updateAll = function (callback) {
         wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
             //crossplot.pointSet = crossplot.pointsets[0];
@@ -420,7 +430,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         },
                         function(cb) {
                             if (xplotProps.pointsets[0].idOverlayLine) {
-                                wiApiService.getOverlayLine(xplotProps.pointsets[0].idOverlayLine, function(ret) {
+                                wiApiService.getOverlayLine(xplotProps.pointsets[0].idOverlayLine, pointSet.idCurveX, pointSet.idCurveY, function(ret) {
                                     overlayLine = (ret || {}).data;
                                     cb();
                                 });
@@ -448,6 +458,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
 
                         if (overlayLine) {
+                            // overlayLine.isSwap = crossplotProps.pointSet.isOverlayLineSwap;
                             crossplotProps.pointSet.overlayLine = overlayLine;
                         }
                         //if (callback) callback(crossplotProps);
@@ -581,12 +592,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     isCheckType: "true",
                     checked: self.crossplotModel ? self.crossplotModel.properties.referenceDisplay : false,
                     handler: function (index) {
-                        self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
-                        self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
-                        console.log(self.crossplotModel);
-                        $timeout(function() {
+                        self.switchReferenceWindow();
+                        //self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
+                        //self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
+                        /*$timeout(function() {
                             self.getWiRefWindCtrl().refresh();
-                        }, 100);
+                        }, 100);*/
                         //utils.triggerWindowResize();
                     }
                 },{
@@ -619,7 +630,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.contextMenu = contextMenu;
         }
     }
-    this.setContextMenu();
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
@@ -765,7 +775,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             function(callback) {
                 if (config.pointSet.idOverlayLine) {
-                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, function(ret) {
+                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, config.pointSet.idCurveX, config.pointSet.idCurveY, function(ret) {
                         config.pointSet.overlayLine = (ret || {}).data;
                         callback();
                     });
@@ -774,6 +784,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     async.setImmediate(callback);
                 }
             }], function(err, result) {
+                if (config.ternaries) {
+                    let vertices = config.ternaries.map(function(d) {
+                        return {
+                            x: d.xValue,
+                            y: d.yValue,
+                            name: d.name,
+                            style: d.style,
+                            used: d.usedIn,
+                            showed: d.show,
+                            idVertex: d.idTernary
+                        };
+                    });
+                    config.ternary = { vertices: vertices };
+                }
+
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 self.loading = false;

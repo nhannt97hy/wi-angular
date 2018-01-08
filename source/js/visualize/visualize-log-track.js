@@ -1008,11 +1008,18 @@ LogTrack.prototype.highlightHeader = function() {
 
 
 LogTrack.prototype.drawingHeaderMouseDownCallback = function(drawing) {
+    if (d3.event.button != 0) {
+        if (!this.currentDrawing) this.setCurrentDrawing(drawing);
+        d3.event.currentDrawing = this.currentDrawing;
+        return;
+    }
     if (d3.event.ctrlKey) {
-        this.setTmpCurve(drawing);
+        if (!this.currentDrawing) this.setCurrentDrawing(drawing);
+        else this.setTmpCurve(drawing);
     }
     else {
         this.setCurrentDrawing(drawing);
+        this.setTmpCurve(null);
     }
 }
 

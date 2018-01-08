@@ -11,14 +11,21 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div id="left-inventory" class="col-sm-5">
-                            <wi-inventory-treeview name="{{wiModal.treeviewName}}" config="wiModal.treeConfig"></wi-inventory-treeview>
+                            <wi-inventory-treeview name="'projectTreeview'" config="wiModal.projectConfig" container="wiModal" selected-node="wiModal.projectSelectedNode"></wi-inventory-treeview>
                         </div>
-                        <div id="center-inventory" class="col-sm-2">
-                            <button class="btn btn-default" ng-click=''>btn1</button>
-                            <button class="btn btn-default" ng-click=''>btn2</button>
+                        <div id="center-inventory" class="col-sm-1">
+                            <div class="row">
+                                <button class="btn btn-default" title="import" ng-click='wiModal.importButtonClicked()' ng-class="{'disabled': !wiModal.importValid}">
+                                    <span class="arrow-left-32x32"></span>
+                                </button>
+                            </div>
+                            <!-- <br>
+                            <div class="row">
+                                <button class="btn btn-default" ng-click=''><span class="arrow-right-32x32"></span></button>
+                            </div> -->
                         </div>
-                        <div id="right-inventory" class="col-sm-5">
-                            <p>right</p>
+                        <div id="right-inventory" class="col-sm-6">
+                            <wi-inventory-treeview name="'inventoryTreeview'" config="wiModal.inventoryConfig" container="wiModal" selected-node="wiModal.inventorySelectedNode"></wi-inventory-treeview>
                         </div>
                     </div>
                 </div>

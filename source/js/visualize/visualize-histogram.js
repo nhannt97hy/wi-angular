@@ -233,7 +233,7 @@ Histogram.prototype._doPlot = function() {
     }
     this.axisX = d3.axisBottom(transformX)
         .tickValues(xTickValues)
-        .tickFormat(Utils.getDecimalFormatter(0))
+        .tickFormat(Utils.getDecimalFormatter(2))
         .tickPadding(10);
 
     // Setup histogram generator

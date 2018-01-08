@@ -111,6 +111,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.histogramModel = self.getModel();
         wiApiService.getHistogram(self.histogramModel.id, function(xplotProps){
             self.histogramModel.properties = xplotProps;
+            self.histogramModel.properties.discriminator = JSON.parse(xplotProps.discriminator);
             if (self.histogramModel.properties.idZoneSet) {
                 self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
                 if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
@@ -242,7 +243,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         );
     }
-
+    
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
             console.log('Discriminator', data);
@@ -428,9 +429,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var elem = document.getElementById(self.histogramAreaId);
 
         var well = getWell();
-        self.visHistogram = graph.createHistogram(histogramModel, parseFloat(well.properties.step), 
-                parseFloat(well.properties.topDepth), 
-                parseFloat(well.properties.bottomDepth), elem);
+        self.visHistogram = graph.createHistogram(histogramModel, well.step, 
+                well.topDepth, 
+                well.bottomDepth, elem);
         //self.visHistogram.zoneSetModel = self.zoneSetModel;
         //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
 

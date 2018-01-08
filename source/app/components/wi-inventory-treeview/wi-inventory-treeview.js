@@ -7,11 +7,25 @@ function Controller($controller, wiComponentService) {
 
     self.$onInit = function () {
         wiComponentService.putComponent(self.name, self);
-        console.log('wiInventoryTreeview onInit self.config', self.config);
     };
 
+    function unselectAllNodes () {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        self.config.forEach(function(item) {
+            utils.visit(item, function(node) {
+                if(node.data) node.data.selected = false;
+            });
+        });
+    }
+
     this.onClick = function ($index, $event) {
-        console.log('wi-inventory-treeview onclick $index', $index);
+        let node = this.config[$index];
+        unselectAllNodes();
+        if (node.data) node.data.selected = true;
+        self.selectedNode = node;
+        setTimeout(() => {
+            this.container.onConfigClick && this.container.onConfigClick();
+        });
     }
 }
 
@@ -25,9 +39,9 @@ app.component(componentName, {
     bindings: {
         name: '@',
         config: '<',
-        contextmenuholder: '@',
         baseTreeviewName: '<',
-        container: '<'
+        container: '<',
+        selectedNode: '='
     }
 });
 exports.name = moduleName;

@@ -87,8 +87,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.CloseReferenceWindow = function () {
         let wiD3CrossplotCtrl = self.getWiD3CrossplotCtrl();
-        if (wiD3CrossplotCtrl) return;
-            wiD3CrossplotCtrl.crossplotModel.properties.referenceDisplay = false;
+        if (!wiD3CrossplotCtrl) return;
+        wiD3CrossplotCtrl.switchReferenceWindow(false);
+        //wiD3CrossplotCtrl.crossplotModel.properties.referenceDisplay = false;
     }
 }
 

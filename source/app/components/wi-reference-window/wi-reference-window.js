@@ -88,15 +88,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         return _wiD3CrossplotCtrl;
     }
 
-    this.addRefCurve = function(idCurve, config, callback) {
+    this.addRefCurve = function(idCurve, config,callback) {
         var viCurve = null;
         utils.getCurveData(wiApiService, idCurve, function (err, dataCurve) {
             if (err) {
                 utils.error(err);
                 return;
             }
+            // let filteredDataCurve = dataCurve.filter(function(d) {
+            //     let depth = wellTopDepth + parseFloat(d.y) * config.yStep;
+            //     return (depth >= config.minY) && (depth <= config.maxY);
+            // });
+            // viCurve = graph.createCurve(config, filteredDataCurve, getRefCurveContainer());
             viCurve = graph.createCurve(config, dataCurve, getRefCurveContainer());
-            console.log(viCurve);
+            //console.log(viCurve);
             //viCurve.doPlot();
             _viCurves.push(viCurve);
             if (callback) callback();
@@ -190,7 +195,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 .tickSize(-1 * $(getRefCurveContainer().node()).width());
         else 
             axisY = d3.axisLeft(transformY).tickValues(d3.range(_top, _bottom, step))
-                .tickFormat(d3.format(',.0f'))
+                .tickFormat(d3.format(',.2f'))
                 .tickSize(-1 * $(getRefCurveContainer().node()).width());
 
             if(!self.showGrid){
@@ -265,7 +270,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
         adjustRange();
 
-        let stepY = parseFloat(well.properties.step);
+        let stepY = well.step;
 
         var refWindCtrl = self;
         refWindCtrl.removeAllRefCurves();
@@ -297,7 +302,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             minY: _top,
                             maxY: _bottom,
                             yStep: stepY,
-                            offsetY: _top,
+                            offsetY: well.topDepth,
                             scale: curve.LineProperty ? curve.LineProperty.displayType : "Linear",
                             line: {
                                 color: refCurve.color

@@ -20,17 +20,19 @@ let app = angular.module(moduleName, []);
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
+const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
 // const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
 // const PROCESSING_SERVICE = 'http://54.169.13.92';
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://localhost:3000';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 // const PROCESSING_SERVICE = 'http://localhost:5000';
-
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -225,6 +227,8 @@ const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/de
 const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
 const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
 
+const GET_INVENTORY = '/user/fullinfo';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -412,6 +416,10 @@ Service.prototype.post = function (route, payload, callback, option) {
             break;
         case 'processing':
             url = PROCESSING_SERVICE + route;
+            break;
+        case 'inventory':
+            url = INVENTORY_SERVICE + route;
+            break;
         default:
             url = self.baseUrl + route;
             break;
@@ -534,19 +542,22 @@ Service.prototype.register = function (data, callback) {
     console.log(data);
     this.post(REGISTER, data, callback, 'auth');
 }
-Service.prototype.refreshToken = function (refreshToken) {
+Service.prototype.refreshToken = function (refreshToken, callback) {
   if (!refreshToken) return;
   let self = this;
   this.post(REFRESH_TOKEN, {refresh_token: refreshToken}, function (res, err) {
     if (err) {
-        self.getUtils().doLogin(function () {
-            getAuthInfo();
-        });
+        if (err.code == 401) {
+            self.getUtils().doLogin(function () {
+                getAuthInfo();
+            });
+        }
         return;
     }
     window.localStorage.setItem('token', res.token);
     window.localStorage.setItem('refreshToken', res.refresh_token);
     getAuthInfo();
+    callback && callback();
   },  'auth');
 }
 Service.prototype.postWithTemplateFile = function (dataPayload) {
@@ -806,8 +817,10 @@ Service.prototype.getProject = function (infoProject, callback) {
 }
 
 Service.prototype.getProjectInfo = function (idProject, callback) {
-    this.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
-    __USERINFO.refreshToken && this.refreshToken(__USERINFO.refreshToken);
+    let self = this;
+    __USERINFO.refreshToken && this.refreshToken(__USERINFO.refreshToken, function () {
+        self.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
+    });
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {
@@ -1548,7 +1561,7 @@ Service.prototype.listCombinedBoxTool = function (idCombinedBox, callback) {
 
 
 //ternary apis
-Service.prototype.createGroup = function (data, callback) {
+Service.prototype.createTernary = function (data, callback) {
     let self = this;
     this.post(CREATE_TERNARY, data, callback);
 }
@@ -1578,9 +1591,7 @@ Service.prototype.saveCustomFills = function (customFills, callback) {
     this.post(SAVE_CUSTOM_FILLS, customFills, callback);
 }
 Service.prototype.setAuthenticationInfo = function (authenInfo) {
-    __USERINFO.username = authenInfo.username;
-    __USERINFO.password = authenInfo.password;
-    __USERINFO.token = authenInfo.token;
+    __USERINFO = authenInfo;
 }
 
 Service.prototype.getCaptcha = function () {
@@ -1644,8 +1655,12 @@ Service.prototype.listOverlayLine = function(idCurveX, idCurveY, callback) {
     this.post(LIST_OVERLAY_LINE, { idCurveX: idCurveX, idCurveY: idCurveY }, callback);
 }
 
-Service.prototype.getOverlayLine = function(idOverlayLine, callback) {
-    this.post(GET_OVERLAY_LINE, { idOverlayLine: idOverlayLine }, callback);
+Service.prototype.getOverlayLine = function(idOverlayLine, idCurveX, idCurveY, callback) {
+    this.post(GET_OVERLAY_LINE, {
+        idOverlayLine: idOverlayLine,
+        idCurveX: idCurveX,
+        idCurveY: idCurveY
+    }, callback);
 }
 
 Service.prototype.createObjectOfObjectTrack = function (data, callback) {
@@ -1677,4 +1692,14 @@ Service.prototype.convolution = function (data, callback){
 }
 Service.prototype.deconvolution = function (data, callback){
     this.post('/deconvolution', data, callback, 'processing');
+}
+Service.prototype.medfil = function (data, callback){
+    this.post('/median', data, callback, 'processing');
+}
+Service.prototype.savgolfil = function (data, callback){
+    this.post('/savgol', data, callback, 'processing');
+}
+
+Service.prototype.getInventory = function (callback) {
+    this.post(GET_INVENTORY, {}, callback, 'inventory');
 }

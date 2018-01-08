@@ -33,9 +33,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         let well = utils.findWellByLogplot(logplotId);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-        let minY = parseFloat(well.properties.topDepth);
-        let maxY = parseFloat(well.properties.bottomDepth);
-        let stepY = parseFloat(well.properties.step);
+        let minY = well.topDepth;
+        let maxY = well.bottomDepth;
+        let stepY = well.step;
         wiApiService.infoCurve(idCurve, function (infoCurve) {
             let config = {
                 minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
@@ -157,6 +157,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let high = low + (max - min) * self.slidingBarState.range / 100.;
         let newLogplot = {
             idPlot: logPlotCtrl.getLogplotModel().properties.idPlot,
+            cropDisplay: logPlotCtrl.cropDisplay,
             currentState: {
                 top: low,
                 bottom: high
@@ -267,17 +268,22 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.scroll = scroll;
 
     function scroll(sign) {
-        let pHeight = $(self.contentId).parent().height();
-        let realDeltaY = pHeight * self.slidingBarState.range / 100. * 0.1;
-        realDeltaY = (realDeltaY > 1)?realDeltaY:1;
+        const SCROLL_FACTOR = 0.15;
+        const MIN_SCROLL = 2;
+
+        let wholeHeight = $(self.contentId).height();
+        let viewHeight = $(self.contentId).parent().height();
+
+        let realDeltaY = wholeHeight * self.slidingBarState.range / 100. * SCROLL_FACTOR;
+        realDeltaY = (realDeltaY > MIN_SCROLL)?realDeltaY:MIN_SCROLL;
         realDeltaY *= sign;
         let tempTopHandler = self.tinyWindow.top - realDeltaY;
 
         if (tempTopHandler < 0 + _offsetTop) {
             tempTopHandler = 0 + _offsetTop;
         }
-        else if (tempTopHandler + self.tinyWindow.height > pHeight + _offsetTop ) {
-            tempTopHandler = pHeight + _offsetTop - self.tinyWindow.height;
+        else if (tempTopHandler + self.tinyWindow.height > viewHeight + _offsetTop ) {
+            tempTopHandler = viewHeight + _offsetTop - self.tinyWindow.height;
         }
 
         //let newTop = Math.round(tempTopHandler);
@@ -356,11 +362,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     this.scaleView = function() {
-        if ( logPlotCtrl.cropDisplay ) return;
+        //if ( logPlotCtrl.cropDisplay ) return;
         logPlotCtrl.cropDisplay = true;
         //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
         let currentParentHeight = $(self.contentId).height();
-        let scale = currentParentHeight / self.tinyWindow.height;
+        let viewHeight = $(self.contentId).parent().parent().height();
+        let scale = viewHeight / self.tinyWindow.height;
         let newParentHeight = currentParentHeight * scale;
         let newTop = (self.slidingBarState.top * newParentHeight) / 100.;
 
@@ -368,6 +375,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         _offsetTop = newTop;
         $(self.contentId).css('top', '-' + newTop + 'px');
         _viCurve.doPlot();
+        saveStateToServer();
     }
 
     this.resetView = function() {
@@ -376,6 +384,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);
         if (_viCurve) _viCurve.doPlot();
+        saveStateToServer();
     }
 }
 

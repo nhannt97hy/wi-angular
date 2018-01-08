@@ -226,6 +226,7 @@ exports.promptDialog = function (ModalService, promptConfig, callback) {
         this.title = promptConfig.title;
         this.inputName = promptConfig.inputName;
         this.input = promptConfig.input;
+        // type: [select, text]
         this.type = promptConfig.type ? promptConfig.type : 'text';
         this.options = promptConfig.options;
         this.onBlur = function(args) {
@@ -1757,19 +1758,122 @@ exports.importMultiLASDialog = function (ModalService, callback) {
     });
 };
 
+function importModelExistedDialog (ModalService, callback) {
+    function ModalController($scope, close, wiComponentService) {
+        let self = this;
+    }
+    ModalService.showModal({
+        templateUrl: "import-model-existed/import-model-existed-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback && callback();
+        });
+    });
+}
+
 exports.importFromInventoryDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        self.treeviewName = "inventoryTreeview";
+        function modelFrom (project) {
+            let projectModel = utils.createProjectModel(project);
+            project.wells.forEach(well => {
+                let wellModel = utils.createWellModel(well)
+                projectModel.children.push(wellModel);
+                well.datasets.forEach(dataset => {
+                    let datasetModel = utils.createDatasetModel(dataset);
+                    wellModel.children.push(datasetModel);
+                    dataset.curves.forEach(curve => {
+                        datasetModel.children.push(utils.createCurveModel(curve));
+                    })
+                })
+            })
+            return projectModel;
+        }
 
         let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        let projectModel = utils.projectToTreeConfig(projectLoaded);
-        let dustbinModel = utils.dustbinToTreeConfig();
-        self.treeConfig = [projectModel, dustbinModel];
+        let projectModel = modelFrom(projectLoaded);
+        this.projectConfig = [projectModel];
+        this.projectSelectedNode = projectModel;
+        let inventoryModel;
+        this.inventoryConfig = [inventoryModel];
+        wiApiService.getInventory(function (inventory) {
+            inventoryModel = modelFrom(inventory);
+            self.inventoryConfig[0] = inventoryModel;
+            inventoryModel.type = 'inventory';
+            inventoryModel.data.label = 'Inventory';
+            self.inventorySelectedNode = inventoryModel;
+        })
 
+        this.onConfigClick = function () {
+            console.log(this.projectSelectedNode, this.inventorySelectedNode);
+            if (!this.projectSelectedNode || !this.inventorySelectedNode) return;
+            this.importValid = false;
+            switch (this.inventorySelectedNode.type) {
+                case 'well':
+                    if (this.projectSelectedNode.type == 'project' || this.projectSelectedNode.type == 'well') self.importValid = true;
+                    break;
+                case 'dataset':
+                    if (this.projectSelectedNode.type == 'well' || this.projectSelectedNode.type == 'dataset') self.importValid = true;
+                    break;
+                case 'curve':
+                    if (this.projectSelectedNode.type == 'dataset' || this.projectSelectedNode.type == 'curve') self.importValid = true;
+                    break;
+                default:
+                    this.importValid = false;
+                    break;
+            }
+            $scope.$apply();
+        }
+        let importItems = [];
+        let dialogUtils = exports;
+        function importModel (model, desParentModel) {
+            let item = angular.copy(model.properties);
+            let sameNameExisted = desParentModel.children.find(c => c.name == model.name);
+            if (sameNameExisted) {
+                importModelExistedDialog(ModalService, function () {
+                    
+                });
+                // dialogUtils.promptDialog(ModalService, {
+                //     title: model.type.capitalize() + 'name existed',
+                //     inputName: ''
+                //     input: 
+                // })
+            } else {
+                switch (model.type) {
+                    case 'well':
+                        item.parent = angular.copy(desParentModel.properties);
+                        importItems.push(item);
+                        desParentModel.children.push(angular.copy(model));
+                        break;
+                    case 'dataset':
+                        break;
+                    case 'curve':
+                        
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        this.importButtonClicked = function () {
+            if (!this.importValid) return;
+            let parentModel = this.projectSelectedNode;
+            if (this.projectSelectedNode.type == this.inventorySelectedNode.type) {
+                parentModel = utils.getParentByModel(this.projectSelectedNode.type, this.projectSelectedNode.id, null, projectModel);
+            }
+            importModel(this.inventorySelectedNode, parentModel);
+        }
+
+        this.onLoadButtonClicked = function () {
+
+        }
         this.onCancelButtonClicked = function () {
-            console.log("onCancelButtonClicked");
             close(null, 100);
         };
     }
@@ -4347,14 +4451,8 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         wiApiService.getImageGallery(function (images) {
             self.uploadedImages = images.map(function(item) {
-                let _DIVIDER;
-                if (item.match('/') != null) {
-                    _DIVIDER = '/';
-                } else {
-                    _DIVIDER = '\\';
-                }
                 return {
-                    name: item.split(_DIVIDER).pop(),
+                    name: getImageName(item),
                     imageUrl: wiApiService.BASE_URL + item
                 }
             });
@@ -4374,7 +4472,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
                     self.onImageUrlChange();
                     self.done = true;
                     let latestImage = {
-                        name: self.imageUrl.match(/\/([^\/]+)\/?$/)[1],
+                        name: getImageName(self.imageUrl),
                         imageUrl: self.imageUrl
                     }
                     self.uploadedImages.push(latestImage);
@@ -4386,7 +4484,6 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         this.background = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill, function (colorStr) {
                 self.fill = colorStr;
-                console.log(colorStr);
             });
             self.isPropsChanged = true;
         }
@@ -4417,8 +4514,18 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
         }
 
         function validateUrl (str) {
-            var regex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+            var regex = /^(http|https|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(me|cloud|com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
             return regex.test(str);
+        }
+
+        function getImageName (img) {
+            let _DIVIDER;
+            if (img.match('/') != null) {
+                _DIVIDER = '/';
+            } else {
+                _DIVIDER = '\\';
+            }
+            return img.split(_DIVIDER).pop();
         }
 
         function doApply(callback) {
@@ -5096,12 +5203,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
             getZonesAndCurvesInDataset,
             function(cb){
                 let blankCurve = [{
-                    name: 'Blank Curve',
+                    name: '',
                     type: 'curve',
                     id: null,
-                    datasetName: 'Blank',
+                    datasetName: '',
                     properties: {
-                        name: 'Blank Curve',
+                        name: '',
                         idCurve: null
                     }
                 }]
@@ -5200,7 +5307,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 if(ret.length){
                     let blank = [{
                         idOverlayLine: null,
-                        name: 'Blank OverlayLine'
+                        name: ''
                     }]
                     self.overlayLines = blank.concat(ret);
                 }else{
@@ -5210,10 +5317,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
         }
 
         function getTopFromWell() {
-            return parseFloat(self.well.properties.topDepth);
+            return self.well.topDepth;
         }
         function getBottomFromWell() {
-            return parseFloat(self.well.properties.bottomDepth);
+            return self.well.bottomDepth;
         }
 
         function onSelectedCurveChange(symbol) {
@@ -5367,7 +5474,12 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                     return;
                 }
             }
-
+            // if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
+            //     let overlayProps = self.overlayLines.filter(function(o) {
+            //         return o.idOverlayLine == self.crossplotModelProps.pointsets[0].idOverlayLine;
+            //     })[0];
+            //     self.crossplotModelProps.pointsets[0].isOverlayLineSwap = overlayProps.isSwap;
+            // }
             _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
             self.updating = true;
             self.updating = false;
@@ -6303,11 +6415,11 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback,
         }
 
         function getTopFromWell() {
-            return parseFloat(self.well.properties.topDepth);
+            return self.well.topDepth;
         }
 
         function getBottomFromWell() {
-            return parseFloat(self.well.properties.bottomDepth);
+            return self.well.bottomDepth;
         }
         this.onDepthTypeChanged = function () {
             switch (self.depthType) {
@@ -7003,7 +7115,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 if (pre_zone) {
                     free = zone.properties.startDepth - pre_zone.properties.endDepth >= 50 ? 50 : zone.properties.startDepth - pre_zone.properties.endDepth;
                 } else {
-                    free = zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth) >= 50 ? 50 : zone.properties.startDepth - parseFloat(self.SelectedWell.properties.topDepth);
+                    free = zone.properties.startDepth - self.SelectedWell.topDepth >= 50 ? 50 : zone.properties.startDepth - self.SelectedWell.topDepth;
                 }
 
                 if (parseInt(free) > 0) {
@@ -7013,8 +7125,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 }
 
             } else {
-                var top = parseFloat(self.SelectedWell.properties.topDepth);
-                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                var top = self.SelectedWell.topDepth;
+                var bottom = self.SelectedWell.bottomDepth > top + 50 ? top + 50 : self.SelectedWell.bottomDepth;
                 self.addZone(0, top, bottom);
             }
         }
@@ -7034,7 +7146,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 if (next_zone) {
                     free = next_zone.properties.startDepth - zone.properties.endDepth >= 50 ? 50 : next_zone.properties.startDepth - zone.properties.endDepth;
                 } else {
-                    free = parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth >= 50 ? 50 : parseFloat(self.SelectedWell.properties.bottomDepth) - zone.properties.endDepth;
+                    free = self.SelectedWell.bottomDepth - zone.properties.endDepth >= 50 ? 50 : self.SelectedWell.bottomDepth - zone.properties.endDepth;
 
                 }
 
@@ -7045,8 +7157,8 @@ exports.zoneManagerDialog = function (ModalService, item) {
                 }
 
             } else {
-                var top = parseFloat(self.SelectedWell.properties.topDepth);
-                var bottom = parseFloat(self.SelectedWell.properties.bottomDepth) > top + 50 ? top + 50 : parseFloat(self.SelectedWell.properties.bottomDepth);
+                var top = self.SelectedWell.topDepth;
+                var bottom = self.SelectedWell.bottomDepth > top + 50 ? top + 50 : self.SelectedWell.bottomDepth;
                 self.addZone(0, top, bottom);
             }
         }
@@ -7073,7 +7185,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                     return false; // check unique zone name
                 }
 
-                if( self.zoneArr[0].properties.startDepth < self.SelectedWell.properties.topDepth){
+                if( self.zoneArr[0].properties.startDepth < self.SelectedWell.topDepth){
                     self.zoneArr[0].err = true;
                     return false;
                 }
@@ -7090,7 +7202,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         return false;
                     }
                     let last = self.zoneArr[self.zoneArr.length - 1];
-                    if(last.properties.startDepth >= last.properties.endDepth || last.properties.endDepth > self.SelectedWell.properties.bottomDepth){
+                    if(last.properties.startDepth >= last.properties.endDepth || last.properties.endDepth > self.SelectedWell.bottomDepth){
                         self.zoneArr[self.zoneArr.length - 1].err = true;
                         return false;
                     }
@@ -7472,21 +7584,24 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             displayProp: 'id',
             checkBoxes: true
         };
-        $scope.result = {}
         this.idPolygonTest = [];
         let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
         let props = angular.copy(viCrossplot.getProperties());
         let ternary = this.ternary = props.ternary;
 
-        this.vertices = ternary.vertices.map(function(vertex, index) {
-            vertex.change = change.unchanged;
-            vertex.index = index;
+        function prepareVertices(vertices) {
+            self.vertices = vertices.map(function(vertex, index) {
+                vertex.change = change.unchanged;
+                vertex.index = index;
 
-            vertex.x = +parseFloat(vertex.x).toFixed(4);
-            vertex.y = +parseFloat(vertex.y).toFixed(4);
+                vertex.x = +parseFloat(vertex.x).toFixed(4);
+                vertex.y = +parseFloat(vertex.y).toFixed(4);
 
-            return vertex;
-        });
+                return vertex;
+            });
+        }
+        prepareVertices(ternary.vertices);
+
         this.modelData = [];
         this.optionsData = [1, 2, 3];
         let savedTernary = angular.copy(ternary);
@@ -7500,6 +7615,7 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
             $scope.selectedRow = 0;
         }
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
+        $scope.result = ternary.result || {};
 
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
@@ -7619,6 +7735,14 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
         };
 
         function setVertices(callback) {
+            let usedVertices = self.getVertices().filter(function(d) {
+                return d.used && d.x != null && d.y != null && !isNaN(d.x) && !isNaN(d.y);
+            });
+            if (usedVertices.length > 3) {
+                utils.error('There can not be more than 3 vertices used in ternary');
+                return;
+            }
+
             async.eachOfSeries(self.vertices, function(vertex, idx, cb){
                 vertex = self.vertices[idx];
                 let data = {
@@ -7634,36 +7758,38 @@ exports.ternaryDialog = function (ModalService, wiD3CrossplotCtrl, callback){
 
                 switch(self.vertices[idx].change) {
                     case change.created:
-                    wiApiService.createTernary(data, function(response) {
-                        self.vertices[idx].change = change.unchanged;
-                        self.vertices[idx].idVertex = response.idTernary;
-                        cb();
-                    });
-                    break;
+                        wiApiService.createTernary(data, function(response) {
+                            self.vertices[idx].idVertex = response.idTernary;
+                            cb();
+                        });
+                        break;
                     case change.updated:
-                    wiApiService.editTernary(data, function(response) {
-                        self.vertices[idx].change = change.unchanged;
-                        cb();
-                    });
-                    break;
+                        wiApiService.editTernary(data, function(response) {
+                            cb();
+                        });
+                        break;
                     case change.deleted:
-                    wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
-                        cb();
-                    });
-                    break;
+                        wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
+                            cb();
+                        });
+                        break;
                     default:
-                    cb();
+                        cb();
                 }
             }, function() {
                 for (let i = self.vertices.length - 1; i >= 0; i--){
-                    if (self.vertices[i].change == change.deleted) {
+                    if (self.vertices[i].change == change.deleted || self.vertices[i].change == change.uncreated) {
                         self.vertices.splice(i, 1);
                     }
                 }
+                prepareVertices(self.vertices);
                 savedTernary.vertices = self.getVertices();
                 savedTernary.calculate = calculateOptions;
+                if (usedVertices.length < 3) $scope.result = {};
+                savedTernary.result = $scope.result;
                 viCrossplot.setProperties({ ternary: savedTernary });
                 viCrossplot.plotTernary();
+                savedTernary = angular.copy(savedTernary);
                 if (callback) callback();
             });
         }
@@ -7795,10 +7921,10 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             }
         })
         this.getTopFromWell = function() {
-            return parseFloat(self.well.properties.topDepth);
+            return self.well.topDepth;
         }
         this.getBottomFromWell = function() {
-            return parseFloat(self.well.properties.bottomDepth);
+            return self.well.bottomDepth;
         }
 
         this.defaultDepthButtonClick = function(){
@@ -7870,26 +7996,20 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
 
         this.Delete = function (index) {
             self.SelectedRefCurve = index;
-            // self.ref_Curves_Arr.splice(self.SelectedRefCurve, index, 1);
             if (self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW) {
                 self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-                //self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             } else {
                 self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
             }
             self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-            // $event.stopPropagation();
+        }
+        this.roundDepth = function(){
+            if(self.props.referenceTopDepth)
+            self.props.referenceTopDepth = parseFloat(self.props.referenceTopDepth.toFixed(4));
+            if(self.props.referenceBottomDepth)
+            self.props.referenceBottomDepth = parseFloat(self.props.referenceBottomDepth.toFixed(4));
         }
 
-        this.DeleteRefCurve = function(){
-            if(self.ref_Curves_Arr[self.SelectedRefCurve].flag != self._FNEW){
-                self.ref_Curves_Arr[self.SelectedRefCurve].flag = self._FDEL;
-            }else{
-                self.ref_Curves_Arr.splice(self.SelectedRefCurve, 1);
-            }
-            self.SelectedRefCurve = self.SelectedRefCurve > 0 ? self.SelectedRefCurve - 1 : -1;
-            $event.stopPropagation();
-        }
         this.IsNotValid = function(){
             return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
         }
@@ -7968,7 +8088,6 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
-            //callbackFinal && callbackFinal();
             if (!ret) return;
         })
     });
@@ -8196,8 +8315,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
         refresh();
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         this.selectWell = function(idWell) {
@@ -8252,8 +8371,8 @@ exports.curveAverageDialog = function (ModalService, callback) {
         function curveAverageCacl () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            if(self.topDepth < self.wellModel.topDepth || self.bottomDepth > self.wellModel.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
             let selectedCurves = [];
             let allData = [];
             let dataAvg = [];
@@ -8261,11 +8380,11 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 return (curve.flag == true);
             });
             let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.topDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.bottomDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             console.log("yy", yTop, yBottom);
             if(selectedCurves.length > 0){
                 async.eachOfSeries(selectedCurves, function(item, idx, callback) {
@@ -8388,8 +8507,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
 
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         function setLinePropertiesIfNull (curve) {
@@ -8432,8 +8551,8 @@ exports.curveRescaleDialog = function (ModalService, callback) {
             }, 100);
         }
         this.defaultDepth = function () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
         function refresh (cb) {
             self.datasets = [];
@@ -8452,17 +8571,17 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         function run () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth ||
-                self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            if(self.topDepth < self.wellModel.topDepth ||
+                self.bottomDepth > self.wellModel.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
             let inputData = [];
             let outputData = [];
             let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.topDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.bottomDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
 
             function linearToLinearX (a, b, c, y, z) {
                 return (c - a) * (z - y) / (b - a) + y;
@@ -8629,8 +8748,8 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.selectZoneSetPara = selectZoneSetPara;
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         this.selectedWell = function (idWell) {
@@ -8669,12 +8788,12 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(!self.checked && (self.topDepth < self.wellModel.properties.topDepth ||
-                self.bottomDepth > self.wellModel.properties.bottomDepth))
+            if(!self.checked && (self.topDepth < self.wellModel.topDepth ||
+                self.bottomDepth > self.wellModel.bottomDepth))
             {
                 dialogUtils.errorMessageDialog(ModalService,
-                    "Input invalid [" + self.wellModel.properties.topDepth + "," +
-                    self.wellModel.properties.bottomDepth+ "]" );
+                    "Input invalid [" + self.wellModel.topDepth + "," +
+                    self.wellModel.bottomDepth+ "]" );
             }
 
 
@@ -8693,11 +8812,11 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                                 let Sx2 = null;
                                 let Sy2 = null;
                                 let yStart = Math.round((
-                                    start - parseFloat(self.wellModel.properties.topDepth))
-                                /parseFloat(self.wellModel.properties.step));
+                                    start - self.wellModel.topDepth)
+                                /self.wellModel.step);
                                 let yEnd = Math.round((
-                                    end - parseFloat(self.wellModel.properties.topDepth))
-                                /parseFloat(self.wellModel.properties.step));
+                                    end - self.wellModel.topDepth)
+                                /self.wellModel.step);
                                 let N = yEnd - yStart + 1;
                                 for (let i = yStart; i <= yEnd; i++){
                                     if (data1[i] != null && !isNaN(data1[i]) &&
@@ -9055,8 +9174,8 @@ exports.splitCurveDialog = function (ModalService, callback) {
             self.idDataset = self.datasetModel.id;
             self.curveModel = self.curves[0];
             self.idCurve = self.curveModel.id;
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         };
         this.selectWell = function (idWell) {
             self.wellModel = utils.findWellById(idWell);
@@ -9131,7 +9250,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
 
                     async.each(self.arrayCurve,function(curve, cb) {
                         dataCurve.forEach(function(data, y) {
-                            let currentDept = y*parseFloat(self.wellModel.properties.step) + parseFloat(self.wellModel.properties.topDepth);
+                            let currentDept = y*self.wellModel.step + self.wellModel.topDepth;
 
                             if(currentDept >= curve.start && currentDept <= curve.end) {
                                 curve.data[y] = parseFloat(data.x);
@@ -9207,8 +9326,8 @@ exports.mergeCurveDialog = function (ModalService) {
         refresh();
         this.defaultDepth = defaultDepth;
         function defaultDepth () {
-            self.topDepth = parseFloat(self.wellModel.properties.topDepth);
-            self.bottomDepth = parseFloat(self.wellModel.properties.bottomDepth);
+            self.topDepth = self.wellModel.topDepth;
+            self.bottomDepth = self.wellModel.bottomDepth;
         }
 
         this.selectWell = function(idWell) {
@@ -9261,18 +9380,18 @@ exports.mergeCurveDialog = function (ModalService) {
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.properties.topDepth || self.bottomDepth > self.wellModel.properties.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.properties.topDepth + "," + self.wellModel.properties.bottomDepth+ "]" );
+            if(self.topDepth < self.wellModel.topDepth || self.bottomDepth > self.wellModel.bottomDepth)
+                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
             let allData = [];
             self.selectedCurves = self.availableCurves.filter(function(curve, index) {
                 return (curve.flag == true);
             });
             let yTop = Math.round((
-                self.topDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.topDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             let yBottom = Math.round((
-                self.bottomDepth - parseFloat(self.wellModel.properties.topDepth))
-            /parseFloat(self.wellModel.properties.step));
+                self.bottomDepth - self.wellModel.topDepth)
+            /self.wellModel.step);
             console.log("yy", yTop, yBottom);
             if(self.selectedCurves.length > 0){
                 async.eachOfSeries(self.selectedCurves, function(item, idx, callback) {
@@ -9433,8 +9552,8 @@ exports.fillDataGapsDialog = function(ModalService){
                        });
                    }
                })
-                self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-                self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+                self.topDepth = self.selectedWell.topDepth;
+                self.bottomDepth = self.selectedWell.bottomDepth;
                 self.SelectedCurve = self.curves[0];
                 self.selectedDataset = self.datasets[0];
                 this.getCurveData();
@@ -9453,8 +9572,8 @@ exports.fillDataGapsDialog = function(ModalService){
             }, 0);
         });
         this.clickDefault = function () {
-            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+            self.topDepth = self.selectedWell.topDepth;
+            self.bottomDepth = self.selectedWell.bottomDepth;
         }
 
         this.checked = false;
@@ -9527,7 +9646,7 @@ exports.fillDataGapsDialog = function(ModalService){
             })
         }
         function run(){
-            let step = parseFloat(self.selectedWell.properties.step);
+            let step = self.selectedWell.step;
             self.maxgaps = self.calcMethod == 'sample' ? self.gapsMaximum : (self.gapsMaximum/step);
             let data = self.CurvesData.find(d => {return d.id == self.SelectedCurve.id;}).data;
             processing(data, function(){
@@ -9672,8 +9791,8 @@ exports.curveDerivativeDialog = function(ModalService){
                         });
                     }
                 })
-                self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-                self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+                self.topDepth = self.selectedWell.topDepth;
+                self.bottomDepth = self.selectedWell.bottomDepth;
                 if (self.curves.length) {
                     self.SelectedCurve = self.curves[0];
                     self.selectedDataset = self.datasets[0].id;
@@ -9745,15 +9864,15 @@ exports.curveDerivativeDialog = function(ModalService){
             }
         }
         this.clickDefault = function () {
-            self.topDepth = parseFloat(self.selectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.selectedWell.properties.bottomDepth);
+            self.topDepth = self.selectedWell.topDepth;
+            self.bottomDepth = self.selectedWell.bottomDepth;
         }
 
         function derivative(input){
             let out = new Array(input.length).fill(NaN);
             for(let i = 0; i < input.length - 1; i++){
-                let step = parseFloat(self.selectedWell.properties.step);
-                let currentDepth = i * step + parseFloat(self.selectedWell.properties.topDepth);
+                let step = self.selectedWell.step;
+                let currentDepth = i * step + self.selectedWell.topDepth;
                 if(currentDepth >= self.topDepth && currentDepth <= self.bottomDepth)
                     out[i] = (input[i + 1] - input[i])/step;
             }
@@ -9893,10 +10012,10 @@ exports.TVDConversionDialog = function (ModalService) {
                 self.DevCurve = null;
                 self.AziCurve = null;
             // }
-            self.step = parseFloat(self.SelectedWell.properties.step);
-            self.topDepth = parseFloat(self.SelectedWell.properties.topDepth);
-            self.bottomDepth = parseFloat(self.SelectedWell.properties.bottomDepth);
-            self.tvdRef = parseFloat(self.SelectedWell.properties.topDepth);
+            self.step = self.SelectedWell.step;
+            self.topDepth = self.SelectedWell.topDepth;
+            self.bottomDepth = self.SelectedWell.bottomDepth;
+            self.tvdRef = self.SelectedWell.topDepth;
             let length = Math.round((self.bottomDepth - self.topDepth)/self.step) + 1;
             self.FullSize = new Array(length);
             for(let i = 0; i < length; i++){
@@ -10463,9 +10582,9 @@ exports.addCurveDialog = function (ModalService) {
                 utils.error('Curve existed!');
                 self.applyingInProgress = false;
             }else {
-                let bottomDepth = self.SelectedWell.properties.bottomDepth;
-                let topDepth = self.SelectedWell.properties.topDepth;
-                let step = self.SelectedWell.properties.step;
+                let bottomDepth = self.SelectedWell.bottomDepth;
+                let topDepth = self.SelectedWell.topDepth;
+                let step = self.SelectedWell.step;
                 let length = Math.ceil((bottomDepth - topDepth)/step)+1;
                 let initValue = self.initValue?self.initValue:100;
                 let payload = {
@@ -11084,6 +11203,7 @@ exports.curveFilterDialog = function(ModalService){
         this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];
+        this.curveData = null;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if(selectedNodes && selectedNodes.length){
             switch (selectedNodes[0].type){
@@ -11131,8 +11251,8 @@ exports.curveFilterDialog = function(ModalService){
         }
 
         this.defaultDepthButtonClick = function(){
-            self.topDepth = self.SelectedWell.properties.topDepth;
-            self.bottomDepth = self.SelectedWell.properties.bottomDepth;
+            self.topDepth = self.SelectedWell.topDepth;
+            self.bottomDepth = self.SelectedWell.bottomDepth;
         }
         this.onChangeWell = function () {
             getDatasets();
@@ -11144,12 +11264,17 @@ exports.curveFilterDialog = function(ModalService){
             self.applyingInProgress = false;
             $timeout(function(){
                 self.wells = utils.findWells();
+                self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
                 self.onChangeWell();
             }, 0);
         });
 
         this.onCancelButtonClicked = function(){
             close(null);
+        }
+
+        this.onChangeCurve = function(){
+            if(self.createOp == 'new') self.curveName = self.SelectedCurve.name;
         }
 
         this.validate = function(){
@@ -11159,6 +11284,7 @@ exports.curveFilterDialog = function(ModalService){
             }else{
                 return !self.numLevel;
             }
+            if(self.createOp == 'new') return !self.curveName;
         }
         this.onNumLevelChange = function(){
             if(self.numLevel %2 == 0) self.numLevel = self.numLevel + 1;
@@ -11166,8 +11292,63 @@ exports.curveFilterDialog = function(ModalService){
                 self.table = new Array(self.numLevel).fill(1/self.numLevel).map(d => {return parseFloat(d.toFixed(4))});
             }
         }
-        function getData(){
-            wiApiService.dataCurve(self.SelectedCurve.id)
+        function isExisted(curveName, dataset){
+            return self.curvesArr.find(curve => {
+                return curve.name == curveName && curve.properties.idDataset == dataset;
+            })
+        }
+        function getData(callback){
+            delete self.curveData;
+            wiApiService.dataCurve(self.SelectedCurve.id, function(data){
+                self.curveData = data.map(d => {return parseFloat(d.x)});
+                if(callback) callback();
+            })
+        }
+
+        function saveCurve(data){
+            let payload = null;
+            switch(self.createOp){
+                case 'backup':
+                    payload = {
+                        idDataset: self.SelectedCurve.properties.idDataset,
+                        curveName: self.SelectedCurve.properties.name + '_BK',
+                        unit: self.SelectedCurve.properties.unit,
+                        idDesCurve: self.SelectedCurve.id,
+                        data: data
+                    };
+                    let i = isExisted(payload.curveName, payload.idDataset);
+                    while(i){
+                        payload.curveName = payload.curveName + '_BK';
+                        i = isExisted(payload.curveName, payload.idDataset);
+                    }
+                    $timeout(function(){
+                        console.log('do save curve');
+                        delete payload.idDesCurve;
+                        wiApiService.processingDataCurve(payload, function(){
+                            utils.refreshProjectState();
+                        })
+                    },500)
+                    break;
+
+                case 'new':
+                    payload = {
+                        idDataset: self.SelectedDataset.id,
+                        curveName: self.curveName,
+                        unit: self.SelectedCurve.properties.unit,
+                        idDesCurve: self.SelectedCurve.id,
+                        data: data
+                    };
+                    if(isExisted(payload.curveName, payload.idDataset)){
+                        delete payload.curveName;
+                    } else{
+                        delete payload.idDesCurve;
+                    }
+
+                    wiApiService.processingDataCurve(payload, function(){
+                        utils.refreshProjectState();
+                    })
+                    break;
+            }
         }
 
         function squareFilter(){
@@ -11175,6 +11356,27 @@ exports.curveFilterDialog = function(ModalService){
         }
         function savgoFilter(){
             console.log('savgoFilter');
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < self.curveData.length; i++){
+                if(!isNaN(self.curveData[i])){
+                    inputF.push(self.curveData[i]);
+                    lstIndex.push(i);
+                }
+            }
+            let out = new Array(self.curveData.length).fill(NaN);
+
+            wiApiService.savgolfil({input: inputF, length: self.numPoints, poly: self.polyOder, deriv: self.devOrder}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        saveCurve(out);
+                    }
+                }
+            })
         }
         function bellFilter(){
             console.log('bellFilter');
@@ -11184,37 +11386,77 @@ exports.curveFilterDialog = function(ModalService){
         }
         function medianFilter(){
             console.log('medianFilter');
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < self.curveData.length; i++){
+                if(!isNaN(self.curveData[i])){
+                    inputF.push(self.curveData[i]);
+                    lstIndex.push(i);
+                }
+            }
+            let out = new Array(self.curveData.length).fill(NaN);
+
+            wiApiService.medfil({input: inputF, length: self.numLevel}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        saveCurve(out);
+                    }
+                }
+            })
         }
         function customFilter(){
             console.log('customFilter');
         }
 
+        function run(){
+            getData(function(){
+                switch(self.filterOp){
+                    case '1':
+                    squareFilter();
+                    break;
+
+                    case '2':
+                    savgoFilter();
+                    break;
+
+                    case '3':
+                    bellFilter();
+                    break;
+
+                    case '4':
+                    fftFilter();
+                    break;
+
+                    case '5':
+                    medianFilter();
+                    break;
+
+                    case '6':
+                    customFilter();
+                    break;
+                }
+            })
+        }
         this.onRunButtonClicked = function(){
             self.applyingInProgress = true;
-            switch(self.filterOp){
-                case '1':
-                squareFilter();
-                break;
-
-                case '2':
-                savgoFilter();
-                break;
-
-                case '3':
-                bellFilter();
-                break;
-
-                case '4':
-                fftFilter();
-                break;
-
-                case '5':
-                medianFilter();
-                break;
-
-                case '6':
-                customFilter();
-                break;
+            if(self.createOp == 'new'){
+                if(isExisted(self.curveName, self.SelectedDataset.id)){
+                    DialogUtils.confirmDialog(ModalService, "Save Curve", "OverWrite?", function (ret) {
+                        if(ret){
+                            run();
+                        }else{
+                            self.applyingInProgress = false;
+                        }
+                    })
+                }else{
+                    run();
+                }
+            }else{
+                run();
             }
         }
     }

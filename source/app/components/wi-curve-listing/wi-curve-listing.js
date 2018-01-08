@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.applyingInProgress = false;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     function getDatasets() {
         self.datasets.length = 0;
@@ -20,7 +21,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         self.datasets.forEach(child => {
                             child.children.forEach(function (item) {
                                 if (item.type == 'curve') {
-                                    let d = item;
+                                    let d = angular.copy(item);
                                     d.selected = false;
                                     self.curvesArr.push(d);
                                 }
@@ -31,26 +32,35 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         }
     }
-    this.onChangeWell = function () {
+    this.onChangeWell = function (clear) {
         getDatasets();
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
-        let step = self.SelectedWell.properties.step;
-        let topDepth = self.SelectedWell.properties.topDepth;
-        let bottomDepth = self.SelectedWell.properties.bottomDepth;
+        let step = self.SelectedWell.step;
+        let topDepth = self.SelectedWell.topDepth;
+        let bottomDepth = self.SelectedWell.bottomDepth;
         let length = Math.round((bottomDepth - topDepth)/step) + 1;
         self.depthArr = new Array(length);
         for(let i = 0; i < length; i++){
             self.depthArr[i] = parseFloat((step * i + topDepth).toFixed(4));
         }
-        self.loaded = self.depthArr.slice(0,15);
+        self.loaded = self.depthArr.slice(0,500);
+        if(clear){
+            self.curvesData[self.currentIndex].forEach(curve => {
+                curve.show = false;
+            })
+        }
         self.curvesData[self.currentIndex].forEach(curve => {
-            curve.show = false;
+            if(curve.show){
+                self.curvesArr.find(c => {
+                    return c.id == curve.id;
+                }).selected = true;
+            }
         })
         $scope.$emit('list:changeWell');
     }
     
     this.$onInit = function () {
-        // wiComponentService.putComponent('wiCurveListing',self);
+        wiComponentService.putComponent('WCL', self);
         self.isShowRefWin = false;
         self.datasets = [];
         self.curvesArr = [];
@@ -79,11 +89,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
 
-        this.onChangeWell();
+        this.onChangeWell(true);
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
             $timeout(function(){
                 self.wells = utils.findWells();
+                self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
                 self.onChangeWell();
             }, 0);
         });
@@ -94,8 +105,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.LoadMoreOutPut = function(){
         let len = self.loaded.length;
-        console.log('Load more',len);
-        self.loaded.push(...self.depthArr.slice(len, len + 15));
+        self.loaded.push(...self.depthArr.slice(len, len + 500));
     }
 
     this.onCurveSelectClick = function(name, dataset, id, selected){
@@ -123,8 +133,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
 
+    this.onModifyCurve = function(id){
+        self.curvesArr.find(c => {
+            return c.id == id;
+        }).modified = true;
+    }
+
     this.onAddCurveButtonClicked = function(){
         console.log('onAddCurveButtonClicked');
+        DialogUtils.addCurveDialog(ModalService);
     }
     this.onSaveButtonClicked = function(){
         console.log('onSaveButtonClicked');

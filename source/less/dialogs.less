@@ -535,7 +535,11 @@ input[type=checkbox].input-check {
 	border-radius: 5px;
 	border: 1px solid #333;
 }
-
+.ui-select-choices-row{
+	&>span{
+		height: 26px;
+	}
+}
 .ui-select-match .ui-select-toggle {
 	height: 24px;
 	padding: 2px 8px;
@@ -620,10 +624,13 @@ input[type=checkbox].input-check {
 }
 
 #center-inventory {
-	position: sticky;
-	top: 50%;
-	transform: translateY(-50%);
 	text-align: center;
+	height: 100%;
+	.btn {
+		padding: 5px;
+		border: 0;
+		height: 100%;
+	}
 }
 
 #right-inventory {

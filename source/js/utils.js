@@ -74,6 +74,7 @@ exports.doLogin = function doLogin (cb) {
         window.localStorage.setItem('username', userInfo.username);
         window.localStorage.setItem('token', userInfo.token);
         window.localStorage.setItem('refreshToken', userInfo.refreshToken);
+        __GLOBAL.wiApiService.setAuthenticationInfo(userInfo);
         wiComponentService.getComponent('user').userUpdate();
         cb && cb();
     });
@@ -524,11 +525,38 @@ function comboviewToTreeConfig(comboview, isDeleted) {
 
     return comboviewModel;
 }
-
 exports.comboviewToTreeConfig = comboviewToTreeConfig;
 
-function curveToTreeConfig(curve, isDeleted) {
+function createCurveModel (curve) {
     let curveModel = new Object();
+    curveModel.name = curve.name;
+    curveModel.type = 'curve';
+    curveModel.id = curve.idCurve;
+    curveModel.properties = curve;
+    Object.assign(curveModel.properties, {
+        idDataset: curve.idDataset,
+        idCurve: curve.idCurve,
+        idFamily: curve.idFamily,
+        name: curve.name,
+        unit: curve.unit || "NA",
+        alias: curve.name
+    });
+    curveModel.datasetName = curve.dataset;
+    curveModel.data = {
+        childExpanded: false,
+        icon: 'curve-16x16',
+        label: curve.name,
+        unit: curveModel.properties.unit
+    };
+    curveModel.lineProperties = curve.LineProperty;
+    curveModel.curveData = null;
+    curveModel.parent = curve.dataset;
+    return curveModel;
+}
+exports.createCurveModel = createCurveModel;
+
+function curveToTreeConfig(curve, isDeleted) {
+    let curveModel = createCurveModel(curve);
     setTimeout(() => {
         let datasetModel = getModel('dataset', curve.idDataset);
         let wellModel = getModel('well', datasetModel.properties.idWell);
@@ -558,35 +586,36 @@ function curveToTreeConfig(curve, isDeleted) {
         curveModel.parent = curve.dataset;
         return curveModel;
     } else {
-        curveModel.name = curve.name;
-        curveModel.type = 'curve';
-        curveModel.id = curve.idCurve;
-        curveModel.properties = {
-            idDataset: curve.idDataset,
-            idCurve: curve.idCurve,
-            idFamily: curve.idFamily,
-            name: curve.name,
-            unit: curve.unit || "NA",
-            alias: curve.name
-        };
-        curveModel.datasetName = curve.dataset;
-        curveModel.data = {
-            childExpanded: false,
-            icon: 'curve-16x16',
-            label: curve.name,
-            unit: curveModel.properties.unit
-        };
-        curveModel.lineProperties = curve.LineProperty;
-        curveModel.curveData = null;
-        curveModel.parent = curve.dataset;
         return curveModel;
     }
 }
-
 exports.curveToTreeConfig = curveToTreeConfig;
 
-function datasetToTreeConfig(dataset, isDeleted) {
+function createDatasetModel (dataset) {
     let datasetModel = new Object();
+    datasetModel.name = dataset.name;
+    datasetModel.type = "dataset";
+    datasetModel.id = dataset.idDataset;
+    datasetModel.properties = dataset;
+    Object.assign(datasetModel.properties, {
+        idWell: dataset.idWell,
+        idDataset: dataset.idDataset,
+        name: dataset.name,
+        datasetKey: dataset.datasetKey,
+        datasetLabel: dataset.datasetLabel
+    });
+    datasetModel.data = {
+        childExpanded: false,
+        icon: "curve-data-16x16",
+        label: dataset.name
+    };
+    datasetModel.children = new Array();
+    return datasetModel;
+}
+exports.createDatasetModel = createDatasetModel;
+
+function datasetToTreeConfig(dataset, isDeleted) {
+    let datasetModel = createDatasetModel(dataset);
     setTimeout(() => {
         let wellModel = getModel('well', dataset.idWell);
         datasetModel.parentData = wellModel.data;
@@ -612,25 +641,7 @@ function datasetToTreeConfig(dataset, isDeleted) {
         if (!dataset.curves) return datasetModel;
         return datasetModel;
     } else {
-        datasetModel.name = dataset.name;
-        datasetModel.type = "dataset";
-        datasetModel.id = dataset.idDataset;
-        datasetModel.properties = {
-            idWell: dataset.idWell,
-            idDataset: dataset.idDataset,
-            name: dataset.name,
-            datasetKey: dataset.datasetKey,
-            datasetLabel: dataset.datasetLabel
-        };
-        datasetModel.data = {
-            childExpanded: false,
-            icon: "curve-data-16x16",
-            label: dataset.name
-        };
-        datasetModel.parent = 'well' + dataset.idWell;
-        datasetModel.children = new Array();
         if (!dataset.curves) return datasetModel;
-
         dataset.curves.forEach(function (curve) {
             curve.dataset = dataset.name;
             datasetModel.children.push(curveToTreeConfig(curve));
@@ -638,9 +649,7 @@ function datasetToTreeConfig(dataset, isDeleted) {
         return datasetModel;
     }
 }
-
 exports.datasetToTreeConfig = datasetToTreeConfig;
-
 
 function createWellsNode(parent) {
     let wellsModel = new Object();
@@ -859,6 +868,35 @@ function createComboviewsNode(parent) {
     return comboviewsModel;
 }
 
+function createWellModel(well) {
+    let wellModel = new Object();
+    wellModel.name = "well";
+    wellModel.type = "well";
+    wellModel.id = well.idWell;
+    wellModel.properties = well;
+    Object.assign(wellModel, {
+        idProject: well.idProject,
+        idWell: well.idWell,
+        name: well.name,
+        topDepth: parseFloat(well.topDepth),
+        bottomDepth: parseFloat(well.bottomDepth),
+        step: parseFloat(well.step),
+        idGroup: well.idGroup
+    });
+    wellModel.data = {
+        childExpanded: false,
+        icon: "well-16x16",
+        label: well.name
+    };
+    if (well.idGroup) {
+        wellModel.parent = 'group' + well.idGroup;
+    }
+    wellModel.parent = 'project' + well.idProject;
+    wellModel.children = new Array();
+    return wellModel;
+}
+exports.createWellModel = createWellModel;
+
 function wellToTreeConfig(well, isDeleted) {
     if (isDeleted) {
         var wellModel = new Object();
@@ -882,30 +920,7 @@ function wellToTreeConfig(well, isDeleted) {
         wellModel.parent = 'project' + well.idProject;
         return wellModel;
     } else {
-        var wellModel = new Object();
-        wellModel.name = "well";
-        wellModel.type = "well";
-        wellModel.id = well.idWell;
-        wellModel.properties = {
-            idProject: well.idProject,
-            idWell: well.idWell,
-            name: well.name,
-            topDepth: parseFloat(well.topDepth),
-            bottomDepth: parseFloat(well.bottomDepth),
-            step: parseFloat(well.step),
-            idGroup: well.idGroup
-        };
-        wellModel.data = {
-            childExpanded: false,
-            icon: "well-16x16",
-            label: well.name
-        };
-        if (well.idGroup) {
-            wellModel.parent = 'group' + well.idGroup;
-        }
-        wellModel.parent = 'project' + well.idProject;
-        wellModel.children = new Array();
-
+        let wellModel = createWellModel(well);
         if (well.datasets) {
             well.datasets.forEach(function (dataset) {
                 wellModel.children.push(datasetToTreeConfig(dataset));
@@ -959,25 +974,25 @@ function getGroupModel (idGroup, allGroups, rootNode) {
 }
 exports.getGroupModel = getGroupModel;
 
-exports.projectToTreeConfig = function (project) {
-    var projectModel = new Object();
+function createProjectModel (project) {
+    let projectModel = new Object();
     projectModel.type = 'project';
     projectModel.name = 'project';
     projectModel.id = project.idProject;
-    projectModel.properties = {
-        idProject: project.idProject,
-        name: project.name,
-        department: project.department,
-        company: project.company,
-        description: project.description
-    };
+    projectModel.properties = project;
     projectModel.data = {
-        childExpanded: false,
+        childExpanded: true,
         icon: 'well-insight-16x16',
         label: project.name,
         selected: false
     };
     projectModel.children = new Array();
+    return projectModel;
+}
+exports.createProjectModel = createProjectModel;
+
+exports.projectToTreeConfig = function (project) {
+    let projectModel = createProjectModel(project);
     let wiComponentService = __GLOBAL.wiComponentService;
     // project logplots
     let projectLogplots = [];
@@ -1089,12 +1104,14 @@ function getSelectedProjectNode() {
 
 exports.getSelectedPath = getSelectedPath;
 
-function getSelectedPath(foundCB) {
+function getSelectedPath(foundCB, rootNode) {
     const wiComponentService = __GLOBAL.wiComponentService;
-    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
-    if (!rootNodes) return;
+    if (!rootNode) {
+        rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0];
+    }
+    if (!rootNode) return;
     let selectedPath = new Array();
-    visit(rootNodes[0], function (node, options) {
+    visit(rootNode, function (node, options) {
         if (node.data) {
             if (foundCB) {
                 if (foundCB(node)) {
@@ -1841,8 +1858,15 @@ function getModel(type, id, rootNode) {
     });
     return model;
 }
-
 exports.getModel = getModel;
+
+exports.getParentByModel = function (modelType, idModel, parentType, rootNode) {
+    var path = getSelectedPath(function (node) {
+        return node.type == modelType && node.id == idModel;
+    }, rootNode) || [];
+    if (!parentType) return path[path.length - 2];
+    return path.find(p => p.type == parentType);
+};
 
 exports.findLogplotModelById = function (logplotId) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -2495,29 +2519,33 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             }
         });
     }, function(cb) {
-        __GLOBAL.wiApiService.createPointSet({
-            idCrossPlot: crossplotProps.idCrossPlot,
-            idWell: idWell,
-            idCurveX: (fromCurves.CurveX || {}).idCurve || null,
-            idCurveY: (fromCurves.CurveY || {}).idCurve || null,
-            idCurveZ: (fromCurves.CurveZ || {}).idCurve || null,
-            majorX: 5,
-            minorX: 5,
-            majorY: 5,
-            minorY: 5,
-            scaleLeft:(fromCurves.CurveX || {}).minX != 'undefined'? (fromCurves.CurveX || {}).minX : null,
-            scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
-            scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
-            scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
-        }, function (pointSet, err) {
-            if (err) {
-                cb('create pointset failed');
-            }
-            else {
-                pointSetProps = pointSet;
-                cb();
-            }
-        });
+        if(!crossTemplate){
+            __GLOBAL.wiApiService.createPointSet({
+                idCrossPlot: crossplotProps.idCrossPlot,
+                idWell: idWell,
+                idCurveX: (fromCurves.CurveX || {}).idCurve || null,
+                idCurveY: (fromCurves.CurveY || {}).idCurve || null,
+                idCurveZ: (fromCurves.CurveZ || {}).idCurve || null,
+                majorX: 5,
+                minorX: 5,
+                majorY: 5,
+                minorY: 5,
+                scaleLeft:(fromCurves.CurveX || {}).minX != 'undefined'? (fromCurves.CurveX || {}).minX : null,
+                scaleRight:(fromCurves.CurveX || {}).maxX != 'undefined'? (fromCurves.CurveX || {}).maxX : null,
+                scaleBottom:(fromCurves.CurveY || {}).minX != 'undefined'? (fromCurves.CurveY || {}).minX : null,
+                scaleTop:(fromCurves.CurveY || {}).maxX != 'undefined'? (fromCurves.CurveY || {}).maxX : null
+            }, function (pointSet, err) {
+                if (err) {
+                    cb('create pointset failed');
+                }
+                else {
+                    pointSetProps = pointSet;
+                    cb();
+                }
+            });
+        } else {
+            cb();
+        }
     }, function(cb) {
         refreshProjectState().then(cb);
     }, function(cb) {
@@ -3194,8 +3222,8 @@ exports.getDataTopBottomRange = getDataTopBottomRange;
 
 function convertRangeDepthToIndex (depth, well) {
     let d = Math.round((
-                depth - parseFloat(well.properties.topDepth))
-                            /parseFloat(well.properties.step));
+                depth - well.topDepth)
+                            /well.step);
     return d;
 }
 exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
