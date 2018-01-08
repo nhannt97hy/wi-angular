@@ -3269,3 +3269,25 @@ function isEmpty(val){
     return (val === undefined || val == null || val.length <= 0) ? true : false;
 }
 exports.isEmpty = isEmpty;
+
+function updateWiCurveListingOnModelDeleted(model){
+    let wiComponentService = __GLOBAL.wiComponentService;
+    switch (model.type) {
+        case 'curve':
+            let idCurve = model.properties.idCurve;
+            let wellModel = findWellByCurve(idCurve);
+            let wiCurveListing = wiComponentService.getComponent('WCL');
+            console.log({wiCurveListing});
+            let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
+            let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
+            if(indexCurve){
+                wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+            }
+            break;
+        default:
+            console.log('not implemented')
+            return;
+    }
+}
+
+exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
