@@ -54,9 +54,9 @@
                                 <label for="selected" class="btn btn-default">Select</label>
                             </div>
                             <div class="col-sm-7">
-                                <input name="imageFile" id="selected" class="display-none" type="file" accept="image/*" ngf-max-size="5MB" ngf-model-invalid="errorFile" ngf-select ng-model="wiModal.imageFile"/>
+                                <input name="imageFile" id="selected" class="display-none" type="file" accept="image/*" ngf-max-size="3MB" ngf-model-invalid="errorFile" ngf-select ng-model="wiModal.imageFile"/>
                                 <input type="text" class="form-control" value="{{wiModal.imageFile.name}}" disabled>
-                                <i ng-show="imageForm.imageFile.$error.maxSize" style="color: red">File too large. Max 5Mb</i>
+                                <i ng-show="imageForm.imageFile.$error.maxSize" style="color: red">File too large. Max 3Mb</i>
                             </div>
                             <div class="col-sm-2">
                                 <button type="button" class="btn btn-default" ng-disabled="!wiModal.imageFile || !imageForm.$valid" ng-click="wiModal.onUploadButtonClicked()">
