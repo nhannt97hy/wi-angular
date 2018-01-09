@@ -3653,13 +3653,18 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         break;
                     }
                     case changed.deleted:
-                    wiApiService.removeLine(item.idLine, function () {
-                        currentTrack.removeCurveById(item.idLine);
-                        self.curveList = currentTrack.getCurves();
-                        callback();
-                    });
-                    break;
-                    default:
+                        wiApiService.removeLine(item.idLine, function (res) {
+                            currentTrack.removeCurveById(item.idLine);
+                            if (Array.isArray(res.shadings) && res.shadings.length) {
+                                res.shadings.forEach(function(s) {
+                                    let shading = utils.getVisualizeShading(currentTrack, s.idShading);
+                                    currentTrack.removeDrawing(shading);
+                                });
+                            }
+                            callback();
+                        });
+                        break;
+                        default:
                         // break;
                         callback('unknown change code:', item.change);
                     }
@@ -3669,6 +3674,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
+                    self.curves = self.curves.filter(c => { return c.changed != changed.deleted });
                     self.curveList = currentTrack.getCurves();
 
                     if (updateCurvesTabCb) updateCurvesTabCb(err);
@@ -3762,12 +3768,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         this.__idx = 0;
         this.setClickedRowShading = function (index) {
+            if (index < 0) return;
             $scope.selectedRowShading = index;
             self.__idx = self.getShadings()[index]._index;
 
         };
         this.onChangeShading = function (index) {
-            if (self.shadings[self.__idx].changed == changed.unchanged) self.shadings[self.__idx].changed = changed.updated;
+            if (self.shadings.find(s => s._index == self.__idx).changed == changed.unchanged) self.shadings.find(s => s._index == self.__idx).changed = changed.updated;
         }
         this.addRowShading = function () {
             self.shadings.push({
@@ -3810,13 +3817,29 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 self.setClickedRowShading(self.getShadings().length-1);
             }
         };
-        this.removeRowShading = function (index) {
-            if (!self.shadings[index]) return;
-            if(self.shadings[index].changed == changed.created)
+        this.removeRowShading = function (shading) {
+            let index = self.shadings.indexOf(shading);
+            if(shading.changed == changed.created && index)
                 self.shadings.splice(index, 1);
             else
-                self.shadings[index].changed = changed.deleted;
+                shading.changed = changed.deleted;
+            if (self.getShadings().length <= $scope.selectedRowShading) self.setClickedRowShading(self.getShadings().length-1);
+            if (!self.getShadings().length) {
+                self.addRowShading();
+                self.setClickedRowShading(0);
+            }
+
+            // if (!self.shadings[index]) return;
+            // if(self.shadings[index].changed == changed.created)
+            //     self.shadings.splice(index, 1);
+            // else
+            //     self.shadings[index].changed = changed.deleted;
         };
+
+        // blank shading
+        this.addRowShading();
+        this.setClickedRowShading(0);
+
         this.defineButtonClicked = function (index, $event) {
             self.setClickedRowShading(index);
 
@@ -3947,6 +3970,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
+                    self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                     if (updateShadingsTabCb) updateShadingsTabCb(err);
             });
         }
@@ -3976,8 +4000,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             updateShadingsTab(function(err) {
                                 callback(err);
                             });
-                        }
-                        ], function(err, results) {
+                        }], function(err, results) {
                             console.log(err, results);
                             console.log("applyInProgress", self.applyInProgress);
                             if (!self.applyInProgress) callback(true);

@@ -223,17 +223,20 @@
                                                 <td>
                                                     <input type="text" ng-model="curve.alias"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChangeCurve(curve._index);">
+                                                           ng-change="wiModal.onChangeCurve(curve._index);"
+                                                           ng-focus="wiModal.setClickedRowCurve($index)">
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="curve.minValue" step="any"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChangeCurve(curve._index);">
+                                                           ng-change="wiModal.onChangeCurve(curve._index);"
+                                                           ng-focus="wiModal.setClickedRowCurve($index)">
                                                 </td>
                                                 <td>
                                                     <input type="number" ng-model="curve.maxValue" step="any"
                                                            class="form-control wi-form-control"
-                                                           ng-change="wiModal.onChangeCurve(curve._index);">
+                                                           ng-change="wiModal.onChangeCurve(curve._index);"
+                                                           ng-focus="wiModal.setClickedRowCurve($index)">
                                                 </td>
                                                 <td>
                                                     <select ng-model="curve.displayType"
@@ -362,6 +365,7 @@
                                                             ng-change="wiModal.onChangeShading($index);
                                                             wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index);
                                                             wiModal.typeFixedValue();"
+                                                            ng-focus="wiModal.setClickedRowShading($index)"
                                                             step="any">
                                                 </td>
                                                 <!-- <td class="border border-style1-right">
@@ -373,7 +377,8 @@
                                                 <td>
                                                     <input type="text" ng-model="shading.name"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index); shading.setName = true;">
+                                                            ng-change="wiModal.onChangeShading($index); shading.setName = true;"
+                                                            ng-focus="wiModal.setClickedRowShading($index)">
                                                 </td>
                                                 <td>
                                                     <select ng-model="shading.shadingStyle"
@@ -391,7 +396,7 @@
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-default wi-form-control" 
-                                                            ng-click="wiModal.removeRowShading(shading._index);"
+                                                            ng-click="wiModal.removeRowShading(shading);"
                                                             style="font-size: 10px; width: 100%">
                                                         <span class="delete-16x16"></span>
                                                     </button>
@@ -402,7 +407,6 @@
                                     <p></p>
                                 </div>
                                 <div class="col-sm-1">
-                                    <button type="button" class="btn btn-default" ng-click="wiModal.removeRowShading()"><span class="delete-16x16"></span></button>
                                     <button type="button" class="btn btn-default" ng-click="wiModal.addRowShading()"><span class="plus-16x16"></span></button>
                                 </div>
                             </form>
