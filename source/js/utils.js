@@ -94,6 +94,8 @@ exports.projectOpen = function (wiComponentService, projectData) {
 exports.projectClose = function (wiComponentService) {
     window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
+    window.history.replaceState({}, 'home', '/');
+    document.title = 'Well Insight';
 };
 
 function getCurveFromId(idCurve) {
