@@ -1,0 +1,16 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Save Curve(s)</h4>
+            </div>
+            <div class="modal-body dialog-style">
+                <div class="progress" ng-repeat="item in wiModal.curvesData track by $index">
+                    <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
+                    aria-valuemin="0" aria-valuemax="100" ng-style="{width:item.percent}" style="min-width:2em">{{item.percent}} - {{item.datasetCurve}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

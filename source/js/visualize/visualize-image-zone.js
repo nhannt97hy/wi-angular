@@ -16,6 +16,7 @@ function ImageZone(config) {
 
     this.name = config.name || '';
     this.showName = config.showName == null ? true : config.showName;
+    this.smartDisplay = config.smartDisplay || false;
 
     this.imageUrl = config.imageUrl || '';
     this.done = config.done || false;
@@ -30,6 +31,7 @@ ImageZone.prototype.getProperties = function() {
         idImageOfTrack: this.idImageOfTrack,
         name: this.name,
         showName: this.showName,
+        smartDisplay: this.smartDisplay,
         topDepth: this.topDepth,
         bottomDepth: this.bottomDepth,
         imageUrl: this.imageUrl,
@@ -43,6 +45,7 @@ ImageZone.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'idImageOfTrack', props.idImageOfTrack);
     Utils.setIfNotNull(this, 'name', props.name);
     Utils.setIfNotNull(this, 'showName', props.showName);
+    Utils.setIfNotNull(this, 'smartDisplay', props.smartDisplay);
     Utils.setIfNotNull(this, 'topDepth', props.topDepth);
     Utils.setIfNotNull(this, 'bottomDepth', props.bottomDepth);
     Utils.setIfNotNull(this, 'fill', props.fill);
@@ -134,7 +137,7 @@ ImageZone.prototype.drawImage = function(config, isNewDraw) {
             .append('xhtml:img')
             .attr('class', 'img-responsive')
             .attr('src', config.imageUrl)
-            .style('object-fit', 'contain')
+            .style('object-fit', (config.smartDisplay ? 'contain' : 'fill'))
             .style('width', '100%')
             .style('height', '100%');
     } else {
@@ -144,7 +147,7 @@ ImageZone.prototype.drawImage = function(config, isNewDraw) {
             .select('img')
             .attr('class', 'img-responsive')
             .attr('src', config.imageUrl)
-            .style('object-fit', 'contain')
+            .style('object-fit', (config.smartDisplay ? 'contain' : 'fill'))
             .style('width', '100%')
             .style('height', '100%');
     } 
@@ -238,46 +241,46 @@ ImageZone.prototype.onViewportChange = function(minX, maxX, minY, maxY) {
         || (maxY == viewportY)) {
         this.foreignObject
             .attr('x', minX)
-            .attr('y', minY + 2)
+            .attr('y', minY)
             .attr('width', maxX - minX)
             .attr('height', 0)
             .style('position', 'relative');
         return;
     } else if ((minY >= 0 && minY <= viewportY)
         && (maxY >= 0 && maxY <= viewportY)) {
-        if (maxY - minY - 4 < 0) return;
+        if (maxY - minY < 0) return;
         this.foreignObject
             .attr('x', minX)
-            .attr('y', minY + 2)
+            .attr('y', minY)
             .attr('width', maxX - minX)
-            .attr('height', maxY - minY - 4)
+            .attr('height', maxY - minY)
             .style('position', 'relative');
     } else if ((minY >= 0 && minY <= viewportY)
         && (maxY >= viewportY)) {
-        if (viewportY - minY - 4 < 0) return;
+        if (viewportY - minY < 0) return;
         this.foreignObject
             .attr('x', minX)
-            .attr('y', minY + 2)
+            .attr('y', minY)
             .attr('width', maxX - minX)
-            .attr('height', viewportY - minY - 4)
+            .attr('height', viewportY - minY)
             .style('position', 'relative');
     } else if ((minY <= 0)
         && (maxY >= 0 && maxY <= viewportY)) {
-        if (maxY - 0 - 4 < 0) return;
+        if (maxY - 0 < 0) return;
         this.foreignObject
             .attr('x', minX)
             .attr('y', 0)
             .attr('width', maxX - minX)
-            .attr('height', maxY - 0 - 4)
+            .attr('height', maxY - 0)
             .style('position', 'relative');
     } else if ((minY <= 0)
         && (maxY >= viewportY)) {
-        if (viewportY - 0 - 4 < 0) return;
+        if (viewportY - 0 < 0) return;
         this.foreignObject
             .attr('x', minX)
             .attr('y', 0)
             .attr('width', maxX - minX)
-            .attr('height', viewportY - 0 - 4)
+            .attr('height', viewportY - 0)
             .style('position', 'relative');
     } else if (((minY <= 0) && (maxY <= 0))
         || ((minY >= viewportY) && (maxY >= viewportY))) {

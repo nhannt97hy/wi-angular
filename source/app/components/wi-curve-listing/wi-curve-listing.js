@@ -55,6 +55,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     return c.id == curve.id;
                 }).selected = true;
             }
+            if(curve.edit){
+                self.curvesArr.find(c => {
+                    return c.id == curve.id;
+                }).modified = true;
+            }
         })
         $scope.$emit('list:changeWell');
     }
@@ -117,27 +122,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.loaded.push(...self.depthArr.slice(len, len + 500));
     }
 
-    this.onCurveSelectClick = function(name, dataset, id, selected){
-        if(selected){
+    this.onCurveSelectClick = function(SelCurve){
+        if(SelCurve.selected){
             let curve = self.curvesData[self.currentIndex].find(curve => {
-                return curve.id == id;
+                return curve.id == SelCurve.id;
             })
             if(!curve){
-                wiApiService.dataCurve(id, function(data){
+                wiApiService.dataCurve(SelCurve.id, function(data){
                     let dataF = data.map(d => parseFloat(d.x));
                     self.curvesData[self.currentIndex].push({
-                        datasetCurve: dataset + '.' + name,
-                        id:id,
+                        datasetCurve: SelCurve.datasetName + '.' + SelCurve.name,
+                        idDataset: SelCurve.properties.idDataset,
+                        id: SelCurve.id,
                         data: dataF,
+                        dataBK: angular.copy(dataF),
                         show: true
                     })
                 })
             }else{
-                let index = self.curvesData[self.currentIndex].findIndex(c => {return c.id == id});
+                let index = self.curvesData[self.currentIndex].findIndex(c => {return c.id == SelCurve.id});
                 self.curvesData[self.currentIndex][index].show = true;
             }
         }else{
-            let index = self.curvesData[self.currentIndex].findIndex(c => {return c.id == id});
+            let index = self.curvesData[self.currentIndex].findIndex(c => {return c.id == SelCurve.id});
             self.curvesData[self.currentIndex][index].show = false;
         }
     }
@@ -148,12 +155,37 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }).modified = true;
     }
 
+    this.reverseModified = function(id){
+        let curve = self.curvesData[self.currentIndex].find(c => {
+            return c.id == id;
+        })
+        $timeout(function(){
+            curve.data = curve.dataBK;
+            self.curvesArr.find(c => {return c.id == id;}).modified = false;
+        })
+    }
+
     this.onAddCurveButtonClicked = function(){
         console.log('onAddCurveButtonClicked');
         DialogUtils.addCurveDialog(ModalService);
     }
     this.onSaveButtonClicked = function(){
         console.log('onSaveButtonClicked');
+        let modifiedCurves = [];
+        modifiedCurves = self.curvesData[self.currentIndex].filter(c => {
+                return c.edit;
+            });
+        
+        if(modifiedCurves.length){
+            DialogUtils.saveCurvesDialog(ModalService, modifiedCurves, function(){
+                console.log('save curves successed!');
+                $timeout(function(){
+                    self.curvesArr.forEach(curve => {
+                        delete curve.modified;
+                    })
+                })
+            })
+        }
     }
     this.onRefWinBtnClicked = function(){
         console.log('onRefWinBtnClicked');
