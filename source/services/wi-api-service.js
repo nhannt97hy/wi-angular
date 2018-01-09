@@ -646,7 +646,7 @@ Service.prototype.postWithTrackTemplateFile = function (dataPayload) {
     });
 }
 
-Service.prototype.postWithFile = function (route, dataPayload) {
+Service.prototype.postWithFile = function (route, dataPayload, callback) {
     var self = this;
     return new Promise(function (resolve, reject) {
         let configUpload = {
@@ -684,6 +684,7 @@ Service.prototype.postWithFile = function (route, dataPayload) {
             function (evt) {
                 let progress = Math.round(100.0 * evt.loaded / evt.total);
                 console.log('evt upload', progress);
+                if(callback) callback(progress);
             }
         );
     });
@@ -975,9 +976,9 @@ Service.prototype.editDataCurve = function (request, callback) {
         });
 }
 
-Service.prototype.processingDataCurve = function (request, callback) {
+Service.prototype.processingDataCurve = function (request, callback, progressCb) {
     const self = this;
-    this.postWithFile(PROCESSING_DATA_CURVE, request)
+    this.postWithFile(PROCESSING_DATA_CURVE, request, progressCb)
         .then(function (response) {
             if (callback) callback(response);
         })

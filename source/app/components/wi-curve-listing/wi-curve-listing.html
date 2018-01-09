@@ -32,10 +32,12 @@
 				<tbody>
 					<tr ng-repeat="curve in wiCurveListing.curvesArr track by curve.id"
 					ng-class="{modified: curve.modified}">
-						<td style="flex:2">{{curve.name}}</td>
+						<td style="flex:2">{{curve.name}}
+							<span class="fa fa-undo" ng-if="curve.modified" ng-click="wiCurveListing.reverseModified(curve.id)" title='Discard Changes'></span>
+						</td>
 						<td style="flex:2">{{curve.datasetName}}</td>
 						<td style="flex:1;text-align:center">
-							<input type="checkbox" ng-model="curve.selected" ng-change="wiCurveListing.onCurveSelectClick(curve.name, curve.datasetName, curve.id, curve.selected)">
+							<input type="checkbox" ng-model="curve.selected" ng-change="wiCurveListing.onCurveSelectClick(curve)">
 						</td>
 					</tr>
 				</tbody>
