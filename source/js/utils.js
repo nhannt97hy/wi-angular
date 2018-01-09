@@ -3271,6 +3271,12 @@ function isEmpty(val){
 }
 exports.isEmpty = isEmpty;
 
+function getVisualizeShading (track, idShading) {
+    let shadings = (track.drawings).filter(d => d.type == 'shading')
+    return shadings.filter(s => s.id == idShading)[0];
+}
+exports.getVisualizeShading = getVisualizeShading;
+
 function updateWiCurveListingOnModelDeleted(model){
     let wiComponentService = __GLOBAL.wiComponentService;
     switch (model.type) {

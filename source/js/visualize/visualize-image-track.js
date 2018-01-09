@@ -84,7 +84,7 @@ ImageTrack.prototype.init = function(baseElement) {
     Track.prototype.init.call(this, baseElement);
     let self = this;
     this.trackContainer
-        .classed('vi-image-zone-track-container', true)
+        .classed('vi-image-track-container', true)
         .on('mousedown', function() {
             self.setCurrentDrawing(null);
         });

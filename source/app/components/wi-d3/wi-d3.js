@@ -360,7 +360,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerImageTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
         _registerTrackDragCallback(track);
-        wiComponentService.putComponent('vi-image-zone-track-' + config.id, track);
+        wiComponentService.putComponent('vi-image-track-' + config.id, track);
         return track;
     }
 
@@ -740,11 +740,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.drawImageZone = function (imgzone, props, isNewDraw) {
         if (!imgzone) return;
         let imageConfig = {
-            idImageTrack: props.idImageTrack,
             fill: props.fill,
             imageUrl: props.imageUrl,
-            width: 'inherit',
-            height: 'inherit'
+            smartDisplay: props.smartDisplay
         };
         imgzone.drawImage(imageConfig, isNewDraw);
     }
@@ -1763,8 +1761,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     let props = curve.getProperties();
                     console.log(props);
                     let idLine = props.idLine;
-                    wiApiService.removeLine(idLine, function () {
+                    wiApiService.removeLine(idLine, function (res) {
                         track.removeCurve(curve);
+                        if (Array.isArray(res.shadings) && res.shadings.length) {
+                            res.shadings.forEach(function(s) {
+                                let shading = utils.getVisualizeShading(track, s.idShading);
+                                track.removeDrawing(shading);
+                            });
+                        }
                     });
                 }
                 else if (drawing.isShading()) {
@@ -2303,7 +2307,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 icon: "curve-hide-16x16",
                 handler: function () {
                     let idLine = _currentTrack.getCurrentCurve().id;
-                    wiApiService.removeLine(idLine, self.removeCurrentCurve());
+                    wiApiService.removeLine(idLine, function(res){
+                        self.removeCurrentCurve();
+                        if (Array.isArray(res.shadings) && res.shadings.length) {
+                            res.shadings.forEach(function(s) {
+                                let shading = utils.getVisualizeShading(track, s.idShading);
+                                track.removeDrawing(shading);
+                            });
+                        }
+                    });
                 }
             }, {
                 name: "BaseLineShift",
