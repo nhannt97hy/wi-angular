@@ -3286,11 +3286,12 @@ function updateWiCurveListingOnModelDeleted(model){
             let idCurve = model.properties.idCurve;
             let wellModel = findWellByCurve(idCurve);
             let wiCurveListing = wiComponentService.getComponent('WCL');
-            console.log({wiCurveListing});
-            let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
-            let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
-            if(indexCurve){
-                wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+            if(wiCurveListing){
+                let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
+                let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
+                if(indexCurve){
+                    wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+                }
             }
             break;
         default:
