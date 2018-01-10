@@ -327,6 +327,26 @@ LogTrack.prototype.doPlot = function(highlight) {
     this.updateAxis();
 }
 
+LogTrack.prototype.getCurveOrderKey = function (curve) {
+    let curves = this.getCurves();
+    if (curves.length <= 0) {
+        return 'm';
+    }
+    if (!curve) curve = curves[curves.length-1];
+    let currentIdx = curves.indexOf(curve);
+    if (currentIdx < 0 || currentIdx == (curves.length - 1)) {
+        currentIdx = curves.length - 1;
+        let currentOrderKey = curves[currentIdx].orderNum;
+        let key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+        console.log(key);
+        return key;
+    }
+    return curves[currentIdx].orderNum + curves[currentIdx + 1].orderNum;
+}
+
+LogTrack.prototype.rearrangeCurves = function () {
+    this.headerContainer.selectAll('.vi-curve-header').sort();
+}
 
 /**
  * Add curve to track
@@ -352,12 +372,14 @@ LogTrack.prototype.addCurve = function(data, config) {
     config._data = data;
     config.yStep = config.yStep || this.yStep;
     config.offsetY = config.offsetY || this.offsetY;
+    config.orderNum = config.orderNum || this.getCurveOrderKey();
 
     let curve = new Curve(config);
 
     curve.init(this.plotContainer, this);
     curve.header = this.addCurveHeader(curve);
     this.drawings.push(curve);
+    this.rearrangeCurves();
 
     return curve;
 }
@@ -907,6 +929,7 @@ LogTrack.prototype.addCurveHeader = function(curve) {
     let curveHeader = this.drawingHeaderContainer
         .append('div')
             .attr('class', 'vi-curve-header')
+            .datum(curve.orderNum)
             .on('mousedown', function() {
                 self.drawingHeaderMouseDownCallback(curve);
             });

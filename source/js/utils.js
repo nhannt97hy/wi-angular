@@ -132,7 +132,7 @@ function lineToTreeConfig(line) {
         minX: line.minValue,
         maxX: line.maxValue,
         scale: line.displayType,
-        alias: curveModel.properties.alias,
+        alias: line.alias,
         showHeader: line.showHeader,
         blockPosition: line.blockPosition,
         wrapMode: line.wrapMode,
@@ -140,7 +140,8 @@ function lineToTreeConfig(line) {
         displayMode: line.displayMode,
         autoValueScale: line.autoValueScale,
         line: null,
-        symbol: null
+        symbol: null,
+        orderNum: line.orderNum
     };
     let temp = line.displayMode.toLowerCase().trim();
     lineModel.data.line = {
@@ -1225,9 +1226,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             if (wiD3Ctrl && track) {
                 let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
                 if (errorCode > 0) {
-                    apiService.post(apiService.CREATE_LINE, {
+                    apiService.createLine({
                         idTrack: track.id,
-                        idCurve: idCurve
+                        idCurve: idCurve,
+                        orderNum: track.getCurveOrderKey()
                     }, function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
@@ -1246,7 +1248,8 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     wiD3Ctrl.addLogTrack(null, function (newViTrack) {
                         apiService.createLine({
                             idTrack: newViTrack.id,
-                            idCurve: idCurve
+                            idCurve: idCurve,
+                            orderNum: newViTrack.getCurveOrderKey()
                         }, function (line) {
                             let lineModel = lineToTreeConfig(line);
                             getCurveData(apiService, idCurve, function (err, data) {
@@ -1448,7 +1451,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
                         trackProps.push(aTrack);
                         async.setImmediate(_callback);
-                        
+
                     } else if(aTrack.idImageTrack) {
                         let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
                         trackProps.push(aTrack);
@@ -1495,8 +1498,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                     _cb();
                                 }
                             });
-
-                            //let someTrack = aTrack;
                             trackProps[idx].lines.forEach(function (line) {
                                 getCurveData(wiApiService, line.idCurve, function (err, data) {
                                     let lineModel = lineToTreeConfig(line);
