@@ -74,6 +74,7 @@ function Curve(config) {
     this.data = Utils.parseData(this.rawData);
     this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
+    this.orderNum = config.orderNum;
 
     let self = this;
     this.data = this.data.map(function(d) {
@@ -140,7 +141,8 @@ Curve.prototype.getProperties = function() {
         symbolFillStyle: symbol.fillStyle,
         symbolLineWidth: symbol.lineWidth,
         symbolLineDash: symbol.lineDash,
-        displayAs: this.displayAs
+        displayAs: this.displayAs,
+        orderNum: this.orderNum
     }
 }
 
@@ -405,6 +407,13 @@ Curve.prototype.getCanvasTranslateXForWrapMode = function() {
         ret.push(width);
 
     return ret;
+}
+
+Curve.prototype.updateOrderNum = function(orderNum) {
+    this.orderNum = orderNum || this.orderNum;
+    this.header.datum(this.orderNum)
+        .attr('tabindex', isNaN(this.orderNum) ? -1 : this.orderNum)
+        .attr('data-order-num', function(d) { return d; });
 }
 
 Curve.prototype.calculateDataForBlockPosition = function(originData) {
