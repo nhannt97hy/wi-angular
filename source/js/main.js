@@ -38,6 +38,7 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -125,6 +126,7 @@ let app = angular.module('wiapp',
         wiMultiInput.name,
         wiCustomInput.name,
         wiCurveListing.name,
+        wiInventory.name,
 
         wiComboview.name,
         wiD3Comboview.name,

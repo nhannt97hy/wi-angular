@@ -219,7 +219,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     /*this.CloseZone = function () {
         self.isShowWiZone = false;
-        utils.triggerWindowResize();
     }*/
 /*
     this.getZoneCtrl = function () {
@@ -340,7 +339,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.CloseReferenceWindow = function () {
         self.crossplotModel.properties.referenceDisplay = false;
-    //    utils.triggerWindowResize();
     }
 
     this.switchReferenceWindow = function(state) {
@@ -350,6 +348,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.contextMenu.length >= index) {
             self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
         }
+        document.dispatchEvent(new Event('resize'));
     }
 
     this.updateAll = function (callback) {
@@ -583,7 +582,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     handler: function (index) {
                         if (!self.wiCrossplotCtrl) return;
                         self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
-                        utils.triggerWindowResize();
+                        document.dispatchEvent(new Event('resize'));
                         self.contextMenu[index].checked = self.wiCrossplotCtrl.isShowWiZone;
                     }
                 }, {
@@ -598,7 +597,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         /*$timeout(function() {
                             self.getWiRefWindCtrl().refresh();
                         }, 100);*/
-                        //utils.triggerWindowResize();
                     }
                 },{
                     name: "ShowTooltip",

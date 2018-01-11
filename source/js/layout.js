@@ -60,6 +60,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 if (model.isReady) model.isReady = false;
                 wiComponentService.dropComponent(model.type + model.id);
             }
+            if (componentState.name) wiComponentService.dropComponent(componentState.name);
         });
         container.on('resize', function () {
             document.dispatchEvent(new Event('resize'));

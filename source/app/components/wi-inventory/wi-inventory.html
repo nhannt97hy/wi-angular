@@ -1,0 +1,27 @@
+<div class="inventory-toolbar-wrapper">
+	<wi-toolbar>
+		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked"></wi-button>
+		<wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert ALL" handler="wiInventory.onRevertAllButtonClicked"></wi-button>
+	</wi-toolbar>
+</div>
+<div class="inventory-main container-fluid">
+	<div class="row">
+			<div id="left-inventory" class="col-xs-5">
+					<wi-inventory-treeview name="projectTreeview" config="wiInventory.projectConfig" container="wiInventory" selected-node="wiInventory.projectSelectedNode"></wi-inventory-treeview>
+			</div>
+			<div id="center-inventory" class="col-xs-1">
+					<div class="row">
+							<button class="btn btn-default" title="import" ng-click='wiInventory.importButtonClicked()' ng-class="{'disabled': !wiInventory.importValid}">
+									<span class="arrow-left-32x32"></span>
+							</button>
+					</div>
+					<!-- <br>
+					<div class="row">
+							<button class="btn btn-default" ng-click=''><span class="arrow-right-32x32"></span></button>
+					</div> -->
+			</div>
+			<div id="right-inventory" class="col-xs-6">
+					<wi-inventory-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-inventory-treeview>
+			</div>
+	</div>
+</div>

@@ -1,7 +1,7 @@
 const componentName = 'wiCurveListing';
 const moduleName = 'wi-curve-listing';
 
-function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout, $scope) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     this.applyingInProgress = false;
 

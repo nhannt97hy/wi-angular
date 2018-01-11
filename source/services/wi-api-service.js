@@ -379,7 +379,7 @@ var wiApiWorker = function ($http, wiComponentService) {
 }
 wiApiWorker.prototype.startWorking = function (silent = false) {
     let self = this;
-    if (!silent) self.wiComponentService.getComponent('SPINNER').show();
+    self.wiComponentService.getComponent('SPINNER').show(silent);
     self.currentRequestWorking++;
     // if(self.currentRequestWorking >= MAXIMUM_REQUEST){
     //     self.isFree = false;
