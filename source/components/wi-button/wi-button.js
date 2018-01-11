@@ -19,7 +19,13 @@ function ButtonController(wiComponentService) {
             self.checked = !self.checked;
         }
         if (self.handler) {
-            self.handler(self.index);
+            self.index && self.handler(self.index);
+            if (self.handlerArgs) {
+                Array.isArray(self.handlerArgs) && self.handler(...self.handlerArgs);
+                self.handler(self.handlerArgs);
+            } else {
+                self.handler();
+            }
         }
     };
 
@@ -72,6 +78,7 @@ app.component(wiButtonName, {
         icon: '@',
         checked: '<',
         handler: '<',
+        handlerArgs: '<',
         disabled: '@',
         separator: '@',
         container: '@'
