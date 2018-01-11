@@ -198,7 +198,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
                 if (err) {
                     throw err;
                 }
-                // item.properties = datasetImported;
+                item.isImported = false;
                 return datasetImported;
             })
         } else if (item.type == 'curve') {
@@ -206,7 +206,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
                 if (err) {
                     throw err;
                 }
-                // item.properties = curveImported;
+                item.isImported = false;
                 return curveImported;
             })
         }

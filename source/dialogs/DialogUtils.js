@@ -4328,7 +4328,6 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
 
         function doApply (callback) {
             if (self.imagesOfCurrentTrack && self.imagesOfCurrentTrack.length) {
-                wiComponentService.getComponent('SPINNER').show();
                 async.eachOfSeries(self.imagesOfCurrentTrack, function(image, i, callback) {
                     switch (self.imagesOfCurrentTrack[i].flag) {
                         case _NEW:
@@ -4544,7 +4543,6 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
 
         function doApply(callback) {
             if (self.uploadedImages && self.uploadedImages.length) {
-                wiComponentService.getComponent("SPINNER").show();
                 async.eachOfSeries(self.uploadedImages, function(img, i, callback){
                     switch (self.uploadedImages[i].flag) {
                         case _DEL:
@@ -7233,7 +7231,6 @@ exports.zoneManagerDialog = function (ModalService, item) {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
             if(self.zoneArr && self.zoneArr.length){
-                wiComponentService.getComponent("SPINNER").show();
                 async.eachOfSeries(self.zoneArr, function(zone, i, callback){
                     switch (self.zoneArr[i].flag) {
                         case _FDEL:
@@ -12226,7 +12223,6 @@ exports.editToolComboboxPropertiesDialog = function (ModalService, toolBox, idCo
 
         function doApply (callback) {
             if (self.tools && self.tools.length) {
-                wiComponentService.getComponent('SPINNER').show();
                 async.eachOfSeries(self.tools, function(tool, i, callback) {
                     switch (self.tools[i].flag) {
                         case _NEW:
