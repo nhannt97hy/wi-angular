@@ -2713,8 +2713,20 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         this.paletteList = null;
         this.paletteName = null;
         this.curveList = currentTrack.getCurves();
+        
+        let leftLineBk = shadingOptions.leftLine;
+        shadingOptions.leftLine = null;
+        let rightLineBk = shadingOptions.rightLine;
+        shadingOptions.rightLine = null;
+        
+
         this.shadingOptions = angular.copy(shadingOptions);
-        let cloneOptions = angular.copy(shadingOptions);
+
+        this.shadingOptions.leftLine = leftLineBk;
+        this.shadingOptions.rightLine = rightLineBk;
+        shadingOptions.leftLine = leftLineBk;
+        shadingOptions.rightLine = rightLineBk;
+
         let paletteNameArr = [];
         let paletteValArr = [];
         // this.varShadingType = 'gradient';
@@ -2784,17 +2796,17 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
 
 
         this.namePals = new Array();
-            utils.getPalettes(function(pals){
-                self.paletteList = pals;
-                self.paletteName = Object.keys(self.paletteList);
-            });
-            this.checkboxVal = !this.fillPatternOptions.fill.display;
+        utils.getPalettes(function(pals){
+            self.paletteList = pals;
+            self.paletteName = Object.keys(self.paletteList);
+        });
+        this.checkboxVal = !this.fillPatternOptions.fill.display;
 
-            this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
-            this.enableFill = function (idEnable, value) {
-                $('#' + idEnable + ":button").attr("disabled", value);
-            }
+        this.enableFill = function (idEnable, value) {
+            $('#' + idEnable + ":button").attr("disabled", value);
+        }
         // function
 
         this.typeFixedValue = function () {
@@ -3301,7 +3313,6 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 idTrack : shadingOptions.idTrack,
                 isNegPosFill : self.shadingOptions.isNegPosFill,
                 leftFixedValue : self.shadingOptions.leftFixedValue,
-                rightFixedValue : self.shadingOptions.rightFixedValue,
                 name : self.shadingOptions.name,
                 shadingStyle : self.shadingOptions.shadingStyle,
                 fill : temp.fill,
@@ -3867,6 +3878,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                 }
                 delete request.leftLine;
                 delete request.rightLine;
+                delete request.changed;
 
                 let options = angular.copy(item);
                 if (item.idLeftLine < 0) {
@@ -3886,32 +3898,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         break;
                     case changed.created: {
                         wiApiService.createShading(request, function (shading) {
-                            utils.getPalettes(function(paletteList){
-                                let shadingModel = utils.shadingToTreeConfig(shading);
-                                let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-                                // let lineObj1 = null;
-                                // let lineObj2 = null;
-                                let lineObj1 = item.rightLine;
-                                let lineObj2 = ( item.idLeftLine > 0 ) ? item.leftLine : null;
-                                if(!shadingModel.idRightLine) return;
-                                if(!shadingModel.idLeftLine || shadingModel.idLeftLine < 0) {
-                                    wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                                    console.log("create1", shading);
-                                } else {
-                                    if (lineObj1 && lineObj2){
-                                        wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
-                                        console.log("create2", shading);
-                                    }
-                                    else {
-                                        console.log("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
-                                    }
-                                }
-                                self.shadingList = currentTrack.getShadings();
-                                self.shadings[idx].idShading = shading.idShading;
-                                callback();
-                            })
+                            wiD3Ctrl.updateLogTrack(currentTrack);
+                            callback();
+                            item.changed = changed.unchanged;
                         });
-                        item.changed = changed.unchanged;
                         break;
                     }
 

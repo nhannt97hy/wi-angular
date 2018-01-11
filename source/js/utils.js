@@ -1495,6 +1495,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 lineCount++;
                                 if (lineCount == lineNum) {
                                     drawAllShadings(someTrack, aTrack);
+                                    aTrack.setCurrentDrawing(null);
                                     _cb();
                                 }
                             });
