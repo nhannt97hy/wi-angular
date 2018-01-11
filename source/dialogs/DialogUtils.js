@@ -3824,10 +3824,10 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
             else
                 shading.changed = changed.deleted;
             if (self.getShadings().length <= $scope.selectedRowShading) self.setClickedRowShading(self.getShadings().length-1);
-            if (!self.getShadings().length) {
-                self.addRowShading();
-                self.setClickedRowShading(0);
-            }
+            // if (!self.getShadings().length) {
+            //     self.addRowShading();
+            //     self.setClickedRowShading(0);
+            // }
 
             // if (!self.shadings[index]) return;
             // if(self.shadings[index].changed == changed.created)
@@ -3837,8 +3837,8 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
 
         // blank shading
-        this.addRowShading();
-        this.setClickedRowShading(0);
+        // this.addRowShading();
+        // this.setClickedRowShading(0);
 
         this.defineButtonClicked = function (index, $event) {
             self.setClickedRowShading(index);
@@ -3895,10 +3895,9 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
 
                 switch(item.changed) {
                     case changed.unchanged:
-                    callback();
-                    break;
+                        callback();
+                        break;
                     case changed.created: {
-                        console.log("create shading", request, item);
                         wiApiService.createShading(request, function (shading) {
                             utils.getPalettes(function(paletteList){
                                 let shadingModel = utils.shadingToTreeConfig(shading);
@@ -3910,13 +3909,18 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                 if(!shadingModel.idRightLine) return;
                                 if(!shadingModel.idLeftLine || shadingModel.idLeftLine < 0) {
                                     wiD3Ctrl.addCustomShadingToTrack(currentTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                                    console.log("create1", shading);
                                 } else {
-                                    if (lineObj1 && lineObj2)
+                                    if (lineObj1 && lineObj2){
                                         wiD3Ctrl.addPairShadingToTrack(currentTrack, lineObj2, lineObj1, shadingModel.data);
+                                        console.log("create2", shading);
+                                    }
                                     else {
                                         console.log("cannot find lineObj1 or lineObj2:", lineObj1, lineObj2);
                                     }
                                 }
+                                self.shadingList = currentTrack.getShadings();
+                                self.shadings[idx].idShading = shading.idShading;
                                 callback();
                             })
                         });
