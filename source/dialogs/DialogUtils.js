@@ -490,10 +490,11 @@ exports.addNewDialog = function (ModalService, callback) {
                 bottomDepth: self.bottomDepth,
                 step: self.step
             };
-            console.log("data new well: ", data);
-
             wiApiService.createWell(data, function (response, err) {
-                if (err) return;
+                if (err) {
+                    self.isDisabled = false;
+                    return;
+                }
                 close(response, 500);
                 $timeout(function(){
                     $scope.$apply();
