@@ -361,14 +361,24 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
             ctx.restore();
         });
     });
-    if (this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative' && this.track) {
+    if ((this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative') ||
+        (this.displayAs != 'Cumulative' && this.prevProps.displayAs == 'Cumulative') && this.track) {
         this.prevProps.displayAs = 'Cumulative';
-        let cumulativeCurves = this.track.getCurves().filter(function(curve) {
+        let cCurves = this.track.getCurves().filter(function(curve) {
             return curve.displayAs == 'Cumulative';
         });
-        let index = cumulativeCurves.indexOf(this);
-        cumulativeCurves.slice(0, index).forEach(function(curve) {
+        cCurves.forEach(function(curve) {
+            if (curve == self) return;
             curve.doPlot();
+        });
+        cCurveIds = new Set(cCurves.map(function(c) { return c.id; }));
+        cShadings = this.track.getShadings().filter(function(sh) {
+            return (sh.leftCurve && cCurveIds.has(sh.leftCurve.id)) ||
+                (sh.rightCurve && cCurveIds.has(sh.rightCurve.id));
+        });
+
+        cShadings.forEach(function(sh) {
+            sh.doPlot();
         })
     }
     return this;
