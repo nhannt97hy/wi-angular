@@ -1837,12 +1837,12 @@ exports.importFromInventoryDialog = function (ModalService) {
             let sameNameExisted = desParentModel.children.find(c => c.name == model.name);
             if (sameNameExisted) {
                 importModelExistedDialog(ModalService, function () {
-                    
+
                 });
                 // dialogUtils.promptDialog(ModalService, {
                 //     title: model.type.capitalize() + 'name existed',
                 //     inputName: ''
-                //     input: 
+                //     input:
                 // })
             } else {
                 switch (model.type) {
@@ -1854,7 +1854,7 @@ exports.importFromInventoryDialog = function (ModalService) {
                     case 'dataset':
                         break;
                     case 'curve':
-                        
+
                         break;
                     default:
                         break;
@@ -11873,7 +11873,7 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
             callAPI(function(){
                 close();
             });
-            
+
         };
         this.onCancelButtonClicked = function(){
             close(null);
@@ -12378,4 +12378,266 @@ exports.saveCurvesDialog = function(ModalService, curvesData, callback){
             $('body').removeClass('modal-open');
         })
     })
+}
+exports.badholeCoalSaltDialog = function(ModalService) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
+
+        let self = this;
+        window.bad = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.wells = wiExplorer.treeConfig[0].children;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        this.applyingInProgress = false;
+        this.zoneSets = [];
+        this.zones = [];
+        this.curves = [];
+        this.zoneSetModel = {};
+        this.curveModel = {};
+        this.badholeCurve = {
+            curveName: 'Bad hole'
+        }
+        this.coalCurve = {
+            curveName: 'Coal'
+        }
+        this.saltCurve = {
+            curveName: 'Salt'
+        }
+        let inputCurves = [];
+        this.dataCurves = [];
+
+        if (selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
+        else if (selectedNodes && selectedNodes[0].type == 'zoneset') {
+            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+            this.zoneSetModel = selectedNodes[0];
+        } else if (selectedNodes && selectedNodes[0].type == 'zone') {
+            this.zoneSetModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+            this.wellModel = utils.findWellById(this.zoneSetModel.properties.idWell);
+        } else if (selectedNodes && selectedNodes[0].type == 'curve') {
+            this.curveModel = selectedNodes[0];
+            this.wellModel = utils.findWellByCurve(this.curveModel.id);
+        } else this.wellModel = angular.copy(self.wells[0]);
+
+        this.idWell = this.wellModel.id;
+        selectWell(this.idWell);
+        this.selectWell = selectWell;
+
+        function zoneModels() {
+            self.modelCurves = [];
+            self.modelCurves = angular.copy(self.zones);
+            self.modelCurves.forEach(function(z) {
+                z.coalDensityCurve = 1.8;
+                z.coalNeuCurve = 0.5;
+                z.coalSonicCurve = 120;
+                z.saltNeuCurve = 2.04;
+                z.saltSonicCurve = 0;
+                z.saltDensityCurve = 67;
+                z.discrMinCurve = '';
+                z.discrMaxCurve = '';
+                z.badholeChecked = true;
+                z.coalChecked = true;
+                z.saltChecked = true;
+            })
+        }
+
+        function selectWell(idWell) {
+
+            self.wellModel = utils.findWellById(idWell);
+            self.curves = self.wellModel.children[0].children;
+            self.curveModel = getCurveModel(self.curves).curveModel;
+            self.curveDensity = getcurveDensity(self.curves).curveModel;
+            self.curveNeutron = getcurveNeutron(self.curves).curveModel;
+            self.curveSonic = getcurveSonic(self.curves).curveModel;
+            self.datasets = self.wellModel.children;
+            self.datasetModel = self.datasets[0];
+            self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
+            console.log("zoneSet", self.zoneSetModel);
+            if (selectedNodes && selectedNodes[0].type == 'zoneset') {
+                self.zoneSetModel = selectedNodes[0];
+            } else self.zoneSetModel = self.zoneSets[0];
+            selectZoneSet(self.zoneSetModel);
+            zoneModels()
+        }
+        this.selectZoneSet = selectZoneSet;
+
+        function selectZoneSet(zoneSetModel) {
+            self.zones = [];
+            if (zoneSetModel && Object.keys(zoneSetModel).length) {
+                self.zones = zoneSetModel.children;
+                zoneModels()
+            }
+
+        }
+
+        function getCurveModel(curves) {
+            let curveModel = {};
+            let frCurves = curves.filter(function(c) {
+                return (c.lineProperties &&
+                    (c.lineProperties.name == 'Characteristic caliper diameter'));
+            });
+            curveModel = frCurves[0];
+            if ((!frCurves || !frCurves.length) && curves.length) {
+                curveModel = curves[0];
+            }
+            return {
+                curveModel: curveModel
+            };
+        }
+
+        function getcurveDensity(curves) {
+            let curveDensity = {};
+            let frCurves = curves.filter(function(c) {
+                return (c.lineProperties &&
+                    ((c.lineProperties.name == 'Density') || (c.lineProperties.name == 'Bulk Density')));
+            });
+            curveDensity = frCurves[0];
+            if ((!frCurves || !frCurves.length) && curves.length) {
+                curveDensity = curves[0];
+            }
+            return {
+                curveModel: curveDensity
+            };
+        }
+
+        function getcurveNeutron(curves) {
+            let curveNeutron = {};
+            let frCurves = curves.filter(function(c) {
+                return (c.lineProperties &&
+                    ((c.lineProperties.name == 'Thermal Neutron Porosity') || (c.lineProperties.name == 'Neutron Porosity')));
+
+            });
+            curveNeutron = frCurves[0];
+            if ((!frCurves || !frCurves.length) && curves.length) {
+                curveNeutron = curves[0];
+            }
+            return {
+                curveModel: curveNeutron
+            };
+        }
+
+        function getcurveSonic(curves) {
+            let curveSonic = {};
+            let frCurves = curves.filter(function(c) {
+                return (c.lineProperties &&
+                    ((c.lineProperties.name == 'Neutron Porosity') || (c.lineProperties.name == 'Acoustic')));
+            });
+            curveSonic = frCurves[0];
+            if ((!frCurves || !frCurves.length) && curves.length) {
+                curveSonic = curves[0];
+            }
+            return {
+                curveModel: curveSonic
+            };
+        }
+
+        function validate() {
+            let validA = [];
+            self.modelCurves.forEach(zone => {
+                if (!!zone.discrMinCurve == false && !!zone.discrMaxCurve == false){
+                    validA.push(zone);
+                }
+
+            })
+            return !validA.length;
+        }
+        this.valid = validate;
+        this.onRunButtonClicked = function() {
+            if (self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            if (validate()) {
+                inputCurves = [self.curveModel, self.curveDensity, self.curveNeutron, self.curveSonic];
+                async.eachSeries(inputCurves, function(model, cb) {
+                    let curve = self.dataCurves.find(function(c) {
+                        return c.id == model.id;
+                    })
+                    if (curve) {
+                        cb();
+                    } else {
+                        wiApiService.dataCurve(model.id, dataCurve => {
+                            self.dataCurves.push({
+                                id: model.id,
+                                data: dataCurve.map(d => {
+                                    return parseFloat(d.x);
+                                })
+                            });
+                            cb();
+                        });
+                    }
+                }, function(err) {
+                    let len = Math.round((self.wellModel.bottomDepth - self.wellModel.topDepth) / self.wellModel.step);
+                    let outputCoal = new Array(len).fill(NaN);
+                    let outputSalt = new Array(len).fill(NaN);
+                    let outputBad = new Array(len).fill(NaN);
+                    let curve1 = self.dataCurves.find(function(c) {
+                        return c.id == self.curveDensity.id;
+                    })
+                    let curve2 = self.dataCurves.find(function(c) {
+                        return c.id == self.curveNeutron.id;
+                    })
+                    let curve3 = self.dataCurves.find(function(c) {
+                        return c.id == self.curveSonic.id;
+                    })
+                    let curve4 = self.dataCurves.find(function(c) {
+                        return c.id == self.curveModel.id;
+                    })
+                    for (let i = 0; i <= len; i++) {
+                        self.modelCurves.forEach(zone => {
+                            if (i >= (zone.properties.startDepth - self.wellModel.topDepth) / self.wellModel.step &&
+                                i <= (zone.properties.endDepth - self.wellModel.topDepth) / self.wellModel.step) {
+                                if (zone.coalChecked) {
+                                    if (curve1.data[i] < zone.coalDensityCurve &&
+                                        curve2.data[i] > zone.coalNeuCurve &&
+                                        curve3.data[i] > zone.coalSonicCurve) {
+                                        outputCoal[i] = 1;
+                                    } else {
+                                        outputCoal[i] = 0;
+                                    }
+                                }
+                                if (zone.saltChecked) {
+                                    if (curve1.data[i] < zone.saltDensityCurve &&
+                                        curve2.data[i] < zone.saltNeuCurve &&
+                                        curve3.data[i] < zone.saltSonicCurve) {
+                                        outputSalt[i] = 1;
+                                    } else {
+                                        outputSalt[i] = 0;
+                                    }
+                                }
+                                if (zone.badholeChecked) {
+                                    if ((curve4.data[i] > zone.discrMinCurve && zone.discrMaxCurve == '') ||
+                                        (curve4.data[i] < zone.discrMaxCurve && zone.discrMinCurve == '')) {
+                                        outputBad[i] = 0;
+                                    } else {
+                                        outputBad[i] = 1;
+                                    }
+                                }
+                            }
+                        })
+                    }
+
+                    self.applyingInProgress = false;
+                })
+            }else {
+                utils.error('error');
+                self.applyingInProgress = false;
+            }
+
+        }
+        this.onCancelButtonClicked = function() {
+            close(null);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: "badhole-coal-salt/badhole-coal-salt-modal.html",
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function(modal) {
+        modal.element.modal();
+        $(modal.element[0].children[0]).draggable();
+        modal.close.then(function() {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        });
+    });
 }
