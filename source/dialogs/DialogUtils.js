@@ -4234,7 +4234,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             showTitle: true,
             title: "New Image Track",
             topJustification: "center",
-            trackColor: '#ffffff',
+            background: '#ffffff',
             width: utils.inchToPixel(2)
             // parameterSet: null
         }
@@ -4245,7 +4245,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
         this.showTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
-        this.trackColor = props.trackColor;
+        this.background = props.background;
         this.width = props.width;
 
         this._DEL = _DEL;
@@ -4257,8 +4257,9 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
         this.wasApplyButtonClicked = false;
 
         this.trackBackground = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.trackColor, function (colorStr) {
-                self.trackColor = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.background, function (colorStr) {
+                self.background = colorStr;
+                self.arePropsChanged = true;
             });
         }
 
@@ -4385,7 +4386,7 @@ exports.imageTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, imag
             props.showTitle = self.showTitle;
             props.title = self.title;
             props.topJustification = self.topJustification;
-            props.trackColor = self.trackColor;
+            props.background = self.background;
             props.width = self.width;
             props.image_of_tracks = self.imagesOfCurrentTrack;
             // parameterSet: self.parameterSet
@@ -4517,6 +4518,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             self.selected = true;
             self.imageUrl = image.imageUrl;
             self.done = true;
+            self.arePropsChanged = true;
         }
 
         this.onImageUrlChange = _.debounce(function () {
@@ -4608,6 +4610,7 @@ exports.imageZonePropertiesDialog = function (ModalService, config, callback) {
             bindProps();
             callback(props);
             self.isNewDraw = false;
+            self.done = true;
         }
 
         this.onCancelButtonClicked = function () {
@@ -12141,6 +12144,89 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');
+        });
+    });
+}
+
+exports.combinedPlotPropertiesDialog = function (ModalService, callback) {
+    function ModalController(wiComponentService, wiApiService, close) {
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let self = this;
+
+        let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+        let wells = project.wells;
+
+        console.log('project loaded', project);
+
+        this.logplots = [];
+        this.histograms = [];
+        this.crossplots = [];
+
+        wells.forEach(function(well) {
+            well.plots.forEach(function(plot) {
+                plot.wellName = well.name;
+                self.logplots.push(plot);
+            });
+            
+            well.histograms.forEach(function(histogram) {
+                histogram.wellName = well.name;
+                self.histograms.push(histogram);
+            });
+
+            well.crossplots.forEach(function(crossplot) {
+                crossplot.wellName = well.name;
+                self.crossplots.push(crossplot);
+            });
+        });
+
+        let blank = [{
+            id: null,
+            name: ''
+        }];
+
+        this.logplots = blank.concat(this.logplots);
+        this.histograms = blank.concat(this.histograms);
+        this.crossplots = blank.concat(this.crossplots);
+
+        console.log('logplots', this.logplots);
+        console.log('histograms', this.histograms);
+        console.log('crossplots', this.crossplots);
+
+        this.onSelectLogplot = function(selectedLogplot) {
+            console.log(selectedLogplot);
+        }
+
+        this.onSelectHistogram = function(selectedHistogram) {
+            console.log(selectedHistogram);
+        }
+
+        this.onSelectCrossplot = function(selectedCrossplot) {
+            console.log(selectedCrossplot);
+        }
+
+        this.onOkButtonClicked = function () {
+            close(null);
+        }
+
+        this.onApplyButtonClicked = function () {
+            close(null);
+        }
+
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: "combined-plot-properties/combined-plot-properties-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (ret) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            callback(ret);
         });
     });
 }
