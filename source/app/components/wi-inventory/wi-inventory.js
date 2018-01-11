@@ -114,7 +114,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
     }
 
     this.importItems = [];
-    window.importItems = () => this.importItems;
+    window.importItems = this.importItems;
     this.importButtonClicked = function () {
         if (!self.importValid) return;
         let desParentModel = self.projectSelectedNode;
@@ -171,61 +171,67 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         return payload;
     }
 
-    async function importProcess(item) {
-        if (item.type == 'well') {
-            let wellPayload = {
-                idProject: item.parent.idProject,
-                name: item.properties.name,
-                topDepth: item.properties.start,
-                bottomDepth: item.properties.stop,
-                step: item.properties.step,
-            }
-            wiApiService.createWell(wellPayload, function (newWell, err) {
-                if (err) {
-                    throw err;
+    function importProcess(item) {
+        return new Promise((resolve, reject) => {
+            if (item.type == 'well') {
+                let wellPayload = {
+                    idProject: item.parent.idProject,
+                    name: item.properties.name,
+                    topDepth: item.properties.start,
+                    bottomDepth: item.properties.stop,
+                    step: item.properties.step,
                 }
-                item.properties = newWell;
-                wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (datasetImported, err) {
+                wiApiService.createWell(wellPayload, function (newWell, err) {
                     if (err) {
-                        throw err;
-                        return;
+                        reject(err);
                     }
-                    return newWell;
+                    item.properties = newWell;
+                    wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
+                        if (err) {
+                            reject(err);
+                        }
+                        item.isImported = false;
+                        resolve();
+                    })
                 })
-            })
-        } else if (item.type == 'dataset') {
-            wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (datasetImported, err) {
-                if (err) {
-                    throw err;
-                }
-                item.isImported = false;
-                return datasetImported;
-            })
-        } else if (item.type == 'curve') {
-            wiApiService.post('/inventory/import/curve', getImportPayload(item), function (curveImported, err) {
-                if (err) {
-                    throw err;
-                }
-                item.isImported = false;
-                return curveImported;
-            })
-        }
+            } else if (item.type == 'dataset') {
+                wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
+                    if (err) {
+                        reject(err);
+                    }
+                    item.isImported = false;
+                    resolve();
+                })
+            } else if (item.type == 'curve') {
+                wiApiService.post('/inventory/import/curve', getImportPayload(item), function (res, err) {
+                    if (err) {
+                        reject(err);
+                    }
+                    item.isImported = false;
+                    resolve();
+                })
+            }
+        })
     }
     this.onLoadButtonClicked = function () {
         async.eachSeries(self.importItems, function (item, next) {
             importProcess(item).then(res => {
-                next(null, res);
+                next();
             }).catch(err => {
                 next(err);
             })
         }, (err) => {
             if (err) return console.error(err);
+            // self.importItems.length = 0;
+            self.onRevertAllButtonClicked();
         })
     }
     this.onRevertAllButtonClicked = function () {
         refreshProject();
         refreshInventory();
         self.importItems.length = 0;
+        self.inventorySelectedNode = null;
+        self.projectSelectedNode = null;
         self.importValid = false;
     };
 }
