@@ -71,8 +71,11 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                     refreshToken: res.refresh_token,
                     remember: self.remember
                 };
-                wiApiService.setAuthenticationInfo(userInfo);
-                close(userInfo);
+                wiApiService.setAuthenticationInfo(userInfo, function () {
+                    wiApiService.createDatabase({}, function (response) {
+                        close(userInfo);
+                    });
+                });
             });
 
         }
