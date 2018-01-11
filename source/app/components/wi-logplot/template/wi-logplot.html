@@ -1,5 +1,16 @@
 <div class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
     @@include('./toolbar/index.html')
+    <label style="display: inline-block; vertical-align: bottom;">
+        <input type="checkbox" checked="wiLogplot.getwiD3Ctrl().referenceLine()"
+            ng-click="wiLogplot.getwiD3Ctrl().toggleReferenceLine()"/>
+        Reference Line
+    </label>
+    &nbsp;
+    <label style="display: inline-block; vertical-align: bottom;">
+        <input type="checkbox" checked="wiLogplot.getwiD3Ctrl().tooltip()"
+            ng-click="wiLogplot.getwiD3Ctrl().toggleTooltip()"/>
+        Tooltip
+    </label>
 </div>
 <div class="logplot-well-name" ng-bind="wiLogplot.wellModel.properties.name"></div>
 <div class="logplot-main-content">
