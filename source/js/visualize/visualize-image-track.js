@@ -32,7 +32,7 @@ ImageTrack.prototype.getProperties = function() {
         showTitle: this.showTitle,
         topJustification: Utils.capitalize(this.justification),
         bottomJustification: 'Center',
-        color: Utils.convertColorToRGB(this.color),
+        background: Utils.convertColorToRGB(this.bgColor),
         width: this.width
     }
 }
@@ -43,7 +43,7 @@ ImageTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'name', props.title);
     Utils.setIfNotNull(this, 'showTitle', props.showTitle);
     Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
-    Utils.setIfNotNull(this, 'color', Utils.convertColorToRGB(props.color));
+    Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.background));
     Utils.setIfNotNull(this, 'width', props.width);
 }
 

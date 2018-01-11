@@ -10,7 +10,6 @@ function Controller(wiComponentService, $timeout, $scope) {
     });
     let _backdrop = null;
 
-    // wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, hide);
     this.$onInit = function() {
         if (self.name) wiComponentService.putComponent(self.name, self);
     }

@@ -317,7 +317,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 title: "Image Track " + (imageTracks.length + 1),
                 topJustification: "center",
                 bottomJustification: "center",
-                color: '#ffffff',
+                background: '#ffffff',
                 width: Utils.inchToPixel(1)
             }
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
@@ -327,7 +327,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     showTitle: imageTrackProperties.showTitle,
                     topJustification: imageTrackProperties.topJustification,
                     bottomJustification: imageTrackProperties.bottomJustification,
-                    color: imageTrackProperties.color,
+                    background: imageTrackProperties.background,
                     width: imageTrackProperties.width,
                     orderNum: trackOrder
                 }
@@ -348,7 +348,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         config.offsetY = parseFloat(_getWellProps().topDepth);
         config.width = Utils.inchToPixel(imageTrack.width);
         config.wiComponentService = wiComponentService;
-        console.log(config);
+        config.bgColor = imageTrack.background;
+
+        console.log('image track config', config);
 
         let track = graph.createImageTrack(config, document.getElementById(self.plotAreaId));
         graph.rearrangeTracks(self);
@@ -3116,11 +3118,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     console.log(props);
                     wiApiService.editImageTrack(props, function (data) {
                         $timeout(function () {
+                            data.width = Utils.inchToPixel(data.width);
+                            _currentTrack.setProperties(data);
                             for (let img of data.image_of_tracks) {
                                 self.addImageZoneToTrack(_currentTrack, img);
                             }
-                            data.width = Utils.inchToPixel(data.width);
-                            _currentTrack.setProperties(data);
                             _currentTrack.doPlot(true);
                         });
                     });
