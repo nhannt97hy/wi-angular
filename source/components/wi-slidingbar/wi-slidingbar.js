@@ -428,7 +428,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         _offsetTop = newTop;
         $(self.contentId).css('top', '-' + newTop + 'px');
-        _viCurve.doPlot();
+        if (_viCurve) _viCurve.doPlot();
 
         // TUNG for limiting height of resizable
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
