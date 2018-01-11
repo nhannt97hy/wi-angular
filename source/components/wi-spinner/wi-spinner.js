@@ -21,7 +21,6 @@ function Controller(wiComponentService, $timeout, $scope) {
     this.show = show;
     function show(silent = false) {
         if (silent) return;
-        console.log('spinner');
         count++;
         if (!_backdrop) return;
         self.shown = true;
@@ -29,9 +28,7 @@ function Controller(wiComponentService, $timeout, $scope) {
     }
     this.hide = hide;
     function hide() {
-        console.log('stop spinner');
-        count--;
-        if (count > 0) return console.log(count);
+        if (--count > 0) return;
         self.shown = false;
         if (_spinner) _spinner.stop();
     }
