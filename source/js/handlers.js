@@ -54,6 +54,16 @@ exports.SaveProjectAsButtonClicked = function () {
     console.log('SaveProjectAsButton is clicked');
 };
 
+exports.InventoryButtonClicked = function() {
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.inventoryDialog(this.ModalService);
+}
+
+exports.ImportButtonClicked = function() {
+    exports.ImportFromInventoryButtonClicked.call(this);
+}
+
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
     let wiComponentService = this.wiComponentService;
