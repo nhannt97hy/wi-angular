@@ -2084,7 +2084,7 @@ let refreshProjectState = function () {
             wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);
             wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
             wiComponentService.emit(wiComponentService.DUSTBIN_REFRESH_EVENT);
-            resolve();
+            resolve(projectRefresh);
         });
     });
 }
@@ -2867,14 +2867,6 @@ function getValPalette(palName, paletteList) {
 }
 
 exports.getValPalette = getValPalette;
-
-function triggerWindowResize() {
-    __GLOBAL.$timeout(function () {
-        window.dispatchEvent(new Event('resize'));
-    })
-}
-
-exports.triggerWindowResize = triggerWindowResize;
 
 function putListFamily() {
     __GLOBAL.wiApiService.listFamily(function (families) {

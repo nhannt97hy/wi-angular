@@ -181,9 +181,20 @@ exports.ImportMultiLASButtonClicked = function () {
 
 exports.ImportFromInventoryButtonClicked = function () {
     let self = this;
-    let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
-    let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    DialogUtils.importFromInventoryDialog(this.ModalService)
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    // let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
+    // DialogUtils.importFromInventoryDialog(this.ModalService)
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'inventory',
+        title: 'Inventory',
+        tabIcon: 'project_normal_32x32',
+        componentState: {
+            html: `<wi-inventory></wi-inventory`,
+            name: 'wiInventory'
+        }
+    })
 };
 
 exports.OpenTemplateButtonClicked = function () {
@@ -860,7 +871,8 @@ exports.CurveListing_EditButtonClicked = function () {
         title: 'Table Curve Edit',
         tabIcon: 'curve-listing-16x16',
         componentState: {
-            html: `<wi-curve-listing></wi-curve-listing>`
+            html: `<wi-curve-listing></wi-curve-listing>`,
+            name: 'WCL'
         }
     })
 };

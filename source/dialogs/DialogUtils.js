@@ -23,6 +23,7 @@ function initModal(modal) {
         }
     });
 }
+exports.initModal = initModal;
 
 exports.authenticationDialog = function (ModalService, wiComponentService,callback) {
     function ModalController($scope, close, wiApiService) {
@@ -71,8 +72,11 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
                     refreshToken: res.refresh_token,
                     remember: self.remember
                 };
-                wiApiService.setAuthenticationInfo(userInfo);
-                close(userInfo);
+                wiApiService.setAuthenticationInfo(userInfo, function () {
+                    wiApiService.createDatabase({}, function (response) {
+                        close(userInfo);
+                    });
+                });
             });
 
         }
@@ -1757,24 +1761,6 @@ exports.importMultiLASDialog = function (ModalService, callback) {
         });
     });
 };
-
-function importModelExistedDialog (ModalService, callback) {
-    function ModalController($scope, close, wiComponentService) {
-        let self = this;
-    }
-    ModalService.showModal({
-        templateUrl: "import-model-existed/import-model-existed-modal.html",
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        initModal(modal);
-        modal.close.then(function (data) {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-            callback && callback();
-        });
-    });
-}
 
 exports.importFromInventoryDialog = function (ModalService) {
     function ModalController($scope, close, wiComponentService, wiApiService) {

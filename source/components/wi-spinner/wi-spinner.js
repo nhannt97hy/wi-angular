@@ -10,25 +10,27 @@ function Controller(wiComponentService, $timeout, $scope) {
     });
     let _backdrop = null;
 
-    wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, hide);
+    // wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, hide);
     this.$onInit = function() {
         if (self.name) wiComponentService.putComponent(self.name, self);
     }
     this.onReady = function() {
         _backdrop = document.getElementById('spinnerHolder');
-        //$timeout(function() {show();}, 3000);
     }
-    this.show = _.debounce(show, 200, { leading: true, trailing: false });
-    function show() {
+    let count = 0;
+    this.show = show;
+    function show(silent = false) {
+        if (silent) return;
+        count++;
+        if (!_backdrop) return;
         self.shown = true;
-        if (_backdrop) _backdrop.appendChild(_spinner.spin().el);
+        _backdrop.appendChild(_spinner.spin().el);
     }
-    this.hide = _.debounce(hide, 300);
+    this.hide = hide;
     function hide() {
-        $timeout(function(){
-            self.shown = false;
-            if (_spinner) _spinner.stop();
-        })
+        if (--count > 0) return;
+        self.shown = false;
+        if (_spinner) _spinner.stop();
     }
 }
 
