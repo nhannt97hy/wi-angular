@@ -9,17 +9,27 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     //let _scaleView = false;
     let _viCurve = null;
-    let parentHeight = 0;
+    //let parentHeight = 0;
     this.tinyWindow = {
         top: 0,
         height: 0
     };
     // tiny windows by percent
     this.slidingBarState = {
+        top0:0,
+        range0: 100.,
         top: 0,
         range: MIN_RANGE
     };
     let logPlotCtrl = null;
+    let __well = null;
+
+    function getWell() {
+        if (!__well) {
+            __well = utils.findWellByLogplot(logPlotCtrl.id);
+        }
+        return __well;
+    }
 
     function createPreview(idCurve) {
         console.log(idCurve);
@@ -113,7 +123,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function update(ui) {
-        parentHeight = $(self.contentId).height();
+        let parentHeight = $(self.contentId).height();
         let tempTinyWindowsHeight = self.tinyWindow.height;
         let tempTinyWindowsTop = self.tinyWindow.top;
 
@@ -125,7 +135,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         }
 
         $timeout(function () {
-            updateState(tempTinyWindowsTop, tempTinyWindowsHeight, parentHeight);
+            updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
         });
     }
 
@@ -133,15 +143,18 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
+        let oldRange = wiD3Controller.getDepthRangeRaw();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
         let high = low + (max - min) * self.slidingBarState.range / 100.;
+
         wiD3Controller.setDepthRange([low, high], true);
         wiD3Controller.processZoomFactor();
         wiD3Controller.plotAll();
         wiD3Controller.updateScale();
     }
 
-    function updateState(top, height, pHeight) {
+    function updateState(top, height) {
+        let pHeight = $(self.contentId).height();
         self.slidingBarState.top = top / pHeight * 100.;
         self.slidingBarState.range = height / pHeight * 100.;
 
@@ -159,6 +172,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             idPlot: logPlotCtrl.getLogplotModel().properties.idPlot,
             cropDisplay: logPlotCtrl.cropDisplay,
             currentState: {
+                top0: self.slidingBarState.top0,
+                range0: self.slidingBarState.range0,
                 top: low,
                 bottom: high
             }
@@ -166,6 +181,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         wiApiService.editLogplot(newLogplot, null, { silent: true });
     }, 1000);
     
+    function getHandleId() {
+        return '#sliding-handle' + self.name;
+    }
     this.$onInit = function () {
         self.contentId = '#sliding-bar-content' + self.name;
         self.handleId = '#sliding-handle' + self.name;
@@ -176,7 +194,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.onReady = function () {
         let logPlotName = self.name.replace('Slidingbar', '');
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
-        parentHeight = $(self.contentId).height();
+        let parentHeight = $(self.contentId).height();
+        //parentHeight = $(self.contentId).height();
         //self.parentHeight = parentHeight;
         let initialHeight = parentHeight * (MIN_RANGE) / 100.;
 
@@ -209,7 +228,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             axis: "y",
             containment: "parent"
         }).resizable({
-            minHeight: initialHeight,
+            minHeight: getMinTinyWinHeight(),
             containment: "parent",
             handles: "n, s"
         });
@@ -242,12 +261,14 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         new ResizeSensor($(self.contentId), function () {
             let currentParentHeight = $(self.contentId).height();
-            if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
+            self.refreshHandler();
+            //if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
             _viCurve && _viCurve.doPlot();
         });
         document.addEventListener('resize', function (event) {
             let currentParentHeight = $(self.contentId).height();
-            if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
+            self.refreshHandler();
+            //if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
             _viCurve && _viCurve.doPlot();
         })
 
@@ -311,21 +332,23 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     function updateSlidingHandler(top, height) {
         $(self.handleId).css('top', (top - _offsetTop) + 'px');
         $(self.handleId).css('height', height + 'px');
+        $(self.handleId).resizable("option", "minHeight", getMinTinyWinHeight());
 
         $timeout(function () {
-            updateState(top, height, parentHeight);
+            //updateState(top, height, parentHeight);
+            updateState(top, height);
         });
     }
 
     this.refreshHandler = function () {
-        parentHeight = $(self.contentId).height();
-        //self.parentHeight = parentHeight;
+        //parentHeight = $(self.contentId).height();
         self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
     }
 
     this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
         //let newTop = Math.round((topPercent * parentHeight) / 100);
         //let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
+        let parentHeight = $(self.contentId).height();
         let newTop = (topPercent * parentHeight) / 100.;
         let newHeight = (rangePercent * parentHeight) / 100.;
 
@@ -359,31 +382,75 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let newRange = self.slidingBarState.range + (deltaRange * 2);
         let newTop = self.slidingBarState.top - deltaRange;
         self.updateSlidingHandlerByPercent(newTop, newRange);
-    };
+    }
 
-    this.scaleView = function() {
+    let __minRange = -1;
+    function getMinRange() {
+        const MIN_STEPS_OF_VIEW = 20;
+        if (__minRange < 0) {
+            let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+            let max = wiD3Controller.getMaxDepth();
+            let min = wiD3Controller.getMinDepth();
+            __minRange = MIN_STEPS_OF_VIEW * getWell().step / (max - min);
+        }
+        return __minRange;
+    }
+    function getMinTinyWinHeight() {
+        return Math.max(10, getMinRange() * $(self.contentId).height());
+    }
+
+    this.scaleView = function(top0, range0, force) {
+        const CROPVIEW_FACTOR = 5;
         //if ( logPlotCtrl.cropDisplay ) return;
+        if (self.tinyWindow.height < CROPVIEW_FACTOR * getMinTinyWinHeight() && !force) {
+            toastr.warning('Current view is too small for cropping');
+            $(self.handleId + " .sliding-handle-border").addClass('too-small');
+            setTimeout(function() {
+                $(self.handleId + " .sliding-handle-border").removeClass('too-small');
+            }, 200);
+            return;
+        }
         logPlotCtrl.cropDisplay = true;
-        //if ( parentHeight !== $(self.contentId).parent().parent().height()) return;
-        let currentParentHeight = $(self.contentId).height();
+
+        self.slidingBarState.top0 = top0?top0:self.slidingBarState.top;
+        self.slidingBarState.range0 = range0?range0:self.slidingBarState.range;
+        _doScaleView(self.slidingBarState);
+        saveStateToServer();
+        return;
+    }
+
+    function _doScaleView(slidingBarState) {
         let viewHeight = $(self.contentId).parent().parent().height();
-        let scale = viewHeight / self.tinyWindow.height;
-        let newParentHeight = currentParentHeight * scale;
-        let newTop = (self.slidingBarState.top * newParentHeight) / 100.;
+        let newParentHeight = viewHeight * 100. / slidingBarState.range0;
+        let newTop = (slidingBarState.top0 * newParentHeight) / 100.;
 
         $(self.contentId).height(newParentHeight);
+
         _offsetTop = newTop;
         $(self.contentId).css('top', '-' + newTop + 'px');
         _viCurve.doPlot();
-        saveStateToServer();
+
+        // TUNG for limiting height of resizable
+        $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
     }
 
     this.resetView = function() {
         logPlotCtrl.cropDisplay = false;
+        self.slidingBarState.top0 = 0;
+        self.slidingBarState.range0 = 100.;
+        _doScaleView(self.slidingBarState);
+        return;
+
         let defaultParentHeight = $(self.contentId).parent().parent().height();
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);
+
+
         if (_viCurve) _viCurve.doPlot();
+
+        // TUNG for limiting height of resizable
+        $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
+
         saveStateToServer();
     }
 }

@@ -264,7 +264,6 @@ exports.ZoomOutButtonClicked = function () {
 
 exports.CropDisplayButtonClicked = function () {
     this.wiLogplot.getSlidingbarCtrl().scaleView();
-    //this.wiApiService.editLogplot({idPlot: this.wiLogplot.id, cropDisplay: true});
 };
 exports.RangeSpecificButtonClicked = function () {
     let self = this;

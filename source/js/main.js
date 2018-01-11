@@ -255,6 +255,13 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
             layoutManager.updateSize();
         }, 500);
     }
+
+    // toastr config
+    toastr.options.escapeHtml = true;
+    toastr.options.progressBar = true;
+    toastr.options.timeOut = 5000;
+    toastr.options.extendedTimeOut = 10000;
+    toastr.options.preventDuplicates = true;
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
     let functionBindingProp = {

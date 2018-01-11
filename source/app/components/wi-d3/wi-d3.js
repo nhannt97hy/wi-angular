@@ -54,6 +54,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
 
+    this.getDepthRangeRaw = function () {
+        return _depthRange;
+    }
+
     this.getMaxOrderNum = function () {
         return _tracks.reduce(function (max, item) {
             return Math.max(max, item.orderNum);
@@ -993,6 +997,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.zoom = function (zoomOut) {
+        const MIN_STEPS_OF_VIEW = 20; // Dupplicate code . See wi-slidingbar.js, getMinRange() function
         let range = _depthRange[1] - _depthRange[0];
         let low, high;
         let maxDepth = self.getMaxDepth();
@@ -1006,7 +1011,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             low = _depthRange[0] + range * 0.2;
             high = _depthRange[1] - range * 0.2;
         }
-        if (low + 2 * yStep >= high) return;
+        if (low + MIN_STEPS_OF_VIEW * yStep >= high) return;
 
         low = low < minDepth ? minDepth : low;
         high = high > maxDepth ? maxDepth : high;
@@ -3212,12 +3217,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log('on destroy');
         wiComponentService.pushComponent(self.name, null);
     }
+    this.shouldShowSlider = function() {
+        return self.contentWidth > self.sliderWidth + 45;
+    }
     function updateSlider() {
         let wholeWidth = $(`wi-logplot[name=${self.logPlotCtrl.name}]`).width();
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
-        if (self.contentWidth <= self.sliderWidth + 41)
+        if (!self.shouldShowSlider())
             self.slider.noUiSlider.reset();
             //$(`#${self.plotAreaId}`).css('left', '0px');
     }

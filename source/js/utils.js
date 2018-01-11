@@ -1624,7 +1624,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                         }
                         setTimeout(function () {
                             if(plot.cropDisplay) {
-                                logplotCtrl.handlers.CropDisplayButtonClicked();
+                                logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
                             } else {
                                 logplotCtrl.handlers.ViewWholeWellButtonClicked();
                             }
@@ -2881,6 +2881,9 @@ function putListFamily() {
         //         return 0;
         //     }
         // });
+        families.sort(function(a, b) {
+            return parseInt(a.idFamily) - parseInt(b.idFamily);
+        });
         __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.LIST_FAMILY, families);
     })
 }
