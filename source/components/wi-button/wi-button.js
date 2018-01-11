@@ -19,12 +19,15 @@ function ButtonController(wiComponentService) {
             self.checked = !self.checked;
         }
         if (self.handler) {
-            self.index && self.handler(self.index);
-            if (self.handlerArgs) {
-                Array.isArray(self.handlerArgs) && self.handler(...self.handlerArgs);
-                self.handler(self.handlerArgs);
+            if (self.index) {
+                self.handler(self.index);
             } else {
-                self.handler();
+                if (self.handlerArgs) {
+                    Array.isArray(self.handlerArgs) && self.handler(...self.handlerArgs);
+                    self.handler(self.handlerArgs);
+                } else {
+                    self.handler();
+                }
             }
         }
     };
