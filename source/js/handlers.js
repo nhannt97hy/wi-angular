@@ -629,7 +629,7 @@ exports.BlankCrossPlotButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let selectedNode = utils.getSelectedNode();
+    let selectedNode = getStaticNode('crossplots');
     if (selectedNode.type != 'crossplots') return;
     let promptConfig = {
         title: 'Create New Crossplot',
@@ -652,7 +652,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     console.log("Template Cross Plot clicked ", templateCross);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let selectedNode = utils.getSelectedNode();
+    let selectedNode = getStaticNode('crossplots');
     if (selectedNode.type != 'crossplots') return;
     let promptConfig = {
         title: 'Create New Crossplots Template',

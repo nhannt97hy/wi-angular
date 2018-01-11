@@ -20,9 +20,8 @@ function Controller(wiComponentService, $timeout, $scope) {
     let count = 0;
     this.show = show;
     function show(silent = false) {
-        if (silent) return;
         count++;
-        if (!_backdrop) return;
+        if (!_backdrop || self.shown || silent) return;
         self.shown = true;
         _backdrop.appendChild(_spinner.spin().el);
     }

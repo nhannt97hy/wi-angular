@@ -352,9 +352,8 @@ var wiApiWorker = function ($http, wiComponentService) {
                         });
                     } else {
                         self.stopWorking();
-                        if (err.reason) self.getUtils().error(err.reason, function () {
-                            job.callback && job.callback(null, err)
-                        });
+                        if (err.reason) toastr.error(err.reason);
+                        job.callback && job.callback(null, err)
                         console.error(err);
                     }
                 });

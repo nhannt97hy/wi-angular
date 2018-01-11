@@ -2551,7 +2551,9 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
             cb();
         }
     }, function(cb) {
-        refreshProjectState().then(cb);
+        refreshProjectState().then(function () {
+            cb();
+        });
     }, function(cb) {
         crossplotModel = getModel('crossplot', crossplotProps.idCrossPlot);
         __GLOBAL.wiApiService.getCrossplot(crossplotProps.idCrossPlot, function(dataReturn) {

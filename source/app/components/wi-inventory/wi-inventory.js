@@ -55,7 +55,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
 
     let projectModel;
     function refreshProject() {
-        projectLoaded = utils.refreshProjectState().then(projectLoaded => {
+        utils.refreshProjectState().then(projectLoaded => {
             projectModel = modelFrom(projectLoaded);
             self.projectConfig = [projectModel];
         });
@@ -107,20 +107,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         desParentModel.children.push(importedModel);
         if (Array.isArray(model.children) && model.children.length) {
             model.children.forEach(childModel => {
-                importedModel.children.push(importModel(childModel, importedModel))
+                importModel(childModel, importedModel);
             })
         }
         return importedModel;
     }
 
-    let importItems = [];
-    window.importItems = importItems;
+    this.importItems = [];
+    window.importItems = () => this.importItems;
     this.importButtonClicked = function () {
-        if (!this.importValid) return;
-        let desParentModel = this.projectSelectedNode;
-        let model = this.inventorySelectedNode;
-        if (this.projectSelectedNode.type == model.type) {
-            desParentModel = utils.getParentByModel(this.projectSelectedNode.type, this.projectSelectedNode.id, null, projectModel);
+        if (!self.importValid) return;
+        let desParentModel = self.projectSelectedNode;
+        let model = self.inventorySelectedNode;
+        if (self.projectSelectedNode.type == model.type) {
+            desParentModel = utils.getParentByModel(self.projectSelectedNode.type, self.projectSelectedNode.id, null, projectModel);
         } else {
             desParentModel.data.childExpanded = true;
         }
@@ -133,15 +133,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
             if (desParentModel.isImported) {
                 importModel(model, desParentModel);
             } else {
-                importItems.push(importModel(model, desParentModel));
+                self.importItems.push(importModel(model, desParentModel));
             }
         }
     }
 
     function getImportPayload(model) {
         const parentModel = utils.getParentByModel(model.type, model.id, null, projectModel);
-        let payload;
-        if (model.type == 'dataset') {
+        let payload = [];
+        if (model.type == 'well') {
+            let datasets = [];
+            model.children.forEach(datasetModel => {
+                payload.push.apply(payload,getImportPayload(datasetModel));
+            })
+        } else if (model.type == 'dataset') {
             let curves = [];
             model.children.forEach(curveModel => {
                 curves.push({
@@ -150,23 +155,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
                     unit: curveModel.properties.unit
                 })
             })
-            payload = {
+            payload.push({
                 name: model.properties.name,
                 idDesWell: parentModel.properties.idWell,
                 curves: curves
-            }
+            });
         } else if (model.type == 'curve') {
-            payload = {
+            payload.push({
                 idInvCurve: model.properties.idCurve,
                 idDesDataset: parentModel.properties.idDataset,
                 name: model.properties.name,
                 unit: model.properties.unit
-            }
+            })
         }
-        return [payload];
+        return payload;
     }
 
-    function importProcess(item) {
+    async function importProcess(item) {
         if (item.type == 'well') {
             let wellPayload = {
                 idProject: item.parent.idProject,
@@ -177,47 +182,51 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
             }
             wiApiService.createWell(wellPayload, function (newWell, err) {
                 if (err) {
-                    // reject(err);
-                    return;
+                    throw err;
                 }
                 item.properties = newWell;
-                item.children.forEach(datasetModel => {
-                    importProcess(datasetModel);
-                });
-                // resolve(newWell);
+                wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (datasetImported, err) {
+                    if (err) {
+                        throw err;
+                        return;
+                    }
+                    return newWell;
+                })
             })
         } else if (item.type == 'dataset') {
             wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (datasetImported, err) {
                 if (err) {
-                    // reject(err);
-                    return;
+                    throw err;
                 }
-                item.properties = datasetImported;
-                // resolve(datasetImported);
+                // item.properties = datasetImported;
+                return datasetImported;
             })
         } else if (item.type == 'curve') {
             wiApiService.post('/inventory/import/curve', getImportPayload(item), function (curveImported, err) {
                 if (err) {
-                    // reject(err);
-                    return;
+                    throw err;
                 }
-                item.properties = curveImported;
-                // resolve(curveImported);
+                // item.properties = curveImported;
+                return curveImported;
             })
         }
     }
     this.onLoadButtonClicked = function () {
-        async.eachSeries(importItems, (item, index, next) => {
-            importProcess(item);
+        async.eachSeries(self.importItems, function (item, next) {
+            importProcess(item).then(res => {
+                next(null, res);
+            }).catch(err => {
+                next(err);
+            })
         }, (err) => {
             if (err) return console.error(err);
-            refreshProject();
-            refreshInventory();
         })
     }
     this.onRevertAllButtonClicked = function () {
         refreshProject();
         refreshInventory();
+        self.importItems.length = 0;
+        self.importValid = false;
     };
 }
 
