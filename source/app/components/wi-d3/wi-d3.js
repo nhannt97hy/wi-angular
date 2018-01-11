@@ -142,7 +142,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         _setCurrentTrack(track);
-
+        track.setCurrentDrawing(null);
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 

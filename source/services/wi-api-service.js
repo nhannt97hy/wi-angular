@@ -30,13 +30,14 @@ const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://localhost:3000';
-// const AUTHENTICATION_SERVICE = 'http://localhost:2999';
-// const PROCESSING_SERVICE = 'http://localhost:5000';
+// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+// const PROCESSING_SERVICE = 'http://login.sflow.me';
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
+const DATABASE_UPDATE = '/database/update';
 const REFRESH_TOKEN = '/refresh-token';
 
 const UPLOAD_MULTIFILES = '/files';
@@ -541,6 +542,12 @@ Service.prototype.register = function (data, callback) {
     let self = this;
     console.log(data);
     this.post(REGISTER, data, callback, 'auth');
+}
+Service.prototype.createDatabase = function (data, callback){
+    this.post(DATABASE_UPDATE, data, callback);
+}
+Service.prototype.dropDatabase = function (data, callback){
+    this.delete(DATABASE_UPDATE, data, callback);
 }
 Service.prototype.refreshToken = function (refreshToken, callback) {
   if (!refreshToken) return;
@@ -1591,8 +1598,9 @@ Service.prototype.saveCustomFills = function (customFills, callback) {
     let self = this;
     this.post(SAVE_CUSTOM_FILLS, customFills, callback);
 }
-Service.prototype.setAuthenticationInfo = function (authenInfo) {
+Service.prototype.setAuthenticationInfo = function (authenInfo, callback) {
     __USERINFO = authenInfo;
+    if(callback) callback();
 }
 
 Service.prototype.getCaptcha = function () {

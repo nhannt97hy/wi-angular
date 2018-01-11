@@ -995,7 +995,14 @@ exports.FormationResistivityButtonClicked = function () {
 
 exports.Badhole_Coal_SaltButtonClicked = function () {
     console.log('Badhole/Coal/SaltButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    DialogUtils.badholeCoalSaltDialog(this.ModalService, function (data) {
+        console.log("Badhole_Coal_Salt");
+    });
 };
+
 
 exports.UserFormulaButtonClicked = function () {
     console.log('UserFormulaButton is clicked');

@@ -8,6 +8,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+
     function getDatasets() {
         self.datasets.length = 0;
         self.curvesArr.length = 0;
@@ -131,7 +132,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 wiApiService.dataCurve(SelCurve.id, function(data){
                     let dataF = data.map(d => parseFloat(d.x));
                     self.curvesData[self.currentIndex].push({
-                        datasetCurve: SelCurve.datasetName + '.' + SelCurve.name,
+                        name: SelCurve.name,
+                        datasetName: SelCurve.datasetName,
                         idDataset: SelCurve.properties.idDataset,
                         id: SelCurve.id,
                         data: dataF,
