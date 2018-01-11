@@ -25,9 +25,18 @@ wi-curve-listing{
             tr{
                 display: flex;
             }
+            td{
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
         .modified{
             background: orange;
+        }
+        .undo{
+            font-size: 14px;
+            margin-left: 1rem;
         }
     }
 
@@ -58,16 +67,16 @@ wi-curve-listing{
                 }
         
                 thead>tr>th{
-                    width:140px;
-                    min-width: 140px;
+                    width:100px;
+                    min-width: 100px;
                     &:first-child{
                         width: 50px;
                         min-width: 50px;
                     }
                 }
                 tbody>tr>td{
-                    min-width: 140px;
-                    width:140px;
+                    min-width: 100px;
+                    width:100px;
                     &:first-of-type{
                         background: #ccc;
                     }

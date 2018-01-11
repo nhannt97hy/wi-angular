@@ -58,6 +58,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 if (!model) return;
                 model.data.opened = false;
                 if (model.isReady) model.isReady = false;
+                wiComponentService.dropComponent(model.type + model.id);
             }
         });
         container.on('resize', function () {
@@ -195,26 +196,7 @@ module.exports.putTabRightWithModel = function (model) {
 module.exports.removeTabWithModel = function (model) {
     let item;
     let wiComponentService = this.wiComponentService;
-    switch (model.type) {
-        case 'logplot':
-            item = layoutManager.root.getItemsById('logplot' + model.id)[0];
-            wiComponentService.dropComponent('logplot' + model.id);
-            break;
-        case 'crossplot':
-            item = layoutManager.root.getItemsById('crossplot' + model.id)[0];
-            wiComponentService.dropComponent('crossplot' + model.id);
-            break;
-        case 'histogram':
-            item = layoutManager.root.getItemsById('histogram' + model.id)[0];
-            wiComponentService.dropComponent('histogram' + model.id);
-            break;
-        case 'comboview':
-            item = layoutManager.root.getItemsById('comboview' + model.id)[0];
-            wiComponentService.dropComponent('comboview' + model.id);
-            break;
-        default:
-            return;
-    }
+    item = layoutManager.root.getItemsById(model.type + model.id)[0];
     if (!item) return;
     layoutManager.root.getItemsById('right')[0].removeChild(item);
 }

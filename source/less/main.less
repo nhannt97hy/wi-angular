@@ -181,7 +181,7 @@ label.flex-row {
             white-space: nowrap;
             vertical-align: middle;
         }
-    }    
+    }
 }
 
 .width-95-percent {
@@ -194,7 +194,7 @@ label.flex-row {
     width: 15%;
 }
 .width-290{
-    width: 290px;    
+    width: 290px;
 }
 
 .width-868{
@@ -211,7 +211,7 @@ label.flex-row {
 }
 
 .width-250{
-    width: 250px;    
+    width: 250px;
 }
 .width-150{
     width: 150px;
@@ -219,7 +219,7 @@ label.flex-row {
 .width-auto {
     width: auto;
 }
-.fix-btn-sm p{ 
+.fix-btn-sm p{
     width: 106px;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -248,7 +248,7 @@ wi-dropdown.fix-btn-sm p{
     -moz-border-image: -moz-linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
     -webkit-border-image: -webkit-linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
     border-image: linear-gradient(to bottom, rgba(180,182,191,0) 0%, rgba(180,182,191,1) 51%, rgba(180,182,191,0) 100%);
-    border-image-slice: 1;     
+    border-image-slice: 1;
     margin-bottom: 0;
 }
 
@@ -261,11 +261,11 @@ wi-dropdown.fix-btn-sm p{
     color: #fff;
     border: none;
     box-shadow: none;
-    text-indent: center;   
+    text-indent: center;
 }
 
 input[type].display-none, .display-none {
-    display: none !important; 
+    display: none !important;
 }
 
 @-webkit-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
@@ -277,11 +277,11 @@ input[type].display-none, .display-none {
     -webkit-animation:fadeIn ease-in 1;  /* call our keyframe named fadeIn, use animattion ease-in and repeat it only 1 time */
     -moz-animation:fadeIn ease-in 1;
     animation:fadeIn ease-in 1;
-  
+
     -webkit-animation-fill-mode:forwards;  /* this makes sure that after animation is done we remain at the last keyframe value (opacity: 1)*/
     -moz-animation-fill-mode:forwards;
     animation-fill-mode:forwards;
-  
+
     -webkit-animation-duration:0.2s;
     -moz-animation-duration:0.2s;
     animation-duration:0.2s;
@@ -508,4 +508,15 @@ div.noUi-handle:after, div.noUi-handle:before {
 div.noUi-base {
     background-color: #888;
     cursor: pointer;
+}
+.table-body-scroll tbody {
+	display: block;
+	height: 200px;
+	max-height:300px;
+	overflow-y:scroll;
+}
+.table-body-scroll  thead, tbody tr {
+	display:table;
+	width:100%;
+	table-layout:fixed;
 }

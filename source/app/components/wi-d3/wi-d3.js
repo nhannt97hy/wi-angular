@@ -1,21 +1,11 @@
 const componentName = 'wiD3';
 const moduleName = 'wi-d3';
 
-function getCurveFromName(name) {
-    console.log("-", name);
-    let nSamples = 1000;
-    let samples = new Array();
-    for (let i = 0; i < nSamples; i++) {
-        samples.push({y: i, x: Math.random()});
-    }
-    return samples;
-}
-
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService, $compile) {
     let self = this;
     this.scopeObj = $scope;
     this.compileFunc = $compile;
-    
+
     let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
