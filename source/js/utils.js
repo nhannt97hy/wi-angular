@@ -183,19 +183,15 @@ function shadingToTreeConfig(shading, paletteList) {
         refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
-        // showRefLine: false
     };
-    if (shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
-        shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palName;
-        shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palette];
+    if (shadingModel.data.fill && shadingModel.data.fill.varShading) {
+        shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palName];
     }
-    if (shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading && shadingModel.data.positiveFill.varShading.palette) {
-        shadingModel.data.positiveFill.varShading.palName = shadingModel.data.positiveFill.varShading.palName;
-        shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palette];
+    if (shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading) {
+        shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palName];
     }
-    if (shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading && shadingModel.data.negativeFill.varShading.palette) {
-        shadingModel.data.negativeFill.varShading.palName = shadingModel.data.negativeFill.varShading.palName;
-        shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palette];
+    if (shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading) {
+        shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palName];
     }
     console.log("shadingModel:", shadingModel);
     return shadingModel;
@@ -1369,6 +1365,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
     let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
     let wiApiService = __GLOBAL.wiApiService;
+    let well = findWellByLogplot(logplotModel.properties.idPlot);
     getPalettes(function (paletteList) {
         wiApiService.getLogplot(logplotModel.id,
             function (plot) {
@@ -1407,32 +1404,36 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 
                 function drawAllShadings(someTrack, trackObj) {
                     someTrack.shadings.forEach(function (shading) {
-                        let shadingModel = shadingToTreeConfig(shading, paletteList);
-                        let linesOfTrack = trackObj.getCurves();
-                        console.log("LinhTinh:", linesOfTrack, shading, shadingModel);
-                        let lineObj1 = null;
-                        let lineObj2 = null;
+                        wiApiService.dataCurve(shading.idControlCurve, function(dataCurve) {
 
-                        if (!shadingModel.idRightLine) return;
-                        if (!shadingModel.idLeftLine) {
-                            for (let line of linesOfTrack) {
-                                if (line.id == shading.idRightLine) {
-                                    lineObj1 = line;
+                            let shadingModel = shadingToTreeConfig(shading, paletteList);
+                            shadingModel.data.selectedCurve = graph.buildCurve({idCurve: shading.idControlCurve}, dataCurve, well.properties);
+                            let linesOfTrack = trackObj.getCurves();
+                            console.log("LinhTinh:", linesOfTrack, shading, shadingModel);
+                            let lineObj1 = null;
+                            let lineObj2 = null;
+
+                            if (!shadingModel.idRightLine) return;
+                            if (!shadingModel.idLeftLine) {
+                                for (let line of linesOfTrack) {
+                                    if (line.id == shading.idRightLine) {
+                                        lineObj1 = line;
+                                    }
                                 }
+                                wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
                             }
-                            wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
-                        }
-                        else {
-                            for (let line of linesOfTrack) {
-                                if (line.id == shading.idRightLine) {
-                                    lineObj1 = line;
+                            else {
+                                for (let line of linesOfTrack) {
+                                    if (line.id == shading.idRightLine) {
+                                        lineObj1 = line;
+                                    }
+                                    if (line.id == shading.idLeftLine) {
+                                        lineObj2 = line;
+                                    }
                                 }
-                                if (line.id == shading.idLeftLine) {
-                                    lineObj2 = line;
-                                }
+                                wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
                             }
-                            wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
-                        }
+                        })
 
                     });
                 };
@@ -1496,6 +1497,7 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
                                 if (lineCount == lineNum) {
                                     drawAllShadings(someTrack, aTrack);
                                     aTrack.setCurrentDrawing(null);
+                                    console.log("innnn", aTrack);
                                     _cb();
                                 }
                             });
@@ -1931,12 +1933,14 @@ function findWellById(idWell) {
 }
 exports.findWellById = findWellById;
 
-exports.findWellByLogplot = function (idLogplot) {
+function findWellByLogplot (idLogplot) {
     var path = getSelectedPath(function (node) {
         return node.type == "logplot" && node.id == idLogplot;
     }) || [];
     return path.find(p => p.type == 'well');
 };
+exports.findWellByLogplot = findWellByLogplot;
+
 exports.findWellByCrossplot = function (idCrossPlot) {
     var path = getSelectedPath(function (node) {
         return node.type == 'crossplot' && node.id == idCrossPlot;

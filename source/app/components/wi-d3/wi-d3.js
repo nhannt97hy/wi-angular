@@ -15,13 +15,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let self = this;
     this.scopeObj = $scope;
     this.compileFunc = $compile;
-
+    
     let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _tooltip = true;
-    let _referenceLine = true;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
 
@@ -57,19 +56,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.tooltip = function (on) {
         if (on === undefined) return _tooltip;
         _tooltip = on;
-    }
-
-    this.referenceLine = function(on) {
-        if (on === undefined) return _referenceLine;
-        _referenceLine = on;
-    }
-
-    this.toggleTooltip = function() {
-        _tooltip = !_tooltip;
-    }
-
-    this.toggleReferenceLine = function() {
-        _referenceLine = !_referenceLine;
     }
 
     this.getDepthRange = function () {
@@ -185,19 +171,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         function _addShadingToTrack (shading) {
-            let shadingModel = Utils.shadingToTreeConfig(shading, palettes);
-            if (!shadingModel.idRightLine) return;
-            if (!shadingModel.idLeftLine) {
-                let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
-                if (!lineObj1) return;
-                self.addCustomShadingToTrack(viTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
-            }
-            else {
-                let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
-                let lineObj2 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idLeftLine);
-                if (!lineObj1 || ! lineObj2) return;
-                self.addPairShadingToTrack(viTrack, lineObj2, lineObj1, shadingModel.data);
-            }
+            wiApiService.dataCurve(shading.idControlCurve, function(dataCurve) {
+                let shadingModel = Utils.shadingToTreeConfig(shading, palettes);
+                shadingModel.data.selectedCurve = graph.buildCurve({idCurve: shading.idControlCurve}, dataCurve, _getWellProps());
+                if (!shadingModel.idRightLine) return;
+                if (!shadingModel.idLeftLine) {
+                    let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
+                    if (!lineObj1) return;
+                    self.addCustomShadingToTrack(viTrack, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                }
+                else {
+                    let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
+                    let lineObj2 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idLeftLine);
+                    if (!lineObj1 || ! lineObj2) return;
+                    self.addPairShadingToTrack(viTrack, lineObj2, lineObj1, shadingModel.data);
+                }
+            })
         }
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
             viTrack.getMarkers().forEach(viMarker => {
@@ -1019,7 +1008,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //let sign = (d3.event.deltaY<0)?"":"-";
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
-        _drawTooltip();
+        _drawTooltip(_currentTrack);
     }
 
     this.zoom = function (zoomOut) {
@@ -1046,7 +1035,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
-        _drawTooltip();
+        _drawTooltip(_currentTrack);
     }
 
     this.updateTrack = function (viTrack) {
@@ -1116,29 +1105,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _drawTooltip(track) {
+        if (!_tooltip) return;
 
-        let plotMouse, x, y, plotDim;
+        let plotMouse = d3.mouse(track.plotContainer.node());
+        let x = plotMouse[0];
+        let y = plotMouse[1];
+        let plotDim = track.plotContainer.node().getBoundingClientRect();
 
-        if (!track) {
-            for (let tr of _tracks) {
-                plotMouse = d3.mouse(tr.plotContainer.node());
-                x = plotMouse[0];
-                y = plotMouse[1];
-                plotDim = tr.plotContainer.node().getBoundingClientRect();
-                if (x > 0 && x < plotDim.width && y > 0 && y < plotDim.height) {
-                    track = tr;
-                    break;
-                }
-            }
-        }
+        if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
 
-        if (!track) track = _currentTrack;
-        y = d3.mouse(track.plotContainer.node())[1];
-        let depth = track.getTransformY().invert(y);
+        let depth = track.getTransformY().invert(plotMouse[1]);
 
         _tracks.forEach(function(tr) {
-            if (_referenceLine && tr.drawTooltipLines) tr.drawTooltipLines(depth);
-            if (_tooltip && tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
+            if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
+            if (tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
         // graph.createTooltipLines(svg);
     }
@@ -1618,7 +1598,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
-        track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
@@ -1906,13 +1885,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     wiApiService.dataCurve(options.idControlCurve, function (curveData) {
                         options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
                         if(!options.isNegPosFill) {
-                            if(options.fill.varShading && options.fill.varShading.palette)
+                            if(options.fill.varShading && options.fill.varShading.palName)
                                 options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
                         }
                         else {
-                            if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
+                            if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
                                 options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                            if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
+                            if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
                                 options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
                         }
                         currentShading.setProperties(options);
@@ -2384,7 +2363,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         ]);
     }
     this.createShadingForSelectedCurve = function () {
-
+        
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1) return;
@@ -2472,7 +2451,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 delete request.leftLine;
                 delete request.rightLine;
 
-                if (options.idLeftLine < 0)
+                if (options.idLeftLine < 0) 
                     request.idLeftLine = null;
                 else {
                         request.leftFixedValue = null;
@@ -2936,7 +2915,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         let newCrossplotModel = null;
                         let newOoT;
                         async.series([ function(callback) {
-                            utils.createCrossplot(_getWellProps().idWell,
+                            utils.createCrossplot(_getWellProps().idWell, 
                                 "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
                                 function(err, crossplotModel) {
                                     if (err) {
@@ -3005,7 +2984,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
-                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot,
+                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
                                 newCrossplotModel.properties.name, $scope, $compile);
                             callback();
                         }]);

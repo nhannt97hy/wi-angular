@@ -236,7 +236,7 @@
                                 <input type="checkbox"
                                        ng-model="wiModal.displayType"
                                        ng-change="wiModal.correctFillingStyleVarShading()"
-                                       ng-disabled="wiModal.varShadingType == 'customFills'">
+                                       ng-disabled="wiModal.variableShadingOptions.fill.varShading.varShadingType == 'customFills'">
                                     Positive/Negative Fill
                             </label>
                         </div>
@@ -289,12 +289,11 @@
                         <div class="form-group">
                             <label class="control-label col-sm-12" style="border-top: 1px solid #cecece">
                                 <input type="radio" value="gradient"
-                                        ng-model="wiModal.varShadingType"
-                                        ng-change="wiModal.setGradientIfNull()">
+                                        ng-model="wiModal.variableShadingOptions.fill.varShading.varShadingType">
                                 Gradient
                             </label>
                         </div>
-                        <div ng-if="wiModal.varShadingType == 'gradient'">
+                        <div ng-if="wiModal.variableShadingOptions.fill.varShading.varShadingType == 'gradient'">
                             <div class="form-group padding-left-1_5em" ng-style="wiModal.disablePointer(!wiModal.variableShadingOptions.fill.display)">
                                 <label class="control-label col-sm-4 padding-left-3em">Fill color</label>
                                 <div class="col-sm-4 text-center padding-bottom-0_5em">
@@ -353,11 +352,12 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-12">
-                                <input type="radio" value="palette" ng-model="wiModal.varShadingType">
+                                <input type="radio" value="palette" 
+                                        ng-model="wiModal.variableShadingOptions.fill.varShading.varShadingType">
                                 Palette
                             </label>
                         </div>
-                        <div ng-if="wiModal.varShadingType == 'palette'">
+                        <div ng-if="wiModal.variableShadingOptions.fill.varShading.varShadingType == 'palette'">
                             <div class="form-group" ng-style="wiModal.disablePointer(!wiModal.variableShadingOptions.fill.display)">
                                 <label class="control-label col-sm-4 padding-left-4_5em">Fill Palette</label>
                                 <div class="col-sm-8 padding-bottom-0_5em">
@@ -401,12 +401,13 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-12">
-                                <input type="radio" value="customFills" ng-model="wiModal.varShadingType"
+                                <input type="radio" value="customFills" 
+                                        ng-model="wiModal.variableShadingOptions.fill.varShading.varShadingType"
                                         ng-change="wiModal.setCustomFillsIfNull()">
                                 Custom Fills
                             </label>
                         </div>
-                        <div ng-if="wiModal.varShadingType == 'customFills'">
+                        <div ng-if="wiModal.variableShadingOptions.fill.varShading.varShadingType == 'customFills'">
                             <form action="" class="form-horizontal">
                                 <div class="width-85-percent float-left padding-left-1em" style="height: 150px; overflow: auto; border-bottom: solid 1.2em transparent">
                                     <table style="border-collapse: collapse;" class="text-on-table table-bordered customFillsTable col-sm-12">
