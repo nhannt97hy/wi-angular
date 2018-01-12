@@ -7971,14 +7971,14 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                         }
                     }
                     self.props.reference_curves = self.ref_Curves_Arr;
-                    plotModel.properties = self.props;
+                    plotModel.properties = angular.copy(self.props);
                     console.log("plotModel:", plotModel.properties);
                     if (callback) callback();
                 });
             }
             else {
                 self.props.reference_curves = self.ref_Curves_Arr;
-                plotModel.properties = self.props;
+                plotModel.properties = angular.copy(self.props);
             }
 
         }

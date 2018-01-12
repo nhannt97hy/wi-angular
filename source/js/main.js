@@ -55,6 +55,7 @@ let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
 
 let layoutManager = require('./layout');
+let historyState = require('./historyState');
 
 let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
@@ -223,16 +224,50 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     layoutManager = {};
     utils.bindFunctions(layoutManager, boundedLayoutManager, functionBindingProp);
     wiComponentService.putComponent(wiComponentService.LAYOUT_MANAGER, layoutManager);
+    wiComponentService.putComponent(wiComponentService.HISTORYSTATE, historyState);
+    window.HS = historyState;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
     layoutManager.putLeft('explorer-block', 'Project');
     layoutManager.putLeft('property-block', 'Properties');
 
     wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
+        historyState.createHistory();
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
+        if(historyState.getPlotsLengthFromHistory()){
+            DialogUtils.confirmDialog(ModalService, 'Restore Opened Plot Tabs', 'Do you want to restore opened plot tabs?', function(ret){
+                if(ret){
+                    let types = ['logplot', 'crossplot', 'histogram', 'comboview'];
+                    types.forEach(type => {
+                        let openedTabs = historyState.getPlotsFromHistory(type);
+                        openedTabs.forEach(tab => {
+                            let model = utils.getModel(type, tab);
+                            switch(type){
+                                case 'logplot':
+                                utils.openLogplotTab(wiComponentService, model);
+                                break;
+
+                                case 'crossplot':
+                                utils.openCrossplotTab(model);
+                                break;
+
+                                case 'histogram':
+                                utils.openHistogramTab(model);
+                                break;
+
+                                case 'comboview':
+                                utils.openComboviewTab(model);
+                                break;
+                            }
+                        })
+                    })
+                }
+            })
+        }
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
+        historyState.removeHistory();
     });
     wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
         console.log(logplotModel);
