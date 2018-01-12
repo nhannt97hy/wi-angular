@@ -453,7 +453,7 @@ function createFillStyles1(ctx, fills, callback) {
 
             let transform;
 
-            if (fill.varShading.customFills) {
+            if (fill.varShading.customFills && fill.varShading.varShadingType == 'customFills') {
                 let customFills = fill.varShading.customFills;
                 let content = customFills.content;
                 let patCanvasId = customFills.patCanvasId;
@@ -516,7 +516,7 @@ function createFillStyles1(ctx, fills, callback) {
 
                 let reverse = startX > endX;
 
-                if (fill.varShading.gradient) {
+                if (fill.varShading.gradient && fill.varShading.varShadingType == 'gradient') {
                     let startColor = fill.varShading.gradient.startColor;
                     let endColor = fill.varShading.gradient.endColor;
                     transform = d3.scaleLinear()
@@ -525,7 +525,7 @@ function createFillStyles1(ctx, fills, callback) {
                         .clamp(true);
 
                 }
-                else if (fill.varShading.palette) {
+                else if (fill.varShading.palette && fill.varShading.varShadingType == 'palette') {
                     let palette = fill.varShading.palette.map(function(c) {
                         return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
                     });
@@ -597,7 +597,7 @@ function createFillStyles(ctx, fills, callback) {
 
                 let transform;
 
-                if (fill.varShading.customFills) {
+                if (fill.varShading.customFills && fill.varShading.varShadingType == 'customFills') {
                     let customFills = fill.varShading.customFills;
                     let content = customFills.content;
                     let patCanvasId = customFills.patCanvasId;
@@ -660,7 +660,7 @@ function createFillStyles(ctx, fills, callback) {
 
                     let reverse = startX > endX;
 
-                    if (fill.varShading.gradient) {
+                    if (fill.varShading.gradient && fill.varShading.varShadingType == 'gradient') {
                         let startColor = fill.varShading.gradient.startColor;
                         let endColor = fill.varShading.gradient.endColor;
                         transform = d3.scaleLinear()
@@ -669,7 +669,7 @@ function createFillStyles(ctx, fills, callback) {
                             .clamp(true);
 
                     }
-                    else if (fill.varShading.palette) {
+                    else if (fill.varShading.palette && fill.varShading.varShadingType == 'palette') {
                         let palette = fill.varShading.palette.map(function(c) {
                             return d3.rgb(c.red, c.green, c.blue, c.alpha).toString();
                         });
