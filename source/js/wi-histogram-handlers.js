@@ -49,8 +49,7 @@ exports.FrequencyInfoButtonClicked = function() {
 }
 
 exports.ZoneButtonClicked = function() {
-    console.log('ZoneButton is clicked');
-    this.wiHistogram.isShowWiZone = !this.wiHistogram.isShowWiZone;
+    this.wiHistogram.toggleShowWiZone();
 }
 
 exports.GaussianButtonClicked = function() {

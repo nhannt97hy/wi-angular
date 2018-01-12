@@ -337,8 +337,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-    this.CloseReferenceWindow = function () {
-        self.crossplotModel.properties.referenceDisplay = false;
+    this.switchReferenceZone = function(state) {
+        if (!self.wiCrossplotCtrl) return;
+        if (state != undefined || state != null) self.wiCrossplotCtrl.isShowWiZone = state;
+        else self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
+        if (self.contextMenu.length) {
+            self.contextMenu.find(c => c.name == 'ShowReferenceZone').checked = self.wiCrossplotCtrl.isShowWiZone;
+        }
+        document.dispatchEvent(new Event('resize'));
     }
 
     this.switchReferenceWindow = function(state) {
@@ -580,10 +586,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     isCheckType: "true",
                     checked: (self.wiCrossplotCtrl || {}).isShowWiZone || false,
                     handler: function (index) {
-                        if (!self.wiCrossplotCtrl) return;
-                        self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
-                        document.dispatchEvent(new Event('resize'));
-                        self.contextMenu[index].checked = self.wiCrossplotCtrl.isShowWiZone;
+                        self.switchReferenceZone();
                     }
                 }, {
                     name: "ShowReferenceWindow",
