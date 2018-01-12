@@ -79,13 +79,11 @@
                                 <div class="form-group" style="overflow-x:auto;">
                                     <table class="table-body-scroll table table-bordered text-on-table " style="background: #F2F2F2;">
                                         <thead>
-
-                                            <th>Zone</th>
-                                            <th colspan="2">Depth</th>
-                                            <th colspan="4">Coal</th>
+                                            <th style="width: 7.6%;">Zone</th>
+                                            <th style="width: 15.4%;" colspan="2">Depth</th>
+                                            <th style="width: 28%;" colspan="4">Coal</th>
                                             <th colspan="4">Salt</th>
                                             <th colspan="3">Bad Hole</th>
-
                                         </thead>
                                         <thead>
                                             <th>Name</th>
@@ -103,7 +101,7 @@
                                             <th>Discr Min</th>
                                             <th>Discr Max</th>
 
-                                            <th style="width:2%" </th>
+                                            <th style="width:1.1%" </th>
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="zone in wiModal.modelCurves track by $index">
@@ -152,41 +150,74 @@
                                 <h5>Output</h5>
                                 <div class="container-fluid">
                                     <div class='form-group'>
-                                        <label class="col-sm-1">Dataset</label>
-                                        <div class="col-sm-2">
-                                            <select class="form-control wi-form-control" ng-model="wiModal.datasetModel" ng-options="dataset as dataset.properties.name for dataset in wiModal.datasets">
-                                            </select>
+                                        <div class="col-sm-3">
+                                            <label class="col-sm-4">Dataset</label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control wi-form-control" ng-model="wiModal.datasetModel" ng-options="dataset as dataset.properties.name for dataset in wiModal.datasets">
+                                                </select>
+                                            </div>
                                         </div>
-                                        <label class="col-sm-1">Bad Hole</label>
-                                        <div class="col-sm-2">
-                                            <wi-custom-input type='curve' model='wiModal.badholeCurve'
-                                                options='wiModal.curves' class="col-sm-6"
-                                                style="width: 100%">
-                                            </wi-custom-input>
-                                        </div>
-                                        <label class="col-sm-1">Coal</label>
-                                        <div class="col-sm-2">
-                                            <wi-custom-input type='curve' model='wiModal.coalCurve'
-                                                options='wiModal.curves' class="col-sm-6"
-                                                style="width: 100%">
-                                            </wi-custom-input>
-                                        </div>
-                                        <label class="col-sm-1">Salt</label>
-                                        <div class="col-sm-2">
-                                            <wi-custom-input type='curve' model='wiModal.saltCurve'
-                                                options='wiModal.curves' class="col-sm-6"
-                                                style="width: 100%">
-                                            </wi-custom-input>
+                                        <div class="col-sm-3">
+                                            <label class="col-sm-4">Bad Hole</label>
+                                            <div class="col-sm-8">
+                                                <wi-custom-input type='curve' model='wiModal.badholeCurve'
+                                                    options='wiModal.curves' class="col-sm-8"
+                                                    style="width: 100%">
+                                                </wi-custom-input>
+                                            </div>
+                                       </div>
+                                       <div class="col-sm-3">
+                                           <label class="col-sm-4">Coal</label>
+                                           <div class="col-sm-8">
+                                               <wi-custom-input type='curve' model='wiModal.coalCurve'
+                                                   options='wiModal.curves' class="col-sm-8"
+                                                   style="width: 100%">
+                                               </wi-custom-input>
+                                           </div>
+                                       </div>
+                                        <div class="col-sm-3">
+                                            <label class="col-sm-4">Salt</label>
+                                            <div class="col-sm-8">
+                                                <wi-custom-input type='curve' model='wiModal.saltCurve'
+                                                    options='wiModal.curves' class="col-sm-8"
+                                                    style="width: 100%">
+                                                </wi-custom-input>
+                                            </div>
                                         </div>
                                     </div>
-
+                                    <div class="form-group" ng-if="wiModal.uploading">
+                                        <div class="col-sm-offset-3 col-sm-3">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" aria-valuenow="70"
+                                                      aria-valuemin="0" aria-valuemax="100" ng-style="{width:wiModal.badholeCurve.percent}">{{wiModal.badholeCurve.percent}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" aria-valuenow="70"
+                                                      aria-valuemin="0" aria-valuemax="100" ng-style="{width:wiModal.coalCurve.percent}">{{wiModal.coalCurve.percent}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" aria-valuenow="70"
+                                                      aria-valuemin="0" aria-valuemax="100" ng-style="{width:wiModal.saltCurve.percent}">{{wiModal.saltCurve.percent}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                     </form>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled='wiModal.applyingInProgress'><span class="run-16x16"></span>&nbsp;Run</button>
+                    <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                    <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'
+                        ng-disabled='wiModal.applyingInProgress ||!wiModal.saltCurve.curveName ||!wiModal.coalCurve.curveName||!wiModal.badholeCurve.curveName ||!wiModal.modelCurves.length ||!wiModal.curveModel.properties.name'>
+                        <span class="run-16x16"></span>&nbsp;Run</button>
                     <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()' ng-disabled='wiModal.applyingInProgress'><span class="close-16x16"></span>&nbsp;Close</button>
                 </div>
             </div>
