@@ -31,7 +31,7 @@ const INVENTORY_SERVICE = 'http://inv.sflow.me';
 //local
 // const BASE_URL = 'http://localhost:3000';
 // const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-// const PROCESSING_SERVICE = 'http://login.sflow.me';
+// const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 // route: GET, CREATE, UPDATE, DELETE
@@ -1711,3 +1711,7 @@ Service.prototype.savgolfil = function (data, callback){
 Service.prototype.getInventory = function (callback) {
     this.post(GET_INVENTORY, {}, callback, 'inventory');
 }
+
+Service.prototype.getInventoryUrl = function () {
+    return INVENTORY_SERVICE;
+};

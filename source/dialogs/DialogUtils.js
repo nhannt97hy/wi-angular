@@ -1767,7 +1767,8 @@ exports.importMultiLASDialog = function (ModalService, callback) {
 exports.inventoryDialog = function (ModalService) {
     function ModalController($scope, $sce, close, wiComponentService, wiApiService) {
         let self = this;
-        this.inventoryUrl = $sce.trustAsResourceUrl(`http://inv.sflow.me?token=${localStorage.getItem('token')}`);
+        let inventoryBaseUrl = wiApiService.getInventoryUrl();
+        this.inventoryUrl = $sce.trustAsResourceUrl(inventoryBaseUrl + `?token=${localStorage.getItem('token')}`);
         this.onCancelButtonClicked = function () {
             close(null, 100);
         };

@@ -15,12 +15,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let self = this;
     this.scopeObj = $scope;
     this.compileFunc = $compile;
-    
+
     let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _tooltip = true;
+    let _referenceLine = true;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
 
@@ -56,6 +57,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.tooltip = function (on) {
         if (on === undefined) return _tooltip;
         _tooltip = on;
+    }
+
+    this.referenceLine = function(on) {
+        if (on === undefined) return _referenceLine;
+        _referenceLine = on;
+    }
+
+    this.toggleTooltip = function() {
+        _tooltip = !_tooltip;
+    }
+
+    this.toggleReferenceLine = function() {
+        _referenceLine = !_referenceLine;
     }
 
     this.getDepthRange = function () {
@@ -1005,7 +1019,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //let sign = (d3.event.deltaY<0)?"":"-";
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
-        _drawTooltip(_currentTrack);
+        _drawTooltip();
     }
 
     this.zoom = function (zoomOut) {
@@ -1032,7 +1046,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
-        _drawTooltip(_currentTrack);
+        _drawTooltip();
     }
 
     this.updateTrack = function (viTrack) {
@@ -1102,20 +1116,29 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _drawTooltip(track) {
-        if (!_tooltip) return;
 
-        let plotMouse = d3.mouse(track.plotContainer.node());
-        let x = plotMouse[0];
-        let y = plotMouse[1];
-        let plotDim = track.plotContainer.node().getBoundingClientRect();
+        let plotMouse, x, y, plotDim;
 
-        if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
+        if (!track) {
+            for (let tr of _tracks) {
+                plotMouse = d3.mouse(tr.plotContainer.node());
+                x = plotMouse[0];
+                y = plotMouse[1];
+                plotDim = tr.plotContainer.node().getBoundingClientRect();
+                if (x > 0 && x < plotDim.width && y > 0 && y < plotDim.height) {
+                    track = tr;
+                    break;
+                }
+            }
+        }
 
-        let depth = track.getTransformY().invert(plotMouse[1]);
+        if (!track) track = _currentTrack;
+        y = d3.mouse(track.plotContainer.node())[1];
+        let depth = track.getTransformY().invert(y);
 
         _tracks.forEach(function(tr) {
-            if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
-            if (tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
+            if (_referenceLine && tr.drawTooltipLines) tr.drawTooltipLines(depth);
+            if (_tooltip && tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
         // graph.createTooltipLines(svg);
     }
@@ -2361,7 +2384,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         ]);
     }
     this.createShadingForSelectedCurve = function () {
-        
+
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1) return;
@@ -2449,7 +2472,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 delete request.leftLine;
                 delete request.rightLine;
 
-                if (options.idLeftLine < 0) 
+                if (options.idLeftLine < 0)
                     request.idLeftLine = null;
                 else {
                         request.leftFixedValue = null;
@@ -2913,7 +2936,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         let newCrossplotModel = null;
                         let newOoT;
                         async.series([ function(callback) {
-                            utils.createCrossplot(_getWellProps().idWell, 
+                            utils.createCrossplot(_getWellProps().idWell,
                                 "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
                                 function(err, crossplotModel) {
                                     if (err) {
@@ -2982,7 +3005,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
-                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
+                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot,
                                 newCrossplotModel.properties.name, $scope, $compile);
                             callback();
                         }]);

@@ -418,10 +418,16 @@ function drawCluster(shading, clustered, negFill, posFill, highlight) {
 
     if (shading.leftCurve) {
         leftSide = shading.leftCurve.calculateDataForBlockPosition(leftSide);
+        if (shading.leftCurve.displayAs == 'Cumulative') {
+            leftSide = shading.leftCurve.calculateDataForDisplayAs(leftSide);
+        }
         leftTranslateX = shading.leftCurve.getCanvasTranslateXForWrapMode();
     }
     if (shading.rightCurve) {
         rightSide = shading.rightCurve.calculateDataForBlockPosition(rightSide);
+        if (shading.rightCurve.displayAs == 'Cumulative'){
+            rightSide = shading.rightCurve.calculateDataForDisplayAs(rightSide);
+        }
         rightTranslateX = shading.rightCurve.getCanvasTranslateXForWrapMode();
     }
     let translateX = Utils.uniq(leftTranslateX.concat(rightTranslateX));
