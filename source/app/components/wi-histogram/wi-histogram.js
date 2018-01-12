@@ -23,9 +23,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
+        document.dispatchEvent(new Event('resize'));
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
+        document.dispatchEvent(new Event('resize'));
     }
     this.CloseReferenceWindow = function () {
         let wiD3HistogramCtrl = self.getwiD3Ctrl();
@@ -58,7 +60,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (self.name) wiComponentService.putComponent(self.name, self);
         let histogramModel = self.getModel();
         self.isShowWiZone = histogramModel ? !!histogramModel.properties.idZoneSet: false;
-        
     };
     this.getwiD3Ctrl = function() {
         if(!_wiD3HistogramCtrl){
