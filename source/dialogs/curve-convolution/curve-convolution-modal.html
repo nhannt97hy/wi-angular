@@ -56,6 +56,11 @@
                             <wi-custom-input type='curve' model='wiModal.ResultCurve' options='wiModal.curvesArr'></wi-custom-input>
                         </div>
                     </div>
+                    <div class="progress" ng-if="wiModal.percent">
+                        <div class="progress-bar" role="progressbar"
+                                aria-valuemin="0" aria-valuemax="100" ng-style="{width:wiModal.percent + '%'}">{{wiModal.percent}}%
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
