@@ -1598,6 +1598,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
+        track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
             if (d3.event.button == 2) {
                 _shadingOnRightClick();
@@ -2393,6 +2394,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     background: "blue"
                 }
             },
+
             showRefLine: false
         };
 
@@ -2408,9 +2410,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: null
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
         }
         wiApiService.createShading(shadingObj, function (shading) {
+            if (!shading) return;
             let shadingModel = Utils.shadingToTreeConfig(shading);
             if (!curve2) {
                 // This should open dialog
@@ -2419,14 +2422,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             else {
                 self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
             }
-            // DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-            //     if (props) {
-            //         console.log('logTrackPropertiesData', props);
-            //     }
-            // }, {
-            //     tabs: ['false', 'false', 'true'],
-            //     shadingOnly: true
-            // });
             let currentShading = _currentTrack.getCurrentShading();
             let shadingOptions = currentShading.getProperties();
             let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
@@ -3380,7 +3375,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             tracks.push(objectTrack);
                         })
                     }
-                    function drawAllShadings(someTrack, trackObj) {
+                    function drawAllShadings(someTrack, trackObj, callback) {
                         someTrack.shadings.forEach(function (shading) {
                             wiApiService.dataCurve(shading.idControlCurve, function(dataCurve) {
                                 let shadingModel = Utils.shadingToTreeConfig(shading, paletteList);
@@ -3468,8 +3463,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     console.log(someTrack);
                                     lineCount++;
                                     if (lineCount == lineNum) {
-                                        drawAllShadings(someTrack, aTrack);
-                                        aTrack.setCurrentDrawing(null);
+                                        drawAllShadings(someTrack, aTrack, function(){
+                                            aTrack.setCurrentDrawing(null);
+                                        });
                                         _cb();
                                     }
                                 });
