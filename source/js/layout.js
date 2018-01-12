@@ -59,6 +59,8 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 model.data.opened = false;
                 if (model.isReady) model.isReady = false;
                 wiComponentService.dropComponent(model.type + model.id);
+                let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
+                historyState.removePlotFromHistory(model.type, model.id);
             }
             if (componentState.name) wiComponentService.dropComponent(componentState.name);
         });
@@ -178,6 +180,8 @@ module.exports.putTabRightWithModel = function (model) {
         },
         title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name} - (${well.properties.name})</span>`
     });
+    let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
+    historyState.putPlotToHistory(model.type, model.id);
     let tabContainer = rightContainer.getItemsById(itemId)[0];
     switch (model.type) {
         case 'crossplot':
@@ -200,6 +204,8 @@ module.exports.removeTabWithModel = function (model) {
     item = layoutManager.root.getItemsById(model.type + model.id)[0];
     if (!item) return;
     layoutManager.root.getItemsById('right')[0].removeChild(item);
+    let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
+    historyState.removePlotFromHistory(model.type, model.id);    
 }
 
 module.exports.removeAllRightTabs = function () {

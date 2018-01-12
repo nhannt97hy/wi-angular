@@ -74,6 +74,7 @@ app.factory(wiServiceName, function () {
         COPYING_CURVE: 'copying-curve',
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
+        HISTORYSTATE: 'HISTORY_STATE',
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         // MOMENT: 'moment',

@@ -278,8 +278,16 @@ function clusterPairData(data1, data2) {
         tmp1 = [],
         tmp2 = [];
 
+    data2Map = {}
+    for (let i = 0; i < data2.length; i ++) {
+        data2Map[data2[i].y] = data2[i].x;
+    }
+
     for (let i = 0; i <= data1.length; i ++) {
-        if (i == data1.length || data1[i].x == null || data2[i].x == null) {
+        let y;
+        if (i < data1.length)
+            y = data1[i].y;
+        if (i == data1.length || data1[i].x == null || data2Map[y] == null) {
             if (tmp1.length && tmp2.length)
                 ret.push([tmp1, tmp2]);
             tmp1 = [];
@@ -287,7 +295,10 @@ function clusterPairData(data1, data2) {
         }
         else {
             tmp1.push(data1[i]);
-            tmp2.push(data2[i]);
+            tmp2.push({
+                x: data2Map[y],
+                y: y
+            });
         }
     };
     return ret
@@ -702,7 +713,7 @@ function trimData(data) {
 function parseData(data) {
     return data.map(function(d) {
         return {
-            x: (d.x == null || isNaN(d.y)) ? null : parseFloat(d.x),
+            x: (d.x == null || isNaN(d.x)) ? null : parseFloat(d.x),
             y: (d.y == null || isNaN(d.y)) ? null : parseFloat(d.y)
         }
     });

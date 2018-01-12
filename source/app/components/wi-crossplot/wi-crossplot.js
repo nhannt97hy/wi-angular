@@ -24,7 +24,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         //self.crossplotModel = utils.getModel('crossplot', self.id);
     };
     this.CloseZone = function () {
-        self.isShowWiZone = false;
+        let wiD3CrossplotCtrl = self.getWiD3CrossplotCtrl();
+        if (!wiD3CrossplotCtrl) return;
+        wiD3CrossplotCtrl.switchReferenceZone(false);
     }
 
     this.getWiZoneCtrlName = function () {
@@ -89,7 +91,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let wiD3CrossplotCtrl = self.getWiD3CrossplotCtrl();
         if (!wiD3CrossplotCtrl) return;
         wiD3CrossplotCtrl.switchReferenceWindow(false);
-        //wiD3CrossplotCtrl.crossplotModel.properties.referenceDisplay = false;
     }
 }
 
