@@ -2608,6 +2608,11 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
                 }
             }
         }
+        this.setVarShadingType = function () {
+            let type = self.variableShadingOptions.fill.varShading.varShadingType;
+            self.variableShadingOptions.positiveFill.varShading.varShadingType = type;
+            self.variableShadingOptions.negativeFill.varShading.varShadingType = type;
+        }
         function isValid() {
             self.errorReason = null;
             if(!self.shadingOptions.idRightLine) {
@@ -2627,8 +2632,10 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         }
         this._options = {};
         function doApply() {
+            self.setVarShadingType();
             let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
             console.log("gg",self.shadingOptions);
+
             self._options = {
                 _index : shadingOptions._index,
                 changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
