@@ -183,19 +183,15 @@ function shadingToTreeConfig(shading, paletteList) {
         refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
-        // showRefLine: false
     };
-    if (shadingModel.data.fill && shadingModel.data.fill.varShading && shadingModel.data.fill.varShading.palette) {
-        shadingModel.data.fill.varShading.palName = shadingModel.data.fill.varShading.palName;
-        shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palette];
+    if (shadingModel.data.fill && shadingModel.data.fill.varShading) {
+        shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palName];
     }
-    if (shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading && shadingModel.data.positiveFill.varShading.palette) {
-        shadingModel.data.positiveFill.varShading.palName = shadingModel.data.positiveFill.varShading.palName;
-        shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palette];
+    if (shadingModel.data.positiveFill && shadingModel.data.positiveFill.varShading) {
+        shadingModel.data.positiveFill.varShading.palette = paletteList[shadingModel.data.positiveFill.varShading.palName];
     }
-    if (shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading && shadingModel.data.negativeFill.varShading.palette) {
-        shadingModel.data.negativeFill.varShading.palName = shadingModel.data.negativeFill.varShading.palName;
-        shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palette];
+    if (shadingModel.data.negativeFill && shadingModel.data.negativeFill.varShading) {
+        shadingModel.data.negativeFill.varShading.palette = paletteList[shadingModel.data.negativeFill.varShading.palName];
     }
     console.log("shadingModel:", shadingModel);
     return shadingModel;
@@ -1524,12 +1520,14 @@ function findWellById(idWell) {
 }
 exports.findWellById = findWellById;
 
-exports.findWellByLogplot = function (idLogplot) {
+function findWellByLogplot (idLogplot) {
     var path = getSelectedPath(function (node) {
         return node.type == "logplot" && node.id == idLogplot;
     }) || [];
     return path.find(p => p.type == 'well');
 };
+exports.findWellByLogplot = findWellByLogplot;
+
 exports.findWellByCrossplot = function (idCrossPlot) {
     var path = getSelectedPath(function (node) {
         return node.type == 'crossplot' && node.id == idCrossPlot;

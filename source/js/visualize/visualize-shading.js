@@ -160,11 +160,10 @@ Shading.prototype.setProperties = function(props) {
     }
 
     Utils.setIfNotUndefined(this, 'selectedCurve', props.controlCurve);
-
     this.showRefLine = this.getType() == 'custom';
 
-    if (!this.leftCurve || !this.rightCurve)
-        this.selectedCurve = this.leftCurve || this.rightCurve;
+    // if (!this.leftCurve || !this.rightCurve)
+    this.selectedCurve = props.controlCurve || this.leftCurve || this.rightCurve;
 }
 
 /**
@@ -271,7 +270,7 @@ Shading.prototype.doPlot = function(highlight) {
 
     let leftData = this.prepareData(this.leftCurve);
     let rightData = this.prepareData(this.rightCurve);
-    let vpRefX = this.vpX.ref = this.getTransformX(this.selectedCurve)(this.refX);
+    let vpRefX = this.vpX.ref = this.getTransformX(this.rightCurve)(this.refX);
     let vpLeftX = this.vpX.left;
     let vpRightX = this.vpX.right;
 
@@ -339,7 +338,7 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
                 }
             });
 
-            if (fill.varShading.customFills) return ret.push(null);
+            if (fill.varShading.customFills && fill.varShading.varShadingType == 'customFills') return ret.push(null);
         }
         else {
             let transformX = self.getTransformX(self.selectedCurve);
@@ -347,7 +346,7 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
             varShading.endX = transformX(varShading.endX);
             varShading.data = self.prepareData(self.selectedCurve);
 
-            if (varShading.customFills) {
+            if (varShading.customFills && varShading.varShadingType == 'customFills') {
                 varShading.customFills.patCanvasId = 'shading-' + self.id + '-pattern-canvas';
                 varShading.customFills.content.forEach(function(d) {
                     d.lowVal = transformX(d.lowVal);

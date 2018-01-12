@@ -270,6 +270,7 @@ LogTrack.prototype.setTmpCurve = function(curve) {
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
     if (drawing == this.currentDrawing) return;
     this.currentDrawing = drawing;
+    console.log("current", this.currentDrawing);
     this.tmpCurve = null;
     this.plotAllDrawings();
     if (drawing && drawing.isCurve()) {
@@ -281,6 +282,8 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
         this.updateAxis();
     }
     this.highlightHeader();
+    console.log("current123", this.currentDrawing);
+
 }
 
 /**
@@ -429,7 +432,7 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
         let vpRefX = d3.event.x;
         vpRefX = vpRefX > rightMost ? rightMost : vpRefX;
         vpRefX = vpRefX < leftMost ? leftMost : vpRefX;
-        shading.refX = shading.getTransformX(shading.selectedCurve).invert(vpRefX);
+        shading.refX = shading.getTransformX(shading.rightCurve).invert(vpRefX);
         shading.drawRootTooltip();
         self.plotShading(shading);
         scheduleUpdateShading(shading, function(res){
