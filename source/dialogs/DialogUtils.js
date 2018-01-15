@@ -3170,7 +3170,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
-                console.log("tab shadings", item);
                 let request = angular.copy(item);
 
                 if(item.idLeftLine == -3) {
@@ -3199,7 +3198,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         request.leftFixedValue = null;
                         request.idLeftLine = parseInt(item.leftLine.id);
                     }
-                console.log("edit Shadinggggggg", item, request, options);
 
                 switch(item.changed) {
                     case changed.unchanged:
@@ -3208,14 +3206,15 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     case changed.created: {
                         wiApiService.createShading(request, function (shading) {
                             wiD3Ctrl.updateLogTrack(currentTrack);
+                            self.shadingList = currentTrack.getShadings();
+                            self.shadings[idx].idShading = shading.idShading;
                             callback();
-                            item.changed = changed.unchanged;
                         });
+                        item.changed = changed.unchanged;
                         break;
                     }
 
                     case changed.updated: {
-                        console.log("edit Shading", item, request, options);
                         wiApiService.editShading(request, function (shading) {
                             utils.getPalettes(function(paletteList){
                                 wiApiService.dataCurve(options.idControlCurve, function (curveData) {
@@ -3230,8 +3229,11 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                                         if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
                                             options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
                                     }
-                                    console.log("item shading", options, shading, paletteList);
-                                    self.shadingList[idx].setProperties(options);
+                                    // self.shadingList[idx].setProperties(options);
+                                    currentTrack.drawings.filter(function(d) {
+                                        return (d.isShading() && d.id == shading.idShading);
+                                    })[0].setProperties(options);
+
                                     $timeout(function() {
                                         currentTrack.plotAllDrawings();
                                     });
@@ -3262,6 +3264,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         });
                     }
                     self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
+                    self.shadingList = currentTrack.getShadings();
                     if (updateShadingsTabCb) updateShadingsTabCb(err);
             });
         }
@@ -3278,9 +3281,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             updateGeneralTab(function (err) {
                                 callback();
                             });
-                            // async.setImmediate(function() {
-                            //     callback();
-                            // });
                         },
                         function(callback) {
                             updateCurvesTab(function(err) {
@@ -3293,7 +3293,6 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                             });
                         }], function(err, results) {
                             console.log(err, results);
-                            console.log("applyInProgress", self.applyInProgress);
                             if (!self.applyInProgress) callback(true);
                         });
             self.applyInProgress = false;
