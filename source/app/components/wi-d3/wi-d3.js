@@ -156,13 +156,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         _setCurrentTrack(track);
-        track.setCurrentDrawing(null);
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(track, depthRange);
 
         _registerLogTrackCallback(track);
         _registerTrackHorizontalResizerDragCallback();
         _registerTrackDragCallback(track);
+        track.setCurrentDrawing(null);
         return track;
     };
 
@@ -2393,7 +2393,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     background: "blue"
                 }
             },
-
             showRefLine: false
         };
 
@@ -2409,13 +2408,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
+            idControlCurve: null
         }
         wiApiService.createShading(shadingObj, function (shading) {
-            if (!shading) return;
             let shadingModel = Utils.shadingToTreeConfig(shading);
             if (!curve2) {
-                // This should open dialog
                 self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);
             }
             else {
@@ -2426,9 +2423,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
             this.shadingList = _currentTrack.getShadings();
 
-            console.log("Shading Properties", currentShading);
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
-                console.log("update shadingAttributeDialog", options);
                 let request = angular.copy(options);
                 if(options.idLeftLine == -3) {
                     options.type = 'custom';
@@ -2445,35 +2440,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 delete request.leftLine;
                 delete request.rightLine;
 
-                if (options.idLeftLine < 0) 
+                if (options.idLeftLine < 0) {
                     request.idLeftLine = null;
+                    options.leftLine = null;
+                    options.idLeftLine = null;
+                }
                 else {
                         request.leftFixedValue = null;
                         request.idLeftLine = parseInt(options.idLeftLine);
                     }
-                Utils.getPalettes(function(paletteList){
-                    wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                        options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
-                        if(!options.isNegPosFill) {
-                            if(options.fill.varShading && options.fill.varShading.palette)
-                                options.fill.varShading.palette = options[options.fill.varShading.palName];
-                        }
-                        else {
-                            if(options.positiveFill.varShading && options.positiveFill.varShading.palette)
-                                options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                            if(options.negativeFill.varShading && options.negativeFill.varShading.palette)
-                                options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                        }
-                        currentShading.setProperties(options);
-                        $timeout(function() {
-                            _currentTrack.plotAllDrawings();
-                        });
+                wiApiService.editShading(request, function (shading) {
+                    Utils.getPalettes(function(paletteList){
+                        wiApiService.dataCurve(options.idControlCurve, function (curveData) {
+                            options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
+                            if(!options.isNegPosFill) {
+                                if(options.fill.varShading && options.fill.varShading.palName)
+                                    options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
+                            }
+                            else {
+                                if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
+                                    options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
+                                if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
+                                    options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
+                            }
+                            currentShading.setProperties(options);
+                            $timeout(function() {
+                                _currentTrack.plotAllDrawings();
+                            });
 
+                        });
                     });
                 });
             }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
         })
     }
+    
     this.createCrossplot = function () {
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
@@ -3405,6 +3406,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 }
                             })
                         });
+                        if(callback) callback();
                     };
                     let trackProps = new Array();
                     async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
@@ -3463,6 +3465,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     lineCount++;
                                     if (lineCount == lineNum) {
                                         drawAllShadings(someTrack, aTrack, function(){
+                                            console.log("setCurrentDrawing is null");
                                             aTrack.setCurrentDrawing(null);
                                         });
                                         _cb();
