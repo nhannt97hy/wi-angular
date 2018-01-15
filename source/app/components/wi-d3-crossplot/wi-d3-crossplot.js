@@ -56,7 +56,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 cb();
             });
         }], function(err, result) {
-            console.log('updated', self.crossplotModel.properties);
+            // console.log('updated', self.crossplotModel.properties);
             if (callback) callback();
         });
     }
@@ -274,7 +274,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.linkModels = function () {
         setWiZoneArr(null);
-
         if (self.crossplotModel && self.crossplotModel.properties.pointsets &&
             self.crossplotModel.properties.pointsets.length &&
             self.crossplotModel.properties.pointsets[0] &&
@@ -282,7 +281,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointsets[0].idZoneSet);
             //self.zoneArr = self.zoneSetModel.children;
-
             setWiZoneArr(self.zoneSetModel.children);
             self.zoneArr.forEach(function (zone) {
                 zone.handler = function () {}
@@ -345,6 +343,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.contextMenu.find(c => c.name == 'ShowReferenceZone').checked = self.wiCrossplotCtrl.isShowWiZone;
         }
         document.dispatchEvent(new Event('resize'));
+    }
+
+    this.switchReferenceZone = function(onOrOff) {
+        if (!self.wiCrossplotCtrl) return;
+        if (onOrOff === undefined)
+            self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
+        else
+            self.wiCrossplotCtrl.isShowWiZone = onOrOff;
+        document.dispatchEvent(new Event('resize'));
+        self.contextMenu[index].checked = self.wiCrossplotCtrl.isShowWiZone;
     }
 
     this.switchReferenceWindow = function(state) {
@@ -413,7 +421,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     cb();
                                 });
                             }
-                            else async.setImmediate(cb);
+                            else cb();
                         },
                         function(cb) {
                             if (pointSet.idCurveY) {
@@ -422,7 +430,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     cb();
                                 });
                             }
-                            else async.setImmediate(cb);
+                            else cb();
                         },
                         function(cb) {
                             if (pointSet.idCurveZ) {
@@ -431,7 +439,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     cb();
                                 })
                             }
-                            else async.setImmediate(cb);
+                            else cb();
                         },
                         function(cb) {
                             if (xplotProps.pointsets[0].idOverlayLine) {
@@ -440,7 +448,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     cb();
                                 });
                             }
-                            else async.setImmediate(cb);
+                            else cb();
                         }
                     ], function(result, err) {
                         let crossplotProps = angular.copy(xplotProps);
@@ -468,17 +476,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
                         //if (callback) callback(crossplotProps);
 
-                        console.log("ret", crossplotProps);
                         self.linkModels();
                         if (crossplotProps.pointSet.idZoneSet) {
                             crossplotProps.pointSet.zones = self.zoneArr.map(function(zone) {
                                 return zone.properties;
                             });;
                         }
+                        let idZoneSet = (crossplotProps.pointSet || {}).idZoneSet;
+
                         delete self.viCrossplot.pointSet;
-                        console.log('OVERLAY', crossplotProps.pointSet.overlayLine);
                         self.viCrossplot.setProperties(crossplotProps);
-                        self.viCrossplot.doPlot();
+                        // self.viCrossplot.doPlot();
+                        try {
+                            self.switchReferenceZone(idZoneSet != null);
+                        }
+                        catch(e) {
+                            // Canh - Dont know why error :'(
+                        }
+
                         if (self.histogramModelX) {
                             if ($('#' + self.name + "HistogramX").length) {
                                 if(crossplotProps.pointSet.idCurveZ){
@@ -737,6 +752,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             config.pointSet = config.pointsets[0];
 
         if (config.pointSet) {
+
             self.loading = true;
             async.parallel([function(callback) {
                 if (!viCurveX && config.pointSet.idCurveX) {
@@ -747,7 +763,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
                 else {
-                    async.setImmediate(callback);
+                    callback();
                 }
             }, function(callback) {
                 if (!viCurveY && config.pointSet.idCurveY) {
@@ -758,7 +774,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
                 else {
-                    async.setImmediate(callback);
+                    callback();
                 }
 
             }, function(callback) {
@@ -771,7 +787,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
                 else {
-                    async.setImmediate(callback);
+                    callback();
                 }
             },
             function(callback) {
@@ -782,9 +798,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
                 else {
-                    async.setImmediate(callback);
+                    callback();
                 }
             }], function(err, result) {
+                config = angular.copy(config);
                 if (config.ternaries) {
                     let vertices = config.ternaries.map(function(d) {
                         return {
@@ -799,7 +816,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                     config.ternary = { vertices: vertices };
                 }
-
+                self.linkModels();
+                if (config.pointSet) {
+                    if (config.pointSet.idZoneSet) {
+                        config.pointSet.zones = self.zoneArr.map(function(zone) {
+                            return zone.properties;
+                        });
+                    }
+                }
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 self.loading = false;

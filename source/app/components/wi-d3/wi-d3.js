@@ -1124,7 +1124,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _removeTooltip(track) {
-        if (!_tooltip) return;
         _tracks.forEach(function(tr) {
             if (tr.removeTooltipLines) tr.removeTooltipLines();
             if (tr.removeTooltipText) tr.removeTooltipText();

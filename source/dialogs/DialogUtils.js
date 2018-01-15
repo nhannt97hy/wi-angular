@@ -8221,6 +8221,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         window.curveCov = this;
         this.isDeconvolution = isDeconvolution;
         this.applyingInProgress = false;
+        this.percent = 0;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.refresh = function(cb){
@@ -8284,6 +8285,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.percent = 0;
             $timeout(function(){
                 self.refresh(function(){
                     self.onWellChanged();
@@ -8357,6 +8359,8 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
             wiApiService.processingDataCurve(payload, function(){
                 console.log('Curve Saved!');
                 utils.refreshProjectState();
+            }, function(percent){
+                self.percent = percent;
             })
         }
 
