@@ -7263,35 +7263,27 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 self.ref_Curves_Arr[index].flag = self._FEDIT;
             }
         }
-        this.onSelectRefCurve = function(index, curve){
-            self.ref_Curves_Arr[index].idCurve = self.ref_Curves_Arr[index].curve.idCurve;
+        this.onSelectRefCurve = function(index){
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
                 self.ref_Curves_Arr[index].flag = self._FEDIT;
             }
-            if(curve) {
-                let family = utils.findFamilyById(self.ref_Curves_Arr[index].curve.idFamily);
-                if (family) {
-                    self.ref_Curves_Arr[index].left = family.minScale;
-                    self.ref_Curves_Arr[index].right = family.maxScale;
-                    self.ref_Curves_Arr[index].color = family.lineColor;
-                }
-                else if(!self.ref_Curves_Arr[index].curve.minScale
-                    && !self.ref_Curves_Arr[index].curve.maxScale != null ) {
-                    self.ref_Curves_Arr[index].left = self.ref_Curves_Arr[index].curve.minScale;
-                    self.ref_Curves_Arr[index].right = self.ref_Curves_Arr[index].curve.maxScale;
-                    self.ref_Curves_Arr[index].color = 'black';
-                }
-                else {
-                    wiApiService.scaleCurve(self.ref_Curves_Arr[index].curve.idCurve, function(scale){
-                        console.log('scale curve');
-                        $timeout(function(){
-                            self.ref_Curves_Arr[index].left = scale.minScale;
-                            self.ref_Curves_Arr[index].right = scale.maxScale;
-                            self.ref_Curves_Arr[index].right = 'black';
-                        });
-                    })
-                }
-
+            
+            let curve = self.curvesArr.find(c => c.id == self.ref_Curves_Arr[index].idCurve);
+            self.ref_Curves_Arr[index].curve = curve.properties;
+            let family = curve.lineProperties;
+            if (family) {
+                self.ref_Curves_Arr[index].left = family.minScale;
+                self.ref_Curves_Arr[index].right = family.maxScale;
+                self.ref_Curves_Arr[index].color = family.lineColor;
+            }
+            else {
+                wiApiService.infoCurve(self.ref_Curves_Arr[index].idCurve, function(curve){
+                    $timeout(function(){
+                        self.ref_Curves_Arr[index].left = curve.LineProperty.minScale;
+                        self.ref_Curves_Arr[index].right = curve.LineProperty.maxScale;
+                        self.ref_Curves_Arr[index].color = 'black';
+                    });
+                })
             }
         }
 
@@ -7343,11 +7335,16 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                             break;
 
                         case self._FNEW:
-                            wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
-                                self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
-                                console.log('createRefCurve');
+                            if(self.ref_Curves_Arr[idx].idCurve){
+                                wiApiService.createRefCurve(self.ref_Curves_Arr[idx], function(data){
+                                    self.ref_Curves_Arr[idx].idReferenceCurve = data.idReferenceCurve;
+                                    console.log('createRefCurve');
+                                    cb();
+                                });
+                            }else{
+                                self.ref_Curves_Arr[idx].flag = self._FDEL;
                                 cb();
-                            });
+                            }
                             break;
 
                         case self._FEDIT:
