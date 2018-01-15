@@ -45,27 +45,45 @@
 		</div>
 	</div>
 	<div class="editing">
-		<div id="output">
-			<table class="table table-bordered" infinite-scroll="wiCurveListing.LoadMoreOutPut()" infinite-scroll-distance="2" infinite-scroll-container='"#output"'
-			    infinite-scroll-listen-for-event='list:changeWell'>
-				<thead>
-					<tr>
-						<th>Index</th>
-						<th>Depth</th>
-						<th ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show" title='{{curve.datasetName}}'>{{curve.name}}</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="row in wiCurveListing.loaded" ng-init="parentId = $index">
-						<th>{{$index}}</th>
-						<td>{{wiCurveListing.depthArr[$index]}}</td>
-						<td ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
-						ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">
-							<input type="number" class='form-control wi-form-control editor' ng-model="col.data[parentId]" step="any" ng-change="col.edit = true;wiCurveListing.onModifyCurve(col.id);">
-					</td>
-					</tr>
-				</tbody>
-			</table>
+		<div class="fix-column">
+			<div class="thead">
+				<div class="trow">
+					<!-- <div class="tcol">Index</div> -->
+					<div class="tcol">Depth</div>
+				</div>
+				<div class="trow">
+					<!-- <div class="tcol"></div> -->
+					<div class="tcol">
+						<input type="number" class='form-control wi-form-control editor' 
+						ng-model="wiCurveListing.depthInput" placeholder="Go to ..."
+						wi-enter='wiCurveListing.goToDepth()'>
+					</div>
+				</div>
+			</div>
+			<div class="tbody">
+				<div ng-repeat="row in wiCurveListing.depthArr[wiCurveListing.currentIndex] track by $index" class="trow">
+					<!-- <div class="tcol">{{$index}}</div> -->
+					<div class="tcol">{{wiCurveListing.depthArr[wiCurveListing.currentIndex][$index]}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="rest-columns">
+			<div class="thead">
+				<div class="trow">
+					<div class="tcol" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.datasetName}}</div>
+				</div>
+				<div class="trow">
+					<div class="tcol" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.name}}</div>
+				</div>
+			</div>
+			<div id="output" class="tbody">
+				<div ng-repeat="row in wiCurveListing.depthArr[wiCurveListing.currentIndex] track by $index" ng-init="parentId = $index" class="trow">
+					<div  class="tcol" ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
+					ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">
+						<input type="number" class='form-control wi-form-control editor' ng-model="col.data[parentId]" step="any" ng-change="col.edit = true;wiCurveListing.onModifyCurve(col.id);">
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 	<div resizable r-directions="['left']" r-flex="true" ng-show="wiCurveListing.isShowRefWin" style="width: 20%; min-width: 10%; max-width: 30%">

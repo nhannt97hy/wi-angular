@@ -41,55 +41,63 @@ wi-curve-listing{
     }
 
     .editing{
-        flex:1;
         display: flex;
-        flex-direction:column;
+        flex: 1;
         margin:0px 14px;
-        height: 95%;
+        // height: 100%;
         overflow: hidden;
-        &>div{
-            overflow-x:overlay;
-            position: relative;
-            table{
-                margin-bottom: 0px;
-                thead{
-                    display: table-row;
-                }
-        
-                tbody{
-                    overflow-y:hidden;
-                    overflow-x:hidden;
-                    display:block;
-                }
-                td,th {
-                    vertical-align: middle;
-                    height: 43px;
-                }
-        
-                thead>tr>th{
-                    width:100px;
-                    min-width: 100px;
-                    &:first-child{
-                        width: 50px;
-                        min-width: 50px;
-                    }
-                }
-                tbody>tr>td{
-                    min-width: 100px;
-                    width:100px;
-                    &:first-of-type{
-                        background: #ccc;
-                    }
-                }
-                tbody>tr>th{
-                    min-width: 50px;
-                    width: 50px;
-                    text-align: center;
-                }
-                thead>tr>th{
-                    text-align:center;
-                }
+        .fix-column {
+            width: 110px;
+        }
+        .thead {
+            white-space: nowrap;
+            >.trow >.tcol{
+                text-align: center;
+                font-weight: bold;
             }
+        }
+        .fix-column > .tbody > .trow{
+            margin-top: -10px;
+            margin-bottom: 10px;
+            background: lightgray;
+            >:first-child{
+                margin-left: 0px;
+            }
+        }
+        .fix-column > .tbody >:first-child{
+            margin-top: 0px;
+        }
+        .trow {
+            white-space: nowrap;
+        }
+        .tbody {
+            height: 86%;
+            overflow: auto;
+        }
+        .fix-column > .tbody {
+            overflow: hidden;
+        }
+        .rest-columns{
+            flex: 1;
+            overflow-y: hidden;
+        }
+        .rest-columns > .thead {
+            overflow: hidden;
+        }
+        .rest-columns > .thead > .trow > .tcol {
+            margin-left: -10px;
+            margin-right: 10px;
+        }
+        .rest-columns > .thead > .trow > :first-child{
+            margin-left: 0;
+        }
+        .tcol{
+            display: inline-block;
+            width: 110px;
+            height: 30px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            padding: 2px 8px;
         }
     }
     .nanValue{

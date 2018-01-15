@@ -8,6 +8,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    let spinner = wiComponentService.getComponent('SPINNER');
 
     function getDatasets() {
         self.datasets.length = 0;
@@ -36,15 +37,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.onChangeWell = function (clear) {
         getDatasets();
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
-        let step = self.SelectedWell.step;
-        let topDepth = self.SelectedWell.topDepth;
-        let bottomDepth = self.SelectedWell.bottomDepth;
-        let length = Math.round((bottomDepth - topDepth)/step) + 1;
-        self.depthArr = new Array(length);
-        for(let i = 0; i < length; i++){
-            self.depthArr[i] = parseFloat((step * i + topDepth).toFixed(4));
+        if(!self.depthArr[self.currentIndex].length){
+            spinner.show();
+            let step = self.SelectedWell.step;
+            let topDepth = self.SelectedWell.topDepth;
+            let bottomDepth = self.SelectedWell.bottomDepth;
+            let length = Math.round((bottomDepth - topDepth)/step) + 1;
+            self.depthArr[self.currentIndex] = new Array(length);
+            async.eachOf(self.depthArr[self.currentIndex], function(depth, i, callback){
+                self.depthArr[self.currentIndex][i] = parseFloat((step * i + topDepth).toFixed(4));
+                async.setImmediate(callback);
+            }, function(err){
+                $timeout(function(){spinner.hide();});  
+            })
         }
-        self.loaded = self.depthArr.slice(0,500);
+
         if(clear){
             self.curvesData[self.currentIndex].forEach(curve => {
                 curve.show = false;
@@ -62,7 +69,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }).modified = true;
             }
         })
-        $scope.$emit('list:changeWell');
     }
     
     this.$onInit = function () {
@@ -72,6 +78,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.curvesArr = [];
         self.wells = utils.findWells();
         self.curvesData = new Array(self.wells.length).fill().map(u => {return new Array()});
+        self.depthArr = new Array(self.wells.length).fill().map(u => {return new Array()});
         if(selectedNodes && selectedNodes.length){
             switch (selectedNodes[0].type){
                 case 'well':
@@ -95,7 +102,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
 
-        this.onChangeWell(true);
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
             $timeout(function(){
@@ -113,14 +119,40 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 
             }, 0);
         });
+
+        angular.element(document).ready(function(){
+            self.onChangeWell(true);
+            
+            let fcBody = $(".fix-column > .tbody");
+            let rcBody = $(".rest-columns > .tbody");
+            let rcHead = $(".rest-columns > .thead");
+
+            let onScroll = function(){
+                fcBody.scrollTop(rcBody.scrollTop());
+                rcHead.scrollLeft(rcBody.scrollLeft());
+            }
+            rcBody.scroll(_.throttle(onScroll, 100));
+        })
     };
 
     this.toggleRefWin = function(){
         self.isShowRefWin = !self.isShowRefWin;
     }
-    this.LoadMoreOutPut = function(){
-        let len = self.loaded.length;
-        self.loaded.push(...self.depthArr.slice(len, len + 500));
+
+    this.goToDepth = function(){
+        let index;
+        let rcBody = $(".rest-columns > .tbody");
+        
+        if(self.depthInput <= self.SelectedWell.topDepth){
+            index = 0;
+        }else if(self.depthInput >= self.SelectedWell.bottomDepth){
+            index = self.depthArr[self.currentIndex].length - 1;
+        }else{
+            index = Math.round((self.depthInput - self.SelectedWell.topDepth)/self.SelectedWell.step);
+        }
+
+        rcBody.scrollTop(index * 30);
+
     }
 
     this.onCurveSelectClick = function(SelCurve){
@@ -162,7 +194,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             return c.id == id;
         })
         $timeout(function(){
-            curve.data = curve.dataBK;
+            curve.data = angular.copy(curve.dataBK);
             self.curvesArr.find(c => {return c.id == id;}).modified = false;
         })
     }
@@ -201,11 +233,7 @@ let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-curve-listing.html',
     controller: Controller,
-    controllerAs: componentName,
-    transclude: true
-    // bindings: {
-    //     name: '@'
-    // }
+    controllerAs: componentName
 });
 
 exports.name = moduleName;
