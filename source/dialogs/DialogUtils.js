@@ -11832,7 +11832,6 @@ exports.badholeCoalSaltDialog = function(ModalService) {
             self.curveSonic = getcurveSonic(self.curves).curveModel;
             self.datasetModel = self.datasets[0];
             self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
-            console.log("zoneSet", self.zoneSetModel);
             if (selectedNodes && selectedNodes[0].type == 'zoneset') {
                 self.zoneSetModel = selectedNodes[0];
             } else self.zoneSetModel = self.zoneSets[0];
@@ -11941,7 +11940,7 @@ exports.badholeCoalSaltDialog = function(ModalService) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
             self.applyingInProgress = false;
-            $setTimeout(function () {
+            $timeout(function () {
                 self.wells =  utils.findWells().filter(well => {
                     return well.children.find(c => c.type == 'dataset');
                 });
