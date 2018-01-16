@@ -323,13 +323,7 @@
                                             <tr ng-repeat="shading in wiModal.getShadings()"
                                                 ng-class="{'selected':$index == selectedRowShading}"
                                                 ng-click="wiModal.setClickedRowShading($index)">
-                                                <td>
-                                                    <!-- <select ng-model="shading.idRightLine" name="curveName"
-                                                            class="form-control wi-form-control"
-                                                            ng-options="item.id as item.datasetCurve for item in wiModal.curvesOnDataset"
-                                                            ng-change="wiModal.onChangeShading($index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);">
-                                                        <option></option>
-                                                    </select> -->
+                                                <td style="width: 12%">
                                                     <ui-select ng-model="shading.rightLine"
                                                                 ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectRightLine();
                                                                 wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
@@ -340,15 +334,7 @@
                                                         </ui-select-choices>
                                                     </ui-select>
                                                 </td>
-                                                <td>
-                                                    <!-- <select ng-model="shading.idLeftLine"
-                                                            class="form-control wi-form-control"
-                                                            ng-options="item.id as item.datasetCurve for item in wiModal.leftLimit"
-                                                            ng-change="wiModal.onChangeShading($index);
-                                                             shading.leftFixedValue = null; wiModal.validate(shading._index); wiModal.setFillDisplay(shading._index); wiModal.setLimit2(shading._index);wiModal.setShadingName(shading.idRightLine, shading.idLeftLine, shading._index);"
-                                                            ng-disabled="!shading.idRightLine"> -->
-                                                        <!-- <option value="{{item.id}}" ng-repeat="item in wiModal.curvesOnDataset">{{item.datasetCurve}}</option> -->
-                                                    <!-- </select> -->
+                                                <td style="width: 12%">
                                                     <ui-select ng-model="shading.leftLine"
                                                                 ng-change="wiModal.onChangeShading(shading._index); wiModal.onSelectLeftLine();
                                                                 wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
@@ -359,7 +345,7 @@
                                                         </ui-select-choices>
                                                     </ui-select>
                                                 </td>
-                                                <td>
+                                                <td style="width: 12%">
                                                     <input type="number" ng-model="shading.leftFixedValue"
                                                             class="form-control wi-form-control" id="fixedVal"
                                                             ng-change="wiModal.onChangeShading($index);
