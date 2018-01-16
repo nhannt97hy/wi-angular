@@ -563,8 +563,8 @@ Shading.prototype.getType = function() {
     let type;
     let e = 0.0000001;
     if (this.leftCurve && this.rightCurve) type = 'pair';
-    else if (Math.abs(this.refX - this.selectedCurve.maxX) < e) type = 'right';
-    else if (Math.abs(this.refX - this.selectedCurve.minX) < e) type = 'left';
+    else if (Math.abs(this.refX - this.rightCurve.maxX) < e) type = 'right';
+    else if (Math.abs(this.refX - this.rightCurve.minX) < e) type = 'left';
     else type = 'custom';
     return type;
 }

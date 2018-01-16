@@ -1256,7 +1256,7 @@ exports.curvePropertiesDialog = function (ModalService, wiComponentService, wiAp
                 console.log("lineObj", lineObj);
                 currentCurve.setProperties(lineObj);
                 currentTrack.plotCurve(currentCurve);
-
+                currentTrack.doPlot(true);
                 if (callback) callback();
             });
         }
@@ -2217,10 +2217,14 @@ exports.shadingAttributeDialog = function(ModalService, wiApiService, callback, 
         };
         this.onSelectLeftLine = function () {
             self.shadingOptions.idLeftLine = self.shadingOptions.leftLine.id;
-            if (self.shadingOptions.leftLine.id == -1)
-                    self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
-            if (self.shadingOptions.leftLine.id == -2)
-                    self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
+            if (self.shadingOptions.leftLine.id == -1) {
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
+                self.shadingOptions.type = 'left';
+            }
+            if (self.shadingOptions.leftLine.id == -2) {
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
+                self.shadingOptions.type = 'right';
+            }
         }
         function getLine (idLine) {
             let line = null;
@@ -2978,7 +2982,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         break;
                         default:
                         // break;
-                        callback('unknown change code:', item.change);
+                        callback('unknown change code:', item.changed);
                     }
                 }, function(err) {
                     if (err) {
@@ -2989,6 +2993,20 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     self.curves = self.curves.filter(c => { return c.changed != changed.deleted });
                     self.curveList = currentTrack.getCurves();
                     self.leftLimit = customLimit.concat(self.curveList);
+
+                    self.shadings.forEach(function(s) {
+                        s.idLeftLine = s.leftLine.id;
+                        if (s.type == 'left') {
+                            s.leftFixedValue = s.rightLine.minX;
+                            s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                        }
+                        if (s.type == 'right') {
+                            s.leftFixedValue = s.rightLine.maxX;
+                            s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                        }
+                    });
+
+                    currentTrack.doPlot(true);
                     if (updateCurvesTabCb) updateCurvesTabCb(err);
             });
         }
@@ -3167,12 +3185,16 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
         };
         this.onSelectLeftLine = function () {
             self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
-            if (self.shadings[self.__idx].leftLine.id == -1)
-                    self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
-            if (self.shadings[self.__idx].leftLine.id == -2)
-                    self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
+            if (self.shadings[self.__idx].leftLine.id == -1) {
+                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
+                self.shadings[self.__idx].type = 'left';
+            }
+            if (self.shadings[self.__idx].leftLine.id == -2) {
+                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
+                self.shadings[self.__idx].type = 'right';
+            }
             if (self.shadings[self.__idx].leftLine.id > 0) self.shadings[self.__idx].leftFixedValue = null;
-        }
+        };
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 let request = angular.copy(item);
@@ -3220,6 +3242,7 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     }
 
                     case changed.updated: {
+                        console.log("updated", request, item);
                         wiApiService.editShading(request, function (shading) {
                             utils.getPalettes(function(paletteList){
                                 wiApiService.dataCurve(options.idControlCurve, function (curveData) {
