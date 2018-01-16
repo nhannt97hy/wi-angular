@@ -2951,9 +2951,14 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                     case changed.updated: {
                         item = preUpdate(item);
                         console.log("updateLine", item);
-                        wiApiService.editLine(item, function () {
-                            self.curveList[idx].setProperties(item);
-                            currentTrack.plotCurve(self.curveList[idx]);
+                        wiApiService.editLine(item, function (res) {
+                            // self.curveList[idx].setProperties(item);
+                            let _currentCurve = currentTrack.drawings.filter(function(d) {
+                                return (d.isCurve() && d.id == res.idLine);
+                            })[0];
+                            _currentCurve.setProperties(item);
+
+                            currentTrack.plotCurve(_currentCurve);
                             if (callback) callback();
                         });
                         item.changed = changed.unchanged;
@@ -3246,13 +3251,13 @@ exports.logTrackPropertiesDialog = function (ModalService, currentTrack, wiLogpl
                         break;
                     }
                     case changed.deleted:
-                    wiApiService.removeShading(item.idShading, function (shading) {
-                        let currentShading = currentTrack.findShadingById(shading.idShading);
-                        wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
-                        self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
-                        callback();
-                    });
-                    break;
+                        wiApiService.removeShading(item.idShading, function (shading) {
+                            let currentShading = currentTrack.findShadingById(shading.idShading);
+                            wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
+                            self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
+                            callback();
+                        });
+                        break;
                     default:
                         // break;
                         callback('unknown change code:', item.change);

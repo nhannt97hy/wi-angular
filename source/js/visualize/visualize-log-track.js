@@ -268,6 +268,7 @@ LogTrack.prototype.setTmpCurve = function(curve) {
  * @param {Object} drawing - The drawing to be current
  */
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
+    console.log("drawing", drawing);
     if (drawing == this.currentDrawing) return;
     this.currentDrawing = drawing;
     console.log("current", this.currentDrawing);
@@ -932,7 +933,7 @@ LogTrack.prototype.addCurveHeader = function(curve) {
     let curveHeader = this.drawingHeaderContainer
         .append('div')
             .attr('class', 'vi-curve-header')
-            .datum(curve.orderNum)
+            .datum(curve.orderNum + curve.name)
             .on('mousedown', function() {
                 self.drawingHeaderMouseDownCallback(curve);
             });
