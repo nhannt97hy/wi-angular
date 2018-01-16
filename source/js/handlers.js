@@ -8,6 +8,7 @@ exports.NewProjectButtonClicked = function () {
             if(!response.name){
                 DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!");
             }else{
+                wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
                 let utils = self.wiComponentService.getComponent('UTILS');
                 self.wiApiService.getProject({ idProject: response.idProject }, function (response) {
                     utils.projectOpen(self.wiComponentService, response);
