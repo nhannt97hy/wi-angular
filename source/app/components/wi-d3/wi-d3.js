@@ -3221,10 +3221,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             // });
         }, 1000)
     };
-    this.$onDestroy = function() {
-        console.log('on destroy');
-        wiComponentService.pushComponent(self.name, null);
-    }
+
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
     }
@@ -3238,15 +3235,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //$(`#${self.plotAreaId}`).css('left', '0px');
     }
     this.onReady = function(args) {
-        document.addEventListener('resize', function (event) {
-            updateSlider();
-        })
-        new ResizeSensor(document.getElementById(self.plotAreaId), function(){
-            updateSlider();
-        });
-        new ResizeSensor($(`wi-logplot[name=${self.logPlotCtrl.name}]`), function(){
-            updateSlider();
-        });
+        document.addEventListener('resize', self.plotAll);
+        document.addEventListener('resize', updateSlider);
     }
 
     this.onSliderReady = function() {
@@ -3602,6 +3592,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 });
         });
     }
+
+	this.$onDestroy = function () {
+        wiComponentService.dropComponent(self.name);
+        document.removeEventListener('resize', self.plotAll);
+        document.removeEventListener('resize', updateSlider);
+	}
 }
 
 let app = angular.module(moduleName, []);

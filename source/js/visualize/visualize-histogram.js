@@ -747,13 +747,6 @@ Histogram.prototype.init = function(domElem) {
 
     this.container.append('div').attr('class', 'vi-histogram-tooltip').style('opacity', 0);
 
-    this.resizeSensor = new ResizeSensor( $(this.container.node()), function(param) {
-        self.doPlot();
-    } );
-    document.addEventListener('resize', function (event) {
-        self.doPlot();
-    })
-
     this.svgContainer
         .selectAll('g.vi-histogram-axis-group')
         .data([
@@ -771,7 +764,6 @@ Histogram.prototype.init = function(domElem) {
         console.warn('Update histogram');
         self.doPlot();
     });
-    window.VISHISTOGRAM = this;
 }
 
 Histogram.prototype.getViewportY = function() {

@@ -9,7 +9,6 @@ function isFunction(functionToCheck) {
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
-    window.VISD3HISTOGRAM = self;
     let _well = null;
 
     let curveLoading = false;
@@ -205,6 +204,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.linkModels();
         let domElem = document.getElementById(self.histogramAreaId);
         self.createVisualizeHistogram(self.histogramModel, domElem);
+        self.resizeHandler = function (event) {
+            self.visHistogram && self.visHistogram.doPlot();
+        }
+        document.addEventListener('resize', self.resizeHandler);
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
@@ -487,6 +490,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         }
     }
+
+	this.$onDestroy = function () {
+        wiComponentService.dropComponent(self.name);
+        document.removeEventListener('resize', self.resizeHandler);
+	}
 }
 
 let app = angular.module(moduleName, []);

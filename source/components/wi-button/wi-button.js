@@ -33,8 +33,6 @@ function ButtonController(wiComponentService) {
     };
 
     this.$onInit = function () {
-        if (self.name) wiComponentService.putComponent(self.name, self);
-
         if (self.container === 'ribbon' || self.container === 'explorer') {
             this.default.initialState.disabled = self.isDisabled() + '';
 

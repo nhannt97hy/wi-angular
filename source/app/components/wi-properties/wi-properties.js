@@ -3,7 +3,6 @@ const moduleName = 'wi-properties';
 
 function Controller(wiComponentService, wiApiService, $timeout) {
     let self = this;
-    window.wiProp = this;
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
 
@@ -100,6 +99,10 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }]
                 }
                 listConfig.push(config);
+                let listFamily = utils.getListFamily();
+                let curveFamily = listFamily.find(f => f.idFamily == itemProperties.idFamily) || {};
+                let listUnit = curveFamily.family_spec;
+                let curveUnit = listUnit.find(u => u.isDefault == true) || {};
                 config = {
                     name: currentItem.name,
                     heading: 'Informations',
@@ -125,7 +128,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         key: 'idFamily',
                         label: 'Family',
                         type: type.select,
-                        options: utils.getListFamily().map(function (family) {
+                        options: listFamily.map(function (family) {
                             return {
                                 value: family.idFamily,
                                 label: family.name
@@ -141,8 +144,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }, {
                         key: 'unit',
                         label: 'Unit',
-                        value: itemProperties.unit,
-                        editable: false
+                        type: type.select,
+                        options: listUnit.map(unit => {
+                            return {
+                                value: unit.idFamilySpec,
+                                label: unit.unit
+                            }
+                        }),
+                        value: curveUnit.idFamilySpec,
+                        editable: true
                     }, {
                         key: 'wellName',
                         label: 'Well Name',

@@ -57,6 +57,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getwiD3Ctrl = function () {
         return wiComponentService.getComponent(self.wiD3AreaName);
     };
+
+    this.$onDestroy = function() {
+        wiComponentService.dropComponent(self.name);
+    }
 }
 
 let app = angular.module(moduleName, []);

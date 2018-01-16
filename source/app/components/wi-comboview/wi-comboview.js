@@ -72,6 +72,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	this.useEraser = function (eraser) {
 		// console.log(eraser);
 	}
+
+	this.$onDestroy = function () {
+			wiComponentService.dropComponent(self.name);
+	}
 }
 
 let app = angular.module(moduleName, []);

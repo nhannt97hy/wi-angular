@@ -38,6 +38,10 @@ function Controller(wiComponentService, $timeout) {
             self.paint();
         }
     }
+
+	this.$onDestroy = function () {
+		wiComponentService.dropComponent(self.name);
+	}
 }
 
 let app = angular.module(moduleName, []);

@@ -5,10 +5,6 @@ function Controller(wiComponentService) {
     let self = this;
     this.shown = true;
 
-    this.$onInit = function() {
-        if (self.name) wiComponentService.putComponent(self.name, self);
-    };
-
     this.addItem = function (key, value) {
         self.items.push({key, value});
     };

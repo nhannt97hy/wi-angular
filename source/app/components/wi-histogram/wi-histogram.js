@@ -116,6 +116,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         return _well;
     }
+
+    this.$onDestroy = function () {
+        wiComponentService.dropComponent(self.name);
+    }
 }
 
 let app = angular.module(moduleName, []);

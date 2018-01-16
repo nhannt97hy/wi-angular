@@ -258,19 +258,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             updateWid3();
             saveStateToServer();
         });
-
-        new ResizeSensor($(self.contentId), function () {
+        self.resizeHandler = function (event) {
             let currentParentHeight = $(self.contentId).height();
             self.refreshHandler();
-            //if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
             _viCurve && _viCurve.doPlot();
-        });
-        document.addEventListener('resize', function (event) {
-            let currentParentHeight = $(self.contentId).height();
-            self.refreshHandler();
-            //if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
-            _viCurve && _viCurve.doPlot();
-        })
+        }
+        document.addEventListener('resize', self.resizeHandler);
 
         $(self.contentId).on("mousewheel", onMouseWheel);
         $(self.handleId).on("mousewheel", onMouseWheel);
@@ -453,6 +446,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         saveStateToServer();
     }
+
+	this.$onDestroy = function () {
+        wiComponentService.dropComponent(self.name);
+        document.removeEventListener('resize', self.resizeHandler);
+	}
 }
 
 let app = angular.module(moduleName, []);
