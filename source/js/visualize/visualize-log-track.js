@@ -268,6 +268,7 @@ LogTrack.prototype.setTmpCurve = function(curve) {
  * @param {Object} drawing - The drawing to be current
  */
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
+    console.log("drawing", drawing);
     if (drawing == this.currentDrawing) return;
     this.currentDrawing = drawing;
     console.log("current", this.currentDrawing);

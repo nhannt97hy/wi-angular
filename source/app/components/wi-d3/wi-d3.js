@@ -3465,7 +3465,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     lineCount++;
                                     if (lineCount == lineNum) {
                                         drawAllShadings(someTrack, aTrack, function(){
-                                            console.log("setCurrentDrawing is null");
                                             aTrack.setCurrentDrawing(null);
                                         });
                                         _cb();
