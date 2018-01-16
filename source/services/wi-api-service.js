@@ -992,9 +992,15 @@ Service.prototype.processingDataCurve = function (request, callback, progressCb)
             self.getUtils().error(err);
         });
 }
-Service.prototype.listFamily = async function (callback) {
+
+Service.prototype.listFamily = function (callback) {
     const self = this;
     this.post(FAMILY_LIST, {}, callback);
+}
+
+Service.prototype.familyUpdate = function (request, callback) {
+    const self = this;
+    this.post('/family/update-spec', request, callback);
 }
 
 Service.prototype.getLogplot = function (idLogplot, callback) {
