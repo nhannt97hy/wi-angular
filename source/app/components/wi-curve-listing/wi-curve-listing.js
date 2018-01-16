@@ -139,6 +139,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isShowRefWin = !self.isShowRefWin;
     }
 
+    this.goToIndex = function(){
+        let index;
+        let rcBody = $(".rest-columns > .tbody");
+        
+        if(self.indexInput <= 0){
+            index = 0;
+        }else if(self.indexInput >= self.depthArr[self.currentIndex].length - 1){
+            index = self.depthArr[self.currentIndex].length - 1;
+        }else{
+            index = self.indexInput;
+        }
+
+        rcBody.scrollTop(index * 30);
+    }
+
     this.goToDepth = function(){
         let index;
         let rcBody = $(".rest-columns > .tbody");
@@ -152,7 +167,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
 
         rcBody.scrollTop(index * 30);
-
     }
 
     this.onCurveSelectClick = function(SelCurve){
