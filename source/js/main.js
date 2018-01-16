@@ -261,6 +261,9 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
                             }
                         })
                     })
+                }else{
+                    historyState.removeHistory();
+                    historyState.createHistory();                    
                 }
             })
         }
