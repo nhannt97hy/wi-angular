@@ -114,7 +114,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
     }
 
     this.importItems = [];
-    window.importItems = this.importItems;
     this.importButtonClicked = function () {
         if (!self.importValid) return;
         let desParentModel = self.projectSelectedNode;

@@ -48,22 +48,26 @@
 		<div class="fix-column">
 			<div class="thead">
 				<div class="trow">
-					<!-- <div class="tcol">Index</div> -->
+					<div class="tcol">Index</div>
 					<div class="tcol">Depth</div>
 				</div>
 				<div class="trow">
-					<!-- <div class="tcol"></div> -->
+					<div class="tcol">
+						<input type="number" class='form-control wi-form-control editor' 
+						ng-model="wiCurveListing.indexInput" placeholder="Go to ..."
+						wi-enter='wiCurveListing.goToIndex()' min="0">
+					</div>
 					<div class="tcol">
 						<input type="number" class='form-control wi-form-control editor' 
 						ng-model="wiCurveListing.depthInput" placeholder="Go to ..."
-						wi-enter='wiCurveListing.goToDepth()'>
+						wi-enter='wiCurveListing.goToDepth()' min="0">
 					</div>
 				</div>
 			</div>
 			<div class="tbody">
 				<div ng-repeat="row in wiCurveListing.depthArr[wiCurveListing.currentIndex] track by $index" class="trow">
-					<!-- <div class="tcol">{{$index}}</div> -->
-					<div class="tcol">{{wiCurveListing.depthArr[wiCurveListing.currentIndex][$index]}}</div>
+					<div class="tcol">{{$index}}</div>
+					<div class="tcol depth">{{wiCurveListing.depthArr[wiCurveListing.currentIndex][$index]}}</div>
 				</div>
 			</div>
 		</div>

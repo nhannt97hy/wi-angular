@@ -176,6 +176,10 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 		wiComponentService.getComponent('ContextMenu')
 			.open(event.clientX, event.clientY, self.contextMenu);
 	}
+
+	this.$onDestroy = function () {
+		wiComponentService.dropComponent(self.name);
+	}
 }
 
 let app = angular.module(moduleName, []);

@@ -101,6 +101,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     xplotProps.referenceBottomDepth,
                     xplotProps.referenceShowDepthGrid);
         });
+        self.resizeHandlerCross = function (event) {
+            self.viCrossplot && self.viCrossplot.doPlot && self.viCrossplot.doPlot();
+        }
+        document.addEventListener('resize', self.resizeHandlerCross);
     }
     function updateHistogramProps(crossplotModel,xy){
         let histogramProps = xy == 'xCurve' ? self.histogramModelX.properties : self.histogramModelY.properties;
@@ -165,14 +169,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var containerId = "#" + self.name + 'HistogramY';
         var elem = $(containerId);
         var innerElem = $(containerId + ' .transform-group');
-        new ResizeSensor(elem[0], function() {
+        self.resizeHandlerHis = function (event) {
             innerElem.css('width', elem[0].clientHeight + 'px');
             innerElem.css('height', elem[0].clientWidth + 'px');
-        });
-        document.addEventListener('resize', function (event) {
-            innerElem.css('width', elem[0].clientHeight + 'px');
-            innerElem.css('height', elem[0].clientWidth + 'px');
-        })
+            self.xHistogram && self.xHistogram.doPlot();
+            self.yHistogram && self.yHistogram.doPlot();
+        }
+        document.addEventListener('resize', self.resizeHandlerHis);
         innerElem.css('width', elem[0].clientHeight + 'px');
         innerElem.css('height', elem[0].clientWidth + 'px');
         var well = getWell();
@@ -1049,6 +1052,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.setContextMenu();
         }
     }
+
+	this.$onDestroy = function () {
+        wiComponentService.dropComponent(self.name);
+        document.removeEventListener('resize', self.resizeHandlerCross);
+        document.removeEventListener('resize', self.resizeHandlerHis);
+	}
 }
 
 let app = angular.module(moduleName, []);

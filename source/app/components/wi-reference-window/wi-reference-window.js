@@ -30,13 +30,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.onReady = function() {
         if (self.onRefWindCtrlReady) self.onRefWindCtrlReady(self);
-        document.addEventListener('resize', function (event) {
+        self.resizeHandler = function () {
             refresh();
-        })
-        new ResizeSensor(document.getElementById(self.name), function() {
-            //_viCurves.forEach(function(c) { c.doPlot(); });
-            refresh();
-        });
+        }
+        document.addEventListener('resize', self.resizeHandler);
         self.svg = getRefCurveContainer().append('svg')
             .attr('class', 'grid-svg')
             .attr('width', $(getRefCurveContainer().node()).width())
@@ -319,6 +316,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         }
     }
+
+	this.$onDestroy = function () {
+        wiComponentService.dropComponent(self.name);
+        document.removeEventListener('resize', self.resizeHandler);
+	}
 }
 
 let app = angular.module(moduleName, []);

@@ -44,10 +44,9 @@ wi-curve-listing{
         display: flex;
         flex: 1;
         margin:0px 14px;
-        // height: 100%;
         overflow: hidden;
         .fix-column {
-            width: 110px;
+            width: 200px;
         }
         .thead {
             white-space: nowrap;
@@ -56,12 +55,26 @@ wi-curve-listing{
                 font-weight: bold;
             }
         }
+        .depth{
+            background: lightgray;
+        }
+        .fix-column > .thead > .trow{
+            >:first-child{
+                width: 90px;
+                input[type=number]::-webkit-inner-spin-button, 
+                input[type=number]::-webkit-outer-spin-button { 
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    appearance: none;
+                    margin: 0; 
+                }
+            }
+        }
         .fix-column > .tbody > .trow{
             margin-top: -10px;
             margin-bottom: 10px;
-            background: lightgray;
             >:first-child{
-                margin-left: 0px;
+                width: 90px;
             }
         }
         .fix-column > .tbody >:first-child{

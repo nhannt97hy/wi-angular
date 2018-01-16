@@ -933,7 +933,7 @@ LogTrack.prototype.addCurveHeader = function(curve) {
     let curveHeader = this.drawingHeaderContainer
         .append('div')
             .attr('class', 'vi-curve-header')
-            .datum(curve.orderNum)
+            .datum(curve.orderNum + curve.name)
             .on('mousedown', function() {
                 self.drawingHeaderMouseDownCallback(curve);
             });

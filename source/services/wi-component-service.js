@@ -6,7 +6,7 @@ app.factory(wiServiceName, function () {
     let __Controllers = {};
     let handlers = {};
     let _state = {};
-
+    window.__CPNTS = __Controllers;
     return {
         getComponent: function (componentName) {
             return __Controllers[componentName];
@@ -26,10 +26,7 @@ app.factory(wiServiceName, function () {
             return __Controllers[wiLogplotName + 'D3Area'];
         },
         putComponent: function (componentName, controller) {
-            // console.log('put component');
-            // console.log('componentName', componentName);
-
-            __Controllers[componentName] = controller;
+            if (componentName) __Controllers[componentName] = controller;
         },
         dropComponent: function (componentName) {
             delete __Controllers[componentName];

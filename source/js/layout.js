@@ -50,7 +50,8 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
-        container.getElement().html(compileFunc(html)(scopeObj));
+        let newScope = scopeObj.$new(false);
+        container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
         container.on('destroy', function () {
             if(modelRef){
@@ -63,15 +64,19 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 historyState.removePlotFromHistory(model.type, model.id);
             }
             if (componentState.name) wiComponentService.dropComponent(componentState.name);
+            newScope.$destroy();
         });
         container.on('resize', function () {
             document.dispatchEvent(new Event('resize'));
         });
     });
-
+    scopeObj.$on("angular-resizable.resizeEnd", function (event) {
+        document.dispatchEvent(new Event('resize'));
+    });
     layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
-        if (activeContentItem.config.componentState.model) {
-            wiComponentService.emit('tab-changed', activeContentItem.config.componentState.model);
+        let model = activeContentItem.config.componentState.model;
+        if (model) {
+            wiComponentService.emit('tab-changed', model);
             document.dispatchEvent(new Event('resize'));
         }
     });
@@ -224,9 +229,10 @@ module.exports.isComponentExist = function (id) {
     return (layoutManager.root.getItemsById(id).length ? true : false);
 }
 
-module.exports.updateSize = function () {
+module.exports.updateSize = _.throttle(function () {
     layoutManager.updateSize();
-}
+    document.dispatchEvent(new Event('resize'));
+}, 1000);
 
 module.exports.getItemById = function (itemId) {
     return layoutManager.root.getItemsById(itemId)[0];

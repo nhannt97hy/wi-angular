@@ -461,18 +461,6 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-overlay-line');
 
-    this.resizeSensor = new ResizeSensor( $(this.root.node()), function(param) {
-        self._doPlot();
-    } );
-    document.addEventListener('resize', function (event) {
-        self._doPlot();
-    })
-    /*
-    d3.select(window)
-        .on('resize', function() {
-            self.doPlot();
-        });
-    */
     this.doPlot();
 
     this.on('mousedown', function() { self.mouseDownCallback() });
@@ -507,18 +495,18 @@ Crossplot.prototype.adjustSize = function() {
         .attr('height', rect.height);
 }
 
-Crossplot.prototype._doPlot = function(){
+Crossplot.prototype.doPlot = function(){
     var self = this;
     if (self.timerHandle) {
         clearTimeout(self.timerHandle)
     }
     self.timerHandle = setTimeout(function() {
         self.timerHandle = null;
-        self.doPlot();
+        self._doPlot();
     }, 500);
 };
 
-Crossplot.prototype.doPlot = function() {
+Crossplot.prototype._doPlot = function() {
     console.log('PLOT CROSSPLOT', this.getProperties());
     if (!this.pointSet || !this.pointSet.curveX || !this.pointSet.curveY) return;
 
@@ -539,7 +527,6 @@ Crossplot.prototype.doPlot = function() {
     this.plotArea();
     this.plotUserLine();
     this.plotOverlayLines();
-    window._CROSSPLOT = this;
 }
 
 Crossplot.prototype.updateClipPath = function() {

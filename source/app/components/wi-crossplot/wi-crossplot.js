@@ -8,7 +8,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let _wiD3CrossplotCtrl = null;
     let refWindCtrl = null;
     this.$onInit = function () {
-        if (self.name) wiComponentService.putComponent(self.name, self);        
+        if (self.name) wiComponentService.putComponent(self.name, self);
         self.wiD3CrossplotName = self.name + 'D3Area';
         const crossplotHandlers = wiComponentService.getComponent(wiComponentService.CROSSPLOT_HANDLERS);
         $scope.handlers = {};
@@ -91,6 +91,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let wiD3CrossplotCtrl = self.getWiD3CrossplotCtrl();
         if (!wiD3CrossplotCtrl) return;
         wiD3CrossplotCtrl.switchReferenceWindow(false);
+    }
+
+    this.$onDestroy = function() {
+        wiComponentService.dropComponent(self.name);
+        wiComponentService.dropComponent(self.wiD3CrossplotName);
     }
 }
 
