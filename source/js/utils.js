@@ -283,10 +283,14 @@ exports.createZoneSet = function createZoneSet (idWell, callback) {
 
 function logplotToTreeConfig(plot, options = {}) {
     let plotModel = new Object();
+    let wellModel = options.wellModel;
+    if (!wellModel)
+        wellModel = getModel('well', plot.idWell);
+
     setTimeout(() => {
-        let wellModel = getModel('well', plot.idWell);
         plotModel.parentData = wellModel.data;
     });
+
     if (options.isDeleted) {
         plotModel.name = 'logplot-deleted-child';
         plotModel.type = 'logplot-deleted-child';
@@ -323,7 +327,8 @@ function logplotToTreeConfig(plot, options = {}) {
         openLogplotTab(wiComponentService, plotModel);
     }
     plotModel.parent = 'well' + plot.idWell;
-    wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS).push(plotModel);
+    let projectLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS)
+    if (projectLogplots) projectLogplots.push(plotModel);
     return plotModel;
 }
 
@@ -1335,7 +1340,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
         curveY.maxX = pointSet.scaleTop;
         pointSet.intervalDepthTop = objectProps.intervalDepthTop;
         pointSet.intervalDepthBottom = objectProps.intervalDepthBottom;
-        
+
         let crossplotConfig = {
             curve1 : curveX,
             curve2 : curveY,
@@ -1507,7 +1512,11 @@ exports.findDatasetById = findDatasetById;
 
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+    if (!wiExplorer) {
+        return wiComponentService.getComponent('WELL_MODEL');
+    }
+    let rootNodes = wiExploer.treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
     visit(rootNodes[0], function (node) {
@@ -2115,7 +2124,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                 // for crosstemplate
                 if (crossplot.foundCurveX && crossplot.foundCurveY) {
                     console.log('found all curves');
-                } 
+                }
                 else {
                     let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
                     let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
