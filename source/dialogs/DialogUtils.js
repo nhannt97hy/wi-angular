@@ -96,47 +96,9 @@ exports.authenticationDialog = function (ModalService, wiComponentService,callba
         });
     });
 };
-
-exports.newProjectDialog = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService, $timeout) {
-        let self = this;
-        this.disabled = false;
-        // this.error = null;
-
-        this.onOkButtonClicked = function () {
-            // self.error = '';
-            self.disabled = true;
-
-            let data = {
-                name: $scope.name,
-                company: $scope.company,
-                department: $scope.department,
-                description: $scope.description
-            };
-            close(data);
-        };
-
-        this.onCancelButtonClicked = function () {
-            close(null);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: 'new-project/new-project-modal.html',
-        controller: ModalController,
-        controllerAs: "wiModal"
-    }).then(function (modal) {
-        initModal(modal);
-        modal.close.then(function (data) {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-
-            if (data) {
-                callback(data);
-            }
-        });
-    });
-};
+var newProjectDialogModule = require('./new-project.js');
+newProjectDialogModule.setInitFunc(initModal);
+exports.newProjectDialog = newProjectDialogModule.newProjectDialog;
 
 exports.openProjectDialog = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
@@ -11155,50 +11117,9 @@ exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
         });
     });
 }
-exports.curveBulkUpdateDialog = function (ModalService, wiLogplotCtrl) {
-    function ModalController(wiComponentService, wiApiService, close) {
-        let self = this;
-        window.cBulk = this;
-
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-
-        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-
-        let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
-
-        // this.tracks = wiD3Ctrl.getTracks();
-
-        // console.log("tracks", logTracks);
-        let tracks = [];
-        logTracks.forEach(function(l) {
-            tracks.push({
-                use : false,
-                name : l.name,
-                lines : (l.drawings).filter(d => d.type == 'curve')
-            });
-        });
-        console.log("log: ", tracks);
-        this.onOkButtonClicked = function(){
-            close(self);
-        };
-        this.onCancelButtonClicked = function(){
-            close(null);
-        }
-    }
-    ModalService.showModal({
-        templateUrl: "curve-bulk-update/curve-bulk-update-modal.html",
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        initModal(modal);
-        modal.close.then(function () {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-        });
-    });
-}
+var curveBulkUpdateDialogModule = require('./curve-bulk-update.js');
+curveBulkUpdateDialogModule.setInitFunc(initModal);
+exports.curveBulkUpdateDialog = curveBulkUpdateDialogModule.curveBulkUpdateDialog;
 
 exports.objectTrackPropertiesDialog = function (ModalService, wiLogplotCtrl, objectTrackProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
