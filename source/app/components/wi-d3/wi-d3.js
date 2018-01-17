@@ -2306,7 +2306,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, {
                 name: "DepthShift",
                 label: "Depth Shift",
-                icon: "",
+                icon: "curve-depth-shift-16x16",
                 handler: function () {
 
                 }
@@ -2329,6 +2329,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }, {
                 name: "BaseLineShift",
                 label: "BaseLine Shift",
+                icon: "curve-interactive-baseline-edit-16x16",
                 handler: function () {
 
                 }

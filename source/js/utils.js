@@ -2043,6 +2043,16 @@ function editProperty(item, callback) {
             });
             break;
         case 'curve':
+            if (item.key == 'unit') {
+                wiApiService.familyUpdate({
+                    idFamily: properties.idFamily,
+                    idFamilySpec: item.value
+                }, function (res, err) {
+                    if (err) return;
+                    putListFamily(callback);
+                })
+                break;
+            }
             if (item.key == 'idFamily') {
                 newProperties.unit = getListFamily().find(family => family.idFamily == newProperties.idFamily).unit;
                 selectedNode.properties.idFamily = newProperties.idFamily;
@@ -2462,7 +2472,7 @@ function getValPalette(palName, paletteList) {
 
 exports.getValPalette = getValPalette;
 
-function putListFamily() {
+function putListFamily(callback) {
     __GLOBAL.wiApiService.listFamily(function (families) {
         // families.sort((a,b) => {
         //     if (a.name.toLowerCase() < b.name.toLowerCase()) {
@@ -2479,6 +2489,7 @@ function putListFamily() {
             return parseInt(a.idFamily) - parseInt(b.idFamily);
         });
         __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.LIST_FAMILY, families);
+        callback && callback();
     })
 }
 

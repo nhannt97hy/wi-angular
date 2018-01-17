@@ -188,13 +188,14 @@ gulp.task('clean', function () {
 });
 
 gulp.task('include', function () {
-    return gulp.src(['./source/html/index.html'])
-        .pipe(fileInclude({
-            prefix: '@@',
-            basepath: '@file',
-            indent: true
-        }))
-        .pipe(gulp.dest('./build'));
+    return gulp.src([
+        './source/html/index.html', 
+        './source/html/plot.html'
+    ]).pipe(fileInclude({
+        prefix: '@@',
+        basepath: '@file',
+        indent: true
+    })).pipe(gulp.dest('./build'));
 });
 
 gulp.task('wi-histogram-include', function () {
@@ -424,4 +425,10 @@ gulp.task('serve', [], function () {
     });
 
     gulp.watch([BUILD_DIR.js + '/main.js.bundle.js'], reload);
+});
+
+gulp.task('build-lightweight', mainTasks, function() {
+    gulp.src([
+        'build/js/main-lightweight.js'
+    ]).pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
 });
