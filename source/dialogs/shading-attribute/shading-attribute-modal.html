@@ -250,12 +250,14 @@
                             <div class="col-sm-4 padding-bottom-0_5em">
                                 <input type="number" step="any"
                                         class="form-control wi-form-control"
-                                        ng-model="wiModal.variableShadingOptions.fill.varShading.startX">
+                                        ng-model="wiModal.variableShadingOptions.fill.varShading.startX"
+                                        ng-blur="wiModal.onRoundValue();">
                             </div>
                             <div class="col-sm-4 padding-bottom-0_5em">
                                 <input type="number" step="any"
                                         class="form-control wi-form-control"
-                                        ng-model="wiModal.variableShadingOptions.fill.varShading.endX">
+                                        ng-model="wiModal.variableShadingOptions.fill.varShading.endX"
+                                        ng-blur="wiModal.onRoundValue();">
                             </div>
                         </div>
                         <div ng-if="wiModal.displayType">
@@ -264,12 +266,14 @@
                                 <div class="col-sm-4 padding-bottom-0_5em">
                                     <input type="number" step="any"
                                             class="form-control wi-form-control"
-                                            ng-model="wiModal.variableShadingOptions.positiveFill.varShading.startX">
+                                            ng-model="wiModal.variableShadingOptions.positiveFill.varShading.startX"
+                                            ng-blur="wiModal.onRoundValue();">
                                 </div>
                                 <div class="col-sm-4 padding-bottom-0_5em">
                                     <input type="number" step="any"
                                             class="form-control wi-form-control"
-                                            ng-model="wiModal.variableShadingOptions.positiveFill.varShading.endX">
+                                            ng-model="wiModal.variableShadingOptions.positiveFill.varShading.endX"
+                                            ng-blur="wiModal.onRoundValue();">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -277,12 +281,14 @@
                                 <div class="col-sm-4 padding-bottom-0_5em">
                                     <input type="number" step="any"
                                             class="form-control wi-form-control"
-                                            ng-model="wiModal.variableShadingOptions.negativeFill.varShading.startX">
+                                            ng-model="wiModal.variableShadingOptions.negativeFill.varShading.startX"
+                                            ng-blur="wiModal.onRoundValue();">
                                 </div>
                                 <div class="col-sm-4 padding-bottom-0_5em">
                                     <input type="number" step="any"
                                             class="form-control wi-form-control"
-                                            ng-model="wiModal.variableShadingOptions.negativeFill.varShading.endX">
+                                            ng-model="wiModal.variableShadingOptions.negativeFill.varShading.endX"
+                                            ng-blur="wiModal.onRoundValue();">
                                 </div>
                             </div>
                         </div>
