@@ -9773,9 +9773,8 @@ exports.TVDConversionDialog = function (ModalService) {
     });
 }
 exports.addCurveDialog = function (ModalService) {
-    function ModalController(wiComponentService, wiApiService, close, $timeout){
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout){
         let self = this;
-        window.addcurve = this;
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -9843,9 +9842,10 @@ exports.addCurveDialog = function (ModalService) {
                     unit : self.unit,
                     idFamily : self.selectedFamily.idFamily
                 }
-                wiApiService.processingDataCurve(payload,function(){
-                    utils.refreshProjectState();
+                wiApiService.processingDataCurve(payload,function(curve, err){
+                    if (!err) utils.refreshProjectState();
                     self.applyingInProgress = false;
+                    $scope.$apply();
                 })
             }
         }
