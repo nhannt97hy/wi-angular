@@ -3394,6 +3394,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         }
                                     }
                                     wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                                    if(callback) callback();
                                 }
                                 else {
                                     for (let line of linesOfTrack) {
@@ -3405,10 +3406,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         }
                                     }
                                     wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                                    if(callback) callback();
                                 }
                             })
                         });
-                        if(callback) callback();
                     };
                     let trackProps = new Array();
                     async.eachOfSeries(tracks, function(aTrack, idx, _callback) {

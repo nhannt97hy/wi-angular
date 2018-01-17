@@ -495,7 +495,9 @@ exports.CurveBulkUpdateButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
-    DialogUtils.curveBulkUpdateDialog(this.ModalService, wiLogplot, function () {
+
+    let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    DialogUtils.curveBulkUpdateDialog(this.ModalService, logTracks, function () {
 
     });
 };
