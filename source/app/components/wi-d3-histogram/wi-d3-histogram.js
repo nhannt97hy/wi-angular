@@ -205,6 +205,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let domElem = document.getElementById(self.histogramAreaId);
         self.createVisualizeHistogram(self.histogramModel, domElem);
         self.resizeHandler = function (event) {
+            let model = event.model;
+            if (model.type != 'histogram' || model.id != self.histogramModel.id) return;
             self.visHistogram && self.visHistogram.doPlot();
         }
         document.addEventListener('resize', self.resizeHandler);

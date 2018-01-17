@@ -48,6 +48,12 @@ module.exports.createLayout = function (domId, $scope, $compile) {
 
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+    let resizeEvent = new Event('resize');
+    resizeEvent.model = {};
+    const triggerResize = _.debounce(function () {
+        document.dispatchEvent(resizeEvent);
+    }, 200)
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
@@ -66,19 +72,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
             if (componentState.name) wiComponentService.dropComponent(componentState.name);
             newScope.$destroy();
         });
-        container.on('resize', function () {
-            document.dispatchEvent(new Event('resize'));
-        });
+        container.on('resize', triggerResize);
     });
-    scopeObj.$on("angular-resizable.resizeEnd", function (event) {
-        document.dispatchEvent(new Event('resize'));
-    });
+    scopeObj.$on("angular-resizable.resizeEnd", triggerResize);
     layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
-        let model = activeContentItem.config.componentState.model;
-        if (model) {
-            wiComponentService.emit('tab-changed', model);
-            document.dispatchEvent(new Event('resize'));
-        }
+        let model = activeContentItem.config.componentState.model || {};
+        resizeEvent.model = model;
+        triggerResize();
     });
 }
 
@@ -210,7 +210,7 @@ module.exports.removeTabWithModel = function (model) {
     if (!item) return;
     layoutManager.root.getItemsById('right')[0].removeChild(item);
     let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
-    historyState.removePlotFromHistory(model.type, model.id);    
+    historyState.removePlotFromHistory(model.type, model.id);
 }
 
 module.exports.removeAllRightTabs = function () {
@@ -231,7 +231,6 @@ module.exports.isComponentExist = function (id) {
 
 module.exports.updateSize = _.throttle(function () {
     layoutManager.updateSize();
-    document.dispatchEvent(new Event('resize'));
 }, 1000);
 
 module.exports.getItemById = function (itemId) {
