@@ -3218,6 +3218,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, 1000)
     };
 
+    $scope.safeApply = function (fn) {
+        var phase = this.$root.$$phase;
+        if (phase == '$apply' || phase == '$digest') {
+            if (fn && (typeof (fn) === 'function')) {
+                fn();
+            }
+        } else {
+            this.$apply(fn);
+        }
+    };
+
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
     }
@@ -3226,9 +3237,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
-        if (!self.shouldShowSlider())
-            self.slider.noUiSlider.reset();
-            //$(`#${self.plotAreaId}`).css('left', '0px');
+        if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
+        $scope.safeApply();
     }
     this.onReady = function(args) {
         self.resizeHandler = function (event) {
@@ -3252,7 +3262,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         self.slider.noUiSlider.on('update', function(values) {
-            console.log('value', values);
+            // console.log('value', values);
             let difference = self.contentWidth - self.sliderWidth + 20;
             let val = parseFloat(values[0]);
             let left = -1*difference * val / 100.;
