@@ -495,7 +495,9 @@ exports.CurveBulkUpdateButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
-    DialogUtils.curveBulkUpdateDialog(this.ModalService, wiLogplot, function () {
+
+    let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    DialogUtils.curveBulkUpdateDialog(this.ModalService, logTracks, function () {
 
     });
 };
@@ -543,4 +545,30 @@ exports.SaveAsLogplotNameButtonClicked = function () {
             });
         }
     });
+}
+
+exports.FitWindowButtonClicked = function() {
+    console.log('FitWindowButton is clicked');
+}
+
+exports.ReferenceLineButtonClicked = function() {
+    console.log('ReferenceLineButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().toggleReferenceLine()
+}
+
+exports.TooltipButtonClicked = function() {
+    console.log('TooltipButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().toggleTooltip()
+}
+
+exports.EditCurveButtonClicked = function() {
+    console.log('EditCurveButton is clicked');
+}
+
+exports.BaselineShiftButtonClicked = function() {
+    console.log('BaselineShiftButton is clicked');
+}
+
+exports.DepthShiftButtonClicked = function() {
+    console.log('DepthShiftButton is clicked');
 }

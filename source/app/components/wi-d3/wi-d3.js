@@ -2306,7 +2306,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, {
                 name: "DepthShift",
                 label: "Depth Shift",
-                icon: "",
+                icon: "curve-depth-shift-16x16",
                 handler: function () {
 
                 }
@@ -2329,6 +2329,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }, {
                 name: "BaseLineShift",
                 label: "BaseLine Shift",
+                icon: "curve-interactive-baseline-edit-16x16",
                 handler: function () {
 
                 }
@@ -3184,11 +3185,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.plotAreaId = self.name + 'PlotArea';
         // self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
-        wiComponentService.on('tab-changed', function (logplotModel) {
-            if (!logplotModel || logplotModel.type != 'logplot' || self.wiLogplotCtrl.id != logplotModel.properties.idPlot) return;
-            if(!logplotModel.isReady) return;
-            self.plotAll();
-        });
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
         let handlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
         Utils.bindFunctions(logplotHandlers, handlers, {
@@ -3235,8 +3231,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //$(`#${self.plotAreaId}`).css('left', '0px');
     }
     this.onReady = function(args) {
-        document.addEventListener('resize', self.plotAll);
-        document.addEventListener('resize', updateSlider);
+        self.resizeHandler = function (event) {
+            let model = event.model;
+            if (model.type != 'logplot' || self.wiLogplotCtrl.id != model.properties.idPlot) return;
+            if(!model.isReady) return;
+            self.plotAll();
+            updateSlider();
+        }
+        document.addEventListener('resize', self.resizeHandler);
     }
 
     this.onSliderReady = function() {
@@ -3382,6 +3384,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         }
                                     }
                                     wiD3Ctrl.addCustomShadingToTrack(trackObj, lineObj1, shadingModel.data.leftX, shadingModel.data);
+                                    if(callback) callback();
                                 }
                                 else {
                                     for (let line of linesOfTrack) {
@@ -3393,10 +3396,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         }
                                     }
                                     wiD3Ctrl.addPairShadingToTrack(trackObj, lineObj2, lineObj1, shadingModel.data);
+                                    if(callback) callback();
                                 }
                             })
                         });
-                        if(callback) callback();
                     };
                     let trackProps = new Array();
                     async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
@@ -3595,8 +3598,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
 	this.$onDestroy = function () {
         wiComponentService.dropComponent(self.name);
-        document.removeEventListener('resize', self.plotAll);
-        document.removeEventListener('resize', updateSlider);
+        document.removeEventListener('resize', self.resizeHandler);
 	}
 }
 

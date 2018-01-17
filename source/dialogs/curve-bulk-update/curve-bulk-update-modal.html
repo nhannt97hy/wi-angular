@@ -28,31 +28,58 @@
                                 <th width="10%">Log/Linear</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <!-- <tbody>
                             <tr ng-repeat="track in wiModal.tracks">
-                                <th width="5%" rowspan="{{track.lines.length}}">
+                                <td width="5%" rowspan="{{track.lines.length}}">
                                     <input type="checkbox" 
                                             ng-model="track.use">
-                                </th>
-                                <th width="10%" rowspan="{{track.lines.length}}">
+                                </td>
+                                <td width="10%" rowspan="{{track.lines.length}}">
                                     {{track.name}}
-                                </th>
-                                <th width="10%">
+                                </td>
+                                <td width="10%">
                                     <input type="text"
                                             class="form-control wi-form-control"
                                             ng-model="track.lines[0].name">
-                                </th>
-                                <th width="10%">
+                                </td>
+                                <td width="10%">
                                     <input type="text"
                                             class="form-control wi-form-control"
                                             ng-model="track.lines[0].name">
-                                </th>
-                                <th width="10%"></th>
-                                <th width="10%"></th>
-                                <th width="10%"></th>
-                                <th width="10%"></th>
-                                <th width="15%"></th>
-                                <th width="10%"></th>
+                                </td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="15%"></td>
+                                <td width="10%"></td>
+                            </tr>
+                        </tbody> -->
+                        <tbody ng-repeat="track in wiModal.tracks">
+                            <tr ng-repeat="line in track.lines">
+                                <td width="5%" rowspan="{{track.lines.length}}"
+                                    ng-hide="$index>0">
+                                    <input type="checkbox" 
+                                            ng-model="track.use">
+                                </td>
+                                <td width="10%" rowspan="{{track.lines.length}}"
+                                    ng-hide="$index>0">
+                                    {{track.name}}
+                                </td>
+                                <td width="10%">
+                                    {{line.name}}
+                                </td>
+                                <td width="10%">
+                                    <input type="text"
+                                            class="form-control wi-form-control"
+                                            ng-model="line.name">
+                                </td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="15%"></td>
+                                <td width="10%"></td>
                             </tr>
                         </tbody>
                     </table>

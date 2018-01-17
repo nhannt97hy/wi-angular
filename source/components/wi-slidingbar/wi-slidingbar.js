@@ -259,17 +259,19 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             saveStateToServer();
         });
 
-        new ResizeSensor($(self.contentId), function () {
-            let currentParentHeight = $(self.contentId).height();
+        let sensor = new ResizeSensor($(self.contentId), function () {
             self.refreshHandler();
-            //if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
             _viCurve && _viCurve.doPlot();
         });
-
         self.resizeHandler = function (event) {
-            let currentParentHeight = $(self.contentId).height();
-            self.refreshHandler();
-            _viCurve && _viCurve.doPlot();
+            let model = event.model;
+            if (model.type != 'logplot' || model.id != logPlotCtrl.id) return;
+            if (!sensor || !sensor.detach) return;
+            sensor.detach();
+            sensor = new ResizeSensor($(self.contentId), function () {
+                self.refreshHandler();
+                _viCurve && _viCurve.doPlot();
+            });
         }
         document.addEventListener('resize', self.resizeHandler);
 
