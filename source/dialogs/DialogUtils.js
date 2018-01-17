@@ -12127,3 +12127,82 @@ exports.badholeCoalSaltDialog = function(ModalService) {
         });
     });
 }
+
+exports.depthShiftDialog = function(ModalService, SelWell, ShiftCurve, callback){
+    function ModalController(close, wiApiService, $timeout, wiComponentService){
+        let self = this;
+        let applyingInProgress = false;
+        window.depthS = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+
+        this.SelWell = SelWell;
+        this.ShiftCurve = ShiftCurve;
+        this.shiftMode = '1';
+        this.other = false,this.ShowTrack = false,this.ShowResult = false;
+        this.suffix = '_ds';
+        this.datasets =[];
+        this.curves = [];
+        this.shiftedTable = [{
+            name: 'Shift point 0',
+            origin: 1119,
+            shifted: 2000,
+            change: 2000-1119
+        }];
+
+        this.onWellChange = function () {
+            self.datasets.length = 0;
+            self.curves.length = 0;
+            if(self.SelWell){
+                self.SelWell.children.forEach(function(child,i) {
+                    if(child.type == 'dataset')
+                       self.datasets.push(child);
+                   if(i == self.SelWell.children.length - 1){
+                       self.datasets.forEach(function (child) {
+                           child.children.forEach(function (item) {
+                               if (item.type == 'curve') {
+                                   let d = item;
+                                   d.flag = false;
+                                   self.curves.push(d);
+                               }
+                           })
+                       });
+                   }
+               })
+                self.selectedDataset = self.datasets[0];
+                self.RefCurve = self.curves[0];
+            }
+        }
+
+        this.onWellChange();
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function(){
+                self.onWellChange();
+            });
+        });
+
+        this.onApplyButtonClicked = function(){
+            console.log('Apply');
+        }
+        this.onRunButtonClicked = function(){
+            console.log('Run');
+        }
+
+        this.onCancelButtonClicked = function(){
+            close(null);
+        }
+    }
+
+    ModalService.showModal({
+        templateUrl: 'depth-shift/depth-shift-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function(modal){
+        initModal(modal);
+        modal.close.then(function(data){
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        })
+    })
+}

@@ -2308,7 +2308,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Depth Shift",
                 icon: "curve-depth-shift-16x16",
                 handler: function () {
-
+                    self.depthShiftDialog();
                 }
             }, {
                 name: "RemoveCurve",
@@ -2524,6 +2524,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                 Utils.createHistogram(idWell, curve, histogramName);
             })
+        }
+    }
+
+    this.depthShiftDialog = function(){
+        let curve = _currentTrack.getCurrentCurve();
+        if(!curve){
+            DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for depth shift!');
+        }else{
+            let well = Utils.findWellByLogplot(self.logPlotCtrl.id);
+            DialogUtils.depthShiftDialog(ModalService, well, curve);
         }
     }
 

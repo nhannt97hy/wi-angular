@@ -569,4 +569,5 @@ exports.BaselineShiftButtonClicked = function() {
 
 exports.DepthShiftButtonClicked = function() {
     console.log('DepthShiftButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().depthShiftDialog();
 }
