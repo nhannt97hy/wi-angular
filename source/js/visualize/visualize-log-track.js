@@ -38,7 +38,6 @@ Utils.extend(Track, LogTrack);
  */
 function LogTrack(config, wiApiService) {
     Track.call(this, config);
-    console.log("logTrack", config);
     if (!wiApiService) console.error("wiApiService is null, fix it!!!");
     this.wiApiService = wiApiService;
     this.id = config.id;
@@ -268,10 +267,8 @@ LogTrack.prototype.setTmpCurve = function(curve) {
  * @param {Object} drawing - The drawing to be current
  */
 LogTrack.prototype.setCurrentDrawing = function(drawing) {
-    console.log("drawing", drawing);
     if (drawing == this.currentDrawing) return;
     this.currentDrawing = drawing;
-    console.log("current", this.currentDrawing);
     this.tmpCurve = null;
     this.plotAllDrawings();
     if (drawing && drawing.isCurve()) {
@@ -283,8 +280,6 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
         this.updateAxis();
     }
     this.highlightHeader();
-    console.log("current123", this.currentDrawing);
-
 }
 
 /**
@@ -642,7 +637,6 @@ LogTrack.prototype.removeAllDrawings = function() {
  * @param {Object} drawing - The drawing to plot
  */
 LogTrack.prototype.plotDrawing = function(drawing) {
-    // console.log('PLOT DRAWING')
     if (!drawing || !drawing.doPlot) return;
     let windowY = this.getWindowY();
     drawing.minY = windowY[0];

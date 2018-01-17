@@ -205,6 +205,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let domElem = document.getElementById(self.histogramAreaId);
         self.createVisualizeHistogram(self.histogramModel, domElem);
         self.resizeHandler = function (event) {
+            let model = event.model;
+            if (model.type != 'histogram' || model.id != self.histogramModel.id) return;
             self.visHistogram && self.visHistogram.doPlot();
         }
         document.addEventListener('resize', self.resizeHandler);
@@ -347,7 +349,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
                 self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-                document.dispatchEvent(new Event('resize'));
+                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
             }
         },{
             name: "ShowCumulative",

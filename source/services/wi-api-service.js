@@ -989,7 +989,8 @@ Service.prototype.processingDataCurve = function (request, callback, progressCb)
             if (callback) callback(response);
         })
         .catch(function (err) {
-            self.getUtils().error(err);
+            toastr.error(err);
+            if (callback) callback(null, err);
         });
 }
 
