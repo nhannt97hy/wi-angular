@@ -7,8 +7,9 @@ Object.defineProperty(Array.prototype, "binarySearch", {
     enumerable: false,
     value: function(accessFunc, searchValue) {
         return this.find(accessFunc, searchValue);
-    }        
+    }
 });
+console.log('hic hic');
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
