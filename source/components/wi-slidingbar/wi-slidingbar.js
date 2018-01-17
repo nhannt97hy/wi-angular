@@ -258,6 +258,14 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             updateWid3();
             saveStateToServer();
         });
+
+        new ResizeSensor($(self.contentId), function () {
+            let currentParentHeight = $(self.contentId).height();
+            self.refreshHandler();
+            //if (currentParentHeight && currentParentHeight !== parentHeight) self.refreshHandler();
+            _viCurve && _viCurve.doPlot();
+        });
+
         self.resizeHandler = function (event) {
             let currentParentHeight = $(self.contentId).height();
             self.refreshHandler();
