@@ -14,23 +14,9 @@ exports.EditToolComboboxButtonClicked = function () {
 	wiComboviewCtrl.editTool();
 }
 
-exports.AddLogplotButtonClicked = function () {
-	console.log('AddLogplotButtonClicked');
+exports.CombinedPlotPropertiesButtonClicked = function () {
+	console.log('CombinedPlotPropertiesButtonClicked');
 	let wiComboviewCtrl = this.wiComboview;
 	let wiD3Ctrl = wiComboviewCtrl.getwiD3Ctrl();
-	wiD3Ctrl.addLogplot();
-}
-
-exports.AddHistogramButtonClicked = function () {
-	console.log('AddHistogramButtonClicked');
-	let wiComboviewCtrl = this.wiComboview;
-	let wiD3Ctrl = wiComboviewCtrl.getwiD3Ctrl();
-	wiD3Ctrl.addHistogram();
-}
-
-exports.AddCrossplotButtonClicked = function () {
-	console.log('AddCrossplotButtonClicked');
-	let wiComboviewCtrl = this.wiComboview;
-	let wiD3Ctrl = wiComboviewCtrl.getwiD3Ctrl();
-	wiD3Ctrl.addCrossplot();
+	wiD3Ctrl.configCombinedPlotProperties();
 }

@@ -11340,13 +11340,22 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
     });
 }
 
-exports.combinedPlotPropertiesDialog = function (ModalService, callback) {
+exports.combinedPlotPropertiesDialog = function (ModalService, combinedplotInfo, callback) {
     function ModalController(wiComponentService, wiApiService, close) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let self = this;
 
         let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         let wells = project.wells;
+
+        let props = {
+            // logplot: combinedplotInfo.plots[0].idPlot || null,
+            // histogram: combinedplotInfo.histograms[0].idHistogram || null,
+            // crossplot: combinedplotInfo.crossplots[0].idCrossPlot || null
+            logplot: null,
+            histogram: null,
+            crossplot: null
+        };
 
         console.log('project loaded', project);
 
@@ -11386,18 +11395,21 @@ exports.combinedPlotPropertiesDialog = function (ModalService, callback) {
 
         this.onSelectLogplot = function(selectedLogplot) {
             console.log(selectedLogplot);
+            props.logplot = selectedLogplot;
         }
 
         this.onSelectHistogram = function(selectedHistogram) {
             console.log(selectedHistogram);
+            props.histogram = selectedHistogram;
         }
 
         this.onSelectCrossplot = function(selectedCrossplot) {
             console.log(selectedCrossplot);
+            props.crossplot = selectedCrossplot;
         }
 
         this.onOkButtonClicked = function () {
-            close(null);
+            close(props);
         }
 
         this.onApplyButtonClicked = function () {
