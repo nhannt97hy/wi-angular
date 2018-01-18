@@ -74,6 +74,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
         self.setContextMenu();
         if (self.name) {
+            self.name = self.name.replace('inCombinedPlot', '');
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }

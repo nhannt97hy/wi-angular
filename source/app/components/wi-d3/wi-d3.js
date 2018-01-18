@@ -879,7 +879,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.updateScale = function () {
-        let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
+        console.log(self.wiLogplotCtrl.name);
+        let trackPlot = $(`wi-logplot[name=${self.wiLogplotCtrl.name}] .vi-track-plot-container .vi-track-drawing`)[0];
         if (!trackPlot) return;
         let trackPlotHeight = trackPlot.getAttribute('height');
         let dpCm = Utils.getDpcm();
@@ -2907,7 +2908,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
-                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile);
+                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
                     }
@@ -2991,7 +2992,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
                             object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
-                                newCrossplotModel.properties.name, $scope, $compile);
+                                newCrossplotModel.properties.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
                     }
@@ -3193,6 +3194,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
+        if (self.containerName == undefined || self.containerName == null) self.containerName = '';
         // self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
@@ -3209,6 +3211,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+        self.init();
         $timeout(function () {
             d3.select('#' + self.plotAreaId).on('mousewheel', function() {
                 _onPlotMouseWheelCallback();
@@ -3531,7 +3534,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                         anObject.createHistogram(
                                                             histogramModel.properties.idHistogram, 
                                                             histogramModel.properties.name, 
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
@@ -3549,7 +3552,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                         anObject.createCrossplot(
                                                             crossplotModel.properties.idCrossPlot, 
                                                             crossplotModel.properties.name, 
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
@@ -3630,7 +3633,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiLogplotCtrl: '<'
+        wiLogplotCtrl: '<',
+        containerName: '@'
     }
 });
 

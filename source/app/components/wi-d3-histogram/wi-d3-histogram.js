@@ -215,6 +215,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.getModel();
         if (self.name) {
+            self.name = self.name.replace('inCombinedPlot', '');
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
