@@ -3547,7 +3547,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                 break;
                                             case 'Crossplot':
                                                 if (objectProps.idCrossplot) {
-                                                    let crossplotModel = getModel('crossplot', objectProps.idCrossplot);
+                                                    let crossplotModel = Utils.getModel('crossplot', objectProps.idCrossplot);
                                                     if (crossplotModel && crossplotModel.properties) {
                                                         anObject.createCrossplot(
                                                             crossplotModel.properties.idCrossPlot, 
