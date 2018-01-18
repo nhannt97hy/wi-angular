@@ -5,17 +5,17 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;Curve bulk update</h4>
             </div>
-            <div class="modal-body dialog-style">
+            <div class="modal-body">
                 <p></p>
                 <form class='form-horizontal form-condensed'>
-                    <table class="text-on-table table table-bordered">
+                    <table class="text-on-table table table-bordered curveTable">
                         <thead>
                             <tr>
                                 <th rowspan="2" width="5%">Use</th>
                                 <th rowspan="2" width="10%">Track</th>
                                 <th colspan="4" width="40%">Header</th>
                                 <th colspan="2" width="20%">Scale</th>
-                                <th colspan="2" width="25%">Display Type</th>
+                                <th colspan="3" width="25%">Display Type</th>
                             </tr>
                             <tr>
                                 <th width="10%">Curve Name</th>
@@ -24,37 +24,10 @@
                                 <th width="10%">Unit</th>
                                 <th width="10%">Left</th>
                                 <th width="10%">Right</th>
-                                <th width="15%">Display Mode</th>
+                                <th width="15%" colspan="2">Display Mode</th>
                                 <th width="10%">Log/Linear</th>
                             </tr>
                         </thead>
-                        <!-- <tbody>
-                            <tr ng-repeat="track in wiModal.tracks">
-                                <td width="5%" rowspan="{{track.lines.length}}">
-                                    <input type="checkbox" 
-                                            ng-model="track.use">
-                                </td>
-                                <td width="10%" rowspan="{{track.lines.length}}">
-                                    {{track.name}}
-                                </td>
-                                <td width="10%">
-                                    <input type="text"
-                                            class="form-control wi-form-control"
-                                            ng-model="track.lines[0].name">
-                                </td>
-                                <td width="10%">
-                                    <input type="text"
-                                            class="form-control wi-form-control"
-                                            ng-model="track.lines[0].name">
-                                </td>
-                                <td width="10%"></td>
-                                <td width="10%"></td>
-                                <td width="10%"></td>
-                                <td width="10%"></td>
-                                <td width="15%"></td>
-                                <td width="10%"></td>
-                            </tr>
-                        </tbody> -->
                         <tbody ng-repeat="track in wiModal.tracks">
                             <tr ng-repeat="line in track.lines">
                                 <td width="5%" rowspan="{{track.lines.length}}"
@@ -72,20 +45,53 @@
                                 <td width="10%">
                                     <input type="text"
                                             class="form-control wi-form-control"
-                                            ng-model="line.name">
+                                            ng-model="line.alias">
                                 </td>
                                 <td width="10%"></td>
                                 <td width="10%"></td>
-                                <td width="10%"></td>
-                                <td width="10%"></td>
-                                <td width="15%"></td>
-                                <td width="10%"></td>
+                                <td width="10%">
+                                    <input type="number" step="any"
+                                            class="form-control wi-form-control"
+                                            ng-model="line.minValue">
+                                </td>
+                                <td width="10%">
+                                    <input type="number" step="any"
+                                            class="form-control wi-form-control"
+                                            ng-model="line.maxValue">
+                                </td>
+                                <td width="10%">
+                                    <select ng-model="line.displayMode"
+                                            class="form-control wi-form-control">
+                                        <option value="Line">Line</option>
+                                        <option value="Symbol">Symbol</option>            
+                                        <option value="Both">Both</option>            
+                                        <option value="None">None</option>
+                                    </select>
+                                </td>
+                                <td width="5%">
+                                    <button type="button"
+                                            ng-click="wiModal.onEditStyleButtonClicked(line)"
+                                            ng-disabled="line.displayMode =='None'"
+                                            class="btn btn-default wi-form-control" 
+                                            style="font-size: 10px; width: 100%">Edit</button>
+                                </td>
+                                <td width="10%">
+                                    <select ng-model="line.displayType"
+                                            class="form-control wi-form-control">
+                                        <option value="Logarithmic">Logarithmic</option>
+                                        <option value="Linear">Linear</option>
+                                    </select>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </form>
             </div>
             <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked();" 
+                        ng-disabled="wiModal.applyingInProgress" class="btn btn-default">
+                    <span class="apply-16x16"></span>&nbsp;Apply
+                </button>
                 <button type="button" ng-click="wiModal.onOkButtonClicked();" 
                         ng-disabled="wiModal.applyingInProgress" class="btn btn-default">
                     <span class="ok-16x16"></span>&nbsp;Ok
