@@ -320,22 +320,20 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     }else{
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
         let query = queryString.parse(location.search);
-        if(Object.keys(query).length){
-            if(query.idProject){
-                $timeout(function () {
-                    wiApiService.getProjectInfo(query.idProject, function (project) {
-                        if (project.name) {
-                            wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                                if (projectData.name) {
-                                    utils.projectOpen(wiComponentService, projectData);
-                                } else {
-                                    utils.error("Project not exist!");
-                                }
-                            })
-                        }
-                    })
-                }, 100);
-            }
+        if(Object.keys(query).length && query.idProject){
+            $timeout(function () {
+                wiApiService.getProjectInfo(query.idProject, function (project) {
+                    if (project.name) {
+                        wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
+                            if (projectData.name) {
+                                utils.projectOpen(wiComponentService, projectData);
+                            } else {
+                                utils.error("Project not exist!");
+                            }
+                        })
+                    }
+                })
+            }, 100);
         }else{
             let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
             if(lastProject){

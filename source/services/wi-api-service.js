@@ -825,9 +825,13 @@ Service.prototype.getProject = function (infoProject, callback) {
 
 Service.prototype.getProjectInfo = function (idProject, callback) {
     let self = this;
-    __USERINFO.refreshToken && this.refreshToken(__USERINFO.refreshToken, function () {
+    if (__USERINFO.refreshToken) {
+        this.refreshToken(__USERINFO.refreshToken, function () {
+            self.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
+        });
+    } else {
         self.post(GET_PROJECT_INFO, {idProject:idProject}, callback);
-    });
+    }
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {
