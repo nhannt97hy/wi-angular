@@ -59,7 +59,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	this.$onInit = function () {
 		self.comboviewAreaId = self.name + 'ComboviewArea';
 		// self.suffix = self.wiComboviewCtrl.name;
-		self.suffix = 'inCombinedPlot'
+		self.suffix = self.wiComboviewCtrl.name;
 		self.comboviewModel = self.getModel();
 		if (self.name) {
 			wiComponentService.putComponent(self.name, self);
@@ -82,13 +82,13 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	            itemId = 'crossplot' + model.id;
 	            tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + model.parentData.label + ')';
 	            name = 'crossplot' + model.properties.idCrossPlot + self.suffix;
-	            htmlTemplate = '<wi-crossplot show-toolbar="false" name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
+	            htmlTemplate = '<wi-crossplot container-name="' + self.suffix + '" show-toolbar="false" name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
 	            break;
 	        case 'histogram':
 	            itemId = 'histogram' + model.id;
 	            tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + model.parentData.label + ')';
 	            name = 'histogram' + model.properties.idHistogram + self.suffix;
-	            htmlTemplate = '<wi-histogram show-toolbar="false" name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
+	            htmlTemplate = '<wi-histogram container-name="' + self.suffix + '" show-toolbar="false" name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
 	            break;
 	    }
 

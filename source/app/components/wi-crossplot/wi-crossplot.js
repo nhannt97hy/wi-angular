@@ -109,7 +109,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         id: '@',
-        showToolbar: '<'
+        showToolbar: '<',
+        containerName: '@'
     }
 });
 
