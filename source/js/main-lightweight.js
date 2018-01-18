@@ -7,7 +7,7 @@ Object.defineProperty(Array.prototype, "binarySearch", {
     enumerable: false,
     value: function(accessFunc, searchValue) {
         return this.find(accessFunc, searchValue);
-    }        
+    }
 });
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
@@ -218,6 +218,18 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
     $scope.myPropertiesConfig = {};
 
+    $scope.onRibbonToggle = function(isCollapsed) {
+        if (isCollapsed) {
+            $('.ribbon-wrapper').css('height', 'auto');
+        }
+        else {
+            $('.ribbon-wrapper').css('height', '120px');
+        }
+        setTimeout(function(){
+            layoutManager.updateSize();
+        }, 500);
+    }
+
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);
     wiComponentService.putComponent(wiComponentService.DRAG_MAN, dragMan);
@@ -299,14 +311,15 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
             let utils = wiComponentService.getComponent(wiComponentService.UTILS);
             let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-            let wellModel = utils.createWellModel(result[1]);
-            wiComponentService.putComponent('WELL_MODEL', wellModel);
+            //let wellModel = utils.createWellModel(result[1]);
+            let wellModel = utils.wellToTreeConfig(result[1]);
+            //wiComponentService.putComponent('WELL_MODEL', wellModel);
             let plotModel = utils.logplotToTreeConfig(result[0], {wellModel : wellModel});
-            wellModel.children.push(plotModel);
+            //wellModel.children.push(plotModel);
             $timeout(function() {
                 wiExplorer.treeConfig = [wellModel];
                 try {
-                    utils.openLogplotTab(wiComponentService, plotModel);
+                    utils.openLogplotTab(wiComponentService, plotModel, null, false);
                 }
                 catch(err) {
                     console.error(err);

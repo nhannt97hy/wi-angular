@@ -33,7 +33,9 @@ let layoutConfig = {
         }
     ]
 };
-
+module.exports.setLayoutConfig = function(newLayoutConfig) {
+    layoutConfig = newLayoutConfig;
+}
 module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
@@ -134,7 +136,7 @@ module.exports.putTabRight = function (config) {
     layoutManager.root.getItemsById('right')[0].addChild(childConfig);
 }
 
-module.exports.putTabRightWithModel = function (model) {
+module.exports.putTabRightWithModel = function (model, isClosable = true) {
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
     let itemType, itemId, tabIcon, name, htmlTemplate;
@@ -178,6 +180,7 @@ module.exports.putTabRightWithModel = function (model) {
     rightContainer.addChild({
         type: 'component',
         id: itemId,
+        isClosable: isClosable,
         componentName: 'html-block',
         componentState: {
             html: htmlTemplate,

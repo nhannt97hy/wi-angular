@@ -560,12 +560,12 @@ function createCurveModel (curve) {
 }
 exports.createCurveModel = createCurveModel;
 
-function curveToTreeConfig(curve, isDeleted) {
+function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel) {
     let curveModel = createCurveModel(curve);
+    let dModel = datasetModel || getModel('dataset', curve.idDataset);
+    let wModel = wellModel || getModel('well', datasetModel.properties.idWell);
     setTimeout(() => {
-        let datasetModel = getModel('dataset', curve.idDataset);
-        let wellModel = getModel('well', datasetModel.properties.idWell);
-        curveModel.parentDataArr = [datasetModel.data, wellModel.data];
+        curveModel.parentDataArr = [dModel.data, wModel.data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
@@ -619,11 +619,12 @@ function createDatasetModel (dataset) {
 }
 exports.createDatasetModel = createDatasetModel;
 
-function datasetToTreeConfig(dataset, isDeleted) {
+function datasetToTreeConfig(dataset, isDeleted, wellModel) {
     let datasetModel = createDatasetModel(dataset);
+    let wM = wellModel;
+    if (!wM) wM = getModel('well', dataset.idWell);
     setTimeout(() => {
-        let wellModel = getModel('well', dataset.idWell);
-        datasetModel.parentData = wellModel.data;
+        datasetModel.parentData = wM.data;
     });
     if (isDeleted) {
         datasetModel.name = "dataset-deleted-child";
@@ -649,7 +650,7 @@ function datasetToTreeConfig(dataset, isDeleted) {
         if (!dataset.curves) return datasetModel;
         dataset.curves.forEach(function (curve) {
             curve.dataset = dataset.name;
-            datasetModel.children.push(curveToTreeConfig(curve));
+            datasetModel.children.push(curveToTreeConfig(curve, false, wM, datasetModel));
         });
         return datasetModel;
     }
@@ -928,7 +929,7 @@ function wellToTreeConfig(well, isDeleted) {
         let wellModel = createWellModel(well);
         if (well.datasets) {
             well.datasets.forEach(function (dataset) {
-                wellModel.children.push(datasetToTreeConfig(dataset));
+                wellModel.children.push(datasetToTreeConfig(dataset, false, wellModel));
             });
         }
         let zoneSetsNode = createZoneSetsNode(well);
@@ -1359,10 +1360,10 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
     });
 };
 exports.createCrossplotToObjectOfTrack = createCrossplotToObjectOfTrack;
-function openLogplotTab(wiComponentService, logplotModel, callback) {
+function openLogplotTab(wiComponentService, logplotModel, callback, isClosable = true) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     // let graph = wiComponentService.getComponent('GRAPH');
-    layoutManager.putTabRightWithModel(logplotModel);
+    layoutManager.putTabRightWithModel(logplotModel, isClosable);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
     let logplotName = 'logplot' + logplotModel.properties.idPlot;
