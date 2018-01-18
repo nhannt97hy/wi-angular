@@ -34,6 +34,19 @@ let layoutConfig = {
     ]
 };
 
+let tabComponents = {};
+let resizeEvent = new Event('resize');
+resizeEvent.model = {};
+const triggerResize = _.debounce(function () {
+    for (const id in tabComponents) {
+        const component = tabComponents[id];
+        if (component.tab.isActive) {
+            resizeEvent.model = component.config.componentState.model || {};
+            document.dispatchEvent(resizeEvent);
+        }
+    }
+}, 200);
+
 module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
@@ -49,17 +62,14 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
-    let resizeEvent = new Event('resize');
-    resizeEvent.model = {};
-    const triggerResize = _.debounce(function () {
-        document.dispatchEvent(resizeEvent);
-    }, 200)
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
         container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
-        container.on('destroy', function () {
+        if (componentState.model) tabComponents[container.parent.config.id] = container.parent;
+        container.on('destroy', function (component) {
+            delete tabComponents[component.config.id];
             if(modelRef){
                 let model = utils.getModel(modelRef.type, modelRef.id);
                 if (!model) return;
@@ -76,6 +86,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     });
     scopeObj.$on("angular-resizable.resizeEnd", triggerResize);
     layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
+        layoutManager.root.getItemsById('right')[0];
         let model = activeContentItem.config.componentState.model || {};
         resizeEvent.model = model;
         triggerResize();
@@ -229,9 +240,10 @@ module.exports.isComponentExist = function (id) {
     return (layoutManager.root.getItemsById(id).length ? true : false);
 }
 
-module.exports.updateSize = _.throttle(function () {
+module.exports.updateSize = function () {
     layoutManager.updateSize();
-}, 1000);
+    triggerResize();
+}
 
 module.exports.getItemById = function (itemId) {
     return layoutManager.root.getItemsById(itemId)[0];

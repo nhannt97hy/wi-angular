@@ -1,4 +1,4 @@
-<div class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
+<div ng-if="wiLogplot.showToolbar" class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
     @@include('./toolbar/index.html')
 </div>
 <div class="logplot-well-name" ng-bind="wiLogplot.wellModel.properties.name"></div>
@@ -12,6 +12,7 @@
     <div class="track-area">
         <wi-d3 style="width: 100%; flex: 1; display: flex;flex-direction:column;"
                name='{{wiLogplot.wiD3AreaName}}'
+               container-name='{{wiLogplot.containerName}}'
                wi-logplot-ctrl='wiLogplot'>
         </wi-d3>
     </div>

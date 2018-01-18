@@ -879,7 +879,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.updateScale = function () {
-        let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
+        console.log(self.wiLogplotCtrl.name);
+        let trackPlot = $(`wi-logplot[name=${self.wiLogplotCtrl.name}] .vi-track-plot-container .vi-track-drawing`)[0];
         if (!trackPlot) return;
         let trackPlotHeight = trackPlot.getAttribute('height');
         let dpCm = Utils.getDpcm();
@@ -2308,7 +2309,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Depth Shift",
                 icon: "curve-depth-shift-16x16",
                 handler: function () {
-
+                    self.depthShiftDialog();
                 }
             }, {
                 name: "RemoveCurve",
@@ -2524,6 +2525,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                 Utils.createHistogram(idWell, curve, histogramName);
             })
+        }
+    }
+
+    this.depthShiftDialog = function(){
+        let curve = _currentTrack.getCurrentCurve();
+        if(!curve){
+            DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for depth shift!');
+        }else{
+            let well = Utils.findWellByLogplot(self.logPlotCtrl.id);
+            DialogUtils.depthShiftDialog(ModalService, well, curve);
         }
     }
 
@@ -2897,7 +2908,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
-                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile);
+                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
                     }
@@ -2981,7 +2992,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
                             object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
-                                newCrossplotModel.properties.name, $scope, $compile);
+                                newCrossplotModel.properties.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
                     }
@@ -3183,6 +3194,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
+        if (self.containerName == undefined || self.containerName == null) self.containerName = '';
         // self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
@@ -3199,6 +3211,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+        self.init();
         $timeout(function () {
             d3.select('#' + self.plotAreaId).on('mousewheel', function() {
                 _onPlotMouseWheelCallback();
@@ -3218,6 +3231,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, 1000)
     };
 
+    $scope.safeApply = function (fn) {
+        var phase = this.$root.$$phase;
+        if (phase == '$apply' || phase == '$digest') {
+            if (fn && (typeof (fn) === 'function')) {
+                fn();
+            }
+        } else {
+            this.$apply(fn);
+        }
+    };
+
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
     }
@@ -3226,9 +3250,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBarWidth = $(`wi-slidingbar[name=${self.logPlotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
-        if (!self.shouldShowSlider())
-            self.slider.noUiSlider.reset();
-            //$(`#${self.plotAreaId}`).css('left', '0px');
+        if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
+        $scope.safeApply();
     }
     this.onReady = function(args) {
         self.resizeHandler = function (event) {
@@ -3252,7 +3275,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         self.slider.noUiSlider.on('update', function(values) {
-            console.log('value', values);
+            // console.log('value', values);
             let difference = self.contentWidth - self.sliderWidth + 20;
             let val = parseFloat(values[0]);
             let left = -1*difference * val / 100.;
@@ -3511,7 +3534,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                         anObject.createHistogram(
                                                             histogramModel.properties.idHistogram, 
                                                             histogramModel.properties.name, 
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
@@ -3524,12 +3547,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                 break;
                                             case 'Crossplot':
                                                 if (objectProps.idCrossplot) {
-                                                    let crossplotModel = getModel('crossplot', objectProps.idCrossplot);
+                                                    let crossplotModel = Utils.getModel('crossplot', objectProps.idCrossplot);
                                                     if (crossplotModel && crossplotModel.properties) {
                                                         anObject.createCrossplot(
                                                             crossplotModel.properties.idCrossPlot, 
                                                             crossplotModel.properties.name, 
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
@@ -3610,7 +3633,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiLogplotCtrl: '<'
+        wiLogplotCtrl: '<',
+        containerName: '@'
     }
 });
 

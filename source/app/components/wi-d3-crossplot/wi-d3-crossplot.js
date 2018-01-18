@@ -74,6 +74,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
         self.setContextMenu();
         if (self.name) {
+            self.name = self.name.replace('inCombinedPlot', '');
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
@@ -355,17 +356,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.contextMenu.length) {
             self.contextMenu.find(c => c.name == 'ShowReferenceZone').checked = self.wiCrossplotCtrl.isShowWiZone;
         }
-        document.dispatchEvent(new Event('resize'));
-    }
-
-    this.switchReferenceZone = function(onOrOff) {
-        if (!self.wiCrossplotCtrl) return;
-        if (onOrOff === undefined)
-            self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
-        else
-            self.wiCrossplotCtrl.isShowWiZone = onOrOff;
-        document.dispatchEvent(new Event('resize'));
-        self.contextMenu[index].checked = self.wiCrossplotCtrl.isShowWiZone;
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
     }
 
     this.switchReferenceWindow = function(state) {
@@ -375,7 +366,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (self.contextMenu.length >= index) {
             self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
         }
-        document.dispatchEvent(new Event('resize'));
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
     }
 
     this.updateAll = function (callback) {

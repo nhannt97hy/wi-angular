@@ -351,49 +351,75 @@ exports.AnnotationsButtonClicked = function () {
 
 exports.AddImageButtonClicked = function () {
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
-    let currentTrack = wiD3Ctrl.getCurrentTrack();
+    let currentImgTrack = wiD3Ctrl.getCurrentTrack();
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    let [top, bottom] = wiD3Ctrl.getDepthRangeFromSlidingBar();
-    const wiApiService = this.wiApiService;
-    if (currentTrack.getImages()[0]) {
-        let imageConfig = currentTrack.getImages()[0];
-        DialogUtils.imagePropertiesDialog(this.ModalService, wiD3Ctrl, imageConfig, function (config) {
-            config.idTrack = currentTrack.id;
-            config.location = config.src;
-            wiApiService.editImage(config, function () {
-                wiD3Ctrl.editImage(currentTrack, config);
-            })
-        })
+    if (currentImgTrack.type != 'image-track') {
+        DialogUtils.errorMessageDialog(this.ModalService, 'Please select a image track for adding an image!');
         return;
     }
-    let defaultConfig = {
-        top: top,
-        bottom: bottom,
-        left: 0,
-        width: 100
-    }
-    DialogUtils.imagePropertiesDialog(this.ModalService, wiD3Ctrl, defaultConfig, function (config) {
-        config.idTrack = currentTrack.id;
-        config.location = config.src;
-        wiApiService.createImage(config, function (image) {
-            image.src = image.location;
-            wiD3Ctrl.addImageToTrack(currentTrack, image);
-        })
+    const wiApiService = this.wiApiService;
+    let imageConfig = wiD3Ctrl.addImageZoneToTrack(currentImgTrack, {});
+    let _currentImage = imageConfig.getProperties();
+    _currentImage.isNewDraw = true;
+    DialogUtils.imageZonePropertiesDialog(this.ModalService, _currentImage, function (props) {
+        if (!props) {
+            currentImgTrack.removeImage(imageConfig);
+            return;
+        } else if (props === true) {
+            return;
+        }
+        let isNewDraw = props.isNewDraw;
+        props.idImageTrack = currentImgTrack.id;
+        delete props.isNewDraw;
+        if (isNewDraw) {
+            wiApiService.createImage(props, function (imgProps) {
+                if (imgProps) {
+                    imageConfig.setProperties(imgProps);
+                    imageConfig.header.attr('id', 'id' + imageConfig.idImageOfTrack);
+                    if (!imageConfig.showName) imageConfig.header.select('div').remove();
+                    wiD3Ctrl.drawImageZone(imageConfig, imgProps, isNewDraw);
+                    currentImgTrack.plotImageZone(imageConfig);
+                    currentImgTrack.rearrangeHeaders();
+                    _currentImage = imageConfig.getProperties();
+                }
+            });
+        } else {
+            props.idImageOfTrack = _currentImage.idImageOfTrack;
+            wiApiService.editImage(props, function (imgProps) {
+                if (imgProps) {
+                    imageConfig.setProperties(imgProps);
+                    if (!imageConfig.showName) imageConfig.header.select('div').remove();
+                    else {
+                        imageConfig.header.select('div').remove();
+                        delete imageConfig.header;
+                        imageConfig.header = currentImgTrack.addImageZoneHeader(imageConfig, false);
+                    }
+                    wiD3Ctrl.drawImageZone(imageConfig, imgProps, isNewDraw);
+                    imageConfig.doPlot();
+                    currentImgTrack.plotImageZone(imageConfig);
+                    currentImgTrack.rearrangeHeaders();
+                    _currentImage = imageConfig.getProperties();
+                }
+            });
+        }
     })
 };
 
 
 exports.RemoveImageButtonClicked = function () {
     let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
-    let currentTrack = wiD3Ctrl.getCurrentTrack();
-    if (!currentTrack.getImages()[0]) return;
+    let currentImgTrack = wiD3Ctrl.getCurrentTrack();
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
-    let imageConfig = currentTrack.getImages()[0];
-    DialogUtils.confirmDialog(this.ModalService, "Remove Image", `Are you sure to remove image from ${currentTrack.name}?`, function (yes) {
+    let imageConfig = currentImgTrack.getCurrentImageZone();
+    if (!imageConfig) {
+        DialogUtils.errorMessageDialog(this.ModalService, 'Please select an image to remove!');
+        return;
+    }
+    DialogUtils.confirmDialog(this.ModalService, "Remove Image", `Are you sure to remove image from ${currentImgTrack.name}?`, function (yes) {
         if (!yes) return;
-        wiApiService.removeImage(imageConfig.id, function () {
-            wiD3Ctrl.removeImage(currentTrack);
+        wiApiService.removeImage(imageConfig.idImageOfTrack, function () {
+            currentImgTrack.removeImage(imageConfig);
         })
     })
 }
@@ -571,4 +597,5 @@ exports.BaselineShiftButtonClicked = function() {
 
 exports.DepthShiftButtonClicked = function() {
     console.log('DepthShiftButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().depthShiftDialog();
 }
