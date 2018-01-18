@@ -104,6 +104,15 @@
 
 <body ng-app='wiapp' wi-initialization>
     <div class='main' id="main" ng-controller="AppController as app">
+        <div class="ribbon-wrapper">
+        <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
+            <wi-tab heading="Main" closable='false'>
+                <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
+                    <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
+                    </wi-button>
+                </wi-toolbar>
+        </wi-tabset>
+        </div>
         <div id='myLayout'>
         </div>
         <wi-user class="user-wrapper" name='user'></wi-user>
@@ -111,7 +120,6 @@
         <wi-spinner name="SPINNER"></wi-spinner>
     </div>
 
-    <!--
     <template id='explorer-block'>
         <wi-explorer name="WiExplorer" tree-config="myTreeviewConfig"></wi-explorer>
     </template>
@@ -119,7 +127,7 @@
     <template id='property-block'>
         <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties>
     </template>
-    -->
+
     <script src="js/main-lightweight.js.bundle.js"></script>
 
     <!-- Insert this line after script imports -->

@@ -230,8 +230,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     window.HS = historyState;
 
     layoutManager.createLayout('myLayout', $scope, $compile);
-    //layoutManager.putLeft('explorer-block', 'Project');
-    //layoutManager.putLeft('property-block', 'Properties');
 
     // update size when container is resized
     $(window).on('resize', function () {
@@ -258,23 +256,62 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    layoutManager.putLeft('explorer-block', 'Project');
+    layoutManager.putLeft('property-block', 'Properties');
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
-            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
             onInit();
         });
     }
     else {
         $scope.$on('initialized', onInit);
-        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
     }
     function onInit() {
         let query = queryString.parse(location.search);
-        toastr.info('Ah ha:' + query.idPlot);
         if (query.idPlot) {
-            wiApiService.getLogplot(query.idPlot, function(logplotProps) {
-                console.log(logplotProps);
-            });
+            viewPlot(query.idPlot);
         }
+    }
+    function viewPlot(idPlot) {
+        let idWell;
+        async.series([function(done) {
+            try {
+                wiApiService.getLogplot(idPlot, function(plotProps) {
+                    idWell = plotProps.idWell;
+                    done(null, plotProps);
+                });
+            }
+            catch(err) {
+                done(err);
+            }
+        }, function(done) {
+            try {
+                wiApiService.getWell(idWell, function(wellProps) {
+                    done(null, wellProps);
+                });
+            }
+            catch(err) {
+                done(err);
+            }
+        }], function(err, result) {
+            console.log(err, result);
+            let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+            let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+
+            let wellModel = utils.createWellModel(result[1]);
+            wiComponentService.putComponent('WELL_MODEL', wellModel);
+            let plotModel = utils.logplotToTreeConfig(result[0], {wellModel : wellModel});
+            wellModel.children.push(plotModel);
+            $timeout(function() {
+                wiExplorer.treeConfig = [wellModel];
+                try {
+                    utils.openLogplotTab(wiComponentService, plotModel);
+                }
+                catch(err) {
+                    console.error(err);
+                }
+            });
+        });
     }
 });

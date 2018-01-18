@@ -1516,7 +1516,7 @@ function findWellById(idWell) {
     if (!wiExplorer) {
         return wiComponentService.getComponent('WELL_MODEL');
     }
-    let rootNodes = wiExploer.treeConfig;
+    let rootNodes = wiExplorer.treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
     visit(rootNodes[0], function (node) {
