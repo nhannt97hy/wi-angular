@@ -4,10 +4,8 @@ const moduleName = 'wi-d3-comboview';
 function Controller($scope, $controller, wiComponentService, $timeout, ModalService, wiApiService, $compile) {
 	let self = this;
 
-	const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-
-	// let mainLayoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-	// this.prefix = mainLayoutManager.prefix + this.name;
+	let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+	let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
 	this.layoutManager;
 	this.layoutConfig = {
@@ -29,12 +27,20 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 		self.layoutManager = new GoldenLayout(self.layoutConfig, document.getElementById(domId));
 		self.layoutManager.registerComponent('blank', function(container, state) {
 			container.getElement().html($compile(state.html)($scope));
-			// let modelRef = state.model;
-	  //       container.on('destroy', function () {
-	  //           let model = utils.getModel(modelRef.type, modelRef.id);
-	  //           if (!model) return;
-	  //           model.data.opened = false;
-	  //       });
+			let modelRef = state.model;
+	        container.on('destroy', function () {
+	        	if (modelRef) {
+	        		let model = utils.getModel(modelRef.type, modelRef.id);
+					if (!model) return;
+					model.data.opened = false;
+					if (model.isReady) model.isReady = false;
+					wiComponentService.dropComponent(model.type + model.id);
+					let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
+					historyState.removePlotFromHistory(model.type, model.id);
+				}
+				if (componentState.name) wiComponentService.dropComponent(componentState.name);
+				newScope.$destroy();
+			});
 		});
 		self.layoutManager.init();
 	}
@@ -52,7 +58,8 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 	this.$onInit = function () {
 		self.comboviewAreaId = self.name + 'ComboviewArea';
-		self.prefix = self.name
+		// self.suffix = self.wiComboviewCtrl.name;
+		self.suffix = 'inCombinedPlot'
 		self.comboviewModel = self.getModel();
 		if (self.name) {
 			wiComponentService.putComponent(self.name, self);
@@ -67,21 +74,21 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	    switch (model.type) {
 	    	case 'logplot':
 	            itemId = 'logplot' + model.id;
-	            tabTitle = '<span class="logplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
-	            name = 'logplot' + model.properties.idPlot;
-	            htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
+	            tabTitle = '<span class="logplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + model.parentData.label + ')';
+	            name = 'logplot' + model.properties.idPlot + self.suffix;
+	            htmlTemplate = '<wi-logplot container-name="' + self.suffix + '" show-toolbar="false" name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
 	            break;
 	        case 'crossplot':
 	            itemId = 'crossplot' + model.id;
-	            tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
-	            name = 'crossplot' + model.properties.idCrossPlot;
-	            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
+	            tabTitle = '<span class="crossplot-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + model.parentData.label + ')';
+	            name = 'crossplot' + model.properties.idCrossPlot + self.suffix;
+	            htmlTemplate = '<wi-crossplot show-toolbar="false" name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
 	            break;
 	        case 'histogram':
 	            itemId = 'histogram' + model.id;
-	            tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + well.properties.name + ')';
-	            name = 'histogram' + model.properties.idHistogram;
-	            htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
+	            tabTitle = '<span class="histogram-blank-16x16"></span> &nbsp;' + model.properties.name + ' - (' + model.parentData.label + ')';
+	            name = 'histogram' + model.properties.idHistogram + self.suffix;
+	            htmlTemplate = '<wi-histogram show-toolbar="false" name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
 	            break;
 	    }
 
@@ -99,60 +106,49 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	    });
 	}
 
-	this.addLogplot = function () {
-		let logplotModel = utils.getModel('logplot', 3);
+	this.configCombinedPlotProperties = function() {
+		// wiApiService.getCombinedBox(self.wiComboviewCtrl.id, function(returnedCombinedBox) {
+			// $timeout(function() {
+			let returnedCombinedBox = '';
+				DialogUtils.combinedPlotPropertiesDialog(ModalService, returnedCombinedBox, function(props) {
+					// let dataRequest = {
+					// 	idWell: returnedCombinedBox.idWell,
+					// 	idCombinedBox: returnedCombinedBox.idCombinedBox,
+					// 	idLogPlots: props.logplot.idPlot,
+					// 	idHistograms: props.histogram.idHistogram,
+					// 	idCrossPlots: props.crossplot.idCrossPlot
+					// }
+					// wiApiService.editCombinedBox(dataRequest, function() {
+						// $timeout(function() {
+							self.addLogplot(props.logplot);
+							self.addHistogram(props.histogram);
+							self.addCrossplot(props.crossplot);
+						// });
+					// });
+				});
+			// });
+		// });
+	}
 
-		let tempId = logplotModel.id;
-		let tempIdPlot = logplotModel.properties.idPlot;
-
-		logplotModel.id = logplotModel.id + self.prefix;
-		logplotModel.properties.idPlot = logplotModel.properties.idPlot + self.prefix;
-
-		console.log(logplotModel);
-
-		// let logplotName = 'logplot' + tempIdPlot;
-	 //    let logplotCtrl = wiComponentService.getComponent(logplotName);
-	 //    let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
-	 //    let slidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
+	this.addLogplot = function (logplotProps) {
+		if(!logplotProps || !logplotProps.idPlot) return;
+		let logplotModel = utils.getModel('logplot', logplotProps.idPlot);
 
 		self.putObjectComponent(logplotModel);
-
-		logplotModel.id = tempId;
-		logplotModel.properties.idPlot = tempIdPlot;
 	}
 
-	this.addHistogram = function () {
-		let histogramModel = utils.getModel('histogram', 1);
-
-		console.log(histogramModel);
-
-		let tempId = histogramModel.id;
-		let tempIdHistogram = histogramModel.properties.idHistogram;
-
-		histogramModel.id = histogramModel.id + self.prefix;
-		histogramModel.properties.idHistogram = histogramModel.properties.idHistogram + self.prefix;
+	this.addHistogram = function (histogramProps) {
+		if(!histogramProps || !histogramProps.idHistogram) return;
+		let histogramModel = utils.getModel('histogram', histogramProps.idHistogram);
 
 		self.putObjectComponent(histogramModel);
-
-		histogramModel.id = tempId;
-		histogramModel.properties.idCrossPlot = tempIdCrossPlot;
 	}
 
-	this.addCrossplot = function () {
-		let crossplotModel = utils.getModel('crossplot', 8);
-
-		console.log(crossplotModel);
-
-		let tempId = crossplotModel.id;
-		let tempIdCrossPlot = crossplotModel.properties.idCrossPlot;
-
-		crossplotModel.id = crossplotModel.id + self.prefix;
-		crossplotModel.properties.idCrossPlot = crossplotModel.properties.idCrossPlot + self.prefix;
+	this.addCrossplot = function (crossplotProps) {
+		if(!crossplotProps || !crossplotProps.idCrossPlot) return;
+		let crossplotModel = utils.getModel('crossplot', crossplotProps.idCrossPlot);
 
 		self.putObjectComponent(crossplotModel);
-
-		crossplotModel.id = tempId;
-		crossplotModel.properties.idCrossPlot = tempIdCrossPlot;
 	}
 
 	this.showContextMenu = function (event) {
@@ -169,7 +165,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 			label: "Properties",
 			icon: "properties2-16x16",
 			handler: function () {
-				console.log('Properties');
+				self.configCombinedPlotProperties();
 			}
 		}];
 		event.stopPropagation();

@@ -66,15 +66,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	}
 
 	this.useSelector = function (selector) {
-		// console.log(selector);
+		console.log(selector);
 	}
 
 	this.useEraser = function (eraser) {
-		// console.log(eraser);
+		console.log(eraser);
 	}
 
 	this.$onDestroy = function () {
-			wiComponentService.dropComponent(self.name);
+		wiComponentService.dropComponent(self.name);
 	}
 }
 

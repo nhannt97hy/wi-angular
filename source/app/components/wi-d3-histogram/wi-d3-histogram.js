@@ -215,6 +215,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.getModel();
         if (self.name) {
+            self.name = self.name.replace('inCombinedPlot', '');
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
@@ -349,7 +350,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
                 self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-                document.dispatchEvent(new Event('resize'));
+                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
             }
         },{
             name: "ShowCumulative",
