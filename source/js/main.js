@@ -205,7 +205,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
-    window.__HANDLERS = globalHandlers;
 
     // config explorer block - treeview
     // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
@@ -271,10 +270,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
         historyState.removeHistory();
-    });
-    wiComponentService.on(wiComponentService.ADD_LOGPLOT_EVENT, function (logplotModel) {
-        console.log(logplotModel);
-        layoutManager.putTabRightWithModel(logplotModel);
     });
 
     // update size when container is resized

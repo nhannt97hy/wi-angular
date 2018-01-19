@@ -7419,7 +7419,9 @@ exports.fillDataGapsDialog = function(ModalService){
             });
         }
         function validate(){
-            self.otherCurves = self.curves.filter(curve => {return curve.flag == true;});
+            self.otherCurves = self.curves.filter(curve => {
+				return curve.flag == true && curve.id != self.SelectedCurve.id;
+			});
             if(self.otherCurves.length){
                 async.each(self.otherCurves, (curve, cb) => {
                     let newName = curve.name + self.suffix;
@@ -10486,81 +10488,219 @@ exports.badholeCoalSaltDialog = function(ModalService) {
     });
 }
 
-exports.depthShiftDialog = function(ModalService, SelWell, ShiftCurve, callback){
-    function ModalController(close, wiApiService, $timeout, wiComponentService){
-        let self = this;
-        let applyingInProgress = false;
-        window.depthS = this;
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback ) {
+	function ModalController(close, wiApiService, $timeout, wiComponentService) {
+	  let self = this;
+	  let applyingInProgress = false;
+	  window.depthS = this;
+	  let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+	  let DialogUtils = wiComponentService.getComponent(
+		wiComponentService.DIALOG_UTILS
+	  );
+  
+	  this.SelWell = SelWell;
+	  this.ShiftCurve = ShiftCurve;
+	  this.shiftMode = "1";
+	  (this.other = false), (this.ShowTrack = false), (this.ShowResult = false);
+	  this.suffix = "_ds";
+	  this.datasets = [];
+	  this.curves = [];
+	  this.shiftedTable = [];
+  
+	  this.onWellChange = function() {
+		self.datasets.length = 0;
+		self.curves.length = 0;
+		if (self.SelWell) {
+		  self.SelWell.children.forEach(function(child, i) {
+			if (child.type == "dataset") self.datasets.push(child);
+			if (i == self.SelWell.children.length - 1) {
+			  self.datasets.forEach(function(child) {
+				child.children.forEach(function(item) {
+				  if (item.type == "curve") {
+					let d = item;
+					d.flag = false;
+					self.curves.push(d);
+				  }
+				});
+			  });
+			}
+		  });
+		  self.selectedDataset = self.datasets[0];
+		  self.RefCurve = self.curves[0];
+		}
+	  };
+  
+	  this.onWellChange();
+	  wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+		self.applyingInProgress = false;
+		$timeout(function() {
+		  self.onWellChange();
+		});
+	  });
+  
+	  this.onChangeDepth = function(index, depth){
+		  let point = self.shiftedTable[index];
+		  point.origin = point.origin >= self.SelWell.topDepth ? point.origin : self.SelWell.topDepth;
+		  if(depth){
+			  point.change = point.shifted - point.origin;
+		  }else{
+			  point.shifted = point.origin + point.change;
+		  }
+		  point.shifted = point.shifted <= self.SelWell.bottomDepth ? point.shifted : self.SelWell.bottomDepth;
+	  }
+  
+	  this.delete = function( index ) {
+		  self.shiftedTable.splice(index,1);
+	  }
+  
+	  this.addShifted = function() {
+		  self.shiftedTable.push(
+			  {
+				  name: "Shift point " + self.shiftedTable.length,
+				  origin: self.shiftedTable.length ? self.shiftedTable[self.shiftedTable.length - 1].shifted : self.SelWell.topDepth,
+				  shifted: self.shiftedTable.length ? self.shiftedTable[self.shiftedTable.length - 1].shifted : self.SelWell.topDepth,
+				  change: 0,
+				  id: Math.random()
+				}
+		  )
+	  }
+  
+	  this.checked = false;
+	  this.select = function(curve) {
+		curve.flag = !curve.flag;
+	  };
+	  this.checkAll = function() {
+		self.checked = !self.checked;
+		self.curves.forEach(function(curve) {
+		  curve.flag = self.checked;
+		});
+	  };
+	  this.CurveF = function(curve){
+		  return curve.id != self.ShiftCurve.idCurve;
+	  }
 
-        this.SelWell = SelWell;
-        this.ShiftCurve = ShiftCurve;
-        this.shiftMode = '1';
-        this.other = false,this.ShowTrack = false,this.ShowResult = false;
-        this.suffix = '_ds';
-        this.datasets =[];
-        this.curves = [];
-        this.shiftedTable = [{
-            name: 'Shift point 0',
-            origin: 1119,
-            shifted: 2000,
-            change: 2000-1119
-        }];
-
-        this.onWellChange = function () {
-            self.datasets.length = 0;
-            self.curves.length = 0;
-            if(self.SelWell){
-                self.SelWell.children.forEach(function(child,i) {
-                    if(child.type == 'dataset')
-                       self.datasets.push(child);
-                   if(i == self.SelWell.children.length - 1){
-                       self.datasets.forEach(function (child) {
-                           child.children.forEach(function (item) {
-                               if (item.type == 'curve') {
-                                   let d = item;
-                                   d.flag = false;
-                                   self.curves.push(d);
-                               }
-                           })
-                       });
-                   }
-               })
-                self.selectedDataset = self.datasets[0];
-                self.RefCurve = self.curves[0];
-            }
-        }
-
-        this.onWellChange();
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
-            self.applyingInProgress = false;
-            $timeout(function(){
-                self.onWellChange();
-            });
-        });
-
-        this.onApplyButtonClicked = function(){
-            console.log('Apply');
-        }
-        this.onRunButtonClicked = function(){
-            console.log('Run');
-        }
-
-        this.onCancelButtonClicked = function(){
-            close(null);
-        }
-    }
-
-    ModalService.showModal({
-        templateUrl: 'depth-shift/depth-shift-modal.html',
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function(modal){
-        initModal(modal);
-        modal.close.then(function(data){
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-        })
-    })
-}
+	  this.validate = validate;
+	  function validate(callback){
+		  async.each(self.shiftedTable,(point, cb) => {
+			  point.flag = false;
+			  if(point.origin < self.SelWell.topDepth || point.shifted > self.SelWell.bottomDepth){
+				point.flag = true;
+			  }
+			  let below = self.shiftedTable.find(p => p.origin >= point.origin && p.id != point.id);
+			  if(below){
+				  if(point.origin == below.origin) point.flag = true;
+				  if((point.shifted  + self.SelWell.step > below.shifted) || (point.origin  + self.SelWell.step > below.origin))
+					point.flag = true;
+			  }
+			  cb();
+		  }, function(err){
+			  let flag = self.shiftedTable.find(p => p.flag == true);
+			  callback(!flag);
+		  })
+  
+	  }
+  
+	  this.onImportButtonClicked = function() {
+		  console.log("Import");
+		  if (self.ImportFile) {
+			  self.shiftedTable.length = 0;
+			  if (self.ImportFile.type.match("text")) {
+				let reader = new FileReader();
+				reader.onload = function(event) {
+				  let lines = this.result.split("\n");
+				  if(lines[0].trim() == "Depth Shift File"){
+					  let line1 = lines[1]
+					  .trim()
+					  .split(',');
+					  if(line1.length == 1){
+						  let len = parseInt(line1[0]);
+						  len = len <= lines.length - 2 ? len : lines.length - 2;
+						  for (let i = 0; i < len; i++) {
+							let ele = lines[i + 2].trim().split(',');
+							if (ele.length >=3) self.shiftedTable.push({
+								name: ele[0],
+								origin: parseFloat(ele[1]) || 0,
+								shifted: parseFloat(ele[2]) || 0,
+								change: parseFloat(ele[2]) - parseFloat(ele[1]) || 0,
+								id: Math.random()
+							});
+						  }
+					  }else{
+						  utils.error("Import error! Invalid Format!");                        
+					  }
+				  }else{
+					  utils.error("Import error! Not Depth Shifts File");
+				  }
+				};
+				reader.readAsText(self.ImportFile);
+			  } else {
+				utils.error("Supported text file(.txt) only!");
+				delete self.ImportFile;
+			  }
+			}
+	  }
+  
+	  this.onExportButtonClicked = function() {
+		  console.log("Export");
+		  if(self.shiftedTable.length){
+			  let text = 'Depth Shift File\r\n' + self.shiftedTable.length + '\r\n';
+			  self.shiftedTable.forEach(point => {
+				text = text + point.name + ',' + point.origin + ',' + point.shifted + '\r\n';
+			  })
+			  let blob = new Blob([text], {
+				type: 'text'
+			  });
+			  let a = document.createElement('a');
+			  let fileName = 'depth shift.txt';
+			  a.download = fileName;
+			  a.href = URL.createObjectURL(blob);
+			  a.style.display = 'none';
+			  document.body.appendChild(a);
+			  a.click();
+			  a.parentNode.removeChild(a);
+			}else{
+			  utils.error("Export error!");
+			}
+	  }
+  
+	  this.onApplyButtonClicked = function() {
+		console.log("Apply");
+		validate(valid => {
+			if(valid){
+				console.log("true");
+			}else{
+				utils.error("Shift point(s) invalid!");
+			}
+		})
+	  };
+  
+	  this.onRunButtonClicked = function() {
+		console.log("Run");
+		validate(valid => {
+			if(valid){
+				console.log("true");
+			}else{
+				utils.error("Shift point(s) invalid!");
+			}
+		})
+	  };
+  
+	  this.onCancelButtonClicked = function() {
+		close(null);
+	  };
+	}
+  
+	ModalService.showModal({
+	  templateUrl: "depth-shift/depth-shift-modal.html",
+	  controller: ModalController,
+	  controllerAs: "wiModal"
+	}).then(function(modal) {
+	  initModal(modal);
+	  modal.close.then(function(data) {
+		$(".modal-backdrop")
+		  .last()
+		  .remove();
+		$("body").removeClass("modal-open");
+	  });
+	});
+  };

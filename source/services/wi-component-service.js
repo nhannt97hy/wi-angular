@@ -7,6 +7,7 @@ app.factory(wiServiceName, function () {
     let handlers = {};
     let _state = {};
     window.__CPNTS = __Controllers;
+    window.__HANDLERS = handlers;
     return {
         getComponent: function (componentName) {
             return __Controllers[componentName];
@@ -40,11 +41,9 @@ app.factory(wiServiceName, function () {
         },
 
         on: function (eventName, handlerCb) {
-            let eventHandlers = handlers[eventName];
-            if (!Array.isArray(eventHandlers)) {
+            if (!Array.isArray(handlers[eventName])) {
                 handlers[eventName] = [];
             }
-
             handlers[eventName].push(handlerCb);
         },
         emit: function (eventName, data) {
@@ -53,6 +52,16 @@ app.factory(wiServiceName, function () {
                 eventHandlers.forEach(function (handler) {
                     handler(data);
                 })
+            }
+        },
+        // remove 1 handler or all handlers
+        removeEvent: function (eventName, handler) {
+            const eventHandlers = handlers[eventName];
+            if (typeof handler != 'function') delete handlers[eventName];
+            else if (Array.isArray(eventHandlers)) {
+                for (let i = 0; i < eventHandlers.length; i++) {
+                    if (handler == eventHandlers[i]) eventHandlers.splice(i, 1);
+                }
             }
         },
 
@@ -94,6 +103,7 @@ app.factory(wiServiceName, function () {
         PROJECT_REFRESH_EVENT: 'project-refresh-event',
         DUSTBIN_REFRESH_EVENT: 'dustbin-refresh-event',
         PALETTES: 'PALETTES',
+        LOGPLOT_LOADED_EVENT: 'logplot-loaded-event',
     };
 });
 
