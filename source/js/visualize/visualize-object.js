@@ -282,7 +282,7 @@ function buildHistogramProps(config, wellProps) {
     return histogramProps;
 }
 
-let getWiD3HistogramName, getWiD3CrossplotName;
+let getWiD3HistogramName = () => '', getWiD3CrossplotName = () => '';
 ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, scopeObj, compileFunc, containerName) {
     getWiD3HistogramName = function (idHistogram) {
         return containerName + 'objHistogram' + idHistogram + 'D3Area';

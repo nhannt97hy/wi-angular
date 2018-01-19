@@ -879,7 +879,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.updateScale = function () {
-        console.log(self.wiLogplotCtrl.name);
         let trackPlot = $(`wi-logplot[name=${self.wiLogplotCtrl.name}] .vi-track-plot-container .vi-track-drawing`)[0];
         if (!trackPlot) return;
         let trackPlotHeight = trackPlot.getAttribute('height');
@@ -3360,7 +3359,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.contextMenu = ctxMenu;
     }
 
-    this.init = _.debounce(function (callback) {
+    this.init = _.debounce(function () {
         Utils.getPalettes(function (paletteList) {
             let logplotCtrl = self.logPlotCtrl;
             let logplotModel = logplotCtrl.getLogplotModel();
@@ -3619,7 +3618,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 }
                             },500);
                             self.isReady = true;
-                            if (callback) callback();
+                            wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
                         });
                     }
                 });
