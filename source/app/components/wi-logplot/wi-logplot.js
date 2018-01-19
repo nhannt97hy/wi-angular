@@ -16,6 +16,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isTooltip = true;
         self.logplotModel = self.getLogplotModel();
         self.wellModel = utils.getModel('well', self.logplotModel.properties.idWell);
+        if (self.showToolbar == undefined || self.showToolbar == null) self.showToolbar = true;
+        if (self.containerName == undefined || self.containerName == null) self.containerName = '';
 
         // Setup handlers for logplot
         $scope.handlers = {};
@@ -71,7 +73,9 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        id: '@'
+        id: '@',
+        showToolbar: '<',
+        containerName: '@'
     }
 });
 

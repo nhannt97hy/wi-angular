@@ -57,6 +57,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     });
     this.$onInit = function () {
         self.wiD3AreaName = self.name + "D3Area";
+        if (self.showToolbar == undefined || self.showToolbar == null) self.showToolbar = true;
         if (self.name) wiComponentService.putComponent(self.name, self);
         let histogramModel = self.getModel();
         self.isShowWiZone = histogramModel ? !!histogramModel.properties.idZoneSet: false;
@@ -130,7 +131,9 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        id: '@'
+        id: '@',
+        showToolbar: '<',
+        containerName: '@'
     }
 });
 

@@ -282,13 +282,11 @@ function buildHistogramProps(config, wellProps) {
     return histogramProps;
 }
 
-function getWiD3HistogramName(idHistogram) {
-    return 'objHistogram' + idHistogram + 'D3Area';
-}
-function getWiD3CrossplotName(idCrossplot) {
-    return 'objCrossplot' + idCrossplot + 'D3Area';
-}
-ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, scopeObj, compileFunc) {
+let getWiD3HistogramName = () => '', getWiD3CrossplotName = () => '';
+ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, scopeObj, compileFunc, containerName) {
+    getWiD3HistogramName = function (idHistogram) {
+        return containerName + 'objHistogram' + idHistogram + 'D3Area';
+    }
     this.idHistogram = idHistogram;
     var domEle = this.objectContainer
             .append("div")
@@ -301,7 +299,7 @@ ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, s
             .node();
 
     let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="' 
-               + getWiD3HistogramName(idHistogram) + '" id-histogram="'
+               + (getWiD3HistogramName(idHistogram)) + '" id-histogram="'
                + idHistogram + '"></wi-d3-histogram>';
     $(domEle).html(compileFunc(html)(scopeObj));
     this.currentDraw = "Histogram";
@@ -309,7 +307,10 @@ ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, s
 
     this.doPlot(true, true);
 }
-ObjectOfTrack.prototype.createCrossplot = function(idCrossplot, crossplotName, scopeObj, compileFunc) {
+ObjectOfTrack.prototype.createCrossplot = function(idCrossplot, crossplotName, scopeObj, compileFunc, containerName) {
+    getWiD3CrossplotName = function (idCrossplot) {
+        return containerName + 'objCrossplot' + idCrossplot + 'D3Area';
+    }
     this.idCrossplot = idCrossplot;
     var domEle = this.objectContainer
             .append("div")
@@ -322,7 +323,7 @@ ObjectOfTrack.prototype.createCrossplot = function(idCrossplot, crossplotName, s
             .node();
 
     let html = '<wi-d3-crossplot style="flex: 1; display: flex;flex-direction:column;" name="' 
-               + getWiD3CrossplotName(idCrossplot) + '" id-crossplot="'
+               + (getWiD3CrossplotName(idCrossplot)) + '" id-crossplot="'
                + idCrossplot + '"></wi-d3-crossplot>';
     $(domEle).html(compileFunc(html)(scopeObj));
     this.currentDraw = "Crossplot";

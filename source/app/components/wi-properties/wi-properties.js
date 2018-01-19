@@ -101,7 +101,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 listConfig.push(config);
                 let listFamily = utils.getListFamily();
                 let curveFamily = listFamily.find(f => f.idFamily == itemProperties.idFamily) || {};
-                let listUnit = curveFamily.family_spec;
+                let listUnit = curveFamily.family_spec || [];
                 let curveUnit = listUnit.find(u => u.isDefault == true) || {};
                 config = {
                     name: currentItem.name,

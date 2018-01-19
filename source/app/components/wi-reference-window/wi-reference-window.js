@@ -33,16 +33,27 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let sensor = new ResizeSensor(document.getElementById(self.name), function () {
             refresh();
         });
+        function handler () {
+            if (!sensor || !sensor.detach) return;
+            sensor.detach();
+            sensor = new ResizeSensor(document.getElementById(self.name), function () {
+                refresh();
+            });
+        }
         self.resizeHandler = function (event) {
             let parentCtrl = getParentCtrl();
-            if (parentCtrl.idCrossplot && (model.type != 'crossplot' || model.id != parentCtrl.idCrossplot)) return;
-            if (parentCtrl.idHistogram && (model.type != 'histogram' || model.id != parentCtrl.idHistogram)) return;
-            if (sensor && sensor.detach) {
-                sensor.detach();
-                sensor = new ResizeSensor(document.getElementById(self.name), function () {
-                    refresh();
-                });
+            let model = event.model;
+            if (self.containerName) {
+                if (parentCtrl.idCrossplot && model.type == 'crossplot') return;
+                if (parentCtrl.idHistogram && model.type == 'histogram') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+            } else {
+                if (parentCtrl.idCrossplot && (model.type != 'crossplot' || model.id != parentCtrl.idCrossplot)) return;
+                if (parentCtrl.idHistogram && (model.type != 'histogram' || model.id != parentCtrl.idHistogram)) return;
+                handler();
             }
+            
         }
         document.addEventListener('resize', self.resizeHandler);
         self.svg = getRefCurveContainer().append('svg')
@@ -341,7 +352,8 @@ app.component(componentName, {
     controllerAs: componentName,
     bindings: {
         name: '@',
-        onRefWindCtrlReady: "<"
+        onRefWindCtrlReady: "<",
+        containerName: '@'
     }
 });
 

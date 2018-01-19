@@ -206,14 +206,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.createVisualizeHistogram(self.histogramModel, domElem);
         self.resizeHandler = function (event) {
             let model = event.model;
-            if (model.type != 'histogram' || model.id != self.histogramModel.id) return;
-            self.visHistogram && self.visHistogram.doPlot();
+            if (self.containerName) {
+                if (model.type == 'histogram') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) self.visHistogram && self.visHistogram.doPlot();
+            } else {
+                if (model.type != 'histogram' || model.id != self.histogramModel.id) return;
+                self.visHistogram && self.visHistogram.doPlot();
+            }
         }
         document.addEventListener('resize', self.resizeHandler);
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.getModel();
+        if (self.containerName == undefined || self.containerName == null) self.containerName = '';
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
@@ -508,7 +515,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiHistogramCtrl: '<',
-        idHistogram: '<'
+        idHistogram: '<',
+        containerName: '@'
     }
 });
 app.filter('toFixed2', function() {

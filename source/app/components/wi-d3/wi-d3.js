@@ -168,6 +168,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.updateLogTrack = function (viTrack) {
         if (!viTrack.isLogTrack()) return;
+        
+        viTrack.drawings.forEach(function(d) {
+            if (d.isShading) self.removeShadingFromTrack(viTrack, d);
+        })
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         function _addShadingToTrack (shading) {
@@ -879,7 +883,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     this.updateScale = function () {
-        let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
+        let trackPlot = $(`wi-logplot[name=${self.wiLogplotCtrl.name}] .vi-track-plot-container .vi-track-drawing`)[0];
         if (!trackPlot) return;
         let trackPlotHeight = trackPlot.getAttribute('height');
         let dpCm = Utils.getDpcm();
@@ -2907,7 +2911,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
-                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile);
+                            object.createHistogram(newHistogram.idHistogram, newHistogram.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
                     }
@@ -2991,7 +2995,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
                             object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
-                                newCrossplotModel.properties.name, $scope, $compile);
+                                newCrossplotModel.properties.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
                     }
@@ -3209,6 +3213,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+        self.init();
         $timeout(function () {
             d3.select('#' + self.plotAreaId).on('mousewheel', function() {
                 _onPlotMouseWheelCallback();
@@ -3251,12 +3256,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $scope.safeApply();
     }
     this.onReady = function(args) {
-        self.resizeHandler = function (event) {
-            let model = event.model;
-            if (model.type != 'logplot' || self.wiLogplotCtrl.id != model.properties.idPlot) return;
-            if(!model.isReady) return;
+        function handler () {
             self.plotAll();
             updateSlider();
+        }
+        self.resizeHandler = function (event) {
+            let model = event.model;
+            if(!self.isReady) return;
+            if (self.containerName) {
+                if (model.type == 'logplot') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+            } else {
+                if (model.type == 'logplot' && self.wiLogplotCtrl.id == model.properties.idPlot) handler();
+            }
         }
         document.addEventListener('resize', self.resizeHandler);
     }
@@ -3350,7 +3363,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.contextMenu = ctxMenu;
     }
 
-    this.init = function (callback) {
+    this.init = _.debounce(function () {
         Utils.getPalettes(function (paletteList) {
             let logplotCtrl = self.logPlotCtrl;
             let logplotModel = logplotCtrl.getLogplotModel();
@@ -3531,7 +3544,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                         anObject.createHistogram(
                                                             histogramModel.properties.idHistogram, 
                                                             histogramModel.properties.name, 
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
@@ -3544,12 +3557,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                 break;
                                             case 'Crossplot':
                                                 if (objectProps.idCrossplot) {
-                                                    let crossplotModel = getModel('crossplot', objectProps.idCrossplot);
+                                                    let crossplotModel = Utils.getModel('crossplot', objectProps.idCrossplot);
                                                     if (crossplotModel && crossplotModel.properties) {
                                                         anObject.createCrossplot(
                                                             crossplotModel.properties.idCrossPlot, 
                                                             crossplotModel.properties.name, 
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc
+                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
@@ -3608,13 +3621,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     logplotCtrl.handlers.ViewWholeWellButtonClicked();
                                 }
                             },500);
-                            logplotModel.isReady = true;
-                            if (callback) callback();
+                            self.isReady = true;
+                            wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
                         });
                     }
                 });
         });
-    }
+    }, 100);
 
 	this.$onDestroy = function () {
         wiComponentService.dropComponent(self.name);
@@ -3630,7 +3643,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiLogplotCtrl: '<'
+        wiLogplotCtrl: '<',
+        containerName: '@'
     }
 });
 

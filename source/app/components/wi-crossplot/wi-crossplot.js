@@ -10,6 +10,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
         self.wiD3CrossplotName = self.name + 'D3Area';
+        if (self.showToolbar == undefined || self.showToolbar == null) self.showToolbar = true;
         const crossplotHandlers = wiComponentService.getComponent(wiComponentService.CROSSPLOT_HANDLERS);
         $scope.handlers = {};
         utils.bindFunctions($scope.handlers, crossplotHandlers, {
@@ -107,7 +108,9 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        id: '@'
+        id: '@',
+        showToolbar: '<',
+        containerName: '@'
     }
 });
 

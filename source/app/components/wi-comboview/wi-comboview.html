@@ -7,7 +7,8 @@
                     style="{{tool.color}}" 
                     label="{{tool.name}}" 
                     layout="icon-left" class="height-auto"
-                    handler="handlers.SelectorButtonClicked(tool.name)">
+                    handler="handlers.SelectorButtonClicked"
+                    handler-args="[tool.name]">
                 </wi-button>
 
                 <wi-button label="Edit Tool" layout="icon-left" class="height-auto" handler="handlers.EditToolComboboxButtonClicked">
@@ -21,7 +22,8 @@
                     style="{{tool.color}}"
                     label="{{tool.name}}"
                     layout="icon-left" class="height-auto"
-                    handler="handlers.EraserButtonClicked(tool.name)">
+                    handler="handlers.EraserButtonClicked"
+                    handler-args="[tool.name]">
                 </wi-button>
 
                 <wi-button label="Edit Tool" layout="icon-left" class="height-auto" handler="handlers.EditToolComboboxButtonClicked">
@@ -31,13 +33,7 @@
     </wi-toolbar>
 
     <wi-toolbar name="ComboviewToolbar2">
-            <wi-button name="AddLogplotButton" label="Logplot" type="small" tooltip="Logplot" handler="handlers.AddLogplotButtonClicked">
-            </wi-button>
-            
-            <wi-button name="AddHistogramButton" label="Histogram" type="small" tooltip="Histogram" handler="handlers.AddHistogramButtonClicked">
-            </wi-button>
-            
-            <wi-button name="AddCrossplotButton" label="Crossplot" type="small" tooltip="Crossplot" handler="handlers.AddCrossplotButtonClicked">
+            <wi-button name="PropertiesButton" label="Properties" type="small" tooltip="Properties" handler="handlers.CombinedPlotPropertiesButtonClicked">
             </wi-button>
     </wi-toolbar>
     

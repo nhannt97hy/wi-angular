@@ -1360,10 +1360,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     layoutManager.putTabRightWithModel(logplotModel);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
-    let logplotName = 'logplot' + logplotModel.properties.idPlot;
-    let logplotCtrl = wiComponentService.getComponent(logplotName);
-    let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
-    wiD3Ctrl.init(callback);
+    if (callback) wiComponentService.on(wiComponentService.LOGPLOT_LOADED_EVENT, function handler () {
+        callback();
+        wiComponentService.removeEvent(wiComponentService.LOGPLOT_LOADED_EVENT, handler);
+    });
 };
 exports.openLogplotTab = openLogplotTab;
 
@@ -2360,7 +2360,7 @@ exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
         selection: '',
         idLogPlots: null,
         idCrossPlots: null,
-        idHistogram: null
+        idHistograms: null
     };
 
     return new Promise (function (resolve, reject) {
@@ -2379,7 +2379,6 @@ exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
 }
 
 function openComboviewTab(comboviewModel) {
-    console.log('openComboviewTab button clicked');
     let wiComponentService = __GLOBAL.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRightWithModel(comboviewModel);

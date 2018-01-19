@@ -1,4 +1,4 @@
-<div class="crossplot-toolbar-wrapper">
+<div ng-if="wiCrossplot.showToolbar" class="crossplot-toolbar-wrapper">
     @@include('./toolbar/index.html')
 </div>
 <div class="crossplot-main-content" style="flex: 1; display: flex; flex-direction: row;">
@@ -9,6 +9,7 @@
     </div>
     <wi-d3-crossplot style="width: 100%; flex: 1; display: flex;margin-left:14px;"
         name='{{wiCrossplot.wiD3CrossplotName}}'
+        container-name="{{wiCrossplot.containerName}}"
         wi-crossplot-ctrl='wiCrossplot'>
     </wi-d3-crossplot>
     <div resizable r-directions="['left']" r-flex="true" 
@@ -18,6 +19,7 @@
             close-handler='wiCrossplot.CloseReferenceWindow'>
           <wi-reference-window
             name='{{wiCrossplot.getWiRefWindCtrlName()}}'
+            container-name="{{wiCrossplot.containerName}}"
             on-ref-wind-ctrl-ready="wiCrossplot.onRefWindCtrlReady">
           </wi-reference-window>
         </wi-container>
