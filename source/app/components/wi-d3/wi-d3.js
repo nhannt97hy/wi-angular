@@ -168,6 +168,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.updateLogTrack = function (viTrack) {
         if (!viTrack.isLogTrack()) return;
+        
+        viTrack.drawings.forEach(function(d) {
+            if (d.isShading) self.removeShadingFromTrack(viTrack, d);
+        })
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         function _addShadingToTrack (shading) {
