@@ -119,9 +119,13 @@ ImageZone.prototype.doPlot = function(highlight) {
         .attr('height', maxY - minY)
         .style('position', 'relative');
 
-    this.updateHeader();
+    this.foreignObject
+        .attr('x', minX)
+        .attr('y', minY)
+        .attr('width', maxX - minX)
+        .attr('height', maxY - minY);
 
-    self.onViewportChange(minX, maxX, minY, maxY);    
+    this.updateHeader();
 }
 
 ImageZone.prototype.on = function(type, cb) {
@@ -210,8 +214,6 @@ ImageZone.prototype.lineDragCallback = function(line) {
 
     this.topDepth = transformY.invert(minY);
     this.bottomDepth = transformY.invert(maxY);
-
-    self.onViewportChange(minX, maxX, minY, maxY);
 }
 
 ImageZone.prototype.onLineDragEnd = function(cb) {
@@ -229,66 +231,3 @@ ImageZone.prototype.onLineDragEnd = function(cb) {
 ImageZone.prototype.getDepthRange = function(){
     return [this.topDepth, this.bottomDepth];
 };
-
-ImageZone.prototype.onViewportChange = function(minX, maxX, minY, maxY) {
-    let viewportY = this.getViewportY()[1];
-    // get out of viewport
-    if(maxY > viewportY && minY > viewportY && minY < 0 && maxY < 0) { return; }
-
-    // handle cases
-    if ((minY == maxY)
-        || (minY == viewportY)
-        || (maxY == viewportY)) {
-        this.foreignObject
-            .attr('x', minX)
-            .attr('y', minY)
-            .attr('width', maxX - minX)
-            .attr('height', 0)
-            .style('position', 'relative');
-        return;
-    } else if ((minY >= 0 && minY <= viewportY)
-        && (maxY >= 0 && maxY <= viewportY)) {
-        if (maxY - minY < 0) return;
-        this.foreignObject
-            .attr('x', minX)
-            .attr('y', minY)
-            .attr('width', maxX - minX)
-            .attr('height', maxY - minY)
-            .style('position', 'relative');
-    } else if ((minY >= 0 && minY <= viewportY)
-        && (maxY >= viewportY)) {
-        if (viewportY - minY < 0) return;
-        this.foreignObject
-            .attr('x', minX)
-            .attr('y', minY)
-            .attr('width', maxX - minX)
-            .attr('height', viewportY - minY)
-            .style('position', 'relative');
-    } else if ((minY <= 0)
-        && (maxY >= 0 && maxY <= viewportY)) {
-        if (maxY - 0 < 0) return;
-        this.foreignObject
-            .attr('x', minX)
-            .attr('y', 0)
-            .attr('width', maxX - minX)
-            .attr('height', maxY - 0)
-            .style('position', 'relative');
-    } else if ((minY <= 0)
-        && (maxY >= viewportY)) {
-        if (viewportY - 0 < 0) return;
-        this.foreignObject
-            .attr('x', minX)
-            .attr('y', 0)
-            .attr('width', maxX - minX)
-            .attr('height', viewportY - 0)
-            .style('position', 'relative');
-    } else if (((minY <= 0) && (maxY <= 0))
-        || ((minY >= viewportY) && (maxY >= viewportY))) {
-        this.foreignObject
-            .attr('x', minX)
-            .attr('y', 0)
-            .attr('width', maxX - minX)
-            .attr('height', 0)
-            .style('position', 'relative');
-    }
-}
