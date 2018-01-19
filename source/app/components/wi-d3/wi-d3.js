@@ -3198,7 +3198,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let logplotHandlers = {};
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
-        if (self.containerName == undefined || self.containerName == null) self.containerName = '';
         // self.svgId = self.plotAreaId + 'SVG';
         self.logPlotCtrl = getLogplotCtrl();
         //WiLogplotModel = self.wiLogplotCtrl.getLogplotModel();
@@ -3258,12 +3257,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $scope.safeApply();
     }
     this.onReady = function(args) {
-        self.resizeHandler = function (event) {
-            let model = event.model;
-            if (model.type != 'logplot' || self.wiLogplotCtrl.id != model.properties.idPlot) return;
-            if(!model.isReady) return;
+        function handler () {
             self.plotAll();
             updateSlider();
+        }
+        self.resizeHandler = function (event) {
+            let model = event.model;
+            if(!self.isReady) return;
+            if (self.containerName) {
+                if (model.type == 'logplot') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+            } else {
+                if (model.type == 'logplot' && self.wiLogplotCtrl.id == model.properties.idPlot) handler();
+            }
         }
         document.addEventListener('resize', self.resizeHandler);
     }
@@ -3357,7 +3364,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.contextMenu = ctxMenu;
     }
 
-    this.init = function (callback) {
+    this.init = _.debounce(function (callback) {
         Utils.getPalettes(function (paletteList) {
             let logplotCtrl = self.logPlotCtrl;
             let logplotModel = logplotCtrl.getLogplotModel();
@@ -3615,13 +3622,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     logplotCtrl.handlers.ViewWholeWellButtonClicked();
                                 }
                             },500);
-                            logplotModel.isReady = true;
+                            self.isReady = true;
                             if (callback) callback();
                         });
                     }
                 });
         });
-    }
+    }, 100);
 
 	this.$onDestroy = function () {
         wiComponentService.dropComponent(self.name);

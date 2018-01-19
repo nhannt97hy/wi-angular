@@ -72,9 +72,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
+        if (self.containerName == undefined || self.containerName == null) self.containerName = '';
         self.setContextMenu();
         if (self.name) {
-            self.name = self.name.replace('inCombinedPlot', '');
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
@@ -102,10 +102,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     xplotProps.referenceBottomDepth,
                     xplotProps.referenceShowDepthGrid);
         });
+        function handler () {
+            self.viCrossplot && self.viCrossplot.doPlot && self.viCrossplot.doPlot();
+        }
         self.resizeHandlerCross = function (event) {
             let model = event.model;
-            if (model.type != 'crossplot' || model.id != self.crossplotModel.id) return;
-            self.viCrossplot && self.viCrossplot.doPlot && self.viCrossplot.doPlot();
+            if (self.containerName) {
+                if (model.type == 'crossplot') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+            } else {
+                if (model.type != 'crossplot' || model.id != self.crossplotModel.id) return;
+                handler();
+            }
         }
         document.addEventListener('resize', self.resizeHandlerCross);
     }
@@ -176,15 +185,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             innerElem.css('width', elem[0].clientHeight + 'px');
             innerElem.css('height', elem[0].clientWidth + 'px');
         });
-        self.resizeHandlerHis = function (event) {
-            let model = event.model;
-            if (model.type != 'crossplot' || model.id != self.crossplotModel.id) return;
+
+        function handler () {
             if (!sensor || !sensor.detach) return;
             sensor.detach();
             sensor = new ResizeSensor(elem[0], function() {
                 innerElem.css('width', elem[0].clientHeight + 'px');
                 innerElem.css('height', elem[0].clientWidth + 'px');
             });
+        }
+        self.resizeHandlerHis = function (event) {
+            let model = event.model;
+            if (self.containerName) {
+                if (model.type == 'crossplot') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+            } else {
+                if (model.type != 'crossplot' || model.id != self.crossplotModel.id) return;
+                handler();
+            }
         }
         document.addEventListener('resize', self.resizeHandlerHis);
         innerElem.css('width', elem[0].clientHeight + 'px');
@@ -1070,7 +1089,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiCrossplotCtrl: '<',
-        idCrossplot: '<'
+        idCrossplot: '<',
+        containerName: '@'
     }
 });
 app.filter('toFixed2', function() {

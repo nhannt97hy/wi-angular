@@ -1360,7 +1360,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
     layoutManager.putTabRightWithModel(logplotModel);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
-    callback && callback();
+    let logplotName = 'logplot' + logplotModel.properties.idPlot;
+    let logplotCtrl = wiComponentService.getComponent(logplotName);
+    let wiD3Ctrl = logplotCtrl.getwiD3Ctrl();
+    wiD3Ctrl.init(callback);
 };
 exports.openLogplotTab = openLogplotTab;
 
