@@ -235,29 +235,30 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
         let openedTabModels = [];
         if (historyState.getPlotsLengthFromHistory()) {
-            let types = ['logplot', 'crossplot', 'histogram', 'comboview'];
-            types.forEach(type => {
-                openedTabModels = historyState.getPlotsFromHistory(type).map(tab => utils.getModel(type, tab));
-            });
+            let plots = historyState.getPlotsFromHistory();
+            for (const type in plots) {
+                const tabIds = plots[type];
+                tabIds.forEach(id => {
+                    const model = utils.getModel(type, id);
+                    if (!model) return;
+                    openedTabModels.push(model);
+                })
+            }
         }
         if (openedTabModels.length) {
             DialogUtils.confirmDialog(ModalService, 'Restore Opened Plot Tabs', 'Do you want to restore opened plot tabs?', function (ret) {
                 if (ret) {
                     openedTabModels.forEach(model => {
-                        if (!model) toastr.error('One or some of plot tabs was deleted');
-                        switch (type) {
+                        switch (model.type) {
                             case 'logplot':
                                 utils.openLogplotTab(wiComponentService, model);
                                 break;
-
                             case 'crossplot':
                                 utils.openCrossplotTab(model);
                                 break;
-
                             case 'histogram':
                                 utils.openHistogramTab(model);
                                 break;
-
                             case 'comboview':
                                 utils.openComboviewTab(model);
                                 break;
