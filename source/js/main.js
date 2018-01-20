@@ -233,38 +233,44 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
         historyState.createHistory();
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
-        if(historyState.getPlotsLengthFromHistory()){
-            DialogUtils.confirmDialog(ModalService, 'Restore Opened Plot Tabs', 'Do you want to restore opened plot tabs?', function(ret){
-                if(ret){
-                    let types = ['logplot', 'crossplot', 'histogram', 'comboview'];
-                    types.forEach(type => {
-                        let openedTabs = historyState.getPlotsFromHistory(type);
-                        openedTabs.forEach(tab => {
-                            let model = utils.getModel(type, tab);
-                            switch(type){
-                                case 'logplot':
+        let openedTabModels = [];
+        if (historyState.getPlotsLengthFromHistory()) {
+            let types = ['logplot', 'crossplot', 'histogram', 'comboview'];
+            types.forEach(type => {
+                openedTabModels = historyState.getPlotsFromHistory(type).map(tab => utils.getModel(type, tab));
+            });
+        }
+        if (openedTabModels.length) {
+            DialogUtils.confirmDialog(ModalService, 'Restore Opened Plot Tabs', 'Do you want to restore opened plot tabs?', function (ret) {
+                if (ret) {
+                    openedTabModels.forEach(model => {
+                        if (!model) toastr.error('One or some of plot tabs was deleted');
+                        switch (type) {
+                            case 'logplot':
                                 utils.openLogplotTab(wiComponentService, model);
                                 break;
 
-                                case 'crossplot':
+                            case 'crossplot':
                                 utils.openCrossplotTab(model);
                                 break;
 
-                                case 'histogram':
+                            case 'histogram':
                                 utils.openHistogramTab(model);
                                 break;
 
-                                case 'comboview':
+                            case 'comboview':
                                 utils.openComboviewTab(model);
                                 break;
-                            }
-                        })
-                    })
-                }else{
+                        }
+                    });
+                } else {
                     historyState.removeHistory();
                     historyState.createHistory();
                 }
             })
+        } else {
+            historyState.removeHistory();
+            historyState.createHistory();
         }
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
