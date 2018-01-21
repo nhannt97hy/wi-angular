@@ -201,7 +201,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         self.tinyWindow = {
             top: 0,
-            height: parentHeight / 20 || 1
+            height: parentHeight / 10 || 1
         };
 
         // init tiny window height
