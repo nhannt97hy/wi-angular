@@ -134,6 +134,7 @@ function lineToTreeConfig(line) {
         scale: line.displayType,
         alias: line.alias,
         showHeader: line.showHeader,
+        showDataset: line.showDataset,
         blockPosition: line.blockPosition,
         wrapMode: line.wrapMode,
         displayAs: line.displayAs,
@@ -1290,27 +1291,11 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 };
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
-    let currentWell = getSelectedPath().find(node => node.type == 'well');
-    if (!currentWell) {
-        error('Please choose a well');
-        return;
-    }
-    let logplotsNode = getStaticNode('logplots');
-    let well = getModel('well', logplotsNode.properties.idWell);
-    let firstCurve = null;
-    for (let child of well.children) {
-        if (child.type == "dataset") {
-            if (child.children && child.children.length) {
-                firstCurve = child.children[0]
-                break;
-            }
-        }
-    }
+    let currentWell = getCurrentWell();
     let dataRequest = {
-        idWell: logplotsNode.properties.idWell,
+        idWell: currentWell.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
-        referenceCurve: firstCurve ? firstCurve.properties.idCurve : null,
         plotTemplate: type ? type : null
     };
     return new Promise(function (resolve, reject) {
@@ -1318,7 +1303,7 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
             if (err) {
                 reject();
             } else {
-                logplot.parent = angular.copy(well.properties);
+                logplot.parent = angular.copy(currentWell.properties);
                 resolve(logplot);
             }
 
@@ -1366,7 +1351,10 @@ function openLogplotTab(wiComponentService, logplotModel, callback, isClosable =
     layoutManager.putTabRightWithModel(logplotModel, isClosable);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
-    callback && callback();
+    if (callback) wiComponentService.on(wiComponentService.LOGPLOT_LOADED_EVENT, function handler () {
+        callback();
+        wiComponentService.removeEvent(wiComponentService.LOGPLOT_LOADED_EVENT, handler);
+    });
 };
 exports.openLogplotTab = openLogplotTab;
 
@@ -1415,6 +1403,15 @@ function findWellProjectById(idWell, project) {
 
     return null;
 }*/
+function getCurrentWell(type) {
+    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+    if(!currentWell){
+        utils.error("Please select well first!");
+        return;
+    }
+    return currentWell;
+}
+exports.getCurrentWell = getCurrentWell;
 function getStaticNode(type, options) {
     if (!type) return;
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -1961,7 +1958,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         idLine: currentCurve.id,
         idTrack: currentTrack.id,
         showHeader: currentCurve.showHeader,
-        showDataset: false, // add to currentCurve - Canh
+        showDataset: currentCurve.showDataset, // add to currentCurve - Canh
         ignoreMissingValues: false,
         alias: currentCurve.alias,
         minValue: currentCurve.minX,

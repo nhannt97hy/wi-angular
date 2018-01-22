@@ -17,7 +17,7 @@ function getHistory(){
 module.exports.getPlotsFromHistory = getPlotsFromHistory;
 function getPlotsFromHistory(type){
     let history = getHistory();
-    if(!history) return;
+    if(!history) return {};
     if(!type) return history.plots;
     return history.plots[type];
 }

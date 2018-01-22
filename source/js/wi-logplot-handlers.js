@@ -18,7 +18,7 @@ exports.SaveAsLogplotButtonClicked = function () {
     const wiApiService = this.wiApiService;
     const wiLogplot = this.wiLogplot;
     wiApiService.exportLogPlot(wiLogplot.id, function (data, type) {
-        // console.log("DATA NA`" + data);
+        console.log("DATA NA`" + data);
         let blob = new Blob([data], {
             type: type
         });
