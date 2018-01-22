@@ -110,7 +110,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.containerName) {
                 if (model.type == 'crossplot') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) handler();
             } else {
                 if (model.type != 'crossplot' || model.id != self.crossplotModel.id) return;
                 handler();
@@ -206,7 +206,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (self.containerName) {
                     if (model.type == 'crossplot') return;
                     let comboviewId = +self.containerName.replace('comboview', '');
-                    if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                    if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) handler();
                 } else {
                     if (model.type != 'crossplot' || model.id != self.crossplotModel.id) return;
                     handler();

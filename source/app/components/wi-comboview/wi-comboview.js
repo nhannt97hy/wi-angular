@@ -67,6 +67,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
 	this.useSelector = function (selector) {
 		console.log(selector);
+		let wiD3Comboview = self.getwiD3Ctrl();
+		wiD3Comboview.drawOnLogTrack();
 	}
 
 	this.useEraser = function (eraser) {

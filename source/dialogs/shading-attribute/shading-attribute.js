@@ -318,7 +318,10 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
                         },
                         palette : null,
                         palName : 'BarsMap',
-                        customFills : []
+                        customFills : {
+                            name: null,
+                            content: []
+                        }
                     }
                 },
                 positiveFill : {
@@ -333,7 +336,10 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
                         },
                         palette : null,
                         palName : 'BarsMap',
-                        customFills : []
+                        customFills : {
+                            name: null,
+                            content: []
+                        }
                     }
                 },
                 negativeFill : {
@@ -348,7 +354,10 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
                         },
                         palette : null,
                         palName : 'BarsMap',
-                        customFills : []
+                        customFills : {
+                            name: null,
+                            content: []
+                        }
                     }
                 }
             };
@@ -385,7 +394,6 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         this.displayType = this.shadingOptions.isNegPosFill;
 
         this.foregroundCustomFills = function(index){
-            if(!self.variableShadingOptions.fill.varShading.customFills.content[index].foreground) self.variableShadingOptions.fill.varShading.customFills.content[index].pattern = 'basement';
             $timeout(function() {
                 DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.customFills.content[index].foreground, function (colorStr) {
                     self.variableShadingOptions.fill.varShading.customFills.content[index].foreground = colorStr;
@@ -408,7 +416,13 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
             console.log("self", self.variableShadingOptions.fill.varShading.customFills.content, self.idx);
         }
         this.addRow = function(){
-            self.variableShadingOptions.fill.varShading.customFills.content.push({});
+            self.variableShadingOptions.fill.varShading.customFills.content.push({
+                lowVal: null,
+                highVal: null,
+                pattern: "none",
+                background: "blue",
+                description: ""
+            });
         }
 
         this.customFillsList = null;
@@ -449,6 +463,16 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
                 }
             }
         }
+        function validateCustomFills (content) {
+            let lowArr = [];
+            let highArr =[];
+            content.forEach(function(c) {
+                lowArr.push(c.lowVal);
+                highArr.push(c.highVal);
+            });
+            
+        }
+        validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
         function isValid() {
             self.errorReason = null;
             if(!self.shadingOptions.idRightLine) {
