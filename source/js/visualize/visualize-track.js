@@ -409,6 +409,8 @@ Track.prototype.updateHeader = function() {
         .style('display', this.showTitle ? 'block': 'none')
         .style('text-align', this.justification)
         .text(name);
+    if (!d3.event) d3.event = {dy: 0};
+    this.headerScrollCallback();
 }
 
 Track.prototype.shouldRescaleWindowY = function() {
