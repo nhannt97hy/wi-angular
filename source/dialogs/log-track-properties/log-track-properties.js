@@ -119,7 +119,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             let curve = self.curves.find(c => c._index == self.__idx);
             idCurveNew = curve.lineCurve.id;
             let curveUnchanged = false;
-            if (curve.changed == changed.unchanged) curveUnchanged = true;
+            if (curve.idLine != null) curveUnchanged = true;
             wiApiService.infoCurve(idCurveNew, function (curveInfo) {
                 let lineProps = curveInfo.LineProperty;
                 console.log("curveInfo", curveInfo, curve, curveUnchanged);
@@ -328,7 +328,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
 
                     console.log("curveUpdated", self.curveUpdated);
 
-                    self.curveUpdated.forEach(function(c) {
+                    self.curveUpdated.forEach(function (c) {
                         self.shadings.forEach(function (s) {
                             if (s.rightLine.id == c.id) {
                                 s.rightLine = c;
@@ -349,7 +349,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                                 s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
                             }
                         })
-                    })
+                    });
                     // self.shadings.forEach(function(s) {
                     //     s.idLeftLine = s.leftLine.id;
                     //     if (s.type == 'left') {
@@ -540,7 +540,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                 self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
             if (self.shadings[self.__idx].type == 'right')
                 self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
-            self.onSelectLeftLine();
+            if (self.shadings[self.__idx].leftLine) self.onSelectLeftLine();
         };
         this.onSelectLeftLine = function () {
             self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
