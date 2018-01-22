@@ -356,7 +356,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             handler: function (index) {
                 self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
                 self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
             }
         },{
             name: "ShowCumulative",

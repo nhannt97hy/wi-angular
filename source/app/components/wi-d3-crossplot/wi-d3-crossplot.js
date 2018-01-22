@@ -372,20 +372,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (!self.wiCrossplotCtrl) return;
         if (state != undefined || state != null) self.wiCrossplotCtrl.isShowWiZone = state;
         else self.wiCrossplotCtrl.isShowWiZone = !self.wiCrossplotCtrl.isShowWiZone;
-        if (self.contextMenu.length) {
-            self.contextMenu.find(c => c.name == 'ShowReferenceZone').checked = self.wiCrossplotCtrl.isShowWiZone;
+        const menuItem = self.contextMenu.find(c => c.name == 'ShowReferenceZone');
+        if (menuItem) {
+            menuItem.checked = self.wiCrossplotCtrl.isShowWiZone;
         }
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
 
     this.switchReferenceWindow = function(state) {
         if (state != undefined || state != null) self.crossplotModel.properties.referenceDisplay = state;
         else self.crossplotModel.properties.referenceDisplay = !self.crossplotModel.properties.referenceDisplay;
-        let index = 6; // HARD CODED - TUNG (for quick fix)
-        if (self.contextMenu.length >= index) {
-            self.contextMenu[index].checked = self.crossplotModel.properties.referenceDisplay;
+        const menuItem = self.contextMenu.find(c => c.name == 'ShowReferenceWindow');
+        if (menuItem) {
+            menuItem.checked = self.crossplotModel.properties.referenceDisplay;
         }
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+        wiApiService.editCrossplot(self.crossplotModel.properties);
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
 
     this.updateAll = function (callback) {

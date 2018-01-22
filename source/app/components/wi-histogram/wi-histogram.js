@@ -23,11 +23,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
     this.CloseReferenceWindow = function () {
         let wiD3HistogramCtrl = self.getwiD3Ctrl();

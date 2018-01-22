@@ -271,9 +271,11 @@ exports.ExportWellTopButtonClicked = function () {
 exports.BlankLogplotButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
@@ -300,9 +302,11 @@ exports.BlankLogplotButtonClicked = function () {
 exports.TrippleComboButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -339,9 +343,11 @@ exports.TrippleComboButtonClicked = function () {
 exports.DensityNeutronButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -378,9 +384,11 @@ exports.DensityNeutronButtonClicked = function () {
 exports.ResistivitySonicButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -417,9 +425,11 @@ exports.ResistivitySonicButtonClicked = function () {
 exports.TriTracksBlankButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -456,9 +466,11 @@ exports.TriTracksBlankButtonClicked = function () {
 exports.InputCurveButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -497,9 +509,11 @@ exports.InputCurveButtonClicked = function () {
 exports.LithoPlusSyn_CurveButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -544,9 +558,11 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
 exports.Syn_CurveButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -587,9 +603,11 @@ exports.Syn_CurveButtonClicked = function () {
 exports.ResultButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
     let promptConfig = {
@@ -641,15 +659,15 @@ exports.BlankCrossPlotButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let selectedNode = getStaticNode('crossplots');
-    if (selectedNode.type != 'crossplots') return;
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     let promptConfig = {
         title: 'Create New Crossplot',
         inputName: 'Crossplot Name',
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(err, crossplotModel) {
+        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function(err, crossplotModel) {
             if (err) {
                 exports.BlankCrossPlotButtonClicked.call(self);
             }
@@ -664,8 +682,8 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     console.log("Template Cross Plot clicked ", templateCross);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let selectedNode = getStaticNode('crossplots');
-    if (selectedNode.type != 'crossplots') return;
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     let promptConfig = {
         title: 'Create New Crossplots Template',
         inputName: 'Crossplot Name',
@@ -673,7 +691,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         console.log("CROSS NAME : ", crossplotName);
-        utils.createCrossplot(selectedNode.properties.idWell, crossplotName, function(err, crossplotModel){
+        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function(err, crossplotModel){
             if (err) {
                 newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
             }
@@ -748,13 +766,7 @@ exports.PickettButtonClicked = function () {
     console.log('PickettButton is clicked');
     newCrossPlotTemplate("PickettPlot", this.wiComponentService, this.ModalService);
 };
-function getStaticNode(type) {
-    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
-    if(!currentWell){
-        return utils.error("Please select well first!");
-    }
-    return utils.getStaticNode(type);
-}
+
 exports.BlankHistogramButtonClicked = function () {
     const self = this;
     console.log("Blank Hisogram clicked");
@@ -764,8 +776,8 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let selectedNode = getStaticNode('histograms');
-    if (!selectedNode) return;
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
@@ -773,7 +785,7 @@ exports.BlankHistogramButtonClicked = function () {
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(selectedNode.properties.idWell, null, histogramName)
+        utils.createHistogram(currentWell.properties.idWell, null, histogramName)
             .then(function (histogram) {
             })
             .catch(function (err) {
@@ -786,8 +798,8 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let selectedNode = getStaticNode('histograms');
-    if (!selectedNode) return;
+    let currentWell = utils.getCurrentWell();
+    if (!currentWell) return;
     let promptConfig = {
         title: 'Create New Histogram From Template',
         inputName: 'Histogram Name',
@@ -795,7 +807,7 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
-        utils.createHistogram(selectedNode.properties.idWell, null, histogramName, templateHistogram)
+        utils.createHistogram(currentWell.properties.idWell, null, histogramName, templateHistogram)
             .then(function (histogram) {
             })
             .catch(function (err) {
