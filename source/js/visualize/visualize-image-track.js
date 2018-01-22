@@ -8,7 +8,7 @@ Utils.extend(Track, ImageTrack);
 
 function ImageTrack(config) {
     Track.call(this, config);
-    this.MIN_WIDTH = 120;
+    this.MIN_WIDTH = 0;
 
     this.id = config.id || config.idImageTrack;
     this.idPlot = config.idPlot;

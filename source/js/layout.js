@@ -48,6 +48,7 @@ const triggerResize = _.debounce(function () {
         }
     }
 }, 200);
+module.exports.triggerResize = triggerResize;
 
 module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;

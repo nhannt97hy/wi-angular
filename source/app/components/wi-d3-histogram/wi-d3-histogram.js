@@ -35,27 +35,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
     this.saveHistogramNow = saveHistogramNow;
-/*
-    this.statistics = {
-        length: null,
-        min: null,
-        max: null,
-        avg: null,
-        avg_dev: null,
-        std_dev: null,
-        var: null,
-        skew: null,
-        kur: null,
-        med: null,
-        p10: null,
-        p50: null,
-        p90: null
-    }
-*/
-//    this.zoneArr = null;
-
-    //this.isShowWiZone = true;
-    // this.isShowReferenceWindow = true;
 
     function getIdHistogram() {
         return self.name.replace('histogram', "").replace("D3Area", "");
@@ -116,7 +95,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
                     self.visHistogram.setHistogramModel(self.histogramModel);
                 if (self.getZoneCtrl()) zoneCtrl.zones = self.zoneSetModel.children;
-                //self.zoneArr = self.zoneSetModel.children;
                 setWiHistogramZoneArr(self.zoneSetModel.children);
             }
             else {
@@ -177,15 +155,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.refreshHistogram();
         });
     }
-    // this.onRefWindCtrlReady = function(refWindCtrl) {
-    //     console.log('RefWindCtrlReady');
-    //     refWindCtrl.update(getWell(), 
-    //         self.histogramModel.properties.reference_curves, 
-    //         self.histogramModel.properties.referenceScale,
-    //         self.histogramModel.properties.referenceVertLineNumber,
-    //         self.histogramModel.properties.referenceTopDepth,
-    //         self.histogramModel.properties.referenceBottomDepth);
-    // }
+    
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
@@ -209,7 +179,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.containerName) {
                 if (model.type == 'histogram') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) self.visHistogram && self.visHistogram.doPlot();
+                if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) self.visHistogram && self.visHistogram.doPlot();
             } else {
                 if (model.type != 'histogram' || model.id != self.histogramModel.id) return;
                 self.visHistogram && self.visHistogram.doPlot();
@@ -227,18 +197,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
 
-/*
-    this.toggleShowWiZone = function () {
-        self.isShowWiZone = !self.isShowWiZone;
+    this.switchReferenceWindow = function(state){
+        if (state != undefined || state != null) self.histogramModel.properties.referenceDisplay = state;
+        else self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
+        saveHistogram();
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
-    this.CloseZone = function () {
-        self.isShowWiZone = false;
-    }
-
-    this.CloseReferenceWindow = function () {
-        self.histogramModel.properties.referenceDisplay = false;
-    }
-*/
 
     this.histogramFormat = function(){
         DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id, 
@@ -354,9 +318,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             "isCheckType": "true",
             checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,
             handler: function (index) {
-                self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
+                self.switchReferenceWindow();
                 self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
             }
         },{
             name: "ShowCumulative",
