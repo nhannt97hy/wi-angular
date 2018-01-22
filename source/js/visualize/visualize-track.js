@@ -292,7 +292,6 @@ Track.prototype.headerScrollCallback = function() {
 
     //let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
     let step = this.headerContainer.node().clientHeight/10.;
-    d3.event = Object.assign({ dy: 0 }, d3.event);
     let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? (0 - step) : step);
     let top = parseInt(this.drawingHeaderContainer.style('top').replace('px', '')) + dy;
     let maxTop = rowHeight + extraHeight;
@@ -410,6 +409,7 @@ Track.prototype.updateHeader = function() {
         .style('display', this.showTitle ? 'block': 'none')
         .style('text-align', this.justification)
         .text(name);
+    d3.event = {dy: 0};
     this.headerScrollCallback();
 }
 
