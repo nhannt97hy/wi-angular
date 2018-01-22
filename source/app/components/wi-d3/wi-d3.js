@@ -876,11 +876,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };
 
-    this.plotAll = function () {
+    this.plotAll = _.throttle(function () {
         _tracks.forEach(function (track) {
             track.doPlot(track == _currentTrack);
         });
-    };
+        self.updateScale();
+    }, 50);
 
     this.updateScale = function () {
         let trackPlot = $(`wi-logplot[name=${self.wiLogplotCtrl.name}] .vi-track-plot-container .vi-track-drawing`)[0];
@@ -3370,7 +3371,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let wiD3Ctrl = self;
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
-                function (plot) {
+                function (plot, err) {
+                    if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
                     }
