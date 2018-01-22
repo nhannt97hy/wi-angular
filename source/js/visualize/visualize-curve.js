@@ -59,6 +59,7 @@ function Curve(config) {
     this.line = config.line;
     this.symbol = config.symbol;
     this.showHeader = (config.showHeader == null) ? true : config.showHeader;
+    this.showDataset = (config.showDataset == null) ? false : config.showDataset;
 
     this.blockPosition = config.blockPosition || 'none';
     this.wrapMode = config.wrapMode || 'none';
@@ -122,7 +123,7 @@ Curve.prototype.getProperties = function() {
         name: this.name,
         unit: this.unit,
         showHeader: this.showHeader,
-        showDataset: false,
+        showDataset: this.showDataset,
         minValue: this.minX,
         maxValue: this.maxX,
         autoValueScale: this.autoValueScale,
@@ -160,6 +161,7 @@ Curve.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'name', props.name);
     Utils.setIfNotNull(this, 'unit', props.unit);
     Utils.setIfNotNull(this, 'showHeader', props.showHeader);
+    Utils.setIfNotNull(this, 'showDataset', props.showDataset);
     Utils.setIfNotNull(this, 'autoValueScale', props.autoValueScale);
     Utils.setIfNotNull(this, 'minX', props.minValue);
     Utils.setIfNotNull(this, 'maxX', props.maxValue);

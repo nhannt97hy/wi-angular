@@ -10579,7 +10579,6 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 		  return curve.id != self.ShiftCurve.idCurve;
 	  }
 
-	  this.validate = validate;
 	  function validate(callback){
 		  async.each(self.shiftedTable,(point, cb) => {
 			  point.flag = false;
@@ -10661,13 +10660,57 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 			}else{
 			  utils.error("Export error!");
 			}
-	  }
+      }
+
+      function toIndex(depth){
+          return Math.round((depth - self.SelWell.topDepth)/self.SelWell.step);
+      }
+      
+      function run(){
+            wiApiService.dataCurve(self.ShiftCurve.idCurve, function(dataCurve){
+                let data  = dataCurve.map(d => {return {y: parseInt(d.y),x: parseFloat(d.x)}});
+                let origin2d = [];
+                let shift2d = [];
+                async.sortBy(self.shiftedTable, function(point, cb){
+                    cb(null, point.origin);
+                }, function(err, result){
+                    for ( let i = 0; i <= result.length; i++){
+                        let start = function(type){
+                            return result[i - 1] ? toIndex(result[i - 1][type]) + 1 : 0;
+                            }
+                        let end = function(type){
+                            return result[i] ? toIndex(result[i][type]) + 1 : data.length;
+                            }
+                        let originArr = data.slice(start('origin'), end('origin'));
+                        let shiftedArr = data.slice(start('shifted'), end('shifted'));
+                        origin2d.push(originArr)
+                        shift2d.push(angular.copy(shiftedArr))
+                        }
+                        shift2d.forEach((array, idx) => {
+                            let origin = origin2d[idx];
+                            array[0].x = origin[0].x;
+                            array[array.length - 1].x = origin[origin.length - 1].x;
+                            for(let i = 1; i < array.length - 1; i++){
+                                let index = Math.round((i + 1) * origin.length / array.length);
+                                array[i].x = origin[index - 1].x;
+                            }
+                            console.log(array);
+                        })
+
+                        let out = [];
+                        shift2d.forEach(a => {
+                            out = out.concat(a);
+                        })
+                        console.log(out);
+                    })
+                })
+      }
   
 	  this.onApplyButtonClicked = function() {
 		console.log("Apply");
 		validate(valid => {
 			if(valid){
-				console.log("true");
+				run();
 			}else{
 				utils.error("Shift point(s) invalid!");
 			}
@@ -10678,7 +10721,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 		console.log("Run");
 		validate(valid => {
 			if(valid){
-				console.log("true");
+				run();
 			}else{
 				utils.error("Shift point(s) invalid!");
 			}

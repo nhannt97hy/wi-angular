@@ -134,6 +134,7 @@ function lineToTreeConfig(line) {
         scale: line.displayType,
         alias: line.alias,
         showHeader: line.showHeader,
+        showDataset: line.showDataset,
         blockPosition: line.blockPosition,
         wrapMode: line.wrapMode,
         displayAs: line.displayAs,
@@ -1954,7 +1955,7 @@ exports.curveOptions = function (currentTrack, currentCurve, index) {
         idLine: currentCurve.id,
         idTrack: currentTrack.id,
         showHeader: currentCurve.showHeader,
-        showDataset: false, // add to currentCurve - Canh
+        showDataset: currentCurve.showDataset, // add to currentCurve - Canh
         ignoreMissingValues: false,
         alias: currentCurve.alias,
         minValue: currentCurve.minX,

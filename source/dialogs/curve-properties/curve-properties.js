@@ -5,6 +5,7 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
     function ModalController($scope, close, $timeout) {
         let error = null;
         let self = this;
+        window.cProps = this;
         console.log("currentCurve", currentCurve);
         wiApiService.curveInfo
         thisModalController = this;
@@ -68,7 +69,7 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
         }
 
         this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
-        console.log("CURVEOPTONS", this.curveOptions, currentCurve);
+        console.log("CURVEOPTONS", this.curveOptions);
         this.onToggleShowDataset = function () {
             self.curveOptions.alias = self.curveOptions.showDataset ? self.lineObjTemplate.name : currentCurve.name;
         }
