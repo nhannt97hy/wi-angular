@@ -1115,6 +1115,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let plotMouse = d3.mouse(track.plotContainer.node());
         let x = plotMouse[0];
         let y = plotMouse[1];
+        if (Number.isNaN(x) || Number.isNaN(y)) return;
         let plotDim = track.plotContainer.node().getBoundingClientRect();
 
         if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
