@@ -3254,7 +3254,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
         if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
         $scope.safeApply();
-    }
+    }   
     this.onReady = function(args) {
         function handler () {
             self.plotAll();
@@ -3266,7 +3266,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.containerName) {
                 if (model.type == 'logplot') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) handler();
             } else {
                 if (model.type == 'logplot' && self.wiLogplotCtrl.id == model.properties.idPlot) handler();
             }
@@ -3624,6 +3624,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             },500);
                             self.isReady = true;
                             wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
+                            self.plotAll();
+                            updateSlider();
                         });
                     }
                 });
