@@ -3612,7 +3612,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             if (currentState.top && currentState.bottom){
                                 logplotCtrl.handlers.ScalePreviousState(currentState.top, currentState.bottom);
                             } else {
-                                logplotCtrl.handlers.Scale100ButtonClicked();
+                                // logplotCtrl.handlers.Scale100ButtonClicked();
+                                // commented to keep default scale
                             }
                             setTimeout(function () {
                                 if(plot.cropDisplay) {
