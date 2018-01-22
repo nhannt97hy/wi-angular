@@ -28,7 +28,7 @@ Utils.extend(Track, ZoneTrack);
  */
 function ZoneTrack(config) {
     Track.call(this, config);
-    this.MIN_WIDTH = 120;
+    this.MIN_WIDTH = 0;
     this.wiComponentService = config.wiComponentService;
 
     this.id = config.id || config.idZoneTrack;
