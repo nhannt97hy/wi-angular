@@ -291,7 +291,7 @@ Track.prototype.headerScrollCallback = function() {
     let extraHeight = this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM;
 
     //let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
-    let step = this.headerContainer.node().clientHeight/40.;
+    let step = this.headerContainer.node().clientHeight/10.;
     d3.event = Object.assign({ dy: 0 }, d3.event);
     let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? (0 - step) : step);
     let top = parseInt(this.drawingHeaderContainer.style('top').replace('px', '')) + dy;
