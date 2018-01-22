@@ -15,7 +15,7 @@ function Track(config) {
     this.BODY_CONTAINER_HEIGHT = 70;
     this.BODY_HIGHLIGHT_COLOR = '#ffffe0';
     this.BODY_DEFAULT_COLOR = 'transparent';
-    this.MIN_WIDTH = utils.inchToPixel(0.5);
+    this.MIN_WIDTH = 0;
 
     this.orderNum = config.orderNum;
     this.bgColor = config.bgColor || this.BODY_DEFAULT_COLOR;

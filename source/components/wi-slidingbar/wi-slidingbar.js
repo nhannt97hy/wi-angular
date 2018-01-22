@@ -201,7 +201,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         self.tinyWindow = {
             top: 0,
-            height: parentHeight / 20 || 1
+            height: parentHeight / 10 || 1
         };
 
         // init tiny window height
@@ -263,15 +263,24 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             self.refreshHandler();
             _viCurve && _viCurve.doPlot();
         });
-        self.resizeHandler = function (event) {
-            let model = event.model;
-            if (model.type != 'logplot' || model.id != logPlotCtrl.id) return;
+
+        function handler () {
             if (!sensor || !sensor.detach) return;
             sensor.detach();
             sensor = new ResizeSensor($(self.contentId), function () {
                 self.refreshHandler();
                 _viCurve && _viCurve.doPlot();
             });
+        }
+        self.resizeHandler = function (event) {
+            let model = event.model;
+            if (self.containerName) {
+                if (model.type == 'logplot') return;
+                let comboviewId = +self.containerName.replace('comboview', '');
+                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                return;
+            }
+            if (model.type == 'logplot' && model.id == logPlotCtrl.id) handler();
         }
         document.addEventListener('resize', self.resizeHandler);
 
@@ -470,7 +479,8 @@ app.component(componentName, {
     controllerAs: componentName,
     transclude: true,
     bindings: {
-        name: '@'
+        name: '@',
+        containerName: '@'
     }
 });
 

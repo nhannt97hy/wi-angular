@@ -35,6 +35,7 @@ let layoutConfig = {
 };
 
 let tabComponents = {};
+window.TABCPNTS = tabComponents;
 let resizeEvent = new Event('resize');
 resizeEvent.model = {};
 const triggerResize = _.debounce(function () {
@@ -43,9 +44,11 @@ const triggerResize = _.debounce(function () {
         if (component.tab.isActive) {
             resizeEvent.model = component.config.componentState.model || {};
             document.dispatchEvent(resizeEvent);
+            console.log('refresh ' + resizeEvent.model.type + ' ' + resizeEvent.model.id);
         }
     }
 }, 200);
+module.exports.triggerResize = triggerResize;
 
 module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
@@ -86,9 +89,6 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     });
     scopeObj.$on("angular-resizable.resizeEnd", triggerResize);
     layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
-        layoutManager.root.getItemsById('right')[0];
-        let model = activeContentItem.config.componentState.model || {};
-        resizeEvent.model = model;
         triggerResize();
     });
 }
@@ -242,7 +242,7 @@ module.exports.isComponentExist = function (id) {
 
 module.exports.updateSize = function () {
     layoutManager.updateSize();
-    triggerResize();
+    // triggerResize();
 }
 
 module.exports.getItemById = function (itemId) {

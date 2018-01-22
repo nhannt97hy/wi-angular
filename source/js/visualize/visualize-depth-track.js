@@ -38,7 +38,7 @@ function DepthTrack(config) {
     this.yTicks = config.yTicks || 10;
     this.yDecimal = (config.decimal == null) ? 2 : config.decimal;
 
-    this.MIN_WIDTH = 60;
+    this.MIN_WIDTH = 0;
 }
 
 /**
@@ -136,6 +136,7 @@ DepthTrack.prototype.doPlot = function(highlight) {
     this.yAxisGroupRight.selectAll('text')
         .attr('x', function() {
             let textDim = this.getBBox();
+            if (plotDim.width < textDim.width) return 0;
             return -plotDim.width / 2 + textDim.width / 2;
         });
 

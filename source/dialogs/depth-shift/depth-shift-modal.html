@@ -3,7 +3,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled='wiModal.applyingInProgress'>&times;</button>
-                <h4><span class="curve-depth-shift-16x16"></span>&nbsp;Depth Shift</h4>
+                <h4>
+                    <span class="curve-depth-shift-16x16"></span>&nbsp;Depth Shift</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -14,7 +15,7 @@
                                 <div class='form-group'>
                                     <label class="col-sm-2">Select well</label>
                                     <div class="col-sm-4">
-                                       <input type="text" class="form-control wi-form-control" ng-model="wiModal.SelWell.name" disabled>
+                                        <input type="text" class="form-control wi-form-control" ng-model="wiModal.SelWell.name" disabled>
                                     </div>
                                     <label class="col-sm-2">Shift Mode</label>
                                     <div class="col-sm-4">
@@ -26,10 +27,10 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                        <label class="col-sm-2">Shift Curve</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control wi-form-control" ng-model="wiModal.ShiftCurve.name" disabled>
-                                        </div>
+                                    <label class="col-sm-2">Shift Curve</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control wi-form-control" ng-model="wiModal.ShiftCurve.name" disabled>
+                                    </div>
                                     <label class="col-sm-2">Reference curve</label>
                                     <div class="col-sm-4">
                                         <ui-select ng-model="wiModal.RefCurve" class="normal-text">
@@ -43,14 +44,12 @@
                                 <div class="form-group">
                                     <div class="col-sm-6">
                                         <label>
-                                            <input ng-model="wiModal.ShowTrack" type="checkbox">
-                                            &nbsp;Show original track
+                                            <input ng-model="wiModal.ShowTrack" type="checkbox">&nbsp;Show original track
                                         </label>
                                     </div>
                                     <div class="col-sm-6">
                                         <label>
-                                            <input ng-model="wiModal.ShowResult" type="checkbox" value="depth">
-                                            &nbsp;Show correlation result on new track
+                                            <input ng-model="wiModal.ShowResult" type="checkbox">&nbsp;Show correlation result on new track
                                         </label>
                                     </div>
                                 </div>
@@ -63,7 +62,7 @@
                                     <label class="col-sm-2">Dataset</label>
                                     <div class="col-sm-4">
                                         <select class="form-control wi-form-control" ng-options="dataset as dataset.properties.name for dataset in wiModal.datasets"
-                                                 ng-model="wiModal.selectedDataset">
+                                            ng-model="wiModal.selectedDataset">
                                         </select>
                                     </div>
                                     <label class="col-sm-2">Suffix</label>
@@ -79,38 +78,38 @@
                                 <table class="table table-bordered">
                                     <thead style="display:block">
                                         <tr style="display:table;width:100%">
-                                            <th style="width:15%">Name</th>
-                                            <th style="width:25%">Original Depth</th>
-                                            <th style="width:25%">Shifted Depth</th>
-                                            <th style="width:25%">Change</th>
-                                            <th style="width:10%"></th>
+                                            <th style="width:15%; text-align:center;">Name</th>
+                                            <th style="width:25%; text-align:center;">Original Depth</th>
+                                            <th style="width:25%; text-align:center;">Shifted Depth</th>
+                                            <th style="width:25%; text-align:center;">Change</th>
+                                            <th style="width:10%; text-align:center;">
+                                                <button type="button" class="btn btn-default" ng-click="wiModal.addShifted()" style="padding:3px">
+                                                    <span class="plus-16x16"></span>
+                                                </button>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody style="overflow-y: overlay;display:block;height:10em; overflow-x:hidden">
-                                        <tr ng-repeat="row in wiModal.shiftedTable track by $index">
+                                        <tr ng-repeat="row in wiModal.shiftedTable track by $index" ng-class="{'color-red': row.flag}">
                                             <td style="width:15%">
                                                 <input type="text" class="form-control wi-form-control" ng-model='row.name'>
                                             </td>
                                             <td style="width:25%">
-                                                <input type="number" class="form-control wi-form-control" ng-model="row.origin" step="any">
+                                                <input type="number" class="form-control wi-form-control" ng-model="row.origin" step="any"
+                                                ng-change="wiModal.onChangeDepth($index, true)">
                                             </td>
                                             <td style="width:25%">
-                                                <input type="number" class="form-control wi-form-control" ng-model="row.shifted" step="any">
+                                                <input type="number" class="form-control wi-form-control" ng-model="row.shifted" step="any"
+                                                ng-change="wiModal.onChangeDepth($index, true)">
                                             </td>
                                             <td style="width:25%">
-                                                <input type="number" class="form-control wi-form-control" ng-model="row.change" step="any">
+                                                <input type="number" class="form-control wi-form-control" ng-model="row.change" step="any"
+                                                ng-change="wiModal.onChangeDepth($index, false)">
                                             </td>
-                                            <td style="width:10%;text-align:center">                                            
+                                            <td style="width:10%;text-align:center">
                                                 <button type="button" class="btn btn-default" ng-click="wiModal.delete($index)" style="padding:3px">
                                                     <span class="delete-16x16"></span>
-                                                </button>                                                
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="5" style="text-align:center">
-                                                <button type="button" class="btn btn-default" ng-click="wiModal.addShifted" style="padding:3px">
-                                                        <span class="plus-16x16"></span>
-                                                    </button>
+                                                </button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -122,8 +121,7 @@
                             <div class="container-fluid">
                                 <div class="form-group">
                                     <label class="control-label col-sm-4">
-                                        <input type="checkbox" ng-model="wiModal.other">
-                                        &nbsp;Select other curves to depth shift
+                                        <input type="checkbox" ng-model="wiModal.other">&nbsp;Select other curves to depth shift
                                     </label>
                                     <div class="col-sm-8">
                                         <table class="table availableCurve" ng-if="wiModal.other">
@@ -137,14 +135,14 @@
                                                         <input class="form-control wi-form-control" ng-model="filterCurve" placeholder="Curve">
                                                     </th>
                                                     <th style="width: 40%">
-                                                        <input  class="form-control wi-form-control" ng-model="filterDataset" placeholder="Dataset">
+                                                        <input class="form-control wi-form-control" ng-model="filterDataset" placeholder="Dataset">
                                                     </th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody style="overflow-y: scroll;display:block;height:10em; overflow-x:hidden">
                                                 <tr ng-repeat="curve in wiModal.curves | filter:{name: filterCurve, datasetName:filterDataset}| filter: wiModal.CurveF track by $index"
-                                                   ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
+                                                    ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
                                                     <td style="width: 20%">
                                                         <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
                                                     </td>
@@ -161,12 +159,21 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <label class="btn btn-default" style="float:left;">
+                        <input class="display-none" type="file" accept=".txt"
+                        ngf-select
+                        ng-model="wiModal.ImportFile"
+                        ng-change="wiModal.onImportButtonClicked()"/>
+                        <span class="file-import-16x16"></span>
+                        Import</label>
+                    <button class='btn btn-default' ng-click='wiModal.onExportButtonClicked()' style="float:left;">
+                        <span class="file-export-16x16"></span>&nbsp;Export</button>
                     <button class='btn btn-default' ng-click='wiModal.onApplyButtonClicked()'>
                         <span class="apply-16x16"></span>&nbsp;Apply</button>
-                    <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()'
-                    ng-disabled='wiModal.applyingInProgress'><span class="run-16x16"></span>&nbsp;Run</button>
-                    <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'
-                    ng-disabled='wiModal.applyingInProgress'><span class="close-16x16"></span>&nbsp;Cancel</button>
+                    <button class='btn btn-default' ng-click='wiModal.onRunButtonClicked()' ng-disabled='wiModal.applyingInProgress'>
+                        <span class="run-16x16"></span>&nbsp;Run</button>
+                    <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()' ng-disabled='wiModal.applyingInProgress'>
+                        <span class="close-16x16"></span>&nbsp;Cancel</button>
                 </div>
             </div>
         </div>

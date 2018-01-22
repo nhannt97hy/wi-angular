@@ -8,7 +8,7 @@ Utils.extend(Track, ObjectTrack);
 
 function ObjectTrack(config) {
     Track.call(this, config);
-    this.MIN_WIDTH = 200;
+    this.MIN_WIDTH = 0;
 
     this.id = config.id || config.idObjectTrack;
     this.name = config.title || 'Object Track';

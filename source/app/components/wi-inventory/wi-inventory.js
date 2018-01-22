@@ -138,7 +138,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
     }
 
     function getImportPayload(model) {
-        const parentModel = utils.getParentByModel(model.type, model.id, null, projectModel);
         let payload = [];
         if (model.type == 'well') {
             let datasets = [];
@@ -156,13 +155,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
             })
             payload.push({
                 name: model.properties.name,
-                idDesWell: parentModel.properties.idWell,
+                idDesWell: model.parent.idWell,
                 curves: curves
             });
         } else if (model.type == 'curve') {
             payload.push({
                 idInvCurve: model.properties.idCurve,
-                idDesDataset: parentModel.properties.idDataset,
+                idDesDataset: model.parent.idDataset,
                 name: model.properties.name,
                 unit: model.properties.unit
             })

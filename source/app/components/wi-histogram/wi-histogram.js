@@ -23,16 +23,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
     this.CloseZone = function () {
         self.isShowWiZone = false;
-        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).updateSize();
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
     this.CloseReferenceWindow = function () {
         let wiD3HistogramCtrl = self.getwiD3Ctrl();
-        if (wiD3HistogramCtrl && wiD3HistogramCtrl.histogramModel) 
-            wiD3HistogramCtrl.histogramModel.properties.referenceDisplay = false;
+        if (!wiD3HistogramCtrl) return;
+        wiD3HistogramCtrl.switchReferenceWindow(false);
     }
 
     this.getWiZoneCtrlName = function () {
@@ -132,7 +132,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         id: '@',
-        showToolbar: '<'
+        showToolbar: '<',
+        containerName: '@'
     }
 });
 

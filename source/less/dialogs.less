@@ -63,7 +63,7 @@ img {
 		color: blue;
 	}
 }
-.modal-footer button {
+.modal-footer button,.modal-footer label{
 	padding: 4px 10px 4px 8px;
 	background: rgba(255,255,255,1);
 	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(222,224,230,1) 49%, rgba(255,255,255,1) 100%);
@@ -519,6 +519,24 @@ input[type="checkbox"] {
 	background: #F2F2F2;
 	border: 1px solid #ccc;
 }
+.scrollTable {
+	thead, tbody {
+		display: block;
+	}
+	tbody {
+		max-height: 9em;
+		overflow-y: overlay;
+	}
+	tbody::-webkit-scrollbar {
+		width: 5px;
+	}
+	thead>tr>th {
+		text-align: center;
+	};
+	tbody>tr>td {
+		text-align: center;
+	};
+}
 input[type=checkbox].input-check {
 	margin-top: 60%;
 	width: 15px;
@@ -612,5 +630,9 @@ input[type=checkbox].input-check {
 	}
 }
 
+.modal-body {
+	max-height: 40em;
+    overflow-y: overlay;
+}
 //end import from inventory inentory dialog 
 .ui-select-toggle > .caret { pointer-events: none }
