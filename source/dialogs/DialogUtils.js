@@ -8318,7 +8318,7 @@ exports.addCurveDialog = function (ModalService) {
                 return curve.name == self.curveName && curve.properties.idDataset == self.datasetName;
             })
             if(curve){
-                utils.error('Curve existed!');
+                toastr.error('Curve existed!');
                 self.applyingInProgress = false;
             }else {
                 let bottomDepth = self.SelectedWell.bottomDepth;
@@ -8334,9 +8334,13 @@ exports.addCurveDialog = function (ModalService) {
                     idFamily : self.selectedFamily.idFamily
                 }
                 wiApiService.processingDataCurve(payload,function(curve, err){
-                    if (!err) utils.refreshProjectState();
-                    self.applyingInProgress = false;
-                    $scope.$apply();
+                    if (err) {
+                        self.applyingInProgress = false;
+                        $scope.$apply();
+                        return;
+                    }
+                    utils.refreshProjectState();
+                    close(null);
                 })
             }
         }
