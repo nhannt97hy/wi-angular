@@ -997,13 +997,13 @@ let curvePropertiesDialogModule = require('./curve-properties.js');
 curvePropertiesDialogModule.setInitFunc(initModal);
 exports.curvePropertiesDialog = curvePropertiesDialogModule.curvePropertiesDialog;
 
-exports.OpenTemplateDialog = function (ModalService, selectedNode, callback) {
+exports.OpenTemplateDialog = function (ModalService, wellModel, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         const utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let payloadParams = new Object();
         this.plotName = "PlotTemplate";
-        payloadParams.idWell = selectedNode.properties.idWell;
+        payloadParams.idWell = wellModel.properties.idWell;
         this.error = null;
         this.tplFile = null;
         let self = this;
