@@ -2711,7 +2711,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             return colorToString(color);
         };
         self.CpCustoms = null;
-        self.currentFocus = 1;
+        self.currentFocus = null;
         self.BoxBorder = function (id) {
             if (self.currentFocus === id) {
                 return '2px solid black';
@@ -2723,6 +2723,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             self.currentFocus = col.id;
         };
         self.addToCustom = function () {
+            if(self.currentFocus == null) self.currentFocus = 1;
             self.CpCustoms[self.currentFocus-1].color = self.currentColor;
             self.currentFocus = (self.currentFocus + 1);
             if(self.currentFocus > 16) self.currentFocus = 1;
