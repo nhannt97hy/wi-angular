@@ -2378,6 +2378,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             isNegPosFill: false,
             fill: {
                 display: true,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -2386,6 +2387,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             positiveFill: {
                 display: false,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -2394,6 +2396,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             negativeFill: {
                 display: false,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
