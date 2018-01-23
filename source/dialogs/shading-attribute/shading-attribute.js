@@ -413,7 +413,6 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         };
         this.removeRow = function() {
             self.variableShadingOptions.fill.varShading.customFills.content.splice(self.idx, 1);
-            console.log("self", self.variableShadingOptions.fill.varShading.customFills.content, self.idx);
         }
         this.addRow = function(){
             self.variableShadingOptions.fill.varShading.customFills.content.push({
@@ -426,6 +425,8 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         }
 
         this.customFillsList = null;
+        this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills
+
         wiApiService.getCustomFills(function(customFillsList){
             self.customFillsList = customFillsList;
         });
@@ -439,7 +440,11 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
             }
             else {
                 wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
-                    DialogUtils.confirmDialog(ModalService, "Save CustomFills", "CustomFills: " + customFills.name + " saved successfully!", function(){});
+                    DialogUtils.confirmDialog(ModalService, "Save CustomFills", "CustomFills: " + customFills.name + " saved successfully!", function(){
+                        wiApiService.getCustomFills(function(customFillsList){
+                            self.customFillsList = customFillsList;
+                        });
+                    });
                 });
             }
         };
