@@ -49,29 +49,23 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
-            if(self.props.general.width >= 0.5 ) {
-                wiApiService.editTrack(self.props.general, function(res) {
-                    console.log("res", res);
-                    let newProps = angular.copy(self.props);
-                    newProps.general.width = utils.inchToPixel(self.props.general.width);
-                    currentTrack.setProperties(newProps.general);
+            if (self.props.general.width < 0 ) self.props.general.width = 0;
+            wiApiService.editTrack(self.props.general, function(res) {
+                console.log("res", res);
+                let newProps = angular.copy(self.props);
+                newProps.general.width = utils.inchToPixel(self.props.general.width);
+                currentTrack.setProperties(newProps.general);
 
-                    if (newProps.general.zoomFactor != savedZoomFactor) {
-                        savedZoomFactor = newProps.general.zoomFactor;
-                        wiD3Ctrl.processZoomFactor();
-                        wiD3Ctrl.plotAll();
-                    }
-                    else {
-                        currentTrack.doPlot(true);
-                    }
-                    if (callback) callback();
-                })
-            } else {
-                console.log("temp");
-                temp = false;
-                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
-                callback();
-            }
+                if (newProps.general.zoomFactor != savedZoomFactor) {
+                    savedZoomFactor = newProps.general.zoomFactor;
+                    wiD3Ctrl.processZoomFactor();
+                    wiD3Ctrl.plotAll();
+                }
+                else {
+                    currentTrack.doPlot(true);
+                }
+                if (callback) callback();
+            })
             return temp;
         }
 

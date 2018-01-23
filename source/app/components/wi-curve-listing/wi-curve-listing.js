@@ -133,8 +133,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
             rcBody.scroll(_.throttle(onScroll, 100));
             document.addEventListener('keydown', function(event){
-                event.preventDefault();
                 if(event.ctrlKey && event.keyCode == 71){
+                    event.preventDefault();
                     $("#depthInput").focus();
                 }
             })

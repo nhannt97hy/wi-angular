@@ -27,10 +27,20 @@ wi-d3 {
         height: 0px;
     }
     .vi-track-container {
-        //margin-left: -3px;
+        &:first-child {
+            margin-left: unset;
+            .vi-track-plot-container {
+                border-left: 1px solid black;
+                border-right: 1px solid black;
+            }
+        }
+        margin-left: -2px;
+        .vi-track-plot-container {
+            border-right: 1px solid black;
+        }
     }
     .vi-track-vertical-resizer {
-        margin-left: -5px;
+        margin-left: -3px;
         //border: 1px solid blue;
     }
 }
