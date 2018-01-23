@@ -1,9 +1,16 @@
 function initModal(modal) {
     modal.element.modal();
     $(modal.element).prop('tabindex', 1);
-    $(modal.element).find('.modal-content').draggable({
-        containment:[-$(window).width()/2, -100, $(window).width()/2, $(window).height() - 100]
-    });
+    const elem = $(modal.element).find('.modal-content');
+    setTimeout(() => {
+        elem.find('.modal-header').css('cursor', 'pointer');
+        const offsetWidth = elem.width()/3;
+        const offsetHeight = elem.height()/3;
+        elem.draggable({
+            containment:[-2*offsetWidth, -10, $(window).width()-offsetWidth, $(window).height()-offsetHeight],
+            handle: '.modal-header'
+        });
+    }, 700);
     $(modal.element).keyup(function (e) {
         if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.ESCAPE) {
             let okButton, cancelButton;
