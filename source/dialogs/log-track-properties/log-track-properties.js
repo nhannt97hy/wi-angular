@@ -591,8 +591,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         break;
                     case changed.created: {
                         wiApiService.createShading(request, function (shading) {
-                            wiD3Ctrl.updateLogTrack(currentTrack);
-                            self.shadingList = currentTrack.getShadings();
                             self.shadings[idx].idShading = shading.idShading;
                             callback();
                         });
@@ -603,34 +601,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     case changed.updated: {
                         console.log("updated", request, item);
                         wiApiService.editShading(request, function (shading) {
-                           /* utils.getPalettes(function(paletteList){
-                                wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                                    options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, self.well.properties);
-                                    if(!options.isNegPosFill) {
-                                        if(options.fill.varShading && options.fill.varShading.palName)
-                                            options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
-                                    }
-                                    else {
-                                        if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
-                                            options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                                        if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
-                                            options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                                    }
-                                    currentTrack.drawings.filter(function(d) {
-                                        return (d.isShading() && d.id == shading.idShading);
-                                    })[0].setProperties(options);
-
-                                    $timeout(function() {
-                                        currentTrack.plotAllDrawings();
-                                        currentTrack.doPlot(true);
-                                    });
-
-                                    if(callback) callback();
-                                });
-                            });*/
-                            wiD3Ctrl.updateLogTrack(currentTrack);
-                            self.shadingList = currentTrack.getShadings();
-                            // self.shadings[idx].idShading = shading.idShading;
                             callback();
                         });
                         item.changed = changed.unchanged;
@@ -638,9 +608,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     }
                     case changed.deleted:
                         wiApiService.removeShading(item.idShading, function (shading) {
-                            let currentShading = currentTrack.findShadingById(shading.idShading);
-                            wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
-                            self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                             callback();
                         });
                         break;
@@ -654,6 +621,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
+                    wiD3Ctrl.updateLogTrack(currentTrack);
+
                     self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                     self.shadingList = currentTrack.getShadings();
                     if (updateShadingsTabCb) updateShadingsTabCb(err);
