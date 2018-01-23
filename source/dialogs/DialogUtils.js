@@ -3,7 +3,7 @@ function initModal(modal) {
     $(modal.element).prop('tabindex', 1);
     const elem = $(modal.element).find('.modal-content');
     setTimeout(() => {
-        elem.find('.modal-header').css('cursor', 'pointer');
+        elem.find('.modal-header').css('cursor', 'move');
         const offsetWidth = elem.width()/3;
         const offsetHeight = elem.height()/3;
         elem.draggable({
