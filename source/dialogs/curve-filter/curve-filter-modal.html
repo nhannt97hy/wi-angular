@@ -169,6 +169,11 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="progress" ng-if="wiModal.percent">
+                            <div class="progress-bar" role="progressbar"
+                                    aria-valuemin="0" aria-valuemax="100" ng-style="{width:wiModal.percent + '%'}">{{wiModal.percent}}%
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
