@@ -48,7 +48,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.depthArr[self.currentIndex][i] = parseFloat((step * i + topDepth).toFixed(4));
                 async.setImmediate(callback);
             }, function(err){
-                $timeout(function(){spinner.hide();});  
+                $timeout(function(){spinner.hide();});
             })
         }
 
@@ -70,7 +70,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         })
     }
-    
+
     this.$onInit = function () {
         wiComponentService.putComponent('WCL', self);
         self.isShowRefWin = false;
@@ -116,13 +116,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }], function(err, ret){
                     self.onChangeWell();
                 })
-                
+
             }, 0);
         });
 
         angular.element(document).ready(function(){
             self.onChangeWell(true);
-            
+
             let fcBody = $(".fix-column > .tbody");
             let rcBody = $(".rest-columns > .tbody");
             let rcHead = $(".rest-columns > .thead");
@@ -142,7 +142,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.goToIndex = function(){
         let index;
         let rcBody = $(".rest-columns > .tbody");
-        
+
         if(self.indexInput <= 0){
             index = 0;
         }else if(self.indexInput >= self.depthArr[self.currentIndex].length - 1){
@@ -157,7 +157,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.goToDepth = function(){
         let index;
         let rcBody = $(".rest-columns > .tbody");
-        
+
         if(self.depthInput <= self.SelectedWell.topDepth){
             index = 0;
         }else if(self.depthInput >= self.SelectedWell.bottomDepth){
@@ -223,7 +223,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         modifiedCurves = self.curvesData[self.currentIndex].filter(c => {
                 return c.edit;
             });
-        
+
         if(modifiedCurves.length){
             DialogUtils.saveCurvesDialog(ModalService, modifiedCurves, function(){
                 console.log('save curves successed!');

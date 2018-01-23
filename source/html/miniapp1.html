@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>I2G miniapp1</title>
+    <title>I2G Lightweight</title>
     <link rel="shortcut icon" href="img/icon/Well_Insight.ico" type="image/x-icon">
 
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
@@ -105,18 +105,32 @@
 <body ng-app='wiapp' wi-initialization>
     <div class='main' id="main" ng-controller="AppController as app">
         <div class="ribbon-wrapper">
-            <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
-        		<wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
-        		</wi-button>
-            </wi-toolbar>
+        <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
+            <wi-tab heading="Main" closable='false'>
+                <wi-toolbar name="ViewToolbar" label="View" container="ribbon" disabled="true" class="height65">
+                		<wi-button name="MigrationButton" icon="migration-32x32" label="Migration" container="ribbon" disabled="false" class="height65" handler="handlers.MigrationButtonClicked">
+                		</wi-button>
+                </wi-toolbar>
+                <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
+                    <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
+                    </wi-button>
+                </wi-toolbar>
+        </wi-tabset>
         </div>
         <div id='myLayout'>
         </div>
         <wi-user class="user-wrapper" name='user'></wi-user>
         <wi-context-menu name="ContextMenu"></wi-context-menu>
         <wi-spinner name="SPINNER"></wi-spinner>
-
     </div>
+
+    <template id='explorer-block'>
+        <wi-explorer name="WiExplorer" tree-config="myTreeviewConfig"></wi-explorer>
+    </template>
+
+    <template id='property-block'>
+        <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties>
+    </template>
 
     <script src="js/miniapp1.js.bundle.js"></script>
 

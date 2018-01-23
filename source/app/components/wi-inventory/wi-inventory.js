@@ -4,6 +4,7 @@ const moduleName = 'wi-inventory';
 function Controller($scope, wiComponentService, wiApiService, ModalService) {
     modalService = ModalService;
     let self = this;
+    window.inv =this;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);

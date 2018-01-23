@@ -1,9 +1,21 @@
+String.prototype.capitalize = function() {
+    if (this.length < 1) return this;
+    return this.replace(this[0], this[0].toUpperCase());
+}
+
+Object.defineProperty(Array.prototype, "binarySearch", {
+    enumerable: false,
+    value: function(accessFunc, searchValue) {
+        return this.find(accessFunc, searchValue);
+    }
+});
 let queryString = require('query-string');
+let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
 
 let DialogUtils = require('./DialogUtils');
 
-let wiInitialization = require('./wi-initialization');
+let wiInitialization = require('./wi-initialization.js');
 let wiButton = require('./wi-button.js');
 let wiDropdown = require('./wi-dropdown.js');
 let wiToolbar = require('./wi-toolbar.js');
@@ -27,6 +39,7 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiMigration = require('./wi-migration');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -118,6 +131,7 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiMigration.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -150,6 +164,7 @@ let app = angular.module('wiapp',
         wiMultiselect.name,
 
         wiConditionNode.name,
+        ngInfiniteScroll,
 
         'angularModalService',
         'angularResizable',
@@ -195,6 +210,28 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
     window.__HANDLERS = globalHandlers;
+
+    // config explorer block - treeview
+    // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
+    $scope.myTreeviewConfig = {};
+    // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
+
+    // config properties - list block
+    // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    $scope.myPropertiesConfig = {};
+
+    $scope.onRibbonToggle = function(isCollapsed) {
+        if (isCollapsed) {
+            $('.ribbon-wrapper').css('height', 'auto');
+        }
+        else {
+            $('.ribbon-wrapper').css('height', '120px');
+        }
+        setTimeout(function(){
+            layoutManager.updateSize();
+        }, 500);
+    }
+
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);
     wiComponentService.putComponent(wiComponentService.DRAG_MAN, dragMan);
@@ -219,6 +256,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.timeOut = 5000;
     toastr.options.extendedTimeOut = 10000;
     toastr.options.preventDuplicates = true;
+
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
     let functionBindingProp = {
@@ -232,50 +270,63 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    $scope.$on('initialized', onInit);
     appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    layoutManager.putLeft('explorer-block', 'Project');
+    layoutManager.putLeft('property-block', 'Properties');
+    if(!window.localStorage.getItem('rememberAuth')) {
+        utils.doLogin(function () {
+            onInit();
+        });
+    }
+    else {
+        $scope.$on('initialized', onInit);
+    }
     function onInit() {
-        if(!window.localStorage.getItem('rememberAuth')) {
-            utils.doLogin(function () {
-                toastr.info("App start");
-                onInit();
-            });
-        } else {
-            let query = queryString.parse(location.search);
-            if (query.idPlot) {
-                viewPlot(query.idPlot);
-            }
-            else {
-                toastr.warning('do not have idPlot to open');
-            }
+        let query = queryString.parse(location.search);
+        if (query.idPlot) {
+            viewPlot(query.idPlot);
         }
     }
     function viewPlot(idPlot) {
-        let idWell = null;
+        let idWell;
         async.series([function(done) {
-            wiApiService.getLogplot(idPlot, function(plotProps) {
-                console.log(plotProps);
-                idWell = plotProps.idWell;
-                done(null, plotProps);
-            });
+            try {
+                wiApiService.getLogplot(idPlot, function(plotProps) {
+                    idWell = plotProps.idWell;
+                    done(null, plotProps);
+                });
+            }
+            catch(err) {
+                done(err);
+            }
         }, function(done) {
-            wiApiService.getWell(idWell, function(wellProps) {
-                console.log(wellProps);
-                done(null, wellProps);
-            });
+            try {
+                wiApiService.getWell(idWell, function(wellProps) {
+                    done(null, wellProps);
+                });
+            }
+            catch(err) {
+                done(err);
+            }
         }], function(err, result) {
             console.log(err, result);
             let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+            let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
-            let wellModel = utils.createWellModel(result[1]);
-            wiComponentService.putComponent('WELL_MODEL', wellModel);
+            //let wellModel = utils.createWellModel(result[1]);
+            let wellModel = utils.wellToTreeConfig(result[1]);
+            //wiComponentService.putComponent('WELL_MODEL', wellModel);
             let plotModel = utils.logplotToTreeConfig(result[0], {wellModel : wellModel});
-            try {
-                utils.openLogplotTab(wiComponentService, plotModel);
-            }
-            catch(err) {
-                console.error(err);
-            }
+            //wellModel.children.push(plotModel);
+            $timeout(function() {
+                wiExplorer.treeConfig = [wellModel];
+                try {
+                    utils.openLogplotTab(wiComponentService, plotModel, null, false);
+                }
+                catch(err) {
+                    console.error(err);
+                }
+            });
         });
     }
 });

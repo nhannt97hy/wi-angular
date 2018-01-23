@@ -23,7 +23,7 @@ exports.OpenProjectButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
-        wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();        
+        wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
         let utils = self.wiComponentService.getComponent('UTILS');
         utils.projectOpen(self.wiComponentService, projectData);
     });
@@ -1198,4 +1198,17 @@ exports.BlankComboviewButtonClicked = function () {
                 });
             });
     });
+}
+exports.MigrationButtonClicked = function () {
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'curveMigration',
+        title: 'Table Curve Migration',
+        tabIcon: 'migration_32x32',
+        componentState: {
+            html: `<wi-migration></wi-migration>`,
+            name: 'wiMigration'
+        }
+    })
 }

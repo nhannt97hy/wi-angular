@@ -105,13 +105,13 @@
 <body ng-app='wiapp' wi-initialization>
     <div class='main' id="main" ng-controller="AppController as app">
         <div class="ribbon-wrapper">
-        <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
-            <wi-tab heading="Main" closable='false'>
-                <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
-                    <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
-                    </wi-button>
-                </wi-toolbar>
-        </wi-tabset>
+            <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
+                <wi-tab heading="Main" closable='false'>
+                    <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
+                        <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
+                        </wi-button>
+                    </wi-toolbar>
+            </wi-tabset>
         </div>
         <div id='myLayout'>
         </div>
@@ -121,8 +121,43 @@
     </div>
 
     <template id='import-block'>
-        <div style="width: 70%; margin:auto">
+        <style media="screen">
+            .flexs>div {
+                border: 1px solid #ccc;
+                flex:1;
+                margin: 5px;
+                background: #fff;
+                padding: 5px;
+            }
+            div.lm_content {
+                display:flex;
+                flex-direction: column;
+            }
+        </style>
+        <div>
             <h2 style="text-align:center;">I2G Import Tool <a href="" ng-click="helpClick();"><i class="fa fa-question-circle"></i></a></h2>
+        </div>
+        <div style="flex:1; display:flex;flex-direction:column">
+            <div style="flex:1;display:flex; width:80%;margin:auto;"class="flexs">
+                <div>
+                    <div>
+                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
+                    </div>
+                    <div>
+                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
+                    </div>
+                    <div>
+                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
+                    </div>
+                    <div>
+                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
+                    </div>
+                </div>
+                <div>
+                    <input type="text" name="" value="">
+                </div>
+                <div>3</div>
+            </div>
         </div>
     </template>
 
