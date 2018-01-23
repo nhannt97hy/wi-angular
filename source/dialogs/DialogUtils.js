@@ -1,9 +1,16 @@
 function initModal(modal) {
     modal.element.modal();
     $(modal.element).prop('tabindex', 1);
-    $(modal.element).find('.modal-content').draggable({
-        containment:[-$(window).width()/2, -100, $(window).width()/2, $(window).height() - 100]
-    });
+    const elem = $(modal.element).find('.modal-content');
+    setTimeout(() => {
+        elem.find('.modal-header').css('cursor', 'move');
+        const offsetWidth = elem.width()/3;
+        const offsetHeight = elem.height()/3;
+        elem.draggable({
+            containment:[-2*offsetWidth, -10, $(window).width()-offsetWidth, $(window).height()-offsetHeight],
+            handle: '.modal-header'
+        });
+    }, 700);
     $(modal.element).keyup(function (e) {
         if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.ESCAPE) {
             let okButton, cancelButton;
@@ -2704,7 +2711,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             return colorToString(color);
         };
         self.CpCustoms = null;
-        self.currentFocus = 1;
+        self.currentFocus = null;
         self.BoxBorder = function (id) {
             if (self.currentFocus === id) {
                 return '2px solid black';
@@ -2716,6 +2723,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             self.currentFocus = col.id;
         };
         self.addToCustom = function () {
+            if(self.currentFocus == null) self.currentFocus = 1;
             self.CpCustoms[self.currentFocus-1].color = self.currentColor;
             self.currentFocus = (self.currentFocus + 1);
             if(self.currentFocus > 16) self.currentFocus = 1;
@@ -8311,7 +8319,7 @@ exports.addCurveDialog = function (ModalService) {
                 return curve.name == self.curveName && curve.properties.idDataset == self.datasetName;
             })
             if(curve){
-                utils.error('Curve existed!');
+                toastr.error('Curve existed!');
                 self.applyingInProgress = false;
             }else {
                 let bottomDepth = self.SelectedWell.bottomDepth;
@@ -8327,9 +8335,13 @@ exports.addCurveDialog = function (ModalService) {
                     idFamily : self.selectedFamily.idFamily
                 }
                 wiApiService.processingDataCurve(payload,function(curve, err){
-                    if (!err) utils.refreshProjectState();
-                    self.applyingInProgress = false;
-                    $scope.$apply();
+                    if (err) {
+                        self.applyingInProgress = false;
+                        $scope.$apply();
+                        return;
+                    }
+                    utils.refreshProjectState();
+                    close(null);
                 })
             }
         }
