@@ -91,9 +91,11 @@ module.exports.createLayout = function (domId, $scope, $compile) {
         container.on('resize', triggerResize);
     });
     scopeObj.$on("angular-resizable.resizeEnd", triggerResize);
-    layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
-        triggerResize();
-    });
+    let rightContainer = layoutManager.root.getItemsById('right');
+    if (rightContainer && rightContainer.length)
+        layoutManager.root.getItemsById('right')[0].on('activeContentItemChanged', function (activeContentItem) {
+            triggerResize();
+        });
 }
 
 module.exports.putLeft = function (templateId, title) {
@@ -251,4 +253,8 @@ module.exports.updateSize = function () {
 
 module.exports.getItemById = function (itemId) {
     return layoutManager.root.getItemsById(itemId)[0];
+}
+
+module.exports.getRoot = function() {
+    return layoutManager.root;
 }
