@@ -365,6 +365,7 @@ Track.prototype.destroy = function() {
  * Function to call if the track is highlighted
  */
 Track.prototype.highlightCallback = function() {
+    this.highlight = true;
     this.setBackgroundColor(this.BODY_HIGHLIGHT_COLOR);
 }
 
@@ -374,11 +375,8 @@ Track.prototype.highlightCallback = function() {
 Track.prototype.doPlot = function(highlight) {
     if (highlight != null) this.highlight = highlight;
     this.trackContainer.style('width', this.width + 'px');
-
-    this.setBackgroundColor(this.bgColor);
-    if (this.highlight && (typeof this.highlightCallback == 'function'))
-        this.highlightCallback();
-
+    if (this.highlight && (typeof this.highlightCallback == 'function')) this.highlightCallback();
+    else this.setBackgroundColor(this.bgColor);
     this.updateHeader();
     this.updateBody();
 }
