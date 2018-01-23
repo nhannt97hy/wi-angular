@@ -1265,6 +1265,12 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 console.log('drop curve into slidingBar', errorCode);
                 if (errorCode > 0) {
                     wiSlidingBarCtrl.createPreview(idCurve);
+                    let logplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
+                    let logplotRequest = angular.copy(logplotModel.properties);
+                    logplotRequest.referenceCurve = idCurve;
+                    wiApiService.editLogplot(logplotRequest, function () {
+                        logplotModel.properties.referenceCurve = idCurve;
+                    });
                 }
                 else if (errorCode === 0) {
                     error("Cannot drop curve from another well");

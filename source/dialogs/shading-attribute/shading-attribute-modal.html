@@ -1,5 +1,5 @@
 <div class="modal fade" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog" style="width: 700px">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()"
@@ -428,6 +428,7 @@
                                                 <th class="padding-tb-small">Foreground</th>
                                                 <th class="padding-tb-small">Background</th>
                                                 <th class="padding-tb-small">Description</th>
+                                                <th class="padding-tb-small"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -480,6 +481,13 @@
                                                             ng-model="fill.description"
                                                             class="form-control wi-form-control">
                                                 </td>
+                                                <td>
+                                                    <button class="btn btn-default wi-form-control" 
+                                                            ng-click="wiModal.removeRow();"
+                                                            style="font-size: 10px; width: 100%">
+                                                        <span class="delete-16x16"></span>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -487,15 +495,17 @@
                                 </div>
                                 <div class="width-15-percent float-left padding-left-5px text-center">
                                     <button class="btn btn-default" ng-click="wiModal.addRow()"><span class="plus-16x16"></span></button>
-                                    <button class="btn btn-default" ng-click="wiModal.removeRow()"><span class="delete-16x16"></span></button>
+                                    <!-- <button class="btn btn-default" ng-click="wiModal.removeRow()"><span class="delete-16x16"></span></button> -->
                                     <br><br>
                                     <p class="template">Load from template</p>
-                                    <select ng-model="wiModal.customFillsCurrent"
-                                            class="form-control wi-form-control normal-text"
-                                            ng-options="customFills as customFills.name for customFills in wiModal.customFillsList"
-                                            ng-change="wiModal.setCustomFills()">
-                                            <option value="">--------</option>
-                                    </select>
+                                    <ui-select theme="bootstrap" ng-model="wiModal.customFillsCurrent"
+                                                ng-change="wiModal.setCustomFills()">
+                                        <ui-select-match placeholder='Select template'>{{wiModal.customFillsCurrent.name}}</ui-select-match>
+                                        <ui-select-choices group-by="'datasetName'"
+                                                    repeat='customFills as customFills in wiModal.customFillsList | filter: $select.search'>
+                                                    <div class="" style="width: 2em;">{{customFills.name}}</div>
+                                        </ui-select-choices>
+                                    </ui-select>
                                 </div>
                                 <br>
                                 <div class="row">

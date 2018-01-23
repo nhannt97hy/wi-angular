@@ -138,6 +138,10 @@ function curveBulkUpdateDialog (ModalService, logTracks) {
         controllerAs: 'wiModal'
     }).then(function (modal) {
         initModal(modal);
+        /*$(modal.element).find('.modal-content').resizable({
+            minHeight: 300,
+            minWidth: 300
+        });*/
         modal.close.then(function () {
             $('.modal-backdrop').last().remove();
             $('body').removeClass('modal-open');

@@ -291,7 +291,7 @@ Track.prototype.headerScrollCallback = function() {
     let extraHeight = this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM;
 
     //let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
-    let step = this.headerContainer.node().clientHeight/40.;
+    let step = this.headerContainer.node().clientHeight/5.;
     let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? (0 - step) : step);
     let top = parseInt(this.drawingHeaderContainer.style('top').replace('px', '')) + dy;
     let maxTop = rowHeight + extraHeight;
@@ -365,6 +365,7 @@ Track.prototype.destroy = function() {
  * Function to call if the track is highlighted
  */
 Track.prototype.highlightCallback = function() {
+    this.highlight = true;
     this.setBackgroundColor(this.BODY_HIGHLIGHT_COLOR);
 }
 
@@ -374,11 +375,8 @@ Track.prototype.highlightCallback = function() {
 Track.prototype.doPlot = function(highlight) {
     if (highlight != null) this.highlight = highlight;
     this.trackContainer.style('width', this.width + 'px');
-
-    this.setBackgroundColor(this.bgColor);
-    if (this.highlight && (typeof this.highlightCallback == 'function'))
-        this.highlightCallback();
-
+    if (this.highlight && (typeof this.highlightCallback == 'function')) this.highlightCallback();
+    else this.setBackgroundColor(this.bgColor);
     this.updateHeader();
     this.updateBody();
 }
