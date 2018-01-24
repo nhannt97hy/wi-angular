@@ -256,8 +256,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addDepthTrack = function (callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
-            wiApiService.createDepthTrack(self.wiLogplotCtrl.id, trackOrder, function (depthTrack) {
-                console.log("Success: ", depthTrack);
+            wiApiService.createDepthTrack({
+                idPlot: self.logPlotCtrl.id,
+                orderNum: trackOrder,
+                width: 0.65
+            }, function (depthTrack) {
                 self.pushDepthTrack(depthTrack);
                 if (callback) callback();
             });
@@ -440,7 +443,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.pushTrackComponent(objectTrackProps);
     }
 
-    /* connection with tracks visualization */
+    this.plot = function (track) {
+        if (track && track.doPlot) track.doPlot(track == _currentTrack);
+    };
+
+    this.plotAll = _.throttle(function () {
+        _tracks.forEach(function (track) {
+            track.doPlot(track == _currentTrack);
+        });
+        self.updateScale();
+    }, 50);
+
+    this.getDisplayView = function () {
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = this.getMaxDepth();
+        let minDepth = this.getMinDepth();
+        let minDisplay = minDepth + (maxDepth - minDepth) * slidingBar.slidingBarState.top0 / 100.;
+        let maxDisplay = minDisplay + (maxDepth - minDepth) * slidingBar.slidingBarState.range0 / 100.;
+        return [minDisplay.toFixed(2), maxDisplay.toFixed(2)];
+    }
     this.updateScale = function () {
         let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
         if (!trackPlot) return;
@@ -449,18 +470,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let heightCm = trackPlotHeight / dpCm;
         let depthRange = this.getDepthRange();
         let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
-        this.scale = scale.toFixed(0);
+        this.scale = {
+            scale: '1:' + scale.toFixed(0),
+            displayView: self.getDisplayView(),
+            currentView: [depthRange[0].toFixed(2), depthRange[1].toFixed(2)]
+        };
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
         })
-    }
-    this.plotAll = function () {
-        _tracks.forEach(function (track) {
-            track.doPlot(track == _currentTrack);
-        });
-    };
-    this.plot = function (track) {
-        if (track && track.doPlot) track.doPlot(track == _currentTrack);
     }
     this.setCurrentTrack = function (track) {
         if (_currentTrack == track) return;
@@ -1020,6 +1037,46 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _previousTrack.doPlot(false);
         }
     }
+    function _registerTrackCallback(track) {
+        track.on('focus', function () {
+            _setCurrentTrack(track);
+        });
+        track.on('mousedown', function () {
+            _setCurrentTrack(track);
+            // if (d3.event.button == 2) _trackOnRightClick(track);
+        })
+        track.on('dblclick', function () {
+            _setCurrentTrack(track);
+            openTrackPropertiesDialog();
+        });
+        track.onVerticalResizerDrag(function () {
+            if (track.isLogTrack()) {
+                wiApiService.editTrack({idTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
+                })
+            } else if (track.isDepthTrack()) {
+                wiApiService.editDepthTrack({
+                    idDepthAxis: track.id,
+                    width: Utils.pixelToInch(track.width)
+                }, function () {
+                })
+            } else if (track.isZoneTrack()) {
+                wiApiService.editZoneTrack({idZoneTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
+                })
+            } else if (track.isImageTrack()) {
+                wiApiService.editImageTrack({
+                    idImageTrack: track.id,
+                    width: Utils.pixelToInch(track.width)
+                }, function () {
+                })
+            } else if (track.isObjectTrack()) {
+                wiApiService.editObjectTrack({
+                    idObjectTrack: track.id,
+                    width: Utils.pixelToInch(track.width)
+                }, function () {
+                })
+            }
+        });
+    }
     function _onPlotMouseWheelCallback(track) {
         if (!_tracks || !_tracks.length) return;
         let mouse = d3.mouse(_tracks[0].plotContainer.node());
@@ -1157,46 +1214,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }).catch(function (err) {
             if (err) {
                 _tracks = backupTracks;
-            }
-        });
-    }
-    function _registerTrackCallback(track) {
-        track.on('focus', function () {
-            _setCurrentTrack(track);
-        });
-        track.on('mousedown', function () {
-            _setCurrentTrack(track);
-            // if (d3.event.button == 2) _trackOnRightClick(track);
-        })
-        track.on('dblclick', function () {
-            _setCurrentTrack(track);
-            openTrackPropertiesDialog();
-        });
-        track.onVerticalResizerDrag(function () {
-            if (track.isLogTrack()) {
-                wiApiService.editTrack({idTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
-                })
-            } else if (track.isDepthTrack()) {
-                wiApiService.editDepthTrack({
-                    idDepthAxis: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
-            } else if (track.isZoneTrack()) {
-                wiApiService.editZoneTrack({idZoneTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
-                })
-            } else if (track.isImageTrack()) {
-                wiApiService.editImageTrack({
-                    idImageTrack: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
-            } else if (track.isObjectTrack()) {
-                wiApiService.editObjectTrack({
-                    idObjectTrack: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
             }
         });
     }
