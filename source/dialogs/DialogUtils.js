@@ -5142,6 +5142,7 @@ exports.discriminatorDialog = function (ModalService, plotCtrl, callback) {
         }
 
         function getCurveName(idCurve){
+            if(idCurve == 0) return "Depth";
             let model = utils.getModel('curve', idCurve);
             if( model ) return model.properties.name;
             return;
