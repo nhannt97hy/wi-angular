@@ -663,8 +663,64 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }, {
                     name: "Function",
                     label: "Function",
+                    class: "has-more",
                     childContextMenu: [
-
+                        {
+                            name: "CreatePolygon",
+                            label: "Create Polygon",
+                            handler: function () {
+                                self.drawAreaPolygon();
+                            }
+                        },
+                        {
+                            name: "CreateRectangle",
+                            label: "Create Rectangle",
+                            handler: function () {
+                                self.drawAreaRectangle();
+                            }
+                        },
+                        {
+                            name: "DeleteArea",
+                            label: "Delete Area",
+                            handler: function () {
+                                self.deleteArea();
+                            }
+                        },
+                        {
+                            name: "CreateUserLine",
+                            label: "Create User Line",
+                            handler: function () {
+                                self.drawUserLine();
+                            }
+                        },
+                        {
+                            name: "DeleteUserLine",
+                            label: "Delete User Line",
+                            handler: function () {
+                                self.deleteUserLine();
+                            }
+                        },
+                        {
+                            name: "UserDefineLine",
+                            label: "User Define Line",
+                            handler: function () {
+                                DialogUtils.userDefineLineDialog(ModalService, self, function () {});
+                            }
+                        },
+                        {
+                            name: "PolygonManager",
+                            label: "Polygon Manager",
+                            handler: function () {
+                                DialogUtils.polygonManagerDialog(ModalService, self, function () {});
+                            }
+                        },
+                        {
+                            name: "RegessionLine",
+                            label: "Regession Line",
+                            handler: function () {
+                                DialogUtils.regressionLineDialog(ModalService, self, function () {});
+                            }
+                        }
                     ],
                     handler: function () {
 
