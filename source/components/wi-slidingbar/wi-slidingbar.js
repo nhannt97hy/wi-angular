@@ -460,6 +460,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         // TUNG for limiting height of resizable
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
+
+        const wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        wiD3Controller.updateScale();
     }
 
     this.resetView = function() {
