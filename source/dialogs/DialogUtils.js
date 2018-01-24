@@ -5748,7 +5748,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
                 left: 0,
                 right: 0,
                 visiable: true,
-                log: true,
+                log: false,
                 flag: self._FNEW
             }
 
