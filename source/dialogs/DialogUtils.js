@@ -2736,13 +2736,47 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
                 return colorCustoms;
             }
         };
+        self.checkColorValue = function(value, label) {
+            let message = "The value must be between ";
+            let isValidValue = true;
+            switch (label) {
+                case 1: 
+                    message += "0 and 255";
+                    if((!value && value != 0) || value > 255 || value < 0) {
+                        // errorMessageDialog(ModalService, message, function () {});
+                        self.errorMessage = message;
+                        isValidValue = false;
+                    }
+                    break;
+                case 2:
+                    message += "0 and 1";
+                    if((!value && value != 0) || value > 1 || value < 0) {
+                        // errorMessageDialog(ModalService, message, function () {});
+                        self.errorMessage = message;
+                        isValidValue = false;
+                    }
+                    break;
+            }
+            if(isValidValue) {
+                self.errorMessage = null;
+            }
+            return isValidValue;
+        }
+        self.isValidColor = function (color) {
+            return self.checkColorValue(color.r, 1) && self.checkColorValue(color.g, 1) &&
+                    self.checkColorValue(color.b, 1) && self.checkColorValue(color.a, 2);
+        }
         self.saveColorCustom = function () {
             let colorString = JSON.stringify(self.CpCustoms);
             $window.localStorage.setItem('colorCustoms', colorString);
         };
         this.onOkButtonClicked = function () {
-            self.saveColorCustom();
-            close(colorToString(self.currentColor));
+            if(self.isValidColor(self.currentColor)) {
+                self.saveColorCustom();
+                close(colorToString(self.currentColor));
+            } else {
+                errorMessageDialog(ModalService, self.errorMessage);
+            }
         }
         this.onCancelButtonClicked = function () {
             close();
