@@ -179,7 +179,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.containerName) {
                 if (model.type == 'histogram') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) self.visHistogram && self.visHistogram.doPlot();
+                if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) self.visHistogram && self.visHistogram.doPlot();
             } else {
                 if (model.type != 'histogram' || model.id != self.histogramModel.id) return;
                 self.visHistogram && self.visHistogram.doPlot();

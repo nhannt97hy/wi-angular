@@ -351,10 +351,10 @@ var wiApiWorker = function ($http, wiComponentService) {
                             });
                         });
                     } else {
+                        console.error(err);
                         self.stopWorking();
                         if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
-                        console.error(err);
                     }
                 });
 
@@ -1056,22 +1056,15 @@ Service.prototype.infoTrack = function (idTrack, callback) {
     this.post(GET_LOG_TRACK, dataRequest, callback);
 }
 
-Service.prototype.editTrack = function (trackObj, callback) {
+Service.prototype.editTrack = function (trackObj, callback, option) {
     var self = this;
     let dataRequest = trackObj;
-    this.post(EDIT_TRACK, dataRequest, callback);
+    this.post(EDIT_TRACK, dataRequest, callback, option);
 }
 
-
-Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
+Service.prototype.createDepthTrack = function (depthTrack, callback) {
     var self = this;
-    console.log("createDepthTrack", self);
-    let dataRequest = {
-        idPlot: idPlot,
-        orderNum: orderNum,
-        geogetryWidth: 1
-    };
-    this.post(CREATE_DEPTH_AXIS, dataRequest, callback);
+    this.post(CREATE_DEPTH_AXIS, depthTrack, callback);
 }
 Service.prototype.removeDepthTrack = function (idDepthAxis, callback) {
     var self = this;

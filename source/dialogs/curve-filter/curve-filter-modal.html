@@ -142,7 +142,7 @@
                                             </tr>
                                             <tr>
                                                 <td ng-repeat="col in wiModal.table track by $index" style="min-width:130px;">
-                                                    <input type="number" class="form-control wi-form-control" ng-model="col" step='0.0001' min='0'>
+                                                    <input type="number" class="form-control wi-form-control" ng-model="wiModal.table[$index]" step='0.0001' min='0'>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -167,6 +167,11 @@
                                         ng-disabled="wiModal.createOp == 'backup'">
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="progress" ng-if="wiModal.percent">
+                            <div class="progress-bar" role="progressbar"
+                                    aria-valuemin="0" aria-valuemax="100" ng-style="{width:wiModal.percent + '%'}">{{wiModal.percent}}%
                             </div>
                         </div>
                     </form>

@@ -1271,6 +1271,12 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 console.log('drop curve into slidingBar', errorCode);
                 if (errorCode > 0) {
                     wiSlidingBarCtrl.createPreview(idCurve);
+                    let logplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
+                    let logplotRequest = angular.copy(logplotModel.properties);
+                    logplotRequest.referenceCurve = idCurve;
+                    wiApiService.editLogplot(logplotRequest, function () {
+                        logplotModel.properties.referenceCurve = idCurve;
+                    });
                 }
                 else if (errorCode === 0) {
                     error("Cannot drop curve from another well");
@@ -2682,10 +2688,10 @@ exports.evaluateExpr = evaluateExpr;
 
 function evaluateExpr(well, discriminator, callback) {
     let result = new Array();
-    let wellProps = well.properties;
-    let length = (wellProps.bottomDepth - wellProps.topDepth) / wellProps.step;
+    let length = (well.bottomDepth - well.topDepth) / well.step;
     let curveSet = new Set();
     let curvesData = new Array();
+    let spinner = __GLOBAL.wiComponentService.getComponent("SPINNER");
 
     function findCurve(condition) {
         if (condition && condition.children && condition.children.length) {
@@ -2720,14 +2726,14 @@ function evaluateExpr(well, discriminator, callback) {
                 return curve.idCurve == condition.left.value;
             });
 
-            let left = leftCurve ? parseFloat(leftCurve.data[index].x) : null;
+            let left = leftCurve ? parseFloat(leftCurve.data[index]) : null;
 
             let right = condition.right.value;
             if (condition.right.type == 'curve') {
                 let rightCurve = curvesData.find(function (curve) {
                     return curve.idCurve == condition.right.value;
                 })
-                right = rightCurve ? parseFloat(rightCurve.data[index].x): null;
+                right = rightCurve ? parseFloat(rightCurve.data[index]): null;
             }
 
             if (left!= null && right!= null) {
@@ -2755,15 +2761,32 @@ function evaluateExpr(well, discriminator, callback) {
     async.eachOfSeries(
         curveArr,
         function (curve, i, done) {
-            __GLOBAL.wiApiService.dataCurve(curve, function (data) {
-                if(Array.isArray(data)){
+            if(curve){
+                __GLOBAL.wiApiService.dataCurve(curve, function (data) {
+                    if(Array.isArray(data)){
+                        curvesData.push({
+                            idCurve: curve,
+                            data: data.map(d => parseFloat(d.x))
+                        })
+                    }
+                    done();
+                })
+            }else{
+                let len = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
+                let data = new Array(len);
+                spinner.show();
+                async.eachOf(data, function(depth, i, callback){
+                    data[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
+                    async.setImmediate(callback);
+                }, function(err){
                     curvesData.push({
                         idCurve: curve,
                         data: data
                     })
-                }
-                done();
-            })
+                    done();
+                    spinner.hide();
+                })
+            }
         },
         function (err) {
             console.log('done!', curvesData);

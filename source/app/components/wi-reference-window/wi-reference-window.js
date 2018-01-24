@@ -312,7 +312,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             async.eachOf(referenceCurves, function(refCurve, idx, callback) {
                 if(refCurve.idCurve && refCurve.visiable){
                     refCurve.datasetName = utils.findDatasetById(refCurve.curve.idDataset).properties.name;
-                    wiApiService.infoCurve(refCurve.idCurve, function (curve) {
+                    // wiApiService.infoCurve(refCurve.idCurve, function (curve) {
                         let config = {
                             idCurve: refCurve.idCurve,
                             name: refCurve.datasetName + '.' + refCurve.curve.name,
@@ -322,13 +322,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             maxY: _bottom,
                             yStep: stepY,
                             offsetY: well.topDepth,
-                            scale: curve.LineProperty ? curve.LineProperty.displayType : "Linear",
+                            scale: refCurve.log ? "Logarithmic" : "Linear",
                             line: {
                                 color: refCurve.color
                             }
                         }
                         refWindCtrl.addRefCurve(refCurve.idCurve, config, callback);
-                    });
+                    // });
                 }else{
                     callback();
                 }

@@ -49,29 +49,23 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
-            if(self.props.general.width >= 0.5 ) {
-                wiApiService.editTrack(self.props.general, function(res) {
-                    console.log("res", res);
-                    let newProps = angular.copy(self.props);
-                    newProps.general.width = utils.inchToPixel(self.props.general.width);
-                    currentTrack.setProperties(newProps.general);
+            if (self.props.general.width < 0 ) self.props.general.width = 0;
+            wiApiService.editTrack(self.props.general, function(res) {
+                console.log("res", res);
+                let newProps = angular.copy(self.props);
+                newProps.general.width = utils.inchToPixel(self.props.general.width);
+                currentTrack.setProperties(newProps.general);
 
-                    if (newProps.general.zoomFactor != savedZoomFactor) {
-                        savedZoomFactor = newProps.general.zoomFactor;
-                        wiD3Ctrl.processZoomFactor();
-                        wiD3Ctrl.plotAll();
-                    }
-                    else {
-                        currentTrack.doPlot(true);
-                    }
-                    if (callback) callback();
-                })
-            } else {
-                console.log("temp");
-                temp = false;
-                DialogUtils.errorMessageDialog(ModalService, "LogTrack's width must be greater than 0.5 inch!");
-                callback();
-            }
+                if (newProps.general.zoomFactor != savedZoomFactor) {
+                    savedZoomFactor = newProps.general.zoomFactor;
+                    wiD3Ctrl.processZoomFactor();
+                    wiD3Ctrl.plotAll();
+                }
+                else {
+                    currentTrack.doPlot(true);
+                }
+                if (callback) callback();
+            })
             return temp;
         }
 
@@ -119,7 +113,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             let curve = self.curves.find(c => c._index == self.__idx);
             idCurveNew = curve.lineCurve.id;
             let curveUnchanged = false;
-            if (curve.changed == changed.unchanged) curveUnchanged = true;
+            if (curve.idLine != null) curveUnchanged = true;
             wiApiService.infoCurve(idCurveNew, function (curveInfo) {
                 let lineProps = curveInfo.LineProperty;
                 console.log("curveInfo", curveInfo, curve, curveUnchanged);
@@ -328,7 +322,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
 
                     console.log("curveUpdated", self.curveUpdated);
 
-                    self.curveUpdated.forEach(function(c) {
+                    self.curveUpdated.forEach(function (c) {
                         self.shadings.forEach(function (s) {
                             if (s.rightLine.id == c.id) {
                                 s.rightLine = c;
@@ -349,7 +343,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                                 s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
                             }
                         })
-                    })
+                    });
                     // self.shadings.forEach(function(s) {
                     //     s.idLeftLine = s.leftLine.id;
                     //     if (s.type == 'left') {
@@ -540,7 +534,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                 self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
             if (self.shadings[self.__idx].type == 'right')
                 self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
-            self.onSelectLeftLine();
+            if (self.shadings[self.__idx].leftLine) self.onSelectLeftLine();
         };
         this.onSelectLeftLine = function () {
             self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
@@ -591,8 +585,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         break;
                     case changed.created: {
                         wiApiService.createShading(request, function (shading) {
-                            wiD3Ctrl.updateLogTrack(currentTrack);
-                            self.shadingList = currentTrack.getShadings();
                             self.shadings[idx].idShading = shading.idShading;
                             callback();
                         });
@@ -603,34 +595,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     case changed.updated: {
                         console.log("updated", request, item);
                         wiApiService.editShading(request, function (shading) {
-                           /* utils.getPalettes(function(paletteList){
-                                wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                                    options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, self.well.properties);
-                                    if(!options.isNegPosFill) {
-                                        if(options.fill.varShading && options.fill.varShading.palName)
-                                            options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
-                                    }
-                                    else {
-                                        if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
-                                            options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                                        if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
-                                            options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                                    }
-                                    currentTrack.drawings.filter(function(d) {
-                                        return (d.isShading() && d.id == shading.idShading);
-                                    })[0].setProperties(options);
-
-                                    $timeout(function() {
-                                        currentTrack.plotAllDrawings();
-                                        currentTrack.doPlot(true);
-                                    });
-
-                                    if(callback) callback();
-                                });
-                            });*/
-                            wiD3Ctrl.updateLogTrack(currentTrack);
-                            self.shadingList = currentTrack.getShadings();
-                            // self.shadings[idx].idShading = shading.idShading;
                             callback();
                         });
                         item.changed = changed.unchanged;
@@ -638,9 +602,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     }
                     case changed.deleted:
                         wiApiService.removeShading(item.idShading, function (shading) {
-                            let currentShading = currentTrack.findShadingById(shading.idShading);
-                            wiD3Ctrl.removeShadingFromTrack(currentTrack, currentShading);
-                            self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                             callback();
                         });
                         break;
@@ -654,6 +615,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
+                    wiD3Ctrl.updateLogTrack(currentTrack);
+
                     self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                     self.shadingList = currentTrack.getShadings();
                     if (updateShadingsTabCb) updateShadingsTabCb(err);
