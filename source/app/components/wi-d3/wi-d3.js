@@ -183,10 +183,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
     }
-    this.getWellProps = function() {
-        let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-        return well.properties || {};
-    }
+    this.getWellProps = _getWellProps;
     this.getLogplotHandler = function () {
         return logplotHandlers;
     }
@@ -447,13 +444,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };
 
+    /* connect wirh visualize track */
     this.plotAll = _.throttle(function () {
         _tracks.forEach(function (track) {
             track.doPlot(track == _currentTrack);
         });
         self.updateScale();
     }, 50);
-
     this.getDisplayView = function () {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = this.getMaxDepth();
@@ -512,6 +509,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
+        _drawTooltip(_currentTrack);
+    }
+    this.zoom = function (zoomOut) {
+        const MIN_STEPS_OF_VIEW = 20; // Dupplicate code . See wi-slidingbar.js, getMinRange() function
+        let range = _depthRange[1] - _depthRange[0];
+        let low, high;
+        let maxDepth = self.getMaxDepth();
+        let minDepth = self.getMinDepth();
+        let yStep = parseFloat(_getWellProps().step) || 1;
+        if (zoomOut) {
+            low = _depthRange[0] - range * 0.2;
+            high = _depthRange[1] + range * 0.2;
+        }
+        else {
+            low = _depthRange[0] + range * 0.2;
+            high = _depthRange[1] - range * 0.2;
+        }
+        if (low + MIN_STEPS_OF_VIEW * yStep >= high) return;
+
+        low = low < minDepth ? minDepth : low;
+        high = high > maxDepth ? maxDepth : high;
+
+        self.setDepthRange([low, high], true);
+        self.processZoomFactor();
+        self.plotAll();
+        self.adjustSlidingBarFromDepthRange([low, high]);
         _drawTooltip(_currentTrack);
     }
     this.processZoomFactor = function () {
@@ -625,6 +648,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let handlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
         Utils.bindFunctions(logplotHandlers, handlers, {
             $scope: $scope,
+            $timeout: $timeout,
             wiComponentService: wiComponentService,
             wiApiService: wiApiService,
             ModalService: ModalService,
@@ -1028,6 +1052,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return key;
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
+    }
+    function _getWellProps() {
+        let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+        return well.properties || {};
     }
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;

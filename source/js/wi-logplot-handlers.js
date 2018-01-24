@@ -472,6 +472,7 @@ exports.ImportTrackButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
+    let timeoutFunc = this.$timeout;
     const currentTrack = wiLogplot.getwiD3Ctrl().getCurrentTrack();
     let trackData = {
         idTrack: currentTrack.id,
@@ -492,7 +493,10 @@ exports.ImportTrackButtonClicked = function () {
             aTrack.orderNum = wiD3Ctrl.getOrderKey(currentTrack);
             wiApiService.editTrack(aTrack, function (t) {
                 let trackObj = wiD3Ctrl.pushLogTrack(t);
-                wiD3Ctrl.updateTrack(trackObj);
+                // wiD3Ctrl.updateTrack(trackObj);
+                timeoutFunc(function () {
+                    wiD3Ctrl.getComponentCtrlByProperties(t).update();
+                })
             });
         }).catch(err => {
             console.log(err);
