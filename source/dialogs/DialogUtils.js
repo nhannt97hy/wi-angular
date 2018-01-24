@@ -2711,7 +2711,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             return colorToString(color);
         };
         self.CpCustoms = null;
-        self.currentFocus = 1;
+        self.currentFocus = null;
         self.BoxBorder = function (id) {
             if (self.currentFocus === id) {
                 return '2px solid black';
@@ -2723,6 +2723,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             self.currentFocus = col.id;
         };
         self.addToCustom = function () {
+            if(self.currentFocus == null) self.currentFocus = 1;
             self.CpCustoms[self.currentFocus-1].color = self.currentColor;
             self.currentFocus = (self.currentFocus + 1);
             if(self.currentFocus > 16) self.currentFocus = 1;
@@ -8939,6 +8940,7 @@ exports.curveFilterDialog = function(ModalService){
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.percent = 0;
 
         this.createOp = 'backup';
         this.filterOp = '5';
@@ -9006,6 +9008,7 @@ exports.curveFilterDialog = function(ModalService){
         this.onChangeWell();
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.percent = 0;
             $timeout(function(){
                 self.wells = utils.findWells();
                 self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
@@ -9070,6 +9073,8 @@ exports.curveFilterDialog = function(ModalService){
                         delete payload.idDesCurve;
                         wiApiService.processingDataCurve(payload, function(){
                             utils.refreshProjectState();
+                        },function(percent){
+                            self.percent = percent;
                         })
                     },500)
                     break;
@@ -9090,6 +9095,8 @@ exports.curveFilterDialog = function(ModalService){
 
                     wiApiService.processingDataCurve(payload, function(){
                         utils.refreshProjectState();
+                    },function(percent){
+                        self.percent = percent;
                     })
                     break;
             }
@@ -9097,6 +9104,22 @@ exports.curveFilterDialog = function(ModalService){
 
         function squareFilter(){
             console.log('squareFilter');
+            async.eachOfSeries(self.curveData, (depth, idx, callback) => {
+                let len = (self.numLevel - 1)/2;
+                let start = idx - len;
+                start = start > 0 ? start : 0;
+                let end = idx + len;
+                let range = self.curveData.slice(start, end + 1).filter(d => !isNaN(d));
+                let weight = 1/range.length;
+                let out = range.reduce((acc, cur) => {
+                    return acc + cur * weight;
+                },0);
+                self.curveData[idx] = parseFloat(out.toFixed(4));
+                async.setImmediate(callback);
+            },function(err){
+                console.log('Done!');
+                saveCurve(self.curveData);
+            })
         }
         function savgoFilter(){
             console.log('savgoFilter');
@@ -9124,6 +9147,22 @@ exports.curveFilterDialog = function(ModalService){
         }
         function bellFilter(){
             console.log('bellFilter');
+            async.eachOfSeries(self.curveData, (depth, idx, callback) => {
+                let len = (self.numLevel - 1)/2;
+                let start = idx - len;
+                start = start > 0 ? start : 0;
+                let end = idx + len;
+                let range = self.curveData.slice(start, end + 1);
+                let out = range.reduce((acc, curVal, curIdx) => {
+                    let curW = (1 - Math.cos(2 * Math.PI * (curIdx + 1)/(range.length + 1)))/(range.length + 1);
+                    return acc + (curVal || 0) * curW;
+                },0);
+                self.curveData[idx] = parseFloat(out.toFixed(4));
+                async.setImmediate(callback);
+            },function(err){
+                console.log('Done!');
+                saveCurve(self.curveData);
+            })
         }
         function fftFilter(){
             console.log('fftFilter');
@@ -9154,6 +9193,29 @@ exports.curveFilterDialog = function(ModalService){
         }
         function customFilter(){
             console.log('customFilter');
+            async.eachOfSeries(self.curveData, (depth, idx, callback) => {
+                let len = (self.numLevel - 1)/2;
+                let start = idx - len;
+                start = start > 0 ? start : 0;
+                let end = idx + len;
+                let range = self.curveData.slice(start, end + 1);
+                if(range.length < self.numLevel){
+                    let add = new Array(self.numLevel - range.length).fill(0);
+                    if(start == 0){
+                        range = add.concat(range);
+                    }else{
+                        range = range.concat(add);
+                    }
+                }
+                let out = range.reduce((acc, curVal, curIdx) => {
+                    return acc + (curVal || 0) * self.table[curIdx];
+                },0);
+                self.curveData[idx] = parseFloat(out.toFixed(4));
+                async.setImmediate(callback);
+            },function(err){
+                console.log('Done!');
+                saveCurve(self.curveData);
+            })
         }
 
         function run(){
