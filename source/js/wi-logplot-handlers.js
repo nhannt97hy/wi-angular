@@ -297,12 +297,16 @@ exports.DuplicateTrackButtonClicked = function () {
     const wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     const currentTrack = wiD3Ctrl.getCurrentTrack();
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let timeoutFunc = this.$timeout;
     let trackInfo = currentTrack.getProperties();
     DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this log track?", function (yes) {
         if (yes) {
             wiApiService.duplicateLogTrack({orderNum: wiD3Ctrl.getOrderKey(currentTrack), idTrack: trackInfo.idTrack}, function (aTrack) {
                 let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-                wiD3Ctrl.updateTrack(trackObj);
+                // wiD3Ctrl.updateTrack(trackObj);
+                timeoutFunc(function () {
+                    wiD3Ctrl.getComponentCtrlByProperties(aTrack).update();
+                })
             });
         }
     });

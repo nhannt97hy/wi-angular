@@ -1061,7 +1061,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     if (d3.event.button != 0) {
         d3.event.currentDrawing = this.currentDrawing;
         return;
-    } 
+    }
 
     if (this.currentDrawing && this.currentDrawing.nearPoint(x, y)) {
         d3.event.currentDrawing = this.currentDrawing;
@@ -1202,11 +1202,11 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
     }
     $(this.plotContainer.node()).draggable({
         axis: 'x',
-        containment: self.root.node(),
+        containment: self.root.node().parentNode.parentNode,
         helper: function () {
             if (self.getCurrentCurve()) {
                 let currentCurve = self.getCurrentCurve();
-                return $('<img></img>').prop({src: currentCurve.canvas.node().toDataURL()});
+                return $('<img></img>').prop({src: currentCurve.canvas.node().toDataURL(), style: 'z-index: 99'});
             }
             return $('<span></span>');
         },

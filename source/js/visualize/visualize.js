@@ -55,7 +55,7 @@ exports.createZoneTrack = function(config, domElem) {
  * Create and draw a new ImageTrack inside a new specified DOM element
  * @param {Object} config - configurations of new ImageTrack
  * @param {Object} domElem - the DOM element to contain the track
- * @returns {Object} The created track 
+ * @returns {Object} The created track
  */
 exports.createImageTrack = function (config, domElem) {
     let imageTrack = new ImageTrack(config);
@@ -67,7 +67,7 @@ exports.createImageTrack = function (config, domElem) {
  * Create and draw a new ObjectTrack inside a new specified DOM element
  * @param {Object} config - configurations of new ObjectTrack
  * @param {Object} domElem - the DOM element to contain the track
- * @returns {Object} The created track 
+ * @returns {Object} The created track
  */
 exports.createObjectTrack = function(config, domElem) {
     let objectTrack = new ObjectTrack(config);
@@ -134,7 +134,10 @@ exports.buildCurve = function(config, data, well) {
  */
 exports.rearrangeTracks = function(wiD3Ctrl) {
     let wiD3Name = wiD3Ctrl.name;
-    d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
+
+    // d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
+
+    d3.select('[name=' + wiD3Name + ']').selectAll('.wi-d3-track-component').sort();
 }
 
 /**

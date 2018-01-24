@@ -5723,7 +5723,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
                 self.ref_Curves_Arr[index].flag = self._FEDIT;
             }
-            
+
             let curve = self.curvesArr.find(c => c.id == self.ref_Curves_Arr[index].idCurve);
             self.ref_Curves_Arr[index].curve = curve.properties;
             let family = curve.lineProperties;
@@ -10604,7 +10604,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 	  let DialogUtils = wiComponentService.getComponent(
 		wiComponentService.DIALOG_UTILS
 	  );
-  
+
 	  this.SelWell = SelWell;
 	  this.ShiftCurve = ShiftCurve;
 	  this.shiftMode = "1";
@@ -10613,7 +10613,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 	  this.datasets = [];
 	  this.curves = [];
 	  this.shiftedTable = [];
-  
+
 	  this.onWellChange = function() {
 		self.datasets.length = 0;
 		self.curves.length = 0;
@@ -10636,7 +10636,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 		  self.RefCurve = self.curves[0];
 		}
 	  };
-  
+
 	  this.onWellChange();
 	  wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
 		self.applyingInProgress = false;
@@ -10644,7 +10644,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 		  self.onWellChange();
 		});
 	  });
-  
+
 	  this.onChangeDepth = function(index, depth){
 		  let point = self.shiftedTable[index];
 		  point.origin = point.origin >= self.SelWell.topDepth ? point.origin : self.SelWell.topDepth;
@@ -10655,11 +10655,11 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 		  }
 		  point.shifted = point.shifted <= self.SelWell.bottomDepth ? point.shifted : self.SelWell.bottomDepth;
 	  }
-  
+
 	  this.delete = function( index ) {
 		  self.shiftedTable.splice(index,1);
 	  }
-  
+
 	  this.addShifted = function() {
 		  self.shiftedTable.push(
 			  {
@@ -10671,7 +10671,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 				}
 		  )
 	  }
-  
+
 	  this.checked = false;
 	  this.select = function(curve) {
 		curve.flag = !curve.flag;
@@ -10703,9 +10703,9 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 			  let flag = self.shiftedTable.find(p => p.flag == true);
 			  callback(!flag);
 		  })
-  
+
 	  }
-  
+
 	  this.onImportButtonClicked = function() {
 		  console.log("Import");
 		  if (self.ImportFile) {
@@ -10732,7 +10732,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 							});
 						  }
 					  }else{
-						  utils.error("Import error! Invalid Format!");                        
+						  utils.error("Import error! Invalid Format!");
 					  }
 				  }else{
 					  utils.error("Import error! Not Depth Shifts File");
@@ -10745,7 +10745,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 			  }
 			}
 	  }
-  
+
 	  this.onExportButtonClicked = function() {
 		  console.log("Export");
 		  if(self.shiftedTable.length){
@@ -10772,7 +10772,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
       function toIndex(depth){
           return Math.round((depth - self.SelWell.topDepth)/self.SelWell.step);
       }
-      
+
       function run(){
             wiApiService.dataCurve(self.ShiftCurve.idCurve, function(dataCurve){
                 let data  = dataCurve.map(d => {return {y: parseInt(d.y),x: parseFloat(d.x)}});
@@ -10812,7 +10812,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
                     })
                 })
       }
-  
+
 	  this.onApplyButtonClicked = function() {
 		console.log("Apply");
 		validate(valid => {
@@ -10823,7 +10823,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 			}
 		})
 	  };
-  
+
 	  this.onRunButtonClicked = function() {
 		console.log("Run");
 		validate(valid => {
@@ -10834,12 +10834,12 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 			}
 		})
 	  };
-  
+
 	  this.onCancelButtonClicked = function() {
 		close(null);
 	  };
 	}
-  
+
 	ModalService.showModal({
 	  templateUrl: "depth-shift/depth-shift-modal.html",
 	  controller: ModalController,

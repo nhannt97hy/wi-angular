@@ -137,7 +137,10 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                     case 'curve':
                         deleteFunction = wiApiService.removeCurve;
                         cleanUpFunction = function () {
+                            /*
                             utils.updateWiLogplotOnModelDeleted(selectedNode);
+                            */
+                            utils.emitEvent('curve-deleted', selectedNode);
                             utils.updateWiCrossplotOnModelDeleted(selectedNode);
                             utils.updateWiHistogramOnModelDeleted(selectedNode);
                             utils.updateWiCurveListingOnModelDeleted(selectedNode);
@@ -148,6 +151,9 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         break;
                     case 'zone':
                         deleteFunction = wiApiService.removeZone;
+                        cleanUpFunction = function () {
+                            utils.emitEvent('zone-updated', selectedNode);
+                        }
                         break;
                     case 'logplot':
                         deleteFunction = wiApiService.removeLogplot;

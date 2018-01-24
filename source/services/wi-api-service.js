@@ -1073,6 +1073,9 @@ Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
     };
     this.post(CREATE_DEPTH_AXIS, dataRequest, callback);
 }
+Service.prototype.getDepthAxis = function (idDepthAxis, callback) {
+    this.post(GET_DEPTH_AXIS, {idDepthAxis: idDepthAxis}, callback);
+}
 Service.prototype.removeDepthTrack = function (idDepthAxis, callback) {
     var self = this;
     let dataRequest = {

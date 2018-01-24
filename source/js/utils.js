@@ -1230,7 +1230,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     }, function (line) {
                         let lineModel = lineToTreeConfig(line);
                         getCurveData(apiService, idCurve, function (err, data) {
-                            if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                            if (!err) wiD3Ctrl.getComponentCtrlByViTrack(track).addCurveToTrack(track, data, lineModel.data);
                         });
                     });
                 }
@@ -1242,7 +1242,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             if (wiD3Ctrl && !track) {
                 let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
                 if (errorCode > 0) {
-                    wiD3Ctrl.addLogTrack(null, function (newViTrack) {
+                    wiD3Ctrl.addLogTrack(null, idCurve/*, function (newViTrack) {
                         apiService.createLine({
                             idTrack: newViTrack.id,
                             idCurve: idCurve,
@@ -1250,10 +1250,10 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                         }, function (line) {
                             let lineModel = lineToTreeConfig(line);
                             getCurveData(apiService, idCurve, function (err, data) {
-                                if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                                if (!err) wiD3Ctrl.getComponentCtrlByViTrack(newViTrack).addCurveToTrack(newViTrack, data, lineModel.data);
                             });
                         });
-                    })
+                    }*/)
                 }
                 else if (errorCode === 0) {
                     error("Cannot drop curve from another well");
@@ -1326,7 +1326,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
         curveY.maxX = pointSet.scaleTop;
         pointSet.intervalDepthTop = objectProps.intervalDepthTop;
         pointSet.intervalDepthBottom = objectProps.intervalDepthBottom;
-        
+
         let crossplotConfig = {
             curve1 : curveX,
             curve2 : curveY,
@@ -2115,7 +2115,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                 // for crosstemplate
                 if (crossplot.foundCurveX && crossplot.foundCurveY) {
                     console.log('found all curves');
-                } 
+                }
                 else {
                     let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
                     let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
@@ -2901,3 +2901,16 @@ function updateWiCurveListingOnModelDeleted(model){
 }
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
+
+function emitEvent (eventName, eventData) {
+    let event = new CustomEvent(eventName, {detail: eventData});
+    document.dispatchEvent(event);
+}
+exports.emitEvent = emitEvent;
+
+function listenEvent (eventName, callback) {
+    document.addEventListener(eventName, function (e) {
+        callback(e.detail);
+    })
+}
+exports.listenEvent = listenEvent;
