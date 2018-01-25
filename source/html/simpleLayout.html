@@ -108,6 +108,8 @@
             <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
                 <wi-tab heading="Main" closable='false'>
                     <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
+                        <wi-button name="WellImport" icon="well-load-32x32" label="Well Import" container="ribbon" disabled="false" class="height65" handler="handlers.WellImportClicked">
+                        </wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
                         </wi-button>
                     </wi-toolbar>
@@ -161,6 +163,12 @@
         </div>
     </template>
 
+    <template id="well-import">
+        <div style="width:200px;height:150px;margin:auto;">
+            <wi-chunked-upload upload-url="'http://localhost:3000/chunked-upload'" id-input="my-file">
+            </wi-chunked-upload>
+        </div>
+    </template>
 
     <script src="js/simpleLayout.js.bundle.js"></script>
 
