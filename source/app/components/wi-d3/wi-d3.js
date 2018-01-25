@@ -881,7 +881,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     async.setImmediate(_cb);
                                 } else {
                                     for (let objectOfTrack of trackProps[idx].object_of_tracks) {
-                                        let anObject = wiD3Ctrl.addObjectToTrack(aTrack, objectOfTrack);
+                                        let anObject = wiD3Ctrl.getComponentCtrlByViTrack(aTrack).addObjectToTrack(aTrack, objectOfTrack);
                                         let objectProps = JSON.parse(objectOfTrack.object);
                                         switch(objectProps.type) {
                                             case 'Histogram' :

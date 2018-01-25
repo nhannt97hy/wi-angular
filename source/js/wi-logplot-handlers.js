@@ -381,7 +381,7 @@ exports.AddImageButtonClicked = function () {
                     imageConfig.setProperties(imgProps);
                     imageConfig.header.attr('id', 'id' + imageConfig.idImageOfTrack);
                     if (!imageConfig.showName) imageConfig.header.select('div').remove();
-                    wiD3Ctrl.drawImageZone(imageConfig, imgProps, isNewDraw);
+                    wiD3Ctrl.getComponentCtrlByViTrack(currentImgTrack).drawImageZone(imageConfig, imgProps, isNewDraw);
                     currentImgTrack.plotImageZone(imageConfig);
                     currentImgTrack.rearrangeHeaders();
                     _currentImage = imageConfig.getProperties();
@@ -398,7 +398,7 @@ exports.AddImageButtonClicked = function () {
                         delete imageConfig.header;
                         imageConfig.header = currentImgTrack.addImageZoneHeader(imageConfig, false);
                     }
-                    wiD3Ctrl.drawImageZone(imageConfig, imgProps, isNewDraw);
+                    wiD3Ctrl.getComponentCtrlByViTrack(currentImgTrack).drawImageZone(imageConfig, imgProps, isNewDraw);
                     imageConfig.doPlot();
                     currentImgTrack.plotImageZone(imageConfig);
                     currentImgTrack.rearrangeHeaders();

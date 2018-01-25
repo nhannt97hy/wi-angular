@@ -74,7 +74,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.wiD3Ctrl.setDepthRange(depthRange);
             self.wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
             if (d3.event.button == 2) {
-                _imageZoneOnRightClick();
+                // _imageZoneOnRightClick();
+                self.isImageZoneRightClicked = true;
             }
         });
 
@@ -273,8 +274,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                             depthRange[0] -= rangeValue * 0.5;
                             depthRange[1] += rangeValue * 0.5;
 
-                            self.setDepthRange(depthRange);
-                            self.adjustSlidingBarFromDepthRange(depthRange);
+                            self.wiD3Ctrl.setDepthRange(depthRange);
+                            self.wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
                             if (d3.event.button == 2) {
                                 _imageZoneOnRightClick();
                             }

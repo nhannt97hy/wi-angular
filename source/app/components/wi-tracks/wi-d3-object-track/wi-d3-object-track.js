@@ -279,8 +279,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
                 handler: function () {
                     objectProperties();
                 }
-            }, {
-                separator: '1'
             }
         ];
 
