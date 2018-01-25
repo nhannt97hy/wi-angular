@@ -28,6 +28,16 @@ wi-d3 {
         height: 0px;
     }
     .vi-track-container {
+    }
+    .vi-track-vertical-resizer {
+        margin-left: -3px;
+        //border: 1px solid blue;
+        &:hover {
+            background: #e1e1e1;
+        }
+    }
+    .wi-d3-track-component {
+        // .vi-track-container
         &:first-child {
             margin-left: unset;
             .vi-track-plot-container {
@@ -39,15 +49,5 @@ wi-d3 {
         .vi-track-plot-container {
             border-right: 1px solid black;
         }
-    }
-    .vi-track-vertical-resizer {
-        margin-left: -3px;
-        //border: 1px solid blue;
-        &:hover {
-            background: #e1e1e1;
-        }
-    }
-    .wi-d3-track-component {
-        .vi-track-container
     }
 }
