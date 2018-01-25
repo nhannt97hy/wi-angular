@@ -403,6 +403,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             utils.renameDataset();
                         }
                     }, {
+                        name: "DuplicateDataset",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('dataset');
+                        }
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -462,6 +469,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         icon: "annotation-16x16-edit",
                         handler: function() {
                             utils.renameCurve();
+                        }
+                    }, {
+                        name: "DuplicateCurve",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('curve');
                         }
                     }, {
                         name: "Delete",
@@ -524,6 +538,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                             let zonesetsModel = utils.getSelectedNode();
                             console.log(zonesetsModel);
                             utils.renameZoneSet(zonesetsModel);
+                        }
+                    }, {
+                        name: "DuplicateZoneSet",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('zoneset');
                         }
                     }, {
                         name: "Delete",

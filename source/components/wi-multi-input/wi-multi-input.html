@@ -17,7 +17,7 @@
             </label>
             <input type="number" ng-model="wiMultiInput.SelectedValue" ng-disabled="wiMultiInput.model.type == 'curve'" class="form-control wi-form-control" ng-change='wiMultiInput.onValueChange()'>
         </li>
-        <li>
+        <li ng-if="wiMultiInput.valueOnly">
             <label>
                 <input type="radio" name='{{wiMultiInput.name}}' value="curve" ng-model="wiMultiInput.model.type" style="vertical-align:top"
                 ng-click="wiMultiInput.onSelectCurve()">

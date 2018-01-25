@@ -44,7 +44,8 @@ app.component(name, {
     bindings: {
         model: '<',
         curvesList: '<',
-        ngChange: '<'
+        ngChange: '<',
+        valueOnly: '<'
     }
 });
 

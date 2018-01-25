@@ -363,6 +363,30 @@ exports.DuplicateButtonClicked = function (type) {
                             next();
                         });
                     });
+                } else if (type === 'dataset') {
+                    wiApiService.duplicateDataset(selectedNode.properties.idDataset, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            next();
+                        });
+                    });
+                } else if (type === 'curve') {
+                    wiApiService.duplicateCurve(selectedNode.properties.idCurve, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            next();
+                        });
+                    });
+                } else if (type === 'zoneset') {
+                    wiApiService.duplicateZoneset(selectedNode.properties.idZoneSet, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+                            next();
+                        });
+                    });
                 }
             }, function (err) {
                 if (err) {
