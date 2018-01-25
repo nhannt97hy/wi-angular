@@ -2912,7 +2912,7 @@ exports.shadingPropertiesDialog = function (ModalService, currentTrack, currentC
 exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback, cancelCallback, options){
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         const CURVE_SYMBOLS = ['X', 'Y', 'Z'];
-
+        window.CrossF = this;
         let self = this;
         this.hideApply = ((options || {}).hideApply || false);
 
@@ -3127,7 +3127,7 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                 case "intervalDepth":
                 self.crossplotModelProps.pointsets[0].intervalDepthTop = self.crossplotModelProps.pointsets[0].intervalDepthTop ? self.crossplotModelProps.pointsets[0].intervalDepthTop: getTopFromWell();
                 self.crossplotModelProps.pointsets[0].intervalDepthBottom = self.crossplotModelProps.pointsets[0].intervalDepthBottom ? self.crossplotModelProps.pointsets[0].intervalDepthBottom : getBottomFromWell();
-                delete self.crossplotModelProps.pointsets[0].idZoneSet;
+                self.crossplotModelProps.pointsets[0].idZoneSet = null;
                 break;
                 case "zonalDepth":
                 if(self.selectedZoneSet){

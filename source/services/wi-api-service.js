@@ -1327,6 +1327,9 @@ Service.prototype.createCrossplot = function (data, callback) {
 }
 Service.prototype.editCrossplot = function (data, callback) {
     let self = this;
+    if(typeof(data.discriminator) == "string"){
+        data.discriminator = JSON.parse(data.discriminator);
+    }
     this.post(EDIT_CROSSPLOT, data, callback);
 }
 Service.prototype.getCrossplot = function (idCrossPlot, callback) {
