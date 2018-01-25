@@ -1729,6 +1729,9 @@ Service.prototype.medfil = function (data, callback){
 Service.prototype.savgolfil = function (data, callback){
     this.post('/savgol', data, callback, 'processing');
 }
+Service.prototype.fftfil = function (data, callback){
+    this.post('/fft', data, callback, 'processing');
+}
 
 Service.prototype.getInventory = function (callback) {
     this.post(GET_INVENTORY, {}, callback, 'inventory');

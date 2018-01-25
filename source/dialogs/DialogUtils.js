@@ -8977,7 +8977,7 @@ exports.curveFilterDialog = function(ModalService){
 
         this.createOp = 'backup';
         this.filterOp = '5';
-        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;
+        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 4;
         this.table = new Array(5).fill(0.2).map(d => {return parseFloat(d.toFixed(4))});
         this.wells = utils.findWells();
         this.datasets = [];
@@ -9061,7 +9061,10 @@ exports.curveFilterDialog = function(ModalService){
             if(self.applyingInProgress) return true;
             if(self.filterOp == '2'){
                 return !self.polyOder || self.devOrder == null || ! self.numPoints;
-            }else{
+            }else if (self.filterOp == '4'){
+                return !self.cutoff;
+            }
+            else{
                 return !self.numLevel;
             }
             if(self.createOp == 'new') return !self.curveName;
@@ -9211,6 +9214,27 @@ exports.curveFilterDialog = function(ModalService){
         }
         function fftFilter(){
             console.log('fftFilter');
+            let lstIndex = new Array();
+            let inputF = new Array();
+            for(let i = 0; i < self.curveData.length; i++){
+                if(!isNaN(self.curveData[i]) && i >= _top && i <= _bottom){
+                    inputF.push(self.curveData[i]);
+                    lstIndex.push(i);
+                }
+            }
+            let out = new Array(self.curveData.length).fill(NaN);
+
+            wiApiService.fftfil({input: inputF, length: self.cutoff}, (result) => {
+                let retArr = result.curve;
+                let len = Math.min(lstIndex.length, retArr.length);
+                for(let j = 0; j < len; j++){
+                    out[lstIndex[j]] = retArr[j];
+                    if(j == len - 1) {
+                        console.log('Done!');
+                        saveCurve(out);
+                    }
+                }
+            })
         }
         function medianFilter(){
             console.log('medianFilter');
