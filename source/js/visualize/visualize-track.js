@@ -159,7 +159,7 @@ Track.prototype.createHeaderContainer = function() {
         .style('background-color', this.HEADER_NAME_COLOR)
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
-        // .style('z-index', 1)
+        .style('z-index', 1)
         .style('margin', '0 1px')
         .style('white-space', 'nowrap')
         .text(this.name)

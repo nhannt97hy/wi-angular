@@ -254,7 +254,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var trackOrder = getOrderKey();
         if (trackOrder) {
             wiApiService.createDepthTrack({
-                idPlot: self.logPlotCtrl.id,
+                idPlot: self.wiLogplotCtrl.id,
                 orderNum: trackOrder,
                 width: 0.65
             }, function (depthTrack) {
@@ -535,7 +535,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
-        _drawTooltip(_currentTrack);
+        // _drawTooltip(_currentTrack);
     }
     this.processZoomFactor = function () {
         let maxZoomFactor = d3.max(_tracks, function (track) {
@@ -600,40 +600,45 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     // log track
     this.createShadingForSelectedCurve = function () {
-        if(!_currentTrack.isLogTrack()) {
-            DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+        if(_currentTrack || !_currentTrack.isLogTrack()) {
+            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
             return;
         }
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.createShadingForSelectedCurve();
     }
     this.addAnnotation = function () {
-        if(!_currentTrack.isLogTrack()) {
-            DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+        if(!_currentTrack || !_currentTrack.isLogTrack()) {
+            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error');
             return;
         }
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.addAnnotation();
     }
     this.addMarker = function () {
-        if(!_currentTrack.isLogTrack()) {
-            DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+        if(!_currentTrack || !_currentTrack.isLogTrack()) {
+            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error');
             return;
         }
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.addMarker();
     }
     this.createHistogram = function () {
-        if(!_currentTrack.isLogTrack()) {
-            DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+        if(!_currentTrack || !_currentTrack.isLogTrack()) {
+            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
             return;
         }
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.createHistogram();
     }
     this.createCrossplot = function () {
-        if(!_currentTrack.isLogTrack()) {
-            DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+        if(!_currentTrack || !_currentTrack.isLogTrack()) {
+            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
+            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
             return;
         }
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);

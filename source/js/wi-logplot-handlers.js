@@ -293,10 +293,16 @@ exports.NewTrackButtonClicked = function () {
 exports.DuplicateTrackButtonClicked = function () {
     const wiComponentService = this.wiComponentService;
     const wiApiService = this.wiApiService;
+    const ModalService = this.ModalService;
     const wiLogplot = this.wiLogplot;
     const wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     const currentTrack = wiD3Ctrl.getCurrentTrack();
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    if(!currentTrack.isLogTrack()) {
+        // DialogUtils.errorMessageDialog(ModalService, "this track is not a log track. Please select a log track and try again.");
+        toastr.error("This track is not a log track. Please select a log track and try again.", 'Error');
+        return;
+    }
     let timeoutFunc = this.$timeout;
     let trackInfo = currentTrack.getProperties();
     DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this log track?", function (yes) {
@@ -344,8 +350,10 @@ exports.AddMarkerButtonClicked = function () {
 
 exports.AddZoneButtonClicked = function () {
     const currentTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
-    if (currentTrack.isZoneTrack()) {
+    if (currentTrack && currentTrack.isZoneTrack()) {
         currentTrack.setMode('AddZone');
+    } else {
+        toastr.error('Please select a zonation track and try again.', 'Error');
     }
 };
 
@@ -358,7 +366,8 @@ exports.AddImageButtonClicked = function () {
     let currentImgTrack = wiD3Ctrl.getCurrentTrack();
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     if (currentImgTrack.type != 'image-track') {
-        DialogUtils.errorMessageDialog(this.ModalService, 'Please select a image track for adding an image!');
+        // DialogUtils.errorMessageDialog(this.ModalService, 'Please select a image track for adding an image!');
+        toastr.error('Please select a image track for adding an image!', 'Error');
         return;
     }
     const wiApiService = this.wiApiService;
@@ -415,6 +424,10 @@ exports.RemoveImageButtonClicked = function () {
     let currentImgTrack = wiD3Ctrl.getCurrentTrack();
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
+    if(!currentImgTrack || !currentImgTrack.isImageTrack()) {
+        toastr.error('this track is not an image track. Please select an image track and try again', 'Error');
+        return;
+    }
     let imageConfig = currentImgTrack.getCurrentImageZone();
     if (!imageConfig) {
         DialogUtils.errorMessageDialog(this.ModalService, 'Please select an image to remove!');

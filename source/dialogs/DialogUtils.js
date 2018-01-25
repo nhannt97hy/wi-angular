@@ -2740,7 +2740,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             let message = "The value must be between ";
             let isValidValue = true;
             switch (label) {
-                case 1: 
+                case 1:
                     message += "0 and 255";
                     if((!value && value != 0) || value > 255 || value < 0) {
                         isValidValue = false;
@@ -2757,7 +2757,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
                 self.errorMessage = null;
             } else {
                 self.errorMessage = message;
-                toastr.error(self.errorMessage);
+                toastr.error(self.errorMessage, 'Range Error');
             }
             return isValidValue;
         }
@@ -9158,7 +9158,7 @@ exports.curveFilterDialog = function(ModalService){
                     self.curveData[idx] = parseFloat(out.toFixed(4));
                     async.setImmediate(callback);
                 }else{
-                    async.setImmediate(callback);                    
+                    async.setImmediate(callback);
                 }
             },function(err){
                 console.log('Done!');
@@ -9205,8 +9205,8 @@ exports.curveFilterDialog = function(ModalService){
                     self.curveData[idx] = parseFloat(out.toFixed(4));
                     async.setImmediate(callback);
                 }else{
-                    async.setImmediate(callback);                    
-                }                
+                    async.setImmediate(callback);
+                }
             },function(err){
                 console.log('Done!');
                 saveCurve(self.curveData);
@@ -9263,7 +9263,7 @@ exports.curveFilterDialog = function(ModalService){
         function customFilter(){
             console.log('customFilter');
             async.eachOfSeries(self.curveData, (depth, idx, callback) => {
-                if(idx >= _top && idx <= _bottom){                
+                if(idx >= _top && idx <= _bottom){
                     let len = (self.numLevel - 1)/2;
                     let start = idx - len;
                     start = start > 0 ? start : 0;
@@ -9284,7 +9284,7 @@ exports.curveFilterDialog = function(ModalService){
                     self.curveData[idx] = parseFloat(out.toFixed(4));
                     async.setImmediate(callback);
                 }else{
-                    async.setImmediate(callback);                
+                    async.setImmediate(callback);
                 }
             },function(err){
                 console.log('Done!');

@@ -266,7 +266,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                             utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
-                                    wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
+                                    wiD3Ctrl.getComponentCtrlByViTrack(currentTrack).addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curveList = currentTrack.getCurves();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;
@@ -326,21 +326,21 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         self.shadings.forEach(function (s) {
                             if (s.rightLine.id == c.id) {
                                 s.rightLine = c;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                             if (s.leftLine.id == c.id) {
                                 s.leftLine = c;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
 
                             s.idLeftLine = s.leftLine.id;
                             if (s.type == 'left') {
                                 s.leftFixedValue = s.rightLine.minX;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                             if (s.type == 'right') {
                                 s.leftFixedValue = s.rightLine.maxX;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                         })
                     });
@@ -348,11 +348,11 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     //     s.idLeftLine = s.leftLine.id;
                     //     if (s.type == 'left') {
                     //         s.leftFixedValue = s.rightLine.minX;
-                    //         s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                    //         s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                     //     }
                     //     if (s.type == 'right') {
                     //         s.leftFixedValue = s.rightLine.maxX;
-                    //         s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                    //         s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                     //     }
                     // });
 
@@ -454,7 +454,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
 
         };
         this.onChangeShading = function (index) {
-            if (self.shadings.find(s => s._index == self.__idx).changed == changed.unchanged) 
+            if (self.shadings.find(s => s._index == self.__idx).changed == changed.unchanged)
                 self.shadings.find(s => s._index == self.__idx).changed = changed.updated;
         }
         this.addRowShading = function () {
@@ -615,7 +615,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
-                    wiD3Ctrl.updateLogTrack(currentTrack);
+                    wiD3Ctrl.updateTrack(currentTrack);
 
                     self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                     self.shadingList = currentTrack.getShadings();
