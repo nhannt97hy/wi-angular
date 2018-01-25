@@ -12,6 +12,8 @@ function Track(config) {
     this.HEADER_ITEM_MARGIN_BOTTOM = 1;
     this.HEADER_HIGHLIGHT_COLOR = 'rgb(255,128,128)';
     //this.BODY_CONTAINER_HEIGHT = 340;
+    this.HEADER_CONTAINER_HEIGHT = 100;
+    this.HORIZONTAL_RESIZER_HEIGHT = 5;
     this.BODY_CONTAINER_HEIGHT = 70;
     this.BODY_HIGHLIGHT_COLOR = '#ffffe0';
     this.BODY_DEFAULT_COLOR = 'transparent';
@@ -153,8 +155,9 @@ Track.prototype.createHeaderContainer = function() {
         .style('background-color', this.HEADER_NAME_COLOR)
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
-        .style('z-index', 1)
+        // .style('z-index', 1)
         .style('margin', '0 1px')
+        .style('white-space', 'nowrap')
         .text(this.name)
         .on('mousedown', function(d) {
         })
@@ -195,7 +198,7 @@ Track.prototype.createBodyContainer = function() {
     this.bodyContainer = this.trackContainer.append('div')
         .attr('class', 'vi-track-body-container')
         .style('position', 'relative')
-        .style('height', this.BODY_CONTAINER_HEIGHT + '%');
+        .style('height', `calc(100% - ${this.HEADER_CONTAINER_HEIGHT + this.HORIZONTAL_RESIZER_HEIGHT}px)`);
 
     this.plotContainer = this.bodyContainer.append('div')
         .attr('class', 'vi-track-plot-container')
@@ -257,8 +260,8 @@ Track.prototype.createHorizontalResizer = function() {
     let self = this;
     this.horizontalVertical = this.trackContainer.append('div')
         .attr('class', 'vi-track-horizontal-resizer')
-        .style('height', '5px')
-        .style('background-color', 'lightgray')
+        .style('height', this.HORIZONTAL_RESIZER_HEIGHT + 'px')
+        .style('background-color', '#e1e1e1')
         .style('width', '100%')
         .style('cursor', 'row-resize')
         .call(d3.drag()

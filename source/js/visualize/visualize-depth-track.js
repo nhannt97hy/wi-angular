@@ -31,7 +31,7 @@ function DepthTrack(config) {
     this.idPlot = config.idPlot;
 
     this.name = config.name || 'Depth';
-    this.width = config.width || 60;
+    this.width = config.width || 100;
 
     this.unit = config.unit || 'm';
 
@@ -39,6 +39,7 @@ function DepthTrack(config) {
     this.yDecimal = (config.decimal == null) ? 2 : config.decimal;
 
     this.MIN_WIDTH = 0;
+    this.scale = {scale: '', displayView: [], currentView: []}
 }
 
 /**
@@ -69,7 +70,18 @@ DepthTrack.prototype.init = function(baseElement) {
     this.drawingHeaderContainer.append('div')
         .attr('class', 'vi-track-unit')
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
-        .style('padding', '1.5 0');
+        .style('padding', '1.5 0')
+        .style('margin-bottom', '1px');
+    this.drawingHeaderContainer.append('div')
+        .attr('class', 'vi-track-current-view')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('padding', '1.5 0')
+        .style('margin-bottom', '1px');
+    this.drawingHeaderContainer.append('div')
+        .attr('class', 'vi-track-display-view')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('padding', '1.5 0')
+        .style('margin-bottom', '1px');
 }
 
 DepthTrack.prototype.getProperties = function() {
@@ -174,7 +186,11 @@ DepthTrack.prototype.updateHeader = function() {
     Track.prototype.updateHeader.call(this);
 
     this.drawingHeaderContainer.select('.vi-track-unit')
-        .html(this.unit + '<br>' + '1:' + this.scale);
+        .html(this.unit + '<br>' + this.scale.scale);
+    this.drawingHeaderContainer.select('.vi-track-display-view')
+        .html(`<div style="white-space:nowrap">Display View</div>[${this.scale.displayView[0]},${this.scale.displayView[1]}]`);
+    this.drawingHeaderContainer.select('.vi-track-current-view')
+        .html(`<div style="white-space:nowrap">Current View</div>[${this.scale.currentView[0]},${this.scale.currentView[1]}]`);
 }
 
 /**

@@ -1,8 +1,23 @@
 const name = 'wiConditionNode';
 const moduleName = 'wi-condition-node';
 
-function Controller(wiComponentService) {
+function Controller(wiComponentService, $timeout) {
     let self = this;
+    this.$onInit = function(){
+        $timeout(function(){
+            let depth = [{
+                name: 'Depth',
+                type: 'curve',
+                id: 0,
+                datasetName: '',
+                properties: {
+                    name: 'Depth',
+                    idCurve: 0
+                }
+            }]
+            self.curveOptionsWithDepth = depth.concat(self.curveOptions);
+        },500);
+    }
 
     this.comparisons = ['<', '>', '=', '<=', '>='];
     this.operators = ['and', 'or'];

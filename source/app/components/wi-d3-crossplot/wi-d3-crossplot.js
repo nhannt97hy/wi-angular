@@ -3,15 +3,12 @@ const moduleName = 'wi-d3-crossplot';
 
 function Controller($scope, wiComponentService, $timeout, ModalService, wiApiService) {
     let self = this;
-    //window.VISCROSSPLOT = self;
     let graph = wiComponentService.getComponent('GRAPH');
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.crossplotModel = null;
     let zoneCtrl = null, refWindCtrl;
     this.viCrossplot = {};
-    //this.isShowWiZone = true;
-    // this.isShowReferenceWindow = true;
     let _well = null;
 
     var saveCrossplot= _.debounce(function() {
@@ -85,14 +82,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.onReady = function () {
-        self.linkModels();
         wiApiService.getCrossplot(self.idCrossplot || self.wiCrossplotCtrl.id, function(xplotProps) {
             self.crossplotModel.properties = xplotProps;
+            self.linkModels();
             let crossplotProps = angular.copy(self.crossplotModel.properties);
 
             if (crossplotProps.pointsets && crossplotProps.pointsets.length)
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
+            self.switchReferenceZone(crossplotProps.pointSet.idZoneSet != null);
             let refWindCtrl = self.getWiRefWindCtrl();
             if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
@@ -135,7 +133,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function buildHistogramProps(crossplotModel, xy) {
         var histogramProps = {};
         var pointSet = null;
-        //histogramProps = crossplotModel.properties;
         if (crossplotModel.properties.pointsets && crossplotModel.properties.pointsets.length) {
             pointSet = crossplotModel.properties.pointsets[0];
             histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
@@ -259,18 +256,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getModel = function(){
         return self.crossplotModel;
     }
-    /*this.CloseZone = function () {
-        self.isShowWiZone = false;
-    }*/
-/*
-    this.getZoneCtrl = function () {
-        if (!zoneCtrl) zoneCtrl = wiComponentService.getComponent(self.getZoneName());
-        return zoneCtrl;
-    }
-    this.getZoneName = function () {
-        return self.name + "Zone";
-    }
-*/
+    
     this.getZoneCtrl = function () {
         if (self.wiCrossplotCtrl) {
             return self.wiCrossplotCtrl.getWiZoneCtrl();
@@ -278,27 +264,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return null;
     }
 
-//    this.onRefWindCtrlReady = function(refWindCtrl) {
-//        console.log('Reference window is ready to update');
-//        refWindCtrl.update(
-//            getWell(),
-//            self.crossplotModel.properties.reference_curves,
-//            self.crossplotModel.properties.referenceScale,
-//            self.crossplotModel.properties.referenceVertLineNumber,
-//            self.crossplotModel.properties.referenceTopDepth,
-//            self.crossplotModel.properties.referenceBottomDepth,
-//            self.crossplotModel.properties.referenceShowDepthGrid);
-//    }
-/*
-    this.getWiRefWindCtrlName = function () {
-        return self.name + "RefWind";
-    }
-
-    this.getWiRefWindCtrl = function () {
-        if (!refWindCtrl) refWindCtrl =  wiComponentService.getComponent(self.getWiRefWindCtrlName());
-        return refWindCtrl;
-    }
-*/
     this.getWiRefWindCtrl = function () {
         if (self.wiCrossplotCtrl) {
             return self.wiCrossplotCtrl.getWiRefWindCtrl();
@@ -306,7 +271,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return null;
     }
     function setWiZoneArr(zoneArray) {
-        //if (self.wiCrossplotCtrl) self.wiCrossplotCtrl.zoneArr = zoneArray;
         self.zoneArr = zoneArray;
     }
     function getWiZoneArr() {
@@ -322,22 +286,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.pointsets[0].idZoneSet) {
             console.log("idZoneSet:", self.crossplotModel.properties.pointsets[0].idZoneSet);
             self.zoneSetModel = utils.getModel('zoneset', self.crossplotModel.properties.pointsets[0].idZoneSet);
-            //self.zoneArr = self.zoneSetModel.children;
             setWiZoneArr(self.zoneSetModel.children);
-            self.zoneArr.forEach(function (zone) {
-                zone.handler = function () {}
-            });
+            // self.zoneArr.forEach(function (zone) {
+            //     zone.handler = function () {}
+            // });
             let zoneCtrl = self.getZoneCtrl();
             if (zoneCtrl) {
                 zoneCtrl.zones = self.zoneSetModel.children;
                 zoneCtrl.zoneUpdate();
             }
-            /*
-            if (!self.pointSet) self.pointSet = self.crossplotModel.properties.pointsets[0];
-            self.pointSet.zones = self.zoneArr.map(function(zone) {
-                return zone.properties;
-            });
-            */
             let pointSet = getPointSet(self.crossplotModel.properties);
             if (pointSet) pointSet.zones = self.zoneArr.map(function(zone) {
                 return zone.properties;
@@ -345,14 +302,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-/*
-    this.onZoneCtrlReady = function(zoneCtrl) {
-        zoneCtrl.trap('zone-data', function(data) {
-            console.log("zone data", data);
-            self.updateViCrossplotZones(data);
-        });
-    }
-*/
     this.updateViCrossplotZones = function(data) {
         let zoneCtrl = self.getZoneCtrl();
         if (!zoneCtrl) return;
@@ -401,7 +350,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.updateAll = function (callback) {
         wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
-            //crossplot.pointSet = crossplot.pointsets[0];
             self.crossplotModel.properties = crossplot;
             self.pointSet = crossplot.pointSet;
             self.linkModels();
@@ -441,7 +389,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return;
             }
             console.log("Model", self.crossplotModel);
-            DialogUtils.crossplotFormatDialog(ModalService, /*self.wiCrossplotCtrl*/ self.crossplotModel.properties.idCrossPlot, function (xplotProps) {
+            DialogUtils.crossplotFormatDialog(ModalService,self.crossplotModel.properties.idCrossPlot, function (xplotProps) {
                 self.saveCrossplotNow(function() {
                     let overlayLine;
 
@@ -510,6 +458,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
                         //if (callback) callback(crossplotProps);
 
+                        self.crossplotModel.properties = crossplotProps;                        
                         self.linkModels();
                         if (crossplotProps.pointSet.idZoneSet) {
                             crossplotProps.pointSet.zones = self.zoneArr.map(function(zone) {
@@ -663,8 +612,64 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }, {
                     name: "Function",
                     label: "Function",
+                    class: "has-more",
                     childContextMenu: [
-
+                        {
+                            name: "CreatePolygon",
+                            label: "Create Polygon",
+                            handler: function () {
+                                self.drawAreaPolygon();
+                            }
+                        },
+                        {
+                            name: "CreateRectangle",
+                            label: "Create Rectangle",
+                            handler: function () {
+                                self.drawAreaRectangle();
+                            }
+                        },
+                        {
+                            name: "DeleteArea",
+                            label: "Delete Area",
+                            handler: function () {
+                                self.deleteArea();
+                            }
+                        },
+                        {
+                            name: "CreateUserLine",
+                            label: "Create User Line",
+                            handler: function () {
+                                self.drawUserLine();
+                            }
+                        },
+                        {
+                            name: "DeleteUserLine",
+                            label: "Delete User Line",
+                            handler: function () {
+                                self.deleteUserLine();
+                            }
+                        },
+                        {
+                            name: "UserDefineLine",
+                            label: "User Define Line",
+                            handler: function () {
+                                DialogUtils.userDefineLineDialog(ModalService, self, function () {});
+                            }
+                        },
+                        {
+                            name: "PolygonManager",
+                            label: "Polygon Manager",
+                            handler: function () {
+                                DialogUtils.polygonManagerDialog(ModalService, self, function () {});
+                            }
+                        },
+                        {
+                            name: "RegessionLine",
+                            label: "Regession Line",
+                            handler: function () {
+                                DialogUtils.regressionLineDialog(ModalService, self, function () {});
+                            }
+                        }
                     ],
                     handler: function () {
 
