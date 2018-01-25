@@ -422,11 +422,11 @@ function createFillStyles1(ctx, fills, callback) {
             //loop.next();
             callback();
         }
-        else if (fill.color) {
+        else if (fill.color && fill.shadingType == 'color') {
             fillStyles.push(fill.color);
             callback();
         }
-        else if (fill.pattern) {
+        else if (fill.pattern && fill.shadingType == 'pattern') {
             let name = fill.pattern.name;
             let fg = fill.pattern.foreground;
             let bg = fill.pattern.background;
@@ -435,7 +435,7 @@ function createFillStyles1(ctx, fills, callback) {
                 callback();
             });
         }
-        else if (fill.varShading) {
+        else if (fill.varShading && fill.shadingType == 'varShading') {
             let startX = fill.varShading.startX;
             let endX = fill.varShading.endX;
             let data = fill.varShading.data;
@@ -557,7 +557,7 @@ function createFillStyles1(ctx, fills, callback) {
 }
 function createFillStyles(ctx, fills, callback) {
     let fillStyles = [];
-
+    console.log("fills", fills);
     asyncLoop(
         fills.length,
         function(loop) {
@@ -566,20 +566,24 @@ function createFillStyles(ctx, fills, callback) {
                 fillStyles.push('transparent');
                 loop.next();
             }
-            else if (fill.color) {
+            else if (fill.color && fill.shadingType == 'color') {
                 fillStyles.push(fill.color);
                 loop.next();
             }
-            else if (fill.pattern) {
+            else if (fill.pattern && fill.shadingType == 'pattern') {
+
                 let name = fill.pattern.name;
                 let fg = fill.pattern.foreground;
                 let bg = fill.pattern.background;
                 CanvasHelper.createPattern(ctx, name, fg, bg, function(pattern) {
+                    console.log("check pattern", pattern);
                     fillStyles.push(pattern);
                     loop.next();
                 });
             }
-            else if (fill.varShading) {
+            else if (fill.varShading && fill.shadingType == 'varShading') {
+                console.log("check varShading", fill);
+
                 let startX = fill.varShading.startX;
                 let endX = fill.varShading.endX;
                 let data = fill.varShading.data;

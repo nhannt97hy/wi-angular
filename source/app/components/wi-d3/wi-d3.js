@@ -2418,7 +2418,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: null
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);

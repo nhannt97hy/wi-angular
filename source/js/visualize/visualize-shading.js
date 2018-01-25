@@ -44,7 +44,6 @@ Utils.extend(Drawing, Shading);
  * @param {Boolean} [config.showRefLine] - Indicate whether to plot reference line
  */
 function Shading(config) {
-
     Drawing.call(this, config);
     if (typeof config != 'object') config = {};
 
@@ -315,7 +314,7 @@ Shading.prototype.doPlot = function(highlight) {
 }
 
 
-Shading.prototype.prepareFillStyles = function(forHeader) {
+Shading.prototype.prepareFillStyles1 = function(forHeader) {
     let self = this;
     let fills = [this.fill, this.positiveFill, this.negativeFill];
     let ret = [];
@@ -356,6 +355,52 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
             }
         }
         ret.push({ varShading: varShading });
+    });
+    return ret;
+}
+
+Shading.prototype.prepareFillStyles = function(forHeader) {
+    let self = this;
+    let fills = [this.fill, this.positiveFill, this.negativeFill];
+    let ret = [];
+    fills.forEach(function(fill) {
+        if (!fill || !fill.varShading || fill.shadingType != 'varShading') {
+            ret.push(fill);
+            return;
+        }
+        let varShading = Utils.clone(fill.varShading);
+
+        if (forHeader) {
+            let rect = self.header.node().getBoundingClientRect();
+            varShading.startX = 0;
+            varShading.endX = rect.width;
+            varShading.horizontal = true;
+            varShading.data = Utils.range(0, 1, 0.01).map(function(d) {
+                return {
+                    x: d * rect.width,
+                    y: d * rect.height
+                }
+            });
+
+            if (fill.varShading.customFills && fill.varShading.varShadingType == 'customFills') return ret.push(null);
+        }
+        else {
+            let transformX = self.getTransformX(self.selectedCurve);
+            varShading.startX = transformX(varShading.startX);
+            varShading.endX = transformX(varShading.endX);
+            varShading.data = self.prepareData(self.selectedCurve);
+
+            if (varShading.customFills && varShading.varShadingType == 'customFills') {
+                varShading.customFills.patCanvasId = 'shading-' + self.id + '-pattern-canvas';
+                varShading.customFills.content.forEach(function(d) {
+                    d.lowVal = transformX(d.lowVal);
+                    d.highVal = transformX(d.highVal);
+                });
+                varShading.customFills.content = Utils.sortByKey(varShading.customFills.content, 'lowVal');
+            }
+        }
+        fill.varShading = varShading;
+        ret.push(fill);
     });
     return ret;
 }

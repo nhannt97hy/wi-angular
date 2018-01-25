@@ -83,6 +83,7 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
             }
         }
         let controlCurve = utils.getCurveFromId(this.shadingOptions.idControlCurve);
+        console.log("controlCurve", this.shadingOptions.idControlCurve, controlCurve);
         
         this.namePals = new Array();
         utils.getPalettes(function(pals){
@@ -425,7 +426,7 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         }
 
         this.customFillsList = null;
-        this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills
+        // this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills
 
         wiApiService.getCustomFills(function(customFillsList){
             self.customFillsList = customFillsList;
@@ -471,13 +472,20 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         function validateCustomFills (content) {
             let lowArr = [];
             let highArr =[];
+            let message = null;
+            let checkErr = false;
+            if (!content.length) {
+                message = 'Please add custom fills!';
+            }
             content.forEach(function(c) {
                 lowArr.push(c.lowVal);
                 highArr.push(c.highVal);
+                if (utils.isEmpty(c.lowVal) || utils.isEmpty(c.highVal)) checkErr = true;
             });
-            
+            if (checkErr) message = 'CustomFills: Low value or High value is invalid!';
+            return message;
         }
-        validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
+        // validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
         function isValid() {
             self.errorReason = null;
             if(!self.shadingOptions.idRightLine) {
@@ -523,7 +531,6 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
                 positiveFill : temp.positiveFill,
                 negativeFill : temp.negativeFill
             };
-            console.log("_options", self._options);
         }
         this.onCancelButtonClicked = function () {
             close(null);

@@ -1975,7 +1975,7 @@ exports.mergeLineObj = function (curveOptions, lineStyle, symbolStyle) {
     lineObj.symbolLineDash = JSON.stringify(lineObj.symbolLineDash);
     return lineObj;
 };
-exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableShadingStyle) {
+exports.mergeShadingObj1 = function (shadingOptions, fillPatternStyles, variableShadingStyle) {
 
     let shadingObj = new Object();
     angular.extend(shadingObj, shadingOptions);
@@ -2002,7 +2002,43 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
     }
     return shadingObj;
 }
+exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableShadingStyle) {
 
+    let shadingObj = new Object();
+    angular.extend(shadingObj, shadingOptions);
+
+    shadingObj.fill.pattern = fillPatternStyles.fill.pattern;
+    shadingObj.fill.varShading = variableShadingStyle.fill.varShading;
+    shadingObj.positiveFill.pattern = fillPatternStyles.positiveFill.pattern;
+    shadingObj.positiveFill.varShading = variableShadingStyle.positiveFill.varShading;
+    shadingObj.negativeFill.pattern = fillPatternStyles.negativeFill.pattern;
+    shadingObj.negativeFill.varShading = variableShadingStyle.negativeFill.varShading;
+
+    if (shadingObj.shadingStyle == 'pattern') {
+        shadingObj.fill.display = fillPatternStyles.fill.display;
+        shadingObj.positiveFill.display = fillPatternStyles.positiveFill.display;
+        shadingObj.negativeFill.display = fillPatternStyles.negativeFill.display;
+
+        shadingObj.fill.shadingType = 'pattern';
+        shadingObj.positiveFill.shadingType = 'pattern';
+        shadingObj.negativeFill.shadingType = 'pattern';
+
+    }
+    else if (shadingObj.shadingStyle == 'varShading') {
+        shadingObj.idControlCurve = variableShadingStyle.idControlCurve;
+        shadingObj.fill.display = variableShadingStyle.fill.display;
+        shadingObj.positiveFill.display = variableShadingStyle.positiveFill.display;
+        shadingObj.negativeFill.display = variableShadingStyle.negativeFill.display;
+
+        shadingObj.fill.shadingType = 'varShading';
+        shadingObj.positiveFill.shadingType = 'varShading';
+        shadingObj.negativeFill.shadingType = 'varShading';
+
+    } else {
+        error("shadingObj has undefined shadingStyle");
+    }
+    return shadingObj;
+}
 exports.changeLine = function (lineObj, wiApiService, callback) {
     wiApiService.editLine(lineObj, function (result) {
         if (callback) callback(result);
@@ -2854,7 +2890,7 @@ function getAllCurvesOfWell (well) {
 }
 exports.getAllCurvesOfWell = getAllCurvesOfWell;
 
-function getShadingStyle(fillObj) {
+/*function getShadingStyle(fillObj) {
     if (fillObj.pattern) return "fillPattern";
 
     if (fillObj.varShading) return "variableShading";
@@ -2865,6 +2901,13 @@ function getShadingStyle(fillObj) {
         foreground: 'black'
     };
     return "fillPattern";
+}*/
+function getShadingStyle (fillObj) {
+    if(fillObj.shadingType == 'pattern') return 'pattern';
+    if(fillObj.shadingType == 'varShading') return 'varShading';
+    fillObj.shadingType = 'pattern';
+    return 'pattern';
+
 }
 exports.getShadingStyle = getShadingStyle;
 

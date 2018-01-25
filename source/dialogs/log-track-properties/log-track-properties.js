@@ -84,6 +84,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         this.curveList.forEach(function(c) {
             self.curves.push(c.getProperties());
         });
+        let curves_bk = angular.copy(this.curveList);
 
         this.curves.forEach(function(c, index) {
             c.changed = changed.unchanged;
@@ -320,29 +321,40 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     self.curveList = currentTrack.getCurves();
                     self.leftLimit = customLimit.concat(self.curveList);
 
-                    console.log("curveUpdated", self.curveUpdated);
+                    console.log("curveUpdated", self.curveUpdated, curves_bk);
 
+                    // idCurve changed
+                    let curvesTemp = [];
                     self.curveUpdated.forEach(function (c) {
-                        self.shadings.forEach(function (s) {
-                            if (s.rightLine.id == c.id) {
-                                s.rightLine = c;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                            }
-                            if (s.leftLine.id == c.id) {
-                                s.leftLine = c;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                            }
+                        // curvesTemp = curves_bk.filter(cBk => (cBk.idLine))
+                        curves_bk.forEach(function(cBk) {
+                            self.shadings.forEach(function (s) {
+                                // delete shading when select other curve
+                                if (cBk.id == c.id && cBk.idCurve != c.idCurve) {
+                                    if (s.rightLine.id == c.id || s.leftLine.id == c.id)
+                                        s.changed = (s.changed == changed.created) ? s.changed : changed.deleted;
+                                }
 
-                            s.idLeftLine = s.leftLine.id;
-                            if (s.type == 'left') {
-                                s.leftFixedValue = s.rightLine.minX;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                            }
-                            if (s.type == 'right') {
-                                s.leftFixedValue = s.rightLine.maxX;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                            }
-                        })
+                                if (s.rightLine.id == c.id) {
+                                    s.rightLine = c;
+                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                }
+                                if (s.leftLine.id == c.id) {
+                                    s.leftLine = c;
+                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                }
+
+                                s.idLeftLine = s.leftLine.id;
+                                if (s.type == 'left') {
+                                    s.leftFixedValue = s.rightLine.minX;
+                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                }
+                                if (s.type == 'right') {
+                                    s.leftFixedValue = s.rightLine.maxX;
+                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                }
+                            });
+                        });
                     });
                     // self.shadings.forEach(function(s) {
                     //     s.idLeftLine = s.leftLine.id;
@@ -434,18 +446,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             };
             return line;
         }
-        function getShadingStyle(fillObj) {
-            if (fillObj.pattern) return "fillPattern";
-
-            if (fillObj.varShading) return "variableShading";
-
-            fillObj.pattern = {
-                name: 'none',
-                background: "blue",
-                foreground: 'black'
-            };
-            return "fillPattern";
-        }
         this.__idx = 0;
         this.setClickedRowShading = function (index) {
             if (index < 0) return;
@@ -465,7 +465,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                 idTrack: currentTrack.id,
                 idControlCurve: utils.getAllCurvesOfWell(this.well)[0].id,
                 name: 'xx_yy',
-                shadingStyle: "fillPattern",
+                shadingStyle: "pattern",
                 isNegPosFill: false,
                 type: null,
                 fill: {
