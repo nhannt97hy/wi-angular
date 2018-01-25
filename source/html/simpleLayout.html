@@ -164,10 +164,7 @@
     </template>
 
     <template id="well-import">
-        <div style="width:200px;height:150px;margin:auto;">
-            <wi-chunked-upload upload-url="'http://localhost:3000/chunked-upload'" id-input="my-file">
-            </wi-chunked-upload>
-        </div>
+        @@include('./well-import/index.html')
     </template>
 
     <script src="js/simpleLayout.js.bundle.js"></script>

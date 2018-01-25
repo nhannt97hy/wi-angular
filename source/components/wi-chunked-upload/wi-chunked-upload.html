@@ -1,0 +1,11 @@
+<div style="cursor:pointer;position:relative;width: 100%;height: 100%;border:1px solid #ccc;"
+    ng-click='wiChunkedUpload.selectFile($event);'>
+    <wi-progress-bar percent="wiChunkedUpload.progress||0"></wi-progress-bar>
+    <div style="cursor:pointer;width: 100%;position:absolute;top:50%;transform:translateY('-50%');text-align:center;word-wrap:break-word;">
+        {{wiChunkedUpload.fileName}}
+    </div>
+    <!--<div><button ng-click="wiChunkedUpload.startUpload();">Clicked</button></div>-->
+</div>
+<input style='display:none;' 
+    id="{{wiChunkedUpload.idInput}}" 
+    type='file' name='myFile' onchange='angular.element(this).scope().fileNameChanged()'>
