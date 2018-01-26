@@ -29,3 +29,10 @@ exports.WellImportClicked = function() {
         title: 'Title'
     });
 }
+exports.lasZipArchiveUploadDone = function() {
+    toastr.info('upload successfully completed');
+    angular.element($('wi-stages ul')[0]).scope().ctrl.skip();
+}
+exports.lasZipArchiveUploadError = function(error) {
+    toastr.error('Error: ' + error.reason + " (error:" + error.code + ")");
+}

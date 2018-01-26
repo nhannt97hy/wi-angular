@@ -1,0 +1,40 @@
+<html>
+<head>
+    <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
+    <link href="vendor/css/themify-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/sprite_32.css">
+    <link rel="stylesheet" href="css/sprite_16.css">
+
+    <script src="vendor/js/jquery.min.js"></script>
+    <script src="vendor/js/bootstrap.min.js"></script>
+    <script src="vendor/js/angular.min.js"></script>
+
+    <script src="js/main-stages.js.bundle.js"></script>
+
+    <title>Test</title>
+</head>
+
+<body ng-app='helloapp'>
+    <div ng-controller="WiDummy">
+        <wi-stages>
+            <wi-stage heading="stage 1">
+                <h4>this is stage 1</h4>
+            </wi-stage>
+
+            <wi-stage heading="stage 2">
+                <h5>this is stage 2</h5>
+            </wi-stage>
+            <wi-stage heading="stage 3">
+                <h5>this is stage 2</h5>
+            </wi-stage>
+            <wi-stage heading="stage 4">
+                <h5>this is stage 2</h5>
+            </wi-stage>
+        </wi-stages>
+        <button onclick='angular.element($("wi-stages ul")[0]).scope().ctrl.skip();'>Skip</button>
+        <button onclick='angular.element($("wi-stages ul")[0]).scope().ctrl.back();'>Back</button>
+    </div>
+</body>
+</html>

@@ -34,6 +34,9 @@ function Controller($scope, $http, $timeout) {
         $http({
             method: 'POST',
             url: self.uploadUrl,
+            headers: {
+                Authorization: window.localStorage.getItem('token')
+            },
             data: {
                 fileName: file.name,
                 fileType: file.type,
@@ -58,10 +61,16 @@ function Controller($scope, $http, $timeout) {
                 }
             }
             else {
-                if (self.onError) self.onError(response);
+                transactionId = null;
+                $("#" + self.idInput)[0].value = "";
+                self.fileName += " error";
+                if (self.onError) self.onError(response.data);
             }
         }, function(err) {
-            if (self.onError) self.onError(err);
+            transactionId = null;
+            $("#" + self.idInput)[0].value = "";
+            self.fileName += " error";
+            if (self.onError) self.onError(err.data || err);
         });
     }
     function sendChunk(start) {
