@@ -64,6 +64,7 @@
     <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/simpleLayout.css' rel='stylesheet'>
+    <link href='css/wipm.css' rel="stylesheet">
     <!-- Insert this line above script imports  -->
     <script>
         if (typeof module === 'object') {
@@ -100,6 +101,10 @@
     <script src="vendor/js/angular-sanitize.min.js"></script>
     <script src="vendor/js/toastr.min.js"></script>
 
+
+    <script src="vendor/js/angular-toastr.tpls.js"></script>
+    <link rel="stylesheet" href="vendor/css/angular-toastr.css" />
+
 </head>
 
 <body ng-app='wiapp' wi-initialization>
@@ -108,9 +113,14 @@
             <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
                 <wi-tab heading="Main" closable='false'>
                     <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon" disabled="true">
+                        <wi-button name="ImportBlockButton" icon="arrow-left-32x32" label="Import Block" container="ribbon" disabled="false" class="height65" handler="handlers.ImportBlockButtonClicked">
+                        </wi-button>
+                        <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="false" class="height65" handler="handlers.WipmButtonClicked">
+                        </wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
                         </wi-button>
                     </wi-toolbar>
+                </wi-tab>
             </wi-tabset>
         </div>
         <div id='myLayout'>
@@ -119,7 +129,6 @@
         <wi-context-menu name="ContextMenu"></wi-context-menu>
         <wi-spinner name="SPINNER"></wi-spinner>
     </div>
-
     <template id='import-block'>
         <style media="screen">
             .flexs>div {
@@ -160,10 +169,12 @@
             </div>
         </div>
     </template>
-
+    <template id="wipm" >
+        @@include('./wipm/index.html')
+    </template>
 
     <script src="js/simpleLayout.js.bundle.js"></script>
-
+    
     <!-- Insert this line after script imports -->
     <script>
         if (window.module) module = window.module;

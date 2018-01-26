@@ -1,0 +1,167 @@
+<div class="container-fluid" id="container" ng-controller="wipmController">
+    <div class="row">
+        <div class="col-sm-3" id="left">
+            <ul>
+                <li style="text-align: center"><a href="" style="font-size: 20px; text-align: center">WIPM</a></li>
+                <li><a href="" ng-click="create=true;retrain=predict=list=result=false;">Create Model</a></li>
+                <li><a href="" ng-click="retrain=true;create=predict=list=result=false;">Retrain model</a></li>
+                <li><a href="" ng-click="predict=true;retrain=create=list=result=false;">Predict</a></li>
+                <li><a href="" ng-click="list=true;retrain=predict=create=result=false;">List model</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9" id="right">
+            <form ng-if="create" ng-controller="createFormController as create">
+                <h3>Create model</h3>	
+                <div class="form-group form-inline">
+                    <label class="col-sm-3">Model name</label>
+                    <input type="text" class="form-control" ng-model="create.name" autofocus required>
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-sm-3">Model type</label>
+                    <select ng-model="create.type" 
+                            ng-options="x.type as x.name for x in create.types"
+                            ng-change="create.changeType(create.type)" required>
+                    </select>
+                </div>
+                <div class="form-group form-inline container-fluid" ng-show="create.dnn" style="margin: 0; padding-left: 0">
+                    <label class="col-sm-3">Unit for Multi Perceptrons</label>
+                    <div class="col-sm-9" style="padding: 0">
+                        <div style="margin-bottom: 8px; " ng-repeat="x in create.units">
+                            <select ng-model='x.activate' class="form-control">
+                                <option value="sigmoid">Sigmoid</option>
+                                <option value="tanh">Tanh</option>
+                                <option value="softmax">Softmax</option>
+                            </select>	
+                            <input type="number" ng-model="x.n_nodes" class="form-control"  required>
+                            <a class="remove" ng-click="create.remove_layer($index)">&times;</a>
+                        </div>
+                        <a ng-click="create.add_layer()" 
+                            class="btn btn-default" 
+                            style="margin-bottom: 8px; color: black; text-decoration: none">
+                            Add layer
+                        </a>
+                    </div>
+                </div>				
+                <div class="form-group form-inline" ng-show="create.dnn || create.lnr">
+                    <label class="col-sm-3">Number of epoch</label>
+                    <input type="number" ng-model="create.params['n_epochs']">
+                </div>
+                <div class="form-group form-inline" ng-show="create.lnr">
+                    <label class="col-sm-3">Learning rate</label>
+                    <input type="number" step="0.001" ng-model="create.params['learning_rate']"  required>
+                </div>
+                <div class="form-group form-inline" ng-show="create.lnr">
+                    <label class="col-sm-3">Feature range</label>
+                    <input type="number" step="0.1" ng-model="create.params['feature_range'][0]"  required>
+                    <input type="number" step="0.1" ng-model="create.params['feature_range'][1]"  required>
+                </div>
+                <div class="form-group form-inline" ng-show="create.lnr">
+                    <label class="col-sm-3">Batch size</label>
+                    <input type="number" step="10" ng-model="create.params['batch_size']" id="batch_size">
+                </div>
+                <div class="form-group form-inline" >
+                    <label class="col-sm-3">Dataset</label>
+                    <label> Data <input type="file" id="data" accept=".csv" on-read-file="create.read_data($fileContent)"  required="true"></label>
+                    <label> Target <input type="file" id="target" accept=".csv" on-read-file="create.read_target($fileContent)"  required="true"></label>
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-sm-3">Description</label>
+                    <input type="text" ng-model="create.description" class="form-control"  required />
+                </div>
+                <div class="form-group  form-inline">
+                    <button type="submit" class="btn btn-primary" ng-click="create.create_model()">Create</button>
+                </div>
+            </form>
+            <form ng-if="predict" ng-controller="predictFormController as predict">
+                <h3>Use model to predict data</h3>
+                <div class="form-group form-inline">
+                    <label class="col-sm-3">Model name</label>
+                    <select ng-options="x as x.name for x in predict.models track by x.id" 
+                            ng-model="predict.model" required></select>
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-sm-3">Observation set</label>
+                    <input type="file" accept=".csv" on-read-file="predict.read_data($fileContent)" required>
+                </div>
+                <div class="form-group form-inline">
+                    <button class="btn btn-primary" ng-click="predict.predict()">Predict</button>
+                </div>
+            </form>    
+            <form ng-if="retrain" ng-controller="retrainFormController as retrain">
+                <h3>Retrain model</h3>
+                <div class="form-group form-inline">
+                    <label class="col-sm-3">Model name</label>
+                    <select ng-model="retrain.model"
+                            ng-options="x as x.name for x in retrain.models track by x.id" 
+                            ng-change="retrain.changeModel(retrain.model.type)">
+                    </select>
+                </div>
+                <div class="form-group form-inline" ng-show="!retrain.rnd">
+                    <label class="col-sm-3">Number of epochs</label>
+                    <input type="number" ng-model="retrain.params['n_epochs']" required>
+                </div>
+                <div class="form-group form-inline" ng-show="!retrain.rnd">
+                    <label class="col-sm-3">Learning rate</label>
+                    <input type="number" step="0.001" ng-model="retrain.params['learning_rate']" required>
+                </div>
+                <div class="form-group form-inline">
+                    <label for="dataset" class="col-sm-3">Dataset</label>
+                    <label for="data"> Data <input type="file" id="data" accept=".csv" on-read-file="retrain.read_data($fileContent)" required></label>
+                    <label for="target"> Target <input type="file" id="target" accept=".csv" on-read-file="retrain.read_target($fileContent)" required></label>
+                </div>
+                <div class="form-group form-inline">
+                    <button class="btn btn-primary" ng-click="retrain.retrain()">Retrain</button>
+                </div>
+            </form>
+            <div class="container-fluid" ng-if="list" ng-controller="listModelController as list">
+                <h3>List model</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <!-- <th width="12.5%">ID</th> -->
+                            <th width="12.5%">Name</th>
+                            <th width="12.5%">Type</th>
+                            <th width="12.5%">Dims Input</th>
+                            <th width="25%">MSE</th>
+                            <th width="12.5%">Describe</th>
+                            <th width="15%">Last train</th>
+                            <th width="10%">Delete</th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="x in list.models">
+                            <!-- <td width="12.5%">{{ x.id }}</td> -->
+                            <td width="12.5%">{{ x.name }}</td>
+                            <td width="12.5%">{{ x.type }}</td>
+                            <td width="12.5%">{{ x.dims_input }}</td>
+                            <td width="25%">{{ x.mse }}</td>
+                            <td width="12.5%">{{ x.description }}</td>
+                            <td width="15%">{{ x.updatedAt }}</td>
+                            <td width="10%">
+                                <button type="button" class="btn btn-mall btn-danger" ng-click="list.delete($index, x.id)" style="padding: 0px 5px">X</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>   
+            <!-- <div class="container-fluid" ng-if="result" ng-controller="result as result">
+                <h3>Result</h3>
+                <div ng-if="!result.predict">
+                    {{result.result}}
+                </div>
+
+                <table ng-if="result.predict" class="table table-bordered " style="width: 25%">
+                    <thead>
+                        <tr>
+                            <th style="width: 100%">Target</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        <tr ng-repeat="e in result.target">
+                            <td style="width: 100%">{{e}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>      -->
+        </div>
+    </div>
+</div>

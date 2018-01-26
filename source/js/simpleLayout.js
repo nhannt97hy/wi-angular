@@ -99,6 +99,8 @@ let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
+let wipm = require('./wipm.js');
+
 let app = angular.module('wiapp',
     [
         wiInitialization.name,
@@ -163,7 +165,7 @@ let app = angular.module('wiapp',
 
         wiConditionNode.name,
         ngInfiniteScroll,
-
+        'wipm',
         'angularModalService',
         'angularResizable',
 
@@ -207,7 +209,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
-    window.__HANDLERS = globalHandlers;
+    //window.__HANDLERS = globalHandlers;
 
     // config explorer block - treeview
     // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
@@ -293,7 +295,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         console.log('Help clicked');
     }
     function onInit() {
-        console.log(layoutManager.getRoot());
         layoutManager.getRoot().addChild({
             type: 'component',
             id: 'import-block',
@@ -305,3 +306,4 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         });
     }
 });
+
