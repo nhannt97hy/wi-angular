@@ -68,3 +68,20 @@ exports.WipmButtonClicked = function () {
         }
     });
 };
+
+exports.testGetData = function() {
+    let wiApiService = this.wiApiService;
+    console.log('Test get Data', wiApiService);
+    // wiApiService.dataCurve(1, function(dataCurve) {
+    //     console.log(dataCurve);
+    // });
+    window.WIAPISERVICE = wiApiService;
+
+    wiApiService.getProjectInfo(1, function(projectInfo) {
+        console.log(projectInfo);
+        wiApiService.getProject(projectInfo, function(pInfo) {
+            console.log(pInfo);
+        });
+    });
+
+}
