@@ -133,11 +133,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         })
 
         Utils.listenEvent('zone-updated', function(eventData) {
-            console.log('zone updated event', eventData);
+            console.log('zone updated event', eventData, eventData == self.viTrack);
             if(eventData && eventData.isZoneTrack && eventData.isZoneTrack()) {
-                if(eventData.id == self.viTrack.id) return;
+                if(eventData.id == self.viTrack.id) {
+                    return;
+                }
                 self.update(eventData);
-            } else if(eventData &&( (eventData.isZone && eventData.isZone() && eventData.idZoneSet == self.viTrack.idZoneSet) || (eventData.properties && eventData.properties.idZoneSet == self.viTrack.idZoneSet) )) {
+            } else if(eventData &&
+                ( (eventData.isZone && eventData.isZone() && eventData.idZoneSet == self.viTrack.idZoneSet) ||
+                (eventData.properties && eventData.properties.idZoneSet == self.viTrack.idZoneSet) )) {
                 self.update();
             } else {
                 return;

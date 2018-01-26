@@ -70,19 +70,19 @@
                                 Shading type
                             </label>
                             <label class="control-label col-sm-4">
-                                <input type="radio" value="fillPattern" 
+                                <input type="radio" value="pattern" 
                                        ng-model="wiModal.shadingOptions.shadingStyle">
                                     Fill Pattern
                             </label>
                             <label class="control-label col-sm-4">
-                                <input type="radio" value="variableShading" 
+                                <input type="radio" value="varShading" 
                                        ng-model="wiModal.shadingOptions.shadingStyle">
                                     Variable Shading
                             </label>
                         </div>
                     </div>
                     <hr class="margin-tb-5px">
-                    <div class="row padding-bottom-1em" ng-if="wiModal.shadingOptions.shadingStyle == 'fillPattern'">
+                    <div class="row padding-bottom-1em" ng-if="wiModal.shadingOptions.shadingStyle == 'pattern'">
                         <div class="container-fluid">
                             
                             <div class="form-group">
@@ -219,7 +219,7 @@
                         </div>
                     </div>
 
-                    <div class="row padding-bottom-1em" ng-show="wiModal.shadingOptions.shadingStyle == 'variableShading'">
+                    <div class="row padding-bottom-1em" ng-show="wiModal.shadingOptions.shadingStyle == 'varShading'">
                         <div class="form-group">
                             <label class="control-label col-sm-4">Shading Control By Curve</label>
                             <div class="col-sm-4 padding-bottom-1em">

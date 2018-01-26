@@ -66,6 +66,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         trackItemsCreation: []
     }
 
+    let _referenceLine = true;
     let _depthRange = [0, 100000];
     var commonCtxMenu = null;
     let _tracks = [];
@@ -130,7 +131,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         graph.rearrangeTracks(self);
         self.updateScale();
     }
-
+    this.referenceLine = function(on) {
+        if (on === undefined) return _referenceLine;
+        _referenceLine = on;
+    }
+    this.toggleTooltip = function() {
+        _tooltip = !_tooltip;
+    }
+    this.toggleReferenceLine = function() {
+        _referenceLine = !_referenceLine;
+    }
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);
         let trackName = getTrackName(trackProperties);
@@ -191,25 +201,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.setContextMenu = function (ctxMenu) {
         self.contextMenu = ctxMenu;
     }
-    this.onSliderReady = function() {
-        self.slider = $($('#' + self.plotAreaId).siblings()[0]).children()[0];
-        noUiSlider.create(self.slider, {
-            start: [0],
-            connect: [true, false],
-            range: {
-                'min': 0,
-                'max': 100
-            }
-        });
-        self.slider.noUiSlider.on('update', function(values) {
-            console.log('value', values);
-            let difference = self.contentWidth - self.sliderWidth + 20;
-            let val = parseFloat(values[0]);
-            let left = -1*difference * val / 100.;
-            $(`#${self.plotAreaId}`).css('left', left + 'px');
-        });
-        updateSlider();
-    }
+
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
     }
@@ -444,7 +436,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };
 
-    /* connect wirh visualize track */
+    /* connect with visualize track */
     this.plotAll = _.throttle(function () {
         _tracks.forEach(function (track) {
             track.doPlot(track == _currentTrack);
@@ -687,12 +679,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         window._WiD3CTRL = self;
     }
     this.$onDestroy = function () {
-        console.log('on destroy wi-d3 controller');
-
-        // unsubcribe with wiComponentService
-        wiComponentService.putComponent(self.name, null);
+        wiComponentService.dropComponent(self.name);
+        document.removeEventListener('resize', self.resizeHandler);
     }
-    this.onReady = function() {
+    this.onReady = function(args) {
         function handler () {
             self.plotAll();
             updateSlider();
@@ -703,12 +693,31 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.containerName) {
                 if (model.type == 'logplot') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) handler();
             } else {
                 if (model.type == 'logplot' && self.wiLogplotCtrl.id == model.properties.idPlot) handler();
             }
         }
         document.addEventListener('resize', self.resizeHandler);
+    }
+    this.onSliderReady = function() {
+        self.slider = $($('#' + self.plotAreaId).siblings()[0]).children()[0];
+        noUiSlider.create(self.slider, {
+            start: [0],
+            connect: [true, false],
+            range: {
+                'min': 0,
+                'max': 100
+            }
+        });
+        self.slider.noUiSlider.on('update', function(values) {
+            console.log('value', values);
+            let difference = self.contentWidth - self.sliderWidth + 20;
+            let val = parseFloat(values[0]);
+            let left = -1*difference * val / 100.;
+            $(`#${self.plotAreaId}`).css('left', left + 'px');
+        });
+        updateSlider();
     }
     this.init = _.debounce(function () {
         Utils.getPalettes(function (paletteList) {
@@ -981,6 +990,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 });
         });
     }, 100);
+    $scope.safeApply = function (fn) {
+        var phase = this.$root.$$phase;
+        if (phase == '$apply' || phase == '$digest') {
+            if (fn && (typeof (fn) === 'function')) {
+                fn();
+            }
+        } else {
+            this.$apply(fn);
+        }
+    };
 
     /* private method*/
     function generateHtml (trackProperties) {
@@ -1033,8 +1052,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBarWidth = $(`wi-slidingbar[name=${self.wiLogplotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
-        if (self.contentWidth <= self.sliderWidth + 41)
-            self.slider.noUiSlider.reset();
+        if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
+        $scope.safeApply();
     }
     function openTrackPropertiesDialog() {
         console.log('open track properties');

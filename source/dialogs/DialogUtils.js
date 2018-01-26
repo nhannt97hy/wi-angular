@@ -5032,6 +5032,7 @@ exports.zoneManagerDialog = function (ModalService, item) {
                         }
                     }
                     utils.refreshProjectState().then(function(){
+                        utils.emitEvent('zone-updated', self.SelectedZoneSet);
                         if(callback) callback();
                     });
                 })
