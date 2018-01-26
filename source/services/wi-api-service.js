@@ -61,6 +61,7 @@ const INFO_WELL = '/project/well/info';
 const CREATE_DATASET = '/project/well/dataset/new';
 const EDIT_DATASET = '/project/well/dataset/edit';
 const DELETE_DATASET = '/project/well/dataset/delete';
+const DUPLICATE_DATASET = '/project/well/dataset/duplicate';
 
 const INFO_CURVE = '/project/well/dataset/curve/info';
 const DATA_CURVE = '/project/well/dataset/curve/getData';
@@ -72,6 +73,7 @@ const COPY_CURVE = '/project/well/dataset/curve/copy';
 const CUT_CURVE = '/project/well/dataset/curve/move';
 const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
+const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -127,6 +129,7 @@ const LIST_ZONE_SET = '/project/well/zone-set/list';
 const EDIT_ZONE_SET = '/project/well/zone-set/edit';
 const GET_ZONE_SET = '/project/well/zone-set/info';
 const DELETE_ZONE_SET = '/project/well/zone-set/delete';
+const DUPLICATE_ZONE_SET = '/project/well/zone-set/duplicate';
 
 const CREATE_ZONE = '/project/well/zone-set/zone/new';
 const EDIT_ZONE = '/project/well/zone-set/zone/edit';
@@ -351,10 +354,10 @@ var wiApiWorker = function ($http, wiComponentService) {
                             });
                         });
                     } else {
+                        console.error(err);
                         self.stopWorking();
                         if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
-                        console.error(err);
                     }
                 });
 
@@ -1056,22 +1059,15 @@ Service.prototype.infoTrack = function (idTrack, callback) {
     this.post(GET_LOG_TRACK, dataRequest, callback);
 }
 
-Service.prototype.editTrack = function (trackObj, callback) {
+Service.prototype.editTrack = function (trackObj, callback, option) {
     var self = this;
     let dataRequest = trackObj;
-    this.post(EDIT_TRACK, dataRequest, callback);
+    this.post(EDIT_TRACK, dataRequest, callback, option);
 }
 
-
-Service.prototype.createDepthTrack = function (idPlot, orderNum, callback) {
+Service.prototype.createDepthTrack = function (depthTrack, callback) {
     var self = this;
-    console.log("createDepthTrack", self);
-    let dataRequest = {
-        idPlot: idPlot,
-        orderNum: orderNum,
-        geogetryWidth: 1
-    };
-    this.post(CREATE_DEPTH_AXIS, dataRequest, callback);
+    this.post(CREATE_DEPTH_AXIS, depthTrack, callback);
 }
 Service.prototype.removeDepthTrack = function (idDepthAxis, callback) {
     var self = this;
@@ -1334,6 +1330,9 @@ Service.prototype.createCrossplot = function (data, callback) {
 }
 Service.prototype.editCrossplot = function (data, callback) {
     let self = this;
+    if(typeof(data.discriminator) == "string"){
+        data.discriminator = JSON.parse(data.discriminator);
+    }
     this.post(EDIT_CROSSPLOT, data, callback);
 }
 Service.prototype.getCrossplot = function (idCrossPlot, callback) {
@@ -1436,6 +1435,18 @@ Service.prototype.duplicateCrossPlot = function (idCrossPlot, idWell, callback){
 Service.prototype.duplicateHistogram = function (idHistogram, idWell, callback) {
     let self = this;
     this.post(DUPLICATE_HISTOGRAM, {idHistogram: idHistogram, idWell: idWell}, callback);
+}
+
+Service.prototype.duplicateDataset = function (idDataset, callback) {
+    this.post(DUPLICATE_DATASET, {idDataset: idDataset}, callback);
+}
+
+Service.prototype.duplicateCurve = function (idCurve, callback) {
+    this.post(DUPLICATE_CURVE, {idCurve: idCurve}, callback);
+}
+
+Service.prototype.duplicateZoneset = function (idZoneSet, callback) {
+    this.post(DUPLICATE_ZONE_SET, {idZoneSet: idZoneSet}, callback);
 }
 
 Service.prototype.savePlotAs = function (payload, callback) {
@@ -1717,6 +1728,9 @@ Service.prototype.medfil = function (data, callback){
 }
 Service.prototype.savgolfil = function (data, callback){
     this.post('/savgol', data, callback, 'processing');
+}
+Service.prototype.fftfil = function (data, callback){
+    this.post('/fft', data, callback, 'processing');
 }
 
 Service.prototype.getInventory = function (callback) {

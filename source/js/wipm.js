@@ -3,9 +3,9 @@ const controllerName = 'wipmController';
 const createFormCtrlName = 'createFormController';
 const retrainFormCtrlName = 'retrainFormController';
 const predictFormCtrlName = 'predictFormController';
-const listModelFormCtrlName = 'listModelFormController';
+const listModelFormCtrlName = 'listModelController';
 
-let wipm = angular.module(moduleName, ['toastr']);
+let wipm = angular.module(moduleName, []);
 
 wipm.directive('onReadFile', function ($parse) {
     return {
@@ -34,7 +34,7 @@ wipm.controller(controllerName, function($scope){
     $scope.retrain = $scope.predict = $scope.list = $scope.result = false;
 })
 
-wipm.controller(createFormCtrlName, function($http, $location, toastr){
+wipm.controller(createFormCtrlName, function($http, $location){
     var self = this;
     this.name = "Model";
     this.description = "Description"
@@ -136,7 +136,7 @@ wipm.controller(createFormCtrlName, function($http, $location, toastr){
         }
     }
 })
-wipm.controller(retrainFormCtrlName, function($http, $location, toastr){
+wipm.controller(retrainFormCtrlName, function($http, $location){
     var self = this;    
     $http({
         method: 'GET',
@@ -224,7 +224,7 @@ wipm.controller(retrainFormCtrlName, function($http, $location, toastr){
             return;
     })
 })
-wipm.controller(predictFormCtrlName, function($http, $location, toastr){
+wipm.controller(predictFormCtrlName, function($http, $location){
     var self = this;    
         $http({
             method: 'GET',
@@ -285,7 +285,7 @@ wipm.controller(predictFormCtrlName, function($http, $location, toastr){
                 return;
         })
 })
-wipm.controller(listModelFormCtrlName, function($http, toastr){
+wipm.controller(listModelFormCtrlName, function($http){
     var self = this;
     $http({
         method: 'GET',

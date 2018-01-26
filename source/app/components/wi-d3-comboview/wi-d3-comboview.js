@@ -41,14 +41,15 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 				if (componentState.name) wiComponentService.dropComponent(componentState.name);
 				newScope.$destroy();
 			});
+			container.on('resize', wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize);
 		});
 		self.layoutManager.init();
 	}
 
 	this.onReady = function () {
 		self.createLayout(self.comboviewAreaId);
-		$('wi-d3-comboview').on('click', function() {
-			console.log($('wi-d3-comboview'));
+		$(document).on('resize', function() {
+			self.layoutManager.updateSize();
 		});
 	}
 
@@ -58,8 +59,12 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 	this.$onInit = function () {
 		self.comboviewAreaId = self.name + 'ComboviewArea';
-		// self.suffix = self.wiComboviewCtrl.name;
 		self.suffix = self.wiComboviewCtrl.name;
+		self.plotModels = {
+			logplot: null,
+			histogram: null,
+			crossplot: null
+		};
 		self.comboviewModel = self.getModel();
 		if (self.name) {
 			wiComponentService.putComponent(self.name, self);
@@ -133,6 +138,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	this.addLogplot = function (logplotProps) {
 		if(!logplotProps || !logplotProps.idPlot) return;
 		let logplotModel = utils.getModel('logplot', logplotProps.idPlot);
+		self.plotModels.logplot = logplotModel;
 
 		self.putObjectComponent(logplotModel);
 	}
@@ -140,6 +146,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	this.addHistogram = function (histogramProps) {
 		if(!histogramProps || !histogramProps.idHistogram) return;
 		let histogramModel = utils.getModel('histogram', histogramProps.idHistogram);
+		self.plotModels.histogram = histogramModel;
 
 		self.putObjectComponent(histogramModel);
 	}
@@ -147,8 +154,17 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	this.addCrossplot = function (crossplotProps) {
 		if(!crossplotProps || !crossplotProps.idCrossPlot) return;
 		let crossplotModel = utils.getModel('crossplot', crossplotProps.idCrossPlot);
+		self.plotModels.crossplot = crossplotModel;
 
 		self.putObjectComponent(crossplotModel);
+	}
+
+	this.drawSelectorOnLogTrack = function() {
+		let createdLogplotId = self.plotModels.logplot.properties.idPlot;
+		let wiD3Logplot = wiComponentService.getComponent('logplot' + createdLogplotId + self.suffix).getwiD3Ctrl();
+		let logTrack = d3.selectAll('.vi-log-track-container').selectAll('.vi-track-plot-container');
+		logTrack.style('cursor', 'copy');
+		console.log(logTrack);
 	}
 
 	this.showContextMenu = function (event) {

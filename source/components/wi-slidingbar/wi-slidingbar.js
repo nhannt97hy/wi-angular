@@ -3,6 +3,15 @@ const moduleName = 'wi-slidingbar';
 
 const MIN_RANGE = 1;
 
+function actual(selector, dim) {
+    const tabElement = $(`div[style*="display: none"]`).has(selector);
+    if (!tabElement) return $(selector)[dim]();
+    tabElement.css({display: 'block'});
+    const result = $(selector)[dim]();
+    tabElement.css({display: 'none'});
+    return result;
+}
+
 function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let self = this;
     let _offsetTop = 0;
@@ -68,18 +77,25 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 if (_viCurve) _viCurve.destroy();
                 console.log("slidingCurve", config);
                 config._data = dataCurve;
-                _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
-                // _viCurve.setProperties({displayType: 'Logarithmic | Linear'})
-                _viCurve.setProperties({displayType: config.scale});
-                _viCurve.doPlot();
+                const tabElement = $(`div[style*="display: none"]`).has(self.contentId);
+                if (tabElement.length) {
+                    tabElement.css({display: 'block'});
+                    tabElement.wrap('<div style="position: absolute; z-index: -1"></div>')
+                    _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
+                    _viCurve.setProperties({displayType: config.scale});
+                    _viCurve.doPlot();
+                    setTimeout(() => {
+                        tabElement.css({display: 'none'});
+                        tabElement.unwrap();
+                    }, 1000);
+                } else {
+                    _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
+                    // _viCurve.setProperties({displayType: 'Logarithmic | Linear'})
+                    _viCurve.setProperties({displayType: config.scale});
+                    _viCurve.doPlot();
+                }
             });
         })
-        let logplotModel = logPlotCtrl.getLogplotModel();
-        let logplotRequest = angular.copy(logplotModel.properties);
-        logplotRequest.referenceCurve = idCurve;
-        wiApiService.editLogplot(logplotRequest, function () {
-            logplotModel.properties.referenceCurve = idCurve;
-        });
     }
 
     this.verifyDroppedIdCurve = function(idCurve) {
@@ -123,7 +139,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function update(ui) {
-        let parentHeight = $(self.contentId).height();
+        let parentHeight = actual(self.contentId, 'height');
         let tempTinyWindowsHeight = self.tinyWindow.height;
         let tempTinyWindowsTop = self.tinyWindow.top;
 
@@ -154,7 +170,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function updateState(top, height) {
-        let pHeight = $(self.contentId).height();
+        let pHeight = actual(self.contentId, 'height');
         self.slidingBarState.top = top / pHeight * 100.;
         self.slidingBarState.range = height / pHeight * 100.;
 
@@ -194,7 +210,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.onReady = function () {
         let logPlotName = self.name.replace('Slidingbar', '');
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
-        let parentHeight = $(self.contentId).height();
+        let parentHeight = actual(self.contentId, 'height');
         //parentHeight = $(self.contentId).height();
         //self.parentHeight = parentHeight;
         let initialHeight = parentHeight * (MIN_RANGE) / 100.;
@@ -304,8 +320,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         const SCROLL_FACTOR = 0.15;
         const MIN_SCROLL = 2;
 
-        let wholeHeight = $(self.contentId).height();
-        let viewHeight = $(self.contentId).parent().height();
+        let wholeHeight = actual(self.contentId, 'height');
+        let viewHeight = actual($(self.contentId).parent(), 'height');
 
         let realDeltaY = wholeHeight * self.slidingBarState.range / 100. * SCROLL_FACTOR;
         realDeltaY = (realDeltaY > MIN_SCROLL)?realDeltaY:MIN_SCROLL;
@@ -360,7 +376,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
         //let newTop = Math.round((topPercent * parentHeight) / 100);
         //let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
-        let parentHeight = $(self.contentId).height();
+        let parentHeight = actual(self.contentId, 'height');
         let newTop = (topPercent * parentHeight) / 100.;
         let newHeight = (rangePercent * parentHeight) / 100.;
 
@@ -408,7 +424,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         return __minRange;
     }
     function getMinTinyWinHeight() {
-        return Math.max(10, getMinRange() * $(self.contentId).height());
+        return Math.max(10, getMinRange() * actual(self.contentId, 'height'));
     }
 
     this.scaleView = function(top0, range0, force) {
@@ -432,7 +448,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function _doScaleView(slidingBarState) {
-        let viewHeight = $(self.contentId).parent().parent().height();
+        let viewHeight = actual($(self.contentId).parent().parent(), 'height');
         let newParentHeight = viewHeight * 100. / slidingBarState.range0;
         let newTop = (slidingBarState.top0 * newParentHeight) / 100.;
 
@@ -444,6 +460,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         // TUNG for limiting height of resizable
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
+
+        const wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        wiD3Controller.updateScale();
     }
 
     this.resetView = function() {
@@ -453,7 +472,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         _doScaleView(self.slidingBarState);
         return;
 
-        let defaultParentHeight = $(self.contentId).parent().parent().height();
+        let defaultParentHeight = actual($(self.contentId).parent().parent(), 'height');
         _offsetTop = 0;
         $(self.contentId).height('auto').css('top', 0);
 

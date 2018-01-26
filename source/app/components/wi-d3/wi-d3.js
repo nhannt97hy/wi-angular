@@ -263,8 +263,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var trackOrder = getOrderKey();
         console.log(trackOrder);
         if (trackOrder) {
-            wiApiService.createDepthTrack(self.logPlotCtrl.id, trackOrder, function (depthTrack) {
-                console.log("Success: ", depthTrack);
+            wiApiService.createDepthTrack({
+                idPlot: self.logPlotCtrl.id,
+                orderNum: trackOrder,
+                width: 0.65
+            }, function (depthTrack) {
                 self.pushDepthTrack(depthTrack);
                 if (callback) callback();
             });
@@ -876,11 +879,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };
 
-    this.plotAll = function () {
+    this.plotAll = _.throttle(function () {
         _tracks.forEach(function (track) {
             track.doPlot(track == _currentTrack);
         });
-    };
+        self.updateScale();
+    }, 50);
+
+    this.getDisplayView = function () {
+        let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
+        let maxDepth = this.getMaxDepth();
+        let minDepth = this.getMinDepth();
+        let minDisplay = minDepth + (maxDepth - minDepth) * slidingBar.slidingBarState.top0 / 100.;
+        let maxDisplay = minDisplay + (maxDepth - minDepth) * slidingBar.slidingBarState.range0 / 100.;
+        return [minDisplay.toFixed(2), maxDisplay.toFixed(2)];
+    }
 
     this.updateScale = function () {
         let trackPlot = $(`wi-logplot[name=${self.wiLogplotCtrl.name}] .vi-track-plot-container .vi-track-drawing`)[0];
@@ -890,7 +903,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let heightCm = trackPlotHeight / dpCm;
         let depthRange = this.getDepthRange();
         let scale = (depthRange[1] - depthRange[0]) * 100 / heightCm;
-        this.scale = scale.toFixed(0);
+        this.scale = {
+            scale: '1:' + scale.toFixed(0),
+            displayView: self.getDisplayView(),
+            currentView: [depthRange[0].toFixed(2), depthRange[1].toFixed(2)]
+        };
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
         })
@@ -1114,6 +1131,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let plotMouse = d3.mouse(track.plotContainer.node());
         let x = plotMouse[0];
         let y = plotMouse[1];
+        if (Number.isNaN(x) || Number.isNaN(y)) return;
         let plotDim = track.plotContainer.node().getBoundingClientRect();
 
         if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
@@ -1573,29 +1591,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
-                wiApiService.editTrack({idTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
-                })
+                wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
             } else if (track.isDepthTrack()) {
-                wiApiService.editDepthTrack({
-                    idDepthAxis: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
+                wiApiService.editDepthTrack({ idDepthAxis: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
             } else if (track.isZoneTrack()) {
-                wiApiService.editZoneTrack({idZoneTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
-                })
+                wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
             } else if (track.isImageTrack()) {
-                wiApiService.editImageTrack({
-                    idImageTrack: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
+                wiApiService.editImageTrack({ idImageTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
             } else if (track.isObjectTrack()) {
-                wiApiService.editObjectTrack({
-                    idObjectTrack: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
+                wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
             }
         });
     }
@@ -2376,6 +2380,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             isNegPosFill: false,
             fill: {
                 display: true,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -2384,6 +2389,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             positiveFill: {
                 display: false,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -2392,6 +2398,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             },
             negativeFill: {
                 display: false,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -3254,7 +3261,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
         if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
         $scope.safeApply();
-    }
+    }   
     this.onReady = function(args) {
         function handler () {
             self.plotAll();
@@ -3266,7 +3273,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (self.containerName) {
                 if (model.type == 'logplot') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                if (model.type == 'comboview' && comboviewId == model.properties.idCombinedBox) handler();
             } else {
                 if (model.type == 'logplot' && self.wiLogplotCtrl.id == model.properties.idPlot) handler();
             }
@@ -3370,7 +3377,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let wiD3Ctrl = self;
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
-                function (plot) {
+                function (plot, err) {
+                    if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
                     }
@@ -3624,6 +3632,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             },500);
                             self.isReady = true;
                             wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
+                            self.plotAll();
+                            updateSlider();
                         });
                     }
                 });

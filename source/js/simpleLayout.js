@@ -51,14 +51,17 @@ let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
 let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
+let wiChunkedUpload = require('./wi-chunked-upload');
+let wiProgressBar = require('./wi-progress-bar');
 
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
+let wiStages = require('./wi-stages');
 
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
 
-let handlers = require('./handlers');
+let handlers = require('./simple-layout-handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
 let treeviewHandlers = require('./wi-treeview-handlers');
@@ -66,6 +69,7 @@ let crossplotHanders = require('./wi-crossplot-handlers');
 let histogramHandlers = require('./wi-histogram-handlers');
 
 let comboviewHandlers = require('./wi-comboview-handlers');
+
 
 let graph = require('./visualize/visualize');
 let dragMan = {
@@ -135,6 +139,7 @@ let app = angular.module('wiapp',
 
         wiComboview.name,
         wiD3Comboview.name,
+        wiStages.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -163,9 +168,12 @@ let app = angular.module('wiapp',
         wiUser.name,
         wiMultiselect.name,
 
+        wiChunkedUpload.name,
+        wiProgressBar.name,
+
         wiConditionNode.name,
         ngInfiniteScroll,
-        'wipm',
+        wipm.name,
         'angularModalService',
         'angularResizable',
 

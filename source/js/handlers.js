@@ -108,38 +108,7 @@ exports.ExitButtonClicked = function () {
     })
 };
 
-exports.ImportBlockButtonClicked = function () {
-    let wiComponentService = this.wiComponentService;
-    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    // console.log(layoutManager.getRoot());
-    let root = layoutManager.getRoot();
-    root.removeChild(root.contentItems[0]);
-    root.addChild({
-        type: 'component',
-        id: 'import-block',
-        componentName: 'wi-block',
-        componentState: {
-            templateId: 'import-block'
-        },
-        title: 'Title'
-    });
-};
 
-exports.WipmButtonClicked = function () {
-    let wiComponentService = this.wiComponentService;
-    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    // console.log(layoutManager.getRoot());
-    let root = layoutManager.getRoot();
-    root.removeChild(root.contentItems[0]);
-    root.addChild({
-        type: 'component',
-        id: 'wipm',
-        componentName: 'wi-block',
-        componentState: {
-            templateId: 'wipm'
-        }
-    });
-};
 
 exports.AddNewButtonClicked = function () {
     let self = this;
@@ -246,8 +215,8 @@ exports.OpenTemplateButtonClicked = function () {
     let self = this;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    let selectedNode = utils.getSelectedNode();
-    DialogUtils.OpenTemplateDialog(this.ModalService, selectedNode, function (plot) {
+    let currentWell = utils.getCurrentWell();
+    DialogUtils.OpenTemplateDialog(this.ModalService, currentWell, function (plot) {
         utils.openLogplotTab(self.wiComponentService, utils.getModel('logplot', plot.idPlot));
     });
 };

@@ -132,6 +132,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 rcHead.scrollLeft(rcBody.scrollLeft());
             }
             rcBody.scroll(_.throttle(onScroll, 100));
+            document.addEventListener('keydown', function(event){
+                if(event.ctrlKey && event.keyCode == 71){
+                    event.preventDefault();
+                    $("#depthInput").focus();
+                }
+            })
         })
     };
 

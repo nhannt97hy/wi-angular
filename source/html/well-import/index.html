@@ -1,0 +1,143 @@
+<style>
+    .wi-inline-button {
+        float: none;
+        display: inline-block;
+    }
+    .content-heading {
+        text-align: center;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5em;
+        margin-left: auto;
+        margin-right: auto;
+        width: 97%;
+    }
+</style>
+<h2 class="content-heading">Well import tool</h2>
+<wi-stages style='padding:90px 10px 10px;display:flex;flex-direction:row;position:absolute;top:0;left:0;right:0;bottom:0;'>
+    <wi-stage title="Upload well LAS zip" icon="fa fa-cloud-upload">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+                <div style="width:200px;height:150px;margin:auto;">
+                    <wi-chunked-upload upload-url="'http://batch.sflow.me/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
+                    </wi-chunked-upload>
+                </div>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Setup new batch import task" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+                <form class="form-horizontal">
+                    <h4 style='text-align:center'>Create batch import task</h4>
+                    <div class="form-group">
+                        <label style='text-align:right;' class="control-label col-sm-4">Name:</label>
+                        <div class="col-sm-6">
+                            <input class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label style='text-align:right;' class="control-label col-sm-4">Host:</label>
+                        <div class="col-sm-6">
+                            <input type="email" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label style='text-align:right;' class="control-label col-sm-4">Post:</label>
+                        <div class="col-sm-6">
+                            <input class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label style='text-align:right;' class="control-label col-sm-4">Path:</label>
+                        <div class="col-sm-6">
+                            <input type="email" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label style='text-align:right;' class="control-label col-sm-4">Data Dir:</label>
+                        <div class="col-sm-6">
+                            <input class="form-control">
+                        </div>
+                        <div class="col-sm-2">
+                            <a href="">
+                                <i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
+            <div style='flex:1; border: 1px solid red'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
+            <div style='flex:1; border: 1px solid red'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
+            <div style='flex:1; border: 1px solid red'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
+            <div style='flex:1; border: 1px solid red'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+            </div>
+        </div>
+    </wi-stage>
+</wi-stages>

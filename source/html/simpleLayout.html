@@ -3,14 +3,11 @@
 <head>
     <title>I2G Lightweight</title>
     <link rel="shortcut icon" href="img/icon/Well_Insight.ico" type="image/x-icon">
-
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href="vendor/css/jquery-ui.css" rel="stylesheet">
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
-
     <link rel="stylesheet" type="text/css" href="vendor/css/toastr.min.css">
-
     <!-- color picker -->
     <link rel="stylesheet" type="text/css" href="vendor/css/bootstrap-colorpicker.min.css">
     <link rel="stylesheet" type="text/css" href="css/color-picker.css">
@@ -18,15 +15,11 @@
     <link rel="stylesheet" type="text/css" href="vendor/css/multiple-select.css">
     <link rel="stylesheet" href="vendor/css/select.css">
     <link rel="stylesheet" type="text/css" href="css/dialogs.css">
-
     <link rel="stylesheet" href="css/sprite_16.css">
     <link rel="stylesheet" href="css/sprite_32.css">
-
     <link rel='stylesheet' href='vendor/css/goldenlayout-base.css'>
     <link type="text/css" rel="stylesheet" href="vendor/css/goldenlayout-light-theme.css" />
-
     <link rel='stylesheet' href='vendor/css/nouislider.min.css'>
-
     <link href='css/wi-button.css' rel='stylesheet'>
     <link href='css/wi-dropdown.css' rel='stylesheet'>
     <link href='css/wi-toolbar.css' rel='stylesheet'>
@@ -35,17 +28,14 @@
     <link href='css/wi-context-menu.css' rel='stylesheet'>
     <link href='css/wi-treeview.css' rel='stylesheet'>
     <link href='css/wi-base-treeview.css' rel='stylesheet'>
-
     <link href='css/wi-status-bar.css' rel='stylesheet'>
     <link href='css/wi-slidingbar.css' rel='stylesheet'>
     <link href='css/wi-resizable-x.css' rel='stylesheet'>
     <link href='css/wi-reference-window.css' rel='stylesheet'>
     <link href='css/wi-multi-input.css' rel='stylesheet'>
     <link href='css/wi-custom-input.css' rel='stylesheet'>
-
     <link rel="stylesheet" href="css/wi-comboview.css">
     <link rel="stylesheet" href="css/wi-d3-comboview.css">
-
     <link rel="stylesheet" href="css/wi-inventory.css">
     <link rel="stylesheet" href="css/wi-curve-listing.css">
     <link href='css/wi-logplot.css' rel='stylesheet'>
@@ -96,14 +86,13 @@
     <script src="vendor/js/math.min.js"></script>
     <script src="vendor/js/select.js"></script>
     <script src="vendor/js/nouislider.min.js"></script>
-
     <!--select line style && line width-->
     <script src="vendor/js/angular-sanitize.min.js"></script>
     <script src="vendor/js/toastr.min.js"></script>
 
 
-    <script src="vendor/js/angular-toastr.tpls.js"></script>
-    <link rel="stylesheet" href="vendor/css/angular-toastr.css" />
+    <!-- <script src="vendor/js/angular-toastr.tpls.js"></script>
+    <link rel="stylesheet" href="vendor/css/angular-toastr.css" /> -->
 
 </head>
 
@@ -117,55 +106,147 @@
                         </wi-button>
                         <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="false" class="height65" handler="handlers.WipmButtonClicked">
                         </wi-button>
-                        <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked">
-                        </wi-button>
+                        <wi-button name="WellImport" icon="well-load-32x32" label="Well Import" container="ribbon" disabled="false" class="height65" handler="handlers.WellImportClicked"></wi-button>
+                        <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="false" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
             </wi-tabset>
         </div>
-        <div id='myLayout'>
-        </div>
+        <div id='myLayout'></div>
         <wi-user class="user-wrapper" name='user'></wi-user>
         <wi-context-menu name="ContextMenu"></wi-context-menu>
         <wi-spinner name="SPINNER"></wi-spinner>
     </div>
-    <template id='import-block'>
+    <template id='import-block' style="background: #F2F2F2;">
         <style media="screen">
+            textarea {
+                resize: none;
+            }
             .flexs>div {
                 border: 1px solid #ccc;
-                flex:1;
+                flex: 1;
                 margin: 5px;
-                background: #fff;
                 padding: 5px;
+                box-shadow: inset 1px 1px 1px #e1e1e1;
+                background-color: #ffffff;
+                border-radius: 5px;
             }
             div.lm_content {
-                display:flex;
+                display: flex;
                 flex-direction: column;
+            }
+            .lm_content {
+                background: #f4f4f4f4;
+            }
+
+            h5 {
+                color: blue;
             }
         </style>
         <div>
-            <h2 style="text-align:center;">I2G Import Tool <a href="" ng-click="helpClick();"><i class="fa fa-question-circle"></i></a></h2>
+            <h2 style="text-align:center;">I2G Import Tool 																																															</h2>
         </div>
-        <div style="flex:1; display:flex;flex-direction:column">
-            <div style="flex:1;display:flex; width:80%;margin:auto;"class="flexs">
+        <div style="flex:1; display:flex;flex-direction:column" class="modal-body">
+            <div style="flex:1;display:flex; width:100%;margin:auto;" class="flexs">
                 <div>
-                    <div>
-                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
+                    <h5>Workflow Management</h5>
+                    <div class="col-sm-6">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Check</th>
+                                    <th>Well</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <i class='glyphicon glyphicon-ok' style="color: black;"></i>
+                                    </td>
+                                    <td>well 1</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <i class='glyphicon glyphicon-ok' style="color: #ccc"></i>
+                                    </td>
+                                    <td>well 1</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div>
-                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
-                    </div>
-                    <div>
-                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
-                    </div>
-                    <div>
-                        <i class="glyphicon glyphicon-check"></i><span>well 1</span>
+                    <div class="col-sm-6">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Well</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>well 1</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div>
-                    <input type="text" name="" value="">
+                    <form class="form-horizontal">
+                        <h5>Create Workflow</h5>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4">Name:</label>
+                            <div class="col-sm-6">
+                                <input class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4">Host:</label>
+                            <div class="col-sm-6">
+                                <input type="email" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4">Post:</label>
+                            <div class="col-sm-6">
+                                <input class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4">Path:</label>
+                            <div class="col-sm-6">
+                                <input type="email" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-4">Data Dir:</label>
+                            <div class="col-sm-6">
+                                <input class="form-control">
+                            </div>
+                            <div class="col-sm-2">
+                                <a href="">
+                                    <i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
                 </div>
-                <div>3</div>
+                <div>
+                    <h5>Run Workflow</h5>
+                    <div class="form-group">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-default" name="button">Run</button>
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control">
+                        </div>
+                    </div>
+                    <!-- <div class="form-group"><wi-progress-bar percent= 0></wi-progress-bar></div> -->
+                    <h5>Result</h5>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+
+                            <textarea class="form-control" rows="5" id="comment"></textarea>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </template>
@@ -173,11 +254,17 @@
         @@include('./wipm/index.html')
     </template>
 
+    <template id="well-import">
+        @@include('./well-import/index.html')
+    </template>
     <script src="js/simpleLayout.js.bundle.js"></script>
-    
     <!-- Insert this line after script imports -->
     <script>
         if (window.module) module = window.module;
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
+    <script>
+        hljs.initHighlightingOnLoad();
     </script>
 </body>
 

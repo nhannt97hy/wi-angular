@@ -3,7 +3,7 @@ const moduleName = 'wi-crossplot';
 
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
-    this.isShowWiZone = true;
+    this.isShowWiZone = false;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let _wiD3CrossplotCtrl = null;
     let refWindCtrl = null;
