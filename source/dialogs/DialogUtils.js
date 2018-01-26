@@ -8977,7 +8977,7 @@ exports.curveFilterDialog = function(ModalService){
 
         this.createOp = 'backup';
         this.filterOp = '5';
-        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 4;
+        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 100;
         this.table = new Array(5).fill(0.2).map(d => {return parseFloat(d.toFixed(4))});
         this.wells = utils.findWells();
         this.datasets = [];
@@ -9062,7 +9062,8 @@ exports.curveFilterDialog = function(ModalService){
             if(self.filterOp == '2'){
                 return !self.polyOder || self.devOrder == null || ! self.numPoints;
             }else if (self.filterOp == '4'){
-                return !self.cutoff;
+                let range = Math.floor((self.bottomDepth - self.topDepth)/self.SelectedWell.step);
+                return !self.cutoff || self.cutoff > range;
             }
             else{
                 return !self.numLevel;
