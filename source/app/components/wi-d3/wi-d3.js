@@ -3378,6 +3378,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
                 function (plot, err) {
+                console.log("getLogplot", plot); 
                     if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);

@@ -291,7 +291,8 @@ Shading.prototype.doPlot = function(highlight) {
     let self = this;
     let plotSamples = Utils.clusterPairData(leftData, rightData);
 
-    let fills = this.prepareFillStyles();
+    let fills = !this.isNegPosFill ? this.prepareFillStyles([this.fill, null, null])
+        : this.prepareFillStyles([null, this.positiveFill, this.negativeFill]);
     Utils.createFillStyles(this.ctx, fills, function(fillStyles) {
         let fill = fillStyles[0];
         let posFill = fillStyles[1];
@@ -359,9 +360,8 @@ Shading.prototype.prepareFillStyles1 = function(forHeader) {
     return ret;
 }
 
-Shading.prototype.prepareFillStyles = function(forHeader) {
+Shading.prototype.prepareFillStyles = function(fills, forHeader) {
     let self = this;
-    let fills = [this.fill, this.positiveFill, this.negativeFill];
     let ret = [];
     fills.forEach(function(fill) {
         if (!fill || !fill.varShading || fill.shadingType != 'varShading') {
@@ -381,7 +381,6 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
                     y: d * rect.height
                 }
             });
-
             if (fill.varShading.customFills && fill.varShading.varShadingType == 'customFills') return ret.push(null);
         }
         else {
@@ -389,6 +388,7 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
             varShading.startX = transformX(varShading.startX);
             varShading.endX = transformX(varShading.endX);
             varShading.data = self.prepareData(self.selectedCurve);
+            varShading.horizontal = false
 
             if (varShading.customFills && varShading.varShadingType == 'customFills') {
                 varShading.customFills.patCanvasId = 'shading-' + self.id + '-pattern-canvas';
@@ -399,8 +399,10 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
                 varShading.customFills.content = Utils.sortByKey(varShading.customFills.content, 'lowVal');
             }
         }
-        fill.varShading = varShading;
-        ret.push(fill);
+        ret.push({ 
+            varShading: varShading,
+            shadingType: 'varShading'
+        });
     });
     return ret;
 }
@@ -585,7 +587,9 @@ function drawHeader(shading) {
         .attr('height', height)
 
     let hCtx = hCanvas.node().getContext('2d');
-    let fills = shading.prepareFillStyles(true);
+
+    let fills = shading.isNegPosFill ? shading.prepareFillStyles([null, shading.positiveFill, shading.negativeFill], true)
+                : shading.prepareFillStyles([shading.fill, null, null], true);
     Utils.createFillStyles(hCtx, fills, function(fillStyles) {
         hCtx.save();
         //if (shading.isNegPosFilling) {

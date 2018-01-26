@@ -557,7 +557,6 @@ function createFillStyles1(ctx, fills, callback) {
 }
 function createFillStyles(ctx, fills, callback) {
     let fillStyles = [];
-    console.log("fills", fills);
     asyncLoop(
         fills.length,
         function(loop) {
@@ -576,13 +575,11 @@ function createFillStyles(ctx, fills, callback) {
                 let fg = fill.pattern.foreground;
                 let bg = fill.pattern.background;
                 CanvasHelper.createPattern(ctx, name, fg, bg, function(pattern) {
-                    console.log("check pattern", pattern);
                     fillStyles.push(pattern);
                     loop.next();
                 });
             }
             else if (fill.varShading && fill.shadingType == 'varShading') {
-                console.log("check varShading", fill);
 
                 let startX = fill.varShading.startX;
                 let endX = fill.varShading.endX;
@@ -605,13 +602,11 @@ function createFillStyles(ctx, fills, callback) {
                     let customFills = fill.varShading.customFills;
                     let content = customFills.content;
                     let patCanvasId = customFills.patCanvasId;
-
                     if (minX == null || maxX == null || maxX - minX == 0) {
                         fillStyles.push('transparent');
                         loop.next();
                         return;
                     }
-
                     let patCanvas = d3.select('#' + patCanvasId);
                     if (!patCanvas.node()) patCanvas = d3.select('body').append('canvas');
 
@@ -628,7 +623,8 @@ function createFillStyles(ctx, fills, callback) {
                                 name: d.pattern,
                                 foreground: d.foreground,
                                 background: d.background
-                            }
+                            },
+                            shadingType: 'pattern'
                         };
                     });
 
@@ -638,7 +634,6 @@ function createFillStyles(ctx, fills, callback) {
                             range.push(p);
                             range.push('transparent');
                         });
-
                         let domain = [minX - 1];
                         content.forEach(function(d) {
                             domain.push(d.lowVal);
@@ -651,7 +646,7 @@ function createFillStyles(ctx, fills, callback) {
                             let patFillStyle = transform(data[i].x);
                             if (patFillStyle == 'transparent') continue;
                             patCtx.fillStyle = patFillStyle;
-                            patCtx.fillRect(0, data[i].y - minY, CanvasHelper.PATTERN_WIDTH, data[i+1].y - data[i].y);
+                            patCtx.fillRect(0, Math.floor(data[i].y - minY), CanvasHelper.PATTERN_WIDTH, Math.ceil(data[i+1].y - data[i].y));
                         }
                         fillStyles.push(ctx.createPattern(patCanvas.node(), 'repeat-x'));
                         loop.next();

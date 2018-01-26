@@ -326,7 +326,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     // idCurve changed
                     let curvesTemp = [];
                     self.curveUpdated.forEach(function (c) {
-                        // curvesTemp = curves_bk.filter(cBk => (cBk.idLine))
                         curves_bk.forEach(function(cBk) {
                             self.shadings.forEach(function (s) {
                                 // delete shading when select other curve
