@@ -44,7 +44,6 @@ Utils.extend(Drawing, Shading);
  * @param {Boolean} [config.showRefLine] - Indicate whether to plot reference line
  */
 function Shading(config) {
-
     Drawing.call(this, config);
     if (typeof config != 'object') config = {};
 
@@ -292,7 +291,8 @@ Shading.prototype.doPlot = function(highlight) {
     let self = this;
     let plotSamples = Utils.clusterPairData(leftData, rightData);
 
-    let fills = this.prepareFillStyles();
+    let fills = !this.isNegPosFill ? this.prepareFillStyles([this.fill, null, null])
+        : this.prepareFillStyles([null, this.positiveFill, this.negativeFill]);
     Utils.createFillStyles(this.ctx, fills, function(fillStyles) {
         let fill = fillStyles[0];
         let posFill = fillStyles[1];
@@ -315,7 +315,7 @@ Shading.prototype.doPlot = function(highlight) {
 }
 
 
-Shading.prototype.prepareFillStyles = function(forHeader) {
+Shading.prototype.prepareFillStyles1 = function(forHeader) {
     let self = this;
     let fills = [this.fill, this.positiveFill, this.negativeFill];
     let ret = [];
@@ -356,6 +356,53 @@ Shading.prototype.prepareFillStyles = function(forHeader) {
             }
         }
         ret.push({ varShading: varShading });
+    });
+    return ret;
+}
+
+Shading.prototype.prepareFillStyles = function(fills, forHeader) {
+    let self = this;
+    let ret = [];
+    fills.forEach(function(fill) {
+        if (!fill || !fill.varShading || fill.shadingType != 'varShading') {
+            ret.push(fill);
+            return;
+        }
+        let varShading = Utils.clone(fill.varShading);
+
+        if (forHeader) {
+            let rect = self.header.node().getBoundingClientRect();
+            varShading.startX = 0;
+            varShading.endX = rect.width;
+            varShading.horizontal = true;
+            varShading.data = Utils.range(0, 1, 0.01).map(function(d) {
+                return {
+                    x: d * rect.width,
+                    y: d * rect.height
+                }
+            });
+            if (fill.varShading.customFills && fill.varShading.varShadingType == 'customFills') return ret.push(null);
+        }
+        else {
+            let transformX = self.getTransformX(self.selectedCurve);
+            varShading.startX = transformX(varShading.startX);
+            varShading.endX = transformX(varShading.endX);
+            varShading.data = self.prepareData(self.selectedCurve);
+            varShading.horizontal = false
+
+            if (varShading.customFills && varShading.varShadingType == 'customFills') {
+                varShading.customFills.patCanvasId = 'shading-' + self.id + '-pattern-canvas';
+                varShading.customFills.content.forEach(function(d) {
+                    d.lowVal = transformX(d.lowVal);
+                    d.highVal = transformX(d.highVal);
+                });
+                varShading.customFills.content = Utils.sortByKey(varShading.customFills.content, 'lowVal');
+            }
+        }
+        ret.push({ 
+            varShading: varShading,
+            shadingType: 'varShading'
+        });
     });
     return ret;
 }
@@ -540,7 +587,9 @@ function drawHeader(shading) {
         .attr('height', height)
 
     let hCtx = hCanvas.node().getContext('2d');
-    let fills = shading.prepareFillStyles(true);
+
+    let fills = shading.isNegPosFill ? shading.prepareFillStyles([null, shading.positiveFill, shading.negativeFill], true)
+                : shading.prepareFillStyles([shading.fill, null, null], true);
     Utils.createFillStyles(hCtx, fills, function(fillStyles) {
         hCtx.save();
         //if (shading.isNegPosFilling) {

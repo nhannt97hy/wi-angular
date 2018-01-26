@@ -2440,7 +2440,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: null
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
@@ -3398,6 +3398,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
                 function (plot, err) {
+                console.log("getLogplot", plot); 
                     if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
