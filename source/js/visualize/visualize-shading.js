@@ -95,7 +95,7 @@ Shading.prototype.getProperties = function() {
     let rightCurve = this.rightCurve
     let leftX = this.leftX;
     let rightX = this.rightX;
-    // Server does not allow right curve to be null
+
     if (!rightCurve && leftCurve) {
         rightCurve = leftCurve;
         rightX = leftX;
@@ -157,7 +157,6 @@ Shading.prototype.setProperties = function(props) {
         Utils.setIfNotUndefined(this, 'rightCurve', props.rightCurve);
         Utils.setIfNotUndefined(this, 'rightX', props.rightFixedValue);
     }
-
     Utils.setIfNotUndefined(this, 'selectedCurve', props.controlCurve);
     this.showRefLine = this.getType() == 'custom';
 
@@ -290,7 +289,6 @@ Shading.prototype.doPlot = function(highlight) {
     let ctx = this.ctx;
     let self = this;
     let plotSamples = Utils.clusterPairData(leftData, rightData);
-
     let fills = !this.isNegPosFill ? this.prepareFillStyles([this.fill, null, null])
         : this.prepareFillStyles([null, this.positiveFill, this.negativeFill]);
     Utils.createFillStyles(this.ctx, fills, function(fillStyles) {
@@ -573,9 +571,30 @@ function drawRefLine(shading) {
 function drawHeader(shading) {
     let header = shading.header;
     if (!header) return;
-    header
-        .select('.vi-shading-name')
-        .text(shading.name);
+
+    let leftVal, rightVal;
+
+    if (!shading.isNegPosFill && shading.fill && shading.fill.shadingType == 'varShading') {
+        leftVal = shading.fill.varShading.startX;
+        rightVal = shading.fill.varShading.endX;
+    }
+
+    header.select('.vi-shading-name').text(shading.name);
+    let leftBlock = header.select('.vi-shading-left-value');
+    let rightBlock = header.select('.vi-shading-right-value');
+    if (leftVal != null && rightVal != null) {
+        leftBlock
+            .style('display', 'inline-block')
+            .text(leftVal);
+        rightBlock
+            .style('display', 'inline-block')
+            .text(rightVal);
+    }
+    else {
+        leftBlock.style('display', 'none');
+        rightBlock.style('display', 'none');
+    }
+
 
     let rect = header.node().getBoundingClientRect();
     let headerBorderWidth = parseInt(header.style('border-width'));

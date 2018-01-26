@@ -479,7 +479,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         name: "none",
                         foreground: "black",
                         background: "blue"
-                    }
+                    },
+                    shadingType: 'pattern'
                 },
                 positiveFill: {
                     display: false,
@@ -487,7 +488,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         name: "none",
                         foreground: "black",
                         background: "blue"
-                    }
+                    },
+                    shadingType: 'pattern'
                 },
                 negativeFill: {
                     display: false,
@@ -495,7 +497,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         name: "none",
                         foreground: "black",
                         background: "blue"
-                    }
+                    },
+                    shadingType: 'pattern'
                 },
             });
             console.log(self.shadings);
