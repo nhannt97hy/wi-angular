@@ -67,22 +67,26 @@ module.exports.createLayout = function (domId, $scope, $compile) {
             nextBtn = control.find("#nextBtn");
     
             let previous = function(){
-                let current = stack.getActiveContentItem().id;
-                let currentIdx = stack.contentItems.findIndex(d => d.id == current);
-                let preIdx = (currentIdx - 1) < 0 ? 0: (currentIdx - 1);
-                stack.setActiveContentItem(stack.contentItems[preIdx]);
+                let current = stack.getActiveContentItem().config.id;
+                let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
+                if(currentIdx){
+                    let preIdx = currentIdx - 1;
+                    stack.setActiveContentItem(stack.contentItems[preIdx]);
+                }
             }
     
             let next = function(){
-                let current = stack.getActiveContentItem().id;
-                let currentIdx = stack.contentItems.findIndex(d => d.id == current);
-                let nextIdx = (currentIdx + 1) >= stack.contentItems.length ? stack.contentItems.length - 1 : currentIdx + 1;
-                stack.setActiveContentItem(stack.contentItems[nextIdx]);
+                let current = stack.getActiveContentItem().config.id;
+                let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
+                if(currentIdx < stack.contentItems.length - 1){
+                    let nextIdx = currentIdx + 1;
+                    stack.setActiveContentItem(stack.contentItems[nextIdx]);
+                }
             }
 
             previousBtn.click(previous);    
             nextBtn.click(next);
-            
+
             // Add the colorDropdown to the header
             stack.header.controlsContainer.prepend( control );
             stack.on("stateChanged", function(){
@@ -93,17 +97,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                     let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
                     if(currentIdx == 0){
                         previousBtn.css("cursor","not-allowed");
-                        previousBtn.unbind("click");
                     }else{
                         previousBtn.css("cursor","pointer");
-                        previousBtn.click(previous);
                     }
                     if(currentIdx == stack.contentItems.length - 1){
                         nextBtn.css("cursor","not-allowed");
-                        nextBtn.unbind("click");
                     }else{
                         nextBtn.css("cursor","pointer");
-                        nextBtn.click(next);
                     }
                 }else{
                     previousBtn.css("display","none");
