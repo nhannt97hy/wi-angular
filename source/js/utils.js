@@ -2014,6 +2014,10 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
     shadingObj.negativeFill.pattern = fillPatternStyles.negativeFill.pattern;
     shadingObj.negativeFill.varShading = variableShadingStyle.negativeFill.varShading;
 
+    shadingObj.fill.varShading.palette = variableShadingStyle.fill.varShading.palName;
+    shadingObj.positiveFill.varShading.palette = variableShadingStyle.positiveFill.varShading.palName;
+    shadingObj.negativeFill.varShading.palette = variableShadingStyle.negativeFill.varShading.palName;
+    
     if (shadingObj.shadingStyle == 'pattern') {
         shadingObj.fill.display = fillPatternStyles.fill.display;
         shadingObj.positiveFill.display = fillPatternStyles.positiveFill.display;

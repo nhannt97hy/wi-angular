@@ -14,6 +14,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
+        console.log("currentTrack", currentTrack);
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
         this.tabFlags = options.tabs;
 
@@ -81,10 +82,16 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             })
         });
         this.curveList = currentTrack.getCurves();
+        let curves_bk = [];
         this.curveList.forEach(function(c) {
             self.curves.push(c.getProperties());
+
+            //get id & idCurve to compare in updateCurvesTab function
+            curves_bk.push({
+                id : c.id,
+                idCurve : c.idCurve
+            });
         });
-        let curves_bk = angular.copy(this.curveList);
 
         this.curves.forEach(function(c, index) {
             c.changed = changed.unchanged;
@@ -373,7 +380,6 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         }
 
         // shading tab
-        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
 
         let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
         this.leftLimit = customLimit.concat(self.curveList);
@@ -473,7 +479,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         name: "none",
                         foreground: "black",
                         background: "blue"
-                    }
+                    },
+                    shadingType: 'pattern'
                 },
                 positiveFill: {
                     display: false,
@@ -481,7 +488,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         name: "none",
                         foreground: "black",
                         background: "blue"
-                    }
+                    },
+                    shadingType: 'pattern'
                 },
                 negativeFill: {
                     display: false,
@@ -489,7 +497,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                         name: "none",
                         foreground: "black",
                         background: "blue"
-                    }
+                    },
+                    shadingType: 'pattern'
                 },
             });
             console.log(self.shadings);

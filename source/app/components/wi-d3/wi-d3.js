@@ -431,7 +431,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.pushObjectTrack = function (objectTrackProps) {
         self.pushTrackComponent(objectTrackProps);
     }
-
     this.plot = function (track) {
         if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };

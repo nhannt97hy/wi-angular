@@ -505,43 +505,55 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         }
         
         this._options = {};
-        function doApply() {
+        function doApply(_callback) {
             self.variableShadingOptions.fill.varShading.varShadingType = self.varShadingType;
             self.variableShadingOptions.positiveFill.varShading.varShadingType = self.varShadingType;
             self.variableShadingOptions.negativeFill.varShading.varShadingType = self.varShadingType;
 
-            let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
-            console.log("gg",self.shadingOptions);
-            self._options = {
-                _index : shadingOptions._index,
-                changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
-                            ? (shadingOptions.changed = 2) : shadingOptions.changed,
-                idControlCurve : self.variableShadingOptions.controlCurve.id,
-                idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
-                idRightLine : self.shadingOptions.rightLine.id,
-                leftLine : self.shadingOptions.leftLine,
-                rightLine : self.shadingOptions.rightLine,
-                idShading : shadingOptions.idShading,
-                idTrack : shadingOptions.idTrack,
-                isNegPosFill : self.shadingOptions.isNegPosFill,
-                leftFixedValue : self.shadingOptions.leftFixedValue,
-                name : self.shadingOptions.name,
-                shadingStyle : self.shadingOptions.shadingStyle,
-                fill : temp.fill,
-                positiveFill : temp.positiveFill,
-                negativeFill : temp.negativeFill
+            let message = null;
+            if (self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') 
+            {
+                message = validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
+            }
+            if(!message) {
+                let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
+                console.log("gg",self.shadingOptions);
+                self._options = {
+                    _index : shadingOptions._index,
+                    changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
+                                ? (shadingOptions.changed = 2) : shadingOptions.changed,
+                    idControlCurve : self.variableShadingOptions.controlCurve.id,
+                    idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
+                    idRightLine : self.shadingOptions.rightLine.id,
+                    leftLine : self.shadingOptions.leftLine,
+                    rightLine : self.shadingOptions.rightLine,
+                    idShading : shadingOptions.idShading,
+                    idTrack : shadingOptions.idTrack,
+                    isNegPosFill : self.shadingOptions.isNegPosFill,
+                    leftFixedValue : self.shadingOptions.leftFixedValue,
+                    name : self.shadingOptions.name,
+                    shadingStyle : self.shadingOptions.shadingStyle,
+                    fill : temp.fill,
+                    positiveFill : temp.positiveFill,
+                    negativeFill : temp.negativeFill
+                };
+                _callback();
+            } else {
+                DialogUtils.warningMessageDialog(ModalService, message);
             };
         }
         this.onCancelButtonClicked = function () {
             close(null);
         }
         this.onApplyButtonClicked = function () {
-            doApply();
-            callback(self._options);
+            doApply(function() {
+                callback(self._options);
+            });
         };
         this.onOkButtonClicked = function () {
-            doApply();
-            close(self._options, 100);
+            doApply(function() {
+                close(self._options, 100);
+            });
         };
     }
     ModalService.showModal({

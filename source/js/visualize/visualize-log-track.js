@@ -985,18 +985,15 @@ LogTrack.prototype.addShadingHeader = function(shading) {
             self.drawingHeaderMouseDownCallback(shading);
         });
 
-    let nameBlock = header.append('div')
-        .attr('class', 'vi-shading-name')
-        .style('display', 'inline-block')
-        .style('position', 'relative')
-        .style('text-align', 'center')
-        .style('background-color', 'white')
-        .style('border', '1px solid black')
-        .style('padding', '0 2px 0 2px')
-        .style('font-size', '10px')
-        .style('z-index', 1)
-        .style('cursor', 'default')
-        .text(name);
+    let valueClasses = ['vi-shading-left-value', 'vi-shading-name', 'vi-shading-right-value'];
+    let valueBlocks = header.selectAll('div')
+        .data(valueClasses)
+        .enter()
+        .append('div')     
+            .attr('class', d => d)
+            .classed('vi-shading-header-item', true)
+            .text('.');
+
 
     let rect = header.node().getBoundingClientRect();
     let headerCanvas = header.append('canvas')

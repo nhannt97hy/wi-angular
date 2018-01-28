@@ -116,8 +116,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
     }
     this.update = function () {
-        let viTrack = self.viTrack;
         if (!viTrack.isLogTrack()) return;
+
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         function _addShadingToTrack (shading) {
@@ -190,10 +190,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         if (!shading) return;
                         _addShadingToTrack(shading);
                     });
-                    logTrack.shadings.forEach(shading => {
+                    /*logTrack.shadings.forEach(shading => {
                         if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
                         _addShadingToTrack(shading);
-                    });
+                    });*/
 
                     logTrack.width = Utils.inchToPixel(logTrack.width);
                     viTrack.setProperties(logTrack);

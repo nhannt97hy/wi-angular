@@ -8978,7 +8978,7 @@ exports.curveFilterDialog = function(ModalService){
 
         this.createOp = 'backup';
         this.filterOp = '5';
-        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 4;
+        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 100;
         this.table = new Array(5).fill(0.2).map(d => {return parseFloat(d.toFixed(4))});
         this.wells = utils.findWells();
         this.datasets = [];
@@ -9063,7 +9063,8 @@ exports.curveFilterDialog = function(ModalService){
             if(self.filterOp == '2'){
                 return !self.polyOder || self.devOrder == null || ! self.numPoints;
             }else if (self.filterOp == '4'){
-                return !self.cutoff;
+                let range = Math.floor((self.bottomDepth - self.topDepth)/self.SelectedWell.step);
+                return !self.cutoff || self.cutoff > range;
             }
             else{
                 return !self.numLevel;
@@ -9563,194 +9564,10 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
     });
 }
 
-exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
-    function ModalController(wiComponentService, wiApiService, close) {
-        let self = this;
-        window.tBulk = this;
+let trackBulkUpdateDialogModule = require('./track-bulk-update.js');
+trackBulkUpdateDialogModule.setInitFunc(initModal);
+exports.trackBulkUpdateDialog = trackBulkUpdateDialogModule.trackBulkUpdateDialog;
 
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-
-        this.tracks = [];
-        this.sumWidth = 0;
-
-        allTracks.forEach(function(t) {
-            self.tracks.push(getTrackProps(t));
-        });
-
-        this.tracks.forEach(function(track) {
-            self.colorTrack = function (track) {
-                dialogUtils.colorPickerDialog(ModalService, track.color, function (colorStr) {
-                    track.color = colorStr;
-                });
-            };
-            self.sumWidth += track.width;
-        });
-        this.getSum = function () {
-            self.sumWidth = 0;
-            this.tracks.forEach(function(track) {
-                self.sumWidth += track.width;
-            });
-        };
-
-        console.log("tracks", this.tracks);
-        function getLogTrack (track) {
-            return (allTracks.filter(t => t.id == track.idTrack))[0];
-        };
-        function getDepthTrack (track) {
-            return (allTracks.filter(t => t.id == track.idDepthAxis))[0];
-        };
-        function getZoneTrack (track) {
-            return (allTracks.filter(t => t.id == track.idZoneTrack))[0];
-        };
-        function getImageTrack (track) {
-            return (allTracks.filter(t => t.id == track.idImageTrack))[0];
-        };
-        // console.log("allTracks", allTracks);
-        function getTrackProps (track) {
-            let props =  {
-                check : true
-            }
-            switch (track.type) {
-                case 'log-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Log Track";
-                    break;
-                case 'depth-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Depth Track";
-                    break;
-                case 'zone-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Zone Track";
-                    break;
-                case 'image-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Image Track";
-                    break;
-                default:
-                    break;
-            }
-            return props;
-        }
-        function callAPI (cb) {
-            async.eachOfSeries(self.tracks, function(track, idx, callback){
-                console.log("API", track);
-                switch(track.type) {
-                    case 'Log Track':
-                        if( track.check ) {
-                            wiApiService.editTrack(track, function(res) {
-                                let l = angular.copy(track);
-                                l.width = utils.inchToPixel(l.width);
-                                let logTrack = getLogTrack(l);
-                                console.log("log", res, l, logTrack);
-                                logTrack.setProperties(l);
-
-                                logTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    case 'Depth Track':
-                        if( track.check ) {
-                            track.trackBackground = track.color;
-                            wiApiService.editDepthTrack(track, function(res) {
-                                console.log("depth", res);
-                                let d = angular.copy(track);
-                                d.width = utils.inchToPixel(d.width);
-                                let depthTrack = getDepthTrack(d);
-                                depthTrack.setProperties(d);
-
-                                depthTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    case 'Zone Track':
-                        if( track.check ) {
-                            wiApiService.editZoneTrack(track, function(res) {
-                                console.log("zone", res);
-                                let z = angular.copy(track);
-                                z.width = utils.inchToPixel(z.width);
-                                let zoneTrack = getZoneTrack(z);
-                                zoneTrack.setProperties(z);
-
-                                zoneTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    case 'Image Track':
-                        if( track.check ) {
-                            wiApiService.editImageTrack(track, function(res) {
-                                console.log("image", res);
-                                let i = angular.copy(track);
-                                i.width = utils.inchToPixel(i.width);
-                                let imageTrack = getImageTrack(i);
-                                imageTrack.setProperties(i);
-
-                                imageTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    default:
-                        if (callback) callback();
-                        break;
-                }
-            }, function(err) {
-                if (err) {
-                    setTimeout(() => {
-                        DialogUtils.errorMessageDialog(ModalService, err);
-                    });
-                }
-                if(cb) cb();
-            });
-        }
-        this.onApplyButtonClicked = function(){
-            callAPI(function(){});
-        };
-        this.onOkButtonClicked = function(){
-            callAPI(function(){
-                close();
-            });
-
-        };
-        this.onCancelButtonClicked = function(){
-            close(null);
-        }
-    }
-    ModalService.showModal({
-        templateUrl: "track-bulk-update/track-bulk-update-modal.html",
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        initModal(modal);
-        // modal.element.modal();
-        // $(modal.element[0].children[0]).draggable();
-        modal.close.then(function () {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-        });
-    });
-}
 let curveBulkUpdateDialogModule = require('./curve-bulk-update.js');
 curveBulkUpdateDialogModule.setInitFunc(initModal);
 exports.curveBulkUpdateDialog = curveBulkUpdateDialogModule.curveBulkUpdateDialog;
