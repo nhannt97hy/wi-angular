@@ -21,6 +21,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _currentTrack = null;
     let _previousTrack = null;
     let _tooltip = true;
+    let _referenceLine = true;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
 
@@ -56,6 +57,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.tooltip = function (on) {
         if (on === undefined) return _tooltip;
         _tooltip = on;
+    }
+    this.referenceLine = function(on) {
+        if (on === undefined) return _referenceLine;
+        _referenceLine = on;
+    }
+
+    this.toggleTooltip = function() {
+        _tooltip = !_tooltip;
+    }
+
+    this.toggleReferenceLine = function() {
+        _referenceLine = !_referenceLine;
     }
 
     this.getDepthRange = function () {
@@ -169,9 +182,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.updateLogTrack = function (viTrack) {
         if (!viTrack.isLogTrack()) return;
         
-        viTrack.drawings.forEach(function(d) {
-            if (d.isShading) self.removeShadingFromTrack(viTrack, d);
-        })
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         function _addShadingToTrack (shading) {
@@ -242,7 +252,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         let shading = logTrack.shadings.find(shading => shading.idShading == viShading.id);
                         viTrack.removeDrawing(viShading);
                         if (!shading) return;
-                        _addShadingToTrack(shading);
                     });
                     logTrack.shadings.forEach(shading => {
                         if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
@@ -1029,7 +1038,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //let sign = (d3.event.deltaY<0)?"":"-";
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
-        _drawTooltip(_currentTrack);
+        _drawTooltip();
     }
 
     this.zoom = function (zoomOut) {
@@ -1056,7 +1065,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
-        _drawTooltip(_currentTrack);
+        _drawTooltip();
     }
 
     this.updateTrack = function (viTrack) {
@@ -1126,21 +1135,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     function _drawTooltip(track) {
-        if (!_tooltip) return;
-
-        let plotMouse = d3.mouse(track.plotContainer.node());
-        let x = plotMouse[0];
-        let y = plotMouse[1];
-        if (Number.isNaN(x) || Number.isNaN(y)) return;
-        let plotDim = track.plotContainer.node().getBoundingClientRect();
-
-        if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
-
-        let depth = track.getTransformY().invert(plotMouse[1]);
+        let plotMouse, x, y, plotDim;
+        if (!track) {
+            for (let tr of _tracks) {
+                plotMouse = d3.mouse(tr.plotContainer.node());
+                x = plotMouse[0];
+                y = plotMouse[1];
+                plotDim = tr.plotContainer.node().getBoundingClientRect();
+                
+                if (Number.isNaN(x) || Number.isNaN(y)) continue;
+                if (x > 0 && x < plotDim.width && y > 0 && y < plotDim.height) {
+                    track = tr;
+                    break;
+                }
+            }
+        }
+        if (!track) track = _currentTrack;
+        y = d3.mouse(track.plotContainer.node())[1];
+        let depth = track.getTransformY().invert(y);
 
         _tracks.forEach(function(tr) {
-            if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
-            if (tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
+            if (_referenceLine && tr.drawTooltipLines) tr.drawTooltipLines(depth);
+            if (_tooltip && tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
         // graph.createTooltipLines(svg);
     }
@@ -2420,7 +2436,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: null
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
@@ -3378,6 +3394,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
                 function (plot, err) {
+                console.log("getLogplot", plot); 
                     if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
