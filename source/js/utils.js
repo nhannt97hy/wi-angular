@@ -863,7 +863,7 @@ function createComboviewsNode(parent) {
         idWell: parent.idWell
     }
     parent.combined_boxes.forEach(function (comboview) {
-        comboview.parent = parent;
+        // comboview.parent = parent;
         comboviewsModel.children.push(comboviewToTreeConfig(comboview));
     });
     return comboviewsModel;
@@ -889,10 +889,8 @@ function createWellModel(well) {
         icon: "well-16x16",
         label: well.name
     };
-    if (well.idGroup) {
-        wellModel.parent = 'group' + well.idGroup;
-    }
-    wellModel.parent = 'project' + well.idProject;
+    if (well.idGroup) wellModel.parent = 'group' + well.idGroup;
+    else wellModel.parent = 'project' + well.idProject;
     wellModel.children = new Array();
     return wellModel;
 }

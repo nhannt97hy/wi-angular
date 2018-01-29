@@ -71,7 +71,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
         let selectedNodes = [];
         backupSelectedNodes.forEach(function(selectedNode) {
             let node = utils.getModel(selectedNode.type, selectedNode.id) || utils.getStaticNode(selectedNode.type);
-            if (node) selectedNodes.push(node);
+            if (node) {
+                node.data.selected = true;
+                selectedNodes.push(node);
+            }
         })
         wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
     };
@@ -248,7 +251,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                     }
                 ]);
             case 'group':
-            let groupModel = utils.getSelectedNode();
+                let groupModel = utils.getSelectedNode();
                 return [
                     {
                         label: "Group Manager",
@@ -273,7 +276,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                 let groupsContextMenu = [];
                 let wellModels = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
                 groups.forEach(group => {
-                    if (wellModels[0].properties.idGroup == group.idGroup) return;
+                    if (!wellModels.find(wm => wm.properties.idGroup != group.idGroup)) return;
                     groupsContextMenu.push({
                         label: group.name,
                         icon: 'group-16x16',
@@ -354,7 +357,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         childContextMenu: groupsContextMenu
                     });
                 }
-                if (wellModels[0].properties.idGroup) {
+                if (wellModels.find(wm => wm.properties.idGroup)) {
                     wellContextMenu.push({
                         label: 'Ungroup',
                         icon: 'clear-16x16',
