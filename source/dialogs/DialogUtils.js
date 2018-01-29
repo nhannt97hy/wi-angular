@@ -6076,8 +6076,26 @@ exports.curveAverageDialog = function (ModalService, callback) {
         this.idSelectedDataset = null;
         this.desCurve = null;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well') self.wellModel = selectedNodes[0];
-        else self.wellModel = angular.copy(self.wells[0]);
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
+        }else{
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+        }
         self.idWell = self.wellModel.id;
         refresh();
         this.defaultDepth = defaultDepth;
@@ -6114,7 +6132,6 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 idDesCurve: self.availableCurves[0].id,
                 data: []
             };
-            console.log("curves", self.availableCurves);
         }
         this.select = function (curve) {
             curve.flag = !curve.flag;
@@ -6130,6 +6147,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh(function(){
                 });
@@ -6253,12 +6271,11 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         this.curves = [];
         this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        console.log("selectedNodes", selectedNodes);
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else this.wellModel = angular.copy(self.wells[0]);
         this.datasets = this.wellModel.children;
         this.curves = this.wellModel.children[0].children;
-        if( selectedNodes && selectedNodes[0].type == 'curve') {
+        if( selectedNodes && selectedNodes.length && selectedNodes[0].type == 'curve') {
             console.log("SELECTED_NODES");
             this.curveModel = setLinePropertiesIfNull(selectedNodes[0]);
             this.wellModel = utils.findWellByCurve(self.curveModel.id);
@@ -6330,6 +6347,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh(function(){
                 });
@@ -6473,16 +6491,38 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.zoneSetPara = [];
         this.zones = [];
         this.curves = [];
-        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
-            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
-            zoneSetParaModel = selectedNodes[0];
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+
+                case 'zoneset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                zoneSetParaModel = selectedNodes[0];
+                break;
+
+                case 'zone':
+                zoneSetParaModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+                self.wellModel = utils.findWellById(zoneSetParaModel.properties.idWell);
+                break;
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;               
+            }
         }
-        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
-            zoneSetParaModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
-            this.wellModel = utils.findWellById(zoneSetParaModel.properties.idWell);
-        }
-        else this.wellModel = angular.copy(self.wells[0]);
+        else {
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+        };
 
         this.idWell = this.wellModel.id;
         defaultDepth();
@@ -6675,12 +6715,34 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         this.percent = 0;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        
         this.refresh = function(cb){
             self.wellArr = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
             });
             if(!self.SelectedWell){
-                self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+                if(selectedNodes && selectedNodes.length){
+                    switch (selectedNodes[0].type){
+                        case 'well':
+                        self.SelectedWell = selectedNodes[0];
+                        break;
+        
+                        case 'dataset':
+                        self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                        break;
+        
+                        case 'curve':
+                        self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                        break;
+        
+                        default:
+                        self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0] : null;
+                    }
+                }
+                else {
+                    self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+                }
             }else{
                 self.SelectedWell = self.wellArr.find(function(well){
                     return well.id == self.SelectedWell.id;
@@ -6913,14 +6975,27 @@ exports.splitCurveDialog = function (ModalService, callback) {
         this.data;
         this.arrayCurve = [];
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well')
-            this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'curve' ) {
-            this.curveModel = selectedNodes[0];
-            this.wellModel = utils.findWellByCurve(this.curveModel.id);
-        }
-        else {
-            this.wellModel = angular.copy(self.wells[0]);
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+                
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.curveModel = selectedNodes[0];
+                self.wellModel = utils.findWellByCurve(self.curveModel.id);
+                break;
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
+        }else{
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
         }
 
         getInfo();
@@ -6988,6 +7063,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.process = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh();
             }, 100);
@@ -7084,13 +7160,26 @@ exports.mergeCurveDialog = function (ModalService) {
         this.idSelectedDataset = null;
         this.desCurve = null;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well')
-            this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'curve' ) {
-            this.wellModel = utils.findWellByCurve(selectedNodes[0].id);
-        }
-        else {
-            this.wellModel = angular.copy(self.wells[0]);
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+                
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
+        }else{
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
         }
 
         self.idWell = self.wellModel.id;
@@ -7143,6 +7232,7 @@ exports.mergeCurveDialog = function (ModalService) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh(function(){
                 });
@@ -7267,13 +7357,34 @@ exports.fillDataGapsDialog = function(ModalService){
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        
         function refresh(cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
             });
             if(!self.selectedWell){
-                self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
-
+                if(selectedNodes && selectedNodes.length){
+                    switch (selectedNodes[0].type){
+                        case 'well':
+                        self.selectedWell = selectedNodes[0];
+                        break;
+        
+                        case 'dataset':
+                        self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                        break;
+        
+                        case 'curve':
+                        self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                        break;
+        
+                        default:
+                        self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+                    }
+                }
+                else {
+                    self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
+                }
             }else {
                 self.selectedWell = self.wells.find(function (well) {
                     return well.id == self.selectedWell.id;
@@ -7528,13 +7639,34 @@ exports.curveDerivativeDialog = function(ModalService){
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        
         this.refresh = function (cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
             });
             if(!self.selectedWell){
-                self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
-
+                if(selectedNodes && selectedNodes.length){
+                    switch (selectedNodes[0].type){
+                        case 'well':
+                        self.selectedWell = selectedNodes[0];
+                        break;
+        
+                        case 'dataset':
+                        self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                        break;
+        
+                        case 'curve':
+                        self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                        break;
+        
+                        default:
+                        self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+                    }
+                }
+                else {
+                    self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
+                }
             }else {
                 self.selectedWell = self.wells.find(function (well) {
                     return well.id == self.selectedWell.id;
@@ -7721,7 +7853,7 @@ exports.TVDConversionDialog = function (ModalService) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-        this.wells = angular.copy(utils.findWells());
+        this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];
         this.step;this.topDepth; this.bottomDepth;
@@ -8164,7 +8296,7 @@ exports.TVDConversionDialog = function (ModalService) {
                     data: self.outaziArr
                 }
                 ];
-                async.eachOfSeries(payloads, (payload, i, callback) => {
+                async.each(payloads, (payload, callback) => {
                     let overwrite = self.curvesArr.find(curve => {return curve.name == payload.curveName && curve.properties.idDataset == payload.idDataset;});
                     if(overwrite) {
                         delete payload.curveName;
@@ -8523,20 +8655,38 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         this.unit = 'DEGC';
         this.desCurve = null
 
-        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
-            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
-            this.zoneSetModel = selectedNodes[0];
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+
+                case 'zoneset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                self.zoneSetModel = selectedNodes[0];
+                break;
+
+                case 'zone':
+                self.zoneSetModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+                self.wellModel = utils.findWellById(this.zoneSetModel.properties.idWell);
+                break;
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
         }
-        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
-            this.zoneSetModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
-            this.wellModel = utils.findWellById(this.zoneSetModel.properties.idWell);
-        }
-        else if ( selectedNodes && selectedNodes[0].type == 'curve' ) {
-            this.curveModel = selectedNodes[0];
-            this.wellModel = utils.findWellByCurve(this.curveModel.id);
-        }
-        else this.wellModel = angular.copy(self.wells[0]);
+        else {
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+        };
 
         this.idWell = this.wellModel.id;
         selectWell (this.idWell);
@@ -8550,7 +8700,6 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             self.datasetModel = self.datasets[0];
             // self.zones = [];
             self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
-            console.log("zoneSet", self.zoneSetModel);
             // if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) {
             //         self.zoneSetModel = self.zoneSets[0];
             // }
