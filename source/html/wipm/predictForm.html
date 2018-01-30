@@ -1,0 +1,47 @@
+<form ng-if="predict" ng-controller="predictFormController as predict" id="predict">
+    <div class="form-group form-inline">
+        <label class="control-label col-sm-3">Model name</label>
+        <select ng-options="x as x.name for x in predict.models track by x.id" 
+                ng-model="predict.model" 
+                class="form-control wi-form-control"
+                required>
+        </select>
+    </div>
+    <div class="form-group form-inline container-fluid" style="padding-left: 0">
+        <label class="control-label col-sm-3">Chose obs</label>
+        <label class="col-sm-3">Well
+            <select ng-options="x as x.name for x in predict.wells track by x.idWell" 
+                    ng-model="predict.well" 
+                    ng-change="predict.changeWell()"
+                    style="width:100%; font-weight: normal"
+                    class="form-control wi-form-control"
+                    required>
+            </select>
+        </label>
+        <label class="control-label col-sm-3">Dataset
+            <select ng-options="x as x.name for x in predict.datasets track by x.idDataset" 
+                    ng-model="predict.dataset" 
+                    ng-change="predict.changeDataset()"
+                    style="width:100%; font-weight: normal"
+                    class="form-control wi-form-control"
+                    required>
+            </select>
+        </label>
+        <label class="control-label col-sm-3">Curve
+            <select ng-options="x as x.name for x in predict.curves track by x.idCurve" 
+                    ng-model="predict.curve" 
+                    ng-change="predict.changeCurve()"
+                    style="width:100%; font-weight: normal"
+                    class="form-control wi-form-control"
+                    required>
+            </select>
+        </label>
+    </div>
+    <!-- <div class="form-group form-inline">
+        <label class="col-sm-3">Observation set</label>
+        <input type="file" accept=".csv" on-read-file="predict.read_data($fileContent)" required>
+    </div>-->
+    <div class="form-group form-inline">
+        <button class="btn btn-primary" ng-click="predict.predict()">Predict</button>
+    </div> 
+</form> 

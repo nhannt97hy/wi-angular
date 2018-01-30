@@ -13,16 +13,13 @@ wipm.directive('onReadFile', function ($parse) {
         scope: false,
         link: function(scope, element, attrs) {
             var fn = $parse(attrs.onReadFile);
-
             element.on('change', function(onChangeEvent) {
                 var reader = new FileReader();
-
                 reader.onload = function(onLoadEvent) {
                     scope.$apply(function() {
                         fn(scope, {$fileContent:onLoadEvent.target.result});
                     });
                 };
-
                 reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
             });
         }
@@ -34,7 +31,7 @@ wipm.controller(controllerName, function($scope){
     $scope.retrain = $scope.predict = $scope.list = $scope.result = false;
 })
 
-wipm.controller(createFormCtrlName, function($http, $location){
+wipm.controller(createFormCtrlName, function($http){
     var self = this;
     this.name = "Model";
     this.description = "Description"
@@ -130,13 +127,13 @@ wipm.controller(createFormCtrlName, function($http, $location){
                     }
                 return;
             }, function(error){
-                toastr.error(error, '');
+                toastr.error(JSON.stringify(error), '');
                 return;
             })
         }
     }
 })
-wipm.controller(retrainFormCtrlName, function($http, $location){
+wipm.controller(retrainFormCtrlName, function($http){
     var self = this;    
     $http({
         method: 'GET',
@@ -212,7 +209,7 @@ wipm.controller(retrainFormCtrlName, function($http, $location){
                                 }
                             return;
                         }, function(error){
-                            toastr.error(error, '');
+                            toastr.error(JSON.stringify(error), '');
                             return;
                         })
                     }
@@ -220,70 +217,96 @@ wipm.controller(retrainFormCtrlName, function($http, $location){
             }
             return;
     }, function(error){
-            toastr.error(error, '');
+            toastr.error(JSON.stringify(error), '');
             return;
     })
 })
-wipm.controller(predictFormCtrlName, function($http, $location){
-    var self = this;    
-        $http({
-            method: 'GET',
-            url: 'http://localhost:3000/store/api/model/list'
-        }).then(function(response){
-                var res = response.data;
-                if(res.statusCode == 400){
-                    toastr.error(res.body + '\n Load page again!', '');
-                }else{
-                    self.models = res;
-                    self.model = self.models[0];
-                    self.read_data = function($fileContent){
-                        var string = $fileContent.split('\n');
-                        self.data = [];
-                        for( let i=0; i < string.length - 1; i++){
-                            let str = string[i].split(',');
-                            var arr = [];
-                            for( let j=0; j < str.length; j++){
-                                arr.push(parseFloat(str[j]))
-                            }
-                            self.data.push(arr);
+wipm.controller(predictFormCtrlName, function($http,  wiApiService){
+    var self = this; 
+    this.project;
+    wiApiService.getProjectInfo(1, function(projectInfo){
+        wiApiService.getProject(projectInfo, function(project){
+            self.project = project;
+            self.wells = self.project.wells;
+            self.well = self.wells[0];
+            self.datasets = self.well.datasets;
+            self.dataset = self.datasets[0];
+            self.curves = self.dataset.curves;
+            self.curve = self.curves[0];
+        })
+    });  
+    this.changeWell = function(){
+        self.datasets = self.well.datasets;
+        self.dataset = self.datasets[0];
+        self.curves = self.dataset.curves;
+        self.curve = self.curves[0];
+    }
+    this.changeDataset = function(){
+        self.curves = self.dataset.curves;
+        self.curve = self.curves[0];
+    }
+    this.changeCurve = function(){
+        console.log('change curve: ', self.curve);
+    }
+    $http({
+        method: 'GET',
+        url: 'http://localhost:3000/store/api/model/list'
+    }).then(function(response){
+            var res = response.data;
+            if(res.statusCode == 400){
+                toastr.error(res.body + '\n Load page again!', '');
+            }else{
+                self.models = res;
+                self.model = self.models[0];
+                // self.read_data = function($fileContent){
+                //     var string = $fileContent.split('\n');
+                //     self.data = [];
+                //     for( let i=0; i < string.length - 1; i++){
+                //         let str = string[i].split(',');
+                //         var arr = [];
+                //         for( let j=0; j < str.length; j++){
+                //             arr.push(parseFloat(str[j]))
+                //         }
+                //         self.data.push(arr);
+                //     }
+                // }
+                self.predict = function(){
+                    if(self.curve){
+                        $("form").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
+                        $("form").css('opacity', '0.5');
+                        payload = {
+                            model_id: self.model.id,
+                            model_type: self.model.type,
+                            data: self.curve
                         }
-                    }
-                    self.predict = function(){
-                        if(self.data){
-                            $("form").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
-                            $("form").css('opacity', '0.5');
-                            payload = {
-                                model_id: self.model.id,
-                                model_type: self.model.type,
-                                data: self.data
-                            }
-                            $http({
-                                method: 'POST',
-                                url: 'http://localhost:3000/store/api/predict',
-                                data: payload
-                            }).then(function(response){
-                                    $(".load").remove();
-                                    $("form").css('opacity', '1');
-                                    var res = response.data;
-                                    console.log('predict:', res);
-                                    if(res.statusCode == 200){
-                                        toastr.success('Predict observation success!', '');
-                                    }else{
-                                        toastr.error(res.body.message, '');
-                                    }
-                                return;
-                            }, function(error){
-                                toastr.error(error, '');
-                                return;
-                            })
-                        }
+                        $http({
+                            method: 'POST',
+                            url: 'http://localhost:3000/store/api/predict',
+                            data: payload
+                        }).then(function(response){
+                                $(".load").remove();
+                                $("form").css('opacity', '1');
+                                var res = response.data;
+                                console.log('predict:', res);
+                                if(res.statusCode == 200){
+                                    toastr.success('Predict observation success!', '');
+                                }else{
+                                    console.log('fail');
+                                    toastr.error(res.body.message, '');
+                                }
+                            return;
+                        }, function(error){
+                            toastr.error(JSON.stringify(error), '');
+                            return;
+                        })
                     }
                 }
-                return;
-        }, function(error){
-                toastr.error(error, '');
-                return;
-        })
+            }
+            return;
+    }, function(error){
+            toastr.error(JSON.stringify(error), '');
+            return;
+    })
 })
 wipm.controller(listModelFormCtrlName, function($http){
     var self = this;
@@ -306,24 +329,23 @@ wipm.controller(listModelFormCtrlName, function($http){
                     }).then(function(response){
                             $(".load").remove();
                             $("table").css('opacity', '1');
-                            self.models.splice(index, 1);
                             var res = response.data;
                             if(res.statusCode == 200){
+                                self.models.splice(index, 1);
                                 toastr.success('Delete model success!', '');
                             }else{
                                 toastr.error(res.body.message, '');
                             }
                         return;
                     }, function(error){
-                        toastr.error(error, '');
+                        toastr.error(JSON.stringify(error), '');
                         return;
                     })
-                    
                 }
             }
             return;
         }, function(error){
-            toastr.error(error, '');
+            toastr.error(JSON.stringify(error), '');
             return;
     })
 });

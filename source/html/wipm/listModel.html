@@ -1,0 +1,29 @@
+<div class="container-fluid" ng-if="list" ng-controller="listModelController as list" id="list">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <!-- <th width="12.5%">ID</th> -->
+                <th width="12.5%">Name</th>
+                <th width="12.5%">Type</th>
+                <th width="12.5%">Dims Input</th>
+                <th width="25%">MSE</th>
+                <th width="12.5%">Describe</th>
+                <th width="15%">Last train</th>
+                <th width="10%">Delete</th>
+        </thead>
+        <tbody>
+            <tr ng-repeat="x in list.models">
+                <!-- <td width="12.5%">{{ x.id }}</td> -->
+                <td width="12.5%">{{ x.name }}</td>
+                <td width="12.5%">{{ x.type }}</td>
+                <td width="12.5%">{{ x.dims_input }}</td>
+                <td width="25%">{{ x.mse }}</td>
+                <td width="12.5%">{{ x.description }}</td>
+                <td width="15%">{{ x.updatedAt }}</td>
+                <td width="10%">
+                    <button type="button" class="btn btn-mall btn-danger" ng-click="list.delete($index, x.id)" style="padding: 0px 5px">X</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div> 
