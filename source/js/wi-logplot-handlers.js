@@ -367,7 +367,7 @@ exports.AddImageButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     if (currentImgTrack.type != 'image-track') {
         // DialogUtils.errorMessageDialog(this.ModalService, 'Please select a image track for adding an image!');
-        toastr.error('Please select a image track for adding an image!', 'Error');
+        toastr.error('Please select an image track for adding an image!', 'Error');
         return;
     }
     const wiApiService = this.wiApiService;

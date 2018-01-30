@@ -116,6 +116,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
     }
     this.update = function () {
+        let viTrack = this.viTrack;
         if (!viTrack.isLogTrack()) return;
 
         let trackProps = viTrack.getProperties();

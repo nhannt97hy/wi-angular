@@ -591,7 +591,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     // log track
     this.createShadingForSelectedCurve = function () {
-        if(_currentTrack || !_currentTrack.isLogTrack()) {
+        if(!_currentTrack || !_currentTrack.isLogTrack()) {
             // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
             toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
             return;
