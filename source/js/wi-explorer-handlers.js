@@ -282,12 +282,12 @@ exports.RestoreButtonClicked = function () {
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     console.log(selectedNodes);
     if (!Array.isArray(selectedNodes)) return;
-    selectedNodesName = selectedNodes[0].type + '(s):';
-    selectedNodes.forEach(function (selectedNode) {
-        selectedNodesName += ' ' + selectedNode.data.label;
+    selectedNodesName = selectedNodes[0].type + '(s):<br>';
+    selectedNodes.forEach(function (selectedNode, index) {
+        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     ModalService = this.ModalService;
-    dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore ${selectedNodesName} ?`, function (yes) {
+    dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore ${selectedNodesName}?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
                 let type = selectedNode.type.substring(0, selectedNode.type.indexOf('-'));
@@ -308,7 +308,6 @@ exports.RestoreButtonClicked = function () {
                     dialogUtils.errorMessageDialog(ModalService, "Can't restore");
                 }
                 utils.refreshProjectState();
-                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
             });
         }
     });
@@ -324,20 +323,18 @@ exports.DuplicateButtonClicked = function (type) {
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     if (!Array.isArray(selectedNodes)) return;
-    selectedNodesName = selectedNodes[0].type + '(s):';
-    selectedNodes.forEach(function (selectedNode) {
-        selectedNodesName += ' ' + selectedNode.data.label;
+    selectedNodesName = selectedNodes[0].type + '(s):<br>';
+    selectedNodes.forEach(function (selectedNode, index) {
+        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     ModalService = this.ModalService;
-    dialogUtils.confirmDialog(ModalService, "Duplicate Confirm", `Are you sure to duplicate ${selectedNodesName} ?`, function (yes) {
+    dialogUtils.confirmDialog(ModalService, "Duplicate Confirm", `Are you sure to duplicate ${selectedNodesName}?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
                 if(type === 'plot'){
                     wiApiService.duplicateLogplot(selectedNode.properties.idPlot, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
-                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
-                            // utils.openLogplotTab(wiComponentService, utils.getModel('logplot', response.idPlot));
                             next();
                         });
                     });
@@ -345,7 +342,6 @@ exports.DuplicateButtonClicked = function (type) {
                     wiApiService.duplicateCrossPlot(selectedNode.properties.idCrossPlot, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
-                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
                             next();
                         });
                     });
@@ -353,7 +349,6 @@ exports.DuplicateButtonClicked = function (type) {
                     wiApiService.duplicateHistogram(selectedNode.properties.idHistogram, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
-                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
                             next();
                         });
                     });
@@ -361,7 +356,6 @@ exports.DuplicateButtonClicked = function (type) {
                     wiApiService.duplicateDataset(selectedNode.properties.idDataset, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
-                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
                             next();
                         });
                     });
@@ -369,7 +363,6 @@ exports.DuplicateButtonClicked = function (type) {
                     wiApiService.duplicateCurve(selectedNode.properties.idCurve, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
-                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
                             next();
                         });
                     });
@@ -377,7 +370,6 @@ exports.DuplicateButtonClicked = function (type) {
                     wiApiService.duplicateZoneset(selectedNode.properties.idZoneSet, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
-                            wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
                             next();
                         });
                     });
@@ -387,7 +379,6 @@ exports.DuplicateButtonClicked = function (type) {
                     dialogUtils.errorMessageDialog(ModalService, "Can't duplicate");
                 }
                 utils.refreshProjectState();
-                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
             });
         }
     });

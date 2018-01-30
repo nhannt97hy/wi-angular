@@ -569,7 +569,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         self.crossplotModel.properties.referenceShowDepthGrid);
                                         //true);
                             });
-                        }, self.setContextMenu);
+                            self.switchReferenceWindow(self.crossplotModel.properties.referenceDisplay);
+                        });
                     }
                 }, {
                     name: "ShowOverlay",
