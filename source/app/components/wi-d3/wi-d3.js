@@ -131,6 +131,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         graph.rearrangeTracks(self);
         self.updateScale();
     }
+    this.tooltip = function (on) {
+        if (on === undefined) return _tooltip;
+        _tooltip = on;
+    }
     this.referenceLine = function(on) {
         if (on === undefined) return _referenceLine;
         _referenceLine = on;
@@ -217,10 +221,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this._removeTooltip = _removeTooltip;
     this._drawTooltip = _drawTooltip;
-    this.tooltip = function (on) {
-        if (on === undefined) return _tooltip;
-        _tooltip = on;
-    }
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
@@ -1142,21 +1142,30 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.scroll();
     }
     function _drawTooltip(track) {
-        if (!_tooltip) return;
+        let plotMouse, x, y, plotDim;
+        if (!track) {
+            for (let tr of _tracks) {
+                plotMouse = d3.mouse(tr.plotContainer.node());
+                x = plotMouse[0];
+                y = plotMouse[1];
+                plotDim = tr.plotContainer.node().getBoundingClientRect();
 
-        let plotMouse = d3.mouse(track.plotContainer.node());
-        let x = plotMouse[0];
-        let y = plotMouse[1];
-        let plotDim = track.plotContainer.node().getBoundingClientRect();
-
-        if (x < 0 || x > plotDim.width || y < 0 || y > plotDim.height) return;
-
-        let depth = track.getTransformY().invert(plotMouse[1]);
+                if (Number.isNaN(x) || Number.isNaN(y)) continue;
+                if (x > 0 && x < plotDim.width && y > 0 && y < plotDim.height) {
+                    track = tr;
+                    break;
+                }
+            }
+        }
+        if (!track) track = _currentTrack;
+        y = d3.mouse(track.plotContainer.node())[1];
+        let depth = track.getTransformY().invert(y);
 
         _tracks.forEach(function(tr) {
-            if (tr.drawTooltipLines) tr.drawTooltipLines(depth);
-            if (tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
+            if (_referenceLine && tr.drawTooltipLines) tr.drawTooltipLines(depth);
+            if (_tooltip && tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
+        // graph.createTooltipLines(svg);
     }
     function _removeTooltip(track) {
         if (!_tooltip) return;
