@@ -2963,3 +2963,21 @@ function updateWiCurveListingOnModelDeleted(model){
 }
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
+function calVSHfromGR(well, grCurve, matrix, shale){
+    let result = new Array();
+    let length = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
+
+    function getData(idCurve, callback){
+        __GLOBAL.wiApiService.dataCurve(idCurve, function(data){
+            callback(data);
+        })
+    }
+
+    if(grCurve.id){
+        // real curve
+    }else{
+        //depth curve
+    }
+}
+
+exports.calVSHfromGR = calVSHfromGR;
