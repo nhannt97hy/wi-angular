@@ -6,7 +6,8 @@
         ng-class='{"item-active": item.data.selected}'
         data="{{wiBaseTreeview.config[$index].id}}"
         wi-right-click="wiBaseTreeview.onClick($index, $event); wiBaseTreeview.showContextMenuFunction($event, $index)"
-        wi-element-ready="wiBaseTreeview.onReadyFunction();">
+        wi-element-ready="wiBaseTreeview.onReadyFunction();"
+        ng-hide="item.data.hide">
         <div class="wi-parent-content">
             <div class="icon-expanded"
                 ng-click="wiBaseTreeview.onCollapse($index)">
