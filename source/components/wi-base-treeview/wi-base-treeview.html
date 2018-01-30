@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div ng-show="item.data.childExpanded">
+    <div ng-if="item.data.childExpanded">
         <wi-base-treeview
             container="wiBaseTreeview.container"
             config="item.children"
