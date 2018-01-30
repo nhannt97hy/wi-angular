@@ -1148,7 +1148,7 @@ exports.importLASDialog = function (ModalService) {
                                         self.isDisabled = false;
                                         utils.error(err);
                                     });
-                                }, 1000);
+                                }, 2000);
                             }
                         })
                         .catch(function (err) {
@@ -1177,7 +1177,7 @@ exports.importLASDialog = function (ModalService) {
                                             self.isDisabled = false;
                                             utils.error(err);
                                         });
-                                    }, 1000);
+                                    }, 2000);
                                 }
                             })
                             .catch(function (err) {
@@ -1192,14 +1192,16 @@ exports.importLASDialog = function (ModalService) {
                     .then(function (well) {
                         console.log('well response', well);
                         if (well) {
-                            utils.refreshProjectState()
-                            .then(function () {
-                                close(well, 500);
-                            })
-                            .catch(function () {
-                                self.isDisabled = false;
-                                utils.error(err);
-                            });
+                            setTimeout(function () {
+                                utils.refreshProjectState()
+                                    .then(function () {
+                                        close(well, 500);
+                                    })
+                                    .catch(function () {
+                                        self.isDisabled = false;
+                                        utils.error(err);
+                                    });
+                            }, 2000)
                         }
                     })
                     .catch(function (err) {
