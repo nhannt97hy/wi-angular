@@ -3,12 +3,16 @@ const name = 'wiStages';
 
 const stageComponentName = 'wiStage';
 
-function MasterController($scope, $timeout) {
+function MasterController($scope, $timeout, wiChunkedUploadService) {
     let self = this;
     $scope.ctrl = self;
     this.stages = [];
     this.isExpand = true;
     this.icon = 'fa fa-chevron-up';
+    
+    this.navigatable = function() {
+        return !wiChunkedUploadService.uploadUrl;
+    }
 
     /*
     this.toggleRibbon = function(){
@@ -85,11 +89,7 @@ app.component(name, {
     templateUrl: 'wi-stages.html',
     controller: MasterController,
     controllerAs: name,
-    transclude: true,
-    bindings: {
-        toggle: "<",
-        onToggle: "<"
-    }
+    transclude: true
 });
 
 
@@ -109,7 +109,7 @@ app.component(stageComponentName, {
         'wiStagesCtrl': '^wiStages'
     },
     bindings: {
-        title: '@',
+        label: '@',
         icon: '@',
         active: '<'
     }

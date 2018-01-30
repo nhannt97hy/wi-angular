@@ -3,132 +3,167 @@
         float: none;
         display: inline-block;
     }
+    .content-heading {
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0em;
+        margin-left: auto;
+        margin-right: auto;
+        width: 97%;
+        font-style: italic;
+    }
+    .wi-chunked-upload-container {
+        width: 70%;
+        height: 70%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        /*background: linear-gradient(gray, white);
+        box-shadow: 5px 5px 10px #888;*/
+    }
+    .color-running, .color-processed {
+        color: green;
+    }
+    .color-running {
+        animation: blinker 1s cubic-bezier(.5, 0, 1, 1) infinite alternate; 
+    }
+    @keyframes blinker {  
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    .color-new {
+        color: blue;
+    }
+    .color-error {
+        color: red;
+    }
+    .console {
+        border: 1px solid black;
+        background-color: #444;
+        box-shadow: inset 1px 1px 2px black;
+        font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+        padding: 0.5em 1em;
+        color: white;
+    }
+    .console::-webkit-scrollbar {
+        width:5px;
+    }
+    .height34px span.btn-default {
+        line-height:32px;
+        height:34px;
+    }
+    .height34px .ui-select-search {
+        height:34px;
+    }
+    .animate::after {
+        animation: changeLetter 4s linear infinite;
+        content: " /";
+    }
+    @keyframes changeLetter {
+        0% { content: " /"; }
+        5% { content: " -"; }
+        10% { content: " \\"; }
+        15% { content: " |"; }
+        20% { content: " /"; }
+        25% { content: " -"; }
+        30% { content: " \\"; }
+        35% { content: " |"; }
+        40% { content: " /"; }
+        45% { content: " -"; }
+        50% { content: " \\"; }
+        55% { content: " |"; }
+        60% { content: " /"; }
+        65% { content: " -"; }
+        70% { content: " \\"; }
+        75% { content: " |"; }
+        80% { content: " /"; }
+        85% { content: " -"; }
+        90% { content: " \\"; }
+        95% { content: " |"; }
+        100% { content: " /"; }
+    }
 </style>
-<h2 class="content-heading">Well import tool</h2>
-<wi-stages style='padding:90px 10px 10px;display:flex;flex-direction:row;position:absolute;top:0;left:0;right:0;bottom:0;'>
-    <wi-stage title="Upload well LAS zip" icon="fa fa-cloud-upload">
+<h3 class="content-heading">Well import tool</h3>
+<wi-stages style='padding:70px 10px 10px;display:flex;flex-direction:row;position:absolute;top:0;left:0;right:0;bottom:0;'>
+    <wi-stage label="Upload Well LAS Archive (zip format)" icon="fa fa-cloud-upload">
         <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-                <div style="width:200px;height:150px;margin:auto;">
-                    <wi-chunked-upload upload-url="'http://batch.sflow.me/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
+            <div style='flex:1;position-relative;'>
+                <div class='wi-chunked-upload-container'>
+                    <wi-chunked-upload style="display:flex;flex-direction:column;height:100%;" upload-url="'http://192.168.0.91:33333/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
                     </wi-chunked-upload>
+                    <!--<wi-chunked-upload style="display:flex;flex-direction:column;height:100%;" upload-url="'http://batch.sflow.me/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
+                    </wi-chunked-upload>-->
                 </div>
             </div>
         </div>
     </wi-stage>
-    <wi-stage title="Setup new batch import task" icon="fa fa-file-code-o">
+    <wi-stage label="Manage Well LAS Archives" icon="fa fa-archive">
         <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-                <form class="form-horizontal">
-                    <h4 style='text-align:center'>Create batch import task</h4>
-                    <div class="form-group">
-                        <label style='text-align:right;' class="control-label col-sm-4">Name:</label>
-                        <div class="col-sm-6">
-                            <input class="form-control">
+            <div style='flex:1;overflow:auto;' ng-controller='zipArchiveManager as zam'>
+                <!--<h4 style="text-align: center;padding-top:1em;">Zip Archives</h4>-->
+                <ul style="width:70%;margin:auto;padding-left:0">
+                    <li style='display:flex;padding:1em 1em 0.2em;border-bottom: 1px solid black;font-weight:700;'>
+                        <div style='flex-basis:100px;'>Status</div>
+                        <div style='flex:1'>Archive name</div>
+                        <div style='flex:1'>Upload time</div>
+                        <div style='flex-basis:120px;text-align:right;'>Actions</div>
+                    </li>
+                    <li style='display:flex;padding:1em 1em 0.5em;border-bottom: 1px solid #888;font-style:italic;font-weight:200;' ng-repeat='zipArchive in zipArchives'>
+                        <div style='flex-basis:100px;'>
+                            <i class='fa fa-circle' 
+                            ng-class="{'color-running': zipArchive.status == 'running','color-processed':zipArchive.status == 'processed', 'color-error':zipArchive.status == 'error', 'color-new':zipArchive.status == 'new'}"></i>
+                            &nbsp;&nbsp;&nbsp;&nbsp;{{zipArchive.status}}
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label style='text-align:right;' class="control-label col-sm-4">Host:</label>
-                        <div class="col-sm-6">
-                            <input type="email" class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label style='text-align:right;' class="control-label col-sm-4">Post:</label>
-                        <div class="col-sm-6">
-                            <input class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label style='text-align:right;' class="control-label col-sm-4">Path:</label>
-                        <div class="col-sm-6">
-                            <input type="email" class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label style='text-align:right;' class="control-label col-sm-4">Data Dir:</label>
-                        <div class="col-sm-6">
-                            <input class="form-control">
-                        </div>
-                        <div class="col-sm-2">
-                            <a href="">
-                                <i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i>
+                        <div style='flex:1'>{{zipArchive.workflowName}}</div>
+                        <div style='flex:1;'>{{zipArchive.workflowConfig.ts | datetimeFormat}}</div>
+                        <div style='flex-basis:120px;text-align:right;'>
+                            <a style="font-size: 12px;padding: 4px 9px;vertical-align: text-bottom;" 
+                                href='{{wiBatchUrl}}/log/{{username}}/{{zipArchive.workflowName}}/error.txt' 
+                                class='btn btn-default' ng-show="zipArchive.status == 'processed'" target='_blank'>
+                                <i class="fa fa-file-o"></i>
                             </a>
+                            <button ng-click='nextStage(zipArchive)'><span class='run-16x16'></span></button>
+                            <button ng-disabled="zipArchive.status=='running'"  ng-click='deleteZipArchive(zipArchive.workflowName)'><span class='close-16x16-edit'></span></button>
                         </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </wi-stage>
+    <wi-stage label="Import a Well LAS archive into Online Inventory" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column' ng-controller="runImport">
+            <form class="form-horizontal">
+                <div class='col-sm-offset-1 col-sm-10 {{animateClass}}' style="padding-top:1em;padding-bottom:0.5em;color:red;font-style:italic;">{{message}}</div>
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-8">
+                        <ui-select class='height34px' ng-model="selected.zipArchive" 
+                            ng-change="onSelectZipArchive()" ng-disabled='isDisabled'>
+                            <ui-select-match placeholder='Select a zip archive'>{{selected.zipArchive.workflowName}}</ui-select-match>
+                            <ui-select-choices repeat='zip in zipArchives'>
+                                <div>{{zip.workflowName}}</div>
+                            </ui-select-choices>
+                        </ui-select>
                     </div>
-                </form>
+                    <div class="col-sm-2">
+                        <button ng-click='startImport();'><span style='vertical-align:middle;' class='run-32x32'></span>Run import</button>
+                    </div>
+                </div>
+            </form>
+            <div style='flex: 1;overflow:auto;' class="col-sm-offset-1 col-sm-10 console"> 
+                <ul style="padding-left:0px;list-style:none;">
+                    <li style='display:flex' ng-repeat='line in msgQueue'>
+                        <div style='color:#888;flex-basis:7em;'>[{{line.ts | timeFormat}}]</div>
+                        <div style='user-select: text;flex:1'>{{line.content}}</div>
+                    </li>
+                </ul>
             </div>
         </div>
     </wi-stage>
-    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
-            <div style='flex:1; border: 1px solid red'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
+    <wi-stage label="Finish" icon="fa fa-flag-checkered">
         <div style='flex:1;display:flex;flex-direction:column'>
             <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
-            <div style='flex:1; border: 1px solid red'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
-            <div style='flex:1; border: 1px solid red'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Setup batch import task" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column;border: 1px solid green'>
-            <div style='flex:1; border: 1px solid red'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Manage batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
-            </div>
-        </div>
-    </wi-stage>
-    <wi-stage title="Run a batch import tasks" icon="fa fa-file-code-o">
-        <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1'>
+                <h1 style="text-align:center;color: #ccc;font-size:6em;">FINISH</h1>
             </div>
         </div>
     </wi-stage>

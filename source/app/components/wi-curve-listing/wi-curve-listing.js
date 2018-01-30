@@ -4,6 +4,10 @@ const moduleName = 'wi-curve-listing';
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     this.applyingInProgress = false;
+    let buffer = 100;
+    let threshold = 200;
+    let currentScroll;
+    let padding = 5;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -34,6 +38,35 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         }
     }
+
+    function getData(){
+        let len = self.depthArr[self.currentIndex].length;        
+        if(self.first < 0) self.first = 0;
+        if(self.first + buffer + threshold > len) self.first = len - buffer - threshold;        
+        console.log('getData', self.first);
+        self.loaded = self.depthArr[self.currentIndex].slice(self.first, self.first + threshold);        
+    }
+
+    function loadUp(cb){
+        if(self.first > 0){
+            self.first -= buffer;
+            $timeout(function(){
+                getData();
+                if(cb) cb();
+            })
+        }
+    }
+    
+    function loadDown(cb){
+        let len = self.depthArr[self.currentIndex].length;
+        if(self.first + buffer + threshold != len){
+            self.first += buffer;
+            $timeout(function(){
+                getData()
+                if(cb) cb();
+            })
+        }
+    }
     this.onChangeWell = function (clear) {
         getDatasets();
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
@@ -48,8 +81,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.depthArr[self.currentIndex][i] = parseFloat((step * i + topDepth).toFixed(4));
                 async.setImmediate(callback);
             }, function(err){
-                $timeout(function(){spinner.hide();});
+                $timeout(function(){
+                    spinner.hide();
+                    self.loaded = self.depthArr[self.currentIndex].slice(0,threshold);
+                    self.first = 0;
+                });  
             })
+        }else{
+            self.loaded = self.depthArr[self.currentIndex].slice(0,threshold);
+            self.first = 0;
         }
 
         if(clear){
@@ -128,6 +168,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             let rcHead = $(".rest-columns > .thead");
 
             let onScroll = function(){
+                if(rcBody.scrollTop() < (padding * 30) && rcBody.scrollTop() < currentScroll){
+                    console.log('up');
+                    loadUp(function(){
+                        rcBody.scrollTop(buffer * 30);
+                    });
+                }
+                if(rcBody[0].scrollHeight - Math.round(rcBody.scrollTop() + rcBody.innerHeight()) < (padding * 30) && rcBody.scrollTop() > currentScroll){
+                    console.log('Down');
+                    loadDown(function(){
+                        rcBody.scrollTop(rcBody[0].scrollHeight - rcBody.innerHeight() - buffer * 30);
+                    });
+                }
+                currentScroll = rcBody.scrollTop();
                 fcBody.scrollTop(rcBody.scrollTop());
                 rcHead.scrollLeft(rcBody.scrollLeft());
             }
@@ -146,33 +199,47 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.goToIndex = function(){
-        let index;
         let rcBody = $(".rest-columns > .tbody");
-
+        let scroll = padding + 1;
+        self.indexInput = Math.round(self.indexInput);
+        
         if(self.indexInput <= 0){
-            index = 0;
+            self.first = 0;
+            scroll = 0;
         }else if(self.indexInput >= self.depthArr[self.currentIndex].length - 1){
-            index = self.depthArr[self.currentIndex].length - 1;
+            self.first = self.depthArr[self.currentIndex].length - buffer - threshold;
+            scroll = threshold;
         }else{
-            index = self.indexInput;
+            self.first = self.indexInput < padding - 1 ? 0 : self.indexInput - padding - 1;
+            scroll = self.indexInput < padding + 1 ? 0 : padding + 1;
         }
 
-        rcBody.scrollTop(index * 30);
+        $timeout(function(){
+            getData();
+            rcBody.scrollTop(scroll * 30);
+        })
     }
 
     this.goToDepth = function(){
-        let index;
         let rcBody = $(".rest-columns > .tbody");
-
-        if(self.depthInput <= self.SelectedWell.topDepth){
-            index = 0;
-        }else if(self.depthInput >= self.SelectedWell.bottomDepth){
-            index = self.depthArr[self.currentIndex].length - 1;
+        let scroll = padding + 1;
+        let indexInput = Math.round((self.depthInput - self.SelectedWell.topDepth)/self.SelectedWell.step);
+        
+        if(indexInput <= 0){
+            self.first = 0;
+            scroll = 0;
+        }else if(indexInput >= self.depthArr[self.currentIndex].length - 1){
+            self.first = self.depthArr[self.currentIndex].length - buffer - threshold;
+            scroll = threshold;
         }else{
-            index = Math.round((self.depthInput - self.SelectedWell.topDepth)/self.SelectedWell.step);
+            self.first = indexInput < padding - 1 ? 0 : indexInput - padding - 1;
+            scroll = indexInput < padding + 1 ? 0 : padding + 1;
         }
 
-        rcBody.scrollTop(index * 30);
+        $timeout(function(){
+            getData();
+            rcBody.scrollTop(scroll * 30);
+        })
     }
 
     this.onCurveSelectClick = function(SelCurve){

@@ -22,8 +22,8 @@ let layoutConfig = {
                     isClosable: false,
                     width: 15,
                     content: []
-                },
-                {
+                }
+                ,{
                     type: 'stack',
                     id: 'right',
                     isClosable: false,
@@ -57,6 +57,64 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     scopeObj = $scope;
     compileFunc = $compile;
     layoutManager = new GoldenLayout(layoutConfig, document.getElementById(domId));
+    layoutManager.on("stackCreated", function(stack){
+        // console.log('stack created', stack);
+        let projectItem = stack.getItemsById("explorer-block");
+        let propertiesItem = stack.getItemsById("property-block");
+        if(projectItem.length || propertiesItem.length){
+            // console.log('do nothing');            
+        }else{
+            // console.log('add more control');
+            let control = $($("#stack-header-control").html()),
+            previousBtn = control.find("#previousBtn"),
+            nextBtn = control.find("#nextBtn");
+    
+            let previous = function(){
+                let current = stack.getActiveContentItem().config.id;
+                let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
+                if(currentIdx){
+                    let preIdx = currentIdx - 1;
+                    stack.setActiveContentItem(stack.contentItems[preIdx]);
+                }
+            }
+    
+            let next = function(){
+                let current = stack.getActiveContentItem().config.id;
+                let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
+                if(currentIdx < stack.contentItems.length - 1){
+                    let nextIdx = currentIdx + 1;
+                    stack.setActiveContentItem(stack.contentItems[nextIdx]);
+                }
+            }
+
+            previousBtn.click(previous);    
+            nextBtn.click(next);
+
+            // Add the colorDropdown to the header
+            stack.header.controlsContainer.prepend( control );
+            stack.on("stateChanged", function(){
+                if(stack.contentItems.length){
+                    previousBtn.css("display","inline");
+                    nextBtn.css("display","inline");
+                    let current = stack.getActiveContentItem().config.id;
+                    let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
+                    if(currentIdx == 0){
+                        previousBtn.css("cursor","not-allowed");
+                    }else{
+                        previousBtn.css("cursor","pointer");
+                    }
+                    if(currentIdx == stack.contentItems.length - 1){
+                        nextBtn.css("cursor","not-allowed");
+                    }else{
+                        nextBtn.css("cursor","pointer");
+                    }
+                }else{
+                    previousBtn.css("display","none");
+                    nextBtn.css("display","none");
+                }
+            })
+        }
+    })
     layoutManager.init();
     LAYOUT = layoutManager;
 

@@ -89,7 +89,7 @@ let wiDepth = require('./wi-depth.model');
 let wiCurve = require('./wi-curve.model');
 let wiDataset = require('./wi-dataset.model');
 let wiProperty = require('./wi-property.model');
-let wiListview = require('./wi-listview.model');
+//let wiListview = require('./wi-listview.model');
 let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
@@ -100,6 +100,8 @@ let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
+let wiChunkedUploadService = require('./wi-chunked-upload-service');
+let wiBatchApiService = require('./wi-batch-api-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
@@ -151,7 +153,7 @@ let app = angular.module('wiapp',
         wiCurve.name,
         wiDataset.name,
         wiProperty.name,
-        wiListview.name,
+        //wiListview.name,
         wiTreeConfig.name,
         wiTreeItem.name,
         wiWell.name,
@@ -160,6 +162,8 @@ let app = angular.module('wiapp',
 
         wiApiService.name,
         wiComponentService.name,
+        wiChunkedUploadService.name,
+        wiBatchApiService.name,
 
         wiCanvasRect.name,
         wiZone.name,
@@ -185,7 +189,7 @@ let app = angular.module('wiapp',
         'angularjs-dropdown-multiselect'
     ]);
 
-function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -195,6 +199,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiComponentService,
         ModalService,
         wiApiService,
+        wiChunkedUploadService,
         $timeout
     };
     // Logplot Handlers
@@ -278,7 +283,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.preventDuplicates = true;
 
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService) {
     let functionBindingProp = {
         $scope,
         wiComponentService,
@@ -290,7 +295,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
             onInit();
@@ -314,4 +319,118 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         });
     }
 });
+app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope) {
+    window.ZIPARCHIVEMAN = $scope;
+    $scope.deleteZipArchive = function(zipArchiveName) {
+        wiBatchApiService.deleteDataDir(zipArchiveName, function(err, res) {
+            if (err) {
+                toastr.error('Error' + (err.message || err));
+                return;
+            }
+            updateWorkflowList();
+        });
+    }
+    $scope.wiBatchUrl = wiBatchApiService.getWiBatchUrl();
+    $scope.username = window.localStorage.getItem('username');
+    $scope.nextStage = function(zArchive) {
+        $rootScope.zipArchive = zArchive;
+        angular.element($('wi-stages ul')[0]).scope().ctrl.skip();
+    }
+    updateWorkflowList();
+    function updateWorkflowList() {
+        wiBatchApiService.listWorkflows(function(err, workflows) {
+            if (err) {
+                toastr.error('Error' + (err.message || err));
+                return;
+            }
+            /*
+            $scope.zipArchives = workflows.map(function(wf) {
+                return wf;
+            });
+            */
+            $scope.zipArchives = workflows;
+            $rootScope.zipArchives = angular.copy($scope.zipArchives);
+        });
+    }
+});
+const monthNames = [ 
+    "Jan", "Feb", "Mar", "Apr", 
+    "May", "Jun", "Jul", "Aug", 
+    "Sep", "Oct", "Nov", "Dec"
+];
+app.controller('runImport', function($scope, $rootScope, $timeout) {
+    var socket = initSocket();
+    $scope.selected = {};
+    $scope.selected.zipArchive = $rootScope.zipArchive;
+    window.SCOPE = $scope;
+    $scope.isDisabled = !!$rootScope.zipArchive;
+    delete $rootScope.zipArchive;
 
+    $scope.message = "Select a zip archive to import into Inventory";
+    $scope.animateClass = "";
+    $scope.msgQueue = [];
+
+    if (!$scope.selected.zipArchive) 
+        $scope.selected.zipArchive = $rootScope.zipArchives && $rootScope.zipArchives.length ? $rootScope.zipArchives[0] : null;
+
+    $scope.zipArchives = $rootScope.zipArchives;
+
+    $scope.onSelectZipArchive = function() {
+        console.log('abc :', $scope.selected.zipArchive);
+    }
+
+    $scope.startImport = function() {
+        $scope.message = "Importing zip archive ...";
+        $scope.animateClass = "animate";
+        let token = window.localStorage.getItem('token');
+        if (!$scope.selected.zipArchive || !$scope.selected.zipArchive.workflowName || !$scope.selected.zipArchive.workflowName.length) {
+            toastr.error("Please choose a zip archive");
+            return;
+        }
+        if (!token) {
+            toastr.error("Please login");
+            return;
+        }
+        socket.emit('run-workflow', {
+            token: token,
+            workflowName: $scope.selected.zipArchive.workflowName
+        });
+    }
+    function initSocket() {
+        var socket = io('http://192.168.0.91:33333');
+        socket.on('run-workflow-done', function(msg) {
+            console.log(msg);
+            $timeout(function() {
+                $scope.msgQueue.push(msg);
+                var conObj = $('.console');
+                conObj.scrollTop(conObj[0].scrollHeight);
+            });
+        }).on('run-workflow-file-result', function(msg) {
+            $timeout(function() {
+                $scope.msgQueue.push(msg);
+                var conObj = $('.console');
+                conObj.scrollTop(conObj[0].scrollHeight);
+            });
+        });
+        return socket;
+    }
+});
+app.filter('datetimeFormat', function() {
+    return function(timestamp) {
+        var date = new Date(timestamp);
+        return date.getFullYear() + "-" + monthNames[date.getMonth()] + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+    }
+});
+app.filter('timeFormat', function() {
+    return function(timestamp) {
+        var date = new Date(timestamp);
+        var h = date.getHours();
+        var m = date.getMinutes();
+        var s = date.getSeconds();
+
+        h = (h > 9)?h:("0" + h);
+        m = (m > 9)?m:("0" + m);
+        s = (s > 9)?s:("0" + s);
+        return h + ":" + m + ":" + s;
+    }
+});

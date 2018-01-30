@@ -370,15 +370,16 @@
                                                     <select ng-model="shading.shadingStyle"
                                                             class="form-control wi-form-control"
                                                             ng-change="wiModal.onChangeShading($index)">
-                                                        <option value="fillPattern">Fill Pattern</option>
-                                                        <option value="variableShading">Variable Shading</option>
+                                                        <option value="pattern">Fill Pattern</option>
+                                                        <option value="varShading">Variable Shading</option>
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <input type="button" value="Define"
                                                             ng-model="shading.fillPattern"
                                                             class="form-control wi-form-control"
-                                                            ng-click="wiModal.defineButtonClicked($index, $event); wiModal.onChangeShading($index);">
+                                                            ng-click="wiModal.defineButtonClicked($index, $event); wiModal.onChangeShading($index);"
+                                                            ng-disabled="!shading.rightLine || !shading.leftLine">
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-default wi-form-control" 

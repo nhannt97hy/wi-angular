@@ -31,6 +31,7 @@ function WiExpTreeController($controller, wiComponentService, wiApiService) {
         if (!$event.shiftKey) {
             if (selectedNodes.length) {
                 if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    if ($event.type == 'contextmenu' && selectedNodes.includes(node)) return this.container.selectHandler(node);
                     this.container.unselectAllNodes();
                 }
             }

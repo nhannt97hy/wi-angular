@@ -65,9 +65,9 @@
 				</div>
 			</div>
 			<div class="tbody">
-				<div ng-repeat="row in wiCurveListing.depthArr[wiCurveListing.currentIndex] track by $index" class="trow">
-					<div class="tcol">{{$index}}</div>
-					<div class="tcol depth">{{wiCurveListing.depthArr[wiCurveListing.currentIndex][$index]}}</div>
+				<div ng-repeat="row in wiCurveListing.loaded track by $index" class="trow">
+					<div class="tcol">{{$index + wiCurveListing.first}}</div>
+					<div class="tcol depth">{{wiCurveListing.depthArr[wiCurveListing.currentIndex][$index + wiCurveListing.first]}}</div>
 				</div>
 			</div>
 		</div>
@@ -81,10 +81,10 @@
 				</div>
 			</div>
 			<div id="output" class="tbody">
-				<div ng-repeat="row in wiCurveListing.depthArr[wiCurveListing.currentIndex] track by $index" ng-init="parentId = $index" class="trow">
+				<div ng-repeat="row in wiCurveListing.loaded track by $index" ng-init="parentId = $index" class="trow">
 					<div  class="tcol" ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
-					ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId])}">
-						<input type="number" class='form-control wi-form-control editor' ng-model="col.data[parentId]" step="any" ng-change="col.edit = true;wiCurveListing.onModifyCurve(col.id);">
+					ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId + wiCurveListing.first])}">
+						<input type="number" class='form-control wi-form-control editor' ng-model="col.data[parentId + wiCurveListing.first]" step="any" ng-change="col.edit = true;wiCurveListing.onModifyCurve(col.id);">
 					</div>
 				</div>
 			</div>

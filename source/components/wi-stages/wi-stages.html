@@ -40,6 +40,7 @@
         top: 0;
         bottom: 0;
         display: flex;
+        flex-direction: column;
     }
 </style>
 <div class='scroll-container' style="flex-basis:400px;overflow:auto;">
@@ -50,18 +51,24 @@
                 <div style="text-align:center;font-size:24px;color:#ccc;margin:3px;"><i class="fa fa-angle-double-down"></i></div>
                 <div style="opacity:{{wiStage.active?1:0}}" class="wi-stage-heading"><i class="fa fa-arrow-right"></i></div>
                 <div class='wi-stage'>
-                    <h5>{{wiStage.stageIndex + 1}}. &nbsp;&nbsp;<i style='font-size:180%;vertical-align:middle;' class="{{wiStage.icon}}"></i>&nbsp;&nbsp;{{wiStage.title}}</h5>
+                    <h5>{{wiStage.stageIndex + 1}}. &nbsp;&nbsp;<i style='font-size:180%;vertical-align:middle;' class="{{wiStage.icon}}"></i>&nbsp;&nbsp;{{wiStage.label}}</h5>
                 </div>
             </div>
         </li>
     </ul>
 </div>
 <div style='display:flex;flex-direction:column;flex:1'>
-    <div style='display:flex;flex-direction:row;flex:1;position:relative;' ng-transclude></div>
-    <div style='text-align:right;padding-right: 10px;padding-bottom:10px;'>
+    <div style='display:flex;flex-direction:column;flex:1;position:relative;' ng-transclude></div>
+    <div style='text-align:right;padding-top: 5px;'>
         <wi-button class='wi-inline-button' 
-            ng-show="wiStages.currentStageIndex > 0" icon='arrow-left-32x32' label='Back' handler="wiStages.back"></wi-button>
+            ng-show="wiStages.currentStageIndex > 0" 
+            icon='arrow-left-32x32' 
+            disabled="{{!wiStages.navigatable()}}"
+            label='Back' handler="wiStages.back"></wi-button>
         <wi-button class='wi-inline-button' 
-            ng-show="wiStages.currentStageIndex < wiStages.stages.length - 1" icon='arrow-right-32x32' label='Skip' handler="wiStages.skip"></wi-button>
+            ng-show="wiStages.currentStageIndex < wiStages.stages.length - 1" 
+            icon='arrow-right-32x32' 
+            disabled="{{!wiStages.navigatable()}}"
+            label='Skip' handler="wiStages.skip"></wi-button>
     </div>
 </div>

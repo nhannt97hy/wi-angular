@@ -6076,8 +6076,26 @@ exports.curveAverageDialog = function (ModalService, callback) {
         this.idSelectedDataset = null;
         this.desCurve = null;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well') self.wellModel = selectedNodes[0];
-        else self.wellModel = angular.copy(self.wells[0]);
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
+        }else{
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+        }
         self.idWell = self.wellModel.id;
         refresh();
         this.defaultDepth = defaultDepth;
@@ -6114,7 +6132,6 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 idDesCurve: self.availableCurves[0].id,
                 data: []
             };
-            console.log("curves", self.availableCurves);
         }
         this.select = function (curve) {
             curve.flag = !curve.flag;
@@ -6130,6 +6147,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh(function(){
                 });
@@ -6253,12 +6271,11 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         this.curves = [];
         this.wells = utils.findWells();
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        console.log("selectedNodes", selectedNodes);
         if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
         else this.wellModel = angular.copy(self.wells[0]);
         this.datasets = this.wellModel.children;
         this.curves = this.wellModel.children[0].children;
-        if( selectedNodes && selectedNodes[0].type == 'curve') {
+        if( selectedNodes && selectedNodes.length && selectedNodes[0].type == 'curve') {
             console.log("SELECTED_NODES");
             this.curveModel = setLinePropertiesIfNull(selectedNodes[0]);
             this.wellModel = utils.findWellByCurve(self.curveModel.id);
@@ -6330,6 +6347,7 @@ exports.curveRescaleDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh(function(){
                 });
@@ -6473,16 +6491,38 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
         this.zoneSetPara = [];
         this.zones = [];
         this.curves = [];
-        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
-            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
-            zoneSetParaModel = selectedNodes[0];
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+
+                case 'zoneset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                zoneSetParaModel = selectedNodes[0];
+                break;
+
+                case 'zone':
+                zoneSetParaModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+                self.wellModel = utils.findWellById(zoneSetParaModel.properties.idWell);
+                break;
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;               
+            }
         }
-        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
-            zoneSetParaModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
-            this.wellModel = utils.findWellById(zoneSetParaModel.properties.idWell);
-        }
-        else this.wellModel = angular.copy(self.wells[0]);
+        else {
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+        };
 
         this.idWell = this.wellModel.id;
         defaultDepth();
@@ -6675,12 +6715,34 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         this.percent = 0;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        
         this.refresh = function(cb){
             self.wellArr = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
             });
             if(!self.SelectedWell){
-                self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+                if(selectedNodes && selectedNodes.length){
+                    switch (selectedNodes[0].type){
+                        case 'well':
+                        self.SelectedWell = selectedNodes[0];
+                        break;
+        
+                        case 'dataset':
+                        self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                        break;
+        
+                        case 'curve':
+                        self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                        break;
+        
+                        default:
+                        self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0] : null;
+                    }
+                }
+                else {
+                    self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+                }
             }else{
                 self.SelectedWell = self.wellArr.find(function(well){
                     return well.id == self.SelectedWell.id;
@@ -6913,14 +6975,27 @@ exports.splitCurveDialog = function (ModalService, callback) {
         this.data;
         this.arrayCurve = [];
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well')
-            this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'curve' ) {
-            this.curveModel = selectedNodes[0];
-            this.wellModel = utils.findWellByCurve(this.curveModel.id);
-        }
-        else {
-            this.wellModel = angular.copy(self.wells[0]);
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+                
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.curveModel = selectedNodes[0];
+                self.wellModel = utils.findWellByCurve(self.curveModel.id);
+                break;
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
+        }else{
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
         }
 
         getInfo();
@@ -6988,6 +7063,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.process = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh();
             }, 100);
@@ -7084,13 +7160,26 @@ exports.mergeCurveDialog = function (ModalService) {
         this.idSelectedDataset = null;
         this.desCurve = null;
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well')
-            this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'curve' ) {
-            this.wellModel = utils.findWellByCurve(selectedNodes[0].id);
-        }
-        else {
-            this.wellModel = angular.copy(self.wells[0]);
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+                
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
+        }else{
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
         }
 
         self.idWell = self.wellModel.id;
@@ -7143,6 +7232,7 @@ exports.mergeCurveDialog = function (ModalService) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
+            self.wells = utils.findWells();            
             $timeout(function(){
                 refresh(function(){
                 });
@@ -7267,13 +7357,34 @@ exports.fillDataGapsDialog = function(ModalService){
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        
         function refresh(cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
             });
             if(!self.selectedWell){
-                self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
-
+                if(selectedNodes && selectedNodes.length){
+                    switch (selectedNodes[0].type){
+                        case 'well':
+                        self.selectedWell = selectedNodes[0];
+                        break;
+        
+                        case 'dataset':
+                        self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                        break;
+        
+                        case 'curve':
+                        self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                        break;
+        
+                        default:
+                        self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+                    }
+                }
+                else {
+                    self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
+                }
             }else {
                 self.selectedWell = self.wells.find(function (well) {
                     return well.id == self.selectedWell.id;
@@ -7528,13 +7639,34 @@ exports.curveDerivativeDialog = function(ModalService){
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        
         this.refresh = function (cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
             });
             if(!self.selectedWell){
-                self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
-
+                if(selectedNodes && selectedNodes.length){
+                    switch (selectedNodes[0].type){
+                        case 'well':
+                        self.selectedWell = selectedNodes[0];
+                        break;
+        
+                        case 'dataset':
+                        self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                        break;
+        
+                        case 'curve':
+                        self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                        break;
+        
+                        default:
+                        self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
+                    }
+                }
+                else {
+                    self.selectedWell = self.wells && self.wells.length ? self.wells[0]: null;
+                }
             }else {
                 self.selectedWell = self.wells.find(function (well) {
                     return well.id == self.selectedWell.id;
@@ -7721,7 +7853,7 @@ exports.TVDConversionDialog = function (ModalService) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-        this.wells = angular.copy(utils.findWells());
+        this.wells = utils.findWells();
         this.datasets = [];
         this.curvesArr = [];
         this.step;this.topDepth; this.bottomDepth;
@@ -8164,7 +8296,7 @@ exports.TVDConversionDialog = function (ModalService) {
                     data: self.outaziArr
                 }
                 ];
-                async.eachOfSeries(payloads, (payload, i, callback) => {
+                async.each(payloads, (payload, callback) => {
                     let overwrite = self.curvesArr.find(curve => {return curve.name == payload.curveName && curve.properties.idDataset == payload.idDataset;});
                     if(overwrite) {
                         delete payload.curveName;
@@ -8523,20 +8655,38 @@ exports.formationResistivityDialog = function (ModalService, callback) {
         this.unit = 'DEGC';
         this.desCurve = null
 
-        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
-        else if( selectedNodes && selectedNodes[0].type == 'zoneset') {
-            this.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
-            this.zoneSetModel = selectedNodes[0];
+        if( selectedNodes && selectedNodes.length){
+            switch(selectedNodes[0].type){
+                case 'well':
+                self.wellModel = selectedNodes[0];
+                break;
+
+                case 'dataset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                break;
+
+                case 'curve':
+                self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
+                break;
+
+                case 'zoneset':
+                self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
+                self.zoneSetModel = selectedNodes[0];
+                break;
+
+                case 'zone':
+                self.zoneSetModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
+                self.wellModel = utils.findWellById(this.zoneSetModel.properties.idWell);
+                break;
+
+                default:
+                self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+                break;
+            }
         }
-        else if ( selectedNodes && selectedNodes[0].type == 'zone' ) {
-            this.zoneSetModel = utils.findZoneSetById(selectedNodes[0].properties.idZoneSet);
-            this.wellModel = utils.findWellById(this.zoneSetModel.properties.idWell);
-        }
-        else if ( selectedNodes && selectedNodes[0].type == 'curve' ) {
-            this.curveModel = selectedNodes[0];
-            this.wellModel = utils.findWellByCurve(this.curveModel.id);
-        }
-        else this.wellModel = angular.copy(self.wells[0]);
+        else {
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
+        };
 
         this.idWell = this.wellModel.id;
         selectWell (this.idWell);
@@ -8550,7 +8700,6 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             self.datasetModel = self.datasets[0];
             // self.zones = [];
             self.zoneSets = utils.getZoneSetsInWell(self.wellModel);
-            console.log("zoneSet", self.zoneSetModel);
             // if (!self.zoneSetModel || !Object.keys(self.zoneSetModel).length) {
             //         self.zoneSetModel = self.zoneSets[0];
             // }
@@ -8977,7 +9126,7 @@ exports.curveFilterDialog = function(ModalService){
 
         this.createOp = 'backup';
         this.filterOp = '5';
-        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 4;
+        this.numLevel = 5;this.polyOder = 2;this.devOrder = 0;this.numPoints = 5;this.cutoff = 100;
         this.table = new Array(5).fill(0.2).map(d => {return parseFloat(d.toFixed(4))});
         this.wells = utils.findWells();
         this.datasets = [];
@@ -9062,7 +9211,8 @@ exports.curveFilterDialog = function(ModalService){
             if(self.filterOp == '2'){
                 return !self.polyOder || self.devOrder == null || ! self.numPoints;
             }else if (self.filterOp == '4'){
-                return !self.cutoff;
+                let range = Math.floor((self.bottomDepth - self.topDepth)/self.SelectedWell.step);
+                return !self.cutoff || self.cutoff > range;
             }
             else{
                 return !self.numLevel;
@@ -9562,194 +9712,10 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
     });
 }
 
-exports.trackBulkUpdateDialog = function (ModalService, allTracks) {
-    function ModalController(wiComponentService, wiApiService, close) {
-        let self = this;
-        window.tBulk = this;
+let trackBulkUpdateDialogModule = require('./track-bulk-update.js');
+trackBulkUpdateDialogModule.setInitFunc(initModal);
+exports.trackBulkUpdateDialog = trackBulkUpdateDialogModule.trackBulkUpdateDialog;
 
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-
-        this.tracks = [];
-        this.sumWidth = 0;
-
-        allTracks.forEach(function(t) {
-            self.tracks.push(getTrackProps(t));
-        });
-
-        this.tracks.forEach(function(track) {
-            self.colorTrack = function (track) {
-                dialogUtils.colorPickerDialog(ModalService, track.color, function (colorStr) {
-                    track.color = colorStr;
-                });
-            };
-            self.sumWidth += track.width;
-        });
-        this.getSum = function () {
-            self.sumWidth = 0;
-            this.tracks.forEach(function(track) {
-                self.sumWidth += track.width;
-            });
-        };
-
-        console.log("tracks", this.tracks);
-        function getLogTrack (track) {
-            return (allTracks.filter(t => t.id == track.idTrack))[0];
-        };
-        function getDepthTrack (track) {
-            return (allTracks.filter(t => t.id == track.idDepthAxis))[0];
-        };
-        function getZoneTrack (track) {
-            return (allTracks.filter(t => t.id == track.idZoneTrack))[0];
-        };
-        function getImageTrack (track) {
-            return (allTracks.filter(t => t.id == track.idImageTrack))[0];
-        };
-        // console.log("allTracks", allTracks);
-        function getTrackProps (track) {
-            let props =  {
-                check : true
-            }
-            switch (track.type) {
-                case 'log-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Log Track";
-                    break;
-                case 'depth-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Depth Track";
-                    break;
-                case 'zone-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Zone Track";
-                    break;
-                case 'image-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
-                    props.type = "Image Track";
-                    break;
-                default:
-                    break;
-            }
-            return props;
-        }
-        function callAPI (cb) {
-            async.eachOfSeries(self.tracks, function(track, idx, callback){
-                console.log("API", track);
-                switch(track.type) {
-                    case 'Log Track':
-                        if( track.check ) {
-                            wiApiService.editTrack(track, function(res) {
-                                let l = angular.copy(track);
-                                l.width = utils.inchToPixel(l.width);
-                                let logTrack = getLogTrack(l);
-                                console.log("log", res, l, logTrack);
-                                logTrack.setProperties(l);
-
-                                logTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    case 'Depth Track':
-                        if( track.check ) {
-                            track.trackBackground = track.color;
-                            wiApiService.editDepthTrack(track, function(res) {
-                                console.log("depth", res);
-                                let d = angular.copy(track);
-                                d.width = utils.inchToPixel(d.width);
-                                let depthTrack = getDepthTrack(d);
-                                depthTrack.setProperties(d);
-
-                                depthTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    case 'Zone Track':
-                        if( track.check ) {
-                            wiApiService.editZoneTrack(track, function(res) {
-                                console.log("zone", res);
-                                let z = angular.copy(track);
-                                z.width = utils.inchToPixel(z.width);
-                                let zoneTrack = getZoneTrack(z);
-                                zoneTrack.setProperties(z);
-
-                                zoneTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    case 'Image Track':
-                        if( track.check ) {
-                            wiApiService.editImageTrack(track, function(res) {
-                                console.log("image", res);
-                                let i = angular.copy(track);
-                                i.width = utils.inchToPixel(i.width);
-                                let imageTrack = getImageTrack(i);
-                                imageTrack.setProperties(i);
-
-                                imageTrack.doPlot(true);
-                                if (callback) callback();
-                            })
-                        } else {
-                            if (callback) callback();
-
-                        }
-                        break;
-                    default:
-                        if (callback) callback();
-                        break;
-                }
-            }, function(err) {
-                if (err) {
-                    setTimeout(() => {
-                        DialogUtils.errorMessageDialog(ModalService, err);
-                    });
-                }
-                if(cb) cb();
-            });
-        }
-        this.onApplyButtonClicked = function(){
-            callAPI(function(){});
-        };
-        this.onOkButtonClicked = function(){
-            callAPI(function(){
-                close();
-            });
-
-        };
-        this.onCancelButtonClicked = function(){
-            close(null);
-        }
-    }
-    ModalService.showModal({
-        templateUrl: "track-bulk-update/track-bulk-update-modal.html",
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        initModal(modal);
-        // modal.element.modal();
-        // $(modal.element[0].children[0]).draggable();
-        modal.close.then(function () {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-        });
-    });
-}
 let curveBulkUpdateDialogModule = require('./curve-bulk-update.js');
 curveBulkUpdateDialogModule.setInitFunc(initModal);
 exports.curveBulkUpdateDialog = curveBulkUpdateDialogModule.curveBulkUpdateDialog;

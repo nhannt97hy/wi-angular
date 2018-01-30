@@ -35,6 +35,7 @@ exports.lasZipArchiveUploadDone = function() {
 }
 exports.lasZipArchiveUploadError = function(error) {
     toastr.error('Error: ' + error.reason + " (error:" + error.code + ")");
+    $('wi-stage wi-chunked-upload form')[0].reset();
 }
 exports.ImportBlockButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
@@ -84,4 +85,7 @@ exports.testGetData = function() {
         });
     });
 
+}
+exports.isDisabled = function() {
+    return !!this.wiChunkedUploadService.uploadUrl
 }
