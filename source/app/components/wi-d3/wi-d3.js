@@ -1922,7 +1922,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         $timeout(function() {
                             _currentTrack.plotAllDrawings();
                         });
-
                     });
                 });
             });

@@ -43,31 +43,31 @@ function trackBulkUpdateDialog (ModalService, allTracks) {
         function getImageTrack (track) {
             return (allTracks.filter(t => t.id == track.idImageTrack))[0];
         };
+        function getObjectTrack (track) {
+            return (allTracks.filter(t => t.id == track.idObjectTrack))[0];
+        };
         // console.log("allTracks", allTracks);
         function getTrackProps (track) {
             let props =  {
                 check : true
             }
+            props = track.getProperties();
+            props.width = utils.pixelToInch(track.width);
             switch (track.type) {
                 case 'log-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
                     props.type = "Log Track";
                     break;
                 case 'depth-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
                     props.type = "Depth Track";
                     break;
                 case 'zone-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
                     props.type = "Zone Track";
                     break;
                 case 'image-track':
-                    props = track.getProperties();
-                    props.width = utils.pixelToInch(track.width);
                     props.type = "Image Track";
+                    break;
+                case 'object-track':
+                    props.type = "Object Track";
                     break;
                 default:
                     break;
@@ -145,6 +145,21 @@ function trackBulkUpdateDialog (ModalService, allTracks) {
                         } else {
                             if (callback) callback();
 
+                        }
+                        break;
+                    case 'Object Track':
+                        if( track.check ) {
+                            wiApiService.editObjectTrack(track, function(res) {
+                                let i = angular.copy(track);
+                                i.width = utils.inchToPixel(i.width);
+                                let objectTrack = getObjectTrack(i);
+                                objectTrack.setProperties(i);
+
+                                objectTrack.doPlot(true);
+                                if (callback) callback();
+                            })
+                        } else {
+                            if (callback) callback();
                         }
                         break;
                     default:
