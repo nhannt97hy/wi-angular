@@ -400,6 +400,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             isNegPosFill: false,
             fill: {
                 display: true,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -408,6 +409,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             },
             positiveFill: {
                 display: false,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -416,6 +418,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             },
             negativeFill: {
                 display: false,
+                shadingType: 'pattern',
                 pattern: {
                     name: "none",
                     foreground: "black",
@@ -437,7 +440,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: null
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
@@ -501,7 +504,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     });
                 });
             }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
-        });
+        })
     }
     this.createCrossplot = function () {
         _currentTrack = self.wiD3Ctrl.getCurrentTrack();
