@@ -1129,63 +1129,6 @@ function getSelectedPath(foundCB, rootNode) {
     return selectedPath;
 }
 
-exports.pushProjectToExplorer = function (self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
-    self.treeConfig = (new WiTreeConfig()).config;
-    $timeout(function () {
-        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
-        wiRootTreeviewComponent.config[0].data.label = project.name;
-        wiRootTreeviewComponent.config[0].children = [];
-    });
-    if (!project.wells) return;
-    // parse config from data
-    // inject child item to origin config
-    let wells = [];
-    for (let well of project.wells) {
-        let wiWellTemp = new WiWell(well);
-        wells.push(wiWellTemp);
-    }
-    $timeout(function () {
-        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
-        if (wiRootTreeviewComponent) {
-            for (let well of wells) {
-                wiRootTreeviewComponent.addItemToFirst('wells', well);
-            }
-        }
-    });
-};
-
-exports.updateWellProject = updateWellProject;
-
-function updateWellProject(wiComponentService, well) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-    if (!project) return;
-    if (!Array.isArray(project.wells)) {
-        project.wells = [];
-        project.wells.push(well);
-    } else {
-        let isNewWell = true;
-        for (let i = 0; i < project.wells.length; i++) {
-            if (project.wells[i].idWell == well.idWell) {
-                project.wells[i] = well;
-                isNewWell = false;
-            }
-        }
-        if (isNewWell) {
-            project.wells.push(well);
-        }
-    }
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
-    wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
-};
-
-exports.updateWellsProject = function (wiComponentService, wells) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-    if (!project) return;
-    for (let well of wells) {
-        updateWellProject(wiComponentService, well);
-    }
-};
-
 exports.getCurveData = getCurveData;
 
 function getCurveData(apiService, idCurve, callback) {
@@ -1199,12 +1142,16 @@ function getCurveData(apiService, idCurve, callback) {
         });*/
 }
 
-//exports.getCurveDataByName = getCurveDataByName;
-
 exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
     let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-
+    let selectedObjs;
     element.draggable({
+        helper: function (event) {
+            selectedObjs = $(`.wi-parent-node[type='curve']`).filter('.item-active').clone();
+            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) return $(event.currentTarget).clone();
+            return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+        },
         start: function (event, ui) {
             dragMan.dragging = true;
             d3.selectAll('.vi-track-plot-container').style('z-index', 1);
@@ -1216,69 +1163,82 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
-            let idCurve = parseInt(ui.helper.attr('data'));
             d3.selectAll('.vi-track-plot-container').style('z-index', 'unset');
-            if (wiD3Ctrl && track) {
-                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
-                if (errorCode > 0) {
-                    apiService.createLine({
-                        idTrack: track.id,
-                        idCurve: idCurve,
-                        orderNum: track.getCurveOrderKey()
-                    }, function (line) {
-                        let lineModel = lineToTreeConfig(line);
-                        getCurveData(apiService, idCurve, function (err, data) {
-                            if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+            function handleDrop(idCurves) {
+                if (wiSlidingBarCtrl) {
+                    let idCurve = idCurves[0];
+                    let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
+                    console.log('drop curve into slidingBar', errorCode);
+                    if (errorCode > 0) {
+                        wiSlidingBarCtrl.createPreview(idCurve);
+                        let logplotModel = wiSlidingBarCtrl.logPlotCtrl.getLogplotModel();
+                        let logplotRequest = angular.copy(logplotModel.properties);
+                        logplotRequest.referenceCurve = idCurve;
+                        apiService.editLogplot(logplotRequest, function () {
+                            logplotModel.properties.referenceCurve = idCurve;
                         });
-                    });
+                    }
+                    else if (errorCode === 0) {
+                        toastr.error("Cannot drop curve from another well");
+                    }
+                    return;
                 }
-                else if (errorCode === 0) {
-                    error("Cannot drop curve from another well");
+                if (wiD3Ctrl && !track) {
+                    let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                    if (errorCode > 0) {
+                        wiD3Ctrl.addLogTrack(null, function (newViTrack) {
+                            idCurves.forEach(idCurve => {
+                                apiService.createLine({
+                                    idTrack: newViTrack.id,
+                                    idCurve: idCurve,
+                                    orderNum: newViTrack.getCurveOrderKey()
+                                }, function (line) {
+                                    let lineModel = lineToTreeConfig(line);
+                                    getCurveData(apiService, idCurve, function (err, data) {
+                                        if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                                    });
+                                });
+                            })
+                        })
+                    }
+                    else if (errorCode === 0) {
+                        toastr.error("Cannot drop curve from another well");
+                    }
+                    return;
                 }
-                return;
-            }
-            if (wiD3Ctrl && !track) {
-                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
-                if (errorCode > 0) {
-                    wiD3Ctrl.addLogTrack(null, function (newViTrack) {
-                        apiService.createLine({
-                            idTrack: newViTrack.id,
-                            idCurve: idCurve,
-                            orderNum: newViTrack.getCurveOrderKey()
-                        }, function (line) {
-                            let lineModel = lineToTreeConfig(line);
-                            getCurveData(apiService, idCurve, function (err, data) {
-                                if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                if (wiD3Ctrl && track) {
+                    idCurves.forEach(idCurve => {
+                        let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                        if (errorCode > 0) {
+                            apiService.createLine({
+                                idTrack: track.id,
+                                idCurve: idCurve,
+                                orderNum: track.getCurveOrderKey()
+                            }, function (line) {
+                                let lineModel = lineToTreeConfig(line);
+                                getCurveData(apiService, idCurve, function (err, data) {
+                                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                                });
                             });
-                        });
+                        }
+                        else if (errorCode === 0) {
+                            toastr.error("Cannot drop curve from another well");
+                        }
+                        return;
                     })
                 }
-                else if (errorCode === 0) {
-                    error("Cannot drop curve from another well");
-                }
-                return;
             }
-            if (wiSlidingBarCtrl) {
-                let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
-                console.log('drop curve into slidingBar', errorCode);
-                if (errorCode > 0) {
-                    wiSlidingBarCtrl.createPreview(idCurve);
-                    let logplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
-                    let logplotRequest = angular.copy(logplotModel.properties);
-                    logplotRequest.referenceCurve = idCurve;
-                    wiApiService.editLogplot(logplotRequest, function () {
-                        logplotModel.properties.referenceCurve = idCurve;
-                    });
-                }
-                else if (errorCode === 0) {
-                    error("Cannot drop curve from another well");
-                }
+            let idCurves = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
+            if (idCurves.length) {
+                handleDrop(idCurves);
+            } else {
+                let idCurve = parseInt(ui.helper.attr('data'));
+                handleDrop([idCurve]);
             }
         },
         appendTo: 'body',
         revert: false,
         scroll: false,
-        helper: 'clone',
         containment: 'document',
         cursor: 'move',
         cursorAt: {
@@ -2058,10 +2018,11 @@ exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
 }
 
 function editProperty(item, callback) {
-    let selectedNode = getSelectedNode();
-    let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
     let wiComponentService = __GLOBAL.wiComponentService;
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    let selectedNode = selectedNodes[0];
+    let properties = selectedNode.properties;
     let newProperties = angular.copy(properties);
     newProperties[item.key] = item.value;
     if (JSON.stringify(newProperties) === JSON.stringify(properties)) return;
@@ -2081,27 +2042,40 @@ function editProperty(item, callback) {
             });
             break;
         case 'curve':
-            if (item.key == 'unit') {
-                wiApiService.familyUpdate({
-                    idFamily: properties.idFamily,
-                    idFamilySpec: item.value
-                }, function (res, err) {
-                    if (err) return;
-                    putListFamily(callback);
-                })
-                break;
-            }
-            if (item.key == 'idFamily') {
-                newProperties.unit = getListFamily().find(family => family.idFamily == newProperties.idFamily).unit;
-                selectedNode.properties.idFamily = newProperties.idFamily;
-                selectedNode.properties.unit = newProperties.unit;
-            }
-            wiApiService.editCurve(newProperties, function () {
-                refreshProjectState().then(function () {
-                    updateLinesOnCurveEdited(selectedNode);
-                    callback && callback();
-                }).catch();
+            let promises = [];
+            selectedNodes.forEach(selectedNode => {
+                properties = selectedNode.properties;
+                newProperties = angular.copy(properties);
+                newProperties[item.key] = item.value;
+                if (item.key == 'unit') {
+                    wiApiService.familyUpdate({
+                        idFamily: properties.idFamily,
+                        idFamilySpec: item.value
+                    }, function (res, err) {
+                        if (err) return;
+                        putListFamily(callback);
+                    })
+                    return;
+                }
+                if (item.key == 'idFamily') {
+                    if (!newProperties.idFamily) newProperties.idFamily = null;
+                    else {
+                        const family = getListFamily().find(family => family.idFamily == newProperties.idFamily);
+                        if (family) newProperties.unit = family.family_spec.unit;
+                    }
+                }
+                promises.push(new Promise(resolve => {
+                    wiApiService.editCurve(newProperties, function () {
+                        resolve();
+                    });
+                }));
             });
+            Promise.all(promises).then(() => {
+                refreshProjectState().then(function () {
+                    selectedNodes.forEach(n => updateLinesOnCurveEdited(n));
+                    callback && callback();
+                });
+            }).catch();
             break;
         case 'zoneset':
             wiApiService.editZoneSet(newProperties, function () {

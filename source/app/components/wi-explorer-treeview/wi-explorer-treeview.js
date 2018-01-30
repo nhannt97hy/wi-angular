@@ -66,11 +66,9 @@ function WiExpTreeController($controller, wiComponentService, wiApiService, $tim
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if (!Array.isArray(selectedNodes)) selectedNodes = [];
         if (!$event.shiftKey) {
-            if (selectedNodes.length) {
-                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
-                    if ($event.type == 'contextmenu' && selectedNodes.includes(node)) return this.container.selectHandler(node);
-                    this.container.unselectAllNodes();
-                }
+            if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                if ($event.type == 'contextmenu' && selectedNodes.includes(node)) return this.container.selectHandler(node);
+                this.container.unselectAllNodes();
             }
             this.container.selectHandler(node);
         } else {

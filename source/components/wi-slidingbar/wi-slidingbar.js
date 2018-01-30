@@ -210,6 +210,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.onReady = function () {
         let logPlotName = self.name.replace('Slidingbar', '');
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
+        this.logPlotCtrl = logPlotCtrl;
         let parentHeight = actual(self.contentId, 'height');
         //parentHeight = $(self.contentId).height();
         //self.parentHeight = parentHeight;
@@ -306,11 +307,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         $(`wi-slidingbar[name=${self.name}]`).on('mouseover', function () {
             dragMan.wiSlidingBarCtrl = self;
-            dragMan.wiD3Ctrl = null;
         });
-
         $(`wi-slidingbar[name=${self.name}]`).on('mouseleave', function () {
             dragMan.wiSlidingBarCtrl = null;
+            dragMan.wiD3Ctrl = null;
         });
     };
 
