@@ -252,12 +252,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         let shading = logTrack.shadings.find(shading => shading.idShading == viShading.id);
                         viTrack.removeDrawing(viShading);
                         if (!shading) return;
-                        _addShadingToTrack(shading);
                     });
-                    /*logTrack.shadings.forEach(shading => {
+                    logTrack.shadings.forEach(shading => {
                         if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
                         _addShadingToTrack(shading);
-                    });*/
+                    });
 
                     logTrack.width = Utils.inchToPixel(logTrack.width);
                     viTrack.setProperties(logTrack);
@@ -1923,7 +1922,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         $timeout(function() {
                             _currentTrack.plotAllDrawings();
                         });
-
                     });
                 });
             });
