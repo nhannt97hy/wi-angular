@@ -5627,7 +5627,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.well = well;
         this.datasets = [];
-        this.curvesArr = [];
+    this.curvesArr = [];
 
         this.scaleOpt = [
             {
@@ -5834,13 +5834,13 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             else {
                 self.props.reference_curves = self.ref_Curves_Arr;
                 plotModel.properties = angular.copy(self.props);
+                if (callback) callback();
             }
 
         }
 
         this.onOKButtonClicked = function () {
             self.onApplyButtonClicked();
-            console.log("on OK clicked");
             close(null);
         }
         this.onCancelButtonClicked = function () {

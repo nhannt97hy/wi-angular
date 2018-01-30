@@ -255,14 +255,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             icon: "ti-layout-tab-window",
             handler: function () {
                 DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
-                    saveHistogramNow(function() {
-                        self.getWiRefWindCtrl().update(getWell(), 
-                            self.histogramModel.properties.reference_curves, 
-                            self.histogramModel.properties.referenceScale,
-                            self.histogramModel.properties.referenceVertLineNumber,
-                            self.histogramModel.properties.referenceTopDepth,
-                            self.histogramModel.properties.referenceBottomDepth,
-                            self.histogramModel.properties.referenceShowDepthGrid);
+                    saveHistogramNow(function () {
+                        let refWindCtrl = self.getWiRefWindCtrl();
+                        if (refWindCtrl)
+                            refWindCtrl.update(getWell(),
+                                self.histogramModel.properties.reference_curves,
+                                self.histogramModel.properties.referenceScale,
+                                self.histogramModel.properties.referenceVertLineNumber,
+                                self.histogramModel.properties.referenceTopDepth,
+                                self.histogramModel.properties.referenceBottomDepth,
+                                self.histogramModel.properties.referenceShowDepthGrid);
                     });
                 });
             }

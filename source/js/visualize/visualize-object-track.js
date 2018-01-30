@@ -31,7 +31,8 @@ ObjectTrack.prototype.getProperties = function () {
         showTitle: this.showTitle,
         topJustification: this.justification || "center",
         title: this.name,
-        width: this.width
+        width: this.width,
+        idObjectTrack: this.id
     }
 };
 
